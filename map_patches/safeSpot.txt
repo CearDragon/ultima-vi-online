@@ -1,0 +1,99 @@
+//U6O MapEdit Full Export V1.36 - Saved with Drewski's Map Edit Program
+patchx=0; patchy=0; //always 0 so far
+
+//House Door Mats
+basehousenumber=0;
+//House Number:  222
+houseentrancex[basehousenumber+222]=406; houseentrancey[basehousenumber+222]=347;
+houseinitialcost[basehousenumber+222]=10;
+housecost[basehousenumber+222]=10;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+409;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+346;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+410;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+346;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+411;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+346;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+411;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+347;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+411;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+348;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+410;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+348;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+409;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+348;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+409;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+346;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+410;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+346;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+411;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+346;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+411;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+347;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+411;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+348;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+410;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+348;
+housestoragenext[basehousenumber+222]++;
+
+housestoragex[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchx+409;
+housestoragey[basehousenumber+222][housestoragenext[basehousenumber+222]]=patchy+348;
+housestoragenext[basehousenumber+222]++;
+
+housenumber=65535;//Non house tiles
+
+
+// Base Tiles for House Number 222
+housenumber=222;
+
+BTset(408,346,108);
+BTset(409,346,208);
+BTset(410,346,208);
+BTset(411,346,208);
+BTset(408,347,108);
+BTset(409,347,208);
+BTset(410,347,208);
+BTset(411,347,208);
+BTset(409,348,208);
+BTset(410,348,208);
+BTset(411,348,208);
+
+housenumber=65535;
+if (NEThost){//cant add objects as a client
+//Objects
+object* item000000=OBJaddnew(409,348,279+1024*0,0,0); // Table
+object* item000001=OBJaddnew(410,348,279+1024*0,0,0); // Table
+object* item000002=OBJaddnew(411,348,279+1024*0,0,0); // Table
+object* item000003=OBJaddnew(411,347,279+1024*0,0,0); // Table
+object* item000004=OBJaddnew(411,346,279+1024*0,0,0); // Table
+object* item000005=OBJaddnew(410,346,279+1024*0,0,0); // Table
+object* item000006=OBJaddnew(409,346,279+1024*0,0,0); // Table
+//  Now placing objects inside containers
+//Resolve any switches, portcullis, electric fields, levers, doors and doorways by setting more variable
+}//NEThost
+//BTRect = new Rectangle(408,346) - (411,348);
+//ItemRect = new Rectangle(409,346) - (411,348);

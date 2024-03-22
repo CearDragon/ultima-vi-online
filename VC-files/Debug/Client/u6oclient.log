@@ -1,0 +1,22 @@
+﻿cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  Xenkan.cpp
+  u6o7.cpp
+  txt.cpp
+  stdafx.cpp
+  sound.cpp
+  random.cpp
+  randi.cpp
+  myfile.cpp
+  myddraw.cpp
+  function_client.cpp
+  function_both.cpp
+  frame.cpp
+  dmusic.cpp
+  data_client.cpp
+  data_both.cpp
+  Generating Code...
+U:\Ultima VI Online\Source\loop_client.cpp(6704,1): warning C4731: 'WinMain': frame pointer register 'ebp' modified by inline assembly code
+U:\Ultima VI Online\Source\loop_client.cpp(6724,1): warning C4731: 'WinMain': frame pointer register 'ebp' modified by inline assembly code
+U:\Ultima VI Online\Source\loop_client.cpp(6726,1): warning C4731: 'WinMain': frame pointer register 'ebp' modified by inline assembly code
+data_both.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
+  u6oclient.vcxproj -> U:\Ultima VI Online\Source\VC-files\Debug\Client\client.exe
