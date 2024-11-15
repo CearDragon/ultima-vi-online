@@ -34,6 +34,9 @@ typedef struct _FRAME {
   bool mouse_over; //TRUE if mouse is over the frame, user reads value then sets to FALSE
   short mouse_x,mouse_y; //position of mouse at last press position
   unsigned char mouse_over_transparent;//default is FALSE
+  short default_size_x, default_size_y;
+  bool scaling;
+  float scale_x, scale_y;
 } FRAME;
 
 typedef struct _FRM_TYPE {

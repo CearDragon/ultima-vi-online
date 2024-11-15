@@ -112,7 +112,7 @@ void data_client_init(void) {
   windowchange=FALSE;
 
   gotfocus=TRUE; //TRUE if program is selected
-  scrx=1920; scry=1080; //size of the window required by the program
+  scrx=512*2; scry=384*2; //size of the window required by the program
 
   smallwindow=FALSE; //use a 512x384 window
   dxrefresh=FALSE;

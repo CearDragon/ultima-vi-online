@@ -373,7 +373,7 @@ extern unsigned long oldtime;
 extern unsigned long newtime;
 extern float et;
 extern double ett;
-extern file *log22;
+extern file *log2file;
 extern unsigned long U6O_SIGNATURE;
 extern unsigned char incorrectversionmessage[9];
 extern unsigned char NEThost;
@@ -399,6 +399,20 @@ extern HINSTANCE hInst;
 extern TCHAR szWindowClass[100];
 extern TCHAR window_name[100];
 extern TCHAR szTitle[100];
+
+
+// b111
+extern int buildtablewithstorage;
+extern int hlocx[BUILD_HOUSEID_MAX][BUILD_SECTIONID_MAX];
+extern int hlocy[BUILD_HOUSEID_MAX][BUILD_SECTIONID_MAX];
+extern object* hobj[BUILD_HOUSEID_MAX][BUILD_OBJPOINTER_MAX];
+extern int arenalocx[BUILD_ARENAID_MAX];
+extern int arenalocy[BUILD_ARENAID_MAX];
+extern int arenasizex[BUILD_ARENAID_MAX];
+extern int arenasizey[BUILD_ARENAID_MAX];
+extern int arenaaddmobnum[BUILD_ARENAID_MAX];
+extern int arenacount;
+
 
 extern bool keyon[65536]; //TRUE if key is being held down
 extern bool key[65536]; //TRUE if key has been pressed (manually set to FALSE)
@@ -517,6 +531,13 @@ extern unsigned long tu6oid; //temp U6OID
 extern long lastsecond;
 extern long framerate;
 extern long framecount; //framerate frames/sec
+
+extern unsigned int windowsizecyclenum;
+
+// s555 turn on/off new changes
+extern int easymodehostn1;
+extern int enhancehostn1;
+extern int enhanceclientn1;
 
 
 /* init_function */

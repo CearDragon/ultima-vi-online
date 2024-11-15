@@ -13,6 +13,120 @@ PORTRAIT_UNAVAILABLE=newsurf(1,1,SURF_SYSMEM16); PORTRAIT_UNAVAILABLE->o2[0]=0;
 bt32=newsurf(32,32,SURF_SYSMEM16);
 bt16=newsurf(16,16,SURF_SYSMEM16);
 
+// r666 loadimage actionbar.bmp
+/*
+actionbarsurf[0]=loadimage(".\\dr\\actionbar1.bmp",SURF_SYSMEM16);
+actionbarsurf[1]=loadimage(".\\dr\\actionbar2.bmp",SURF_SYSMEM16);
+actiontalksurf[0]=loadimage(".\\dr\\actiontalk1.bmp",SURF_SYSMEM16);
+actiontalksurf[1]=loadimage(".\\dr\\actiontalk2.bmp",SURF_SYSMEM16);
+
+actionbuttonsurf[ACTIONBUTTON_DROP][0]=loadimage(".\\dr\\actiondropsetbutton.bmp",SURF_SYSMEM16);
+actionbuttonsurf[ACTIONBUTTON_DROP][1]=loadimage(".\\dr\\actiondropupbutton.bmp",SURF_SYSMEM16);
+actionbuttonsurf[ACTIONBUTTON_DROP][2]=loadimage(".\\dr\\actiondropdownbutton.bmp",SURF_SYSMEM16);
+actionbuttonsurf[ACTIONBUTTON_DROP][3]=loadimage(".\\dr\\actiondropleftbutton.bmp",SURF_SYSMEM16);
+actionbuttonsurf[ACTIONBUTTON_DROP][4]=loadimage(".\\dr\\actiondroprightbutton.bmp",SURF_SYSMEM16);
+actionbuttonsurf[ACTIONBUTTON_FOOD][1]=loadimage(".\\dr\\actionfoodhungrybutton.bmp",SURF_SYSMEM16);
+actionbuttonsurf[ACTIONBUTTON_FOOD][2]=loadimage(".\\dr\\actionfoodfullbutton.bmp",SURF_SYSMEM16);
+*/
+
+// r999 new
+uipanelimgsurf[UI_IMGI_ACTIONBAR+1] = loadimage(".\\dr\\n1actionbar1.bmp",SURF_SYSMEM16);
+uipanelimgsurf[UI_IMGI_ACTIONBAR+2] = loadimage(".\\dr\\n1actionbar2.bmp",SURF_SYSMEM16);
+uipanelimgsurf[UI_IMGI_ACTIONBAR+3] = loadimage(".\\dr\\n1optionbar1.bmp",SURF_SYSMEM16);
+uipanelimgsurf[UI_IMGI_ACTIONBAR+4] = loadimage(".\\dr\\n1mapbar1.bmp",SURF_SYSMEM16);
+uipanelimgsurf[UI_IMGI_ACTIONBAR+5] = loadimage(".\\dr\\n1partymemberbar1.bmp",SURF_SYSMEM16);
+
+uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+1] = loadimage(".\\dr\\n1actiontalk1.bmp",SURF_SYSMEM16);
+uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+2] = loadimage(".\\dr\\n1actiontalk2.bmp",SURF_SYSMEM16);
+uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+3] = loadimage(".\\dr\\n1actiontalk3.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+1][1] = loadimage(".\\dr\\n1buttondrops1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+1][2] = loadimage(".\\dr\\n1buttondrops2.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+1][3] = loadimage(".\\dr\\n1buttondrops3.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+1][4] = loadimage(".\\dr\\n1buttondrops4.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+1][5] = loadimage(".\\dr\\n1buttondrops5.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+2][1] = loadimage(".\\dr\\n1buttonfoods1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+2][2] = loadimage(".\\dr\\n1buttonfoods2.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+3][1] = loadimage(".\\dr\\n1buttonworldmaps1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+4][1] = loadimage(".\\dr\\n1buttoncombatlogs1.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+5][1] = loadimage(".\\dr\\n1optionenhances1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+5][2] = loadimage(".\\dr\\n1optionenhances2.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+6][1] = loadimage(".\\dr\\n1optiongamesounds1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+6][2] = loadimage(".\\dr\\n1optiongamesounds2.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+7][1] = loadimage(".\\dr\\n1optioncombatsounds1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+7][2] = loadimage(".\\dr\\n1optioncombatsounds2.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+8][1] = loadimage(".\\dr\\n1optionminimaps1.bmp",SURF_SYSMEM16);
+
+// s444
+uiwidgetimgsurf[UI_IMGI_WIDGET+9][1] = loadimage(".\\dr\\n1buttonmap1s1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+10][1] = loadimage(".\\dr\\n1buttonmap2s1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+11][1] = loadimage(".\\dr\\n1buttonmap3s1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+12][1] = loadimage(".\\dr\\n1buttonmap4s1.bmp",SURF_SYSMEM16);
+
+// UI_IMGI_HOVER = UI_IMGI_WIDGET+13
+uiwidgetimgsurf[UI_IMGI_WIDGET+13][1] = loadimage(".\\dr\\n1buttonhovers1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+13][2] = loadimage(".\\dr\\n1buttonhovers2.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+13][3] = loadimage(".\\dr\\n1buttonhovers3.bmp",SURF_SYSMEM16);
+
+
+// s444
+worldmapsurfn1[1] = loadimage(".\\dr\\n1u6map.bmp",SURF_SYSMEM16);
+worldmapsurfn1[2] = loadimage(".\\dr\\n1u6pworldmap.bmp",SURF_SYSMEM16);
+worldmapsurfn1[3] = loadimage(".\\dr\\n1cmap.bmp",SURF_SYSMEM16);
+worldmapsurfn1[4] = loadimage(".\\dr\\n1runicsmall.bmp",SURF_SYSMEM16);
+
+// s777
+uiwidgetimgsurf[UI_IMGI_WIDGET+14][1] = loadimage(".\\dr\\n1locks1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+14][2] = loadimage(".\\dr\\n1locks2.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+15][1] = loadimage(".\\dr\\n1buttonpartymember1s1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+15][2] = loadimage(".\\dr\\n1buttonpartymember1s2.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+15][3] = loadimage(".\\dr\\n1buttonpartymember1s3.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+15][4] = loadimage(".\\dr\\n1buttonpartymember1s4.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+16][1] = loadimage(".\\dr\\n1buttonpartymember2s1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+16][2] = loadimage(".\\dr\\n1buttonpartymember2s2.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+16][3] = loadimage(".\\dr\\n1buttonpartymember2s3.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+16][4] = loadimage(".\\dr\\n1buttonpartymember2s4.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+17][1] = loadimage(".\\dr\\n1buttonpartymember3s1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+17][2] = loadimage(".\\dr\\n1buttonpartymember3s2.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+17][3] = loadimage(".\\dr\\n1buttonpartymember3s3.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+17][4] = loadimage(".\\dr\\n1buttonpartymember3s4.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+18][1] = loadimage(".\\dr\\n1buttonpartymember4s1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+18][2] = loadimage(".\\dr\\n1buttonpartymember4s2.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+18][3] = loadimage(".\\dr\\n1buttonpartymember4s3.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+18][4] = loadimage(".\\dr\\n1buttonpartymember4s4.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+19][1] = loadimage(".\\dr\\n1buttonpartymember5s1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+19][2] = loadimage(".\\dr\\n1buttonpartymember5s2.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+19][3] = loadimage(".\\dr\\n1buttonpartymember5s3.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+19][4] = loadimage(".\\dr\\n1buttonpartymember5s4.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+20][1] = loadimage(".\\dr\\n1buttonpartymember6s1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+20][2] = loadimage(".\\dr\\n1buttonpartymember6s2.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+20][3] = loadimage(".\\dr\\n1buttonpartymember6s3.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+20][4] = loadimage(".\\dr\\n1buttonpartymember6s4.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+21][1] = loadimage(".\\dr\\n1buttonpartymember7s1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+21][2] = loadimage(".\\dr\\n1buttonpartymember7s2.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+21][3] = loadimage(".\\dr\\n1buttonpartymember7s3.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+21][4] = loadimage(".\\dr\\n1buttonpartymember7s4.bmp",SURF_SYSMEM16);
+
+uiwidgetimgsurf[UI_IMGI_WIDGET+22][1] = loadimage(".\\dr\\n1buttonpartymember8s1.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+22][2] = loadimage(".\\dr\\n1buttonpartymember8s2.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+22][3] = loadimage(".\\dr\\n1buttonpartymember8s3.bmp",SURF_SYSMEM16);
+uiwidgetimgsurf[UI_IMGI_WIDGET+22][4] = loadimage(".\\dr\\n1buttonpartymember8s4.bmp",SURF_SYSMEM16);
+
+
+
 minimap_b=loadimage(".\\dr\\minimap.bmp",SURF_SYSMEM16);
 treasuremap=loadimage(".\\dr\\cmap.bmp",SURF_SYSMEM16);
 tmap_markers=loadimage(".\\dr\\tmapm.bmp",SURF_SYSMEM16);

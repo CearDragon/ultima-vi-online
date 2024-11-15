@@ -1,0 +1,83 @@
+﻿Build started 2/28/2021 7:14:39 AM.
+     1>Project "C:\New\c source\VC-files\u6oclient.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /I..\include /Zi /nologo /W3 /WX- /Ob2 /Oi /Ot /Oy- /D WIN32 /D NDEBUG /D _WINDOWS /D CLIENT /Gm- /EHsc /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"ReleaseInter\u6oclient2\\" /Fd"ReleaseInter\u6oclient2\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt ..\data_both.cpp ..\data_client.cpp ..\dmusic.cpp ..\frame.cpp ..\function_both.cpp ..\function_client.cpp ..\myddraw.cpp ..\myfile.cpp ..\random\randi.cpp ..\random\random.cpp ..\sound.cpp ..\stdafx.cpp ..\txt.cpp ..\u6o7.cpp ..\Xenkan.cpp
+         data_both.cpp
+         data_client.cpp
+         dmusic.cpp
+         frame.cpp
+         function_both.cpp
+     1>..\function_both.cpp(61): warning C4996: '_snprintf': This function or variable may be unsafe. Consider using _snprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(1952): note: see declaration of '_snprintf'
+     1>..\function_both.cpp(258): warning C4244: '=': conversion from 'long' to 'unsigned short', possible loss of data
+     1>..\function_both.cpp(272): warning C4018: '<': signed/unsigned mismatch
+     1>..\function_both.cpp(377): warning C4244: 'argument': conversion from 'long' to 'unsigned char', possible loss of data
+     1>..\function_both.cpp(380): warning C4244: 'argument': conversion from 'long' to 'unsigned char', possible loss of data
+     1>..\function_both.cpp(383): warning C4244: 'argument': conversion from 'long' to 'unsigned char', possible loss of data
+     1>..\function_both.cpp(386): warning C4244: 'argument': conversion from 'long' to 'unsigned char', possible loss of data
+         function_client.cpp
+         myddraw.cpp
+         myfile.cpp
+         randi.cpp
+         random.cpp
+         sound.cpp
+     1>..\sound.cpp(52): warning C4244: '=': conversion from 'long' to 'WORD', possible loss of data
+     1>..\sound.cpp(54): warning C4244: '=': conversion from 'long' to 'WORD', possible loss of data
+     1>..\sound.cpp(157): warning C4244: '=': conversion from 'long' to 'float', possible loss of data
+     1>..\sound.cpp(162): warning C4244: 'argument': conversion from 'float' to 'LONG', possible loss of data
+         stdafx.cpp
+         txt.cpp
+     1>..\txt.cpp(246): warning C4305: '*=': truncation from 'double' to 'float'
+     1>..\txt.cpp(253): warning C4305: '=': truncation from 'double' to 'float'
+     1>..\txt.cpp(275): warning C4996: '_snprintf': This function or variable may be unsafe. Consider using _snprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(1952): note: see declaration of '_snprintf'
+     1>..\txt.cpp(281): warning C4996: '_snprintf': This function or variable may be unsafe. Consider using _snprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(1952): note: see declaration of '_snprintf'
+     1>..\txt.cpp(287): warning C4996: '_snprintf': This function or variable may be unsafe. Consider using _snprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(1952): note: see declaration of '_snprintf'
+         u6o7.cpp
+     1>c:\new\c source\setup_client.inc(127): warning C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+         C:\Program Files (x86)\Windows Kits\8.1\Include\um\winsock2.h(2238): note: see declaration of 'gethostbyname'
+     1>c:\new\c source\loop_client.cpp(5890): warning C4996: '_snprintf': This function or variable may be unsafe. Consider using _snprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(1952): note: see declaration of '_snprintf'
+     1>c:\new\c source\loop_client.cpp(5899): warning C4996: '_snprintf': This function or variable may be unsafe. Consider using _snprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(1952): note: see declaration of '_snprintf'
+         Xenkan.cpp
+         Generating Code...
+     1>c:\new\c source\loop_client.cpp(8209): warning C4731: 'WinMain': frame pointer register 'ebp' modified by inline assembly code
+     1>c:\new\c source\loop_client.cpp(8213): warning C4731: 'WinMain': frame pointer register 'ebx' modified by inline assembly code
+     1>c:\new\c source\loop_client.cpp(8216): warning C4731: 'WinMain': frame pointer register 'ebx' modified by inline assembly code
+     1>c:\new\c source\loop_client.cpp(8219): warning C4731: 'WinMain': frame pointer register 'ebx' modified by inline assembly code
+     1>c:\new\c source\loop_client.cpp(8220): warning C4731: 'WinMain': frame pointer register 'ebx' modified by inline assembly code
+     1>c:\new\c source\loop_client.cpp(8222): warning C4731: 'WinMain': frame pointer register 'ebx' modified by inline assembly code
+     1>c:\new\c source\loop_client.cpp(8223): warning C4731: 'WinMain': frame pointer register 'ebx' modified by inline assembly code
+     1>c:\new\c source\loop_client.cpp(8224): warning C4731: 'WinMain': frame pointer register 'ebx' modified by inline assembly code
+     1>c:\new\c source\loop_client.cpp(8229): warning C4731: 'WinMain': frame pointer register 'ebp' modified by inline assembly code
+     1>c:\new\c source\loop_client.cpp(8231): warning C4731: 'WinMain': frame pointer register 'ebp' modified by inline assembly code
+     1>c:\new\c source\loop_client.cpp(8234): warning C4731: 'WinMain': frame pointer register 'ebx' modified by inline assembly code
+       ResourceCompile:
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\rc.exe /l"0x0409" /nologo /fo"ReleaseInter\u6oclient2\u6o7.res" ..\u6o7.rc 
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\New\c source\VC-files\Release\u6oclient2.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:..\lib mylib.lib wininet.lib dxguid.lib fdv_dmvr.lib ws2_32.lib winmm.lib user32.lib kernel32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib vfw32.lib dplay.lib dplayx.lib ddraw.lib dsound.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\New\c source\VC-files\Release\u6oclient2.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG:incremental /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\New\c source\VC-files\Release\u6oclient2.lib" /MACHINE:X86 /SAFESEH ReleaseInter\u6oclient2\u6o7.res
+         ReleaseInter\u6oclient2\data_both.obj
+         ReleaseInter\u6oclient2\data_client.obj
+         ReleaseInter\u6oclient2\dmusic.obj
+         ReleaseInter\u6oclient2\frame.obj
+         ReleaseInter\u6oclient2\function_both.obj
+         ReleaseInter\u6oclient2\function_client.obj
+         ReleaseInter\u6oclient2\myddraw.obj
+         ReleaseInter\u6oclient2\myfile.obj
+         ReleaseInter\u6oclient2\randi.obj
+         ReleaseInter\u6oclient2\random.obj
+         ReleaseInter\u6oclient2\sound.obj
+         ReleaseInter\u6oclient2\stdafx.obj
+         ReleaseInter\u6oclient2\txt.obj
+         ReleaseInter\u6oclient2\u6o7.obj
+         ReleaseInter\u6oclient2\Xenkan.obj
+         LINK : /LTCG specified but no code generation required; remove /LTCG from the link command line to improve linker performance
+         u6oclient.vcxproj -> C:\New\c source\VC-files\Release\u6oclient2.exe
+     1>Done Building Project "C:\New\c source\VC-files\u6oclient.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:27.07

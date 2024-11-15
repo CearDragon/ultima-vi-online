@@ -27,6 +27,7 @@
 #define HIRELINGS_MAX (16) //should be at least 11 to get hirelings to all taverns after that they get random positions
 #define MOVER_FOUND 65536
 #define HOUSEMAX 256
+#define HOUSESTORAGESLOTMAX 600
 #ifdef CLIENT 
 #define FIRST_CLIENT 1
 #else 

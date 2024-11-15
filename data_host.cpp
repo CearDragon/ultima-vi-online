@@ -54,6 +54,7 @@ void data_host_init(void) {
   hWnd=NULL;
   hWnd2=NULL;
   hWnd3=NULL;
+  hWnd4=NULL;
   smallwindow=NULL;
   u6ovolume=NULL;
 #endif

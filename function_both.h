@@ -49,4 +49,10 @@ void txtaddcolouredname(txt *t,txt *name,player *p);
 
 void SHA2(txt* t,txt* t2);
 
+
+// c111
+unsigned long new1_getexprequired(unsigned short level);
+unsigned long new1_getexprequired(npc* npc);
+
+
 #endif /* FUNCTION_BOTH_H */

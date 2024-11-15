@@ -78,6 +78,11 @@ b) if "host" param absent; this is the "TESTING CLIENT" (house.cpp must be prese
 
 #include "globals.inc" // all the global variables are to be grouped here
 
+static txt *logtext = txtnew();
+static txt *ltt1 = txtnew();
+static int iii = 0;
+//static txt *ltt2 = txtnew();
+
 #ifdef CONSOLE
 char cyn=0;
 void KeyEventProc(KEY_EVENT_RECORD ker) {
@@ -120,6 +125,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	static txt *t=txtnew(),*t2=txtnew(),*t3=txtnew(),*t4=txtnew(),*t5=txtnew(),*t6=txtnew(),*t7=txtnew(),*t8=txtnew(),*t9=txtnew();
 	static object *myobj,*myobj2,*myobj3,*myobj4,*myobj5,*myobj6,*myobj7,*myobj8,*myobj9;
 	static creature *crt,*crt2,*crt3,*crt4,*crt5,*crt6,*crt7,*crt8,*crt9;
+	// r666
+	static txt *newt1 = txtnew();
+
+	// t111
+	//object *moblistnew[20];
+	//unsigned int mobcount = 0;
+	//for (int mi=0; mi<20; mi++)
+	//	moblistnew[mi]=NULL;
+
 #ifdef CONSOLE /* creates a console for the dedicated host */
     HANDLE hStdin; 
     DWORD cNumRead=0; 
@@ -127,7 +141,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     AllocConsole();
     hStdin = GetStdHandle(STD_INPUT_HANDLE); 
     RemoveMenu(GetSystemMenu(GetConsoleWindow(), FALSE),SC_CLOSE, MF_BYCOMMAND);
-    ShowWindow(GetConsoleWindow(), SW_SHOWMINIMIZED); /* SW_HIDE , SW_SHOW, SW_SHOWMINIMIZED */
+    //ShowWindow(GetConsoleWindow(), SW_SHOWMINIMIZED); /* SW_HIDE , SW_SHOW, SW_SHOWMINIMIZED */
+	ShowWindow(GetConsoleWindow(), SW_SHOW); /* SW_HIDE , SW_SHOW, SW_SHOWMINIMIZED */
 #endif
 	frame_init();  // luteijn: setup the globals originally defined in frame.h
 	data_both_init(); // luteijn: setup the globals originally defined in data_both.h
@@ -147,7 +162,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 #endif
 
 
-	log22=open2("log.txt",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
+	log2file =open2("log.txt",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
 	SCRLOG_FILEONLY=TRUE;
     
 	//check if host command line option is defined
@@ -425,7 +440,9 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 
 	if ((desktop_rect.right>1024)&&(desktop_rect.bottom>768)){
 		//create 1024x768 window with title bar
-		clrect.top=0; clrect.left=0; clrect.bottom=768; clrect.right=1024;
+		// rrr can't change this; it will be broken
+//		clrect.top=0; clrect.left=0; clrect.bottom=768; clrect.right=1024;
+		clrect.top = 0; clrect.left = 0; clrect.bottom = resyo; clrect.right = resxo;
 		AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,FALSE);
 		hWnd2 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,
 			0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
@@ -436,11 +453,21 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 			0, 0, 1024, 768, NULL, NULL, hInstance, NULL);
 	}
 
-	clrect.top=0; clrect.left=0; clrect.bottom=384; clrect.right=512;
+	clrect.top=0; clrect.left=0; clrect.bottom= resys; clrect.right= resxs;
 	AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,FALSE);
 
 	hWnd3 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,
 		0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
+
+	// rrr moved to newmodeinit
+	/*
+	static RECT clrect;
+	clrect.top = 0; clrect.left = 0; clrect.bottom = resyn1w; clrect.right = resxn1w;
+	AdjustWindowRect(&clrect, WS_OVERLAPPED | WS_CAPTION | WS_BORDER, FALSE);
+
+	hWnd4 = CreateWindow(szWindowClass, window_name, WS_OVERLAPPED | WS_CAPTION | WS_BORDER,
+		0, 0, clrect.right - clrect.left, clrect.bottom - clrect.top, NULL, NULL, hInstance, NULL);
+	*/
 
 	hWnd=hWnd2;
 	ShowWindow(hWnd,nCmdShow);

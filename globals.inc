@@ -25,6 +25,73 @@ long FRAME_mb;
 HFONT thfont;
 FRM_TXT *ttxt;
 
+// rrr
+static unsigned int resxa = 1024;
+static unsigned int resya = 768;
+
+static unsigned int resxb = 512;
+static unsigned int resyb = 384;
+static unsigned int respb = resxb*resyb;
+
+static unsigned int resxc = 1200;
+static unsigned int resyc = resxc*3/4;
+static unsigned int respc = resxc*resyc;
+
+unsigned int resxo = resxa;
+unsigned int resyo = resya;
+
+unsigned int resxs = resxb;
+unsigned int resys = resyb;
+
+unsigned int resxn1w = resxc;
+unsigned int resyn1w = resyc;
+
+unsigned int resxn1m = resxn1w - 260;
+unsigned int resyn1m = resxn1m*3/4;
+unsigned int respn1m = resxn1m * resyn1m;
+
+unsigned int resxz;
+unsigned int resyz;
+
+unsigned int windowsizecyclenum = 0;
+unsigned int windowsizecyclemax = 1;
+
+long omx3;
+long omy3;
+
+double scalexm = 1.0f;
+double scaleym = 1.0f;
+
+// r999 new
+surf* uipanelsurf[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+int uipanelx[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+int uipanely[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+int uipanelsizex[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+int uipanelsizey[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+float uipanelscalex[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+float uipanelscaley[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+int uipanelscaling[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+int uipanelhitenable[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+int uipanelusedefaultstatedata[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+
+int uipaneli[UI_PANEL_MAX][UI_PANELWIDGET_MAX];
+int uipanelcount;
+int uipanelwidgetcount[UI_PANEL_MAX];
+int uipanelsidebar, uipanelminimap, uipanelworldmap, uipanelworldmapbar, uipanelpartymemberparent, uipanelactionbarparent, uipanelactiontalkbarparent;
+int uipanelactionbar1, uipanelactionbar2, uipaneloptionbar1, uipanelactiontalkbar1, uipanelactiontalkbar2, uipanelactiontalkbar3;
+int uipanelpartymember0;
+int uipaneloptioninfo;
+
+// s777
+int uipanelpartymemberbar1;
+int uipanelpartymemberlock;
+
+// s555 turn on/off new changes
+int easymodehostn1 = 0;
+int enhancehostn1 = 0;
+int enhanceclientn1 = 1;
+
+
 /* function_both */
 unsigned char OBJGETDIR_FRAME;
 unsigned long BITSleftmask[33];//mask of index-many bits to keep
@@ -56,11 +123,35 @@ unsigned short housepnext[HOUSEMAX];
 unsigned short housepx[HOUSEMAX][512]; unsigned short housepy[HOUSEMAX][512];
 unsigned short housecost[HOUSEMAX]; //gold cost per REAL day (deducted if current system day!=logged day)
 unsigned short houseinitialcost[HOUSEMAX];
-unsigned char housestoragenext[HOUSEMAX];
-unsigned short housestoragex[HOUSEMAX][16]; unsigned short housestoragey[HOUSEMAX][16];
+// s111 increase house storage max slots
+//unsigned char housestoragenext[HOUSEMAX];
+unsigned int housestoragenext[HOUSEMAX];
+unsigned short housestoragex[HOUSEMAX][HOUSESTORAGESLOTMAX]; unsigned short housestoragey[HOUSEMAX][HOUSESTORAGESLOTMAX];
 unsigned char housestorageadd;
 unsigned char housestoragerestore; //flags used when saving/restoring house items in file
 unsigned short houseentrancex[HOUSEMAX],houseentrancey[HOUSEMAX];
+
+// t111
+//object* moblistnew[50];
+//int mobcountnew = 0;
+int num;
+int addmobnum = 1;
+
+// b111
+int buildtablewithstorage = BUILD_TABLEWITHSTORAGE_NO;
+int hlocx[BUILD_HOUSEID_MAX][BUILD_SECTIONID_MAX];
+int hlocy[BUILD_HOUSEID_MAX][BUILD_SECTIONID_MAX];
+object* hobj[BUILD_HOUSEID_MAX][BUILD_OBJPOINTER_MAX];
+int arenalocx[BUILD_ARENAID_MAX];
+int arenalocy[BUILD_ARENAID_MAX];
+int arenasizex[BUILD_ARENAID_MAX];
+int arenasizey[BUILD_ARENAID_MAX];
+int arenaaddmobnum[BUILD_ARENAID_MAX];
+int arenacount = 0;
+
+
+// c222 allowed to cast spells that are in the last "used/registered" spellbook, even if it's unequiped.
+object* playerspellbook = NULL;
 
 //house creation tool 1.0 variables
 unsigned short patchx;
@@ -228,13 +319,10 @@ unsigned long oldtime;
 unsigned long newtime;
 float et;
 double ett;
-file *log22;
+file *log2file;
 unsigned long U6O_SIGNATURE;
 unsigned char incorrectversionmessage[9];
 unsigned char NEThost=0;
-unsigned long GuildOldTime; // Timer used to save guild house contents
-unsigned long GuildNewTime;
-float DeltaGuildTime;
 
 unsigned long u6osocket;//host?
 unsigned long u6osocket2;//client?
@@ -559,6 +647,9 @@ HWND hWnd;
 HWND hWnd2;
 HWND hWnd3;
 
+// rrr
+HWND hWnd4;
+
 bool windowchange;
 
 bool gotfocus; //TRUE if program is selected
@@ -674,6 +765,138 @@ surf *ps8;
 surf *ps640400;
 surf *ps320200;
 
+// rrr
+surf* psnew1;
+surf* psnew1b;
+
+// r999
+/*
+surf* panelsurf[PANEL_MAX];
+int panelx[PANEL_MAX], panely[PANEL_MAX], panelx2[PANEL_MAX], panely2[PANEL_MAX];
+long panelmx[PANEL_MAX], panelmy[PANEL_MAX];
+double panelscalex[PANEL_MAX], panelscaley[PANEL_MAX];
+
+FRAME panelnew[PANEL_MAX];
+int panelcount = 0;
+int panelsideui, panelactionbar1, panelactionbar2, panelactiontalkbar1, panelactiontalkbar2, panelminimap;
+*/
+
+// r999 new
+int hituipaneli, hituiwidgeti;
+surf* uipanelimgsurf[UI_PANEL_IMG_MAX];
+surf* uiwidgetimgsurf[UI_PANELWIDGET_IMG_MAX][UI_WIDGETSTATE_IMG_MAX];
+float uiscalex, uiscaley;
+int uiscaling = 0;
+int uihover = 1;
+surf *uihoveractionbuttonsurf, *uihoveractiontalkbuttonsurf, *uihoverpartymemberbuttonsurf;
+
+
+// r444
+surf *minimaptilesurf, *minimaptilesurf1, *minimaptilesurf2;
+surf* minimap_surf_new;
+unsigned int minimaptype;
+unsigned int minimaptypemax = 0;
+int minimapnewx, minimapnewy;
+int minimapdeltax, minimaptilexstart, minimaptilexend;
+int minimapdeltay, minimaptileystart, minimaptileyend;
+int minimapplayerx, minimapplayery;
+float minimapstepsize;
+int n1i1, n1i2;
+int n1x1, n1x5, n1x4;
+int n1y1, n1y5;
+
+
+// r666
+//surf* actionbarsurf[ACTIONBAR_MAX];
+//int actionbarmax=1;
+//int actionbarx[ACTIONBAR_MAX], actionbary[ACTIONBAR_MAX], actionbuttonsizex, actionbuttonsizey;
+//int actionbuttonx[ACTIONBAR_MAX][ACTIONBUTTON_MAX], actionbuttony[ACTIONBAR_MAX][ACTIONBUTTON_MAX];
+int actionpending = 0;
+int actionlast = 0;
+int actionreset = 0;
+
+//surf* actiontalksurf[ACTIONTALKBAR_MAX];
+//int actiontalkmax=1;
+//int actiontalkx[ACTIONTALKBAR_MAX], actiontalky[ACTIONTALKBAR_MAX], actiontalkbuttonsizex, actiontalkbuttonsizey;
+//int actiontalkbuttonx[ACTIONTALKBAR_MAX][ACTIONTALKBUTTON_MAX], actiontalkbuttony[ACTIONTALKBAR_MAX][ACTIONTALKBUTTON_MAX];
+int actiontalkfilltext = 0;
+
+//surf* actionbuttonsurf[ACTIONBUTTON_MAX][10];
+/*
+surf* actiondropsetbuttonsurf;
+surf* actiondropupbuttonsurf;
+surf* actiondropdownbuttonsurf;
+surf* actiondropleftbuttonsurf;
+surf* actiondroprightbuttonsurf;
+surf* actionfoodfullbuttonsurf;
+*/
+
+// r777
+int itemtoinv = 0;
+int checkstatusmessage = 0;
+int foodstatus = 0;
+int setdroplocation = 0;
+int droplocation = 1;
+int droploc = 0;
+int playeronscreenxn1, playeronscreenyn1;
+
+// r222
+//surf* pspartyorg;
+//surf* pspartytemp;
+//surf* pspartynew;
+//surf* party_surf[8];
+
+unsigned int partyframenewmax = 1;
+FRAME* party_frame_new[1];
+
+
+static unsigned int partyresxn1 = 128;
+static unsigned int partyresyn1 = 128;
+
+unsigned int partyresxo = 256;
+unsigned int partyresyo = 256;
+
+unsigned int partyresxz = partyresxo;
+unsigned int partyresyz = partyresyo;
+int newmodestatus = 1;
+double partyresscale = 1.0;
+
+// s333
+int combatinfo = 0;
+int hittarget = 0;
+int checkpendingstatusmessage = 0;
+int statusmessagependingprevlen = 0;
+int statusmessagechanged = 0;
+int txtcolprev = 0;
+int objtypen1;
+player combatinfoplayerprev;
+int combatinfoplayerprevinit = 0;
+int objremovedn1;
+double combatinfoplayerprevett = 0.0f;
+int resultinfon1 = 0;
+int sfxonscreenn1 = 0;
+
+// s222
+int soundn1 = 2;
+int combatsoundn1 = 2;
+int playstatusmessagesound;
+
+// s444
+int enhancen1 = 2;
+int showworldmapn1 = 0;
+surf* worldmapsurfn1[5];
+int worldmapindexn1 = 1;
+int updateworldmapn1 = 1;
+int showenhancehostn1 = 1;
+HFONT txtfntoldn1;
+
+// s555
+int updatepartyframen1 = 0;
+
+// s777
+int selectedpartymemberframen1 = 0;
+int selectedpartymemberframelock = 0;
+int selectedpartymembern1 = 0;
 
 
 surf* bt32;
@@ -1149,6 +1372,7 @@ unsigned char u6omidisetup;
 HWND hWnd;
 HWND hWnd2;
 HWND hWnd3;
+HWND hWnd4;
 RECT desktop_rect;
 bool smallwindow;
 unsigned char u6ovolume;

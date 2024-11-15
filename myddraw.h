@@ -62,4 +62,15 @@ void imgt0(surf* d,long x,long y,surf* s);
 void img75t0(surf* d,long x,long y,surf* s);
 void img75t(surf* d,long x,long y,surf* s);
 
+// r999 img to handle resizing and positioning
+void img(surf* d, surf* s, int x, int y, int x2, int y2);
+
+// r999
+void imguiw(surf* d, int uipaneli, int uiwidgeti, int uistatei, surf* s);
+void imguiw(surf* d, int uipaneli, int uiwidgeti, int uistatei);
+void imguip(surf* d, int uipaneli);
+void imguip(surf* d, int uipaneli, surf* s);
+
+
+
 #endif

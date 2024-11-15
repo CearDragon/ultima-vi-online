@@ -19,7 +19,7 @@ MessageBox(NULL,"InitInstance failed","Ultima 6 Online",MB_OK); exit(0);
 if (NEThost==NULL) setupddraw();
 
 
-
+/*
 ps=newsurf(1024,768,SURF_SYSMEM16);
 if (DDRAW_display_pixelformat.dwRGBBitCount!=16){
 ps2=newsurf(1024/2,768/2,SURF_SYSMEM);
@@ -33,6 +33,61 @@ ps6=newsurf(80,60,SURF_SYSMEM16); //convert to minimap size
 ps7=newsurf(120,120,SURF_SYSMEM16); //unconverted treasuremap
 ps8=newsurf(240,240,SURF_SYSMEM16); //convert to treasuremap size
 tmap_marker=newsurf(8,8,SURF_SYSMEM16); //surface for treasure map markers
+*/
+
+// r222 nothing changed here: just some constants which can't be changed
+
+ps=newsurf(resxo,resyo,SURF_SYSMEM16);
+if (DDRAW_display_pixelformat.dwRGBBitCount!=16){
+ps2=newsurf(resxo/2,resyo/2,SURF_SYSMEM);
+ps3=newsurf(resxo,resyo,SURF_SYSMEM);
+ps4=newsurf(resxo/2,resyo/2,SURF_SYSMEM16); //to temporarily convert to 16bit?
+}else{
+ps2=newsurf(resxo/2,resyo/2,SURF_SYSMEM16);
+}
+ps5=newsurf(resxo,resyo,SURF_SYSMEM16); //unconverted mimimap
+ps6=newsurf(80,60,SURF_SYSMEM16); //convert to minimap size
+ps7=newsurf(120,120,SURF_SYSMEM16); //unconverted treasuremap
+ps8=newsurf(240,240,SURF_SYSMEM16); //convert to treasuremap size
+tmap_marker=newsurf(8,8,SURF_SYSMEM16); //surface for treasure map markers
+
+
+// r444
+minimaptype = 0;
+i2=getsetting("MINIMAP");
+
+if (i2 == 2) {
+	minimaptype = 1;
+	minimaptypemax = 1;
+} else if (i2 == 3) {
+	minimaptype = 2;
+	minimaptypemax = 2;
+} else if (i2 == 4) {
+	minimaptype = 2;
+	minimaptypemax = 2;
+	droploc = 1;
+}
+
+/*
+if (minimaptype == 2) {
+	minimaptilexstart = 1;
+	minimaptilexend = 3;
+	minimaptileystart = 1;
+	minimaptileyend = 3;
+	minimaptilesurf=newsurf(80*2,60*2,SURF_SYSMEM16); //convert to minimap size
+} else if (minimaptype == 3) {
+	minimaptilexstart = 0;
+	minimaptilexend = 4;
+	minimaptileystart = 0;
+	minimaptileyend = 4;
+	minimaptilesurf=newsurf(80,60,SURF_SYSMEM16); //convert to minimap size
+}
+*/
+
+//if (minimaptype != 0)
+	minimap_surf_new=newsurf(256,256,SURF_SYSMEM16);
+	minimaptilesurf1=newsurf(80*2,60*2,SURF_SYSMEM16); //convert to minimap size
+	minimaptilesurf2=newsurf(80,60,SURF_SYSMEM16); //convert to minimap size
 
 
 systemfont=CreateFont(16,NULL,0,0,0,NULL,NULL,NULL,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,"System");
@@ -414,6 +469,14 @@ con_frm_img=FRM_IMAGEnew(con_frm,newsurf(1024,256,SURF_SYSMEM16));
 con_frm_img->offset_x=0;
 con_frm_img->offset_y=-256;
 
+// r222 init new mode stuff
+extern void newmodeinit();
+
+if (newmodestatus == 1) {
+	newmodestatus++;
+	newmodeinit();
+}
+
 for (i=0;i<=7;i++){
 party_surf[i]=newsurf(256,256,SURF_SYSMEM16);
 party_frame[i]=FRMnew();
@@ -434,6 +497,7 @@ if (i2=getsetting("SPELLBOOKWINDOW_TRANSPARENCYLEVEL")) party_spellbook_frame[i]
 spellbook_page[i]=1; //default to first page (0=can't display spellbook, no spells)
 spellbook_flags[i]=0;
 }
+
 
 qkstf=FRMnew();
 qkstf->graphic=newsurf(128,32,SURF_SYSMEM16);
@@ -502,6 +566,11 @@ tmap_frame->offset_y=0; //startup offset off screen
 tmap_frame->graphic_use0pixel=TRUE;
 tmap_frame->mouse_over_transparent=FALSE;
 img(tmap_frame->graphic,minimap_b);
+
+// r444
+//if (minimaptype != 0)
+	img(minimap_surf_new, minimap_b);
+
 
 scrlog("Setting up client player data structures");
 //setup client-side player structure

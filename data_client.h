@@ -187,6 +187,8 @@ extern long omy;
 extern long omb; //used by frame.h
 extern long omx2;
 extern long omy2;
+extern long omx3;
+extern long omy3;
 
 extern unsigned short vf_mb2_x;
 extern unsigned short vf_mb2_y;
@@ -219,6 +221,7 @@ extern bool midiinfo_loaded;
 extern HWND hWnd;
 extern HWND hWnd2;
 extern HWND hWnd3;
+extern HWND hWnd4;
 
 extern bool windowchange;
 
@@ -330,6 +333,120 @@ extern surf *ps7;
 extern surf *ps8;
 extern surf *ps640400;
 extern surf *ps320200;
+
+// rrr
+extern surf* psnew1;
+extern surf* psnew1b;
+//extern surf* party_surf[8];
+extern FRAME* party_frame_new[];
+extern unsigned int partyframenewmax;
+
+// r222
+extern unsigned int partyresxo;
+extern  unsigned int partyresyo;
+extern unsigned int partyresxz;
+extern unsigned int partyresyz;
+extern int newmodestatus;
+extern double partyresscale;
+extern unsigned int resxn1m;
+extern unsigned int resyn1m;
+extern unsigned int respn1m;
+extern unsigned int resxn1w;
+extern unsigned int resyn1w;
+
+
+// r999
+/*
+extern surf* panelsurf[PANEL_MAX];
+extern int panelx[PANEL_MAX], panely[PANEL_MAX], panelx2[PANEL_MAX], panely2[PANEL_MAX];
+extern long panelmx[PANEL_MAX], panelmy[PANEL_MAX];
+extern double panelscalex[PANEL_MAX], panelscaley[PANEL_MAX];
+extern FRAME panelnew[PANEL_MAX];
+extern int panelcount;
+extern int panelsideui, panelactionbar1, panelactionbar2, panelactiontalkbar1, panelactiontalkbar2, panelminimap;
+*/
+
+// r444
+extern surf *minimaptilesurf, *minimaptilesurf1, *minimaptilesurf2;
+extern surf* minimap_surf_new;
+extern unsigned int minimaptype, minimaptypemax;
+extern int minimapnewx, minimapnewy;
+extern int minimapdeltax, minimaptilexstart, minimaptilexend;
+extern int minimapdeltay, minimaptileystart, minimaptileyend;
+extern int minimapplayerx, minimapplayery;
+extern float minimapstepsize;
+
+// r666
+//extern surf* actionbarsurf[ACTIONBAR_MAX];
+//extern int actionbarx[ACTIONBAR_MAX], actionbary[ACTIONBAR_MAX], actionbuttonsizex, actionbuttonsizey;
+//extern int actionbuttonx[ACTIONBAR_MAX][ACTIONBUTTON_MAX], actionbuttony[ACTIONBAR_MAX][ACTIONBUTTON_MAX];
+extern int actionpending;
+extern int actionlast;
+extern int actionreset;
+
+//extern surf* actiontalksurf[ACTIONTALKBAR_MAX];
+//extern int actiontalkx[ACTIONTALKBAR_MAX], actiontalky[ACTIONTALKBAR_MAX], actiontalkbuttonsizex, actiontalkbuttonsizey;
+//extern int actiontalkbuttonx[ACTIONTALKBAR_MAX][ACTIONTALKBUTTON_MAX], actiontalkbuttony[ACTIONTALKBAR_MAX][ACTIONTALKBUTTON_MAX];
+extern int actiontalkfilltext;
+
+//extern surf* actionbuttonsurf[ACTIONBUTTON_MAX][10];
+
+// r999
+extern surf* uipanelsurf[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanelx[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanely[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanelsizex[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanelsizey[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern float uipanelscalex[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern float uipanelscaley[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanelscaling[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanelhitenable[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanelusedefaultstatedata[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+
+extern int uipaneli[UI_PANEL_MAX][UI_PANELWIDGET_MAX];
+extern int uipanelcount;
+extern int uipanelwidgetcount[UI_PANEL_MAX];
+
+extern int uipanelsidebar, uipanelminimap, uipanelworldmap, uipanelworldmapbar, uipanelpartymemberparent, uipanelactionbarparent, uipanelactiontalkbarparent;
+extern int uipanelactionbar1, uipanelactionbar2, uipaneloptionbar1, uipanelactiontalkbar1, uipanelactiontalkbar2, uipanelactiontalkbar3;
+extern int uipanelpartymember0;
+extern int uipaneloptioninfo;
+
+extern int hituipaneli, hituiwidgeti;
+extern surf* uipanelimgsurf[UI_PANEL_IMG_MAX];
+extern surf* uiwidgetimgsurf[UI_PANELWIDGET_IMG_MAX][UI_WIDGETSTATE_IMG_MAX];
+extern float uiscalex, uiscaley;
+extern int uiscaling;
+extern int uihover;
+extern surf *uihoveractionbuttonsurf, *uihoveractiontalkbuttonsurf, *uihoverpartymemberbuttonsurf;
+
+// s777
+extern int uipanelpartymemberbar1;
+extern int uipanelpartymemberlock;
+
+
+
+// s222
+extern int soundn1;
+extern int combatsoundn1;
+
+// s333 get type of object at coordinate
+extern player combatinfoplayerprev;
+extern int combatinfoplayerprevinit;
+extern int resultinfon1;
+
+// s444
+extern surf* worldmapsurfn1[5];
+extern int worldmapindexn1;
+extern int enhancen1;
+extern int showworldmapn1;
+extern int updateworldmapn1;
+extern int showenhancehostn1;
+extern HFONT txtfntoldn1;
+
+// s555
+extern int updatepartyframen1;
+
 
 
 extern surf* bt32;

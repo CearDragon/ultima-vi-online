@@ -21,7 +21,7 @@ txtadd(t,":");
 txtnumint(t2,lt.wMinute);
 if (t2->l<2) {txtadd(t,"0");}
 txtadd(t,t2);
-txtfileout(t,log22); /* don't use the normal log method, because we don't want a zero running time stamp for the start time */
+txtfileout(t,log2file); /* don't use the normal log method, because we don't want a zero running time stamp for the start time */
 #ifdef CONSOLE
 _cprintf("%s\n",t->d);
 txtset(t2,"u6o Host, ");

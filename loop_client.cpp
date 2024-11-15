@@ -57,6 +57,13 @@ if (setupfail) {
 
 if (exitrequest){
   exitrequest=FALSE;
+
+  // r777 fix quit sometimes not working bug
+	i = U6OK[U6OK_QUIT][0];
+	keyon[i] = FALSE;
+	key[i] = FALSE;
+	key_gotrelease[i] = TRUE;
+
   if (exitrequest_noconfirm){
     DestroyWindow( hWnd );
   }else{
@@ -93,6 +100,797 @@ if (exitrequest){
 }
 //end exit request
 
+// rrr map/scale mouse location to 1024 resolution (because all logic and graphic is tied to that mode!!!)
+if (smallwindow) {
+	if ((mx != omx2) || (my != omy2)) {
+		//double multiplierx;
+		//double multipliery;
+		omx3 = mx;
+		omy3 = my;
+
+		// r999 new
+		hituipaneli = -1;
+		//selectedpartymembern1 = tplay->selected_partymember;
+
+		// r999
+		//panelmx[0] = (omx3 - panelx[0]) * panelscalex[0];
+		//panelmy[0] = (omy3 - panely[0]) * panelscaley[0];
+
+		/*
+		if (windowsizecyclenum == 0) {
+			multiplierx = (double) resxo / resxs;
+			multipliery = (double) resyo / resys;
+//			mx *= multiplierx; my *= multipliery;
+		}
+		else if (windowsizecyclenum > 0) {
+			multiplierx = (double) resxo / resxz;
+			multipliery = (double) resyo / resyz;
+		}
+		*/
+
+		// the scale is only (re)calculated when the resolution changes; in "void refresh(surf* s)" in myddraw.cpp
+
+//		mx *= multiplierx; my *= multipliery;
+		mx *= scalexm; my *= scaleym;
+		omx2 = mx; omy2 = my;
+
+	}
+
+	// r666 actionbar functionality
+	if (windowsizecyclenum == 1) {
+		if (actionpending > 0) {
+			actionlast = actionpending;
+
+			if (actionpending == 1) {
+				//U6OK[U6OK_CANCEL][0];
+				i=U6OK[U6OK_ATTACK][0];
+				//keyon[i]=TRUE;
+				key[i]=TRUE;
+				//key_gotrelease[i]=TRUE;
+
+				//MessageBox(NULL,"attack!","Ultima 6 Online",MB_OK);
+				//txtset(t, "attack!");
+				//LOGadd(t);
+			} else if (actionpending == 2) {
+				i=U6OK[U6OK_TALK][0];
+				keyon[i]=TRUE;
+				key[i]=TRUE;
+				key_gotrelease[i]=TRUE;
+			} else if (actionpending == 3) {
+				i=U6OK[U6OK_LOOK][0];
+				keyon[i]=TRUE;
+				key[i]=TRUE;
+				key_gotrelease[i]=TRUE;
+			} else if (actionpending == 4) {
+				i=U6OK[U6OK_USE][0];
+				keyon[i]=TRUE;
+				key[i]=TRUE;
+				key_gotrelease[i]=TRUE;
+			} else if (actionpending == 5) {
+				minimaptype++;
+				if (minimaptype > minimaptypemax)
+					minimaptype = 0;
+
+				if (minimaptype == 1) {
+					minimaptilexstart = 1;
+					minimaptilexend = 3;
+					minimaptileystart = 1;
+					minimaptileyend = 3;
+					minimaptilesurf = minimaptilesurf1;
+					//minimapplayerx = minimapnewx+128-13;
+					//minimapplayery = minimapnewy+128-24;
+					minimapplayerx = 128-13;
+					minimapplayery = 128-24;
+					minimapstepsize = 4.9f;
+				} else if (minimaptype == 2) {
+					minimaptilexstart = 0;
+					minimaptilexend = 4;
+					minimaptileystart = 0;
+					minimaptileyend = 4;
+					minimaptilesurf = minimaptilesurf2;
+					//minimapplayerx = minimapnewx+128-9;
+					//minimapplayery = minimapnewy+128-21;
+					minimapplayerx = 128-9;
+					minimapplayery = 128-21;
+					minimapstepsize = 2.45f;
+				}
+			} else if (actionpending == 6) {
+				i = U6OK[U6OK_TALK][0];
+				keyon[i] = TRUE;
+				key[i] = TRUE;
+				key_gotrelease[i] = TRUE;
+				actiontalkfilltext = 1;
+			} else if (actionpending == 7) {
+				i = U6OK[U6OK_QUIT][0];
+				keyon[i] = TRUE;
+				key[i] = TRUE;
+				key_gotrelease[i] = TRUE;
+			} else if (actionpending == 100) {
+				// r777 use item on self: step 1
+				i=U6OK[U6OK_USE][0];
+				keyon[i]=TRUE;
+				key[i]=TRUE;
+				key_gotrelease[i]=TRUE;
+				actionpending = 501;
+				//MessageBox(NULL,"a 100","Ultima 6 Online",MB_OK);
+			} else if (actionpending == 501) {
+				// r777 click on self
+				actionpending = 502;
+				//MessageBox(NULL,"a 501","Ultima 6 Online",MB_OK);
+			} else if (actionpending == 503) {
+				// r777 send item to inventory
+				actionpending = 0;
+				actionreset = 1;
+				itemtoinv = 1;
+				//MessageBox(NULL,"a 503","Ultima 6 Online",MB_OK);
+			} else if (actionpending == 599) {
+				// r777 reset action
+				actionpending = 0;
+				actionreset = 1;
+			}
+
+			if (actionpending < 500)
+				actionpending = 0;
+		} else if (actionreset != 0) {
+			actionreset = 0;
+			actionlast = 0;
+		//} else if (mbclick & 1) {
+		} else {
+			hituipaneli = -5;
+			hituiwidgeti = -5;
+
+			// s444 process mouse clicks on worldmap and worldmapbar
+			if (mbclick) {
+				if (showworldmapn1 > 0) {
+					hituipaneli = gethituipaneli(omx3, omy3);
+					//hituiwidgeti = -1;
+
+					// s444 cancel all mouse clicks on world map
+					if (hituipaneli == uipanelworldmap) {
+						hituipaneli = -2;
+						mbclick = 0;
+						mbheld = 0;
+					} else if (hituipaneli == uipanelworldmapbar) {
+						if (mbclick & 1)
+							hituiwidgeti = gethituipanelwidgeti(omx3, omy3, uipanelworldmapbar);
+						else {
+							// s444 cancel non-left mouse clicks on world map bar
+							hituipaneli = -5;
+							mbclick = 0;
+							mbheld = 0;
+						}
+					} else if (!(mbclick & 1)) {
+						hituipaneli = -5;
+					}
+
+					// s444 cancel right mouse clicks on world map bar
+					/*
+					if (hituiwidgeti > 0) {
+						if (!(mbclick & 1)) {
+							hituipaneli = -2;
+							hituiwidgeti = -2;
+							mbclick = 0;
+							mbheld = 0;
+						}
+					}
+					*/
+
+					// s444 worldmapbar
+					if (hituiwidgeti > 0) {
+						mbclick = 0;
+
+						if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6CLOTH) {
+							if (worldmapindexn1 != 1)
+								updateworldmapn1 = 1;
+
+							worldmapindexn1 = 1;
+
+							if (soundn1 >= 2)
+								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+						}
+						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6P) {
+							if (worldmapindexn1 != 2)
+								updateworldmapn1 = 1;
+
+							worldmapindexn1 = 2;
+
+							if (soundn1 >= 2)
+								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+						}
+						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6G) {
+							if (worldmapindexn1 != 3)
+								updateworldmapn1 = 1;
+
+							worldmapindexn1 = 3;
+
+							if (soundn1 >= 2)
+								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+						}
+						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6RUNE) {
+							if (worldmapindexn1 != 4)
+								updateworldmapn1 = 1;
+
+							worldmapindexn1 = 4;
+
+							if (soundn1 >= 2)
+								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+						}
+						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_CLOSE) {
+							showworldmapn1 = 0;
+							uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
+
+							if (soundn1 >= 2)
+								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+						}
+					}
+				}
+			} // mbclick
+
+			// r999 new
+			//hituipaneli = gethituipaneli(omx3, omy3);
+			//hituiwidgeti = -1;
+
+			// r999 new only process left mouse clicks if it was not previously canceled
+			if ((mbclick & 1) && (hituipaneli < -4)) {
+				hituipaneli = gethituipaneli(omx3, omy3);
+				//hituiwidgeti = -1;
+
+				if (hituipaneli < 0)
+					actionreset = 1;
+			}
+
+			// s444 cancel mouse clicks on world map
+			/*
+			if (hituipaneli == uipanelworldmap) {
+				hituipaneli = -1;
+				mbclick = 0;
+			}
+			*/
+
+			// process left mouse clicks on new ui
+			if (hituipaneli > 0) {
+				hituiwidgeti = -1;
+
+				// r999 new actionbar1
+				if (hituipaneli == uipanelactionbar1) {
+					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+
+					if (hituiwidgeti > 0) {
+						if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_ATTACK) {
+							// attack
+							actionreset = 0;
+							if (actionlast != 1) {
+								i=U6OK[U6OK_CANCEL][0];
+								keyon[i]=TRUE;
+								key[i]=TRUE;
+								key_gotrelease[i]=TRUE;
+							} else
+								actionreset = 1;
+
+							actionpending = 1;
+
+							//MessageBox(NULL,"attack!","Ultima 6 Online",MB_OK);
+							//txtset(t, "attack!");
+							//LOGadd(t);
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_TALK) {
+							// talk
+							actionreset = 0;
+							i=U6OK[U6OK_CANCEL][0];
+							keyon[i]=TRUE;
+							key[i]=TRUE;
+							key_gotrelease[i]=TRUE;
+
+							if (actionlast != 2)
+								actionpending = 2;
+							else
+								actionreset = 1;
+
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_LOOK) {
+							// look
+							actionreset = 0;
+							i=U6OK[U6OK_CANCEL][0];
+							keyon[i]=TRUE;
+							key[i]=TRUE;
+							key_gotrelease[i]=TRUE;
+
+							if (actionlast != 3)
+								actionpending = 3;
+							else
+								actionreset = 1;
+
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_USE) {
+							// use
+							actionreset = 0;
+							i=U6OK[U6OK_CANCEL][0];
+							keyon[i]=TRUE;
+							key[i]=TRUE;
+							key_gotrelease[i]=TRUE;
+
+							if (actionlast != 4) {
+								if ( (keyon[VK_SHIFT]) && CLIENTplayer->mobj) {
+									// r777 set use item on self action
+									actionpending = 100;
+								} else
+									actionpending = 4;
+							}
+							else
+								actionreset = 1;
+
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_DROP) {
+							// drop item
+							actionreset = 0;
+							i=U6OK[U6OK_CANCEL][0];
+							keyon[i]=TRUE;
+							key[i]=TRUE;
+							key_gotrelease[i]=TRUE;
+
+							if (CLIENTplayer->mobj)
+								actionpending = 510;
+							else {
+								if (setdroplocation)
+									setdroplocation = 0;
+								else
+									setdroplocation = 1;
+
+								if (soundn1 >= 2)
+									soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+							}
+
+							mbclick = 0;
+						}
+					}
+				} // actionbar1
+				// actionbar2
+				else if (hituipaneli == uipanelactionbar2) {
+					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+
+					if (hituiwidgeti > 0) {
+						if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_FOOD) {
+							// food (use)
+							actionreset = 0;
+							i=U6OK[U6OK_CANCEL][0];
+							keyon[i]=TRUE;
+							key[i]=TRUE;
+							key_gotrelease[i]=TRUE;
+
+							if (CLIENTplayer->mobj) {
+								// r777 set use item on self action
+								actionpending = 100;
+							} else
+								actionreset = 1;
+
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_WORLDMAP) {
+							// worldmap
+							showworldmapn1++;
+							if (showworldmapn1 > 1) {
+								showworldmapn1 = 0;
+								uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
+							} else {
+								uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 1;
+							}
+
+							if (soundn1 >= 2)
+								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_COMBATLOG) {
+							// combatlog
+							combatinfo++;
+							txtsetchar(t3, 255);
+
+							if (combatinfo > 1) {
+								combatinfo = 0;
+								STATUSMESSadd("Combat log disabled.", 1);
+							} else {
+								STATUSMESSadd("Combat log enabled. (experimental)  Warning: may cause game to crash.", 1);
+							}
+
+							if (soundn1)
+								soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
+						}
+					}
+				} // actionbar2
+				// optionbar1
+				else if (hituipaneli == uipaneloptionbar1) {
+					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+
+					if (hituiwidgeti > 0) {
+						if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_ENHANCE) {
+							// game enhancement
+							enhancen1++;
+							if (enhancen1 > 2) {
+								enhancen1 = 0;
+								STATUSMESSadd("Game option: set to default", 1);
+							} else
+								STATUSMESSadd("Game option: set to alternate ", 1, enhancen1);
+
+							if (soundn1)
+								soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
+							//updateoptioninfo();
+							updatepartyframen1 = 1;
+						} else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_SOUND) {
+							// game sound enhancement
+							soundn1++;
+							if (soundn1 > 2) {
+								soundn1 = 0;
+								STATUSMESSadd("Sound option: set to default", 1);
+							} else
+								STATUSMESSadd("Sound option: set to alternate ", 1, soundn1);
+
+							if (soundn1)
+								soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
+							//updateoptioninfo();
+						} else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_COMBATSOUND) {
+							// combat sound enhancement
+							combatsoundn1++;
+							if (combatsoundn1 > 2) {
+								combatsoundn1 = 0;
+								STATUSMESSadd("Combat sound option: set to default", 1);
+							} else
+								STATUSMESSadd("Combat sound option: set to alternate ", 1, combatsoundn1);
+
+							if (soundn1)
+								soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
+							//updateoptioninfo();
+						} else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_MINIMAP) {
+							// minimap toggle
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 5;
+							mbclick = 0;
+
+							if (soundn1 >= 2)
+								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+						} else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_QUIT) {
+							// quit
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 7;
+							mbclick = 0;
+							//MessageBox(NULL,"quit","Ultima 6 Online",MB_OK);
+						}
+					}
+				} // optionbar1
+				// actiontalkbar1
+				else if (hituipaneli == uipanelactiontalkbar1) {
+					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+
+					if (hituiwidgeti > 0) {
+						if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_NAME) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "name");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_JOB) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "job");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_HEAL) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "heal");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_CURE) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "cure");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_RESURRECT) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "resurrect");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_INSURANCE) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "insurance");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_SPELL) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "spell");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_REAGENT) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "reagent");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_POTION) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "potion");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_STAFF) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "staff");
+							mbclick = 0;
+						}
+					}
+				} // actiontalkbar1
+				// actiontalkbar2
+				else if (hituipaneli == uipanelactiontalkbar2) {
+					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+
+					if (hituiwidgeti > 0) {
+						if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_YES) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "yes");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_NO) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "no");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_SELL) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "sell");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BULK) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "bulk");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BUY) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "buy");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_ARMOR) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "armor");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_ARMS) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "arms");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_WEAPON) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "weapon");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_ARROWS) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "arrows");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BOLTS) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "bolts");
+							mbclick = 0;
+						}
+					}
+				} // actiontalkbar2
+				// actiontalkbar3
+				else if (hituipaneli == uipanelactiontalkbar3) {
+					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+
+					if (hituiwidgeti > 0) {
+						if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_DEPOSIT) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "deposit");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_WITHDRAW) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "withdraw");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BALANCE) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "balance");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_EXCHANGE) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "exchange");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_HOUSE) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "house");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_PAYMENT) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "payment");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_JOIN) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "join");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_LEAVE) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "leave");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BAGS) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "bags");
+							mbclick = 0;
+						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_HELP) {
+							actionreset = 0;
+							i = U6OK[U6OK_CANCEL][0];
+							keyon[i] = TRUE;
+							key[i] = TRUE;
+							key_gotrelease[i] = TRUE;
+							actionpending = 6;
+							txtset(newt1, "kal lor <-- replace with all uppercase (i.e. \"KAL LOR\") and press Enter. WARNING: you will LOSE some (i.e. 1/16) of ... your (TOTAL) experience!  This help request will teleport you to the starting location.");
+							mbclick = 0;
+						}
+					}
+				} // actiontalkbar3
+				// partymemberbar1
+				else if (hituipaneli == uipanelpartymemberbar1) {
+					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+
+					if (hituiwidgeti > 0) {
+						selectedpartymemberframen1 = hituiwidgeti - 1;
+					}
+				} // partymemberbar1
+				// party member inventory frame
+				else if (hituipaneli == uipanelpartymember0) {
+					// partymemberlock
+					if (testhituipanel(omx3, omy3, uipanelpartymemberlock)) {
+						selectedpartymemberframelock++;
+
+						if (selectedpartymemberframelock > 1)
+							selectedpartymemberframelock = 0;
+					} // partymemberlock
+				} // party member inventory frame
+
+			}
+
+			/*
+			txtset(t4, "hittest uipi=");
+			txtnumint(t5, hituipaneli);
+			txtadd(t4, t5);
+			txtset(t5, " uiwi=");
+			txtadd(t4, t5);
+			txtnumint(t5, hituiwidgeti);
+			txtadd(t4, t5);
+			LOGadd(t4);
+			*/
+
+		}
+    //if (mb&1){
+	}
+
+}
 
 
 //check for midi keys that need to be cleared
@@ -143,13 +941,17 @@ if (!NEThost) {
   framecount++;
 }
 
+// rrr moved fix mouse logic to (near) top of source file
 //fix mouse 512x384
+/*
 if (smallwindow){
   if ((mx!=omx2)||(my!=omy2)){
     mx*=2; my*=2;
     omx2=mx; omy2=my;
   }
 }
+*/
+
 
 omb=FRAME_mb; //find old button value using FRAME_mb (which now contains old value)
 FRAME_mb=mb; //backup physical mouse value
@@ -238,6 +1040,8 @@ checkobj:
       FRM_type=(FRM_TYPE*)FRM_type->next; goto checkobj;
     }
 
+	// r222 this is where mouse click is checked! no changes are made here
+
     pn->mouse_over=TRUE;
     pn->mouse_x=mx-pn->offset_x;
     pn->mouse_y=my-pn->offset_y;
@@ -293,6 +1097,129 @@ maskcheckfailed:;
   pn=(FRAME*)pn->next; goto checkpanel; //next frame pointer
 }
 checkdone:
+
+// r222 handle mouse click for party[0] (the player avatar) for new resolution mode top-right inventory window
+// r222 we are just simulating the clicking/variables as if it is being performed on the actual inventory in the 1024 res.  the rest is handle by the original 1024 res code/logic.
+if (smallwindow && windowsizecyclenum == 1) {
+	//double multiplierx = (double)resxz / resxo;
+	//double multipliery = (double)resyz / resyo;
+	
+
+	//if (newmodestatus >= 5) {
+	if (itemtoinv) {
+		// r777 send cursor item to inventory; simulate clicks
+		itemtoinv = 0;
+
+		//pmf = party_frame[0];
+		pmf = party_frame[selectedpartymemberframen1];
+		pmf->mouse_over = TRUE; // set this to true so that the original logic will run and handle the inventory actions/clicks.
+
+		// simulate/set the position where the mouse is clicked in the inventory window
+		pmf->mouse_x = pmf->offset_x+10;
+		pmf->mouse_y = pmf->offset_y+10;
+
+		pmf->mouse_click |= 1;
+		//MessageBox(NULL,"item to inv 2","Ultima 6 Online",MB_OK);
+
+	}
+	else if (actionpending == 510) {
+		// Drop item action: remove "focus" from party member frames to allow item to drop on ground
+		for (i = 0; i <= 7; i++) {
+			pmf = party_frame[i];
+			pmf->mouse_over = FALSE;
+		}
+	}
+	else {
+		if (hituipaneli < -4)
+			if (testhituipanel(omx3, omy3, uipanelpartymember0))
+				hituipaneli = uipanelpartymember0;
+
+		for (i = 0; i < partyframenewmax; i++) {
+			party_frame_new[i]->mouse_over = FALSE;
+			//pmf = party_frame[i];
+			pmf = party_frame[selectedpartymemberframen1];
+			
+			//		if ((omx3 >= resxn1m + 3) && (omy3 <= 256))
+
+			// not true anymore --> omx3 and omy3 does not need to be scaled because the (new) top-right inventory window is not scaled at all (it is always the 1024 res scaled-size; i.e. not scaled)
+			//if ((panelmx[0] >= party_frame_new[i]->offset_x) && (panelmx[0] <= party_frame_new[i]->offset_x + pmf->graphic->d.dwWidth)
+				//&& (panelmy[0] >= party_frame_new[i]->offset_y) && (panelmy[0] <= party_frame_new[i]->offset_y + pmf->graphic->d.dwHeight))
+			if (hituipaneli == uipanelpartymember0)
+				party_frame_new[i]->mouse_over = TRUE;
+			//party_frame[0] = TRUE;
+			if (party_frame_new[i]->mouse_over == TRUE) {
+				pmf->mouse_over = TRUE; // set this to true so that the original logic will run and handle the inventory actions/clicks.
+				//CLIENTplayer->mf = i;
+				//CLIENTplayer->mx = pmf->mouse_x;
+				//CLIENTplayer->my = pmf->mouse_y;
+				//pmf->mouse_x = 130;
+				//pmf->mouse_y = 130;
+				//if (pmf->mouse_click == TRUE) CLIENTplayer->key |= KEYmbclick;
+				//pmf->mouse_click = TRUE;
+				//CLIENTplayer->key |= KEYmbclick;
+				/*
+				if (u6okeyhit(U6OK_SCROLLUP)) {
+				CLIENTplayer->mx = 118;
+				CLIENTplayer->my = 202;
+				CLIENTplayer->key |= KEYmbclick;
+				if (CLIENTplayer->key2&KEYmbclick) CLIENTplayer->key2 -= KEYmbclick;
+				}
+				if (u6okeyhit(U6OK_SCROLLDOWN)) {
+				CLIENTplayer->mx = 118;
+				CLIENTplayer->my = 240;
+				CLIENTplayer->key |= KEYmbclick;
+				if (CLIENTplayer->key2&KEYmbclick) CLIENTplayer->key2 -= KEYmbclick;
+				}
+				*/
+
+				// simulate/set the position where the mouse is clicked in the inventory window
+				//pmf->mouse_x = panelmx[0] - party_frame_new[i]->offset_x;
+				//pmf->mouse_y = panelmy[0] - party_frame_new[i]->offset_y;
+				pmf->mouse_x = omx3 - uipanelx[uipanelpartymember0][UI_WIDGET_DEF][UI_STATE_DEF];
+				pmf->mouse_y = omy3 - uipanely[uipanelpartymember0][UI_WIDGET_DEF][UI_STATE_DEF];
+
+				// inverse scaling
+				if (uiscaling) {
+					pmf->mouse_x = pmf->mouse_x / uipanelscalex[uipanelpartymember0][UI_WIDGET_DEF][UI_STATE_DEF];
+					pmf->mouse_y = pmf->mouse_y / uipanelscaley[uipanelpartymember0][UI_WIDGET_DEF][UI_STATE_DEF];
+				}
+
+
+				//if (mbclick & 1) pmf->mouse_click |= 1;
+				if (mbclick & 1) {
+					pmf->mouse_click |= 1;
+					actionreset = 1;
+				}
+
+				if (mb & 1) {
+					pmf->mouse_pressed = TRUE;
+				}
+			}//pmf->mouse_over==TRUE
+
+		/*
+		txtset(t2, "pmf mx ");
+		txtnumint(t3, pmf->mouse_x);
+		txtadd(t2, t3);
+		txtadd(t2, " // my ");
+		txtnumint(t3, pmf->mouse_y);
+		txtadd(t2, t3);
+		LOGadd(t2);
+		*/
+		}//i
+	}
+} else {
+	if (enhancen1 >= 2) {
+		if (actionpending == 510) {
+			// Drop item action: remove "focus" from party member frames to allow item to drop on ground
+			for (i = 0; i <= 7; i++) {
+				pmf = party_frame[i];
+				pmf->mouse_over = FALSE;
+			}
+		}
+	}
+}
+
+
 //external functions, results of button presses
 if ((ONOFF_hold!=NULL)&&((FRAME_mb&1)==0)){
   soundplay(ONOFF_hold->sound_off);
@@ -2096,6 +3023,21 @@ host_minimize_goto:
       for (i=0;i<=65535;i++) keyon[i]=FALSE;
       goto maxminmini;
     }
+
+	// rrr cycle through resolution modes; added the new resolution mode into the cycle
+	if (enhanceclientn1) { // s555
+		if ((smallwindow == TRUE) && (nodisplay == FALSE)) {
+			windowsizecyclenum++;
+			if (windowsizecyclenum > windowsizecyclemax) {
+				windowsizecyclenum = 0;
+			}
+			else {
+				for (i = 0; i <= 65535; i++) keyon[i] = FALSE;
+				goto maxminmini;
+			}
+		}
+	}
+
     if ((smallwindow==FALSE)&&(nodisplay==FALSE)){
       smallwindow=TRUE;
       for (i=0;i<=65535;i++) keyon[i]=FALSE;
@@ -2694,6 +3636,10 @@ voicechat_permissionrequestfinished:
       if (inprec==0){
         deadglobalmessage=1; goto dglobal;
       }
+
+	  // s222 new sound for user actions
+	  if (soundn1 >= 2)
+		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
     }
     if (inpf2->enterpressed){
       deadglobalmessage=1; goto dglobal2; //process receiving input
@@ -2737,6 +3683,13 @@ dglobal:
         txtset(t,"?"); t->d2[0]=19; NET_send(NETplayer,NULL,t); //typing... message
         userkey=0;
         inpf2->enterpressed=FALSE;
+
+		// r666 auto set talk text
+		if (actiontalkfilltext) {
+			actiontalkfilltext = 0;
+			txtset(inpf2->input, newt1);
+		}
+
         GETINPUT_setup(inpf2->input,&inpf2->enterpressed,inpf2->length_limit);
         if (inpf->offset_x>=1024) inpf->offset_x-=2048;
 
@@ -2754,6 +3707,10 @@ dglobal:
         }
         inprec=1;
       }
+
+	  // s222 new sound for user actions
+	  if (soundn1 >= 2)
+		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
     }
 skipglobalmessage:
     if (inpf2->enterpressed){
@@ -2893,12 +3850,16 @@ inpmess_skip: txtset(t,"?"); t->d2[0]=20; NET_send(NETplayer,NULL,t); //typing..
     CLIENTplayer->mx=vf->mouse_x;
     CLIENTplayer->my=vf->mouse_y;
     if (vf->mouse_click==TRUE) CLIENTplayer->key|=KEYmbclick;
+
+	// r222 this is where some values are propagated/set relating to mouse over/click on a party member frame; no changes are made here.
+
     for (i=0;i<=7;i++){
       pmf=party_frame[i];
       if (pmf->mouse_over==TRUE){
         CLIENTplayer->mf=i;
         CLIENTplayer->mx=pmf->mouse_x;
         CLIENTplayer->my=pmf->mouse_y;
+
         if (pmf->mouse_click==TRUE) CLIENTplayer->key|=KEYmbclick;
         if (u6okeyhit(U6OK_SCROLLUP)){
           CLIENTplayer->mx=118;
@@ -2912,8 +3873,19 @@ inpmess_skip: txtset(t,"?"); t->d2[0]=20; NET_send(NETplayer,NULL,t); //typing..
           CLIENTplayer->key|=KEYmbclick;
           if (CLIENTplayer->key2&KEYmbclick) CLIENTplayer->key2-=KEYmbclick;
         }
-      }//pmf->mouse_over==TRUE
+
+		/*
+		txtset(t2, "clientplayer mx ");
+		txtnumint(t3, CLIENTplayer->mx);
+		txtadd(t2, t3);
+		txtadd(t2, " // my ");
+		txtnumint(t3, CLIENTplayer->my);
+		txtadd(t2, t3);
+		LOGadd(t2);
+		*/
+	  }//pmf->mouse_over==TRUE
     }//i
+
     //turn spellbook pages
     for (i=0;i<=7;i++){
       pmf=party_spellbook_frame[i];
@@ -3012,6 +3984,11 @@ turnspellpager:
       if (U6OK_FLAGS[U6OK_USE]&1){//instant click: simulate mouse click on current surface
         CLIENTplayer->key|=KEYmbclick;
       }//instant click
+
+	  // s222 new sound for user actions
+	  if (soundn1 >= 2)
+		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
+
       goto skipaltuse;
     }//use
     if (u6okeyhit(U6OK_USE2)){ //"U" alt use
@@ -3019,6 +3996,10 @@ turnspellpager:
       if (U6OK_FLAGS[U6OK_USE2]&1){//instant click: simulate mouse click on current surface
         CLIENTplayer->key|=KEYmbclick;
       }//instant click
+
+	  // s222 new sound for user actions
+	  if (soundn1 >= 2)
+		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
     }//use
 skipaltuse:
 
@@ -3028,6 +4009,11 @@ skipaltuse:
       if (U6OK_FLAGS[U6OK_LOOK]&1){//instant click: simulate mouse click on current surface
         CLIENTplayer->key|=KEYmbclick;
       }//instant click
+
+	  // s222 new sound for user actions
+	  if (soundn1 >= 2)
+		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
+
       goto skipaltlook;
     }
     if (u6okeyhit(U6OK_LOOK2)){ //"L" alt look
@@ -3035,6 +4021,10 @@ skipaltuse:
       if (U6OK_FLAGS[U6OK_LOOK2]&1){//instant click: simulate mouse click on current surface
         CLIENTplayer->key|=KEYmbclick;
       }//instant click
+
+	  // s222 new sound for user actions
+	  if (soundn1 >= 2)
+		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
     }
 skipaltlook:
 
@@ -3056,6 +4046,11 @@ skipaltlook:
         txtset(t,"?"); t->d2[0]=17; NET_send(NETplayer,NULL,t); //break off combat
         goto userkey_cancel;
       }
+
+	  // s222 new sound for user actions
+	  if (soundn1 >= 2)
+		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
+
       goto u6okattackdone;
     }
     if (u6okeyhit(U6OK_ATTACK2)){ //"A" alt attack
@@ -3073,9 +4068,102 @@ skipaltlook:
         txtset(t,"?"); t->d2[0]=17; NET_send(NETplayer,NULL,t); //break off combat
         goto userkey_cancel;
       }
+
+	  // s222 new sound for user actions
+	  if (soundn1 >= 2)
+		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
+
       goto u6okattackdone;
     }
 u6okattackdone:
+
+	// r777 simulate click on self
+    if (actionpending == 502){ //"U" use
+		actionpending = 503;
+
+//      userkey=1;
+//      if (U6OK_FLAGS[U6OK_USE]&1){//instant click: simulate mouse click on current surface
+		//CLIENTplayer->mx = MX_AVATAR; // 495
+		//CLIENTplayer->my = MY_AVATAR; // 365
+
+		playeronscreenxn1 = tplay->x - tpx;
+		playeronscreenyn1 = tplay->y - tpy;
+
+		CLIENTplayer->mx = playeronscreenxn1*32+16;
+		CLIENTplayer->my = playeronscreenyn1*32+16;
+        CLIENTplayer->key|=KEYmbclick;
+
+		/*
+		txtset(t3, "111 x = ");
+		txtnumint(t4, tplay->x);
+		txtadd(t3, t4);
+		txtadd(t3, " // y = ");
+		txtnumint(t4, tplay->y);
+		txtadd(t3, t4);
+
+		txtadd(t3, " // tpx = ");
+		txtnumint(t4, tpx);
+		txtadd(t3, t4);
+		txtadd(t3, " // tpy = ");
+		txtnumint(t4, tpy);
+		txtadd(t3, t4);
+
+		txtadd(t3, " // ax = ");
+		txtnumint(t4, (tplay->x-tpx) * 32 + 16); // 15
+		txtadd(t3, t4);
+		txtadd(t3, " // ay = ");
+		txtnumint(t4, (tplay->y-tpy) * 32 + 16); // 11
+		txtadd(t3, t4);
+
+		txtadd(t3, " // px = ");
+		txtnumint(t4, playeronscreenxn1); // 15
+		txtadd(t3, t4);
+		txtadd(t3, " // py = ");
+		txtnumint(t4, playeronscreenyn1); // 11
+		txtadd(t3, t4);
+
+		txtadd(t3, " // mx = ");
+		txtnumint(t4, CLIENTplayer->mx);
+		txtadd(t3, t4);
+		txtadd(t3, " // my = ");
+		txtnumint(t4, CLIENTplayer->my);
+		txtadd(t3, t4);
+
+		LOGadd(t3);
+		*/
+//      }//instant click
+    }//use
+
+	// r777 simulate click on drop location
+    if (actionpending == 510) {
+		actionpending = 599;
+
+		playeronscreenxn1 = tplay->x - tpx;
+		playeronscreenyn1 = tplay->y - tpy;
+
+		if (droplocation == 1) {
+			// north
+			CLIENTplayer->mx = playeronscreenxn1*32+16;
+			CLIENTplayer->my = playeronscreenyn1*32+16-32;
+		}
+		else if (droplocation == 2) {
+			// south
+			CLIENTplayer->mx = playeronscreenxn1*32+16;
+			CLIENTplayer->my = playeronscreenyn1*32+16+32;
+		}
+		else if (droplocation == 3) {
+			// west
+			CLIENTplayer->mx = playeronscreenxn1*32+16-32;
+			CLIENTplayer->my = playeronscreenyn1*32+16;
+		}
+		else if (droplocation == 4) {
+			// east
+			CLIENTplayer->mx = playeronscreenxn1*32+16+32;
+			CLIENTplayer->my = playeronscreenyn1*32+16;
+		}
+
+        CLIENTplayer->key|=KEYmbclick;
+    }
 
     //mouse movement
     {
@@ -3144,26 +4232,98 @@ mousemove_finish:
     vf_mb2_x=0xFFFF; vf_mb2_y=0xFFFF;
 
 
-    if (u6okeyhit(U6OK_RIGHT)){CLIENTplayer->key|=KEYright2;
-    }else{
-      if (u6okeyon(U6OK_RIGHT)){
-        CLIENTplayer->key|=KEYright;
-      }
+	if (u6okeyhit(U6OK_RIGHT)) {
+		CLIENTplayer->key |= KEYright2;
+		// r777 set drop location right
+		if (setdroplocation) {
+			setdroplocation = 0;
+			droplocation = 4;
+			if (soundn1 >= 2)
+				soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+		}
+	}
+	else {
+		if (u6okeyon(U6OK_RIGHT)) {
+			CLIENTplayer->key |= KEYright;
+			// r777 set drop location right
+			if (setdroplocation) {
+				setdroplocation = 0;
+				droplocation = 4;
+				if (soundn1 >= 2)
+					soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+			}
+		}
 
-    }
+	}
 
-    if (u6okeyhit(U6OK_LEFT)){CLIENTplayer->key|=KEYleft2;
-    }else{
-      if (u6okeyon(U6OK_LEFT)) CLIENTplayer->key|=KEYleft;
-    }
-    if (u6okeyhit(U6OK_UP)){CLIENTplayer->key|=KEYup2;
-    }else{
-      if (u6okeyon(U6OK_UP)) CLIENTplayer->key|=KEYup;
-    }
-    if (u6okeyhit(U6OK_DOWN)){CLIENTplayer->key|=KEYdown2;
-    }else{
-      if (u6okeyon(U6OK_DOWN)) CLIENTplayer->key|=KEYdown;
-    }
+	if (u6okeyhit(U6OK_LEFT)) {
+		CLIENTplayer->key |= KEYleft2;
+		// r777 set drop location left
+		if (setdroplocation) {
+			setdroplocation = 0;
+			droplocation = 3;
+			if (soundn1 >= 2)
+				soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+		}
+	}
+	else {
+		if (u6okeyon(U6OK_LEFT)) {
+			CLIENTplayer->key |= KEYleft;
+			// r777 set drop location left
+			if (setdroplocation) {
+				setdroplocation = 0;
+				droplocation = 3;
+				if (soundn1 >= 2)
+					soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+			}
+		}
+	}
+
+	if (u6okeyhit(U6OK_UP)) {
+		CLIENTplayer->key |= KEYup2;
+		// r777 set drop location up
+		if (setdroplocation) {
+			setdroplocation = 0;
+			droplocation = 1;
+			if (soundn1 >= 2)
+				soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+		}
+	}
+	else {
+		if (u6okeyon(U6OK_UP)) {
+			CLIENTplayer->key |= KEYup;
+			// r777 set drop location up
+			if (setdroplocation) {
+				setdroplocation = 0;
+				droplocation = 1;
+				if (soundn1 >= 2)
+					soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+			}
+		}
+	}
+
+	if (u6okeyhit(U6OK_DOWN)) {
+		CLIENTplayer->key |= KEYdown2;
+		// r777 set drop location down
+		if (setdroplocation) {
+			setdroplocation = 0;
+			droplocation = 2;
+			if (soundn1 >= 2)
+				soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+		}
+	}
+	else {
+		if (u6okeyon(U6OK_DOWN)) {
+			CLIENTplayer->key |= KEYdown;
+			// r777 set drop location down
+			if (setdroplocation) {
+				setdroplocation = 0;
+				droplocation = 2;
+				if (soundn1 >= 2)
+					soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+			}
+		}
+	}
 
 
 
@@ -3196,6 +4356,7 @@ mousemove_finish:
 
 
                     if (i4==x){
+					  /*
                       if (spell[i][(i3<<4)+i2]!=1){ //can cast?
                         userkey=4;
                         userspell=(i3<<4)+i2;
@@ -3207,6 +4368,39 @@ mousemove_finish:
                         goto gotspell;
 
                       }
+					  */
+
+						// f222 prevent casting until it is ready (when clicking on spells in spellbook)
+						if (enhancen1) {
+							if (!client_spellwait[i]) {
+								if (spell[i][(i3 << 4) + i2] != 1) { //can cast?
+									userkey = 4;
+									userspell = (i3 << 4) + i2;
+									userspellbook = i;
+									if (spelltarget[(i3 << 4) + i2] == 1) {
+										txtset(t, "?"); t->d2[0] = 15; NET_send(NETplayer, NULL, t); //keyboard targeting request
+										ktar_display = 2.0f;
+									}
+									goto gotspell;
+
+								}
+							}
+							else if (soundn1)
+								soundplay2(u6osound[SOUND_MAGIC_NOTREADY], u6osound_volume[SOUND_MAGIC_NOTREADY]);
+						}
+						else { // original
+						  if (spell[i][(i3<<4)+i2]!=1){ //can cast?
+							userkey=4;
+							userspell=(i3<<4)+i2;
+							userspellbook=i;
+							if (spelltarget[(i3<<4)+i2]==1){
+							  txtset(t,"?"); t->d2[0]=15; NET_send(NETplayer,NULL,t); //keyboard targeting request
+							  ktar_display=2.0f;
+							}
+							goto gotspell;
+
+						  }
+						}
                     }
 
                     i4++;
@@ -3293,16 +4487,46 @@ ktarcast:
       if (u6okeyhit(U6OK_CASTRECALL8)) x=7;
       if (x!=-1){
         if (spellrecall_partymember[x]){
-          if (tplay->party[spellrecall_partymember[x]-1]){
-            if (spell[spellrecall_partymember[x]-1][spellrecall_i[x]]>1){ //valid
-              userkey=4;
-              userspell=spellrecall_i[x];
-              userspellbook=spellrecall_partymember[x]-1;
-              if (spelltarget[userspell]==1){
-                txtset(t,"?"); t->d2[0]=15; NET_send(NETplayer,NULL,t); //keyboard targeting request
-                ktar_display=2.0f;
-              }//ktar
-            }//valid
+			if (tplay->party[spellrecall_partymember[x] - 1]) {
+				/*
+				if (spell[spellrecall_partymember[x]-1][spellrecall_i[x]]>1){ //valid
+				  userkey=4;
+				  userspell=spellrecall_i[x];
+				  userspellbook=spellrecall_partymember[x]-1;
+				  if (spelltarget[userspell]==1){
+					txtset(t,"?"); t->d2[0]=15; NET_send(NETplayer,NULL,t); //keyboard targeting request
+					ktar_display=2.0f;
+				  }//ktar
+				}//valid
+				*/
+
+				// f222 prevent casting until it is ready (when using spell hotkeys)
+				if (enhancen1) {
+					if (!client_spellwait[spellrecall_partymember[x] - 1]) {
+						if (spell[spellrecall_partymember[x] - 1][spellrecall_i[x]] > 1) { //valid
+							userkey = 4;
+							userspell = spellrecall_i[x];
+							userspellbook = spellrecall_partymember[x] - 1;
+							if (spelltarget[userspell] == 1) {
+								txtset(t, "?"); t->d2[0] = 15; NET_send(NETplayer, NULL, t); //keyboard targeting request
+								ktar_display = 2.0f;
+							}//ktar
+						}//valid
+					}
+					else if (soundn1)
+						soundplay2(u6osound[SOUND_MAGIC_NOTREADY], u6osound_volume[SOUND_MAGIC_NOTREADY]);
+				}
+				else { // original
+					if (spell[spellrecall_partymember[x]-1][spellrecall_i[x]]>1){ //valid
+					  userkey=4;
+					  userspell=spellrecall_i[x];
+					  userspellbook=spellrecall_partymember[x]-1;
+					  if (spelltarget[userspell]==1){
+						txtset(t,"?"); t->d2[0]=15; NET_send(NETplayer,NULL,t); //keyboard targeting request
+						ktar_display=2.0f;
+					  }//ktar
+					}//valid
+				}
           }//party
         }//partymember
       }//!=-1
@@ -3341,6 +4565,18 @@ ktarcast:
     if (x){
       CLIENTplayer->mf=15+x;
       CLIENTplayer->key|=KEYmbclick;
+
+	  // s777 set selected party member
+	  if (enhanceclientn1) {
+		  //if (tplay->party[x - 1])
+		  if (CLIENTplayer->party[x - 1] != NULL) {
+			  selectedpartymembern1 = x - 1;
+
+			  if (!selectedpartymemberframelock) {
+				  selectedpartymemberframen1 = selectedpartymembern1;
+			  }
+		  }
+	  }
     }
 
     CLIENTplayer->action=0;
@@ -3405,6 +4641,7 @@ ktarcast:
 
   //if (NEThost==NULL){ //client
 
+
 CLIENT_readnext:
   x3=0;
   i=0;
@@ -3414,6 +4651,7 @@ CLIENT_readnext:
     socketclient_ri[i]->next++;
     x3=1;
   }//->l
+
 
   if (x3){
     //U6Ohostlink1:
@@ -3543,6 +4781,7 @@ mess_SFok:;
         goto CLIENT_donemess;
       }
 
+	  // s333 updates (no changes; ignore this)
       if (t->d2[0]==3){
 
 
@@ -3685,16 +4924,62 @@ dbg1:
           tnpc->wt=t->ds[0]; txtright(t,t->l-2);
         }//x4&16
         if (x4&2){//hp
+		  // s333 hp changed (no changes; ignore this)
+			/*
+		  if (combatinfo) {
+			  int hp = tnpc->hp;
+			  int newhp = t->ds[0];
+			  //txtset(t2, "hp: ");
+			  //txtnumint(t3, hp);
+			  //txtadd(t2, t3);
+			  //txtadd(t2, " // new hp: ");
+			  //txtnumint(t3, newhp);
+			  //txtadd(t2, t3);
+			  //LOGadd(t2);
+			  if (newhp < hp) {
+				  txtset(t3, "You lost ");
+				  txtnumint(t4, hp - newhp);
+				  txtadd(t3, t4);
+				  txtadd(t3, " hp");
+				  STATUSMESSadd(t3);
+			  }
+		  }
+		  */
+
           tnpc->hp=t->ds[0]; txtright(t,t->l-2);
         }//x4&2
         if (x4&4){//mp
           x=tnpc->mp; client_spellwait[i2]=0;
           tnpc->mp=t->ds[0]; txtright(t,t->l-2);
           if ((x4&1)==0){ //not setting up a new npc
-            if (tnpc->mp<x) client_spellwait[i2]=1;
+            //if (tnpc->mp<x) client_spellwait[i2]=1;
+			// f222 fix sometimes spellwait not getting triggered
+			if (enhancen1) {
+				if (tnpc->mp<=x) client_spellwait[i2]=1;
+			}
+			else { // original
+				if (tnpc->mp<x) client_spellwait[i2]=1;
+			}
           }//(x4&1)==0
         }//x4&4
         if (x4&8){//xp
+		  // s333 combat info xp change
+		  if (combatinfo) {
+			  x = tnpc->exp;
+			  txtsetchar(t3, 255); // make combat info status messages skippable
+			  txtadd(t3, "I: ");
+			  txtadd(t3, tnpc->name);
+
+			  if (x < t->dl[0])
+				  txtadd(t3, " has gained ");
+			  else if (x > t->dl[0])
+				  txtadd(t3, " has lost ");
+
+			  txtnumint(t4, abs( (int)(t->dl[0] - x)) );
+			  txtadd(t3, t4);
+			  txtadd(t3, " experience.");
+			  STATUSMESSadd(t3);
+		  }
           tnpc->exp=t->dl[0]; txtright(t,t->l-4);
         }//x4&8
 
@@ -3747,6 +5032,7 @@ validpage:;
         goto CLIENT_donemess;
       }
 
+	  // r333 this is where mouse/cursor object is set (displaying it is done somewhere else); no changes are made here
       if (t->d2[0]==4){ //set mouse object
         txtright(t,t->l-1);
         static object *mobj_local=NULL;
@@ -3754,6 +5040,17 @@ validpage:;
         mobj_local->type=t->ds[0];
         CLIENTplayer->mobj=mobj_local;
         if (t->ds[0]==0xFFFF) CLIENTplayer->mobj=NULL;
+		/*
+		txtset(t2, "offsetx ");
+		txtnumint(t3, party_frame[0]->offset_x);
+		txtadd(t2, t3);
+		txtadd(t2, " // offsety ");
+		txtnumint(t3, party_frame[0]->offset_y);
+		txtadd(t2, t3);
+		LOGadd(t2);
+		*/
+
+
         goto CLIENT_donemess;
       }
 
@@ -3761,6 +5058,259 @@ validpage:;
       if (t->d2[0]==8){
         txtright(t,t->l-1);
         STATUSMESSadd(t);
+
+		// s222 new sound for status message
+		if (enhanceclientn1) {
+			playstatusmessagesound = 1;
+
+			// r888 food status
+			checkstatusmessage = 1;
+
+			if (checkstatusmessage) {
+				//txtset(t2,t); txtucase(t2);
+				txtset(t3, "is hungry!");
+				//      if (txtsame(t2,t3)){
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 1;
+					//MessageBox(NULL,"hungry!","Ultima 6 Online",MB_OK);
+					foodstatus = 1;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "eats the");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					foodstatus = 2;
+
+					if (soundn1 >= 2)
+						playstatusmessagesound = 21;
+					else
+						playstatusmessagesound = 2;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "drinks the");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					foodstatus = 2;
+
+					if (soundn1 >= 2)
+						playstatusmessagesound = 22;
+					else
+						playstatusmessagesound = 2;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "full!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 2;
+					foodstatus = 3;
+				}
+			}
+		}
+
+		// s222 play sound for status message
+		if (soundn1) {
+			if (checkstatusmessage) {
+				txtset(t3, "Thou dost see");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 2;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "paralyzed!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 11;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "stuck in a web!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 11;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "free!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 12;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "in Britannia");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 23;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "Entered Britannia");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 23;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "You cannot put stolen things here!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 4;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "You cannot stack more than 8 items here!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 3;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "Blocked!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 3;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "Out of range");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 3;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "Can't cast there!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 3;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "Spell failed!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 14;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "Not enough magic points!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 15;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "No reagents!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 15;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "The staff glows brightly!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 16;
+				}
+			}
+
+			if (checkstatusmessage) {
+				txtset(t3, "Staff successfully enchanted with");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 16;
+				}
+			}
+
+			// suppress sound for below because another status message sound is already played.
+			// Sound already played: The staff glows brightly!
+			if (checkstatusmessage) {
+				txtset(t3, "To enchant this staff");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 0;
+				}
+			}
+
+			// Sound already played: Can't cast there!
+			if (checkstatusmessage) {
+				txtset(t3, "You must cast enchant upon this staff");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 0;
+				}
+			}
+
+			// Sound already played: Can't cast there!
+			if (checkstatusmessage) {
+				txtset(t3, "No more may be added at this time.");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 0;
+				}
+			}
+
+			/*
+			if (checkstatusmessage) {
+				txtset(t3, "U6O can't cast this spell yet!");
+				if ((txtsearch(t, t3) > 0)) {
+					checkstatusmessage = 0;
+					playstatusmessagesound = 15;
+				}
+			}
+			*/
+
+			if (playstatusmessagesound == 11)
+				soundplay2(u6osound[SOUND_MAGIC_FREEZE], u6osound_volume[SOUND_MAGIC_FREEZE]);
+			else if (playstatusmessagesound == 12)
+				soundplay2(u6osound[SOUND_MAGIC_UNFREEZE], u6osound_volume[SOUND_MAGIC_UNFREEZE]);
+			else if (playstatusmessagesound == 2)
+				soundplay2(u6osound[SOUND_STATUSMESSAGELOWPRIORITY], u6osound_volume[SOUND_STATUSMESSAGELOWPRIORITY]);
+			else if (playstatusmessagesound == 1)
+				soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
+			else if (playstatusmessagesound == 3)
+				soundplay2(u6osound[SOUND_USERACTIONDENIED], u6osound_volume[SOUND_USERACTIONDENIED]);
+			else if (playstatusmessagesound == 4)
+				soundplay2(u6osound[SOUND_STOLENITEM], u6osound_volume[SOUND_STOLENITEM]);
+			else if (playstatusmessagesound == 21)
+				soundplay2(u6osound[SOUND_EAT], u6osound_volume[SOUND_EAT]);
+			else if (playstatusmessagesound == 22)
+				soundplay2(u6osound[SOUND_DRINK], u6osound_volume[SOUND_DRINK]);
+			else if (playstatusmessagesound == 23)
+				soundplay2(u6osound[SOUND_PLAYERENTERED], u6osound_volume[SOUND_PLAYERENTERED]);
+			else if (playstatusmessagesound == 13)
+				soundplay2(u6osound[SOUND_MAGIC_FAILED1], u6osound_volume[SOUND_MAGIC_FAILED1]);
+			else if (playstatusmessagesound == 14)
+				soundplay2(u6osound[SOUND_MAGIC_FAILED2], u6osound_volume[SOUND_MAGIC_FAILED2]);
+			else if (playstatusmessagesound == 15)
+				soundplay2(u6osound[SOUND_MAGIC_FAILED3], u6osound_volume[SOUND_MAGIC_FAILED3]);
+			else if (playstatusmessagesound == 16)
+				soundplay2(u6osound[SOUND_MAGIC_SUCCESS], u6osound_volume[SOUND_MAGIC_SUCCESS]);
+		}
+
+
         goto CLIENT_donemess;
       }
 
@@ -3828,6 +5378,10 @@ isplayingwait3: if (u6omidi->IsPlaying()==S_OK) goto isplayingwait3;
           client_spellwait[t->d2[1]]=0;
           tnpc=(npc*)tplay->party[t->d2[1]]->more;
           tnpc->upflags|=4;
+
+		  // s222 new sound when cast/magic is ready
+		  if (soundn1)
+			  soundplay2(u6osound[SOUND_MAGIC_READY], u6osound_volume[SOUND_MAGIC_READY]);
         }
         goto CLIENT_donemess;
       }//18
@@ -4720,6 +6274,8 @@ lluc_nextpixel:
         y3=(t->dl[0]>>10)&1023;
         x4=(t->dl[0]>>20)&7;
         y4=(t->dl[0]>>23)&7;
+		if (droploc) { txtset(t3, "L "); txtnumint(t4, tplay->x); txtadd(t3, t4); txtadd(t3, ","); txtnumint(t4, tplay->y); txtadd(t3, t4);
+		txtadd(t3, " | M "); txtnumint(t4, x3); txtadd(t3, t4); txtadd(t3, ","); txtnumint(t4, y3); txtadd(t3, t4); STATUSMESSadd(t3); }
         x3+=(x4-3)*12;
         y3+=(y4-3)*12;
         if(x3<0) {x3=0;}
@@ -6885,6 +8441,15 @@ osdisplay_ktar_skip:;
         }//time delayed effect!
 
         if (i4==1){ //physical attack
+		  // s222 check attack target
+		  if (combatinfo || combatsoundn1) {
+			  hittarget = 10; // "something" is hit
+
+			  // s222 player is hit
+			  if ((tplay->x == sfx[i3].x) && (tplay->y == sfx[i3].y))
+				  hittarget = 1;
+		  }
+
           img(bt32,-32,0,sfx8);
 
           if ((sfx[i3].wait<=0.04f)||(sfx[i3].wait>=0.85f)){
@@ -6906,16 +8471,289 @@ osdisplay_ktar_skip:;
             txtcol=rgb(0,0,0); txtout(ps,x,y,t); txtout(ps,x+2,y+2,t); txtout(ps,x+2,y,t); txtout(ps,x,y+2,t);
             txtcol=rgb(255,0,0); txtout(ps,x+1,y+1,t);
           }
+		  // s333 set "some" damage if no number (for hitting webs, etc?)
+		  else {
+			  if (combatinfo) {
+				  if (hittarget != 1)
+					hittarget = 20;
+				  //hittarget = 0; // suppress
+				  txtset(t, "some (?)");
+			  }
+		  }
 
 
           if (sfx[i3].more==1){
             sfx[i3].more=0;
-            soundplay2(u6osound[0],u6osound_volume[0]);
+            //soundplay2(u6osound[0],u6osound_volume[0]);
+
+			// s333 combat info for hits
+			if (combatinfo && (hittarget > 0)) {
+				//txtnumint(t, sfx[i3].x2); // t is set above at: if (sfx[i3].x2){
+				txtsetchar(t3, 255); // make combat info status messages skippable
+				objremovedn1 = 0;
+				sfxonscreenn1 = 0;
+
+				if (hittarget == 1) {
+					txtadd(t3, "P: ");
+					txtadd(t3, tnpc->name);
+					sfxonscreenn1 = 1;
+				} else {
+					// something was hit
+					if ((sfx[i3].x >= tpx - 1) && (sfx[i3].x <= tpx - 1 + 33) && (sfx[i3].y >= tpy - 1) && (sfx[i3].y <= tpy - 1 + 25)) {
+						// sfx is on-screen
+						sfxonscreenn1 = 1;
+
+						// something was hit, attempt to get object type of the something
+						objtypen1 = getobjtypen1(tplayer, sfx[i3].x, sfx[i3].y);
+
+						if (objtypen1 == -1) {
+							if (sfx[i3].x2) { // has damage number
+								// a creature was hit here but nothing is here --> must have died. check backup to guess creature
+								objtypen1 = getobjtypen1b(combatinfoplayerprev, sfx[i3].x, sfx[i3].y, 0); //0
+
+								if (resultinfon1 == 2)
+									objremovedn1 = 4;
+								else
+									objremovedn1 = 1;
+							} else {
+								// an item (or maybe a creature) was hit here but can't get objtype --> maybe destroyed? check backup to guess/find item (chest, web, etc.)
+								objtypen1 = getobjtypen1b(combatinfoplayerprev, sfx[i3].x, sfx[i3].y, 1);
+								if (objtypen1 != -1)
+									objremovedn1 = 2;
+							}
+						} else {
+							// something was hit and object (type) was found. attempt to convert it from a <dead body> to the corresponding (alive) creature, if possible
+							objremovedn1 = convertdeadobjtypen1(objtypen1);
+
+							if (objremovedn1 == -2) {
+								// convert success: a dead body (of something) --> check backup to guess creature
+								objtypen1 = getobjtypen1b(combatinfoplayerprev, sfx[i3].x, sfx[i3].y, 0); //0
+
+								if (resultinfon1 == 2)
+									objremovedn1 = 4;
+								else
+									objremovedn1 = 1;
+							} else if (objremovedn1 > 0) {
+								// convert success: a dead <something> --> is converted to the corresponding (alive) creature
+								objtypen1 = objremovedn1;
+								objremovedn1 = 3;
+							} else {
+								// convert fail: not a <dead body> --> check is it a creature
+								objremovedn1 = checkobjtypecreaturen1(objtypen1);
+
+								if (objremovedn1 != 1) {
+									// not a dead body and not a creature --> some item (or loot) is/was on the ground/spot
+									if (sfx[i3].x2) { // has damage number
+										// a creature was hit here but only item is on the spot --> creature is missing --> creature must have died --> check backup to guess creature
+										objtypen1 = getobjtypen1b(combatinfoplayerprev, sfx[i3].x, sfx[i3].y, 0); //0
+
+										if (resultinfon1 == 2)
+											objremovedn1 = 4;
+										else
+											objremovedn1 = 1;
+									} else {
+										if (objremovedn1 == 2) {
+											// a chest/web is found --> item not destroyed
+											objremovedn1 = 0;
+										} else {
+											// something (not a creature) was hit here but only item is on the spot --> something is destroyed --> check backup to guess something (chest, web, etc.)
+											objtypen1 = getobjtypen1b(combatinfoplayerprev, sfx[i3].x, sfx[i3].y, 1);
+											objremovedn1 = 1;
+											//objtypen1 = getobjtypen1b(combatinfoplayerprev, sfx[i3].x, sfx[i3].y, 1);
+											//if (objtypen1 != -1)
+											//	objremovedn1 = 2;
+										}
+									}
+								} else
+									// a creature was hit and is still alive (not dead)
+									objremovedn1 = 0;
+							}
+
+						}
+					} else {
+						// sfx is not on-screen --> check backup to guess creature
+						objtypen1 = getobjtypen1b(combatinfoplayerprev, sfx[i3].x, sfx[i3].y, 1); //0
+					}
+
+					if (hittarget >= 20) {
+						txtadd(t3, "O: ");
+						//txtadd(t3, "Object");
+					}
+					else {
+						txtadd(t3, "C: ");
+						//txtadd(t3, "Creature (or another player)");
+					}
+
+					if (objtypen1 == -1) {
+						txtset(t4, "Something (?)");
+					} else {
+						if (objremovedn1 && (objremovedn1 != 3)) {
+							getobjdescn1(t5, objtypen1);
+							//txtset(t4, "(");
+							//txtadd(t4, t5);
+							txtset(t4, t5);
+							//txtadd(t4, "?)");
+							if (objremovedn1 == 4)
+								txtadd(t4, " (??)");
+							else
+								txtadd(t4, " (?)");
+						} else {
+							getobjdescn1(t4, objtypen1);
+							if (!sfxonscreenn1)
+								txtadd(t4, " (?*)");
+						}
+					}
+
+					txtadd(t3, t4);
+				}
+				
+
+				txtadd(t3, " is hit for ");
+				txtadd(t3, t);
+				txtadd(t3, " damage");
+
+				if (objremovedn1) {
+					if (hittarget >= 20) {
+						if (objremovedn1 == 2)
+							txtadd(t3, " (and is destroyed?)");
+						else
+							txtadd(t3, " and is destroyed!");
+					} else if (hittarget >= 10) {
+						if (objremovedn1 == 2)
+							txtadd(t3, " (and is killed?)");
+						else
+							txtadd(t3, " and is killed!");
+					}
+				} else
+					txtadd(t3, ".");
+
+				STATUSMESSadd(t3);
+				//if (!objremovedn1)
+				//if ((sfx[i3].x >= tpx - 1) && (sfx[i3].x <= tpx - 1 + 33) && (sfx[i3].y >= tpy - 1) && (sfx[i3].y <= tpy - 1 + 25)) {
+				if (sfxonscreenn1) {
+					if (objremovedn1) {
+						if (ett - combatinfoplayerprevett > 2.0) {
+							combatinfoplayerprevett = ett;
+							backupplayermvinfon1(tplayer);
+						}
+						else
+							combatinfoplayerprevett = ett;
+					}
+					else if (ett - combatinfoplayerprevett > 0.5) {
+						combatinfoplayerprevett = ett;
+						backupplayermvinfon1(tplayer);
+					}
+				}
+
+				/*
+				txtset(t3, "-- movers: ");
+				for (y = 0; y <= 25; y++) {
+					for (x = 0; x <= 33; x++) {
+						mapx = tpx + x - 1;
+						mapy = tpy + y - 1;
+						for (i = 0; i < tplayer->mv_i; i++) {
+							if (tplayer->mv_x[i] == mapx) {
+								if (tplayer->mv_y[i] == mapy) {
+									x2 = x - 1; y2 = y - 1;
+									x3 = objgettype(tplayer->mv_type[i], tplayer->mv_dir[i], tplayer->mv_frame[i]);
+									myobj->type = x3;
+
+									//non-pass specific changes
+									//if (tplayer->mv_flags[i] & MV_PARALYZE) keyframe = 0;
+									//check if sleeping
+									//if (tplayer->mv_flags[i] & MV_SLEEP) {
+										z3 = myobj->type & 1023; z2 = 0;
+									//	if (z3 == 376) z2 = 339 + 6 * 1024;
+									//}
+									txtset(t3, "[");
+									txtnumint(t, tplayer->mv_type[i]);
+									txtadd(t3, t);
+									txtadd(t3, "] ");
+									txtnumint(t, z3);
+									txtadd(t3, t);
+									txtadd(t3, ": ");
+									txtnumint(t, x);
+									txtadd(t3, t);
+									txtadd(t3, ", ");
+									txtnumint(t, y);
+									txtadd(t3, t);
+									txtadd(t3, " // ");
+									txtnumint(t, mapx);
+									txtadd(t3, t);
+									txtadd(t3, ", ");
+									txtnumint(t, mapy);
+									txtadd(t3, t);
+									txtadd(t3, " // ");
+									txtnumint(t, sfx[i3].x);
+									txtadd(t3, t);
+									txtadd(t3, ", ");
+									txtnumint(t, sfx[i3].y);
+									txtadd(t3, t);
+									txtadd(t3, " // ");
+									LOGadd(t3);
+								}
+							}
+						}
+					}
+				}
+
+				//LOGadd(t3);
+				*/
+			}
+
+			// s222 new combat sound for player getting hit
+			if (combatsoundn1) {
+				if (hittarget == 1) {
+					soundplay2(u6osound[SOUND_COMBAT_PLAYERHURTN1], u6osound_volume[SOUND_COMBAT_PLAYERHURTN1]);
+
+					/*
+					if (combatinfo) {
+						int hp = tnpc->hp;
+						int newhp = t->ds[0];
+						//txtset(t2, "hp: ");
+						//txtnumint(t3, hp);
+						//txtadd(t2, t3);
+						//txtadd(t2, " // new hp: ");
+						//txtnumint(t3, newhp);
+						//txtadd(t2, t3);
+						//LOGadd(t2);
+						if (newhp < hp) {
+							txtset(t3, "You lost ");
+							txtnumint(t4, hp - newhp);
+							txtadd(t3, t4);
+							txtadd(t3, " hp");
+							STATUSMESSadd(t3);
+						}
+
+						//txtnumint(t, sfx[i3].x2); // t is set above at: if (sfx[i3].x2){
+						txtset(t3, tnpc->name);
+
+						txtadd(t3, " is hit for ");
+						txtadd(t3, t);
+						txtadd(t3, " damage");
+						STATUSMESSadd(t3);
+					}
+					*/
+				} else if (combatsoundn1 >= 2)
+		            soundplay2(u6osound[SOUND_COMBAT_HITN1],u6osound_volume[SOUND_COMBAT_HITN1]);
+				else
+		            soundplay2(u6osound[SOUND_COMBAT_HIT],u6osound_volume[SOUND_COMBAT_HIT]);
+			} else
+	            soundplay2(u6osound[SOUND_COMBAT_HIT],u6osound_volume[SOUND_COMBAT_HIT]);
           }
           goto donesf;
         }//1
 
         if (i4==16){ //physical attack miss!
+		  // s222 check attack target
+		  if (combatinfo || combatsoundn1) {
+			  hittarget = 10; // "something" is hit/miss
+
+			  // s222 player is hit
+			  if ((tplay->x == sfx[i3].x) && (tplay->y == sfx[i3].y))
+				  hittarget = 1;
+		  }
+
           img(bt32,-32*14,-32*3,sfx8);
 
           if ((sfx[i3].wait<=0.04f)||(sfx[i3].wait>=0.85f)){
@@ -6925,11 +8763,74 @@ osdisplay_ktar_skip:;
           }
 
 
+		  // s222 add "miss" text
+		  if (enhancen1) {
+			  txtfnt = fnt1;
+			  //txtnumint(t,sfx[i3].x2);
+			  txtset(t, "miss");
+			  x = (sfx[i3].x - tpx) * 32;
+			  //if (t->l==1) x+=10;
+			  //if (t->l==2) x+=5;
+			  y = (sfx[i3].y - tpy) * 32 - 16 + sfx[i3].wait*16.0f;
+			  txtcol = rgb(0, 0, 0); txtout(ps, x, y, t); txtout(ps, x + 2, y + 2, t); txtout(ps, x + 2, y, t); txtout(ps, x, y + 2, t);
+			  txtcol = rgb(255, 0, 0); txtout(ps, x + 1, y + 1, t);
+		  }
+
+
+		  if (combatinfo && (hittarget > 0)) {
+			  if ((sfx[i3].x >= tpx - 1) && (sfx[i3].x <= tpx - 1 + 33) && (sfx[i3].y >= tpy - 1) && (sfx[i3].y <= tpy - 1 + 25)) {
+				  // sfx is on-screen
+				  if (ett - combatinfoplayerprevett > 0.5) {
+					  combatinfoplayerprevett = ett;
+					  backupplayermvinfon1(tplayer);
+				  }
+			  }
+		  }
+		  /*
+		  txtset(t3, "loc ");
+		  txtnumint(t4, tplay->x);
+		  txtadd(t3, t4);
+		  txtadd(t3, ",");
+		  txtnumint(t4, tplay->y);
+		  txtadd(t3, t4);
+		  LOGadd(t3);
+
+		  txtset(t3, "sfx ");
+		  txtnumint(t4, sfx[i3].x);
+		  txtadd(t3, t4);
+		  txtadd(t3, ",");
+		  txtnumint(t4, sfx[i3].y);
+		  txtadd(t3, t4);
+		  LOGadd(t3);
+		  */
 
 
           if (sfx[i3].more==1){
             sfx[i3].more=0;
-            soundplay2(u6osound[0],u6osound_volume[0]);
+            //soundplay2(u6osound[0],u6osound_volume[0]);
+
+			// s333 combat info for "miss"
+			/*
+			if (combatinfo) {
+				if (hittarget == 1) {
+					txtset(t3, "Creature misses ");
+					txtadd(t3, tnpc->name);
+				} else {
+					txtset(t3, "An attack on creature misses");
+				}
+
+				STATUSMESSadd(t3);
+			}
+			*/
+
+			// s222 new combat sound for "miss"
+			if (combatsoundn1) {
+				if (hittarget > 0 && hittarget < 10)
+					soundplay2(u6osound[SOUND_COMBAT_MISS1N1], u6osound_volume[SOUND_COMBAT_MISS1N1]);
+				else
+					soundplay2(u6osound[SOUND_COMBAT_MISS2N1], u6osound_volume[SOUND_COMBAT_MISS2N1]);
+			} else
+				soundplay2(u6osound[SOUND_COMBAT_HIT],u6osound_volume[SOUND_COMBAT_HIT]);
           }
           goto donesf;
         }//1
@@ -6964,7 +8865,11 @@ pw_jmp:
 
             sfx[i3].more=0; //index type *up arrow
             if (i4==9){
+              //if ((unsigned long)sfx[i3].wait&32768) {soundplay2(u6osound[18],u6osound_volume[18]); sfx[i3].wait-=32768;}
               if ((unsigned long)sfx[i3].wait&32768) {soundplay2(u6osound[18],u6osound_volume[18]); sfx[i3].wait-=32768;}
+			  // s222 new sound for drop item
+			  else if (soundn1 >= 2)
+				soundplay2(u6osound[SOUND_DROP], u6osound_volume[SOUND_DROP]);
               sfx[i3].more=sfx[i3].wait; sfx[i3].wait=1;
             }
 
@@ -6996,12 +8901,35 @@ pw_jmp:
             sfx[i3].wait=f3-(0.75f/24.0f);
             if (i4==7) {sfx[i3].wait=(f3*2)-(0.75f/24.0f); soundplay2(u6osound[10],u6osound_volume[10]);}//*boomerang
             if (sfx[i3].wait<0) sfx[i3].wait=0;
-            if (i4==2) soundplay2(u6osound[7],u6osound_volume[7]);
+			// s222 new sound for bow
+            //if (i4==2) soundplay2(u6osound[7],u6osound_volume[7]);
+			if (i4 == 2) {
+				if (combatsoundn1)
+					soundplay2(u6osound[SOUND_COMBAT_BOWN1], u6osound_volume[SOUND_COMBAT_BOWN1]);
+				else
+					soundplay2(u6osound[SOUND_COMBAT_BOW],u6osound_volume[SOUND_COMBAT_BOW]);
+			}
 
-            if (i4==6) soundplay2(u6osound[8],u6osound_volume[8]);
+			// s222 new sound for crossbow
+            //if (i4==6) soundplay2(u6osound[8],u6osound_volume[8]);
+			if (i4 == 6) {
+				if (combatsoundn1)
+					soundplay2(u6osound[SOUND_COMBAT_CROSSBOWN1], u6osound_volume[SOUND_COMBAT_CROSSBOWN1]);
+				else
+					soundplay2(u6osound[SOUND_COMBAT_CROSSBOW],u6osound_volume[SOUND_COMBAT_CROSSBOW]);
+			}
+
             if (i4==17) soundplay2(u6osound[14],u6osound_volume[14]);
 
-            if (i4==8) soundplay2(u6osound[20],u6osound_volume[20]);
+			// s222 new sound for fireball
+            //if (i4==8) soundplay2(u6osound[20],u6osound_volume[20]);
+			if (i4 == 8) {
+				if (combatsoundn1)
+					soundplay2(u6osound[SOUND_COMBAT_FIREBALLN1], u6osound_volume[SOUND_COMBAT_FIREBALLN1]);
+				else
+					soundplay2(u6osound[SOUND_COMBAT_FIREBALL],u6osound_volume[SOUND_COMBAT_FIREBALL]);
+			}
+			
 
           }//first instance only!
 
@@ -7747,10 +9675,32 @@ txtsf_done:
           //unsigned short more; //distance bolt travels, ...
 
 
-          if (sfx[i3].more==1) soundplay2(u6osound[1],u6osound_volume[1]);
-          if (sfx[i3].more==2) soundplay2(u6osound[2],u6osound_volume[2]);
+		  // s222 new sound for door open/close
+          //if (sfx[i3].more==1) soundplay2(u6osound[1],u6osound_volume[1]);
+          //if (sfx[i3].more==2) soundplay2(u6osound[2],u6osound_volume[2]);
+          if (sfx[i3].more==1) {
+			  if (soundn1)
+				  soundplay2(u6osound[SOUND_DOOROPENN2], u6osound_volume[SOUND_DOOROPENN2]);
+			  else
+				  soundplay2(u6osound[SOUND_DOOROPEN],u6osound_volume[SOUND_DOOROPEN]);
+		  }
+		  if (sfx[i3].more == 2) {
+			  if (soundn1)
+				  soundplay2(u6osound[SOUND_DOORCLOSEN2], u6osound_volume[SOUND_DOORCLOSEN2]);
+			  else
+				  soundplay2(u6osound[SOUND_DOORCLOSE], u6osound_volume[SOUND_DOORCLOSE]);
+		  }
+
           if (sfx[i3].more==3) soundplay2(u6osound[4],u6osound_volume[4]);
-          if (sfx[i3].more==4) soundplay2(u6osound[6],u6osound_volume[6]);
+		  // s222 new sound for lever
+          //if (sfx[i3].more==4) soundplay2(u6osound[6],u6osound_volume[6]);
+		  if (sfx[i3].more == 4) {
+			  if (soundn1)
+				  soundplay2(u6osound[SOUND_LEVERN1], u6osound_volume[SOUND_LEVERN1]);
+			  else
+				  soundplay2(u6osound[SOUND_LEVER], u6osound_volume[SOUND_LEVER]);
+		  }
+
           if (sfx[i3].more==5) soundplay2(u6osound[19],u6osound_volume[19]);
           if (sfx[i3].more==6) soundplay2(u6osound[31],u6osound_volume[31]);
           if (sfx[i3].more==7) soundplay2(u6osound[32],u6osound_volume[32]);
@@ -7768,6 +9718,11 @@ txtsf_done:
           stolenitemwarningx[stolenitemwarningn]=sfx[i3].x;
           stolenitemwarningy[stolenitemwarningn]=sfx[i3].y;
           stolenitemwarningtype[stolenitemwarningn]=sfx[i3].more;
+
+		  // s222 new sound for stolen item
+		  //if (soundn1)
+			//soundplay2(u6osound[SOUND_STEALINGWARNING],u6osound_volume[SOUND_STEALINGWARNING]);
+
           goto donesf;
         }//21
 
@@ -7906,7 +9861,38 @@ donesf2:;
       txtout(ps,x,y+1,t);
       txtout(ps,x+1,y+2,t);
       txtcol=rgb(255,255,255);
-      txtfnt=fnt1;
+
+	  // s333 change color of combat info text
+	  if (combatinfo) {
+		  if (statusmessagechanged) {
+			  statusmessagechanged = 0;
+			  txtcolprev = txtcol;
+
+			  txtset(t3, "P:");
+			  if ((txtsearch(t, t3) == 1)) {
+				  txtcolprev = rgb(255, 80, 80); // red
+			  }
+
+			  txtset(t3, "C:");
+			  if ((txtsearch(t, t3) == 1)) {
+				  txtcolprev = rgb(150, 255, 150); // green
+			  }
+
+			  txtset(t3, "O:");
+			  if ((txtsearch(t, t3) == 1)) {
+				  txtcolprev = rgb(255, 255, 80); // yellow
+			  }
+
+			  txtset(t3, "I:");
+			  if ((txtsearch(t, t3) == 1)) {
+				  txtcolprev = rgb(0, 255, 255); // cyan
+			  }
+		  }
+
+		  txtcol = txtcolprev;
+	  }
+
+      //txtfnt=fnt1;
       txtout(ps,x+1,y+1,t);
     }
 
@@ -8038,22 +10024,30 @@ skiprefresh2:
           cltset2.party_frame_offset_x[i]=32767;
         }}
       }
-      if (pmf->offset_x>=1024){
-        pmf->offset_x-=2048;
-      }
 
+	  // r222 if we want to be able to move the party member frame offscreen, we may need to do something here. no changes are made here.
+		if (pmf->offset_x >= 1024) {
+			pmf->offset_x -= 2048;
+		}
 
       tnpc=(npc*)CLIENTplayer->party[i]->more; //shortcut
-      if (tnpc->upflags){ //upflags
 
+	  // s666 update party frame if needed
+      //if (tnpc->upflags){ //upflags
+      if (tnpc->upflags || updatepartyframen1){ //upflags
+		updatepartyframen1 = 0;
 
+		  // r222 no changes are made here; but it's possible to scale (bigger or smaller) the party member frames by mapping it onto another (different size) surface.
+		  //pspartyorg = party_frame[i]->graphic;
+		  //party_frame[i]->graphic = pspartytemp;
+		  //updatepartyframe1(party_frame[i], i, partyresscale);
 
-
-
+		
         img(party_frame[i]->graphic,status8); //clear frame
 
 
-
+		// s666
+		txtfnt = fnt1;
 
         img0(party_frame[i]->graphic,0,0,getportrait_doublesize(tnpc->port));
 
@@ -8200,7 +10194,8 @@ skiprefresh2:
         txtnumint(t2,tnpc->exp);
         txtadd(t,t2);
 
-
+		// c111 exp on screen
+		/*
         x=800;
         if (tnpc->lev>=2) x=1600;
         if (tnpc->lev>=3) x=3200;
@@ -8209,21 +10204,58 @@ skiprefresh2:
         if (tnpc->lev>=6) x=25600;
         if (tnpc->lev>=7) x=51200;
         if (tnpc->lev>=8) goto skiplevnext;
+		*/
+		if (easymodehostn1) {
+			x = new1_getexprequired(tnpc);
+		}
+		else { // original
+			x=800;
+			if (tnpc->lev>=2) x=1600;
+			if (tnpc->lev>=3) x=3200;
+			if (tnpc->lev>=4) x=6400;
+			if (tnpc->lev>=5) x=12800;
+			if (tnpc->lev>=6) x=25600;
+			if (tnpc->lev>=7) x=51200;
+			if (tnpc->lev>=8) goto skiplevnext;
+		}
+
         txtset(t2,"/");
         txtadd(t,t2);
         txtnumint(t2,x);
         txtadd(t,t2);
+
+
+
+
 skiplevnext:
 
 
         x=128-16; y=12+16+18+18+18;
         txtcol=rgb(192,126,0);
+
+		// s666 fix for experience numbers getting cut off (too big)
+		if (enhancen1 >= 2 && tnpc->exp > 9999) {
+			txtfntoldn1 = txtfnt;
+
+			if (tnpc->exp > 999999) {
+				txtfnt = fnt2;
+				x += 1;
+				y += 3;
+			} else
+				txtfnt = fnt4;
+		}
+
         txtout(party_frame[i]->graphic,x,y,t);
         txtout(party_frame[i]->graphic,x+2,y+2,t);
         txtout(party_frame[i]->graphic,x+2,y,t);
         txtout(party_frame[i]->graphic,x,y+2,t);
         txtcol=rgb(255,128+64+16,0);
         txtout(party_frame[i]->graphic,x+1,y+1,t);
+
+		// s666 fix for experience numbers getting cut off (too big)
+		if (enhancen1 >= 2 && tnpc->exp > 9999) {
+			txtfnt = txtfntoldn1;
+		}
 
 
 
@@ -8258,6 +10290,7 @@ skiplevnext:
         txtout(party_frame[i]->graphic,x,y+2,t);
         txtcol=rgb(252,244,192);
         txtout(party_frame[i]->graphic,x+1,y+1,t);
+
 
 
 
@@ -8573,9 +10606,458 @@ diskip:
 
 
 
-
     } //party member active?
   } //0-7 for/next
+
+
+
+	// r222 for new mode: display party member frame at the top right of window, outside the playing area.
+	//party_frame[i]->graphic = pspartyorg;
+	//img(pspartyorg, pspartytemp);
+	//refresh(pspartyorg);
+
+	if (smallwindow && windowsizecyclenum == 1) {
+		//txtset(t, "2 img..........");
+		//LOGadd(t);
+		//img(psnew1b, statusbar_b255);
+
+		// r999 fill background of panel (solid blue); can be replaced with image/graphics
+  		///img(panelnew[panelsideui].graphic, statusbar_b255);
+
+		/*
+		// r999 fill background of panel (solid blue); can be replaced with image/graphics
+		img(panelsurf[0], statusbar_b255);
+
+		for (int i = 0; i < partyframenewmax; i++) {
+			//img(psnew1b, party_frame_new[i]->offset_x, party_frame_new[i]->offset_y + 260, treasuremap);
+			//img(psnew1b, 1000, 0, intro_startup);
+			//party_frame[i]->offset_x = 4000;
+			//img(psnew1b, party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
+			//img(psnew1b, resxn1m + 3, 300, minimap_frame->graphic);
+
+			//refresh(psnew1b);
+			//refresh(party_frame[i]->graphic);
+
+			//party_frame[i]->offset_x = 4000;
+			//party_frame[i]->offset_y = 0;
+
+			//party_frame_new[i]->offset_x = resxn1m + 3;
+			//party_frame_new[i]->offset_y = 0;
+
+			//img(psnew1b, party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
+			img(panelsurf[0], party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
+	 		//img(panelnew[panelsideui].graphic, party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
+		}
+
+
+
+			
+		// r666 for new mode: display actionbar
+		//img(psnew1b, actionbarx, actionbary, actionbarsurf);
+		//img(psnew1b, actiontalkx, actiontalky, actiontalksurf);
+		for (i = 0; i < ACTIONBAR_MAX; i++)
+		//img(psnew1b, actionbarx[i], actionbary[i], actionbarsurf[i]);
+		img(panelsurf[0], actionbarx[i], actionbary[i], actionbarsurf[i]);
+
+		for (i = 0; i < ACTIONTALKBAR_MAX; i++)
+		//img(psnew1b, actiontalkx[i], actiontalky[i], actiontalksurf[i]);
+		img(panelsurf[0], actiontalkx[i], actiontalky[i], actiontalksurf[i]);
+
+ 		//img(panelnew[panelsideui].graphic, panelnew[panelactionbar1].offset_x, panelnew[panelactionbar1].offset_y, panelnew[panelactionbar1].graphic);
+ 		//img(panelnew[panelsideui].graphic, panelnew[panelactionbar2].offset_x, panelnew[panelactionbar2].offset_y, panelnew[panelactionbar2].graphic);
+
+		// r888 for new mode: update food status
+		if (foodstatus == 1)
+		//img(psnew1b, actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][1]);
+		img(panelsurf[0], actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][1]);
+		else if (foodstatus >= 2)
+		//img(psnew1b, actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][2]);
+		img(panelsurf[0], actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][2]);
+
+		// r777 display proper drop location action button
+		if (setdroplocation)
+			//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][0]);
+			img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][0]);
+		else {
+			if (droplocation == 1)
+				//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][1]);
+				img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][1]);
+			else if (droplocation == 2)
+				//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][2]);
+				img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][2]);
+			else if (droplocation == 3)
+				//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][3]);
+				img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][3]);
+			else if (droplocation == 4)
+				//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][4]);
+				img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][4]);
+		}
+
+		// r444 for new mode: display minimap
+		//minimap tiles its done in a VERY stupid way, but looks like the asm code doesn't like other size surfaces, so this will have to do for now.
+//			if(peer) {
+		if (minimaptype != 0) {
+		for (x5=minimaptilexstart;x5<minimaptilexend;x5++) { for (y5=minimaptileystart;y5<minimaptileyend;y5++) {
+			for (y=y5*24;y<24+y5*24;y++){ for (x=x5*24;x<24+x5*24;x++){
+				if (((y+tpy-35)>=1024)||((y+tpy-35)<0)||((x+tpx-31)>=2048)||((x+tpx-31)<0)) {
+				i=0;
+				}
+				else {
+				i=bt[y+tpy-35][x+tpx-31]&1023;
+				}
+				if ((i>=8)&&(i<48)){ //ocean and coast
+				if (i<=15) oceantiles++; else rivertiles++;
+				i2=i-8;
+				x4=0; if (i2>=8) {i2=wateri[i2-8]; x4=1; }
+				sf32(ps5,(x-x5*24)*32,(y-y5*24)*32,sfx8,i2+128);
+				if (x4==1) g32z(ps5,(x-x5*24)*32,(y-y5*24)*32,bt8[0],i);
+				}else{//not ocean
+				i2=0;
+				if (i==252){i=14;}
+				if (i==253){i=15;}
+				if (i==254){i=0;}
+				if ((i>=221)&&(i<=223)){i=i-210;}
+				if ((i>=217)&&(i<=219)){i=i-209;}
+				g32(ps5,(x-x5*24)*32,(y-y5*24)*32,bt8[0],i);
+				}
+			}}
+			//img(ps6,ps5);
+			//img0(minimap_frame->graphic,8+60*x5,8+60*y5,ps6);
+
+			img(minimaptilesurf,ps5);
+
+			if (minimaptype == 1) {
+				if (x5 == 1)
+					minimapdeltax = -60;
+				else
+					minimapdeltax = 0;
+
+				if (y5 == 1)
+					minimapdeltay = -60;
+				else
+					minimapdeltay = 0;
+
+//				if ( ((x5 > 0) && (x5 < 3)) && ((y5 > 0) && (y5 < 3)) )
+				//img0(minimap_frame->graphic,8+60*x5+minimapdeltax,8+60*y5+minimapdeltay,minimaptilesurf);
+				img0(minimap_surf_new,8+60*x5+minimapdeltax,8+60*y5+minimapdeltay,minimaptilesurf);
+			}
+			else {
+				//img0(minimap_frame->graphic,8+60*x5,8+60*y5,minimaptilesurf);
+				img0(minimap_surf_new,8+60*x5,8+60*y5,minimaptilesurf);
+			}
+
+		}}
+//			}
+
+		//minimapdeltax = party_frame_new[0]->offset_x;
+		//minimapdeltay = resyn1w-256-2;
+
+		//img(psnew1b, party_frame_new[0]->offset_x, resyn1w-256-2, minimap_frame->graphic);
+		//img(psnew1b, minimapdeltax, minimapdeltay, minimap_frame->graphic);
+		//img(psnew1b, minimapdeltax, minimapdeltay, minimap_surf_new);
+
+		//img(psnew1b, minimapnewx, minimapnewy, minimap_surf_new);
+		img0(minimap_surf_new, minimapplayerx, minimapplayery, darrow);
+		img(panelsurf[0], minimapnewx, minimapnewy, minimap_surf_new);
+
+			
+		//img0(psnew1b, party_frame_new[0]->offset_x+minimapdeltax, resyn1w-256-2+minimapdeltay, darrow);
+		//img0(psnew1b, minimapdeltax, minimapdeltay, darrow);
+		//img0(psnew1b, minimapplayerx, minimapplayery, darrow);
+		}
+
+		//img(psnew1b, panelx[0], panely[0], panelsurf[0]);
+		//img(psnew1b, panelsurf[0], panelx[0], panely[0], panelx2[0], panely2[0]);
+		img(psnew1b, panelx[0], panely[0], panelsurf[0]);
+		//img(psnew1b, panelnew[panelsideui].offset_x, panelnew[panelsideui].offset_y, panelnew[panelsideui].graphic);
+		//img(psnew1b, panelnew[panelminimap].offset_x, panelnew[panelminimap].offset_y,panelnew[panelminimap].graphic);
+	*/
+
+
+		// s777 reset selected party member if it's not valid anymore (party member asked to leave, etc.).
+		if (CLIENTplayer->party[selectedpartymembern1] == NULL) {
+			selectedpartymembern1 = 0;
+		}
+
+		// s777 reset selected party member frame if it's not valid anymore (party member asked to leave, etc.).
+		if (CLIENTplayer->party[selectedpartymemberframen1] == NULL) {
+			selectedpartymemberframen1 = selectedpartymembern1;
+		}
+
+		// r999 new
+		// r999 fill background of panel (solid blue); can be replaced with image/graphics
+		//img(panelsurf[0], statusbar_b255);
+		//img(uipanelsurf[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF], statusbar_b255);
+		//img(psnew1b, uipanelx[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF]);
+		imguip(psnew1b, uipanelsidebar);
+		if (uiscaling) {
+			//img(uipanelsurf[uipanelpartymember0][UI_WIDGET_DEF][UI_STATE_DEF], party_frame[0]->graphic);
+			img(uipanelsurf[uipanelpartymember0][UI_WIDGET_DEF][UI_STATE_DEF], party_frame[selectedpartymemberframen1]->graphic);
+			imguip(psnew1b, uipanelpartymember0);
+		} else
+		//imguip(psnew1b, uipanelpartymember0, party_frame[0]->graphic);
+		imguip(psnew1b, uipanelpartymember0, party_frame[selectedpartymemberframen1]->graphic);
+
+
+		///for (int i = 0; i < partyframenewmax; i++) {
+			//img(psnew1b, party_frame_new[i]->offset_x, party_frame_new[i]->offset_y + 260, treasuremap);
+			//img(psnew1b, 1000, 0, intro_startup);
+			//party_frame[i]->offset_x = 4000;
+			//img(psnew1b, party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
+			//img(psnew1b, resxn1m + 3, 300, minimap_frame->graphic);
+
+			//refresh(psnew1b);
+			//refresh(party_frame[i]->graphic);
+
+			//party_frame[i]->offset_x = 4000;
+			//party_frame[i]->offset_y = 0;
+
+			//party_frame_new[i]->offset_x = resxn1m + 3;
+			//party_frame_new[i]->offset_y = 0;
+
+			//img(psnew1b, party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
+			//img(panelsurf[0], party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
+	 		//img(panelnew[panelsideui].graphic, party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
+			//img(panelsurf[0], party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
+			///img(panelsurf[0], party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
+		///}
+
+
+		// s777 display party member lock
+		if (selectedpartymemberframelock)
+			imguiw(psnew1b, uipanelpartymemberlock, 1, 2);
+		else
+			imguiw(psnew1b, uipanelpartymemberlock, 1, 1);
+
+		// s777 display party member bar
+		imguip(psnew1b, uipanelpartymemberbar1);
+		for (n1i1 = 0; n1i1 < 8; n1i1++) {
+			if (CLIENTplayer->party[n1i1] != NULL) {
+				uipanelhitenable[uipanelpartymemberbar1][n1i1+1][UI_STATE_DEF] = 1;
+				n1i2 = 1;
+
+				if (n1i1 == selectedpartymembern1)
+					n1i2+=2;
+
+				if (n1i1 == selectedpartymemberframen1)
+					n1i2++;
+
+				imguiw(psnew1b, uipanelpartymemberbar1, n1i1+1, n1i2);
+			} else
+				uipanelhitenable[uipanelpartymemberbar1][n1i1+1][UI_STATE_DEF] = 0;
+		}
+			
+		// r666 for new mode: display actionbar
+		//img(psnew1b, uipanelx[uipanelactionbar1][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelactionbar1][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelactionbar1][UI_WIDGET_DEF][UI_STATE_DEF]);
+		//img(psnew1b, uipanelx[uipanelactionbar2][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelactionbar2][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelactionbar2][UI_WIDGET_DEF][UI_STATE_DEF]);
+		imguip(psnew1b, uipanelactionbar1);
+		imguip(psnew1b, uipanelactionbar2);
+		imguip(psnew1b, uipaneloptionbar1);
+
+		//img(psnew1b, uipanelx[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF]);
+		//img(psnew1b, uipanelx[uipanelactiontalkbar2][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelactiontalkbar2][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelactiontalkbar2][UI_WIDGET_DEF][UI_STATE_DEF]);
+		imguip(psnew1b, uipanelactiontalkbar1);
+		imguip(psnew1b, uipanelactiontalkbar2);
+		imguip(psnew1b, uipanelactiontalkbar3);
+
+		//imguip(psnew1b, uipaneloptioninfo);
+
+ 		//img(panelnew[panelsideui].graphic, panelnew[panelactionbar1].offset_x, panelnew[panelactionbar1].offset_y, panelnew[panelactionbar1].graphic);
+ 		//img(panelnew[panelsideui].graphic, panelnew[panelactionbar2].offset_x, panelnew[panelactionbar2].offset_y, panelnew[panelactionbar2].graphic);
+
+		// r888 for new mode: update food status
+		if (foodstatus == 1)
+		//img(psnew1b, actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][1]);
+		//img(panelsurf[0], actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][1]);
+		imguiw(psnew1b, uipanelactionbar2, UI_WIDGET_ACTIONBUTTON_FOOD, 1);
+		else if (foodstatus >= 2)
+		//img(psnew1b, actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][2]);
+		//img(panelsurf[0], actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][2]);
+		imguiw(psnew1b, uipanelactionbar2, UI_WIDGET_ACTIONBUTTON_FOOD, 2);
+		//img(psnew1b, uipanelx[uipanelactionbar2][UI_WIDGET_ACTIONBUTTON_FOOD][UI_STATE_DEF], uipanely[uipanelactionbar2][UI_WIDGET_ACTIONBUTTON_FOOD][UI_STATE_DEF], uipanelsurf[uipanelactionbar2][0][0]);
+
+		// r777 display proper drop location action button
+		if (setdroplocation)
+			//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][0]);
+			//img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][0]);
+			imguiw(psnew1b, uipanelactionbar1, UI_WIDGET_ACTIONBUTTON_DROP, 1);
+		else {
+			if (droplocation == 1)
+				//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][1]);
+				//img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][1]);
+				imguiw(psnew1b, uipanelactionbar1, UI_WIDGET_ACTIONBUTTON_DROP, 2);
+			else if (droplocation == 2)
+				//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][2]);
+				//img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][2]);
+				imguiw(psnew1b, uipanelactionbar1, UI_WIDGET_ACTIONBUTTON_DROP, 3);
+			else if (droplocation == 3)
+				//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][3]);
+				//img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][3]);
+				imguiw(psnew1b, uipanelactionbar1, UI_WIDGET_ACTIONBUTTON_DROP, 4);
+			else if (droplocation == 4)
+				//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][4]);
+				//img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][4]);
+				imguiw(psnew1b, uipanelactionbar1, UI_WIDGET_ACTIONBUTTON_DROP, 5);
+		}
+
+		// r999 new actionbar2 states
+		if (showworldmapn1 > 0) { // s444 worldmap action button
+			imguiw(psnew1b, uipanelactionbar2, UI_WIDGET_ACTIONBUTTON_WORLDMAP, showworldmapn1);
+			//img0(psnew1b, uipanelx[uipanelactionbar2][UI_WIDGET_ACTIONBUTTON_WORLDMAP][UI_STATE_DEF], uipanely[uipanelactionbar2][UI_WIDGET_ACTIONBUTTON_WORLDMAP][UI_STATE_DEF], uiwidgetimgsurf[UI_IMGI_WIDGET + 13][1]);
+		}
+
+		if (combatinfo > 0)
+		imguiw(psnew1b, uipanelactionbar2, UI_WIDGET_ACTIONBUTTON_COMBATLOG, combatinfo);
+
+		// r999 new optionbar1 states
+		if (enhancen1 > 0) {
+			imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_ENHANCE, enhancen1);
+		}
+
+		if (soundn1 > 0)
+		imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_SOUND, soundn1);
+
+		if (combatsoundn1 > 0)
+		imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_COMBATSOUND, combatsoundn1);
+
+		// r444 for new mode: display minimap
+//			if(peer) {
+		if (minimaptype > 0) {
+		for (n1x5=minimaptilexstart;n1x5<minimaptilexend;n1x5++) { for (n1y5=minimaptileystart;n1y5<minimaptileyend;n1y5++) {
+			for (n1y1=n1y5*24;n1y1<24+n1y5*24;n1y1++){ for (n1x1=n1x5*24;n1x1<24+n1x5*24;n1x1++){
+				if (((n1y1+tpy-35)>=1024)||((n1y1+tpy-35)<0)||((n1x1+tpx-31)>=2048)||((n1x1+tpx-31)<0)) {
+				n1i1=0;
+				}
+				else {
+				n1i1=bt[n1y1+tpy-35][n1x1+tpx-31]&1023;
+				}
+				if ((n1i1>=8)&&(n1i1<48)){ //ocean and coast
+				if (n1i1<=15) oceantiles++; else rivertiles++;
+				n1i2=n1i1-8;
+				n1x4=0; if (n1i2>=8) {n1i2=wateri[n1i2-8]; n1x4=1; }
+				sf32(ps5,(n1x1-n1x5*24)*32,(n1y1-n1y5*24)*32,sfx8,n1i2+128);
+				if (n1x4==1) g32z(ps5,(n1x1-n1x5*24)*32,(n1y1-n1y5*24)*32,bt8[0],n1i1);
+				}else{//not ocean
+				n1i2=0;
+				if (n1i1==252){n1i1=14;}
+				if (n1i1==253){n1i1=15;}
+				if (n1i1==254){n1i1=0;}
+				if ((n1i1>=221)&&(n1i1<=223)){n1i1=n1i1-210;}
+				if ((n1i1>=217)&&(n1i1<=219)){n1i1=n1i1-209;}
+				g32(ps5,(n1x1-n1x5*24)*32,(n1y1-n1y5*24)*32,bt8[0],n1i1);
+				}
+			}}
+			//img(ps6,ps5);
+			//img0(minimap_frame->graphic,8+60*x5,8+60*y5,ps6);
+
+			img(minimaptilesurf,ps5);
+
+			if (minimaptype == 1) {
+				if (n1x5 == 1)
+					minimapdeltax = -60;
+				else
+					minimapdeltax = 0;
+
+				if (n1y5 == 1)
+					minimapdeltay = -60;
+				else
+					minimapdeltay = 0;
+
+//				if ( ((x5 > 0) && (x5 < 3)) && ((y5 > 0) && (y5 < 3)) )
+				//img0(minimap_frame->graphic,8+60*x5+minimapdeltax,8+60*y5+minimapdeltay,minimaptilesurf);
+				img0(minimap_surf_new,8+60*n1x5+minimapdeltax,8+60*n1y5+minimapdeltay,minimaptilesurf);
+			}
+			else {
+				//img0(minimap_frame->graphic,8+60*x5,8+60*y5,minimaptilesurf);
+				img0(minimap_surf_new,8+60*n1x5,8+60*n1y5,minimaptilesurf);
+			}
+
+		}}
+//			}
+
+		//minimapdeltax = party_frame_new[0]->offset_x;
+		//minimapdeltay = resyn1w-256-2;
+
+		//img(psnew1b, party_frame_new[0]->offset_x, resyn1w-256-2, minimap_frame->graphic);
+		//img(psnew1b, minimapdeltax, minimapdeltay, minimap_frame->graphic);
+		//img(psnew1b, minimapdeltax, minimapdeltay, minimap_surf_new);
+
+		playeronscreenxn1 = tplay->x - tpx;
+		playeronscreenyn1 = tplay->y - tpy;
+
+		if (playeronscreenxn1 != 15) {
+			minimapdeltax = (playeronscreenxn1 - 15) * minimapstepsize; // 4.9f;//(float)(128 / 61);
+		} else
+			minimapdeltax = 0;
+
+		if (playeronscreenyn1 != 11) {
+			minimapdeltay = (playeronscreenyn1 - 11) * minimapstepsize; //  4.9f;//(float)(128 / 61);
+		} else
+			minimapdeltay = 0;
+
+		//img(psnew1b, minimapnewx, minimapnewy, minimap_surf_new);
+		img0(minimap_surf_new, minimapplayerx+minimapdeltax, minimapplayery+minimapdeltay, darrow);
+		//img(panelsurf[0], minimapnewx, minimapnewy, minimap_surf_new);
+		if (uiscaling) {
+			img(uipanelsurf[uipanelminimap][UI_WIDGET_DEF][UI_STATE_DEF], minimap_surf_new);
+			imguip(psnew1b, uipanelminimap);
+		} else
+			imguip(psnew1b, uipanelminimap);
+
+		imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_MINIMAP, 1);
+
+			
+		//img0(psnew1b, party_frame_new[0]->offset_x+minimapdeltax, resyn1w-256-2+minimapdeltay, darrow);
+		//img0(psnew1b, minimapdeltax, minimapdeltay, darrow);
+		//img0(psnew1b, minimapplayerx, minimapplayery, darrow);
+		}
+
+		// r999 hover
+		if (uihover) {
+			if (hituipaneli < -4)
+				hituipaneli = gethituipaneli(omx3, omy3);
+
+			if ((hituipaneli == uipanelactionbar1) || (hituipaneli == uipanelactionbar2) || (hituipaneli == uipaneloptionbar1)) {
+				if (hituiwidgeti < 0)
+					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+
+				if (hituiwidgeti > 0)
+					img0(psnew1b, uipanelx[hituipaneli][hituiwidgeti][UI_STATE_DEF], uipanely[hituipaneli][hituiwidgeti][UI_STATE_DEF], uihoveractionbuttonsurf);
+			} else if ((hituipaneli == uipanelactiontalkbar1) || (hituipaneli == uipanelactiontalkbar2) || (hituipaneli == uipanelactiontalkbar3)) {
+				if (hituiwidgeti < 0)
+					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+
+				if (hituiwidgeti > 0)
+					img0(psnew1b, uipanelx[hituipaneli][hituiwidgeti][UI_STATE_DEF], uipanely[hituipaneli][hituiwidgeti][UI_STATE_DEF], uihoveractiontalkbuttonsurf);
+			} else if ((hituipaneli == uipanelpartymemberbar1)) {
+				if (hituiwidgeti < 0)
+					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+
+				if (hituiwidgeti > 0)
+					img0(psnew1b, uipanelx[hituipaneli][hituiwidgeti][UI_STATE_DEF], uipanely[hituipaneli][hituiwidgeti][UI_STATE_DEF], uihoverpartymemberbuttonsurf);
+			}
+		}
+
+		//img(psnew1b, panelx[0], panely[0], panelsurf[0]);
+		//img(psnew1b, panelsurf[0], panelx[0], panely[0], panelx2[0], panely2[0]);
+		//img(psnew1b, panelnew[panelsideui].offset_x, panelnew[panelsideui].offset_y, panelnew[panelsideui].graphic);
+		//img(psnew1b, panelnew[panelminimap].offset_x, panelnew[panelminimap].offset_y,panelnew[panelminimap].graphic);
+		//img(psnew1b, panelx[0], panely[0], panelsurf[0]);
+		//img(psnew1b, uipanelx[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF]);
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -9034,9 +11516,10 @@ gotkey: //x2 is value of key
   }//i (frame)
   clientsettingsvalid=TRUE;
 
+  
 
 
-
+  // r333 no changes are made here
   //frame: display
   pn=firstpanel;
 checkpanel2:
@@ -9087,7 +11570,11 @@ displaypanel:
 
 
       }
-    }
+
+	  // r333 no changes are made here
+	  //img(pspartynew, resxn1-256, 0, pn->graphic);
+	  //refresh(pspartynew);
+	}
     FRM_type=(FRM_TYPE*)pn->firstobject;
 displayobj:
     if (FRM_type!=NULL)
@@ -9396,7 +11883,31 @@ endgame_donemessage:
           txtout(ps,x,y+1,t);
           txtout(ps,x+1,y+2,t);
           txtcol=rgb(255,255,255);
-          txtfnt=fnt1;
+
+		  // s333 change color of combat info text
+		  if (combatinfo) {
+			  txtset(t3, "P:");
+			  if ((txtsearch(t, t3) == 1)) {
+				  txtcol = rgb(255, 80, 80); // red
+			  }
+
+			  txtset(t3, "C:");
+			  if ((txtsearch(t, t3) == 1)) {
+				  txtcol = rgb(150, 255, 150); // green
+			  }
+
+			  txtset(t3, "O:");
+			  if ((txtsearch(t, t3) == 1)) {
+				  txtcol = rgb(255, 255, 80); // yellow
+			  }
+
+			  txtset(t3, "I:");
+			  if ((txtsearch(t, t3) == 1)) {
+				  txtcol = rgb(0, 255, 255); // cyan
+			  }
+		  }
+
+          //txtfnt=fnt1;
           txtout(ps,x+1,y+1,t);
         }
         y-=24;
@@ -9404,10 +11915,18 @@ endgame_donemessage:
     }
   }
 
-
+  // r333 this is where mouse/cursor object is displayed
   if (CLIENTplayer->mobj!=NULL){ //show mobject: active player
     getspr(CLIENTplayer->mobj);
     img0(ps,mx-16,my-16,bt32);
+
+	// use omx3, omy3 to display object on mouse cursor (onto new mode surface) for new mode.
+	if (smallwindow && windowsizecyclenum == 1) {
+		if ( (omx3 > resxn1m) || (omy3 > resyn1m) )
+			img0(psnew1b, omx3 - 16, omy3 - 16, bt32);
+	}
+
+//    if (keyon[VK_SPACE]) {
     if (keyon[VK_SPACE]&&U6O_DEBUG) {
       txtnumint(t,CLIENTplayer->mobj->type&1023); txtadd(t,"<MouseObject type"); txtout(ps,0,16,t);
       txtnumint(t,CLIENTplayer->mobj->type>>10); txtadd(t,"<MouseObject sub-index"); txtout(ps,0,48,t);
@@ -9415,6 +11934,14 @@ endgame_donemessage:
       txtnumint(t,CLIENTplayer->mobj->more2); txtadd(t,"<MouseObject more"); txtout(ps,0,112,t);
     }
 
+	// r777 send cursor item to inventory
+	if (enhancen1 >= 2) {
+		if (keyon[VK_CONTROL]) {
+			//itemtoinv = 1;
+			actionpending = 510; // drop item
+			//MessageBox(NULL,"item to inv 1","Ultima 6 Online",MB_OK);
+		}
+	}
 
   }
 
@@ -9422,9 +11949,12 @@ endgame_donemessage:
 
 
   //DISPLAY DEBUG INFO WHEN SPACE IS HELD (ONLY IF U6O_DEBUG IS TRUE)
+  // rrr
+//  if (keyon[VK_SPACE]) {
   if (keyon[VK_SPACE]&&U6O_DEBUG){
     txtnumint(t,btimeh); txtout(ps,512,32,t);
-    txtnumint(t,framerate); txtout(ps,512,16,t);
+//    txtnumint(t,framerate); txtout(ps,512,16,t);
+	txtset(t2, "FPS: "); txtnumint(t, framerate); txtadd(t2, t); txtout(ps, 512, 16, t2);
 
     txtnum(t,dv); txtadd(t,"<debug value 1"); txtout(ps,512+64,16,t);
     txtnum(t,dv2); txtadd(t,"<debug value 2"); txtout(ps,512+64,16+64+32,t);
@@ -9433,6 +11963,9 @@ endgame_donemessage:
 
     x=tpx+mx/32; txtnumint(t,x); txtadd(t,"<x"); txtout(ps,1024-64,0,t);
     y=tpy+my/32; txtnumint(t,y); txtadd(t,"<y"); txtout(ps,1024-64,32,t);
+
+	txtnumint(t, mx); txtadd(t, "<mx"); txtout(ps, 1024 - 64, 64, t);
+	txtnumint(t, my); txtadd(t, "<my"); txtout(ps, 1024 - 64, 96, t);
 
     if (NEThost){
       txtset(t,"Network Status: HOST");
@@ -9583,7 +12116,7 @@ midiinfo_next:
   }//midiinfo_loaded
 }
 
-
+// s222 sound additions (no changes here; to add sounds, edit wavinfo.txt in wav subfolder)
 if (wavinfo_loaded==FALSE){
   //load wavinfo.txt
   wavinfo_loaded=TRUE;
@@ -9644,7 +12177,6 @@ wavinfo_next:
 
 
 
-
 if (STATUSMESSwait){
   STATUSMESSwait-=(et*(1.0f+(float)STATUSMESSpending->l*0.005f));
   if (STATUSMESSwait<=0.0f){
@@ -9659,6 +12191,25 @@ if (STATUSMESSwait){
 }//STATUSMESSwait
 
 if (STATUSMESSpending->l){
+	// f333 check pending status messages if new messages were added
+	if (enhancen1) {
+		if (STATUSMESSpending->l > statusmessagependingprevlen) {
+			statusmessagependingprevlen = STATUSMESSpending->l;
+			//checkpendingstatusmessage = 1;
+		//}
+
+			// f333 if there is a pending "look" status message, skip status messages until it is displayed
+		//if (checkpendingstatusmessage) {
+			//checkpendingstatusmessage = 0;
+			txtset(t3, "Thou dost see");
+			if (txtsearch(STATUSMESSpending, t3) > 0) {
+				STATUSMESSskipok = 0;
+				STATUSMESSwait = -1.0f;
+			}
+		}
+	}
+
+
   if (STATUSMESSdisplaying->l==0){
     txtsetchar(t,13);
     if (i=txtsearch(STATUSMESSpending,t)){
@@ -9675,6 +12226,24 @@ if (STATUSMESSpending->l){
       txtright(STATUSMESSdisplaying,STATUSMESSdisplaying->l-1);
       STATUSMESSskipok=1;
     }
+
+	// f333 "look" status message will not skip unless there is another pending "look"
+	if (enhancen1) {
+		statusmessagechanged = 1;
+		statusmessagependingprevlen = STATUSMESSpending->l;
+		if (STATUSMESSskipok) {
+			txtset(t3, "Thou dost see");
+			if (txtsearch(STATUSMESSdisplaying, t3) > 0) {
+				STATUSMESSskipok = 0;
+			}
+		} else {
+			// f444 staff enchant message is skippable
+			txtset(t3, "Staff successfully enchanted with");
+			if (txtsearch(STATUSMESSdisplaying, t3) > 0) {
+				STATUSMESSskipok = 1;
+			}
+		}
+	}
   }else{
     if (STATUSMESSskipok){
       STATUSMESSskipok=0;
@@ -9682,6 +12251,7 @@ if (STATUSMESSpending->l){
     }
   }
 }
+
 
 if (portraitlook_wait){
   portraitlook_wait-=et;

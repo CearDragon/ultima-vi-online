@@ -5,6 +5,9 @@
 #pragma warning(disable: 4018 4244 4731)
 #include "myfile.h"
 #include "commdlg.h"
+// r999
+#include "define_both.h"
+
 
 //darklight.cpp extern
 extern RECT desktop_rect;
@@ -13,6 +16,22 @@ extern HWND hWnd;
 extern HWND hWnd2;
 extern HWND hWnd3;
 extern HINSTANCE hInst;
+
+// rrrd
+extern HWND hWnd4;
+extern unsigned int resxz;
+extern unsigned int resyz;
+extern unsigned int windowsizecyclenum;
+extern unsigned int resxs;
+extern unsigned int resys;
+extern unsigned int resxn1m;
+extern unsigned int resyn1m;
+extern double scalexm;
+extern double scaleym;
+extern unsigned int resxo;
+extern unsigned int resyo;
+
+
 
 
 //direct draw surface structures and functions
@@ -38,6 +57,26 @@ extern surf *vs;
 surf* surflist[16384];
 
 DDPIXELFORMAT DDRAW_display_pixelformat;
+
+
+
+// r999
+extern surf* uipanelsurf[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanelx[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanely[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanelsizex[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanelsizey[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern float uipanelscalex[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern float uipanelscaley[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanelhitenable[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int uipanelusedefaultstatedata[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+
+extern int uipaneli[UI_PANEL_MAX][UI_PANELWIDGET_MAX];
+extern int uipanelcount;
+extern int uipanelwidgetcount[UI_PANEL_MAX];
+extern int uipanelsidebar, uipanelactionbar1, uipanelactionbar2, uipanelactiontalkbar1, uipanelactiontalkbar2, uipanelminimap;
+
+
 
 bool setupddraw()
 {
@@ -192,6 +231,7 @@ s->s->Blt(NULL,NULL,NULL,DDBLT_WAIT|DDBLT_COLORFILL,&b);
 return;
 }
 
+// rrr refresh(surf* s)
 void refresh(surf* s)
 {
 static HDC winhdc,ddhdc;
@@ -200,15 +240,49 @@ static long x,x2,y;
 static HWND ohWnd;
 if (smallwindow){
 //switch to 512x384 window if not currently displayed
-if (hWnd!=hWnd3){
-ShowWindow(hWnd3,SW_SHOW);
+/*
+if (hWnd != hWnd3) {
+ShowWindow(hWnd3, SW_SHOW);
 UpdateWindow(hWnd3);
-ShowWindow(hWnd2,SW_HIDE); //hide current window
-hWnd=hWnd3;
+ShowWindow(hWnd2, SW_HIDE); //hide current window
+hWnd = hWnd3;
 }
+*/
+	
+	if (windowsizecyclenum == 0) {
+		if (hWnd != hWnd3) {
+			ShowWindow(hWnd3, SW_SHOW);
+			UpdateWindow(hWnd3);
+			//ShowWindow(hWnd2, SW_HIDE); //hide current window
+			ShowWindow(hWnd, SW_HIDE); //hide current window
+			hWnd = hWnd3;
+
+			resxz = resxs;
+			resyz = resys;
+			scalexm = (double)resxo / resxz;
+			scaleym = (double)resyo / resyz;
+		}
+	}
+	else if (windowsizecyclenum == 1) {
+		if (hWnd != hWnd4) {
+			ShowWindow(hWnd4, SW_SHOW);
+			UpdateWindow(hWnd4);
+			ShowWindow(hWnd, SW_HIDE); //hide current window
+			hWnd = hWnd4;
+
+			resxz = resxn1m;
+			resyz = resyn1m;
+			scalexm = (double)resxo / resxz;
+			scaleym = (double)resyo / resyz;
+		}
+	}
+
+
 // title bar window refresh
 GetWindowRect(hWnd,&wrect);
 GetClientRect(hWnd,&clrect);
+//resxz = clrect.right;
+//resyz = clrect.bottom;
 x=wrect.right-wrect.left; //full window width
 x2=(x-clrect.right)/2; //width of single border
 x=x2;
@@ -272,7 +346,8 @@ return;
 if (hWnd!=hWnd2){
 ShowWindow(hWnd2,SW_SHOW);
 UpdateWindow(hWnd2);
-ShowWindow(hWnd3,SW_HIDE); //hide current window
+//ShowWindow(hWnd3,SW_HIDE); //hide current window
+ShowWindow(hWnd, SW_HIDE); //hide current window
 hWnd=hWnd2;
 }
 //1024x768 title bar window refresh
@@ -621,6 +696,44 @@ void img(surf* d,surf* s)
 {
 d->s->Blt(NULL,s->s,NULL,DDBLT_WAIT,NULL);
 }
+
+// r999 img to handle resizing and positioning
+void img(surf* d, surf* s, int x, int y, int x2, int y2) {
+	RECT drect;
+	drect.left = x;
+	drect.right = x2;
+	drect.top = y;
+	drect.bottom = y2;
+	d->s->Blt(&drect, s->s, NULL, DDBLT_WAIT, NULL);
+}
+
+// r999
+void imguiw(surf* d, int uipaneli, int uiwidgeti, int uistatei, surf* s) {
+	if (uipanelusedefaultstatedata[uipaneli][uiwidgeti][uistatei] == 1)
+		img(d, uipanelx[uipaneli][uiwidgeti][UI_STATE_DEF], uipanely[uipaneli][uiwidgeti][UI_STATE_DEF], s);
+	else
+		img(d, uipanelx[uipaneli][uiwidgeti][uistatei], uipanely[uipaneli][uiwidgeti][uistatei], s);
+}
+
+void imguiw(surf* d, int uipaneli, int uiwidgeti, int uistatei) {
+	/*
+	if (uipanelusedefaultstatedata[uipaneli][uiwidgeti][uistatei] == 1)
+		img(d, uipanelx[uipaneli][uiwidgeti][UI_STATE_DEF], uipanely[uipaneli][uiwidgeti][UI_STATE_DEF], uipanelsurf[uipaneli][uiwidgeti][uistatei]);
+	else
+		img(d, uipanelx[uipaneli][uiwidgeti][uistatei], uipanely[uipaneli][uiwidgeti][uistatei], uipanelsurf[uipaneli][uiwidgeti][uistatei]);
+	*/
+	imguiw(d, uipaneli, uiwidgeti, uistatei, uipanelsurf[uipaneli][uiwidgeti][uistatei]);
+}
+
+void imguip(surf* d, int uipaneli, surf* s) {
+	imguiw(d, uipaneli, UI_WIDGET_DEF, UI_STATE_DEF, s);
+}
+
+void imguip(surf* d, int uipaneli) {
+	imguiw(d, uipaneli, UI_WIDGET_DEF, UI_STATE_DEF);
+}
+
+
 
 DWORD fixcol(DWORD c)
 {

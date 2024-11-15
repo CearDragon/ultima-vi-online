@@ -912,6 +912,7 @@ addmany_loop:
         invobj->info|=112; invobj->next=invbag->more; invobj->prev=invbag; invbag->more=invobj; if (invobj->next) ((object*)invobj->next)->prev=invobj;
 
 
+		// t222
         ENHANCEnewn(invobj,8,4);
 
         if (item==42){//xbow
@@ -3948,7 +3949,6 @@ object *getprimarypartymemberobj(player *sourceplayer){
 object *getpartymemberobj(player *sourceplayer,unsigned char n){
   if (sourceplayer->party[n]) return sourceplayer->party[n];
   static unsigned long i;
-  if (nresu==(-1)) return NULL;
   for (i=0;i<=nresu;i++){
     if (resu[i]){
       if (resu_player[i]==sourceplayer){
@@ -4549,3 +4549,62 @@ respawn_added:;
     OBJremove(obj); OBJrelease(obj);
   }
 }
+
+
+// c111 host functions
+unsigned int new1_getexpdeduction(npc* npc, int option) {
+	unsigned short level = npc->lev;
+	unsigned int deductexp;
+	int currentlevelexp;
+	float deductpercent;
+
+	if (level <= 3) {
+		if (option == 1)
+			deductpercent = (float) 1 / 16;
+		else
+			deductpercent = (float) 1 / 8;
+
+		deductexp = npc->exp * deductpercent;
+	} else if (level > 3) {
+		if (level >= 8) {
+			if (option == 1)
+				deductpercent = (float)1 / 2;
+			else
+				deductpercent = (float)1;
+		} else {
+			if (option == 1)
+				deductpercent = (float)1 / 4;
+			else
+				deductpercent = (float)1 / 2;
+		}
+
+		currentlevelexp = npc->exp - new1_getexprequired(level - 1);
+		deductexp = 2000 * deductpercent;
+
+		if (currentlevelexp <= deductexp)
+			deductexp = currentlevelexp;
+	}
+
+	return deductexp;
+}
+
+// t111
+int getarenaid(player* player) {
+	int arenaid = -1;
+
+	if (player) {
+		int px = player->x;
+		int py = player->y;
+
+		for (int i = 0; i < arenacount; i++) {
+			if ( ((px >= arenalocx[i]) && (px < arenalocx[i] + arenasizex[i])) && ((py >= arenalocy[i]) && (py < arenalocy[i] + arenasizey[i])) ) {
+				arenaid = i;
+				break;
+			}
+		}
+	}
+
+	return arenaid;
+}
+
+

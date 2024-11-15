@@ -416,7 +416,13 @@ negatemagic_field:
                           if ((bt[tplayer->party[x4]->y][tplayer->party[x4]->x]&1023)!=254){
                             if ((bt[tplayer->party[x4]->y][tplayer->party[x4]->x]&1023)!=253){
                               if ((bt[tplayer->party[x4]->y][tplayer->party[x4]->x]&1023)!=252){
-                                tnpc->exp-=(tnpc->exp/16);//kal lor
+                                //tnpc->exp-=(tnpc->exp/16);//kal lor
+								if (easymodehostn1) {
+									tnpc->exp -= new1_getexpdeduction(tnpc, 1); // c111
+								}
+								else { // original
+	                                tnpc->exp-=(tnpc->exp/16);//kal lor
+								}
                               }}}}}
                     }
 
@@ -875,6 +881,7 @@ exitloop1:;
         if (playerlist[tpl]->GNPCflags[253]&1) {playerlist[tpl]->GNPCflags[253]--; goto autoleavebritannia;}
 
         if (playerlist[tpl]->party[0]) x=16; else x=64;
+		// r555 idle timeout check???
 #ifdef CLIENT
         if ((playerlist[tpl]->idle_connect>=x)&&(tpl!=0)) goto connect_failed; //(16sec)
 
@@ -885,7 +892,7 @@ exitloop1:;
         if ((playerlist[tpl]->idle>=8192)){ //remove idle player (not host) (~2 hours)
 #endif
 connect_failed:
-          //txtset(t,"??"); t->d2[0]=250; t->d2[1]=9; NET_send(NETplayer,playerlist[tpl]->net,t);//leaving britannia (idle)
+          txtset(t,"??"); t->d2[0]=250; t->d2[1]=9; NET_send(NETplayer,playerlist[tpl]->net,t);//leaving britannia (idle)
 autoleavebritannia:
 
           //static txt *u6o_user_name=txtnew(); txtset(u6o_user_name,"UNKNOWN");
@@ -1144,6 +1151,10 @@ housestorageadd0:
                       //rubber duck
                       t2->ds[0]=169;//ducky
                       t2->ds[1]=112;//set info to avoid conflict
+					  txtset(newt1, "invalid item make duck ------------------------ ");
+					  txtnumint(t6, OBJlist_list[y6]->type);
+					  txtadd(newt1, t6);
+					  LOGadd(newt1);
                     }
                   }
 
@@ -1492,7 +1503,13 @@ housescan2:;
                   tnpc3->order=2; //schedule
                   tnpc3->follow=NULL;
                   tnpc3->hp=30;
-                  tnpc3->exp-=(tnpc->exp/8);
+                  //tnpc3->exp-=(tnpc->exp/8);
+				  if (easymodehostn1) {
+					  tnpc3->exp -= new1_getexpdeduction(tnpc3, 2); // c111
+				  }
+				  else { // original
+	                  tnpc3->exp-=(tnpc->exp/8);
+				  }
                   tnpc3->flags=0;
                   OBJmove_allow=TRUE;
                   OBJmove2(resu[i3],tnpc3->schedule[0].x,tnpc3->schedule[0].y);
@@ -4113,7 +4130,11 @@ findemptyparty: if (playerlist[tpl]->party[x8]) {x8++; goto findemptyparty;}
 
     //28 house number (not valid if player has been evicted!)
     //29 number of house storage positions saved
-    static unsigned char housestoragerestorei,housechest;
+
+	// s111 increase house storage max slots
+//    static unsigned char housestoragerestorei,housechest;
+    static unsigned char housechest;
+	static unsigned int housestoragerestorei;
     housechest=0;
     if (playerlist[tpl]->GNPCflags[28]){
 
@@ -4554,6 +4575,28 @@ inpartynamefix0:
       additemroot(tnpc3,myobj3);
     }//add house key
 
+	// r555 debug: give house key
+	/*
+	if (TRUE) {
+		//give key (256+housenumber)
+		static object *myobj3 = OBJnew(); myobj3->type = 64; myobj3->info = 256; myobj3->more2 = 256 + 47;
+		static object *myobj4 = tnpc3->items; static object *myobj5 = (object*)myobj4->more;
+		if (myobj5) {
+			myobj3->next = myobj5;
+			myobj5->prev = myobj3;
+			myobj3->prev = myobj4;
+			myobj4->more = myobj3;
+		}
+		else {
+			myobj3->next = NULL;
+			myobj3->prev = myobj4;
+			myobj4->more = myobj3;
+		}
+		tnpc3->upflags |= 32; //inv
+		//tplayer->GNPCflags[28]=x2; //set housenumber
+	}
+	*/
+
 
     /*
     //equipped items
@@ -4744,11 +4787,14 @@ save_createcharacter: //new player
     //Debug new players get high stats, gold, exp, all spells, 
     if (U6O_DEBUG){
       tnpc->lev=6;
+      //tnpc->lev=20;
       tnpc->exp=410000;
       tnpc->s=tnpc->s+3; tnpc->d=tnpc->d+3; tnpc->i=tnpc->i+18;
+      //tnpc->s=888; //tnpc->d=888; tnpc->i=888;
       tnpc->wt=0; tnpc->wt_max=tnpc->s*4*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
       //tnpc->mp_max=640; tnpc->mp=640;
       tnpc->hp_max=180; tnpc->hp=180;
+      //tnpc->hp_max=8800; tnpc->hp=8800;
       for (x=0;x<=9;x++){
         x2=88; x3=0; x4=0;
         if (x==8) {x2=57;}//spell
@@ -6061,6 +6107,255 @@ privilege_denied2:
       }//"/"
 anotherslashcommand:
 
+	  // t111
+	  if (easymodehostn1) {
+
+      txtset(t2,t); txtucase(t2);
+      txtset(t3,"`ADD");
+//    if (txtsame(t2,t3)){
+      if ((txtsearch(t2,t3)==1)){
+			int mobnum = 0;
+			int mobcount = 0;
+
+		    txtset(t3,"`ADD1");
+			if (txtsame(t2, t3))
+				mobnum = OBJ_SWASHBUCKLER;
+
+		    txtset(t3,"`ADD2");
+			if (txtsame(t2, t3))
+				mobnum = OBJ_FIGHTER;
+
+		    txtset(t3,"`ADD3");
+			if (txtsame(t2, t3))
+				mobnum = OBJ_GUARD;
+			
+		    txtset(t3,"`ADD9");
+			if (txtsame(t2, t3))
+				mobnum = OBJ_GARGOYLE_WINGED + 1024 * 3;
+
+        //txtsetchar(t,8); //txtaddchar(t,255);
+        //txtadd(t,"Mobs spawned!");
+		//NET_send(NETplayer,playerlist[tpl]->net,t);
+
+		int basex = 252; // 254
+		int basey = 448; // 448
+		int hx, hy, hi, hi2;
+		//int mi = 0;
+		//unsigned long moverflagbackup = MOVERNEW_GLOBALFLAGS;
+		//MOVERNEW_GLOBALFLAGS=0;
+		//int mobcountnew = 0;
+		//object* o;
+		//for (hi = 0; hi < mobcountnew; hi++) {
+			//OBJremove(moblistnew[hi]);
+			//OBJrelease(moblistnew[hi]);
+		//}
+
+		//mobcount = 0;
+		//mobcountnew = 0;
+
+		/*
+		//bucket
+		//hx=266; hy=448;
+		hx=basex+12; hy=basey;
+		OBJaddnew(hx+2,hy+3,OBJ_BUCKET+1024*0,0,0);//bucket
+		//OBJaddnew(hx+1,hy+6,OBJ_BUCKET+1024*0,0,0);//bucket
+		//mobs
+		//OBJaddnew(1132,655,OBJ_SWASHBUCKLER+1024*0,0,0);
+		//OBJaddnew(1135,655,OBJ_FIGHTER+1024*0,0,0);
+		//hx=255; hy=448+1;
+		hx=basex+2; hy=basey+1;
+		for (hi2=hy; hi2 < hy+7; hi2++) {
+			for (hi=hx; hi < hx+2; hi++) {
+				if (mobnum == 0) {
+					if (hi2 % 2 == 0)
+						//moblistnew[mi] = OBJaddnew(hi, hi2, OBJ_SWASHBUCKLER + 1024 * 0, 0, 0);
+					OBJaddnew(hi,hi2,OBJ_SWASHBUCKLER+1024*0,0,0);
+					//o=OBJaddnew(hi,hi2,OBJ_MAGIC_HELM+1024*0,0,0);
+					//OBJaddnew(hi,hi2,OBJ_DRAKE+1024*0,0,0);
+					else
+						//moblistnew[mi] = OBJaddnew(hi, hi2, OBJ_FIGHTER + 1024 * 0, 0, 0);
+					OBJaddnew(hi,hi2,OBJ_FIGHTER+1024*0,0,0);
+					//o=OBJaddnew(hi,hi2,OBJ_MAGIC_HELM+1024*0,0,0);
+				//ENHANCEnewn(o, 0, 2);
+				}
+				else
+					//moblistnew[mi] = OBJaddnew(hi, hi2, mobnum + 1024 * 0, 0, 0);
+					OBJaddnew(hi, hi2, mobnum + 1024 * 0, 0, 0);
+
+				//o=OBJaddnew(hi,hi2,OBJ_SWORD+1024*0,0,0);
+				//ENHANCEnewn(o, 0, 4);
+				mobcount++;
+				//mi++;
+
+				if (mobcount >= addmobnum)
+					break;
+			}
+
+			if (mobcount >= addmobnum)
+				break;
+		}
+		//mobcount = mi;
+		//mobcountnew = mi;
+		*/
+
+		/*
+		hx=basex+12; hy=basey;
+		OBJaddnew(hx+1,hy+1,OBJ_DEAD_BODY+1024*1,0,0);//bucket
+		OBJaddnew(hx+2,hy+1,OBJ_DEAD_BODY+1024*2,0,0);//bucket
+		OBJaddnew(hx+3,hy+1,OBJ_DEAD_BODY+1024*3,0,0);//bucket
+		OBJaddnew(hx+1,hy+2,OBJ_DEAD_BODY+1024*4,0,0);//bucket
+		OBJaddnew(hx+2,hy+2,OBJ_DEAD_BODY+1024*5,0,0);//bucket
+		OBJaddnew(hx+3,hy+2,OBJ_DEAD_BODY+1024*6,0,0);//bucket
+		OBJaddnew(hx+1,hy+3,OBJ_WOMAN+1024*0,0,0);//bucket
+		OBJaddnew(hx+2,hy+3,OBJ_MAGE+1024*0,0,0);//bucket
+		OBJaddnew(hx+3,hy+3,OBJ_PEASANT+1024*0,0,0);//bucket
+		*/
+
+		int arenaid = getarenaid(playerlist[tpl]);
+		hx=basex+12; hy=basey;
+		//OBJaddnew(hx+2,hy+3,OBJ_BUCKET+1024*0,0,0);//bucket
+
+        txtsetchar(t,8); // status msg
+
+		//mobs
+		if (arenaid >= 0) {
+			hx = arenalocx[arenaid] + 2;
+			hy = arenalocy[arenaid] + 1;
+			//object* mmm;
+			//creature* ccc;
+
+			for (hi2 = hy; hi2 < hy + 7; hi2++) {
+				for (hi = hx; hi < hx + 2; hi++) {
+					if (mobnum == 0) {
+						if (hi2 % 2 == 0)
+							//moblistnew[mi] = OBJaddnew(hi, hi2, OBJ_SWASHBUCKLER + 1024 * 0, 0, 0);
+							OBJaddnew(hi, hi2, OBJ_SWASHBUCKLER + 1024 * 0, 0, 0);
+						//o=OBJaddnew(hi,hi2,OBJ_MAGIC_HELM+1024*0,0,0);
+						//OBJaddnew(hi,hi2,OBJ_DRAKE+1024*0,0,0);
+						else
+							//moblistnew[mi] = OBJaddnew(hi, hi2, OBJ_FIGHTER + 1024 * 0, 0, 0);
+							OBJaddnew(hi, hi2, OBJ_FIGHTER + 1024 * 0, 0, 0);
+						//o=OBJaddnew(hi,hi2,OBJ_MAGIC_HELM+1024*0,0,0);
+					//ENHANCEnewn(o, 0, 2);
+					}
+					else
+						//moblistnew[mi] = OBJaddnew(hi, hi2, mobnum + 1024 * 0, 0, 0);
+						OBJaddnew(hi, hi2, mobnum + 1024 * 0, 0, 0);
+
+					//ccc = (creature*)mmm->more;
+					//ccc->al = 1;
+					//o=OBJaddnew(hi,hi2,OBJ_SWORD+1024*0,0,0);
+					//ENHANCEnewn(o, 0, 4);
+					mobcount++;
+					//mi++;
+
+					if (mobcount >= arenaaddmobnum[arenaid])
+						break;
+				}
+
+				if (mobcount >= arenaaddmobnum[arenaid])
+					break;
+			}
+
+			txtadd(t, "Arena #");
+			txtnumint(t3, arenaid+1);
+			txtadd(t, t3);
+			txtadd(t, ": ");
+	        txtadd(t,"Mobs spawned!");
+		} else {
+			txtadd(t, "You must be in an arena to spawn mobs.");
+		}
+
+		NET_send(NETplayer,playerlist[tpl]->net,t);
+        goto doneclmess;
+      }
+
+	  // t111
+      txtset(t2,t); txtucase(t2);
+      txtset(t3,"`SET");
+//    if (txtsame(t2,t3)){
+	  if (num = (txtsearch(t2, t3) == 1)) {
+		int l = t2->l - num - 4;
+		int arenaid = getarenaid(playerlist[tpl]);
+
+		txtsetchar(t, 8); // status msg
+
+		if (arenaid >= 0) {
+			txtadd(t, "Arena #");
+			txtnumint(t3, arenaid+1);
+			txtadd(t, t3);
+			txtadd(t, ": ");
+
+			if (l > 0)
+			{
+				txtright(t2, l);
+				num = (int)txtnum(t2);
+
+				if (num > 0) {
+					arenaaddmobnum[arenaid] = num;
+					txtadd(t, "Mob spawn amount set to ");
+					txtadd(t, t2);
+				}
+			}
+			else
+				num = -1;
+
+			if (num <= 0) {
+				txtadd(t, "Mob spawn amount is invalid.");
+			}
+		} else {
+			txtadd(t, "You must be in an arena to set the spawn amount.");
+		}
+
+		NET_send(NETplayer, playerlist[tpl]->net, t);
+		goto doneclmess;
+	  }
+
+      txtset(t2,t); txtucase(t2);
+      txtset(t3,"`KARMA");
+	  if ((txtsearch(t2, t3) == 1)) {
+		txtsetchar(t, 8); //txtaddchar(t,255);
+		txtadd(t, "Your karma is ");
+		//txtnumint(t2, tplayer->karma);
+		txtnumint(t2, playerlist[tpl]->karma);
+		txtadd(t, t2);
+
+		// 1076,620 to 74,84
+		//unsigned long zz = 5505098;
+		/*
+		unsigned long zz = 25231719;
+		txtset(t3, " Coord x=");
+		txtnumint(t4, zz&1023); txtadd(t3, t4); txtadd(t3, " y=");
+		txtnumint(t4, (zz>>16)&1023); txtadd(t3, t4);
+		LOGadd(t3);
+		*/
+		// 1330, 410
+		// 1310, 420 2nd floor view to 1st
+		// BTset(1310,420,111);
+		// OBJaddnew(1310,420,416+1024*0,0,25231719);//pointing at something // OBJ_NOTHING
+		// 1310,320 views to 359, 385
+		// 1308,411 2nd floor ladder
+
+		NET_send(NETplayer, playerlist[tpl]->net, t);
+		goto doneclmess;
+	  }
+
+      txtset(t2,t); txtucase(t2);
+      txtset(t3,"`LOC");
+	  if ((txtsearch(t2, t3) == 1)) {
+		txtsetchar(t, 8); //txtaddchar(t,255);
+		txtadd(t, "Your location is x=");
+		txtnumint(t2, playerlist[tpl]->x);
+		txtadd(t, t2);
+		txtadd(t, " y=");
+		txtnumint(t2, playerlist[tpl]->y);
+		txtadd(t, t2);
+
+		NET_send(NETplayer, playerlist[tpl]->net, t);
+		goto doneclmess;
+	  }
+
+	  } // t111
 
 
       txtset(t2,t); txtucase(t2);
@@ -7538,7 +7833,14 @@ leavefinished:
           if (CONpartymember){ if (tplayer->party[CONpartymember-1]){ //valid value?
             tnpc3=(npc*)tplayer->party[CONpartymember-1]->more;
             //entitled to levelup?
-            x3=(800<<(tnpc3->lev-1)); //required xp to level
+            //x3=(800<<(tnpc3->lev-1)); //required xp to level
+			// c111 new required xp to level
+			if (easymodehostn1) {
+				x3 = new1_getexprequired(tnpc3);
+			}
+			else { // original
+				x3=(800<<(tnpc3->lev-1)); //required xp to level
+			}
             if (tnpc3->exp>=x3){ //levelup
               tnpc3->lev++;
               tnpc3->upflags|=1;
@@ -7672,6 +7974,7 @@ resurrect_success:
               if (houseowner(tplayer,x3)){CONerr=2; goto buyhouse_failed;}
             }
             if (housesav[x2].flags&1){CONerr=1; goto buyhouse_failed;} //already owned?
+			// r555 debug: player requirement check for buying house
             if (tnpc3->lev<=2){CONerr=3; goto buyhouse_failed;} //inexperienced?
             //set house username & charactername 32-byte strings
             txtNEWLEN(t3,-32);
@@ -12223,6 +12526,7 @@ dontmove:
             }//wait_walk
 
             if (tnpc->order==3){ //attack target, if target==NULL find target
+				//txtset(t, "ATTACK!"); LOGadd(t); // t222
 
               if (tnpc->target==NULL){ //chk vlnk
                 if (tplayer->party[tplayer->selected_partymember]==myobj) tnpc->order=0; else tnpc->order=1;
@@ -13853,7 +14157,14 @@ skip_ouli:;
               if (resu_partymember[i]>=1){
                 i2=1;
                 tplayer->party[resu_partymember[i]]=resu[i];
-                tnpc=(npc*)resu[i]->more; tnpc->exp-=(tnpc->exp/8);
+                tnpc=(npc*)resu[i]->more;
+				//tnpc->exp-=(tnpc->exp/8);
+				if (easymodehostn1) {
+					tnpc->exp -= new1_getexpdeduction(tnpc, 2); // c111
+				}
+				else { // original
+					tnpc->exp-=(tnpc->exp/8);
+				}
                 resu[i]=NULL;
                 OBJmove_allow=TRUE;
                 OBJmove2(tplayer->party[resu_partymember[i]],tplayer->party[0]->x,tplayer->party[0]->y);
@@ -13893,7 +14204,14 @@ resurrectfollowers_failed:
                 */
                 tplayer->party[0]=resu[i];
                 if (tplayer->GNPCflags[25]==0) {
-                  tnpc=(npc*)resu[i]->more; tnpc->exp-=(tnpc->exp/8);//res by f1
+                  tnpc=(npc*)resu[i]->more;
+				  //tnpc->exp-=(tnpc->exp/8);//res by f1
+				  if (easymodehostn1) {
+					  tnpc->exp -= new1_getexpdeduction(tnpc, 2); // c111
+				  }
+				  else { // original
+					  tnpc->exp-=(tnpc->exp/8);//res by f1
+				  }
                   x2=256+128-16;
                   y2=256+128+2;
                 }
@@ -14107,6 +14425,23 @@ nextspell4:
                   if (myobj2->next) {myobj2=(object*)myobj2->next; goto nextspell4;}
                 }
               }}
+
+			  // c222 spells lookup from lastused spellbook
+			  if (easymodehostn1) {
+				  if (tspell[CASTSPELL_SPELLTYPE] == 0) {
+					  if (myobj2 = playerspellbook) {
+						  if (myobj2->type == 57) {
+							  myobj2 = (object*)myobj2->more;
+							  while (myobj2) {
+								  tspell[myobj2->more2] = 1;
+								  myobj2 = (object*)myobj2->next;
+								  //if (myobj2->next) { myobj2 = (object*)myobj2->next; }
+							  }
+						  }
+					  }
+				  }
+			  }
+
 
               if (tspell[CASTSPELL_SPELLTYPE]==0){
                 if (!cast_spell){
@@ -17043,6 +17378,9 @@ debug_skipweightcheck:;
 
                         if (tplayer->mobj->type==57){ //ready spellbook
                           tnpc->upflags|=128;
+						  // c222 keep lastused spellbook
+						  if (easymodehostn1)
+							playerspellbook = tplayer->mobj;
                         }
 
                         tnpc->wep_right=tplayer->mobj;
@@ -17098,6 +17436,9 @@ wep_right_skip:
 
                         if (tplayer->mobj->type==57){ //ready spellbook
                           tnpc->upflags|=128;
+						  // c222 keep lastused spellbook
+						  if (easymodehostn1)
+							playerspellbook = tplayer->mobj;
                         }
 
                         tnpc->wep_left=tplayer->mobj;
@@ -17531,6 +17872,9 @@ wep_left_skip:
                     if (((rnd*64)+(rnd*tnpc->i))>=56){ //success
                       OBJsave(myobj->x,myobj->y);
                       myobj->type=OBJ_CHEST+1024;
+					  if (enhancehostn1) {
+						  txtsetchar(t, 8); txtaddchar(t, 255); txtadd(t, "Chest unlocked!"); NET_send(NETplayer, tplayer->net, t); // f111
+					  }
                     }else{
                       x2=rnd*2; if (x2){ //break pick!
                         txtset(t,"?"); t->d2[0]=8; txtadd(t,"Key broke!"); NET_send(NETplayer,tplayer->net,t);
@@ -17589,11 +17933,17 @@ lockpick2:
                           myobj->type=(myobj->type&4095)+(2<<12);
                           myobj3=(object*)myobj->more;
                           myobj3->type=(myobj3->type&4095)+(2<<12);
+						  if (enhancehostn1) {
+							  txtsetchar(t, 8); txtaddchar(t, 255); txtadd(t, "Door locked!"); NET_send(NETplayer, tplayer->net, t); // f111
+						  }
                         }
                         if (x2==2){
                           myobj->type=(myobj->type&4095)+(1<<12);
                           myobj3=(object*)myobj->more;
                           myobj3->type=(myobj3->type&4095)+(1<<12);
+						  if (enhancehostn1) {
+							  txtsetchar(t, 8); txtaddchar(t, 255); txtadd(t, "Door unlocked!"); NET_send(NETplayer, tplayer->net, t); // f111
+						  }
                         }
                         goto skip_pickup;
                       }
@@ -18041,7 +18391,19 @@ pirateholefix_bodyremoved:;
 
                 if ((tplayer->mobj->type&1023)==OBJ_TMAP){ //treasure map
                   if (od[y][x]==NULL){
-                    if (((bt[y][x]&1023)==1)||(((bt[y][x]&1023)>=52)&&((bt[y][x]&1023)<64))||(((bt[y][x]&1023)>=73)&&((bt[y][x]&1023)<96))||(((bt[y][x]&1023)>=108)&&((bt[y][x]&1023)<112))){
+                    //if (((bt[y][x]&1023)==1)||(((bt[y][x]&1023)>=52)&&((bt[y][x]&1023)<64))||(((bt[y][x]&1023)>=73)&&((bt[y][x]&1023)<96))||(((bt[y][x]&1023)>=108)&&((bt[y][x]&1023)<112))){
+                    // f111 fix for unable to dig up treasure if it's on a river/coast tile (make it consistent with treasure map creation)
+					// from TMAP creation: while (((bt[y7+(x2-3)*2][x7+(x1-3)*2]&1023)>=8)&&((bt[y7+(x2-3)*2][x7+(x1-3)*2]&1023)<16)) { //check that the map marker is not in the sea.
+					x2 = 0;
+					if (enhancehostn1) {
+						if (!(((bt[y][x] & 1023) >= 8) && ((bt[y][x] & 1023) < 16)))
+							x2 = 1;
+					} else {
+						if (((bt[y][x]&1023)==1)||(((bt[y][x]&1023)>=52)&&((bt[y][x]&1023)<64))||(((bt[y][x]&1023)>=73)&&((bt[y][x]&1023)<96))||(((bt[y][x]&1023)>=108)&&((bt[y][x]&1023)<112)))
+							x2 = 1;
+					}
+                    //if (((bt[y][x]&1023)==1)||(((bt[y][x]&1023)>=52)&&((bt[y][x]&1023)<64))||(((bt[y][x]&1023)>=73)&&((bt[y][x]&1023)<96))||(((bt[y][x]&1023)>=108)&&((bt[y][x]&1023)<112))){
+                    if (x2){
                       tnpc=(npc*)tplayer->party[0]->more;
                       x2=0;
                       if ((tnpc->wep_right)&&(tnpc->wep_right->type&1023)==OBJ_SHOVEL) {x2=1;}
@@ -18068,7 +18430,19 @@ pirateholefix_bodyremoved:;
                             txtset(t,"?"); t->d2[0]=8; txtadd(t,"You dig up a chest."); NET_send(NETplayer,tplayer->net,t);
                             x3=2; //double wait time for digging up the treasure.
                           }else{
-                            txtset(t,"?"); t->d2[0]=8; txtadd(t,"Nothing!"); NET_send(NETplayer,tplayer->net,t);
+                            //txtset(t,"?"); t->d2[0]=8; txtadd(t,"Nothing!"); NET_send(NETplayer,tplayer->net,t);
+                            // f111 for incorrect treasure map markers
+							if (enhancehostn1) {
+								txtset(t,"?"); t->d2[0]=8;
+								txtadd(t,"Nothing! You dig x=");
+								txtnumint(t2, x); txtadd(t, t2); txtadd(t, " y=");
+								txtnumint(t2, y); txtadd(t, t2); txtadd(t, " | Map marker x=");
+								txtnumint(t2, tplayer->mobj->more2&1023); txtadd(t, t2); txtadd(t, " y=");
+								txtnumint(t2, (tplayer->mobj->more2>>10)&1023); txtadd(t, t2);
+								NET_send(NETplayer,tplayer->net,t);
+							} else {
+								txtset(t, "?"); t->d2[0] = 8; txtadd(t, "Nothing!"); NET_send(NETplayer, tplayer->net, t);
+							}
                           }
                           if(x2==1){
                             tnpc->wait_disable+=(8.0f-((tnpc->wep_right->more2)&15)*0.5f)*x3;
@@ -21093,6 +21467,20 @@ nextspell2:
                   if (myobj->next) {myobj=(object*)myobj->next; goto nextspell2;}
                 }
               }}
+
+			  // c222 lastused spellbook always available (even after unreadying)
+			  if (easymodehostn1) {
+				  if (myobj = (object*)playerspellbook) {
+					  myobj = (object*)myobj->more;
+					  while (myobj) {
+						  tspell[myobj->more2] = 1;
+						  myobj = (object*)myobj->next;
+						  //if (myobj->next) {myobj=(object*)myobj->next; goto nextspell2;}
+					  }
+				  }
+			  }
+
+
               //enumerate reagents
               ZeroMemory(&treagent,sizeof(treagent));
               x=OBJlist((object*)tnpc->items->more); //x5=last object number???

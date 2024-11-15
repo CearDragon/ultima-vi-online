@@ -38,11 +38,18 @@ extern unsigned short housepnext[HOUSEMAX];
 extern unsigned short housepx[HOUSEMAX][512]; extern unsigned short housepy[HOUSEMAX][512];
 extern unsigned short housecost[HOUSEMAX]; //gold cost per REAL day (deducted if current system day!=logged day)
 extern unsigned short houseinitialcost[HOUSEMAX];
-extern unsigned char housestoragenext[HOUSEMAX];
-extern unsigned short housestoragex[HOUSEMAX][16]; extern unsigned short housestoragey[HOUSEMAX][16];
+// s111 increase house storage max slots
+//extern unsigned char housestoragenext[HOUSEMAX];
+extern unsigned int housestoragenext[HOUSEMAX];
+extern unsigned short housestoragex[HOUSEMAX][HOUSESTORAGESLOTMAX]; extern unsigned short housestoragey[HOUSEMAX][HOUSESTORAGESLOTMAX];
 extern unsigned char housestorageadd;
 extern unsigned char housestoragerestore; //flags used when saving/restoring house items in file
 extern unsigned short houseentrancex[HOUSEMAX],houseentrancey[HOUSEMAX];
+
+// t111
+//extern object* moblistnew[50];
+//extern int mobcountnew;
+
 
 //house creation tool 1.0 variables
 extern unsigned short patchx;
@@ -163,13 +170,6 @@ void function_host_init(void); // groups all the assignments to globals etc. *yu
 
 
 
-void function_host_init(void); // groups all the assignments to globals etc. *yuck*
-// Routines for Auto Saving the Player's Guild Items for server reset
-void SaveGuildContents();
-void RetrieveGuildContents();
-void AddGuildItem(object *myobj, txt *tstore, unsigned long *Counter);
-//void ReadGuildTableItems(object *prevobject, FILE *instream, unsigned long x, unsigned long y, object *baseobject);
-// End of Auto Saving the Player's Guild Items for server reset
 
 void house();
 void AUTOPICKUPadd(object* partymember, object *obj);//adds an item to the autopickup list
@@ -368,6 +368,14 @@ unsigned long randchestitem();
 void ENHANCEnewn(object* obj,unsigned short n, unsigned short n2);
 
 void addhireling(unsigned long x3, schedule_i *sched);
+
+
+// c111
+unsigned int new1_getexpdeduction(npc* npc, int option);
+
+// t111
+int getarenaid(player* player);
+
 
 #endif FUNCTION_HOST_H
 

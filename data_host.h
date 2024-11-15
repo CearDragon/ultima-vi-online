@@ -5,6 +5,7 @@
 #include "mytxt.h" /* txt* etc */
 #include "data_both.h" /* schedule* etc. */
 
+
 /* structure definitions */
 struct housesav_info{
   unsigned short flags;
@@ -263,12 +264,14 @@ extern unsigned char MOVERNEW_ERROR;//valid when movernew(...) returns 0
 //1=FAILED (object is not a mover)
 //2=IGNORED (object is not the primary part of a mover)
 
+
 #ifndef CLIENT
 //STUBS TO SUPPORT EXTERNAL LINKING (DATA NOT ACTUALLY USED!)
 extern unsigned char u6omidisetup;
 extern HWND hWnd;
 extern HWND hWnd2;
 extern HWND hWnd3;
+extern HWND hWnd4;
 extern RECT desktop_rect;
 extern bool smallwindow;
 extern unsigned char u6ovolume;

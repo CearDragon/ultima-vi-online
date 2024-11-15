@@ -47,6 +47,39 @@ extern txt *STATUSMESSpending;
 extern txt *GETSETTING_RAW;//the actualt text between the square brackets [...]
 extern txt *li2_t;
 
+
+//void updatepartyframe1(FRAME* f, int partyindex, double scale);
+
+// r999 new
+void inituidatan1();
+void applyscaleuipanelwidget(int uipi, int uiwi, int uisi, float scalex, float scaley);
+int gethituipaneli(int x, int y);
+int gethituipanelwidgeti(int x, int y, int uipaneli);
+int gethituipanelwidgeti(int x, int y);
+int testhituipanel(int x, int y, int uipaneli);
+void updateoverlaysurfn1(surf* s);
+
+
+
+// s333 get type of object at coordinate
+void backupplayermvinfon1(player* tplayer);
+//int isobjonscreenn1(int mapxn, int mapyn, int tpxn, int tpyn);
+int getobjtypen1(player* tplayer, int mapx, int mapy);
+//int getobjtypen1b(player p, int mapx, int mapy);
+int getobjtypen1b(player p, int mapx, int mapy, int exactcoord);
+int checkdeadobjtypen1(int typeparam);
+int convertdeadobjtypen1(int typeparam);
+int checkobjtypecreaturen1(int typeparam);
+
+// s333 get description of object type (for creature)
+void getobjdescn1(txt* txtdesc, int typeparam);
+
+// s555
+void updateoptioninfo();
+
+
+
+
 /* function prototypes */
 void function_client_init(void); 
 
@@ -171,6 +204,12 @@ unsigned char getambientlight(unsigned short x,unsigned short y);
 void txtmakeu6ocompatible(txt* t); /* filters out nasty characters that would mess up things */
 void STATUSMESSadd(txt *t);
 void STATUSMESSadd(const char *t);
+
+// s555
+void STATUSMESSadd(txt *t, int skippable);
+void STATUSMESSadd(const char *t, int skippable);
+void STATUSMESSadd(const char *t, int skippable, int num);
+
 
 long getsetting(const char*d);
 

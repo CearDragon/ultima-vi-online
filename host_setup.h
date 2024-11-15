@@ -308,7 +308,9 @@ for (x=0;x<=2047;x++){ for (y=0;y<=1023;y++){
 close(tfh);
 
 //create bt.bin for client to reference
-tfh=open2("bt.bin",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
+//tfh=open2("bt.bin",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
+// f555 bt.bin should be in "dr" subfolder
+tfh=open2(".\\dr\\bt.bin",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
 put(tfh,&bt,1024*2048*2);
 close(tfh);
 //later we will compress and encrypt this

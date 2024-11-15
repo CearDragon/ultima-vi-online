@@ -62,7 +62,7 @@ txtadd(t3,t2);
 
   txtadd(t3,timebuf);
   txtadd(t3,t);
-  txtfileout(t3,log22);
+  txtfileout(t3, log2file);
 #ifdef CONSOLE
   _cprintf("%s\n",t3->d);
 #endif
@@ -491,3 +491,39 @@ void SHA2(txt* t,txt* t2) {
   }
   free(t3);
 }
+
+
+// c111 both functions
+unsigned long new1_getexprequired(unsigned short level) {
+	// original exp required
+	//x3=(800<<(tnpc3->lev-1)); //required xp to level
+	//unsigned short level = npc->lev;
+	unsigned long requiredexp = (800 << (level - 1));
+	unsigned long level3xp = (800 << 2);
+
+	if (level <= 3)
+		requiredexp = (800 << (level - 1));
+	else if (level > 3)
+		requiredexp = level3xp + (level - 3) * 5000;
+
+	return requiredexp;
+}
+
+unsigned long new1_getexprequired(npc* npc) {
+	// original exp required
+	//x3=(800<<(tnpc3->lev-1)); //required xp to level
+	/*
+	unsigned short level = npc->lev;
+	unsigned long requiredexp = (800 << (level - 1));
+	unsigned long level3xp = (800 << 2);
+
+	if (level <= 3)
+		requiredexp = (800 << (level - 1));
+	else if (level > 3)
+		requiredexp = level3xp + (level - 3) * 5000;
+
+	return requiredexp;
+	*/
+	return new1_getexprequired(npc->lev);
+}
+
