@@ -4,6 +4,8 @@
 VC-files/old binaries
 VC-files/DebugInter
 VC-Files/Debug
+VC-Files/Release
+
 VC-files/.vs
 VC-files/build
 VC-files/cmake-build-debug
