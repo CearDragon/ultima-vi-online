@@ -4,13 +4,10 @@
 VC-files/old binaries
 VC-files/DebugInter
 VC-Files/Debug
-VC-Files/Release
 VC-files/.vs
 VC-files/build
 VC-files/cmake-build-debug
 VC-files/cmake-build-release
-VC-files/Release
-build/local-config.mk
 bin/client/debug/*
 !bin/client/debug/README.md
 bin/client/release/*
