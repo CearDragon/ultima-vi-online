@@ -1,0 +1,5 @@
+VC-files/CMakeLists.txt eol=lf
+VC-files/CMake/Default.cmake eol=lf
+VC-files/CMake/DefaultCXX.cmake eol=lf
+VC-files/CMake/DefaultFortran.cmake eol=lf
+VC-files/CMake/Utils.cmake eol=lf

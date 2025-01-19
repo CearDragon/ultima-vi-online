@@ -1,6 +1,21 @@
 .vs
+.vscode
 .idea
 VC-files/old binaries
 VC-files/DebugInter
 VC-Files/Debug
 VC-Files/Release
+VC-files/.vs
+VC-files/build
+VC-files/cmake-build-debug
+VC-files/cmake-build-release
+VC-files/Release
+build/local-config.mk
+bin/client/debug/*
+!bin/client/debug/README.md
+bin/client/release/*
+!bin/client/release/README.md
+bin/host/debug/*
+!bin/host/debug/README.md
+bin/host/release/*
+!bin/host/release/README.md
