@@ -1575,7 +1575,7 @@ transferachar_enterkey:
 
 
 
-  static surf *customport;
+  static surface *customport;
 
 
   if (intro==204){//custom portrait
@@ -3653,7 +3653,7 @@ dbg1:
           txtright(t,t->l-18);
         }//x4&64
 
-        if (x4&1){//1		name, portriat, str, dex, int, lev, hp_max, mp_max (does not change often)
+        if (x4&1){//1		name, portrait, str, dex, int, lev, hp_max, mp_max (does not change often)
           x=t->d2[0];
           txtNEWLEN(tnpc->name,x);
           memcpy(&tnpc->name->d2[0],&t->d2[1],x);
@@ -3663,9 +3663,9 @@ dbg1:
           tnpc->port=t->ds[0];
           if (i2==0) portlast=tnpc->port;
 
-          tnpc->s=t->ds[1];
-          tnpc->d=t->ds[2];
-          tnpc->i=t->ds[3];
+          tnpc->strength=t->ds[1];
+          tnpc->dexterity=t->ds[2];
+          tnpc->intelligence=t->ds[3];
           tnpc->lev=t->ds[4];
           if ((i2==0)&&(tnpc->lev>1)) U6O_WALKTHRU=FALSE;
           tnpc->hp_max=t->ds[5];
@@ -3677,7 +3677,7 @@ dbg1:
 
 
 
-        if (x4&16){//wt
+        if (x4&16){//weight
           tnpc->wt=t->ds[0]; txtright(t,t->l-2);
         }//x4&16
         if (x4&2){//hp
@@ -4567,7 +4567,7 @@ receivenextvolume:
         x2=t->ds[0];
         txtright(t,t->l-2);
 
-        static surf *receiveport=NULL;
+        static surface *receiveport=NULL;
         receiveport=newsurf(56,64,SURF_SYSMEM16);
 
 
@@ -8140,7 +8140,7 @@ skiprefresh2:
         txtout(party_frame[i]->graphic,x+1,y+1,t);
 
         txtset(t,"STR  ");
-        txtnumint(t2,tnpc->s);
+        txtnumint(t2,tnpc->strength);
         txtadd(t,t2);
         x=128-16; y=12+16+18;
         txtcol=rgb(192,126,0);
@@ -8152,7 +8152,7 @@ skiprefresh2:
         txtout(party_frame[i]->graphic,x+1,y+1,t);
 
         txtset(t,"DEX  ");
-        txtnumint(t2,tnpc->d);
+        txtnumint(t2,tnpc->dexterity);
         txtadd(t,t2);
         x=128-16+64+8-4; y=12+16+18;
         txtcol=rgb(192,126,0);
@@ -8164,7 +8164,7 @@ skiprefresh2:
         txtout(party_frame[i]->graphic,x+1,y+1,t);
 
         txtset(t,"INT  ");
-        txtnumint(t2,tnpc->i);
+        txtnumint(t2,tnpc->intelligence);
         txtadd(t,t2);
         x=128-16; y=12+16+18+18;
         txtcol=rgb(192,126,0);

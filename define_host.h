@@ -9,13 +9,13 @@
 #define SAVEVER 5 
 #define ADMINSMAX 8
 //shrine stat improvements
-#define U6O_HONESTY tnpc->i+=3;
-#define U6O_COMPASSION tnpc->d+=3;
-#define U6O_VALOR tnpc->s+=3;
-#define U6O_JUSTICE tnpc->d+=1; tnpc->i+=1;
-#define U6O_SACRIFICE tnpc->s+=1; tnpc->d+=1;
-#define U6O_HONOR tnpc->s+=1; tnpc->i+=1;
-#define U6O_SPIRITUALITY tnpc->s+=1; tnpc->d+=1; tnpc->i+=1;
+#define U6O_HONESTY tnpc->intelligence+=3;
+#define U6O_COMPASSION tnpc->dexterity+=3;
+#define U6O_VALOR tnpc->strength+=3;
+#define U6O_JUSTICE tnpc->dexterity+=1; tnpc->intelligence+=1;
+#define U6O_SACRIFICE tnpc->strength+=1; tnpc->dexterity+=1;
+#define U6O_HONOR tnpc->strength+=1; tnpc->intelligence+=1;
+#define U6O_SPIRITUALITY tnpc->strength+=1; tnpc->dexterity+=1; tnpc->intelligence+=1;
 #define U6O_HUMILITY
 
 /* spell return values */

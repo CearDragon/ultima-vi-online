@@ -1,3 +1,7 @@
+#include "globals.inc"
+#include "data_both.h"
+#include "data_client.h"
+
 #ifdef loadimage
 #undef loadimage
 #endif
@@ -37,15 +41,15 @@ tmap_marker=newsurf(8,8,SURF_SYSMEM16); //surface for treasure map markers
 
 // r222 nothing changed here: just some constants which can't be changed
 
-ps=newsurf(resxo,resyo,SURF_SYSMEM16);
+ps=newsurf(g_EnhancedClientWindowWidth, g_EnhancedClientWindowHeight, SURF_SYSMEM16);
 if (DDRAW_display_pixelformat.dwRGBBitCount!=16){
-ps2=newsurf(resxo/2,resyo/2,SURF_SYSMEM);
-ps3=newsurf(resxo,resyo,SURF_SYSMEM);
-ps4=newsurf(resxo/2,resyo/2,SURF_SYSMEM16); //to temporarily convert to 16bit?
+    ps2=newsurf(g_EnhancedClientWindowWidth / 2, g_EnhancedClientWindowHeight / 2, SURF_SYSMEM);
+    ps3=newsurf(g_EnhancedClientWindowWidth, g_EnhancedClientWindowHeight, SURF_SYSMEM);
+    ps4=newsurf(g_EnhancedClientWindowWidth / 2, g_EnhancedClientWindowHeight / 2, SURF_SYSMEM16); //to temporarily convert to 16bit?
 }else{
-ps2=newsurf(resxo/2,resyo/2,SURF_SYSMEM16);
+    ps2=newsurf(g_EnhancedClientWindowWidth / 2, g_EnhancedClientWindowHeight / 2, SURF_SYSMEM16);
 }
-ps5=newsurf(resxo,resyo,SURF_SYSMEM16); //unconverted mimimap
+ps5=newsurf(g_EnhancedClientWindowWidth, g_EnhancedClientWindowHeight, SURF_SYSMEM16); //unconverted mimimap
 ps6=newsurf(80,60,SURF_SYSMEM16); //convert to minimap size
 ps7=newsurf(120,120,SURF_SYSMEM16); //unconverted treasuremap
 ps8=newsurf(240,240,SURF_SYSMEM16); //convert to treasuremap size
@@ -470,11 +474,11 @@ con_frm_img->offset_x=0;
 con_frm_img->offset_y=-256;
 
 // r222 init new mode stuff
-extern void newmodeinit();
+extern void newModeInit();
 
 if (newmodestatus == 1) {
 	newmodestatus++;
-	newmodeinit();
+	newModeInit();
 }
 
 for (i=0;i<=7;i++){
@@ -600,7 +604,7 @@ tnpc->name=txtnew(); txtset(tnpc->name,"unknown");
 tnpc->hp=255;
 tnpc->hp_max=255;
 tnpc->player=tplay;
-tnpc->s=26; tnpc->d=20; tnpc->i=17;
+tnpc->strength=26; tnpc->dexterity=20; tnpc->intelligence=17;
 tplayobj[i]=myobj;
 tplay->party[i]=NULL;
 }

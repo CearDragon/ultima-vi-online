@@ -105,30 +105,30 @@ if (smallwindow) {
 	if ((mx != omx2) || (my != omy2)) {
 		//double multiplierx;
 		//double multipliery;
-		omx3 = mx;
-		omy3 = my;
+		g_MousePosX = mx;
+		g_MousePosY = my;
 
 		// r999 new
 		hituipaneli = -1;
 		//selectedpartymembern1 = tplay->selected_partymember;
 
 		// r999
-		//panelmx[0] = (omx3 - panelx[0]) * panelscalex[0];
-		//panelmy[0] = (omy3 - panely[0]) * panelscaley[0];
+		//panelmx[0] = (g_MousePosX - panelx[0]) * panelscalex[0];
+		//panelmy[0] = (g_MousePosY - panely[0]) * panelscaley[0];
 
 		/*
 		if (windowsizecyclenum == 0) {
-			multiplierx = (double) resxo / resxs;
-			multipliery = (double) resyo / resys;
+			multiplierx = (double) g_EnhancedClientWindowWidth / g_BaseClientWindowWidth;
+			multipliery = (double) g_EnhancedClientWindowHeight / g_BaseClientWindowHeight;
 //			mx *= multiplierx; my *= multipliery;
 		}
 		else if (windowsizecyclenum > 0) {
-			multiplierx = (double) resxo / resxz;
-			multipliery = (double) resyo / resyz;
+			multiplierx = (double) g_EnhancedClientWindowWidth / g_WindowResolutionWidth;
+			multipliery = (double) g_EnhancedClientWindowHeight / g_WindowResolutionHeight;
 		}
 		*/
 
-		// the scale is only (re)calculated when the resolution changes; in "void refresh(surf* s)" in myddraw.cpp
+		// the scale is only (re)calculated when the resolution changes; in "void refresh(surface* s)" in myddraw.cpp
 
 //		mx *= multiplierx; my *= multipliery;
 		mx *= scalexm; my *= scaleym;
@@ -138,121 +138,106 @@ if (smallwindow) {
 
 	// r666 actionbar functionality
 	if (windowsizecyclenum == 1) {
-		if (actionpending > 0) {
-			actionlast = actionpending;
+        if (actionpending > 0) {
+            actionlast = actionpending;
 
-			if (actionpending == 1) {
-				//U6OK[U6OK_CANCEL][0];
-				i=U6OK[U6OK_ATTACK][0];
-				//keyon[i]=TRUE;
-				key[i]=TRUE;
-				//key_gotrelease[i]=TRUE;
-
-				//MessageBox(NULL,"attack!","Ultima 6 Online",MB_OK);
-				//txtset(t, "attack!");
-				//LOGadd(t);
-			} else if (actionpending == 2) {
-				i=U6OK[U6OK_TALK][0];
-				keyon[i]=TRUE;
-				key[i]=TRUE;
-				key_gotrelease[i]=TRUE;
-			} else if (actionpending == 3) {
-				i=U6OK[U6OK_LOOK][0];
-				keyon[i]=TRUE;
-				key[i]=TRUE;
-				key_gotrelease[i]=TRUE;
-			} else if (actionpending == 4) {
-				i=U6OK[U6OK_USE][0];
-				keyon[i]=TRUE;
-				key[i]=TRUE;
-				key_gotrelease[i]=TRUE;
-			} else if (actionpending == 5) {
-				minimaptype++;
-				if (minimaptype > minimaptypemax)
-					minimaptype = 0;
-
-				if (minimaptype == 1) {
-					minimaptilexstart = 1;
-					minimaptilexend = 3;
-					minimaptileystart = 1;
-					minimaptileyend = 3;
-					minimaptilesurf = minimaptilesurf1;
-					//minimapplayerx = minimapnewx+128-13;
-					//minimapplayery = minimapnewy+128-24;
-					minimapplayerx = 128-13;
-					minimapplayery = 128-24;
-					minimapstepsize = 4.9f;
-				} else if (minimaptype == 2) {
-					minimaptilexstart = 0;
-					minimaptilexend = 4;
-					minimaptileystart = 0;
-					minimaptileyend = 4;
-					minimaptilesurf = minimaptilesurf2;
-					//minimapplayerx = minimapnewx+128-9;
-					//minimapplayery = minimapnewy+128-21;
-					minimapplayerx = 128-9;
-					minimapplayery = 128-21;
-					minimapstepsize = 2.45f;
-				}
-			} else if (actionpending == 6) {
-				i = U6OK[U6OK_TALK][0];
-				keyon[i] = TRUE;
-				key[i] = TRUE;
-				key_gotrelease[i] = TRUE;
-				actiontalkfilltext = 1;
-			} else if (actionpending == 7) {
-				i = U6OK[U6OK_QUIT][0];
-				keyon[i] = TRUE;
-				key[i] = TRUE;
-				key_gotrelease[i] = TRUE;
-			} else if (actionpending == 100) {
-				// r777 use item on self: step 1
-				i=U6OK[U6OK_USE][0];
-				keyon[i]=TRUE;
-				key[i]=TRUE;
-				key_gotrelease[i]=TRUE;
-				actionpending = 501;
-				//MessageBox(NULL,"a 100","Ultima 6 Online",MB_OK);
-			} else if (actionpending == 501) {
-				// r777 click on self
-				actionpending = 502;
-				//MessageBox(NULL,"a 501","Ultima 6 Online",MB_OK);
-			} else if (actionpending == 503) {
-				// r777 send item to inventory
-				actionpending = 0;
-				actionreset = 1;
-				itemtoinv = 1;
-				//MessageBox(NULL,"a 503","Ultima 6 Online",MB_OK);
-			} else if (actionpending == 599) {
-				// r777 reset action
-				actionpending = 0;
-				actionreset = 1;
-			}
-
-			if (actionpending < 500)
-				actionpending = 0;
-		} else if (actionreset != 0) {
-			actionreset = 0;
-			actionlast = 0;
-		//} else if (mbclick & 1) {
-		} else {
+            switch (actionpending) {
+                // Attack
+                case 1:
+                    i = U6OK[U6OK_ATTACK][0];
+                    key[i] = TRUE;
+                    break;
+                // Talk
+                case 2:
+                case 6:
+                    i = U6OK[U6OK_TALK][0];
+                    keyon[i] = TRUE;
+                    key[i] = TRUE;
+                    key_gotrelease[i] = TRUE;
+                    if (actionpending == 6) actionTalkFillText = 1;
+                    break;
+                case 3:
+                    i = U6OK[U6OK_LOOK][0];
+                    keyon[i] = TRUE;
+                    key[i] = TRUE;
+                    key_gotrelease[i] = TRUE;
+                    break;
+                case 4:
+                    i = U6OK[U6OK_USE][0];
+                    keyon[i] = TRUE;
+                    key[i] = TRUE;
+                    key_gotrelease[i] = TRUE;
+                    break;
+                case 5:
+                    minimaptype = (minimaptype + 1) % (minimaptypemax + 1);
+                    if (minimaptype == 1) {
+                        minimaptilexstart = 1;
+                        minimaptilexend = 3;
+                        minimaptileystart = 1;
+                        minimaptileyend = 3;
+                        minimaptilesurf = minimaptilesurf1;
+                        minimapplayerx = 128 - 13;
+                        minimapplayery = 128 - 24;
+                        minimapstepsize = 4.9f;
+                    } else if (minimaptype == 2) {
+                        minimaptilexstart = 0;
+                        minimaptilexend = 4;
+                        minimaptileystart = 0;
+                        minimaptileyend = 4;
+                        minimaptilesurf = minimaptilesurf2;
+                        minimapplayerx = 128 - 9;
+                        minimapplayery = 128 - 21;
+                        minimapstepsize = 2.45f;
+                    }
+                    break;
+                case 7:
+                    i = U6OK[U6OK_QUIT][0];
+                    keyon[i] = TRUE;
+                    key[i] = TRUE;
+                    key_gotrelease[i] = TRUE;
+                    break;
+                case 100:
+                    i = U6OK[U6OK_USE][0];
+                    keyon[i] = TRUE;
+                    key[i] = TRUE;
+                    key_gotrelease[i] = TRUE;
+                    actionpending = 501;
+                    break;
+                case 501:
+                    actionpending = 502;
+                    break;
+                case 503:
+                    actionpending = 0;
+                    actionreset = 1;
+                    itemtoinv = 1;
+                    break;
+                case 599:
+                    actionpending = 0;
+                    actionreset = 1;
+                    break;
+            }
+            if (actionpending < 500) actionpending = 0;
+            } else if (actionreset != 0) {
+            actionreset = 0;
+            actionlast = 0;
+        } else {
 			hituipaneli = -5;
 			hituiwidgeti = -5;
 
 			// s444 process mouse clicks on worldmap and worldmapbar
 			if (mbclick) {
 				if (showworldmapn1 > 0) {
-					hituipaneli = gethituipaneli(omx3, omy3);
+					hituipaneli = gethituipaneli(g_MousePosX, g_MousePosY);
 					//hituiwidgeti = -1;
 
 					// s444 cancel all mouse clicks on world map
-					if (hituipaneli == uipanelworldmap) {
+					if (hituipaneli == g_UI_WorldmapPanelId) {
 						hituipaneli = -2;
 						mbclick = 0;
 						mbheld = 0;
-					} else if (hituipaneli == uipanelworldmapbar) {
+					} else if (hituipaneli == g_UI_WorldmapBarPanelId) {
 						if (mbclick & 1)
-							hituiwidgeti = gethituipanelwidgeti(omx3, omy3, uipanelworldmapbar);
+							hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_WorldmapBarPanelId);
 						else {
 							// s444 cancel non-left mouse clicks on world map bar
 							hituipaneli = -5;
@@ -317,7 +302,7 @@ if (smallwindow) {
 						}
 						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_CLOSE) {
 							showworldmapn1 = 0;
-							uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
+                            g_UI_PanelClickable[g_UI_WorldmapPanelId][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
 
 							if (soundn1 >= 2)
 								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
@@ -327,12 +312,12 @@ if (smallwindow) {
 			} // mbclick
 
 			// r999 new
-			//hituipaneli = gethituipaneli(omx3, omy3);
+			//hituipaneli = gethituipaneli(g_MousePosX, g_MousePosY);
 			//hituiwidgeti = -1;
 
 			// r999 new only process left mouse clicks if it was not previously canceled
 			if ((mbclick & 1) && (hituipaneli < -4)) {
-				hituipaneli = gethituipaneli(omx3, omy3);
+				hituipaneli = gethituipaneli(g_MousePosX, g_MousePosY);
 				//hituiwidgeti = -1;
 
 				if (hituipaneli < 0)
@@ -341,7 +326,7 @@ if (smallwindow) {
 
 			// s444 cancel mouse clicks on world map
 			/*
-			if (hituipaneli == uipanelworldmap) {
+			if (hituipaneli == g_UI_WorldmapPanelId) {
 				hituipaneli = -1;
 				mbclick = 0;
 			}
@@ -352,8 +337,8 @@ if (smallwindow) {
 				hituiwidgeti = -1;
 
 				// r999 new actionbar1
-				if (hituipaneli == uipanelactionbar1) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+				if (hituipaneli == g_UI_ActionBarTopPanelId) {
+					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
 
 					if (hituiwidgeti > 0) {
 						if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_ATTACK) {
@@ -445,8 +430,8 @@ if (smallwindow) {
 					}
 				} // actionbar1
 				// actionbar2
-				else if (hituipaneli == uipanelactionbar2) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+				else if (hituipaneli == g_UI_ActionBarBottomPanelId) {
+					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
 
 					if (hituiwidgeti > 0) {
 						if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_FOOD) {
@@ -469,9 +454,9 @@ if (smallwindow) {
 							showworldmapn1++;
 							if (showworldmapn1 > 1) {
 								showworldmapn1 = 0;
-								uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
+                                g_UI_PanelClickable[g_UI_WorldmapPanelId][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
 							} else {
-								uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 1;
+								g_UI_PanelClickable[g_UI_WorldmapPanelId][UI_WIDGET_DEF][UI_STATE_DEF] = 1;
 							}
 
 							if (soundn1 >= 2)
@@ -494,8 +479,8 @@ if (smallwindow) {
 					}
 				} // actionbar2
 				// optionbar1
-				else if (hituipaneli == uipaneloptionbar1) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+				else if (hituipaneli == g_UI_OptionBarPanelId) {
+					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
 
 					if (hituiwidgeti > 0) {
 						if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_ENHANCE) {
@@ -561,8 +546,8 @@ if (smallwindow) {
 					}
 				} // optionbar1
 				// actiontalkbar1
-				else if (hituipaneli == uipanelactiontalkbar1) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+				else if (hituipaneli == g_UI_TalkActionBar1PanelId) {
+					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
 
 					if (hituiwidgeti > 0) {
 						if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_NAME) {
@@ -659,8 +644,8 @@ if (smallwindow) {
 					}
 				} // actiontalkbar1
 				// actiontalkbar2
-				else if (hituipaneli == uipanelactiontalkbar2) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+				else if (hituipaneli == g_UI_TalkActionBar2PanelId) {
+					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
 
 					if (hituiwidgeti > 0) {
 						if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_YES) {
@@ -757,8 +742,8 @@ if (smallwindow) {
 					}
 				} // actiontalkbar2
 				// actiontalkbar3
-				else if (hituipaneli == uipanelactiontalkbar3) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+				else if (hituipaneli == g_UI_TalkActionBar3PanelId) {
+					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
 
 					if (hituiwidgeti > 0) {
 						if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_DEPOSIT) {
@@ -855,17 +840,17 @@ if (smallwindow) {
 					}
 				} // actiontalkbar3
 				// partymemberbar1
-				else if (hituipaneli == uipanelpartymemberbar1) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+				else if (hituipaneli == g_UI_PartyMemberBarPanelId) {
+					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
 
 					if (hituiwidgeti > 0) {
 						selectedpartymemberframen1 = hituiwidgeti - 1;
 					}
 				} // partymemberbar1
 				// party member inventory frame
-				else if (hituipaneli == uipanelpartymember0) {
+				else if (hituipaneli == g_UI_PartyMemberPanelId) {
 					// partymemberlock
-					if (testhituipanel(omx3, omy3, uipanelpartymemberlock)) {
+					if (testhituipanel(g_MousePosX, g_MousePosY, g_UI_PartyMemberLockPanelId)) {
 						selectedpartymemberframelock++;
 
 						if (selectedpartymemberframelock > 1)
@@ -1101,8 +1086,8 @@ checkdone:
 // r222 handle mouse click for party[0] (the player avatar) for new resolution mode top-right inventory window
 // r222 we are just simulating the clicking/variables as if it is being performed on the actual inventory in the 1024 res.  the rest is handle by the original 1024 res code/logic.
 if (smallwindow && windowsizecyclenum == 1) {
-	//double multiplierx = (double)resxz / resxo;
-	//double multipliery = (double)resyz / resyo;
+	//double multiplierx = (double)g_WindowResolutionWidth / g_EnhancedClientWindowWidth;
+	//double multipliery = (double)g_WindowResolutionHeight / g_EnhancedClientWindowHeight;
 	
 
 	//if (newmodestatus >= 5) {
@@ -1131,20 +1116,20 @@ if (smallwindow && windowsizecyclenum == 1) {
 	}
 	else {
 		if (hituipaneli < -4)
-			if (testhituipanel(omx3, omy3, uipanelpartymember0))
-				hituipaneli = uipanelpartymember0;
+			if (testhituipanel(g_MousePosX, g_MousePosY, g_UI_PartyMemberPanelId))
+				hituipaneli = g_UI_PartyMemberPanelId;
 
 		for (i = 0; i < partyframenewmax; i++) {
 			party_frame_new[i]->mouse_over = FALSE;
 			//pmf = party_frame[i];
 			pmf = party_frame[selectedpartymemberframen1];
 			
-			//		if ((omx3 >= resxn1m + 3) && (omy3 <= 256))
+			//		if ((g_MousePosX >= g_ScaledClientGameWindowWidth + 3) && (g_MousePosY <= 256))
 
-			// not true anymore --> omx3 and omy3 does not need to be scaled because the (new) top-right inventory window is not scaled at all (it is always the 1024 res scaled-size; i.e. not scaled)
+			// not true anymore --> g_MousePosX and g_MousePosY does not need to be scaled because the (new) top-right inventory window is not scaled at all (it is always the 1024 res scaled-size; i.e. not scaled)
 			//if ((panelmx[0] >= party_frame_new[i]->offset_x) && (panelmx[0] <= party_frame_new[i]->offset_x + pmf->graphic->d.dwWidth)
 				//&& (panelmy[0] >= party_frame_new[i]->offset_y) && (panelmy[0] <= party_frame_new[i]->offset_y + pmf->graphic->d.dwHeight))
-			if (hituipaneli == uipanelpartymember0)
+			if (hituipaneli == g_UI_PartyMemberPanelId)
 				party_frame_new[i]->mouse_over = TRUE;
 			//party_frame[0] = TRUE;
 			if (party_frame_new[i]->mouse_over == TRUE) {
@@ -1175,13 +1160,13 @@ if (smallwindow && windowsizecyclenum == 1) {
 				// simulate/set the position where the mouse is clicked in the inventory window
 				//pmf->mouse_x = panelmx[0] - party_frame_new[i]->offset_x;
 				//pmf->mouse_y = panelmy[0] - party_frame_new[i]->offset_y;
-				pmf->mouse_x = omx3 - uipanelx[uipanelpartymember0][UI_WIDGET_DEF][UI_STATE_DEF];
-				pmf->mouse_y = omy3 - uipanely[uipanelpartymember0][UI_WIDGET_DEF][UI_STATE_DEF];
+				pmf->mouse_x = g_MousePosX - g_UI_PanelX[g_UI_PartyMemberPanelId][UI_WIDGET_DEF][UI_STATE_DEF];
+				pmf->mouse_y = g_MousePosY - g_UI_PanelY[g_UI_PartyMemberPanelId][UI_WIDGET_DEF][UI_STATE_DEF];
 
 				// inverse scaling
 				if (uiscaling) {
-					pmf->mouse_x = pmf->mouse_x / uipanelscalex[uipanelpartymember0][UI_WIDGET_DEF][UI_STATE_DEF];
-					pmf->mouse_y = pmf->mouse_y / uipanelscaley[uipanelpartymember0][UI_WIDGET_DEF][UI_STATE_DEF];
+					pmf->mouse_x = pmf->mouse_x / g_UI_PanelScaleX[g_UI_PartyMemberPanelId][UI_WIDGET_DEF][UI_STATE_DEF];
+					pmf->mouse_y = pmf->mouse_y / g_UI_PanelScaleY[g_UI_PartyMemberPanelId][UI_WIDGET_DEF][UI_STATE_DEF];
 				}
 
 
@@ -2497,7 +2482,7 @@ transferachar_enterkey:
 
 
 
-  static surf *customport;
+  static surface *customport;
 
 
   if (intro==204){//custom portrait
@@ -3025,7 +3010,7 @@ host_minimize_goto:
     }
 
 	// rrr cycle through resolution modes; added the new resolution mode into the cycle
-	if (enhanceclientn1) { // s555
+	if (g_EnhancedClient) { // s555
 		if ((smallwindow == TRUE) && (nodisplay == FALSE)) {
 			windowsizecyclenum++;
 			if (windowsizecyclenum > windowsizecyclemax) {
@@ -3685,8 +3670,8 @@ dglobal:
         inpf2->enterpressed=FALSE;
 
 		// r666 auto set talk text
-		if (actiontalkfilltext) {
-			actiontalkfilltext = 0;
+		if (actionTalkFillText) {
+			actionTalkFillText = 0;
 			txtset(inpf2->input, newt1);
 		}
 
@@ -4567,7 +4552,7 @@ ktarcast:
       CLIENTplayer->key|=KEYmbclick;
 
 	  // s777 set selected party member
-	  if (enhanceclientn1) {
+	  if (g_EnhancedClient) {
 		  //if (tplay->party[x - 1])
 		  if (CLIENTplayer->party[x - 1] != NULL) {
 			  selectedpartymembern1 = x - 1;
@@ -4896,7 +4881,7 @@ dbg1:
           txtright(t,t->l-18);
         }//x4&64
 
-        if (x4&1){//1		name, portriat, str, dex, int, lev, hp_max, mp_max (does not change often)
+        if (x4&1){//1		name, portrait, str, dex, int, lev, hp_max, mp_max (does not change often)
           x=t->d2[0];
           txtNEWLEN(tnpc->name,x);
           memcpy(&tnpc->name->d2[0],&t->d2[1],x);
@@ -4906,9 +4891,9 @@ dbg1:
           tnpc->port=t->ds[0];
           if (i2==0) portlast=tnpc->port;
 
-          tnpc->s=t->ds[1];
-          tnpc->d=t->ds[2];
-          tnpc->i=t->ds[3];
+          tnpc->strength=t->ds[1];
+          tnpc->dexterity=t->ds[2];
+          tnpc->intelligence=t->ds[3];
           tnpc->lev=t->ds[4];
           if ((i2==0)&&(tnpc->lev>1)) U6O_WALKTHRU=FALSE;
           tnpc->hp_max=t->ds[5];
@@ -5060,7 +5045,7 @@ validpage:;
         STATUSMESSadd(t);
 
 		// s222 new sound for status message
-		if (enhanceclientn1) {
+		if (g_EnhancedClient) {
 			playstatusmessagesound = 1;
 
 			// r888 food status
@@ -6129,7 +6114,7 @@ receivenextvolume:
         x2=t->ds[0];
         txtright(t,t->l-2);
 
-        static surf *receiveport=NULL;
+        static surface *receiveport=NULL;
         receiveport=newsurf(56,64,SURF_SYSMEM16);
 
 
@@ -10142,7 +10127,7 @@ skiprefresh2:
         txtout(party_frame[i]->graphic,x+1,y+1,t);
 
         txtset(t,"STR  ");
-        txtnumint(t2,tnpc->s);
+        txtnumint(t2,tnpc->strength);
         txtadd(t,t2);
         x=128-16; y=12+16+18;
         txtcol=rgb(192,126,0);
@@ -10154,7 +10139,7 @@ skiprefresh2:
         txtout(party_frame[i]->graphic,x+1,y+1,t);
 
         txtset(t,"DEX  ");
-        txtnumint(t2,tnpc->d);
+        txtnumint(t2,tnpc->dexterity);
         txtadd(t,t2);
         x=128-16+64+8-4; y=12+16+18;
         txtcol=rgb(192,126,0);
@@ -10166,7 +10151,7 @@ skiprefresh2:
         txtout(party_frame[i]->graphic,x+1,y+1,t);
 
         txtset(t,"INT  ");
-        txtnumint(t2,tnpc->i);
+        txtnumint(t2,tnpc->intelligence);
         txtadd(t,t2);
         x=128-16; y=12+16+18+18;
         txtcol=rgb(192,126,0);
@@ -10633,7 +10618,7 @@ diskip:
 			//img(psnew1b, 1000, 0, intro_startup);
 			//party_frame[i]->offset_x = 4000;
 			//img(psnew1b, party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
-			//img(psnew1b, resxn1m + 3, 300, minimap_frame->graphic);
+			//img(psnew1b, g_ScaledClientGameWindowWidth + 3, 300, minimap_frame->graphic);
 
 			//refresh(psnew1b);
 			//refresh(party_frame[i]->graphic);
@@ -10641,7 +10626,7 @@ diskip:
 			//party_frame[i]->offset_x = 4000;
 			//party_frame[i]->offset_y = 0;
 
-			//party_frame_new[i]->offset_x = resxn1m + 3;
+			//party_frame_new[i]->offset_x = g_ScaledClientGameWindowWidth + 3;
 			//party_frame_new[i]->offset_y = 0;
 
 			//img(psnew1b, party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
@@ -10750,9 +10735,9 @@ diskip:
 //			}
 
 		//minimapdeltax = party_frame_new[0]->offset_x;
-		//minimapdeltay = resyn1w-256-2;
+		//minimapdeltay = g_ScaledClientWindowHeight-256-2;
 
-		//img(psnew1b, party_frame_new[0]->offset_x, resyn1w-256-2, minimap_frame->graphic);
+		//img(psnew1b, party_frame_new[0]->offset_x, g_ScaledClientWindowHeight-256-2, minimap_frame->graphic);
 		//img(psnew1b, minimapdeltax, minimapdeltay, minimap_frame->graphic);
 		//img(psnew1b, minimapdeltax, minimapdeltay, minimap_surf_new);
 
@@ -10761,7 +10746,7 @@ diskip:
 		img(panelsurf[0], minimapnewx, minimapnewy, minimap_surf_new);
 
 			
-		//img0(psnew1b, party_frame_new[0]->offset_x+minimapdeltax, resyn1w-256-2+minimapdeltay, darrow);
+		//img0(psnew1b, party_frame_new[0]->offset_x+minimapdeltax, g_ScaledClientWindowHeight-256-2+minimapdeltay, darrow);
 		//img0(psnew1b, minimapdeltax, minimapdeltay, darrow);
 		//img0(psnew1b, minimapplayerx, minimapplayery, darrow);
 		}
@@ -10787,16 +10772,16 @@ diskip:
 		// r999 new
 		// r999 fill background of panel (solid blue); can be replaced with image/graphics
 		//img(panelsurf[0], statusbar_b255);
-		//img(uipanelsurf[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF], statusbar_b255);
-		//img(psnew1b, uipanelx[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF]);
-		imguip(psnew1b, uipanelsidebar);
+		//img(g_UI_PanelSurface[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF], statusbar_b255);
+		//img(psnew1b, g_UI_PanelX[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF], g_UI_PanelY[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF], g_UI_PanelSurface[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF]);
+		imguip(psnew1b, g_UI_SidebarPanelId);
 		if (uiscaling) {
-			//img(uipanelsurf[uipanelpartymember0][UI_WIDGET_DEF][UI_STATE_DEF], party_frame[0]->graphic);
-			img(uipanelsurf[uipanelpartymember0][UI_WIDGET_DEF][UI_STATE_DEF], party_frame[selectedpartymemberframen1]->graphic);
-			imguip(psnew1b, uipanelpartymember0);
+			//img(g_UI_PanelSurface[g_UI_PartyMemberPanelId][UI_WIDGET_DEF][UI_STATE_DEF], party_frame[0]->graphic);
+			img(g_UI_PanelSurface[g_UI_PartyMemberPanelId][UI_WIDGET_DEF][UI_STATE_DEF], party_frame[selectedpartymemberframen1]->graphic);
+			imguip(psnew1b, g_UI_PartyMemberPanelId);
 		} else
-		//imguip(psnew1b, uipanelpartymember0, party_frame[0]->graphic);
-		imguip(psnew1b, uipanelpartymember0, party_frame[selectedpartymemberframen1]->graphic);
+		//imguip(psnew1b, g_UI_PartyMemberPanelId, party_frame[0]->graphic);
+		imguip(psnew1b, g_UI_PartyMemberPanelId, party_frame[selectedpartymemberframen1]->graphic);
 
 
 		///for (int i = 0; i < partyframenewmax; i++) {
@@ -10804,7 +10789,7 @@ diskip:
 			//img(psnew1b, 1000, 0, intro_startup);
 			//party_frame[i]->offset_x = 4000;
 			//img(psnew1b, party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
-			//img(psnew1b, resxn1m + 3, 300, minimap_frame->graphic);
+			//img(psnew1b, g_ScaledClientGameWindowWidth + 3, 300, minimap_frame->graphic);
 
 			//refresh(psnew1b);
 			//refresh(party_frame[i]->graphic);
@@ -10812,7 +10797,7 @@ diskip:
 			//party_frame[i]->offset_x = 4000;
 			//party_frame[i]->offset_y = 0;
 
-			//party_frame_new[i]->offset_x = resxn1m + 3;
+			//party_frame_new[i]->offset_x = g_ScaledClientGameWindowWidth + 3;
 			//party_frame_new[i]->offset_y = 0;
 
 			//img(psnew1b, party_frame_new[i]->offset_x, party_frame_new[i]->offset_y, party_frame[i]->graphic);
@@ -10825,15 +10810,15 @@ diskip:
 
 		// s777 display party member lock
 		if (selectedpartymemberframelock)
-			imguiw(psnew1b, uipanelpartymemberlock, 1, 2);
+			imguiw(psnew1b, g_UI_PartyMemberLockPanelId, 1, 2);
 		else
-			imguiw(psnew1b, uipanelpartymemberlock, 1, 1);
+			imguiw(psnew1b, g_UI_PartyMemberLockPanelId, 1, 1);
 
 		// s777 display party member bar
-		imguip(psnew1b, uipanelpartymemberbar1);
+		imguip(psnew1b, g_UI_PartyMemberBarPanelId);
 		for (n1i1 = 0; n1i1 < 8; n1i1++) {
 			if (CLIENTplayer->party[n1i1] != NULL) {
-				uipanelhitenable[uipanelpartymemberbar1][n1i1+1][UI_STATE_DEF] = 1;
+				g_UI_PanelClickable[g_UI_PartyMemberBarPanelId][n1i1+1][UI_STATE_DEF] = 1;
 				n1i2 = 1;
 
 				if (n1i1 == selectedpartymembern1)
@@ -10842,25 +10827,25 @@ diskip:
 				if (n1i1 == selectedpartymemberframen1)
 					n1i2++;
 
-				imguiw(psnew1b, uipanelpartymemberbar1, n1i1+1, n1i2);
+				imguiw(psnew1b, g_UI_PartyMemberBarPanelId, n1i1+1, n1i2);
 			} else
-				uipanelhitenable[uipanelpartymemberbar1][n1i1+1][UI_STATE_DEF] = 0;
+				g_UI_PanelClickable[g_UI_PartyMemberBarPanelId][n1i1+1][UI_STATE_DEF] = 0;
 		}
 			
 		// r666 for new mode: display actionbar
-		//img(psnew1b, uipanelx[uipanelactionbar1][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelactionbar1][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelactionbar1][UI_WIDGET_DEF][UI_STATE_DEF]);
-		//img(psnew1b, uipanelx[uipanelactionbar2][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelactionbar2][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelactionbar2][UI_WIDGET_DEF][UI_STATE_DEF]);
-		imguip(psnew1b, uipanelactionbar1);
-		imguip(psnew1b, uipanelactionbar2);
-		imguip(psnew1b, uipaneloptionbar1);
+		//img(psnew1b, g_UI_PanelX[g_UI_ActionBarTopPanelId][UI_WIDGET_DEF][UI_STATE_DEF], g_UI_PanelY[g_UI_ActionBarTopPanelId][UI_WIDGET_DEF][UI_STATE_DEF], g_UI_PanelSurface[g_UI_ActionBarTopPanelId][UI_WIDGET_DEF][UI_STATE_DEF]);
+		//img(psnew1b, g_UI_PanelX[g_UI_ActionBarBottomPanelId][UI_WIDGET_DEF][UI_STATE_DEF], g_UI_PanelY[g_UI_ActionBarBottomPanelId][UI_WIDGET_DEF][UI_STATE_DEF], g_UI_PanelSurface[g_UI_ActionBarBottomPanelId][UI_WIDGET_DEF][UI_STATE_DEF]);
+		imguip(psnew1b, g_UI_ActionBarTopPanelId);
+		imguip(psnew1b, g_UI_ActionBarBottomPanelId);
+		imguip(psnew1b, g_UI_OptionBarPanelId);
 
-		//img(psnew1b, uipanelx[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF]);
-		//img(psnew1b, uipanelx[uipanelactiontalkbar2][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelactiontalkbar2][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelactiontalkbar2][UI_WIDGET_DEF][UI_STATE_DEF]);
-		imguip(psnew1b, uipanelactiontalkbar1);
-		imguip(psnew1b, uipanelactiontalkbar2);
-		imguip(psnew1b, uipanelactiontalkbar3);
+		//img(psnew1b, g_UI_PanelX[g_UI_TalkActionBar1PanelId][UI_WIDGET_DEF][UI_STATE_DEF], g_UI_PanelY[g_UI_TalkActionBar1PanelId][UI_WIDGET_DEF][UI_STATE_DEF], g_UI_PanelSurface[g_UI_TalkActionBar1PanelId][UI_WIDGET_DEF][UI_STATE_DEF]);
+		//img(psnew1b, g_UI_PanelX[g_UI_TalkActionBar2PanelId][UI_WIDGET_DEF][UI_STATE_DEF], g_UI_PanelY[g_UI_TalkActionBar2PanelId][UI_WIDGET_DEF][UI_STATE_DEF], g_UI_PanelSurface[g_UI_TalkActionBar2PanelId][UI_WIDGET_DEF][UI_STATE_DEF]);
+		imguip(psnew1b, g_UI_TalkActionBar1PanelId);
+		imguip(psnew1b, g_UI_TalkActionBar2PanelId);
+		imguip(psnew1b, g_UI_TalkActionBar3PanelId);
 
-		//imguip(psnew1b, uipaneloptioninfo);
+		//imguip(psnew1b, g_UI_OptionInfoPanelId);
 
  		//img(panelnew[panelsideui].graphic, panelnew[panelactionbar1].offset_x, panelnew[panelactionbar1].offset_y, panelnew[panelactionbar1].graphic);
  		//img(panelnew[panelsideui].graphic, panelnew[panelactionbar2].offset_x, panelnew[panelactionbar2].offset_y, panelnew[panelactionbar2].graphic);
@@ -10869,56 +10854,56 @@ diskip:
 		if (foodstatus == 1)
 		//img(psnew1b, actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][1]);
 		//img(panelsurf[0], actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][1]);
-		imguiw(psnew1b, uipanelactionbar2, UI_WIDGET_ACTIONBUTTON_FOOD, 1);
+		imguiw(psnew1b, g_UI_ActionBarBottomPanelId, UI_WIDGET_ACTIONBUTTON_FOOD, 1);
 		else if (foodstatus >= 2)
 		//img(psnew1b, actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][2]);
 		//img(panelsurf[0], actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][2]);
-		imguiw(psnew1b, uipanelactionbar2, UI_WIDGET_ACTIONBUTTON_FOOD, 2);
-		//img(psnew1b, uipanelx[uipanelactionbar2][UI_WIDGET_ACTIONBUTTON_FOOD][UI_STATE_DEF], uipanely[uipanelactionbar2][UI_WIDGET_ACTIONBUTTON_FOOD][UI_STATE_DEF], uipanelsurf[uipanelactionbar2][0][0]);
+		imguiw(psnew1b, g_UI_ActionBarBottomPanelId, UI_WIDGET_ACTIONBUTTON_FOOD, 2);
+		//img(psnew1b, g_UI_PanelX[g_UI_ActionBarBottomPanelId][UI_WIDGET_ACTIONBUTTON_FOOD][UI_STATE_DEF], g_UI_PanelY[g_UI_ActionBarBottomPanelId][UI_WIDGET_ACTIONBUTTON_FOOD][UI_STATE_DEF], g_UI_PanelSurface[g_UI_ActionBarBottomPanelId][0][0]);
 
 		// r777 display proper drop location action button
 		if (setdroplocation)
 			//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][0]);
 			//img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][0]);
-			imguiw(psnew1b, uipanelactionbar1, UI_WIDGET_ACTIONBUTTON_DROP, 1);
+			imguiw(psnew1b, g_UI_ActionBarTopPanelId, UI_WIDGET_ACTIONBUTTON_DROP, 1);
 		else {
 			if (droplocation == 1)
 				//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][1]);
 				//img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][1]);
-				imguiw(psnew1b, uipanelactionbar1, UI_WIDGET_ACTIONBUTTON_DROP, 2);
+				imguiw(psnew1b, g_UI_ActionBarTopPanelId, UI_WIDGET_ACTIONBUTTON_DROP, 2);
 			else if (droplocation == 2)
 				//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][2]);
 				//img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][2]);
-				imguiw(psnew1b, uipanelactionbar1, UI_WIDGET_ACTIONBUTTON_DROP, 3);
+				imguiw(psnew1b, g_UI_ActionBarTopPanelId, UI_WIDGET_ACTIONBUTTON_DROP, 3);
 			else if (droplocation == 3)
 				//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][3]);
 				//img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][3]);
-				imguiw(psnew1b, uipanelactionbar1, UI_WIDGET_ACTIONBUTTON_DROP, 4);
+				imguiw(psnew1b, g_UI_ActionBarTopPanelId, UI_WIDGET_ACTIONBUTTON_DROP, 4);
 			else if (droplocation == 4)
 				//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][4]);
 				//img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][4]);
-				imguiw(psnew1b, uipanelactionbar1, UI_WIDGET_ACTIONBUTTON_DROP, 5);
+				imguiw(psnew1b, g_UI_ActionBarTopPanelId, UI_WIDGET_ACTIONBUTTON_DROP, 5);
 		}
 
 		// r999 new actionbar2 states
 		if (showworldmapn1 > 0) { // s444 worldmap action button
-			imguiw(psnew1b, uipanelactionbar2, UI_WIDGET_ACTIONBUTTON_WORLDMAP, showworldmapn1);
-			//img0(psnew1b, uipanelx[uipanelactionbar2][UI_WIDGET_ACTIONBUTTON_WORLDMAP][UI_STATE_DEF], uipanely[uipanelactionbar2][UI_WIDGET_ACTIONBUTTON_WORLDMAP][UI_STATE_DEF], uiwidgetimgsurf[UI_IMGI_WIDGET + 13][1]);
+			imguiw(psnew1b, g_UI_ActionBarBottomPanelId, UI_WIDGET_ACTIONBUTTON_WORLDMAP, showworldmapn1);
+			//img0(psnew1b, g_UI_PanelX[g_UI_ActionBarBottomPanelId][UI_WIDGET_ACTIONBUTTON_WORLDMAP][UI_STATE_DEF], g_UI_PanelY[g_UI_ActionBarBottomPanelId][UI_WIDGET_ACTIONBUTTON_WORLDMAP][UI_STATE_DEF], uiwidgetimgsurf[UI_IMGI_WIDGET + 13][1]);
 		}
 
 		if (combatinfo > 0)
-		imguiw(psnew1b, uipanelactionbar2, UI_WIDGET_ACTIONBUTTON_COMBATLOG, combatinfo);
+		imguiw(psnew1b, g_UI_ActionBarBottomPanelId, UI_WIDGET_ACTIONBUTTON_COMBATLOG, combatinfo);
 
 		// r999 new optionbar1 states
 		if (enhancen1 > 0) {
-			imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_ENHANCE, enhancen1);
+			imguiw(psnew1b, g_UI_OptionBarPanelId, UI_WIDGET_OPTIONBUTTON_ENHANCE, enhancen1);
 		}
 
 		if (soundn1 > 0)
-		imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_SOUND, soundn1);
+		imguiw(psnew1b, g_UI_OptionBarPanelId, UI_WIDGET_OPTIONBUTTON_SOUND, soundn1);
 
 		if (combatsoundn1 > 0)
-		imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_COMBATSOUND, combatsoundn1);
+		imguiw(psnew1b, g_UI_OptionBarPanelId, UI_WIDGET_OPTIONBUTTON_COMBATSOUND, combatsoundn1);
 
 		// r444 for new mode: display minimap
 //			if(peer) {
@@ -10976,9 +10961,9 @@ diskip:
 //			}
 
 		//minimapdeltax = party_frame_new[0]->offset_x;
-		//minimapdeltay = resyn1w-256-2;
+		//minimapdeltay = g_ScaledClientWindowHeight-256-2;
 
-		//img(psnew1b, party_frame_new[0]->offset_x, resyn1w-256-2, minimap_frame->graphic);
+		//img(psnew1b, party_frame_new[0]->offset_x, g_ScaledClientWindowHeight-256-2, minimap_frame->graphic);
 		//img(psnew1b, minimapdeltax, minimapdeltay, minimap_frame->graphic);
 		//img(psnew1b, minimapdeltax, minimapdeltay, minimap_surf_new);
 
@@ -10999,15 +10984,15 @@ diskip:
 		img0(minimap_surf_new, minimapplayerx+minimapdeltax, minimapplayery+minimapdeltay, darrow);
 		//img(panelsurf[0], minimapnewx, minimapnewy, minimap_surf_new);
 		if (uiscaling) {
-			img(uipanelsurf[uipanelminimap][UI_WIDGET_DEF][UI_STATE_DEF], minimap_surf_new);
-			imguip(psnew1b, uipanelminimap);
+			img(g_UI_PanelSurface[g_UI_MinimapPanelId][UI_WIDGET_DEF][UI_STATE_DEF], minimap_surf_new);
+			imguip(psnew1b, g_UI_MinimapPanelId);
 		} else
-			imguip(psnew1b, uipanelminimap);
+			imguip(psnew1b, g_UI_MinimapPanelId);
 
-		imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_MINIMAP, 1);
+		imguiw(psnew1b, g_UI_OptionBarPanelId, UI_WIDGET_OPTIONBUTTON_MINIMAP, 1);
 
 			
-		//img0(psnew1b, party_frame_new[0]->offset_x+minimapdeltax, resyn1w-256-2+minimapdeltay, darrow);
+		//img0(psnew1b, party_frame_new[0]->offset_x+minimapdeltax, g_ScaledClientWindowHeight-256-2+minimapdeltay, darrow);
 		//img0(psnew1b, minimapdeltax, minimapdeltay, darrow);
 		//img0(psnew1b, minimapplayerx, minimapplayery, darrow);
 		}
@@ -11015,26 +11000,26 @@ diskip:
 		// r999 hover
 		if (uihover) {
 			if (hituipaneli < -4)
-				hituipaneli = gethituipaneli(omx3, omy3);
+				hituipaneli = gethituipaneli(g_MousePosX, g_MousePosY);
 
-			if ((hituipaneli == uipanelactionbar1) || (hituipaneli == uipanelactionbar2) || (hituipaneli == uipaneloptionbar1)) {
+			if ((hituipaneli == g_UI_ActionBarTopPanelId) || (hituipaneli == g_UI_ActionBarBottomPanelId) || (hituipaneli == g_UI_OptionBarPanelId)) {
 				if (hituiwidgeti < 0)
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
 
 				if (hituiwidgeti > 0)
-					img0(psnew1b, uipanelx[hituipaneli][hituiwidgeti][UI_STATE_DEF], uipanely[hituipaneli][hituiwidgeti][UI_STATE_DEF], uihoveractionbuttonsurf);
-			} else if ((hituipaneli == uipanelactiontalkbar1) || (hituipaneli == uipanelactiontalkbar2) || (hituipaneli == uipanelactiontalkbar3)) {
+					img0(psnew1b, g_UI_PanelX[hituipaneli][hituiwidgeti][UI_STATE_DEF], g_UI_PanelY[hituipaneli][hituiwidgeti][UI_STATE_DEF], uihoveractionbuttonsurf);
+			} else if ((hituipaneli == g_UI_TalkActionBar1PanelId) || (hituipaneli == g_UI_TalkActionBar2PanelId) || (hituipaneli == g_UI_TalkActionBar3PanelId)) {
 				if (hituiwidgeti < 0)
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
 
 				if (hituiwidgeti > 0)
-					img0(psnew1b, uipanelx[hituipaneli][hituiwidgeti][UI_STATE_DEF], uipanely[hituipaneli][hituiwidgeti][UI_STATE_DEF], uihoveractiontalkbuttonsurf);
-			} else if ((hituipaneli == uipanelpartymemberbar1)) {
+					img0(psnew1b, g_UI_PanelX[hituipaneli][hituiwidgeti][UI_STATE_DEF], g_UI_PanelY[hituipaneli][hituiwidgeti][UI_STATE_DEF], uihoveractiontalkbuttonsurf);
+			} else if ((hituipaneli == g_UI_PartyMemberBarPanelId)) {
 				if (hituiwidgeti < 0)
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
 
 				if (hituiwidgeti > 0)
-					img0(psnew1b, uipanelx[hituipaneli][hituiwidgeti][UI_STATE_DEF], uipanely[hituipaneli][hituiwidgeti][UI_STATE_DEF], uihoverpartymemberbuttonsurf);
+					img0(psnew1b, g_UI_PanelX[hituipaneli][hituiwidgeti][UI_STATE_DEF], g_UI_PanelY[hituipaneli][hituiwidgeti][UI_STATE_DEF], uihoverpartymemberbuttonsurf);
 			}
 		}
 
@@ -11043,7 +11028,7 @@ diskip:
 		//img(psnew1b, panelnew[panelsideui].offset_x, panelnew[panelsideui].offset_y, panelnew[panelsideui].graphic);
 		//img(psnew1b, panelnew[panelminimap].offset_x, panelnew[panelminimap].offset_y,panelnew[panelminimap].graphic);
 		//img(psnew1b, panelx[0], panely[0], panelsurf[0]);
-		//img(psnew1b, uipanelx[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF]);
+		//img(psnew1b, g_UI_PanelX[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF], g_UI_PanelY[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF], g_UI_PanelSurface[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF]);
 
 	}
 
@@ -11920,10 +11905,10 @@ endgame_donemessage:
     getspr(CLIENTplayer->mobj);
     img0(ps,mx-16,my-16,bt32);
 
-	// use omx3, omy3 to display object on mouse cursor (onto new mode surface) for new mode.
+	// use g_MousePosX, g_MousePosY to display object on mouse cursor (onto new mode surface) for new mode.
 	if (smallwindow && windowsizecyclenum == 1) {
-		if ( (omx3 > resxn1m) || (omy3 > resyn1m) )
-			img0(psnew1b, omx3 - 16, omy3 - 16, bt32);
+		if ( (g_MousePosX > g_ScaledClientGameWindowWidth) || (g_MousePosY > g_ScaledClientGameWindowHeight) )
+			img0(psnew1b, g_MousePosX - 16, g_MousePosY - 16, bt32);
 	}
 
 //    if (keyon[VK_SPACE]) {

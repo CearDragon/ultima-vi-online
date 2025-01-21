@@ -18,6 +18,7 @@
 
 #ifdef CONSOLE
 #include <conio.h>
+
 #endif
 
 /* define these in the project, as it also ties in with what to link
@@ -442,7 +443,7 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 		//create 1024x768 window with title bar
 		// rrr can't change this; it will be broken
 //		clrect.top=0; clrect.left=0; clrect.bottom=768; clrect.right=1024;
-		clrect.top = 0; clrect.left = 0; clrect.bottom = resyo; clrect.right = resxo;
+		clrect.top = 0; clrect.left = 0; clrect.bottom = g_EnhancedClientWindowHeight; clrect.right = g_EnhancedClientWindowWidth;
 		AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,FALSE);
 		hWnd2 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,
 			0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
@@ -453,16 +454,16 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 			0, 0, 1024, 768, NULL, NULL, hInstance, NULL);
 	}
 
-	clrect.top=0; clrect.left=0; clrect.bottom= resys; clrect.right= resxs;
+	clrect.top=0; clrect.left=0; clrect.bottom= g_BaseClientWindowHeight; clrect.right= g_BaseClientWindowWidth;
 	AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,FALSE);
 
 	hWnd3 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,
 		0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
 
-	// rrr moved to newmodeinit
+	// rrr moved to newModeInit
 	/*
 	static RECT clrect;
-	clrect.top = 0; clrect.left = 0; clrect.bottom = resyn1w; clrect.right = resxn1w;
+	clrect.top = 0; clrect.left = 0; clrect.bottom = g_ScaledClientWindowHeight; clrect.right = g_ScaledClientWindowWidth;
 	AdjustWindowRect(&clrect, WS_OVERLAPPED | WS_CAPTION | WS_BORDER, FALSE);
 
 	hWnd4 = CreateWindow(szWindowClass, window_name, WS_OVERLAPPED | WS_CAPTION | WS_BORDER,

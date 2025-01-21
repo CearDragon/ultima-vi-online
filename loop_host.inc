@@ -1067,9 +1067,9 @@ newpassword_unavailable:
                 txtset(t,"??"); t->ds[0]=tnpc->hp_max; txtadd(t4,t);
                 txtset(t,"??"); t->ds[0]=tnpc->mp; txtadd(t4,t);
                 txtset(t,"??"); t->ds[0]=tnpc->mp_max; txtadd(t4,t);
-                txtset(t,"??"); t->ds[0]=tnpc->s; txtadd(t4,t);
-                txtset(t,"??"); t->ds[0]=tnpc->d; txtadd(t4,t);
-                txtset(t,"??"); t->ds[0]=tnpc->i; txtadd(t4,t);
+                txtset(t,"??"); t->ds[0]=tnpc->strength; txtadd(t4,t);
+                txtset(t,"??"); t->ds[0]=tnpc->dexterity; txtadd(t4,t);
+                txtset(t,"??"); t->ds[0]=tnpc->intelligence; txtadd(t4,t);
                 txtset(t,"????"); t->dl[0]=tnpc->exp;
 
 
@@ -3733,22 +3733,22 @@ addnewpartymember:
     tnpc->hp_max=t4->ds[0]; txtright(t4,t4->l-2);
     tnpc->mp=t4->ds[0]; txtright(t4,t4->l-2);
     tnpc->mp_max=t4->ds[0]; txtright(t4,t4->l-2);
-    tnpc->s=t4->ds[0]; txtright(t4,t4->l-2);
-    tnpc->d=t4->ds[0]; txtright(t4,t4->l-2);
-    tnpc->i=t4->ds[0]; txtright(t4,t4->l-2);
+    tnpc->strength=t4->ds[0]; txtright(t4,t4->l-2);
+    tnpc->dexterity=t4->ds[0]; txtright(t4,t4->l-2);
+    tnpc->intelligence=t4->ds[0]; txtright(t4,t4->l-2);
     tnpc->exp=t4->dl[0]; txtright(t4,t4->l-4);
     tnpc->lev=t4->ds[0]; txtright(t4,t4->l-2);
     tnpc->flags=t4->d2[0]; txtright(t4,t4->l-1);
 
 
-    tnpc->wt=0; tnpc->wt_max=tnpc->s*4*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+    tnpc->wt=0; tnpc->wt_max=tnpc->strength*4*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 
     if (playerlist[tpl]->party[1]){//if set, not primary partymember
-      tnpc->mp_max=get_mp_max(tnpc->i);
+      tnpc->mp_max=get_mp_max(tnpc->intelligence);
       //tnpc->wt_max/=2;//halve wt_max for non-primary partymember
-      tnpc->wt_max=tnpc->s*3*100;
+      tnpc->wt_max=tnpc->strength*3*100;
     }else{
-      tnpc->mp_max=tnpc->i*2;
+      tnpc->mp_max=tnpc->intelligence*2;
     }
 
     if (save_version==1) goto sv1_objects;
@@ -4643,7 +4643,7 @@ save_createcharacter: //new player
     txtset(tnpc->name,tname);
     tnpc->lev=1; tnpc->exp=370; //same as in original, incentive not to die!
     tnpc->hp=30; tnpc->hp_max=30;
-    tnpc->s=0; tnpc->d=0; tnpc->i=0;
+    tnpc->strength=0; tnpc->dexterity=0; tnpc->intelligence=0;
     x=-1;
     x++; if (t6->d[x]==0) {U6O_HONESTY} else {U6O_COMPASSION} //i3,d3
     x++; if (t6->d[x]==0) {U6O_HONESTY} else {U6O_VALOR} //i3,s3
@@ -4673,18 +4673,18 @@ save_createcharacter: //new player
     x++; if (t6->d[x]==0) {U6O_HONOR} else {U6O_SPIRITUALITY} //X,a1
     x++; if (t6->d[x]==0) {U6O_HONOR} else {U6O_HUMILITY} //OK,X
     x++; if (t6->d[x]==0) {U6O_SPIRITUALITY} else {U6O_HUMILITY} //a1,X
-    x=tnpc->s-8; if (x<1) x=1; tnpc->s=x;
-    x=tnpc->d-8; if (x<1) x=1; tnpc->d=x;
-    x=tnpc->i-8; if (x<1) x=1; tnpc->i=x;
-    tnpc->mp=tnpc->i*2; tnpc->mp_max=tnpc->i*2;
-    tnpc->wt=0; tnpc->wt_max=tnpc->s*4*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+    x=tnpc->strength-8; if (x<1) x=1; tnpc->strength=x;
+    x=tnpc->dexterity-8; if (x<1) x=1; tnpc->dexterity=x;
+    x=tnpc->intelligence-8; if (x<1) x=1; tnpc->intelligence=x;
+    tnpc->mp=tnpc->intelligence*2; tnpc->mp_max=tnpc->intelligence*2;
+    tnpc->wt=0; tnpc->wt_max=tnpc->strength*4*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 
     //Debug new players get high stats, gold, exp, all spells, 
     if (U6O_DEBUG){
       tnpc->lev=6;
       tnpc->exp=410000;
-      tnpc->s=tnpc->s+3; tnpc->d=tnpc->d+3; tnpc->i=tnpc->i+18;
-      tnpc->wt=0; tnpc->wt_max=tnpc->s*4*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+      tnpc->strength=tnpc->strength+3; tnpc->dexterity=tnpc->dexterity+3; tnpc->intelligence=tnpc->intelligence+18;
+      tnpc->wt=0; tnpc->wt_max=tnpc->strength*4*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
       //tnpc->mp_max=640; tnpc->mp=640;
       tnpc->hp_max=180; tnpc->hp=180;
       for (x=0;x<=9;x++){
@@ -4856,7 +4856,7 @@ save_restored:
     //if (tpl==0){
     //if (U6O_DEBUG){
     //tnpc->lev=8;
-    //tnpc->s=64; tnpc->d=64; tnpc->i=64;
+    //tnpc->strength=64; tnpc->dexterity=64; tnpc->intelligence=64;
     //tnpc->mp_max=255; tnpc->mp=255;
     //tnpc->hp_max=255; tnpc->hp=255;
     //playerlist[tpl]->GNPCflags[6]=0;
@@ -6711,17 +6711,17 @@ ifkey_next:
           txtset(t2,"ambidextrous!"); //ambidextrous (FIX: M'sieur Loubet training +1 DEX)
           if (txtsearch(inouttxt2,t2)){
             tnpc2=(npc*)tplayer->party[0]->more;
-            tnpc2->d++;
+            tnpc2->dexterity++;
             tnpc2->upflags|=1;
           }
 
 insert_txt:
 
           /*
-          if ((tnpc->i>=tnpc->s)&&(tnpc->i>=tnpc->d)) myobj->type=378; //i
-          if ((tnpc->d>=tnpc->s)&&(tnpc->d>=tnpc->i)) myobj->type=386; //d
-          if ((tnpc->s>=tnpc->d)&&(tnpc->s>=tnpc->i)) myobj->type=376; //s
-          if ((tnpc->i>tnpc->s)&&(tnpc->d>tnpc->s))  myobj->type=377; //i+d
+          if ((tnpc->intelligence>=tnpc->strength)&&(tnpc->intelligence>=tnpc->dexterity)) myobj->type=378; //i
+          if ((tnpc->dexterity>=tnpc->strength)&&(tnpc->dexterity>=tnpc->intelligence)) myobj->type=386; //d
+          if ((tnpc->strength>=tnpc->dexterity)&&(tnpc->strength>=tnpc->intelligence)) myobj->type=376; //s
+          if ((tnpc->intelligence>tnpc->strength)&&(tnpc->dexterity>tnpc->strength))  myobj->type=377; //i+d
 
           txtset(t2,"$NAME"); //$NAME
           if (x2=txtsearch(inouttxt2,t2)){
@@ -6745,7 +6745,7 @@ insert_txt:
             txtset(t3,inouttxt2); txtright(t3,inouttxt2->l-x2-4);
             //assume +3 per level, anything above min threshold costs double!!!
             x2=37+3*CONnpc2->lev;
-            if ((CONnpc2->s+CONnpc2->d+CONnpc2->i)>x2) txtadd(t2,"24"); else txtadd(t2,"8");
+            if ((CONnpc2->strength+CONnpc2->dexterity+CONnpc2->intelligence)>x2) txtadd(t2,"24"); else txtadd(t2,"8");
             txtadd(t2,t3);
             txtset(inouttxt2,t2);
             goto insert_txt;
@@ -6756,11 +6756,11 @@ insert_txt:
             txtset(t2,inouttxt2); txtleft(t2,x2-1);
             txtset(t3,inouttxt2); txtright(t3,inouttxt2->l-x2-3);
             txtadd(t2,"(str:");
-            txtnumint(t4,CONnpc2->s); txtadd(t2,t4);
+            txtnumint(t4,CONnpc2->strength); txtadd(t2,t4);
             txtadd(t2,", dex:");
-            txtnumint(t4,CONnpc2->d); txtadd(t2,t4);
+            txtnumint(t4,CONnpc2->dexterity); txtadd(t2,t4);
             txtadd(t2,", int:");
-            txtnumint(t4,CONnpc2->i); txtadd(t2,t4);
+            txtnumint(t4,CONnpc2->intelligence); txtadd(t2,t4);
             txtadd(t2,")");
             txtadd(t2,t3);
             txtset(inouttxt2,t2);
@@ -6772,13 +6772,13 @@ insert_txt:
             txtset(t2,inouttxt2); txtleft(t2,x2-1);
             txtset(t3,inouttxt2); txtright(t3,inouttxt2->l-x2-5);
             txtset(t4,"ranger");
-            if ((CONnpc2->i>CONnpc2->s)&&(CONnpc2->i>CONnpc2->d)) {txtset(t4,"mage"); goto gotclass;}
-            if ((CONnpc2->d>CONnpc2->s)&&(CONnpc2->d>CONnpc2->i)) {txtset(t4,"bard"); goto gotclass;}
-            if ((CONnpc2->s>CONnpc2->d)&&(CONnpc2->s>CONnpc2->i)) {txtset(t4,"fighter"); goto gotclass;}
-            if ((CONnpc2->s>CONnpc2->d)&&(CONnpc2->i>CONnpc2->d)) {txtset(t4,"paladin"); goto gotclass;}
-            if ((CONnpc2->s>CONnpc2->i)&&(CONnpc2->d>CONnpc2->i)) {txtset(t4,"tinker"); goto gotclass;}
-            if ((CONnpc2->d>CONnpc2->s)&&(CONnpc2->i>CONnpc2->s)) {txtset(t4,"druid"); goto gotclass;}
-            x2=CONnpc2->s+CONnpc2->d+CONnpc2->i;
+            if ((CONnpc2->intelligence>CONnpc2->strength)&&(CONnpc2->intelligence>CONnpc2->dexterity)) {txtset(t4,"mage"); goto gotclass;}
+            if ((CONnpc2->dexterity>CONnpc2->strength)&&(CONnpc2->dexterity>CONnpc2->intelligence)) {txtset(t4,"bard"); goto gotclass;}
+            if ((CONnpc2->strength>CONnpc2->dexterity)&&(CONnpc2->strength>CONnpc2->intelligence)) {txtset(t4,"fighter"); goto gotclass;}
+            if ((CONnpc2->strength>CONnpc2->dexterity)&&(CONnpc2->intelligence>CONnpc2->dexterity)) {txtset(t4,"paladin"); goto gotclass;}
+            if ((CONnpc2->strength>CONnpc2->intelligence)&&(CONnpc2->dexterity>CONnpc2->intelligence)) {txtset(t4,"tinker"); goto gotclass;}
+            if ((CONnpc2->dexterity>CONnpc2->strength)&&(CONnpc2->intelligence>CONnpc2->strength)) {txtset(t4,"druid"); goto gotclass;}
+            x2=CONnpc2->strength+CONnpc2->dexterity+CONnpc2->intelligence;
             if (x2<=52) txtset(t4,"shepard");
 gotclass:
             /*
@@ -7481,15 +7481,15 @@ leavefinished:
               tnpc3->lev++;
               tnpc3->upflags|=1;
               tnpc3->hp_max=tnpc3->lev*30;
-              tnpc3->s+=npcbin[x].l2; tnpc3->d+=npcbin[x].l3; tnpc3->i+=npcbin[x].l4;
-              tnpc3->wt_max=tnpc3->s*4*100;
-              tnpc3->wt2_max=tnpc3->s*50;
+              tnpc3->strength+=npcbin[x].l2; tnpc3->dexterity+=npcbin[x].l3; tnpc3->intelligence+=npcbin[x].l4;
+              tnpc3->wt_max=tnpc3->strength*4*100;
+              tnpc3->wt2_max=tnpc3->strength*50;
               if (CONpartymember==1){
-                tnpc3->mp_max=tnpc3->i*2;
+                tnpc3->mp_max=tnpc3->intelligence*2;
               }else{
-                tnpc3->mp_max=get_mp_max(tnpc3->i);
+                tnpc3->mp_max=get_mp_max(tnpc3->intelligence);
                 //tnpc3->wt_max/=2;//halve wt_max for non-primary partymember
-                tnpc3->wt_max=tnpc3->s*3*100;
+                tnpc3->wt_max=tnpc3->strength*3*100;
               }
               CONerr=0;
               inbritanniacheck();
@@ -9478,7 +9478,7 @@ already_paralyzed:
                         x3-=x5/4; if (x3<0) x3=0; //npc armour!
 
                         //repel!
-                        //if (target_struct==2) x5=rnd*tnpc->i; else x5=rnd*(obji[sprlnk[crt->target->type&1023]].v7&255);
+                        //if (target_struct==2) x5=rnd*tnpc->intelligence; else x5=rnd*(obji[sprlnk[crt->target->type&1023]].v7&255);
                         //x6=rnd*(32+4*5);
                         //if (x5>=x6) x3=0;
                         if (x3){
@@ -9534,7 +9534,7 @@ already_paralyzed:
                         x3-=x5/4; if (x3<0) x3=0; //npc armour!
 
                         //repel!
-                        //if (target_struct==2) x5=rnd*tnpc->i; else x5=rnd*(obji[sprlnk[crt->target->type&1023]].v7&255);
+                        //if (target_struct==2) x5=rnd*tnpc->intelligence; else x5=rnd*(obji[sprlnk[crt->target->type&1023]].v7&255);
                         //x6=rnd*(32+4*2);
                         //if (x5>=x6) x3=0;
 
@@ -9586,7 +9586,7 @@ already_paralyzed:
                         x3-=x5/4; if (x3<0) x3=0; //npc armour!
 
                         //repel!
-                        //if (target_struct==2) x5=rnd*tnpc->i; else x5=rnd*(obji[sprlnk[crt->target->type&1023]].v7&255);
+                        //if (target_struct==2) x5=rnd*tnpc->intelligence; else x5=rnd*(obji[sprlnk[crt->target->type&1023]].v7&255);
                         //x6=rnd*(32+4*3);
                         //if (x5>=x6) x3=0;
 
@@ -9678,7 +9678,7 @@ crtcantcast:
 
                     //generate 2 random numbers
                     //m is 0-31
-                    //d is 0-tnpc->d
+                    //d is 0-tnpc->dexterity
                     //if d is larger than m you dodged the attack
 
                     //if you have 32 dex you'll dodge half attacks on average
@@ -9690,7 +9690,7 @@ crtcantcast:
 
                     x7=rnd*32; //0-127
 
-                    if (target_struct==2) x8=rnd*(tnpc->d+1); else x8=rnd*((obji[sprlnk[crt->target->type&1023]].v6>>8)+1);
+                    if (target_struct==2) x8=rnd*(tnpc->dexterity+1); else x8=rnd*((obji[sprlnk[crt->target->type&1023]].v6>>8)+1);
 
 
                     //if (int(rnd*32)<=int(rnd*((obji[sprlnk[myobj2->type&1023]].v6>>8)+1))){
@@ -10113,12 +10113,12 @@ npcactiondone:
 
               //$rate$
               //x2=37+3*CONnpc2->lev;
-              //if ((CONnpc2->s+CONnpc2->d+CONnpc2->i)>x2) txtadd(t2,"16"); else txtadd(t2,"8");
+              //if ((CONnpc2->strength+CONnpc2->dexterity+CONnpc2->intelligence)>x2) txtadd(t2,"16"); else txtadd(t2,"8");
               //deduct gold
 
               //1day=1hour of real time
               if (tnpc->converse==201){
-                if ((tnpc->s+tnpc->d+tnpc->i)>(37+3*tnpc->lev)) f=24.0f; else f=8.0f;
+                if ((tnpc->strength+tnpc->dexterity+tnpc->intelligence)>(37+3*tnpc->lev)) f=24.0f; else f=8.0f;
                 f=4096.0f/f; if (int((ett/f))!=int((ett/f)-(et/f))){
                   x5=OBJlist((object*)tnpc->items->more); //x5=last object number
                   for (x6=0;x6<=7;x6++){ if (tplayer->party[x6]){
@@ -10433,13 +10433,13 @@ poisonremoved:
 
 
               //add mp
-              //x3=rnd*(32+(tnpc->i>>1)); //int can only double spell effectiveness!
+              //x3=rnd*(32+(tnpc->intelligence>>1)); //int can only double spell effectiveness!
 
               //NEWCODE
-              if ((float)tnpc->i/4.0 >= 32.0) {
+              if ((float)tnpc->intelligence/4.0 >= 32.0) {
                 f=0.05f;
               }else {
-                f=32.0f-((float)tnpc->i/4.0f);
+                f=32.0f-((float)tnpc->intelligence/4.0f);
 
               }
               if (int((ett/f))!=int((ett/f)-(et/f))) {
@@ -10618,8 +10618,8 @@ skipinvisrings:
 
                 //make fighters (high STR players) heal faster using food
                 //STR 16 is same, STR 48 is double
-                if (tnpc->s>16){
-                  f2=tnpc->s;
+                if (tnpc->strength>16){
+                  f2=tnpc->strength;
                   f2=(f2-16.0f)/4.0f;
                   f-=f2;
                 }
@@ -11102,7 +11102,7 @@ doneswap2:
                     goto NPC_skip1;
                   } //door
 
-                  //f=(float)tnpc->d/64.0f; if (f>1.0f) f=1.0f;
+                  //f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
                   //tnpc->wait_walk+=(0.25f-0.0625f-f*0.125f);
 
                   //npc walk speed
@@ -11657,7 +11657,7 @@ slidemove:
                       goto wait_override;
                     }
 
-                    f=(float)tnpc->d/64.0f; if (f>1.0f) f=1.0f;
+                    f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
                     //f=(0.25f-0.0625f-f*0.125f); //pre Mar
                     f=(0.25f-0.0625f-f*0.125f);
                     f=f*0.875f;
@@ -11665,11 +11665,11 @@ slidemove:
                     tnpc->wait_walk+=f;
 
                     //if (selected_partymember){
-                    //f=(float)tnpc->d/64.0f; if (f>1.0f) f=1.0f;
+                    //f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
                     //tnpc->wait_walk+=(0.25f-0.0625f-f*0.125f);
                     //}else{
                     ////tnpc->wait_walk+=(0.0625f+(rnd*0.125f));
-                    //f=(float)tnpc->d/64.0f; if (f>1.0f) f=1.0f;
+                    //f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
                     //tnpc->wait_walk+=(0.25f-0.0625f-f*0.125f);
                     //}
 
@@ -11970,7 +11970,7 @@ doneswap:
                               sf[i3].wait=1.0f; //NULL
                               sf[i3].more=1;
 
-                              f=(float)tnpc->d/64.0f; if (f>1.0f) f=1.0f;
+                              f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
                               tnpc->wait_walk+=(0.25f-0.0625f-f*0.125f);
                               tnpc->pathn++; //failed to move
                               goto donemove;
@@ -12120,7 +12120,7 @@ npcattack2hnd:
                 if (tplayer->craft==NULL) OBJdir(myobj,myobj2->x,myobj2->y);
 
                 //add wait
-                f=(float)tnpc->d/64.0f; if (f>1.0f) f=1.0f;
+                f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
                 f=2.0f-(f*0.25f);
                 tnpc->wait_attack+=f;
 
@@ -12558,7 +12558,7 @@ crossbow0:
                         x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
 
                         //drop it by accident?
-                        x8=rnd*(tnpc->d+1);
+                        x8=rnd*(tnpc->dexterity+1);
                         if (x8==0){
                           if (x3==0) tnpc->wep_right=NULL; //right hand weapon
                           if (x3==1) tnpc->wep_left=NULL; //left hand weapon
@@ -12824,7 +12824,7 @@ skip_hth2: //skipped other weapon types, projectile weapon
 
                     //miss?
                     if (x){ //can do damage
-                      x7=rnd*(tnpc->d+1);
+                      x7=rnd*(tnpc->dexterity+1);
                       x8=rnd*16; /* this should be dependant on target being attacked I think and with some weapons it should be easier to hit (ranged weapons need higher dex and heavy melee weapons lower) */
                       if (x7<x8) {
                         x=0; miss=1;
@@ -12857,7 +12857,7 @@ skip_hth2: //skipped other weapon types, projectile weapon
 
                         if (triplecrossbow_shot){
                           if (tnpc->wait_attack||tnpc->wait_disable) goto skipnpcattack;
-                          f=(float)tnpc->d/64.0f; if (f>1.0f) f=1.0f;
+                          f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
                           tnpc->wait_attack+=2.0-(f*0.25f);
                           goto triplecrossbow_miss;
                         }
@@ -12904,7 +12904,7 @@ skip_hth1:;
 
                 if (tplayer->craft==NULL) OBJdir(myobj,myobj2->x,myobj2->y);
 
-                f=(float)tnpc->d/64.0f; if (f>1.0f) f=1.0f;
+                f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
                 f=2.0f-(f*0.25f);
                 if (spikedhelm_attack){
                   if (x&&x9) f*=1.25f; else f*=1.125f;
@@ -13056,21 +13056,21 @@ slimedivide_failed:;
 
                     f=x; //default (unclassified) bonus
                     //OLD VALUES
-                    //if (wep_dt[i3]==1) f=(float)x/32.0f*(float)tnpc->s; //100% STR
-                    //if (wep_dt[i3]==2) f=(float)x/32.0f*(((float)tnpc->s/2.0f)+((float)tnpc->d/2.0f)); //50% STR + 50% DEX
-                    //if (wep_dt[i3]==3) f=(float)x/32.0f*((float)tnpc->d*2.0f); //200% DEX (bows, crossbows)
-                    if (wep_dt[i3]==1) f=(float)x/32.0f*((float)tnpc->s+(float)tnpc->d*0.25f);//STR*100%+DEX*25%
-                    if (wep_dt[i3]==2) f=(float)x/32.0f*((float)tnpc->d*0.75f+(float)tnpc->s*0.25f);//DEX*75%+STR*25%
-                    if (wep_dt[i3]==3) f=(float)x/32.0f*((float)tnpc->d*1.75f);//DEX*175%
+                    //if (wep_dt[i3]==1) f=(float)x/32.0f*(float)tnpc->strength; //100% STR
+                    //if (wep_dt[i3]==2) f=(float)x/32.0f*(((float)tnpc->strength/2.0f)+((float)tnpc->dexterity/2.0f)); //50% STR + 50% DEX
+                    //if (wep_dt[i3]==3) f=(float)x/32.0f*((float)tnpc->dexterity*2.0f); //200% DEX (bows, crossbows)
+                    if (wep_dt[i3]==1) f=(float)x/32.0f*((float)tnpc->strength+(float)tnpc->dexterity*0.25f);//STR*100%+DEX*25%
+                    if (wep_dt[i3]==2) f=(float)x/32.0f*((float)tnpc->dexterity*0.75f+(float)tnpc->strength*0.25f);//DEX*75%+STR*25%
+                    if (wep_dt[i3]==3) f=(float)x/32.0f*((float)tnpc->dexterity*1.75f);//DEX*175%
                     if (wep_dt[i3]==4){
                       //DEX*100% or STR*100%, whichever is lower
-                      if (tnpc->s<=tnpc->d){
-                        f=(float)x/32.0f*( (float)tnpc->s + ((float)tnpc->d-(float)tnpc->s)*0.25f );
+                      if (tnpc->strength<=tnpc->dexterity){
+                        f=(float)x/32.0f*( (float)tnpc->strength + ((float)tnpc->dexterity-(float)tnpc->strength)*0.25f );
                       }else{
-                        f=(float)x/32.0f*( (float)tnpc->d + ((float)tnpc->s-(float)tnpc->d)*0.25f );
+                        f=(float)x/32.0f*( (float)tnpc->dexterity + ((float)tnpc->strength-(float)tnpc->dexterity)*0.25f );
                       }
                     }
-                    if (wep_dt[i3]==5) f=(float)x/32.0f*((float)tnpc->i*0.125f+8);//INT*12.5% wands are magical weapons, so they should have some base damage bonus in u6 they were quite good */
+                    if (wep_dt[i3]==5) f=(float)x/32.0f*((float)tnpc->intelligence*0.125f+8);//INT*12.5% wands are magical weapons, so they should have some base damage bonus in u6 they were quite good */
                     x2=rnd*((float)(x*2)+f+1.0f)-(float)x; //weapon damage
                     if (x2>x) x2=x;
 
@@ -13097,7 +13097,7 @@ nododge:
                     }
 
                     //x7=rnd*32; //0-127
-                    //x8=rnd*(tnpc->d+1);
+                    //x8=rnd*(tnpc->dexterity+1);
                     //if (x7>x8){ //couldn't dodge the attack!
 
 spellattcrt0:
@@ -13411,7 +13411,7 @@ triplecrossbow_miss:
                   //3rd/final shot
 
                   /*
-                  x7=rnd*(tnpc->d+1); x8=rnd*16; if (x7<x8) goto triplecrossbow_miss2;
+                  x7=rnd*(tnpc->dexterity+1); x8=rnd*16; if (x7<x8) goto triplecrossbow_miss2;
                   myobj2=OBJfindlast(triplecrossbow_shot_x3,triplecrossbow_shot_y3); if (myobj2==NULL) myobj2=OBJfindlastall(triplecrossbow_shot_x3,triplecrossbow_shot_y3);
                   if (myobj2){
                   //if (myobj2->info&8) myobj2=(object*)myobj2->more; //redirect
@@ -13436,7 +13436,7 @@ triplecrossbow_miss:
                   if (myobj2){
                     //if (myobj2->info&8) myobj2=(object*)myobj2->more; //redirect
                     if (myobj2->info&4){ //<-crt
-                      x7=rnd*(tnpc->d+1); x8=rnd*16; if (x7>=x8){ //didn't miss!
+                      x7=rnd*(tnpc->dexterity+1); x8=rnd*16; if (x7>=x8){ //didn't miss!
                         i3=1;
                         wep_dt[0]=3; wep_dt[1]=3;
                         x=12;
@@ -13494,7 +13494,7 @@ triplecrossbow_miss:
 
                 if (miss){ //miss!
                   if (tplayer->craft==NULL) OBJdir(myobj,myobj2->x,myobj2->y);
-                  f=(float)tnpc->d/64.0f; if (f>1.0f) f=1.0f;
+                  f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
                   tnpc->wait_attack+=2.0-(f*0.25f);
                   goto skipnpcattack;
                 }
@@ -13542,7 +13542,7 @@ npcattackclose:
                   if (OBJmove2(myobj,myobj->x,myobj->y+y2)==0) x3++;
                 }
                 if (x3){
-                  f=(float)tnpc->d/64.0f; if (f>1.0f) f=1.0f;
+                  f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
                   tnpc->wait_walk+=(0.25f-0.0625f-f*0.125f);
                 }
 
@@ -13961,7 +13961,7 @@ nextspell4:
             if (CASTSPELL_SPELLTYPE==((6<<4)+9)){ //wizard eye //txtset(spellname[(6<<4)+9],"WizardEye"); spellreagent[(6<<4)+9]=BLOO|NIGH|MAND|SULF|BLAC|SPID;
               i2=2; //implemented!
               if (tnpc->player->wizardeyetimeleft==0.0f){
-                if (i9=rnd*(tnpc->i+1)){
+                if (i9=rnd*(tnpc->intelligence+1)){
                   i2=1;
                   tnpc->player->wizardeyetimeleft=i9; tnpc->player->wizardeyemovewait=0.0f;
                   tnpc->player->wizardeyex=myobj->x; tnpc->player->wizardeyey=myobj->y;
@@ -13976,9 +13976,9 @@ nextspell4:
             if (CASTSPELL_SPELLTYPE==((2<<4)+7)){ //peer txtset(spellname[(2<<4)+7],"Peer"); spellreagent[(2<<4)+7]=NIGH|MAND;
               i2=2; //implemented!
               x3=rnd*(8+5*3);
-              x4=rnd*(tnpc->i+1);
+              x4=rnd*(tnpc->intelligence+1);
               if (x4>=x3){//success
-                x3=rnd*(32+(tnpc->i>>3));
+                x3=rnd*(32+(tnpc->intelligence>>3));
                 if (x3){
                   if (x3>255) x3=255; //cap
                   if (x3>tnpc->player->peer){
@@ -14029,8 +14029,8 @@ nextspell4:
                       if (myobj2->info&4){ //<-crt
                         crt=(creature*)myobj2->more;
                         i9=i3; i8=x2; //backup!
-                        x2=rnd*(512+tnpc->i*8);
-                        x3=rnd*(512+tnpc->i*8);
+                        x2=rnd*(512+tnpc->intelligence*8);
+                        x3=rnd*(512+tnpc->intelligence*8);
                         x2=((x2+x3)>>1);
                         if (x2<crt->hp) {i2=1; x2=i8; i3=i9; goto deathwind_spelldone;}
                         i3=myobj2->type&1023;
@@ -14085,7 +14085,7 @@ deathwind_spelldone:;
                       if (myobj2->info&4){ //<-crt
                         crt=(creature*)myobj2->more;
                         i9=i3; i8=x2; //backup!
-                        x2=rnd*(64+tnpc->i*2);
+                        x2=rnd*(64+tnpc->intelligence*2);
                         if (x2==0) {i2=3; x2=i8; i3=i9; goto energywind_spelldone;}
                         i3=SFnew(myobj2->x,myobj2->y);
                         sf[i3].type=1; //attack
@@ -14130,7 +14130,7 @@ energywind_spelldone:;
                       if (myobj2->info&4){ //<-crt
                         crt=(creature*)myobj2->more;
                         x3=rnd*(8+5*2);
-                        x4=rnd*(tnpc->i+1);
+                        x4=rnd*(tnpc->intelligence+1);
                         if (x4>=x3){//success
                           crt->flags|=1;
                           z2=SFnew(myobj2->x,myobj2->y);
@@ -14175,7 +14175,7 @@ energywind_spelldone:;
                       if (myobj2->info&4){ //<-crt
                         crt=(creature*)myobj2->more;
                         i9=i3; i8=x2; //backup!
-                        x2=rnd*(48+tnpc->i+(tnpc->i>>1));
+                        x2=rnd*(48+tnpc->intelligence+(tnpc->intelligence>>1));
                         if (x2==0) {i2=1; x2=i8; i3=i9; goto flamewind_spelldone;}
                         //fire resistant???
                         i3=myobj2->type&1023;
@@ -14269,7 +14269,7 @@ flamewind_spelldone:;
                           //resurrection can be performed
                           i2=1;
                           x3=rnd*(8+5*8);
-                          x4=rnd*(tnpc->i+1);
+                          x4=rnd*(tnpc->intelligence+1);
                           if (x4>=x3){//success
                             //resu_player[i3]->party[0]=resu[i3]; //assume current player
                             resu_player[i3]->party[resu_partymember[i3]]=resu[i3];
@@ -14329,8 +14329,8 @@ resurrect_spell_done:
                   tnpc2=(npc*)myobj2->more;
                   if (tnpc2->player){
                     //perform light heal (1 to 64->128 hp)
-                    x3=rnd*(64+tnpc->i); //int can only double spell effectiveness!
-                    x4=rnd*(64+tnpc->i); //int can only double spell effectiveness!
+                    x3=rnd*(64+tnpc->intelligence); //int can only double spell effectiveness!
+                    x4=rnd*(64+tnpc->intelligence); //int can only double spell effectiveness!
                     x3=(x3+x4)>>1;
 
                     tnpc2->hp+=x3; if (tnpc2->hp>tnpc2->hp_max) tnpc2->hp=tnpc2->hp_max;
@@ -14369,8 +14369,8 @@ resurrect_spell_done:
 
                       crt=(creature*)myobj2->more;
                       i9=i3; i8=x2; //backup!
-                      x2=rnd*(512+tnpc->i*8);
-                      x3=rnd*(512+tnpc->i*8);
+                      x2=rnd*(512+tnpc->intelligence*8);
+                      x3=rnd*(512+tnpc->intelligence*8);
                       x2=((x2+x3)>>1);
                       if (x2<crt->hp) {i2=1; x2=i8; i3=i9; goto masskill_spelldone;} //failed!
                       i3=myobj2->type&1023;
@@ -14421,10 +14421,10 @@ masskillblocked:;
                 if (myobj2->info&4){ //<-crt
                   crt=(creature*)myobj2->more;
                   i9=i3; i8=x2; //backup!
-                  //x2=rnd*(256+tnpc->i*4);
-                  //x3=rnd*(256+tnpc->i*4);
-                  x2=rnd*(192+tnpc->i*3);
-                  x3=rnd*(192+tnpc->i*3);
+                  //x2=rnd*(256+tnpc->intelligence*4);
+                  //x3=rnd*(256+tnpc->intelligence*4);
+                  x2=rnd*(192+tnpc->intelligence*3);
+                  x3=rnd*(192+tnpc->intelligence*3);
                   x2=((x2+x3)>>1);
                   if (x2<crt->hp) {i2=3; x2=i8; i3=i9; goto spelldone;} //failed!
                   x2=crt->hp-1;
@@ -14458,8 +14458,8 @@ masskillblocked:;
                 if (myobj2->info&4){ //<-crt
                   crt=(creature*)myobj2->more;
                   i9=i3; i8=x2; //backup!
-                  x2=rnd*(512+tnpc->i*8);
-                  x3=rnd*(512+tnpc->i*8);
+                  x2=rnd*(512+tnpc->intelligence*8);
+                  x3=rnd*(512+tnpc->intelligence*8);
                   x2=((x2+x3)>>1);
                   if (x2<crt->hp) {i2=3; x2=i8; i3=i9; goto spelldone;} //failed!
                   i3=myobj2->type&1023;
@@ -14500,7 +14500,7 @@ IDimmunedeath:
                 if (myobj2->info&4){ //<-crt
                   crt=(creature*)myobj2->more;
                   i9=i3; i8=x2; //backup!
-                  x2=rnd*(64+tnpc->i*2);
+                  x2=rnd*(64+tnpc->intelligence*2);
                   if (x2==0) {i2=3; x2=i8; i3=i9; goto spelldone;}
                   i3=SFnew(myobj2->x,myobj2->y); //destination is more important than the source
                   sf[i3].type=5;
@@ -14537,7 +14537,7 @@ chainbolt_gotnexttarget:
                   chainbolt_miss=0;
                   crt=(creature*)myobj2->more;
                   i9=i3; i8=x2; //backup!
-                  x2=rnd*(64+tnpc->i*2);
+                  x2=rnd*(64+tnpc->intelligence*2);
                   if (x2==0) {x2=i8; i3=i9; goto chainbolt_spelldone;}
                   i2=1;
                   i3=SFnew(myobj2->x,myobj2->y); //destination is more important than the source
@@ -14584,7 +14584,7 @@ chainbolt_spelldone:
                       }}}}//boundries
                     }//both not 0
                     chainbolt_miss++;
-                    i9=128-chainbolt_hits*16+tnpc->i*2; if (chainbolt_miss<i9) goto chainbolt_spelldone;
+                    i9=128-chainbolt_hits*16+tnpc->intelligence*2; if (chainbolt_miss<i9) goto chainbolt_spelldone;
                   }//chainbolthits
                 }//crt
               }//myobj2
@@ -14606,7 +14606,7 @@ chainbolt_spelldone:
                           i9=i3; i8=x2; //backup!
                           x3=abs(spellx2-(tpx+x)); x4=abs(spelly2-(tpy+y)); if (x4>x3) x3=x4;
                           x3*=3;
-                          x2=rnd*(80+tnpc->i+(tnpc->i>>1));
+                          x2=rnd*(80+tnpc->intelligence+(tnpc->intelligence>>1));
                           x2-=x3;
                           if (x2<=0) {x2=i8; i3=i9; goto tremor_spelldone;}
                           i3=SFnew(myobj2->x,myobj2->y);
@@ -14643,7 +14643,7 @@ tremor_spelldone:;
 
                       crt=(creature*)myobj2->more;
                       i9=i3; i8=x2; //backup!
-                      x2=rnd*(48+tnpc->i+(tnpc->i>>1));
+                      x2=rnd*(48+tnpc->intelligence+(tnpc->intelligence>>1));
                       if (x2==0) {i2=1; x2=i8; i3=i9; goto explosion_spelldone;}
                       //fire resistant???
                       i3=myobj2->type&1023;
@@ -14708,7 +14708,7 @@ explosionblocked:;
                 if (myobj2->info&4){ //<-crt
                   crt=(creature*)myobj2->more;
                   i9=i3; i8=x2; //backup!
-                  x2=rnd*(48+tnpc->i+(tnpc->i>>1));
+                  x2=rnd*(48+tnpc->intelligence+(tnpc->intelligence>>1));
                   if (x2==0) {i2=3; x2=i8; i3=i9; goto spelldone;}
                   //fire resistant???
                   i3=myobj2->type&1023;
@@ -14763,7 +14763,7 @@ IFimmuneflame:
                 if (myobj2->info&4){ //<-crt
                   crt=(creature*)myobj2->more;
                   i9=i3; i8=x2; //backup!
-                  x2=rnd*(32+tnpc->i);
+                  x2=rnd*(32+tnpc->intelligence);
                   if (x2==0) {i2=3; x2=i8; i3=i9; goto spelldone;}
                   i3=SFnew(myobj2->x,myobj2->y); //destination is more important than the source
                   sf[i3].type=2; //arrow
@@ -14795,7 +14795,7 @@ IFimmuneflame:
                 if (myobj2->info&4){ //<-crt
                   crt=(creature*)myobj2->more;
                   if (crt->al==1){
-                    x3=rnd*(128+(tnpc->i*2)); if (x3>255) x3=255;
+                    x3=rnd*(128+(tnpc->intelligence*2)); if (x3>255) x3=255;
                     if (x3==0) {i2=3; goto spelldone;}
                     i2=1;
                     crt->al=4;
@@ -14829,7 +14829,7 @@ IFimmuneflame:
                     if (myobj2->info&4){ //<-crt
                       crt=(creature*)myobj2->more;
                       if (crt->al==1){
-                        x3=rnd*(128+(tnpc->i*2)); if (x3>255) x3=255;
+                        x3=rnd*(128+(tnpc->intelligence*2)); if (x3>255) x3=255;
                         if (x3){
                           crt->al=4;
                           crt->target=NULL;
@@ -14863,7 +14863,7 @@ masscharmblocked:;
                 if (myobj2->info&4){ //<-crt
                   crt=(creature*)myobj2->more;
                   i9=i3; i8=x2; //backup!
-                  x2=rnd*(24+(tnpc->i>>1)); //32
+                  x2=rnd*(24+(tnpc->intelligence>>1)); //32
                   if (x2==0) {i2=3; x2=i8; i3=i9; goto spelldone;}
                   i3=SFnew(myobj2->x,myobj2->y); //destination is more important than the source
                   sf[i3].type=14; //blue ball
@@ -14904,7 +14904,7 @@ spellattcrt1: i2=1; x2=i8; i3=i9; //<-
               //creates a localized vortex, strongest at the centre
               i2=2; //implemented!
               if (stormcloakcheck2(tpx+x,tpy+y,tplayer)) goto spelldone;
-              x3=rnd*(64+tnpc->i);
+              x3=rnd*(64+tnpc->intelligence);
               if (x3==0) {i2=3; goto spelldone;}
               for (spellx=-32;spellx<=32;spellx++){ for (spelly=-32;spelly<=32;spelly++){
                 if (stormcloakcheck2(tpx+x+spellx,tpy+y+spelly,tplayer)) goto timestopblocked;
@@ -14939,7 +14939,7 @@ timestopblocked:;
                 if (myobj2->info&8) myobj2=(object*)myobj2->more; //redirect
                 if (myobj2->info&4){ //<-crt
                   crt=(creature*)myobj2->more;
-                  x3=rnd*(32+(tnpc->i>>1));
+                  x3=rnd*(32+(tnpc->intelligence>>1));
                   if (x3==0) {i2=3; goto spelldone;}
                   i2=1;
                   i9=SFnew(myobj2->x,myobj2->y); //destination is more important than the source
@@ -14992,7 +14992,7 @@ timestopblocked:;
                 if (myobj2->info&8) myobj2=(object*)myobj2->more; //redirect
                 if (myobj2->info&4){ //<-crt
                   crt=(creature*)myobj2->more;
-                  x3=rnd*(32+(tnpc->i>>1));
+                  x3=rnd*(32+(tnpc->intelligence>>1));
                   if (x3==0) {i2=3; goto spelldone;}
                   crt->wait+=x3; crt->flags|=8; //1=poison, 2=invisible, 4=asleep, 8=paralyzed
                   i9=SFnew(myobj2->x,myobj2->y); //destination is more important than the source
@@ -15026,7 +15026,7 @@ timestopblocked:;
                   crt=(creature*)myobj2->more;
                   i9=i3; i8=x2; //backup!
                   x3=rnd*(8+5*2);
-                  x4=rnd*(tnpc->i+1);
+                  x4=rnd*(tnpc->intelligence+1);
                   if (x4>=x3){//success
                     crt->flags|=1;
                     i3=SFnew(myobj2->x,myobj2->y); //destination is more important than the source
@@ -15061,7 +15061,7 @@ timestopblocked:;
                 if (myobj2->info&2){ //<-npc
                   tnpc2=(npc*)myobj2->more;
                   if (tnpc2->player){
-                    x3=rnd*(32+(tnpc->i>>1)); //int can only double spell effectiveness!
+                    x3=rnd*(32+(tnpc->intelligence>>1)); //int can only double spell effectiveness!
                     if (x3){
                       if (x3>255) x3=255; //cap
                       if (x3>tnpc2->protection) {tnpc2->protection=x3; tnpc->upflags|=64;}
@@ -15091,7 +15091,7 @@ timestopblocked:;
                 if (myobj2->info&2){ //<-npc
                   tnpc2=(npc*)myobj2->more;
                   if (tnpc2->player){
-                    x3=rnd*(8+(tnpc->i>>3)); //int can only double spell effectiveness!
+                    x3=rnd*(8+(tnpc->intelligence>>3)); //int can only double spell effectiveness!
                     if (x3){
                       if (x3>255) x3=255; //cap
                       if (x3>tnpc2->player->xray){
@@ -15111,7 +15111,7 @@ timestopblocked:;
             if (CASTSPELL_SPELLTYPE==((5<<4)+5)){ //mass protect //txtset(spellname[(5<<4)+5],"MassProtect"); spellreagent[(5<<4)+5]=SULF|GINS|GARL|MAND;
               i2=2; //implemented!
               if (stormcloakcheck2(tpx+x,tpy+y,tplayer)) goto spelldone;
-              x3=rnd*(32+(tnpc->i>>1)); //int can only double spell effectiveness!
+              x3=rnd*(32+(tnpc->intelligence>>1)); //int can only double spell effectiveness!
               if (x3){
                 if (x3>255) x3=255; //cap
                 i2=1;
@@ -15149,7 +15149,7 @@ massprotectblocked:;
               i2=2; //implemented!
               if (stormcloakcheck2(tpx+x,tpy+y,tplayer)) goto spelldone;
 
-              x3=rnd*(32+(tnpc->i>>1)); //int can only double spell effectiveness!
+              x3=rnd*(32+(tnpc->intelligence>>1)); //int can only double spell effectiveness!
               if (x3){
                 if (x3>255) x3=255; //cap
                 i2=1;
@@ -15194,7 +15194,7 @@ invisibilityblocked:;
                 if (myobj2->info&2){ //<-npc
                   tnpc2=(npc*)myobj2->more;
                   if (tnpc2->player){
-                    x3=rnd*(32+(tnpc->i>>1)); //int can only double spell effectiveness!
+                    x3=rnd*(32+(tnpc->intelligence>>1)); //int can only double spell effectiveness!
                     if (x3){
                       if (x3>255) x3=255; //cap
                       if (x3>tnpc2->invisibility) tnpc2->invisibility=x3;
@@ -15224,7 +15224,7 @@ invisibilityblocked:;
                 if (myobj2->info&2){ //<-npc
                   tnpc2=(npc*)myobj2->more;
                   if (tnpc2->player){
-                    x3=rnd*(64+tnpc->i); //int can only double spell effectiveness!
+                    x3=rnd*(64+tnpc->intelligence); //int can only double spell effectiveness!
                     if (x3){
                       x4=1+x3; if (x4>255) x4=255; //cap
                       tnpc2->light=x4;
@@ -15247,7 +15247,7 @@ invisibilityblocked:;
                 if (myobj2->info&2){ //<-npc
                   tnpc2=(npc*)myobj2->more;
                   if (tnpc2->player){
-                    x3=rnd*(16+(tnpc->i>>2)); //int can only double spell effectiveness!
+                    x3=rnd*(16+(tnpc->intelligence>>2)); //int can only double spell effectiveness!
                     if (x3){
                       x4=1+x3; if (x4>255) x4=255; //cap
                       tnpc2->light=x4;
@@ -15277,7 +15277,7 @@ invisibilityblocked:;
                       if (((tpx+x)==574)&&((tpy+y)==364)) goto spelldone;
                       i2=1;
                       x3=rnd*(8+5*1);
-                      x4=rnd*(tnpc->i+1);
+                      x4=rnd*(tnpc->intelligence+1);
                       if (x4>=x3){//success //set npc schedule to unknown! and make them just stand there
                         tnpc2->schedule_i=-1;
                         tnpc2->schedule_last=0;
@@ -15299,7 +15299,7 @@ invisibilityblocked:;
                     if (tnpc2->flags&4){
                       i2=1;
                       x3=rnd*(8+5*1);
-                      x4=rnd*(tnpc->i+1);
+                      x4=rnd*(tnpc->intelligence+1);
                       if (x4>=x3){//success
                         tnpc2->flags-=4; tnpc2->wait_disable=0;
                         //NEWCODE
@@ -15328,7 +15328,7 @@ invisibilityblocked:;
               if (((bt[spelly][spellx]>>10)&1)==0) goto summonfail; //land passable
               if (od[spelly][spellx]) goto summonfail;
               x3=rnd*(8+5*8); //int can only double spell effectiveness!
-              x4=rnd*(tnpc->i+1);
+              x4=rnd*(tnpc->intelligence+1);
               if (x4>=x3){//success
                 i2=1;
                 myobj2=OBJnew();
@@ -15371,8 +15371,8 @@ summonfail:
                           if ((myobj2->type&1023)==430) if (crt->flags&128) goto slimefail;//invincible horse
 
 
-                          x3=rnd*(640+tnpc->i*10); //128 better than kill spell!
-                          x4=rnd*(640+tnpc->i*10);
+                          x3=rnd*(640+tnpc->intelligence*10); //128 better than kill spell!
+                          x4=rnd*(640+tnpc->intelligence*10);
                           x3=((x3+x4)>>1);
 
                           if (x3>=crt->hp){//success
@@ -15428,7 +15428,7 @@ slimeblocked:;
               if (((bt[spelly][spellx]>>10)&1)==0) goto conjfail; //land passable
               if (od[spelly][spellx]) goto conjfail;
               x3=rnd*(8+5*4); //int can only double spell effectiveness!
-              x4=rnd*(tnpc->i+1);
+              x4=rnd*(tnpc->intelligence+1);
               if (x4>=x3){//success
                 i2=1;
                 myobj2=OBJnew();
@@ -15458,7 +15458,7 @@ conjfail:
               i2=2; //implemented!
               if (stormcloakcheck2(tpx+x,tpy+y,tplayer)) goto spelldone;
 
-              x3=rnd*(4+(tnpc->i/16)); //int can only double spell effectiveness!
+              x3=rnd*(4+(tnpc->intelligence/16)); //int can only double spell effectiveness!
               if (x3==0) {i2=3; goto spelldone;}
               for (x4=1;x4<=x3;x4++){
                 x5=16;
@@ -15553,7 +15553,7 @@ isretry: spellx=tpx+x+rnd*5-2; spelly=tpy+y+rnd*5-2;
 
 gotreploc:
                 spellx=rnd*(8+5*6);
-                spelly=rnd*(tnpc->i+1);
+                spelly=rnd*(tnpc->intelligence+1);
                 if (spelly>=spellx){//success
                   i2=1;
                   myobj3=OBJnew();
@@ -15581,7 +15581,7 @@ cantreplicate:
               if ((bt[tpy+y][tpx+x]&1024)==0) goto gatetravel_cantcreate;
               i2=1;
               x3=rnd*(8+5*7);
-              x4=rnd*(tnpc->i+1);
+              x4=rnd*(tnpc->intelligence+1);
               if (x4>=x3){//success
                 myobj2=OBJnew();
                 myobj2->type=84+1024;
@@ -15609,7 +15609,7 @@ untrap_nextobj:
 untrap_trapfound:
               i2=3;
               x3=rnd*(8+5*2);
-              x4=rnd*(tnpc->i+1);
+              x4=rnd*(tnpc->intelligence+1);
               if (x4<x3) goto spelldone;
               i2=1;
               OBJremove(myobj2);
@@ -15640,7 +15640,7 @@ untrap_trapfound:
               if (bt[tpy+y][tpx+x]&1024){
                 i2=1;
                 x3=rnd*(8+5*4);
-                x4=rnd*(tnpc->i+1);
+                x4=rnd*(tnpc->intelligence+1);
                 if (x4>=x3){//success
                   myobj2=OBJnew();
                   myobj2->type=317; //fire
@@ -15664,7 +15664,7 @@ untrap_trapfound:
               if (bt[tpy+y][tpx+x]&1024){
                 i2=1;
                 x3=rnd*(8+5*5);
-                x4=rnd*(tnpc->i+1);
+                x4=rnd*(tnpc->intelligence+1);
                 if (x4>=x3){//success
                   myobj2=OBJnew();
                   myobj2->type=319; //protection field
@@ -15686,7 +15686,7 @@ untrap_trapfound:
               if (bt[tpy+y][tpx+x]&1024){
                 i2=1;
                 x3=rnd*(8+5*4);
-                x4=rnd*(tnpc->i+1);
+                x4=rnd*(tnpc->intelligence+1);
                 if (x4>=x3){//success
                   myobj2=OBJnew();
                   myobj2->type=318; //poison field
@@ -15707,7 +15707,7 @@ untrap_trapfound:
                 if ((x3>=317)&&(x3<=320)){
                   i2=1;
                   x3=rnd*(8+5*3);
-                  x4=rnd*(tnpc->i+1);
+                  x4=rnd*(tnpc->intelligence+1);
                   if (x4>=x3){//success
                     OBJsave(myobj2->x,myobj2->y);
                     OBJremove(myobj2);
@@ -15721,7 +15721,7 @@ untrap_trapfound:
             if (CASTSPELL_SPELLTYPE==((3<<4)+5)){ //locate //txtset(spellname[(3<<4)+5],"Locate"); spellreagent[(3<<4)+5]=NIGH;
               i2=2; //implemented!
               x3=rnd*(8+5*4);
-              x4=rnd*(tnpc->i+1);
+              x4=rnd*(tnpc->intelligence+1);
               if (x4>=x3){//success
                 i2=1;
                 if (myobj->x<1024){
@@ -15758,7 +15758,7 @@ untrap_trapfound:
                 }//crt
                 if (x5){
                   x3=rnd*(8+5*5);
-                  x4=rnd*(tnpc->i+1);
+                  x4=rnd*(tnpc->intelligence+1);
                   if (x4>=x3){//success
                     i2=1;
                     if (x5==1){ //->npc
@@ -15842,7 +15842,7 @@ pickpocketcrtnothing:
                   tnpc2=(npc*)myobj2->more;
                   if (tnpc2->player){
                     x3=rnd*(8+5*1);
-                    x4=rnd*(tnpc->i+1);
+                    x4=rnd*(tnpc->intelligence+1);
                     if (x4>=x3){//success
                       i2=1;
                       tnpc2->flags&=(65535-1); //remove poisoned flag
@@ -15872,8 +15872,8 @@ pickpocketcrtnothing:
                   tnpc2=(npc*)myobj2->more;
                   if (tnpc2->player){
                     //perform light heal (1 to 16->32 hp)
-                    x3=rnd*(16+(tnpc->i>>2)); //int can only double spell effectiveness!
-                    x4=rnd*(16+(tnpc->i>>2)); //int can only double spell effectiveness!
+                    x3=rnd*(16+(tnpc->intelligence>>2)); //int can only double spell effectiveness!
+                    x4=rnd*(16+(tnpc->intelligence>>2)); //int can only double spell effectiveness!
                     x3=(x3+x4)>>1;
 
                     tnpc2->hp+=x3; if (tnpc2->hp>tnpc2->hp_max) tnpc2->hp=tnpc2->hp_max;
@@ -15904,7 +15904,7 @@ pickpocketcrtnothing:
                   if ((myobj2->more2>>16)<=20){//25 spell limit (20+5=25)
                     if ((myobj2->info&(7<<9))==0){//no pending enchantments
                       x3=rnd*(8+5*7);
-                      x4=rnd*(tnpc->i+1);
+                      x4=rnd*(tnpc->intelligence+1);
                       if (x4>=x3){//success
                         i2=1;
                         //allow for 5 new spells to be added
@@ -15936,7 +15936,7 @@ pickpocketcrtnothing:
                   if ((myobj2->type>>10)>=12){
                     i2=1;
                     x3=rnd*(8+5*2);
-                    x4=rnd*(tnpc->i+1);
+                    x4=rnd*(tnpc->intelligence+1);
                     if (x4>=x3){//success
                       myobj2->type-=(8*1024);
                       myobj3=(object*)myobj2->more;
@@ -15948,7 +15948,7 @@ pickpocketcrtnothing:
                 if (myobj2->type==(OBJ_CHEST+(3*1024))){
                   i2=1;
                   x3=rnd*(8+5*2);
-                  x4=rnd*(tnpc->i+1);
+                  x4=rnd*(tnpc->intelligence+1);
                   if (x4>=x3){//success
                     OBJsave(myobj2->x,myobj2->y);
                     myobj2->type-=(2*1024);
@@ -15962,7 +15962,7 @@ pickpocketcrtnothing:
             if (CASTSPELL_SPELLTYPE==((3<<4)+9)){ //WindChange txtset(spellname[(3<<4)+9],"WindChange"); spellreagent[(3<<4)+9]=SULF|BLOO;
               i2=2; //implemented!
               x3=rnd*(8+5*4);
-              x4=rnd*(tnpc->i+1);
+              x4=rnd*(tnpc->intelligence+1);
               if (x4>=x3){//success
                 i2=1;
                 x3=tplayer->windx; y3=tplayer->windy;
@@ -15992,7 +15992,7 @@ windchange_cast:
               if (bt[tpy+y][tpx+x]&1024){
                 i2=1;
                 x3=rnd*(8+5*4);
-                x4=rnd*(tnpc->i+1);
+                x4=rnd*(tnpc->intelligence+1);
                 if (x4>=x3){//success
                   myobj2=OBJnew();
                   myobj2->type=320; //sleep
@@ -16027,7 +16027,7 @@ windchange_cast:
                       tnpc2=(npc*)myobj2->more;
                       if (tnpc2->player){
                         x3=rnd*(8+5*1);
-                        x4=rnd*(tnpc->i+1);
+                        x4=rnd*(tnpc->intelligence+1);
                         if (x4>=x3){//success
                           tnpc2->flags&=(65535-1); //remove poisoned flag
                           tnpc2->upflags|=2;
@@ -16073,7 +16073,7 @@ masscureblocked:;
                   if (myobj2){
                     if (myobj2->info&2){ //<-npc
                       x3=rnd*(8+5*3);
-                      x4=rnd*(tnpc->i+1);
+                      x4=rnd*(tnpc->intelligence+1);
                       if (x4>=x3){//success
                         tnpc2=(npc*)myobj2->more;
                         if (tnpc2->player==NULL){
@@ -16135,7 +16135,7 @@ massawakenblocked:;
                     if (myobj2->info&8) myobj2=(object*)myobj2->more; //redirect
                     if (myobj2->info&4){ //<-crt
                       crt=(creature*)myobj2->more;
-                      x3=rnd*(32+(tnpc->i>>1));
+                      x3=rnd*(32+(tnpc->intelligence>>1));
                       //immune to sleep?
                       x4=myobj2->type&1023;
                       if (x4==364) goto masssleep_immune; //acid slug
@@ -16193,7 +16193,7 @@ masssleepblocked:;
                 if (myobj2->info&2){ //<-npc
                   tnpc2=(npc*)myobj2->more;
                   if (tnpc2->player){
-                    x3=rnd*(32+(tnpc->i>>1)); //int can only double spell effectiveness!
+                    x3=rnd*(32+(tnpc->intelligence>>1)); //int can only double spell effectiveness!
                     if (x3){
                       if (x3>255) x3=255; //cap
                       if (x3>tnpc2->negatemagic) {tnpc2->negatemagic=x3;}
@@ -16212,7 +16212,7 @@ masssleepblocked:;
               if (stormcloakcheck2(tpx+x,tpy+y,tplayer)) goto spelldone;
               x4=4;
               for (x4;x4>0;x4--) {
-                x3=3+rnd*(1+(tnpc->i-24)/8);
+                x3=3+rnd*(1+(tnpc->intelligence-24)/8);
                 for (x3;x3>0;x3--){
                   spellx=rnd*(9)-6;
                   spelly=rnd*(9)-6;
@@ -16225,7 +16225,7 @@ masssleepblocked:;
                       if (myobj2->info&4){ //<-crt
                         crt=(creature*)myobj2->more;
                         i9=i3; i8=x2; //backup!
-                        x2=rnd*(16+(tnpc->i>>1));
+                        x2=rnd*(16+(tnpc->intelligence>>1));
                         if (x2==0) {i2=1; x2=i8; i3=i9; goto hailstorm_spelldone;}
                         i3=SFnew(myobj2->x,myobj2->y);
                         sf[i3].type=1; //attack
@@ -16274,7 +16274,7 @@ hailstorm_blocked:;
               if (stormcloakcheck2(tpx+x,tpy+y,tplayer)) goto spelldone;
               i2=1;
               x3=rnd*(8+5*5);
-              x4=rnd*(tnpc->i+1);
+              x4=rnd*(tnpc->intelligence+1);
               if (x4>=x3) {
                 i2=1;
                 for (spellx=-7;spellx<=7;spellx++){ for (spelly=-7;spelly<=7;spelly++){
@@ -16298,7 +16298,7 @@ hailstorm_blocked:;
               i2=2; //implemented!
               if (stormcloakcheck2(tpx+x,tpy+y,tplayer)) goto spelldone;
               x3=rnd*(8+5*6);
-              x4=rnd*(tnpc->i+1);
+              x4=rnd*(tnpc->intelligence+1);
               if (x4>=x3){//success
                 i2=1;
                 i9=SFnew(tpx+x,tpy+y); //destination is more important than the source
@@ -16333,7 +16333,7 @@ hailstorm_blocked:;
                   else if (myobj2 && myobj2->info&4) {
                     crt=(creature*)myobj2->more;
                     if ((myobj2->type&1023)!=361) {
-                      x3=rnd*(32+(tnpc->i>>1)/2);
+                      x3=rnd*(32+(tnpc->intelligence>>1)/2);
                       crt->wait+=x3; crt->flags|=8; //1=poison, 2=invisible, 4=asleep, 8=paralyzed
                     }
                     myobj2=OBJnew();
@@ -16404,7 +16404,7 @@ spelldone_donttakereagents:
               }
 
               //spell delay
-              tnpc->wait_cast+=4.0f-((float)tnpc->i/32.0f);
+              tnpc->wait_cast+=4.0f-((float)tnpc->intelligence/32.0f);
               //txtset(t,"??"); t->d2[0]=18; t->d2[1]=iparty; NET_send(NETplayer,tplayer->net,t); //set cast icon!
 
             }
@@ -17288,7 +17288,7 @@ wep_left_skip:
                   if (myobj->type==(98+2048)){ //locked chest
                     myobj3=(object*)tplayer->party[0]; tnpc=(npc*)myobj3->more;
                     stealing(tplayer,tplayer->mobj);
-                    if (((rnd*64)+(rnd*tnpc->i))>=56){ //success
+                    if (((rnd*64)+(rnd*tnpc->intelligence))>=56){ //success
                       OBJsave(myobj->x,myobj->y);
                       myobj->type=OBJ_CHEST+1024;
                     }else{
@@ -17329,7 +17329,7 @@ lockpick:
                         myobj3=(object*)tplayer->party[0];
                         tnpc=(npc*)myobj3->more;
                         stealing(tplayer,tplayer->mobj);
-                        if (((rnd*64)+(rnd*tnpc->i))>=56) goto lockpick2; //success
+                        if (((rnd*64)+(rnd*tnpc->intelligence))>=56) goto lockpick2; //success
                         x2=rnd*2; if (x2){ //break pick!
                           txtset(t,"?"); t->d2[0]=8; txtadd(t,"Key broke!"); NET_send(NETplayer,tplayer->net,t);
                           if (tplayer->mobj->more2==1) tplayer->mobj=NULL; else tplayer->mobj->more2--;
@@ -18789,10 +18789,10 @@ usehorse_gotpapers:
 
                     tplayer->karma+=20.0f;
                     tnpc3=(npc*)tplayer->party[0]->more;
-                    tnpc3->s+=3; tnpc3->d+=3; tnpc3->i+=3;
-                    tnpc3->mp_max=tnpc3->i*2; //primary party member INT*2
-                    tnpc3->wt_max=tnpc3->s*4*100;
-                    tnpc3->wt2_max=tnpc3->s*50;
+                    tnpc3->strength+=3; tnpc3->dexterity+=3; tnpc3->intelligence+=3;
+                    tnpc3->mp_max=tnpc3->intelligence*2; //primary party member INT*2
+                    tnpc3->wt_max=tnpc3->strength*4*100;
+                    tnpc3->wt2_max=tnpc3->strength*50;
                     //remove amulet of submission
                     if (tnpc3->neck){
                       if (tnpc3->neck->type==76) tnpc3->neck=NULL;
@@ -20784,9 +20784,9 @@ diskipb:;
               t3->d2[0]=tnpc->name->l; txtadd(t,t3);
               txtadd(t,tnpc->name);
               t2->ds[0]=tnpc->port; txtadd(t,t2);
-              t2->ds[0]=tnpc->s; txtadd(t,t2);
-              t2->ds[0]=tnpc->d; txtadd(t,t2);
-              t2->ds[0]=tnpc->i; txtadd(t,t2);
+              t2->ds[0]=tnpc->strength; txtadd(t,t2);
+              t2->ds[0]=tnpc->dexterity; txtadd(t,t2);
+              t2->ds[0]=tnpc->intelligence; txtadd(t,t2);
               t2->ds[0]=tnpc->lev; txtadd(t,t2);
               t2->ds[0]=tnpc->hp_max; txtadd(t,t2);
               t2->ds[0]=tnpc->mp_max; txtadd(t,t2);
@@ -20896,7 +20896,9 @@ nextspell2:
     }//current player
   }//tpl
 
-
+  #ifdef CONSOLE
+    _cprintf("This is a dedicated u6o host running on port %d.\nTo quit type q or ctrl-c to force quit.\n", global_TCP_listen_port);
+#endif
 
 
 

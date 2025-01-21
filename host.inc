@@ -2311,10 +2311,10 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=90; tnpc->hp_max=90;
 			tnpc->mp=0; tnpc->mp_max=0;
-			tnpc->s=26; tnpc->d=20; tnpc->i=17;
+			tnpc->strength=26; tnpc->dexterity=20; tnpc->intelligence=17;
 			tnpc->lev=3; tnpc->exp=374;
-			//tnpc->wt=0; tnpc->wt_max=tnpc->s*2*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*100;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			//tnpc->wt=0; tnpc->wt_max=tnpc->strength*2*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*100;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 			tnpc->converse=255;
 		}
 
@@ -2324,10 +2324,10 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=90; tnpc->hp_max=90;
 			tnpc->mp=9; tnpc->mp_max=9;
-			tnpc->s=21; tnpc->d=23; tnpc->i=18;
+			tnpc->strength=21; tnpc->dexterity=23; tnpc->intelligence=18;
 			tnpc->lev=3; tnpc->exp=399;
-			//tnpc->wt=0; tnpc->wt_max=tnpc->s*2*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*100;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			//tnpc->wt=0; tnpc->wt_max=tnpc->strength*2*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*100;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 		if (i==2){
@@ -2336,10 +2336,10 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=90; tnpc->hp_max=90;
 			tnpc->mp=8; tnpc->mp_max=8;
-			tnpc->s=20; tnpc->d=26; tnpc->i=17;
+			tnpc->strength=20; tnpc->dexterity=26; tnpc->intelligence=17;
 			tnpc->lev=3; tnpc->exp=424;
-			//tnpc->wt=0; tnpc->wt_max=tnpc->s*2*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*100;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			//tnpc->wt=0; tnpc->wt_max=tnpc->strength*2*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*100;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 		if (i==3){//Lord British
@@ -2367,9 +2367,9 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=30; tnpc->hp_max=30;
 			tnpc->mp=0; tnpc->mp_max=0;
-			tnpc->s=1; tnpc->d=27; tnpc->i=12;
+			tnpc->strength=1; tnpc->dexterity=27; tnpc->intelligence=12;
 			tnpc->lev=1; tnpc->exp=73;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 		if (i==60){
@@ -2377,9 +2377,9 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=120; tnpc->hp_max=120;
 			tnpc->mp=0; tnpc->mp_max=0;
-			tnpc->s=16; tnpc->d=21; tnpc->i=19;
+			tnpc->strength=16; tnpc->dexterity=21; tnpc->intelligence=19;
 			tnpc->lev=4; tnpc->exp=450;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 		if (i==64){
@@ -2387,9 +2387,9 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=60; tnpc->hp_max=60;
 			tnpc->mp=8; tnpc->mp_max=8;
-			tnpc->s=18; tnpc->d=21; tnpc->i=17;
+			tnpc->strength=18; tnpc->dexterity=21; tnpc->intelligence=17;
 			tnpc->lev=2; tnpc->exp=160;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 
@@ -2398,9 +2398,9 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=150; tnpc->hp_max=150;
 			tnpc->mp=0; tnpc->mp_max=0;
-			tnpc->s=19; tnpc->d=16; tnpc->i=16;
+			tnpc->strength=19; tnpc->dexterity=16; tnpc->intelligence=16;
 			tnpc->lev=5; tnpc->exp=840;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 		if (i==111){
@@ -2408,9 +2408,9 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=90; tnpc->hp_max=90;
 			tnpc->mp=7; tnpc->mp_max=7;
-			tnpc->s=15; tnpc->d=19; tnpc->i=15;
+			tnpc->strength=15; tnpc->dexterity=19; tnpc->intelligence=15;
 			tnpc->lev=3; tnpc->exp=320;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 		if (i==112){
@@ -2418,9 +2418,9 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=90; tnpc->hp_max=90;
 			tnpc->mp=0; tnpc->mp_max=0;
-			tnpc->s=15; tnpc->d=15; tnpc->i=18;
+			tnpc->strength=15; tnpc->dexterity=15; tnpc->intelligence=18;
 			tnpc->lev=3; tnpc->exp=270;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 		if (i==129){
@@ -2428,9 +2428,9 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=120; tnpc->hp_max=120;
 			tnpc->mp=0; tnpc->mp_max=0;
-			tnpc->s=26; tnpc->d=21; tnpc->i=14;
+			tnpc->strength=26; tnpc->dexterity=21; tnpc->intelligence=14;
 			tnpc->lev=4; tnpc->exp=650;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 		if (i==135){
@@ -2438,9 +2438,9 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=60; tnpc->hp_max=60;
 			tnpc->mp=0; tnpc->mp_max=0;
-			tnpc->s=16; tnpc->d=21; tnpc->i=18;
+			tnpc->strength=16; tnpc->dexterity=21; tnpc->intelligence=18;
 			tnpc->lev=2; tnpc->exp=120;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 
@@ -2449,9 +2449,9 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=150; tnpc->hp_max=150;
 			tnpc->mp=0; tnpc->mp_max=0;
-			tnpc->s=28; tnpc->d=21; tnpc->i=20;
+			tnpc->strength=28; tnpc->dexterity=21; tnpc->intelligence=20;
 			tnpc->lev=5; tnpc->exp=850;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 		if (i==162){
@@ -2459,9 +2459,9 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=60; tnpc->hp_max=60;
 			tnpc->mp=0; tnpc->mp_max=0;
-			tnpc->s=23; tnpc->d=24; tnpc->i=26;
+			tnpc->strength=23; tnpc->dexterity=24; tnpc->intelligence=26;
 			tnpc->lev=2; tnpc->exp=120;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 		if (i==184){
@@ -2469,9 +2469,9 @@ for (i=0;i<=255;i++){
 			tnpc->upflags|=1; //full update
 			tnpc->hp=90; tnpc->hp_max=90;
 			tnpc->mp=0; tnpc->mp_max=0;
-			tnpc->s=26; tnpc->d=18; tnpc->i=16;
+			tnpc->strength=26; tnpc->dexterity=18; tnpc->intelligence=16;
 			tnpc->lev=3; tnpc->exp=250;
-			tnpc->wt=0; tnpc->wt_max=tnpc->s*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->s*50;
+			tnpc->wt=0; tnpc->wt_max=tnpc->strength*3*100; tnpc->wt2=0; tnpc->wt2_max=tnpc->strength*50;
 		}
 
 

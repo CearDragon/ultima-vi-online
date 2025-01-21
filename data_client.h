@@ -15,12 +15,18 @@
 
 /* structure definitions */
 struct client_settings{
-  short party_frame_offset_x[8],party_frame_offset_y[8];
-  short party_spellbook_frame_offset_x[8],party_spellbook_frame_offset_y[8];
-  short musickeyboard_offset_x,musickeyboard_offset_y;
-  short inpf_offset_x,inpf_offset_y;
-  short con_frm_offset_x,con_frm_offset_y;
-  short volcontrol_offset_x,volcontrol_offset_y;
+  short party_frame_offset_x[8],
+    party_frame_offset_y[8];
+  short party_spellbook_frame_offset_x[8],
+    party_spellbook_frame_offset_y[8];
+  short musickeyboard_offset_x,
+    musickeyboard_offset_y;
+  short inpf_offset_x,
+    inpf_offset_y;
+  short con_frm_offset_x,
+    con_frm_offset_y;
+  short volcontrol_offset_x,
+    volcontrol_offset_y;
   short qkstf_offset_x,qkstf_offset_y;
   unsigned char u6ovolume;
   unsigned char u6omidivolume;
@@ -48,6 +54,7 @@ extern unsigned char JDISABLED;
 extern unsigned char fonts_added;
 extern float intro_timer;
 extern unsigned short U6OK_DEFAULT[128][2];
+// U60K -
 extern unsigned short U6OK[128][2];
 extern unsigned short U6OK_TEMP[128][2];
 //1 INSTANTCLICK ON,?
@@ -65,8 +72,8 @@ extern HFONT fnt7;
 extern HFONT fnt1naa;
 extern HFONT systemfont;
 
-extern surf *intro_ultimavi;
-extern surf *intro_ultimavi2;
+extern surface *intro_ultimavi;
+extern surface *intro_ultimavi2;
 
 
 //visibility checking arrays
@@ -155,7 +162,7 @@ extern unsigned long portraitlook_namecolour;
 extern unsigned char noclouds;
 extern long cloudidealnum;
 extern unsigned char cloudloaded;
-extern surf *cloudimg[16][4];
+extern surface *cloudimg[16][4];
 extern unsigned char cloudactive[32];
 extern unsigned char cloudtype[32];
 extern long cloudx[32],cloudy[32];
@@ -174,7 +181,7 @@ extern MCI_PLAY_PARMS mciPlayParms;
 
 
 
-extern surf *vs;
+extern surface *vs;
 
 extern unsigned char timelval; //0=full brightness, 15=total darkness
 
@@ -187,8 +194,8 @@ extern long omy;
 extern long omb; //used by frame.h
 extern long omx2;
 extern long omy2;
-extern long omx3;
-extern long omy3;
+extern long g_MousePosX;
+extern long g_MousePosY;
 
 extern unsigned short vf_mb2_x;
 extern unsigned short vf_mb2_y;
@@ -323,21 +330,21 @@ extern unsigned long keyframe15;
 extern unsigned long keyframe31; //animation/palette index (0-7)
 extern unsigned long refreshcount; //incremented every refresh
 
-extern surf* ps;
-extern surf *ps2;
-extern surf *ps3;
-extern surf *ps4;
-extern surf *ps5;
-extern surf *ps6;
-extern surf *ps7;
-extern surf *ps8;
-extern surf *ps640400;
-extern surf *ps320200;
+extern surface* ps;
+extern surface *ps2;
+extern surface *ps3;
+extern surface *ps4;
+extern surface *ps5;
+extern surface *ps6;
+extern surface *ps7;
+extern surface *ps8;
+extern surface *ps640400;
+extern surface *ps320200;
 
 // rrr
-extern surf* psnew1;
-extern surf* psnew1b;
-//extern surf* party_surf[8];
+extern surface* psnew1;
+extern surface* psnew1b;
+//extern surface* party_surf[8];
 extern FRAME* party_frame_new[];
 extern unsigned int partyframenewmax;
 
@@ -348,16 +355,16 @@ extern unsigned int partyresxz;
 extern unsigned int partyresyz;
 extern int newmodestatus;
 extern double partyresscale;
-extern unsigned int resxn1m;
-extern unsigned int resyn1m;
-extern unsigned int respn1m;
-extern unsigned int resxn1w;
-extern unsigned int resyn1w;
+extern unsigned int g_ScaledClientGameWindowWidth;
+extern unsigned int g_ScaledClientGameWindowHeight;
+extern unsigned int g_ScaledClientGameWindowPixels;
+extern unsigned int g_ScaledClientWindowWidth;
+extern unsigned int g_ScaledClientWindowHeight;
 
 
 // r999
 /*
-extern surf* panelsurf[PANEL_MAX];
+extern surface* panelsurf[PANEL_MAX];
 extern int panelx[PANEL_MAX], panely[PANEL_MAX], panelx2[PANEL_MAX], panely2[PANEL_MAX];
 extern long panelmx[PANEL_MAX], panelmy[PANEL_MAX];
 extern double panelscalex[PANEL_MAX], panelscaley[PANEL_MAX];
@@ -367,8 +374,8 @@ extern int panelsideui, panelactionbar1, panelactionbar2, panelactiontalkbar1, p
 */
 
 // r444
-extern surf *minimaptilesurf, *minimaptilesurf1, *minimaptilesurf2;
-extern surf* minimap_surf_new;
+extern surface *minimaptilesurf, *minimaptilesurf1, *minimaptilesurf2;
+extern surface* minimap_surf_new;
 extern unsigned int minimaptype, minimaptypemax;
 extern int minimapnewx, minimapnewy;
 extern int minimapdeltax, minimaptilexstart, minimaptilexend;
@@ -376,53 +383,102 @@ extern int minimapdeltay, minimaptileystart, minimaptileyend;
 extern int minimapplayerx, minimapplayery;
 extern float minimapstepsize;
 
+/*void SetMiniMapType(unsigned int t) {
+    switch (t) {
+        case 1:
+            minimaptilexstart = 1;
+            minimaptilexend = 3;
+            minimaptileystart = 1;
+            minimaptileyend = 3;
+            minimaptilesurf = minimaptilesurf1;
+            minimapplayerx = 128 - 13;
+            minimapplayery = 128 - 24;
+            minimapstepsize = 4.9f;
+            break;
+        case 2:
+            minimaptilexstart = 0;
+            minimaptilexend = 4;
+            minimaptileystart = 0;
+            minimaptileyend = 4;
+            minimaptilesurf = minimaptilesurf2;
+            minimapplayerx = 128 - 9;
+            minimapplayery = 128 - 21;
+            minimapstepsize = 2.45f;
+            break;
+        default:
+            SetMiniMapType(1);
+            break;
+    }
+}*/
+
 // r666
-//extern surf* actionbarsurf[ACTIONBAR_MAX];
+//extern surface* actionbarsurf[ACTIONBAR_MAX];
 //extern int actionbarx[ACTIONBAR_MAX], actionbary[ACTIONBAR_MAX], actionbuttonsizex, actionbuttonsizey;
 //extern int actionbuttonx[ACTIONBAR_MAX][ACTIONBUTTON_MAX], actionbuttony[ACTIONBAR_MAX][ACTIONBUTTON_MAX];
 extern int actionpending;
 extern int actionlast;
 extern int actionreset;
 
-//extern surf* actiontalksurf[ACTIONTALKBAR_MAX];
+//extern surface* actiontalksurf[ACTIONTALKBAR_MAX];
 //extern int actiontalkx[ACTIONTALKBAR_MAX], actiontalky[ACTIONTALKBAR_MAX], actiontalkbuttonsizex, actiontalkbuttonsizey;
 //extern int actiontalkbuttonx[ACTIONTALKBAR_MAX][ACTIONTALKBUTTON_MAX], actiontalkbuttony[ACTIONTALKBAR_MAX][ACTIONTALKBUTTON_MAX];
-extern int actiontalkfilltext;
+extern int actionTalkFillText;
 
-//extern surf* actionbuttonsurf[ACTIONBUTTON_MAX][10];
+//extern surface* actionbuttonsurf[ACTIONBUTTON_MAX][10];
 
 // r999
-extern surf* uipanelsurf[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-extern int uipanelx[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-extern int uipanely[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-extern int uipanelsizex[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-extern int uipanelsizey[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-extern float uipanelscalex[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-extern float uipanelscaley[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-extern int uipanelscaling[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-extern int uipanelhitenable[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-extern int uipanelusedefaultstatedata[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+
+// g_UI_PanelSurface - contains all drawable UI textures
+// [parentId][childId][stateId]
+extern surface* g_UI_PanelSurface[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+// g_UI_PanelX - x position of all panels
+// [parentId][childId][stateId]
+extern int g_UI_PanelX[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+// g_UI_PanelY - y position of all panels
+// [parentId][childId][stateId]
+extern int g_UI_PanelY[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+// g_UI_PanelWidth - x size of all panels
+// [parentId][childId][stateId]
+extern int g_UI_PanelWidth[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+
+extern int g_UI_PanelHeight[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern float g_UI_PanelScaleX[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern float g_UI_PanelScaleY[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int g_UI_PanelScaling[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int g_UI_PanelClickable[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern int g_UI_PanelUseDefaultStateData[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
 
 extern int uipaneli[UI_PANEL_MAX][UI_PANELWIDGET_MAX];
-extern int uipanelcount;
-extern int uipanelwidgetcount[UI_PANEL_MAX];
+extern int g_UI_PanelCount;
+extern int g_UI_PanelWidgetCount[UI_PANEL_MAX];
 
-extern int uipanelsidebar, uipanelminimap, uipanelworldmap, uipanelworldmapbar, uipanelpartymemberparent, uipanelactionbarparent, uipanelactiontalkbarparent;
-extern int uipanelactionbar1, uipanelactionbar2, uipaneloptionbar1, uipanelactiontalkbar1, uipanelactiontalkbar2, uipanelactiontalkbar3;
-extern int uipanelpartymember0;
-extern int uipaneloptioninfo;
+extern int g_UI_SidebarPanelId,
+            g_UI_MinimapPanelId,
+            g_UI_WorldmapPanelId,
+            g_UI_WorldmapBarPanelId,
+            g_UI_PartyMemberParentPanelId,
+            g_UI_ActionBarParentPanelId,
+            g_UI_ActionTalkBarParentPanelId;
+extern int g_UI_ActionBarTopPanelId,
+            g_UI_ActionBarBottomPanelId,
+            g_UI_OptionBarPanelId,
+            g_UI_TalkActionBar1PanelId, // first two rows of buttons (first column: name, job)
+            g_UI_TalkActionBar2PanelId, // middle two rows of buttons (first column: yes, no)
+            g_UI_TalkActionBar3PanelId; // last two rows of buttons (first column: depo, with)
+extern int g_UI_PartyMemberPanelId;
+extern int g_UI_OptionInfoPanelId;
 
 extern int hituipaneli, hituiwidgeti;
-extern surf* uipanelimgsurf[UI_PANEL_IMG_MAX];
-extern surf* uiwidgetimgsurf[UI_PANELWIDGET_IMG_MAX][UI_WIDGETSTATE_IMG_MAX];
+extern surface* uipanelimgsurf[UI_PANEL_IMG_MAX];
+extern surface* uiwidgetimgsurf[UI_PANELWIDGET_IMG_MAX][UI_WIDGETSTATE_IMG_MAX];
 extern float uiscalex, uiscaley;
 extern int uiscaling;
 extern int uihover;
-extern surf *uihoveractionbuttonsurf, *uihoveractiontalkbuttonsurf, *uihoverpartymemberbuttonsurf;
+extern surface *uihoveractionbuttonsurf, *uihoveractiontalkbuttonsurf, *uihoverpartymemberbuttonsurf;
 
 // s777
-extern int uipanelpartymemberbar1;
-extern int uipanelpartymemberlock;
+extern int g_UI_PartyMemberBarPanelId;
+extern int g_UI_PartyMemberLockPanelId;
 
 
 
@@ -436,7 +492,7 @@ extern int combatinfoplayerprevinit;
 extern int resultinfon1;
 
 // s444
-extern surf* worldmapsurfn1[5];
+extern surface* worldmapsurfn1[5];
 extern int worldmapindexn1;
 extern int enhancen1;
 extern int showworldmapn1;
@@ -449,12 +505,12 @@ extern int updatepartyframen1;
 
 
 
-extern surf* bt32;
-extern surf* bt16;
-extern surf* spr84[16];
-extern surf* spr8[8];
-extern surf* sfx8;
-extern surf* bt8[8];
+extern surface* bt32;
+extern surface* bt16;
+extern surface* spr84[16];
+extern surface* spr8[8];
+extern surface* sfx8;
+extern surface* bt8[8];
 extern sound* SNDhit;
 
 //sf compatible information
@@ -466,13 +522,13 @@ extern unsigned char action; //active action key
 extern unsigned char sprpi[65536];//index in pal emu spr8
 
 //portraits 2.0 info
-extern surf* portrait[65536];//regular size portraits
-extern surf* portrait_doublesize[65536];//double size
-extern surf* portrait_halfsize[65536];//half size
+extern surface* portrait[65536];//regular size portraits
+extern surface* portrait_doublesize[65536];//double size
+extern surface* portrait_halfsize[65536];//half size
 extern unsigned char portrait_loaded[65536];//TRUE=PORTRAIT LOADED
 extern unsigned char portrait_requested[65536];//TRUE=portrait has been requested
 extern txt *portrait_request_txt;
-extern surf* PORTRAIT_UNAVAILABLE;
+extern surface* PORTRAIT_UNAVAILABLE;
 
 extern unsigned char wateri[32]; //used for hybrid sea tiles
 
@@ -492,8 +548,8 @@ extern unsigned char client_spellwait[8];
 extern txt* inpmess;
 extern inpmess_index *inpmess_mostrecent;
 extern long inpmess_selected;
-extern surf *surf_tremor,*surf_tremor2,*surf_tremorcirclemask;
-extern surf *intro_startup;
+extern surface *surf_tremor,*surf_tremor2,*surf_tremorcirclemask;
+extern surface *intro_startup;
 
 extern unsigned short walkthru_x;
 extern unsigned short walkthru_y;
@@ -513,7 +569,7 @@ extern unsigned char u6o_vq[28];//0=a,1=b
 extern unsigned char u6o_createcharacter;//obselete!
 extern txt *u6o_new_user_password;
 
-extern surf *spellicon[256];
+extern surface *spellicon[256];
 
 extern unsigned long midi_song; //handle to current midi
 extern short midi_loaded;
@@ -523,24 +579,24 @@ extern float midi_foreground_wait;
 
 extern txt *con_txt[8];
 
-extern surf* party_spellbook_surf[8];
+extern surface* party_spellbook_surf[8];
 extern FRAME* party_spellbook_frame[8];
 extern unsigned short spell[8][256]; //number of times spell can be cast (+1)
 extern unsigned char spellbook_page[8]; //current page in spellbook
 extern unsigned char spellbook_flags[8]; //1=left dog-ear 2=right dog-ear
 
 
-extern surf* party_surf[8];
+extern surface* party_surf[8];
 extern FRAME* party_frame[8];
 
-extern surf* minimap_surf;
+extern surface* minimap_surf;
 extern FRAME* minimap_frame;
-extern surf* minimap_b;
-extern surf* treasuremap;
-extern surf* tmap_surf;
+extern surface* minimap_b;
+extern surface* treasuremap;
+extern surface* tmap_surf;
 extern FRAME* tmap_frame;
-extern surf* tmap_markers;
-extern surf* tmap_marker;
+extern surface* tmap_markers;
+extern surface* tmap_marker;
 
 extern object* tobj_i[8][16+1+4+1];
 extern object* tobj_e[8][8];
@@ -552,101 +608,101 @@ extern unsigned char cltset2_restored;
 extern file* messagelog;
 
 extern FRAME* fs;
-extern surf* status8;
-extern surf* darrow;
-extern surf* uarrow;
-extern surf* horizon;
-extern surf* horizon2;
+extern surface* status8;
+extern surface* darrow;
+extern surface* uarrow;
+extern surface* horizon;
+extern surface* horizon2;
 
-extern surf* cave;
-extern surf* sun;
-extern surf* sun2;
-extern surf* mini_1;
-extern surf* tmini_1;
-extern surf* mini_2;
-extern surf* mini_3;
-extern surf* u6ob;
-extern surf* dhno;
-extern surf* not4sale;
-extern surf* not4salemask;
-extern surf* converse_arrows;
-extern surf* spellbook;
-extern surf* spellbookmini;
-extern surf* statusmessage_arrowup;
-extern surf *spellcircle[8];
-extern surf *statusbar_r255;
-extern surf *statusbar_r128;
-extern surf *statusbar_b255;
-extern surf *statusbar_b128;
-extern surf *statusbar_g255;
-extern surf *statusbar_g128;
-extern surf* statusbar;
-extern surf *dogearr;
-extern surf *dogearl;
-extern surf *spellbookline;
-extern surf *intro_gypsy;
-extern surf *intro_gypsy2;
-extern surf *intro_vial;
-extern surf *intro_svial;
-extern surf *intro_bigvial;
-extern surf *intro_hpl0;
-extern surf *intro_hpl2;
-extern surf *intro_hpl3;
-extern surf *intro_hps0;
-extern surf *intro_hps2;
-extern surf *intro_hps3;
-extern surf *intro_hpr0;
-extern surf *intro_hpr2;
-extern surf *intro_hpr3;
-extern surf *intro_arml;
-extern surf *intro_armr;
-extern surf *intro_s64;
-extern surf *intro_s64b;
-extern surf *intro_s128;
-extern surf *intro_ab;
-extern surf *intro_aba;
-extern surf *intro_abb;
-extern surf *intro_caravan;
-extern surf *intro_flask;
-extern surf *intro_ccsave1;
-extern surf *intro_ccsave2;
-extern surf *intro_ccsave3;
-extern surf *intro_tacinfo;
-extern surf *intro_newchar;
-extern surf *intro_newchar2;
-extern surf *intro_x;
-extern surf *intro_back;
-extern surf *intro_next;
-extern surf *intro_ifield;
-extern surf *blr[4];
-extern surf *glr[4];
-extern surf *instantclickx;
-extern surf *instantclickok;
-extern surf *endgame_image[10];
-extern surf *spellbookmini2;
-extern surf *voicechat_voicebar;
-extern surf *voicechat_voice1;
-extern surf *voicechat_voiceof;
-extern surf *inventoryadd_icon;
-extern surf *horsemask;
-extern surf *horsemask2;
-extern surf *horsemaskdress;
-extern surf *horsemask2dress;
-extern surf *horsemaskdressb;
-extern surf *horsemask2dressb;
-extern surf* port_temp;
-extern surf* vm_volumem;
-extern surf* vm_volmmute;
-extern surf* vm_voltab2m;
-extern surf* volcontrol_background;
-extern surf* volcontrol_surf;
-extern surf* volcontrol_tab1;
-extern surf* volcontrol_tab2;
-extern surf* volcontrol_tab3;
-extern surf* viewnpc;
-extern surf* viewnpc2;
-extern surf* viewnpc_temp;
-extern surf* viewnpc2_temp;
+extern surface* cave;
+extern surface* sun;
+extern surface* sun2;
+extern surface* mini_1;
+extern surface* tmini_1;
+extern surface* mini_2;
+extern surface* mini_3;
+extern surface* u6ob;
+extern surface* dhno;
+extern surface* not4sale;
+extern surface* not4salemask;
+extern surface* converse_arrows;
+extern surface* spellbook;
+extern surface* spellbookmini;
+extern surface* statusmessage_arrowup;
+extern surface *spellcircle[8];
+extern surface *statusbar_r255;
+extern surface *statusbar_r128;
+extern surface *statusbar_b255;
+extern surface *statusbar_b128;
+extern surface *statusbar_g255;
+extern surface *statusbar_g128;
+extern surface* statusbar;
+extern surface *dogearr;
+extern surface *dogearl;
+extern surface *spellbookline;
+extern surface *intro_gypsy;
+extern surface *intro_gypsy2;
+extern surface *intro_vial;
+extern surface *intro_svial;
+extern surface *intro_bigvial;
+extern surface *intro_hpl0;
+extern surface *intro_hpl2;
+extern surface *intro_hpl3;
+extern surface *intro_hps0;
+extern surface *intro_hps2;
+extern surface *intro_hps3;
+extern surface *intro_hpr0;
+extern surface *intro_hpr2;
+extern surface *intro_hpr3;
+extern surface *intro_arml;
+extern surface *intro_armr;
+extern surface *intro_s64;
+extern surface *intro_s64b;
+extern surface *intro_s128;
+extern surface *intro_ab;
+extern surface *intro_aba;
+extern surface *intro_abb;
+extern surface *intro_caravan;
+extern surface *intro_flask;
+extern surface *intro_ccsave1;
+extern surface *intro_ccsave2;
+extern surface *intro_ccsave3;
+extern surface *intro_tacinfo;
+extern surface *intro_newchar;
+extern surface *intro_newchar2;
+extern surface *intro_x;
+extern surface *intro_back;
+extern surface *intro_next;
+extern surface *intro_ifield;
+extern surface *blr[4];
+extern surface *glr[4];
+extern surface *instantclickx;
+extern surface *instantclickok;
+extern surface *endgame_image[10];
+extern surface *spellbookmini2;
+extern surface *voicechat_voicebar;
+extern surface *voicechat_voice1;
+extern surface *voicechat_voiceof;
+extern surface *inventoryadd_icon;
+extern surface *horsemask;
+extern surface *horsemask2;
+extern surface *horsemaskdress;
+extern surface *horsemask2dress;
+extern surface *horsemaskdressb;
+extern surface *horsemask2dressb;
+extern surface* port_temp;
+extern surface* vm_volumem;
+extern surface* vm_volmmute;
+extern surface* vm_voltab2m;
+extern surface* volcontrol_background;
+extern surface* volcontrol_surf;
+extern surface* volcontrol_tab1;
+extern surface* volcontrol_tab2;
+extern surface* volcontrol_tab3;
+extern surface* viewnpc;
+extern surface* viewnpc2;
+extern surface* viewnpc_temp;
+extern surface* viewnpc2_temp;
 
 extern FRAME* statusmessage_viewnpc;
 extern FRAME* statusmessage_viewprev;

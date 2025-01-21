@@ -313,6 +313,10 @@ close(tfh);
 tfh=open2(".\\dr\\bt.bin",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
 put(tfh,&bt,1024*2048*2);
 close(tfh);
+
+tfh=open2(".\\dr\\bt.png",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
+put(tfh,&bt,1024*2048*2);
+close(tfh);
 //later we will compress and encrypt this
 
 //NEWCODE

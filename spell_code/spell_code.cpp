@@ -5,38 +5,27 @@
 #include "../function_both.h"
 
 /* First Circle */
-U6O_SPELL_FUNCTION(create_food) { 
-  object * myobj2;
-  int amount;
+U6O_SPELL_FUNCTION(create_food) {
+    if (stormcloakcheck2(x, y, myplr)) {
+        return SPELL_INVALID;
+    }
 
-  if (stormcloakcheck2(x,y,myplr)) {
-    return SPELL_INVALID;
-  }
-  if ((myobj2=OBJfindlast(x,y))){
-    if (!(obji[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].flags&512)) {
-      return SPELL_INVALID;
+    object *myobj2 = OBJfindlast(x, y);
+    if (myobj2 && !(obji[sprlnk[myobj2->type & 1023] + (myobj2->type >> 10)].flags & 512)) {
+        return SPELL_INVALID;
     }
-    /* luteijn: this looks redundant, previous case already applied! */
-    /*
-    if ((bt[y][x]&1024)==0){
-      if (!(obji[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].flags&512)) {
-	return SPELL_INVALID;
-      }
+
+    int amount = static_cast<int>(rnd * (3 + (caster->intelligence >> 4) + 1));
+    if (amount) {
+        myobj2 = OBJnew();
+        myobj2->type = 129; // meat
+        myobj2->more2 = amount;
+        myobj2->info |= 112; // set flags as temp OBJ
+        OBJadd(x, y, myobj2);
+        return SPELL_SUCCESS;
     }
-    */
-  }
-  /* OK, can create food here */
-  amount=3+(caster->i>>4)+1;
-  amount=(int)(rnd*amount);
-  if (amount){
-    myobj2=OBJnew();
-    myobj2->type=129; //meat
-    myobj2->more2=amount;
-    myobj2->info|=112; //set flags as temp OBJ
-    OBJadd(x,y,myobj2);
-    return SPELL_SUCCESS;
-  } 
-  return SPELL_FAILURE;
+
+    return SPELL_FAILURE;
 }
 
 U6O_SPELL_FUNCTION(detect_magic) {
@@ -44,47 +33,43 @@ U6O_SPELL_FUNCTION(detect_magic) {
 }
 
 U6O_SPELL_FUNCTION(detect_trap) {
-  int x3,y3;
-  int x4;
-  object * myobj2;
-  static txt * t=txtnew();
-  static txt * t2=txtnew();
+    int x3, y3, traps_found = 0;
+    object *myobj2;
+    static txt *t = txtnew();
+    static txt *t2 = txtnew();
 
-  if (stormcloakcheck2(x,y,myplr)) {
-    return SPELL_INVALID;
-  }
-  //check for failure here first
-  x3=(int)(rnd*(8+5*1));
-  x4=(int)(rnd*(caster->i+1));
-  if (x4<x3) {
-    return SPELL_FAILURE;
-  }
-  x4=0; // counts number of traps found.
-  for (int spellx=-20;spellx<=20;spellx++){ 
-    for (int spelly=-16;spelly<=16;spelly++){
-    // x3=tpx+15+spellx; y3=tpyy+11+spelly; // caster may not be centered on the screen!
-    x3=x+spellx;
-    y3=y+spelly;
-    if ((x3>=0)&&(y3>=0)&&(x3<=2047)&&(y3<=1023)){
-      if (myobj2=od[y3][x3]){
-	if (myobj2->type==173){ //trap
-	  x4++;
-	  myobj2->info|=(1<<9); //make visible
-	}//trap
-      }//myobj2
-    }//x3,y3
-  }}//x,y
-  if (x4){
-    txtset(t,"?"); t->d2[0]=8;
-    txtnumint(t2,x4);
-    txtadd(t,t2);
-    if (x4==1) txtadd(t," trap detected!"); else txtadd(t," traps detected!");
-  }else{
-    txtset(t,"?"); t->d2[0]=8;
-    txtadd(t,"No traps detected.");
-  }
-  NET_send(NETplayer,myplr->net,t);
-  return SPELL_SUCCESS;
+    if (stormcloakcheck2(x, y, myplr)) {
+        return SPELL_INVALID;
+    }
+
+    if ((int)(rnd * (8 + 5 * 1)) > (int)(rnd * (caster->intelligence + 1))) {
+        return SPELL_FAILURE;
+    }
+
+    for (int spellx = -20; spellx <= 20; spellx++) {
+        for (int spelly = -16; spelly <= 16; spelly++) {
+            x3 = x + spellx;
+            y3 = y + spelly;
+            if (x3 >= 0 && y3 >= 0 && x3 <= 2047 && y3 <= 1023) {
+                if ((myobj2 = od[y3][x3]) && myobj2->type == 173) { // trap
+                    traps_found++;
+                    myobj2->info |= (1 << 9); // make visible
+                }
+            }
+        }
+    }
+
+    txtset(t, "?");
+    t->d2[0] = 8;
+    if (traps_found) {
+        txtnumint(t2, traps_found);
+        txtadd(t, t2);
+        txtadd(t, traps_found == 1 ? " trap detected!" : " traps detected!");
+    } else {
+        txtadd(t, "No traps detected.");
+    }
+    NET_send(NETplayer, myplr->net, t);
+    return SPELL_SUCCESS;
 }
 
 U6O_SPELL_FUNCTION(dispel_magic) {
@@ -119,7 +104,7 @@ U6O_SPELL_FUNCTION(douse) {
       case 145: //candelabra
       case 223: //powder keg
 	x1=(int)(rnd*(8+5*1));
-	x2=(int)(rnd*(caster->i+1));
+	x2=(int)(rnd*(caster->intelligence + 1));
 	if (x2<x1){
 	  //fail
 	  return SPELL_FAILURE;
@@ -199,7 +184,7 @@ U6O_SPELL_FUNCTION(ignite) {
       case 223: //powder keg
       case 53: //web
 	x1=(int)(rnd*(8+5*1));
-	x2=(int)(rnd*(caster->i+1));
+	x2=(int)(rnd*(caster->intelligence + 1));
 	if (x2<x1){
 	  //fail
 	  return SPELL_SUCCESS;
@@ -285,7 +270,7 @@ U6O_SPELL_FUNCTION(telekinesis) {
 	  case 174: //switch
       case 288: //crank
 	x3=(int)rnd*(8+5*2); 
-	x4=(int)rnd*(caster->i+1);
+	x4=(int)rnd*(caster->intelligence + 1);
 	if (x4>=x3){
 	  use_toggle(NULL,myobj2);
 	  return SPELL_SUCCESS;

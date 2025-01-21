@@ -51,13 +51,13 @@ extern txt *li2_t;
 //void updatepartyframe1(FRAME* f, int partyindex, double scale);
 
 // r999 new
-void inituidatan1();
+void initializeUIPanels();
 void applyscaleuipanelwidget(int uipi, int uiwi, int uisi, float scalex, float scaley);
 int gethituipaneli(int x, int y);
 int gethituipanelwidgeti(int x, int y, int uipaneli);
 int gethituipanelwidgeti(int x, int y);
 int testhituipanel(int x, int y, int uipaneli);
-void updateoverlaysurfn1(surf* s);
+void updateoverlaysurfn1(surface* s);
 
 
 
@@ -97,7 +97,7 @@ void GETINPUT_stop();
 //g32
 //req: d=1024x?xSYSMEM16 s=32x?xSYSMEM16
 //used for basetiles
-inline void g32(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i){
+inline void g32(surface *d, unsigned long x, unsigned long y, surface *s, unsigned long i){
   static unsigned long pebx,pecx;
   pebx=(unsigned long)s->o+((i/8)*2048*8)+((i&7)*64);
   pecx=(unsigned long)d->o+x*2+y*2048;
@@ -115,7 +115,7 @@ inline void g32(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i)
 
 
 //used for overlaying dirt on basetiles
-inline void g32z(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i){
+inline void g32z(surface *d, unsigned long x, unsigned long y, surface *s, unsigned long i){
   static unsigned long pebx,pecx;
   pebx=(unsigned long)s->o+((i/8)*2048*8)+((i&7)*64);
   pecx=(unsigned long)d->o+x*2+y*2048;
@@ -127,7 +127,7 @@ inline void g32z(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i
   }
 }
 
-inline void sf32(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i){
+inline void sf32(surface *d, unsigned long x, unsigned long y, surface *s, unsigned long i){
   static unsigned long pebx,pecx;
   pebx=(unsigned long)s->o+((i/32)*2048*32)+((i&31)*64);
   pecx=(unsigned long)d->o+x*2+y*2048;
@@ -139,7 +139,7 @@ inline void sf32(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i
   }
 }
 
-inline void sf32z(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i){
+inline void sf32z(surface *d, unsigned long x, unsigned long y, surface *s, unsigned long i){
   static unsigned long pebx,pecx;
   pebx=(unsigned long)s->o+((i/32)*2048*32)+((i&31)*64);
   pecx=(unsigned long)d->o+x*2+y*2048;
@@ -151,7 +151,7 @@ inline void sf32z(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long 
   }
 }
 
-inline void im32z(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i){
+inline void im32z(surface *d, unsigned long x, unsigned long y, surface *s, unsigned long i){
   static unsigned long pebx,pecx;
   pebx=(unsigned long)s->o+i*64*32;
   pecx=(unsigned long)d->o+x*2+y*2048;
@@ -194,10 +194,10 @@ void getsound(unsigned short type,long x,long y);
 void getlight(unsigned short type,long x,long y);
 
 //portraits 2.0 functions
-void loadportrait(unsigned short i,surf *s);
-surf *getportrait(unsigned short i);
-surf *getportrait_doublesize(unsigned short i);
-surf *getportrait_halfsize(unsigned short i);
+void loadportrait(unsigned short i, surface *s);
+surface *getportrait(unsigned short i);
+surface *getportrait_doublesize(unsigned short i);
+surface *getportrait_halfsize(unsigned short i);
 
 unsigned char getambientlight(unsigned short x,unsigned short y);
 
@@ -217,9 +217,14 @@ void refresh();  // FIXME Inline assembly alert!
 
 void scrlog(const char*d); //screen log
 
-surf *loadimage2(LPCSTR name);
-surf *loadimage2(txt* name);
-surf *loadimage2(LPCSTR name,long flags);
-surf *loadimage2(txt* name,long flags);
+surface *loadimage2(LPCSTR name);
+surface *loadimage2(txt* name);
+surface *loadimage2(LPCSTR name, long flags);
+surface *loadimage2(txt* name, long flags);
+
+// Sets all the states, sizing, scaling, and interaction for a panel widget
+int
+initializeActionBarParent(int widgetId, int sidebarStacky, int panelSizeX, int panelSizeY, float scaleX, float scaleY,
+                          int hitEnabled, int useDefaultState, bool surface);
 
 #endif /* FUNCTION_CLIENT_H */

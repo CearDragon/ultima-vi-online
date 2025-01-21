@@ -25,71 +25,117 @@ long FRAME_mb;
 HFONT thfont;
 FRM_TXT *ttxt;
 
+
+static unsigned int g_Static_EnhancedSideBarWidth = 260;
+static unsigned int g_Static_ScaledHeightModifier = 3 / 4;
+
 // rrr
-static unsigned int resxa = 1024;
-static unsigned int resya = 768;
+static unsigned int g_Static_EnhancedClientWindowWidth = 1024;
+static unsigned int g_Static_EnhancedClientWindowHeight = 768;
 
-static unsigned int resxb = 512;
-static unsigned int resyb = 384;
-static unsigned int respb = resxb*resyb;
+static unsigned int g_Static_BaseClientWindowWidth = 512;
+static unsigned int g_Static_BaseClientWindowHeight = 384;
+static unsigned int g_Static_BaseClientWindowPixels = g_Static_BaseClientWindowWidth * g_Static_BaseClientWindowHeight;
 
-static unsigned int resxc = 1200;
-static unsigned int resyc = resxc*3/4;
-static unsigned int respc = resxc*resyc;
+static unsigned int g_Static_ScaledClientWindowWidth = 1200;
+static unsigned int g_Static_ScaledClientWindowHeight = g_Static_ScaledClientWindowWidth * g_Static_ScaledHeightModifier;
+static unsigned int g_Static_ScaledClientWindowPixels = g_Static_ScaledClientWindowWidth * g_Static_ScaledClientWindowHeight;
 
-unsigned int resxo = resxa;
-unsigned int resyo = resya;
+unsigned int g_EnhancedClientWindowWidth = g_Static_EnhancedClientWindowWidth;
+unsigned int g_EnhancedClientWindowHeight = g_Static_EnhancedClientWindowHeight;
 
-unsigned int resxs = resxb;
-unsigned int resys = resyb;
+unsigned int g_BaseClientWindowWidth = g_Static_BaseClientWindowWidth;
+unsigned int g_BaseClientWindowHeight = g_Static_BaseClientWindowHeight;
 
-unsigned int resxn1w = resxc;
-unsigned int resyn1w = resyc;
+unsigned int g_ScaledClientWindowWidth = g_Static_ScaledClientWindowWidth;
+unsigned int g_ScaledClientWindowHeight = g_Static_ScaledClientWindowHeight;
 
-unsigned int resxn1m = resxn1w - 260;
-unsigned int resyn1m = resxn1m*3/4;
-unsigned int respn1m = resxn1m * resyn1m;
+unsigned int g_ScaledClientGameWindowWidth = g_ScaledClientWindowWidth - g_Static_EnhancedSideBarWidth;
+unsigned int g_ScaledClientGameWindowHeight = g_ScaledClientGameWindowWidth * g_Static_ScaledHeightModifier;
+unsigned int g_ScaledClientGameWindowPixels = g_ScaledClientGameWindowWidth * g_ScaledClientGameWindowHeight;
 
-unsigned int resxz;
-unsigned int resyz;
+unsigned int g_WindowResolutionWidth;
+unsigned int g_WindowResolutionHeight;
 
 unsigned int windowsizecyclenum = 0;
 unsigned int windowsizecyclemax = 1;
 
-long omx3;
-long omy3;
+long g_MousePosX;
+long g_MousePosY;
 
 double scalexm = 1.0f;
 double scaleym = 1.0f;
 
 // r999 new
-surf* uipanelsurf[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-int uipanelx[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-int uipanely[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-int uipanelsizex[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-int uipanelsizey[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-float uipanelscalex[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-float uipanelscaley[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-int uipanelscaling[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-int uipanelhitenable[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
-int uipanelusedefaultstatedata[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
 
+// g_UI_PanelSurface - reference to the surface of the UI Widget
+surface* g_UI_PanelSurface[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+// g_UI_PanelX - x position of the UI Widget
+int g_UI_PanelX[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+// g_UI_PanelY - y position of the UI Widget
+int g_UI_PanelY[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+// g_UI_PanelWidth - x size of the UI Widget
+int g_UI_PanelWidth[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+// g_UI_PanelHeight - y size of the UI Widget
+int g_UI_PanelHeight[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+// g_UI_PanelScaleX - x scale of the UI Widget
+float g_UI_PanelScaleX[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+// g_UI_PanelScaleY - y scale of the UI Widget
+float g_UI_PanelScaleY[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+// g_UI_PanelScaling - scaling of the UI Widget
+int g_UI_PanelScaling[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+// g_UI_PanelClickable - hit enable of the UI Widget
+int g_UI_PanelClickable[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+// g_UI_PanelUseDefaultStateData - use default state data of the UI Widget
+int g_UI_PanelUseDefaultStateData[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+
+// I think this is just to get panel indices?
 int uipaneli[UI_PANEL_MAX][UI_PANELWIDGET_MAX];
-int uipanelcount;
-int uipanelwidgetcount[UI_PANEL_MAX];
-int uipanelsidebar, uipanelminimap, uipanelworldmap, uipanelworldmapbar, uipanelpartymemberparent, uipanelactionbarparent, uipanelactiontalkbarparent;
-int uipanelactionbar1, uipanelactionbar2, uipaneloptionbar1, uipanelactiontalkbar1, uipanelactiontalkbar2, uipanelactiontalkbar3;
-int uipanelpartymember0;
-int uipaneloptioninfo;
+// g_UI_PanelCount - number of UI Panels
+int g_UI_PanelCount;
+// g_UI_PanelWidgetCount - number of UI Widgets in each UI Panel
+int g_UI_PanelWidgetCount[UI_PANEL_MAX];
+// g_UI_SidebarPanelId - ID of the Sidebar Panel
+int g_UI_SidebarPanelId;
+// g_UI_MiniMapPanelId - ID of the Minimap Panel
+int g_UI_MinimapPanelId;
+// g_UI_WorldmapPanelId - ID of the Worldmap Panel
+int g_UI_WorldmapPanelId;
+// g_UI_WorldmapBarPanelId - ID of the Worldmap Bar Panel
+int g_UI_WorldmapBarPanelId;
+// g_UI_PartyMemberParentPanelId - ID of the Party Member Parent Panel
+int g_UI_PartyMemberParentPanelId;
+// g_UI_ActionBarParentPanelId - ID of the Action Bar Parent Panel
+int g_UI_ActionBarParentPanelId;
+// g_UI_ActionTalkBarParentPanelId - ID of the Action Talk Bar Parent Panel
+int g_UI_ActionTalkBarParentPanelId;
+// g_UI_ActionBarTopPanelId - ID of the Top Action Bar Panel (Attack, Say, Look, Use, Drop)
+int g_UI_ActionBarTopPanelId;
+// g_UI_ActionBarBottomPanelId - ID of the Bottom Action Bar Panel (Drop Food, World Map, Combat Log)
+int g_UI_ActionBarBottomPanelId;
+// g_UI_OptionBarPanelId - ID of the Option Bar Panel (Game, Sound, Combat, Minimap, Logout)
+int g_UI_OptionBarPanelId;
+// g_UI_TalkActionBar1PanelId - ID of the Talk Action Bar 1 Panel (Top two bars in the g_UI_ActionTalkBarParentPanelId)
+int g_UI_TalkActionBar1PanelId;
+// g_UI_TalkActionBar2PanelId - ID of the Talk Action Bar 2 Panel (Middle two bars in the g_UI_ActionTalkBarParentPanelId)
+int g_UI_TalkActionBar2PanelId;
+// g_UI_TalkActionBar3PanelId - ID of the Talk Action Bar 3 Panel (Bottom two bars in the g_UI_ActionTalkBarParentPanelId)
+int g_UI_TalkActionBar3PanelId;
+// g_UI_PartyMemberPanelId - ID of the Party Member Panel
+int g_UI_PartyMemberPanelId;
+// g_UI_OptionInfoPanelId - ID of the Option Info Panel
+int g_UI_OptionInfoPanelId;
 
 // s777
-int uipanelpartymemberbar1;
-int uipanelpartymemberlock;
+
+// g_UI_PartyMemberBarPanelId - ID of the Party Member Bar Panel
+int g_UI_PartyMemberBarPanelId;
+int g_UI_PartyMemberLockPanelId;
 
 // s555 turn on/off new changes
 int easymodehostn1 = 0;
 int enhancehostn1 = 0;
-int enhanceclientn1 = 1;
+int g_EnhancedClient = 1;
 
 
 /* function_both */
@@ -98,10 +144,14 @@ unsigned long BITSleftmask[33];//mask of index-many bits to keep
 
 #ifdef HOST
 /* variables originally from function_host.h */
-unsigned long newsocket;
-unsigned long newsocket_ip;
-unsigned long tnewsocket;
-unsigned long tnewsocket_ip;
+// new_socket - new sockets id
+unsigned long new_socket;
+// new_socket_ip - new socket ip
+unsigned long new_socket_ip;
+// tmp_new_socket - temp local variables (transferred to globals after successful connection)
+unsigned long tmp_new_socket;
+// tmp_new_socket_ip - temp local variables (transferred to globals after successful connection)
+unsigned long tmp_new_socket_ip;
 HANDLE hsockets_accept;
 DWORD idsockets_accept;
 unsigned short AUTOPICKUPfirst;
@@ -492,8 +542,8 @@ HFONT fnt7;
 HFONT fnt1naa;
 HFONT systemfont;
 
-surf *intro_ultimavi;
-surf *intro_ultimavi2;
+surface *intro_ultimavi;
+surface *intro_ultimavi2;
 
 
 //visibility checking arrays
@@ -582,7 +632,7 @@ unsigned long portraitlook_namecolour;
 unsigned char noclouds;
 long cloudidealnum;
 unsigned char cloudloaded;
-surf *cloudimg[16][4];
+surface *cloudimg[16][4];
 unsigned char cloudactive[32];
 unsigned char cloudtype[32];
 long cloudx[32],cloudy[32];
@@ -601,7 +651,7 @@ MCI_PLAY_PARMS mciPlayParms;
 
 
 
-surf *vs;
+surface *vs;
 
 unsigned char timelval; //0=full brightness, 15=total darkness
 
@@ -725,7 +775,7 @@ unsigned char shiftnum_show;
 
 unsigned long idlst[1024];
 txt *idlst_name[1024];
-//surf *idlst_port[1024];
+//surface *idlst_port[1024];
 unsigned char idlst_volume[1024];
 unsigned long idlst_namecolour[1024];
 
@@ -754,24 +804,24 @@ unsigned long keyframe15;
 unsigned long keyframe31; //animation/palette index (0-7)
 unsigned long refreshcount; //incremented every refresh
 
-surf* ps;
-surf *ps2;
-surf *ps3;
-surf *ps4;
-surf *ps5;
-surf *ps6;
-surf *ps7;
-surf *ps8;
-surf *ps640400;
-surf *ps320200;
+surface* ps;
+surface *ps2;
+surface *ps3;
+surface *ps4;
+surface *ps5;
+surface *ps6;
+surface *ps7;
+surface *ps8;
+surface *ps640400;
+surface *ps320200;
 
 // rrr
-surf* psnew1;
-surf* psnew1b;
+surface* psnew1;
+surface* psnew1b;
 
 // r999
 /*
-surf* panelsurf[PANEL_MAX];
+surface* panelsurf[PANEL_MAX];
 int panelx[PANEL_MAX], panely[PANEL_MAX], panelx2[PANEL_MAX], panely2[PANEL_MAX];
 long panelmx[PANEL_MAX], panelmy[PANEL_MAX];
 double panelscalex[PANEL_MAX], panelscaley[PANEL_MAX];
@@ -783,17 +833,17 @@ int panelsideui, panelactionbar1, panelactionbar2, panelactiontalkbar1, panelact
 
 // r999 new
 int hituipaneli, hituiwidgeti;
-surf* uipanelimgsurf[UI_PANEL_IMG_MAX];
-surf* uiwidgetimgsurf[UI_PANELWIDGET_IMG_MAX][UI_WIDGETSTATE_IMG_MAX];
+surface* uipanelimgsurf[UI_PANEL_IMG_MAX];
+surface* uiwidgetimgsurf[UI_PANELWIDGET_IMG_MAX][UI_WIDGETSTATE_IMG_MAX];
 float uiscalex, uiscaley;
 int uiscaling = 0;
 int uihover = 1;
-surf *uihoveractionbuttonsurf, *uihoveractiontalkbuttonsurf, *uihoverpartymemberbuttonsurf;
+surface *uihoveractionbuttonsurf, *uihoveractiontalkbuttonsurf, *uihoverpartymemberbuttonsurf;
 
 
 // r444
-surf *minimaptilesurf, *minimaptilesurf1, *minimaptilesurf2;
-surf* minimap_surf_new;
+surface *minimaptilesurf, *minimaptilesurf1, *minimaptilesurf2;
+surface* minimap_surf_new;
 unsigned int minimaptype;
 unsigned int minimaptypemax = 0;
 int minimapnewx, minimapnewy;
@@ -807,7 +857,7 @@ int n1y1, n1y5;
 
 
 // r666
-//surf* actionbarsurf[ACTIONBAR_MAX];
+//surface* actionbarsurf[ACTIONBAR_MAX];
 //int actionbarmax=1;
 //int actionbarx[ACTIONBAR_MAX], actionbary[ACTIONBAR_MAX], actionbuttonsizex, actionbuttonsizey;
 //int actionbuttonx[ACTIONBAR_MAX][ACTIONBUTTON_MAX], actionbuttony[ACTIONBAR_MAX][ACTIONBUTTON_MAX];
@@ -815,20 +865,20 @@ int actionpending = 0;
 int actionlast = 0;
 int actionreset = 0;
 
-//surf* actiontalksurf[ACTIONTALKBAR_MAX];
+//surface* actiontalksurf[ACTIONTALKBAR_MAX];
 //int actiontalkmax=1;
 //int actiontalkx[ACTIONTALKBAR_MAX], actiontalky[ACTIONTALKBAR_MAX], actiontalkbuttonsizex, actiontalkbuttonsizey;
 //int actiontalkbuttonx[ACTIONTALKBAR_MAX][ACTIONTALKBUTTON_MAX], actiontalkbuttony[ACTIONTALKBAR_MAX][ACTIONTALKBUTTON_MAX];
-int actiontalkfilltext = 0;
+int actionTalkFillText = 0;
 
-//surf* actionbuttonsurf[ACTIONBUTTON_MAX][10];
+//surface* actionbuttonsurf[ACTIONBUTTON_MAX][10];
 /*
-surf* actiondropsetbuttonsurf;
-surf* actiondropupbuttonsurf;
-surf* actiondropdownbuttonsurf;
-surf* actiondropleftbuttonsurf;
-surf* actiondroprightbuttonsurf;
-surf* actionfoodfullbuttonsurf;
+surface* actiondropsetbuttonsurf;
+surface* actiondropupbuttonsurf;
+surface* actiondropdownbuttonsurf;
+surface* actiondropleftbuttonsurf;
+surface* actiondroprightbuttonsurf;
+surface* actionfoodfullbuttonsurf;
 */
 
 // r777
@@ -841,10 +891,10 @@ int droploc = 0;
 int playeronscreenxn1, playeronscreenyn1;
 
 // r222
-//surf* pspartyorg;
-//surf* pspartytemp;
-//surf* pspartynew;
-//surf* party_surf[8];
+//surface* pspartyorg;
+//surface* pspartytemp;
+//surface* pspartynew;
+//surface* party_surf[8];
 
 unsigned int partyframenewmax = 1;
 FRAME* party_frame_new[1];
@@ -884,7 +934,7 @@ int playstatusmessagesound;
 // s444
 int enhancen1 = 2;
 int showworldmapn1 = 0;
-surf* worldmapsurfn1[5];
+surface* worldmapsurfn1[5];
 int worldmapindexn1 = 1;
 int updateworldmapn1 = 1;
 int showenhancehostn1 = 1;
@@ -899,12 +949,12 @@ int selectedpartymemberframelock = 0;
 int selectedpartymembern1 = 0;
 
 
-surf* bt32;
-surf* bt16;
-surf* spr84[16];
-surf* spr8[8];
-surf* sfx8;
-surf* bt8[8];
+surface* bt32;
+surface* bt16;
+surface* spr84[16];
+surface* spr8[8];
+surface* sfx8;
+surface* bt8[8];
 sound* SNDhit;
 
 
@@ -921,13 +971,13 @@ unsigned char action; //active action key
 unsigned char sprpi[65536];//index in pal emu spr8
 
 //portraits 2.0 info
-surf* portrait[65536];//regular size portraits
-surf* portrait_doublesize[65536];//double size
-surf* portrait_halfsize[65536];//half size
+surface* portrait[65536];//regular size portraits
+surface* portrait_doublesize[65536];//double size
+surface* portrait_halfsize[65536];//half size
 unsigned char portrait_loaded[65536];//TRUE=PORTRAIT LOADED
 unsigned char portrait_requested[65536];//TRUE=portrait has been requested
 txt *portrait_request_txt;
-surf* PORTRAIT_UNAVAILABLE;
+surface* PORTRAIT_UNAVAILABLE;
 
 unsigned char wateri[32]; //used for hybrid sea tiles
 
@@ -947,8 +997,8 @@ unsigned char client_spellwait[8];
 txt* inpmess;
 inpmess_index *inpmess_mostrecent;
 long inpmess_selected;
-surf *surf_tremor,*surf_tremor2,*surf_tremorcirclemask;
-surf *intro_startup;
+surface *surf_tremor,*surf_tremor2,*surf_tremorcirclemask;
+surface *intro_startup;
 
 unsigned short walkthru_x;
 unsigned short walkthru_y;
@@ -968,7 +1018,7 @@ unsigned char u6o_vq[28];//0=a,1=b
 unsigned char u6o_createcharacter;//obselete!
 txt *u6o_new_user_password;
 
-surf *spellicon[256];
+surface *spellicon[256];
 
 unsigned long midi_song; //handle to current midi
 short midi_loaded;
@@ -978,24 +1028,24 @@ float midi_foreground_wait;
 
 txt *con_txt[8];
 
-surf* party_spellbook_surf[8];
+surface* party_spellbook_surf[8];
 FRAME* party_spellbook_frame[8];
 unsigned short spell[8][256]; //number of times spell can be cast (+1)
 unsigned char spellbook_page[8]; //current page in spellbook
 unsigned char spellbook_flags[8]; //1=left dog-ear 2=right dog-ear
 
 
-surf* party_surf[8];
+surface* party_surf[8];
 FRAME* party_frame[8];
 
-surf* minimap_surf;
+surface* minimap_surf;
 FRAME* minimap_frame;
-surf* minimap_b;
-surf* treasuremap;
-surf* tmap_surf;
+surface* minimap_b;
+surface* treasuremap;
+surface* tmap_surf;
 FRAME* tmap_frame;
-surf* tmap_markers;
-surf* tmap_marker;
+surface* tmap_markers;
+surface* tmap_marker;
 
 object* tobj_i[8][16+1+4+1];
 object* tobj_e[8][8];
@@ -1007,101 +1057,101 @@ unsigned char cltset2_restored;
 file* messagelog;
 
 FRAME* fs;
-surf* status8;
-surf* darrow;
-surf* uarrow;
-surf* horizon;
-surf* horizon2;
+surface* status8;
+surface* darrow;
+surface* uarrow;
+surface* horizon;
+surface* horizon2;
 
-surf* cave;
-surf* sun;
-surf* sun2;
-surf* mini_1;
-surf* tmini_1;
-surf* mini_2;
-surf* mini_3;
-surf* u6ob;
-surf* dhno;
-surf* not4sale;
-surf* not4salemask;
-surf* converse_arrows;
-surf* spellbook;
-surf* spellbookmini;
-surf* statusmessage_arrowup;
-surf *spellcircle[8];
-surf *statusbar_r255;
-surf *statusbar_r128;
-surf *statusbar_b255;
-surf *statusbar_b128;
-surf *statusbar_g255;
-surf *statusbar_g128;
-surf* statusbar;
-surf *dogearr;
-surf *dogearl;
-surf *spellbookline;
-surf *intro_gypsy;
-surf *intro_gypsy2;
-surf *intro_vial;
-surf *intro_svial;
-surf *intro_bigvial;
-surf *intro_hpl0;
-surf *intro_hpl2;
-surf *intro_hpl3;
-surf *intro_hps0;
-surf *intro_hps2;
-surf *intro_hps3;
-surf *intro_hpr0;
-surf *intro_hpr2;
-surf *intro_hpr3;
-surf *intro_arml;
-surf *intro_armr;
-surf *intro_s64;
-surf *intro_s64b;
-surf *intro_s128;
-surf *intro_ab;
-surf *intro_aba;
-surf *intro_abb;
-surf *intro_caravan;
-surf *intro_flask;
-surf *intro_ccsave1;
-surf *intro_ccsave2;
-surf *intro_ccsave3;
-surf *intro_tacinfo;
-surf *intro_newchar;
-surf *intro_newchar2;
-surf *intro_x;
-surf *intro_back;
-surf *intro_next;
-surf *intro_ifield;
-surf *blr[4];
-surf *glr[4];
-surf *instantclickx;
-surf *instantclickok;
-surf *endgame_image[10];
-surf *spellbookmini2;
-surf *voicechat_voicebar;
-surf *voicechat_voice1;
-surf *voicechat_voiceof;
-surf *inventoryadd_icon;
-surf *horsemask;
-surf *horsemask2;
-surf *horsemaskdress;
-surf *horsemask2dress;
-surf *horsemaskdressb;
-surf *horsemask2dressb;
-surf* port_temp;
-surf* vm_volumem;
-surf* vm_volmmute;
-surf* vm_voltab2m;
-surf* volcontrol_background;
-surf* volcontrol_surf;
-surf* volcontrol_tab1;
-surf* volcontrol_tab2;
-surf* volcontrol_tab3;
-surf* viewnpc;
-surf* viewnpc2;
-surf* viewnpc_temp;
-surf* viewnpc2_temp;
+surface* cave;
+surface* sun;
+surface* sun2;
+surface* mini_1;
+surface* tmini_1;
+surface* mini_2;
+surface* mini_3;
+surface* u6ob;
+surface* dhno;
+surface* not4sale;
+surface* not4salemask;
+surface* converse_arrows;
+surface* spellbook;
+surface* spellbookmini;
+surface* statusmessage_arrowup;
+surface *spellcircle[8];
+surface *statusbar_r255;
+surface *statusbar_r128;
+surface *statusbar_b255;
+surface *statusbar_b128;
+surface *statusbar_g255;
+surface *statusbar_g128;
+surface* statusbar;
+surface *dogearr;
+surface *dogearl;
+surface *spellbookline;
+surface *intro_gypsy;
+surface *intro_gypsy2;
+surface *intro_vial;
+surface *intro_svial;
+surface *intro_bigvial;
+surface *intro_hpl0;
+surface *intro_hpl2;
+surface *intro_hpl3;
+surface *intro_hps0;
+surface *intro_hps2;
+surface *intro_hps3;
+surface *intro_hpr0;
+surface *intro_hpr2;
+surface *intro_hpr3;
+surface *intro_arml;
+surface *intro_armr;
+surface *intro_s64;
+surface *intro_s64b;
+surface *intro_s128;
+surface *intro_ab;
+surface *intro_aba;
+surface *intro_abb;
+surface *intro_caravan;
+surface *intro_flask;
+surface *intro_ccsave1;
+surface *intro_ccsave2;
+surface *intro_ccsave3;
+surface *intro_tacinfo;
+surface *intro_newchar;
+surface *intro_newchar2;
+surface *intro_x;
+surface *intro_back;
+surface *intro_next;
+surface *intro_ifield;
+surface *blr[4];
+surface *glr[4];
+surface *instantclickx;
+surface *instantclickok;
+surface *endgame_image[10];
+surface *spellbookmini2;
+surface *voicechat_voicebar;
+surface *voicechat_voice1;
+surface *voicechat_voiceof;
+surface *inventoryadd_icon;
+surface *horsemask;
+surface *horsemask2;
+surface *horsemaskdress;
+surface *horsemask2dress;
+surface *horsemaskdressb;
+surface *horsemask2dressb;
+surface* port_temp;
+surface* vm_volumem;
+surface* vm_volmmute;
+surface* vm_voltab2m;
+surface* volcontrol_background;
+surface* volcontrol_surf;
+surface* volcontrol_tab1;
+surface* volcontrol_tab2;
+surface* volcontrol_tab3;
+surface* viewnpc;
+surface* viewnpc2;
+surface* viewnpc_temp;
+surface* viewnpc2_temp;
 
 FRAME* statusmessage_viewnpc;
 FRAME* statusmessage_viewprev;

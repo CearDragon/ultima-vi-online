@@ -9,14 +9,14 @@
 #include "data_host.h"  /* od[][] etc. */
 #include "data_both.h" /*types*/
 
-//sockets_accept sets newsocket to new sockets id and waits till user sets
-//newsocket=INVALID_SOCKET before accepting new sockets
+//sockets_accept sets new_socket to new sockets id and waits till user sets
+//new_socket=INVALID_SOCKET before accepting new sockets
 //shared global variables
-extern unsigned long newsocket;
-extern unsigned long newsocket_ip;
+extern unsigned long new_socket;
+extern unsigned long new_socket_ip;
 //temp local variables (transferred to globals after successful connection)
-extern unsigned long tnewsocket;
-extern unsigned long tnewsocket_ip;
+extern unsigned long tmp_new_socket;
+extern unsigned long tmp_new_socket_ip;
 extern HANDLE hsockets_accept;
 extern DWORD idsockets_accept;
 extern unsigned short AUTOPICKUPfirst;

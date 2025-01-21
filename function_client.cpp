@@ -1206,39 +1206,36 @@ void getlight(unsigned short type,long x,long y){
       case OBJ_CANDLE: 
       case OBJ_BRAZIER:
       case OBJ_CAMPFIRE:
-	z=11; 
-	break;
-      case OBJ_CANDELABRA:
-	z=13;
-	break;
-      case OBJ_FIREPLACE:
-	if (frame&1) { // frame 2 is also off 
-	  z=7; 
-	}
-	break;
-      case OBJ_CHEST:
-	if (frame==3) { //(only if magic locked)
-	  z=5;
-	}
-	break;
-      case OBJ_STOVE:
-	z=7;
-	break;
-	break;
-      case OBJ_COOKFIRE:
-	if (frame==4) {
-	  z=9;
-	}
-	break;
-      case OBJ_LAMPPOST:
-	if (frame=3) {
-	  z=13;
-	}
-	break;
+	    z=11;
+	    break;
       case OBJ_MOONGATE:
       case OBJ_RED_GATE:
-	z=13;
-	break;
+      case OBJ_CANDELABRA:
+	    z=13;
+	    break;
+      case OBJ_FIREPLACE:
+	    if (frame&1) { // frame 2 is also off
+	        z=7;
+	    }
+	    break;
+      case OBJ_CHEST:
+	    if (frame==3) { //(only if magic locked)
+	        z=5;
+	    }
+	    break;
+      case OBJ_STOVE:
+	    z=7;
+	    break;
+      case OBJ_COOKFIRE:
+	    if (frame==4) {
+	        z=9;
+        }
+	    break;
+      case OBJ_LAMPPOST:
+	    if (frame==3) {
+	        z=13;
+	    }
+	    break;
     }
   }
   switch (type) { // always on types 
@@ -1297,7 +1294,7 @@ void getlight(unsigned short type,long x,long y){
 }//getlight
 
 //portraits 2.0 functions
-void loadportrait(unsigned short i,surf *s){
+void loadportrait(unsigned short i, surface *s){
   //s is assumed to be a valid source of the original portrait which will not be deallocated/changed
   portrait_loaded[i]=TRUE;
   portrait[i]=s;
@@ -1356,7 +1353,7 @@ void loadportrait(unsigned short i,surf *s){
 
 }
 
-surf *getportrait(unsigned short i){
+surface *getportrait(unsigned short i){
   if (portrait_loaded[i]){
     return portrait[i];
   }
@@ -1368,7 +1365,7 @@ surf *getportrait(unsigned short i){
   return PORTRAIT_UNAVAILABLE;
 }
 
-surf *getportrait_doublesize(unsigned short i){
+surface *getportrait_doublesize(unsigned short i){
   if (portrait_loaded[i]){
     return portrait_doublesize[i];
   }
@@ -1380,7 +1377,7 @@ surf *getportrait_doublesize(unsigned short i){
   return PORTRAIT_UNAVAILABLE;
 }
 
-surf *getportrait_halfsize(unsigned short i){
+surface *getportrait_halfsize(unsigned short i){
   if (portrait_loaded[i]){
     return portrait_halfsize[i];
   }
@@ -1710,51 +1707,13 @@ void refresh(){
 			}
 		}
 		else { //not dxrefresh
-		    // i think the new mode only ever executes this condition; because the copy-pasted code in the other conditons are wrong.
+		    // i think the new mode only ever executes this condition; because the copy-pasted code in the other conditions are wrong.
 			if (DDRAW_display_pixelformat.dwRGBBitCount != 16) {
-				//img(ps4, ps);   //ps4=newsurf(1024/2,768/2,SURF_SYSMEM16);
-				//refresh(ps4);
 
-				//img(psnew1b, ps);
-				//refresh(psnew1b);
-
-				// r222 all the graphics are (originally and still is) done in the 1024 surface; copy whats on that surface and put it on the new surface.
+				// r222 all the graphics are (originally and still is) done in the 1024 surface; copy what's on that surface and put it on the new surface.
 				// it is scaled to the area on the new/destination surface.
-				img(psnew1b, ps, 0, 0, resxn1m, resyn1m);
+				img(psnew1b, ps, 0, 0, g_ScaledClientGameWindowWidth, g_ScaledClientGameWindowHeight);
 				updateoverlaysurfn1(psnew1b);
-
-				// s444 display worldmap on top of game playing area
-				/*
-				if (showworldmapn1 > 0) {
-					if (updateworldmapn1) {
-						updateworldmapn1 = 0;
-						img(uipanelsurf[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF], worldmapsurfn1[worldmapindexn1]);
-					}
-
-					imguip(psnew1b, uipanelworldmap);
-					imguip(psnew1b, uipanelworldmapbar);
-
-					// s444 worldmapbar buttons
-					if (worldmapindexn1 == 1)
-						imguiw(psnew1b, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6CLOTH, 1);
-					else if (worldmapindexn1 == 2)
-						imguiw(psnew1b, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6P, 1);
-					else if (worldmapindexn1 == 3)
-						imguiw(psnew1b, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6G, 1);
-					else if (worldmapindexn1 == 4)
-						imguiw(psnew1b, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6RUNE, 1);
-
-					if (uihover) {
-						if (hituipaneli == uipanelworldmapbar) {
-							if (hituiwidgeti < 0)
-								hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
-
-							if (hituiwidgeti > 0)
-								img0(psnew1b, uipanelx[hituipaneli][hituiwidgeti][UI_STATE_DEF], uipanely[hituipaneli][hituiwidgeti][UI_STATE_DEF], uiwidgetimgsurf[UI_IMGI_HOVER][1]);
-						}
-					}
-				}*/
-
 
 				refresh(psnew1b);
 			}
@@ -1824,60 +1783,46 @@ void scrlog(const char*d){
   refresh();
 }
 
-void updateoverlaysurfn1(surf* s) {
+void updateoverlaysurfn1(surface* s) {
 	// s444 display worldmap on top of game playing area
 	if (showworldmapn1 > 0) {
 		if (updateworldmapn1) {
 			updateworldmapn1 = 0;
-			img(uipanelsurf[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF], worldmapsurfn1[worldmapindexn1]);
+			img(g_UI_PanelSurface[g_UI_WorldmapPanelId][UI_WIDGET_DEF][UI_STATE_DEF], worldmapsurfn1[worldmapindexn1]);
 		}
 
-		//imguip(psnew1b, uipanelworldmap);
-		//imguip(psnew1b, uipanelworldmapbar);
-		imguip(s, uipanelworldmap);
-		imguip(s, uipanelworldmapbar);
+		//imguip(psnew1b, g_UI_WorldmapPanelId);
+		//imguip(psnew1b, g_UI_WorldmapBarPanelId);
+		imguip(s, g_UI_WorldmapPanelId);
+		imguip(s, g_UI_WorldmapBarPanelId);
 
 		// s444 worldmapbar buttons
 		if (worldmapindexn1 == 1)
-			imguiw(s, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6CLOTH, 1);
+			imguiw(s, g_UI_WorldmapBarPanelId, UI_WIDGET_MAPBUTTON_U6CLOTH, 1);
 		else if (worldmapindexn1 == 2)
-			imguiw(s, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6P, 1);
+			imguiw(s, g_UI_WorldmapBarPanelId, UI_WIDGET_MAPBUTTON_U6P, 1);
 		else if (worldmapindexn1 == 3)
-			imguiw(s, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6G, 1);
+			imguiw(s, g_UI_WorldmapBarPanelId, UI_WIDGET_MAPBUTTON_U6G, 1);
 		else if (worldmapindexn1 == 4)
-			imguiw(s, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6RUNE, 1);
+			imguiw(s, g_UI_WorldmapBarPanelId, UI_WIDGET_MAPBUTTON_U6RUNE, 1);
 
 		if (uihover) {
-			if (hituipaneli == uipanelworldmapbar) {
+			if (hituipaneli == g_UI_WorldmapBarPanelId) {
 				if (hituiwidgeti < 0)
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
 
 				if (hituiwidgeti > 0)
-					img0(s, uipanelx[hituipaneli][hituiwidgeti][UI_STATE_DEF], uipanely[hituipaneli][hituiwidgeti][UI_STATE_DEF], uiwidgetimgsurf[UI_IMGI_HOVER][1]);
+					img0(s, g_UI_PanelX[hituipaneli][hituiwidgeti][UI_STATE_DEF], g_UI_PanelY[hituipaneli][hituiwidgeti][UI_STATE_DEF], uiwidgetimgsurf[UI_IMGI_HOVER][1]);
 			}
 		}
 	}
 }
 
-// r222 initialize new resolution mode stuff; read resolution from settings.txt (only the Y is used; everything else is computed)
-void newmodeinit() {
-	//partyresscale = (double) partyresxo / partyresxz;
-	//int i2;
+// r222
+// initialize new resolution mode stuff;
+// read resolution from settings.txt (only the Y is used; everything else is computed)
+void newModeInit() {
 
-	// rrr
-	/*
-	resxn1w = getsetting("WINDOW_RESOLUTION_X");
-	resxn1w = (unsigned int)txtnum(GETSETTING_RAW);
-	//resyn1w = getsetting("WINDOW_RESOLUTION_Y");
-	//resyn1w = txtnum(GETSETTING_RAW);
-
-	resxn1m = resxn1w - 260;
-	resyn1m = resxn1m * 3 / 4;
-	respn1m = resxn1m * resyn1m;
-
-	resyn1w = resyn1m;
-	*/
-	
 	int resysettingoption;
 	int uiscalesettingoption;
 	int resysettingraw;
@@ -1890,48 +1835,43 @@ void newmodeinit() {
 	} else //if (resysettingoption > 1)
 		resysettingraw = (unsigned int)txtnum(GETSETTING_RAW);
 
-	resyn1w = resysettingraw;
-	if (resyn1w > desktop_rect.bottom) {
-		resyn1w = desktop_rect.bottom - 100;
+    g_ScaledClientWindowHeight = resysettingraw;
+	if (g_ScaledClientWindowHeight > desktop_rect.bottom) {
+        g_ScaledClientWindowHeight = desktop_rect.bottom - 100;
 	}
 
-	// scale new sidebar if it does not fit
-	//txt *t = txtnew();
-	//txtnumint(t, uiscalesettingoption);
-	//LOGadd(t);
 	uiscalesettingoption = getsetting("UI_SIDEBAR_SCALE");
 	if ((uiscalesettingoption == 1) || (uiscalesettingoption == 3)) {
 		uiscaling = 0;
-		uipanelsizex[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF] = 260;
+        g_UI_PanelWidth[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF] = 260;
 	} else if (uiscalesettingoption == 2) {
-		if (resyn1w < resymin) {
+		if (g_ScaledClientWindowHeight < resymin) {
 			uiscaling = 1;
-			uiscalex = (float)resyn1w / resymin;
+			uiscalex = (float)g_ScaledClientWindowHeight / resymin;
 			uiscaley = uiscalex;
-			uipanelsizex[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF] = 260 * uiscalex;
+            g_UI_PanelWidth[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF] = 260 * uiscalex;
 		}
 		else {
 			uiscaling = 0;
-			uipanelsizex[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF] = 260;
+            g_UI_PanelWidth[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF] = 260;
 		}
 	} else {
 		uiscaling = 1;
 		uiscalex = (float) ((unsigned int)txtnum(GETSETTING_RAW)) / 100;
 		uiscaley = uiscalex;
-		uipanelsizex[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF] = 260 * uiscalex;
+        g_UI_PanelWidth[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF] = 260 * uiscalex;
 	}
 
-	//resyn1w = resysettingraw;
-	resxn1w = resyn1w * 4 / 3 + uipanelsizex[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF];
+	g_ScaledClientWindowWidth = (g_ScaledClientWindowHeight * 4 / 3) + g_UI_PanelWidth[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF];
 
-	if (resxn1w > desktop_rect.right) {
-		resxn1w = desktop_rect.right;
-		resyn1w = (resxn1w - uipanelsizex[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF]) * 3 / 4;
+	if (g_ScaledClientWindowWidth > desktop_rect.right) {
+        g_ScaledClientWindowWidth = desktop_rect.right;
+        g_ScaledClientWindowHeight = (g_ScaledClientWindowWidth - g_UI_PanelWidth[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF]) * 3 / 4;
 	}
 
-	resxn1m = resxn1w - uipanelsizex[uipanelsidebar][UI_WIDGET_DEF][UI_STATE_DEF];
-	resyn1m = resyn1w;
-	respn1m = resxn1m * resyn1m;
+    g_ScaledClientGameWindowWidth = g_ScaledClientWindowWidth - g_UI_PanelWidth[g_UI_SidebarPanelId][UI_WIDGET_DEF][UI_STATE_DEF];
+    g_ScaledClientGameWindowHeight = g_ScaledClientWindowHeight;
+    g_ScaledClientGameWindowPixels = g_ScaledClientGameWindowWidth * g_ScaledClientGameWindowHeight;
 
 	// s888 load startup mode
 	windowsizecyclenum = getsetting("WINDOW_MODE");
@@ -1949,578 +1889,26 @@ void newmodeinit() {
 		windowsizecyclenum = 0;
 	}
 
-	/*
-		if (resysettingoption == 2) {
-			resysettingraw = (unsigned int)txtnum(GETSETTING_RAW);
-
-			//if ((desktop_rect.right>1024)&&(desktop_rect.bottom>768)){
-			resxn1w = resysettingraw * 4 / 3 + 260;
-			if ((resxn1w <= desktop_rect.right) && (resyn1w <= desktop_rect.bottom)) {
-
-				resxn1m = resxn1w - 260;
-				resyn1m = resxn1m * 3 / 4;
-				respn1m = resxn1m * resyn1m;
-
-				resyn1w = resyn1m;
-			} else
-				resysettingoption = 1;
-		}
-
-		if (resysettingoption == 1) {
-			resyn1w = desktop_rect.bottom - 100;
-			resxn1w = resyn1w * 4 / 3 + 260;
-
-			if (resxn1w > desktop_rect.right) {
-				resxn1w = desktop_rect.right;
-				resyn1w = (resxn1w - 260) * 3 / 4;
-			}
-
-			resxn1m = resxn1w - 260;
-			resyn1m = resyn1w;
-			respn1m = resxn1m * resyn1m;
-		}
-
-	// scale new sidebar if it does not fit
-	resyn1w = resysettingraw;
-	if (resyn1w < 840) {
-		uiscaling = 1;
-		uiscalex = (float) resyn1w / 840;
-		uiscaley = uiscalex;
-
-		resyn1w = desktop_rect.bottom - 100;
-		resxn1w = resyn1w * 4 / 3 + 260;
-
-		if (resxn1w > desktop_rect.right) {
-			resxn1w = desktop_rect.right;
-			resyn1w = (resxn1w - 260) * 3 / 4;
-		}
-
-		resxn1m = resxn1w - 260;
-		resyn1m = resyn1w;
-		respn1m = resxn1m * resyn1m;
-	}
-		*/
-
-	/*
-	txtset(t, "RES ");
-	txtnumint(t2, resxn1w);
-	txtadd(t, t2);
-	LOGadd(t);
-
-	txtset(t, "RES Y ");
-	txtnumint(t2, resyn1w);
-	txtadd(t, t2);
-	LOGadd(t);
-
-	txtset(t, "RES X2 ");
-	txtnumint(t2, resxn1m);
-	txtadd(t, t2);
-	LOGadd(t);
-
-	txtset(t, "RES Y2 ");
-	txtnumint(t2, resyn1m);
-	txtadd(t, t2);
-	LOGadd(t);
-	*/
-
-	psnew1 = newsurf(resxn1w, resyn1w, SURF_SYSMEM);
-	psnew1b = newsurf(resxn1w, resyn1w, SURF_SYSMEM16); //to temporarily convert to 16bit?
-	//pspartytemp=newsurf(256,256,SURF_SYSMEM16);
-	//pspartynew=newsurf(resxn1m,256,SURF_SYSMEM16);
+	psnew1 = newsurf(g_ScaledClientWindowWidth, g_ScaledClientWindowHeight, SURF_SYSMEM);
+	psnew1b = newsurf(g_ScaledClientWindowWidth, g_ScaledClientWindowHeight, SURF_SYSMEM16); //to temporarily convert to 16bit?
 
 	static RECT clrect;
-	clrect.top = 0; clrect.left = 0; clrect.bottom = resyn1w; clrect.right = resxn1w;
+	clrect.top = 0; clrect.left = 0; clrect.bottom = g_ScaledClientWindowHeight; clrect.right = g_ScaledClientWindowWidth;
 	AdjustWindowRect(&clrect, WS_OVERLAPPED | WS_CAPTION | WS_BORDER, FALSE);
 
 	hWnd4 = CreateWindow(szWindowClass, window_name, WS_OVERLAPPED | WS_CAPTION | WS_BORDER,
 		0, 0, clrect.right - clrect.left, clrect.bottom - clrect.top, NULL, NULL, hInst, NULL);
 
 	// s555
-	if (!enhanceclientn1) {
+	if (!g_EnhancedClient) {
 		enhancen1 = 0;
 		soundn1 = 0;
 		combatsoundn1 = 0;
 	}
-/*
-	// r999
-	panelx[0] = resxn1m;
-	panely[0] = 0;
-	panelx2[0] = resxn1w;
-	panely2[0] = resyn1m;
-	panelscalex[0] = (float) 260 / (panelx2[0] - panelx[0]);
-	panelscaley[0] = (float) resyn1m / panely2[0];
-	panelsurf[0] = newsurf(260, resyn1m, SURF_SYSMEM16);
-
-	panelsideui = panelcount++;
-	panelnew[panelsideui].offset_x = resxn1m;
-	panelnew[panelsideui].offset_y = 0;
-	panelnew[panelsideui].default_size_x = 260;
-	panelnew[panelsideui].default_size_y = 260 + 51 + 51 + 51 + 51;
-	panelnew[panelsideui].size_x = panelnew[panelsideui].default_size_x;
-	panelnew[panelsideui].size_y = panelnew[panelsideui].default_size_y;
-	panelnew[panelsideui].graphic = newsurf(panelnew[panelsideui].size_x, panelnew[panelsideui].size_y, SURF_SYSMEM16);
-	panelnew[panelsideui].scaling = FALSE;
-
-	if (panelnew[panelsideui].scaling) {
-		panelnew[panelsideui].scale_x = (float) panelnew[panelsideui].default_size_x / panelnew[panelsideui].size_x;
-		panelnew[panelsideui].scale_y = (float) panelnew[panelsideui].default_size_y / panelnew[panelsideui].size_y;
-	}
-
-
-	// r999 new
-	int uipi, uiwi, uisi;
-	int uiscalex, uiscaley;
-	int i2;
-
-	uiscalex = UI_NOSCALE;
-	uiscaley = UI_NOSCALE;
-
-	uipanelsidebar = uipanelcount++;
-	uipi = uipanelsidebar;
-	uipanelwidgetcount[uipi] = 1;
-
-	uiwi = UI_WIDGET_DEF;
-	uisi = UI_STATE_DEF;
-
-	uipanelsizex[uipi][uiwi][uisi] = 260;
-	uipanelsizey[uipi][uiwi][uisi] = resyn1m;
-	uipanelx[uipi][uiwi][uisi] = resxn1w - uipanelsizex[uipi][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = 0;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-
-	img(uipanelsurf[uipi][uiwi][uisi], statusbar_b255);
-	
-	// r999 new
-	uipanelpartymember0= uipanelcount++;
-	uipi = uipanelpartymember0;
-	uipanelwidgetcount[uipi] = 1;
-
-	uiwi = UI_WIDGET_DEF;
-	uisi = UI_STATE_DEF;
-
-	uipanelsizex[uipi][uiwi][uisi] = 256;
-	uipanelsizey[uipi][uiwi][uisi] = 256;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelsidebar][uiwi][uisi] + 2;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = party_frame[0]->graphic;
-
-
-	for (int i = 0; i < partyframenewmax; i++) {
-		//party_surf[i] = newsurf(256, 256, SURF_SYSMEM16);
-		//party_surf[i] = newsurf(partyresxz, partyresxz, SURF_SYSMEM16);
-		party_frame_new[i] = FRMnew();
-		//party_frame_new[i]->graphic = party_surf[i];
-		//party_frame_new[i]->offset_x = resxn1m + 2; //startup offset off screen
-		//party_frame_new[i]->offset_y = 0 + 2; //startup offset off screen
-		//party_frame_new[i]->graphic_use0pixel = TRUE;
-		//party_frame_new[i]->mouse_over_transparent = TRUE;
-		//if (i2 = getsetting("INVENTORYWINDOW_TRANSPARENCYLEVEL")) party_frame[i]->mouse_over_transparent = i2 - 1;
-
-		//party_frame_new[i]->offset_x = resxn1m + 2;
-		//party_frame_new[i]->offset_y = 0 + 2;
-		party_frame_new[i]->offset_x = 2;
-		party_frame_new[i]->offset_y = 2;
-		party_frame_new[i]->default_size_x = 256;
-		party_frame_new[i]->default_size_y = 256;
-		//party_frame_new[i]->size_x = party_frame_new[i]->default_size_x;
-		//party_frame_new[i]->size_y = party_frame_new[i]->default_size_y;
-		party_frame_new[i]->graphic = NULL;
-		party_frame_new[i]->display = FALSE;
-		party_frame_new[i]->active = FALSE;
-		party_frame_new[i]->no_focus = TRUE;
-		party_frame_new[i]->move = FALSE;
-		party_frame_new[i]->scaling = FALSE;
-
-		if (party_frame_new[i]->scaling) {
-			party_frame_new[i]->scale_x = (float) party_frame_new[i]->default_size_x / party_frame_new[i]->size_x;
-			party_frame_new[i]->scale_y = (float) party_frame_new[i]->default_size_y / party_frame_new[i]->size_y;
-		}
-
-		/*
-		party_spellbook_surf[i] = newsurf(245, 173, SURF_SYSMEM16);
-		party_spellbook_frame[i] = FRMnew();
-		party_spellbook_frame[i]->graphic = party_spellbook_surf[i];
-		party_spellbook_frame[i]->offset_x = 4096; //startup offset off screen
-		party_spellbook_frame[i]->offset_y = 0; //startup offset off screen
-		party_spellbook_frame[i]->mouse_over_transparent = TRUE;
-		if (i2 = getsetting("SPELLBOOKWINDOW_TRANSPARENCYLEVEL")) party_spellbook_frame[i]->mouse_over_transparent = i2 - 1;
-		spellbook_page[i] = 1; //default to first page (0=can't display spellbook, no spells)
-		spellbook_flags[i] = 0;
-		*/
-/*
-	}
-
-	// r444 init for minimap
-	//minimapnewx = resxn1m + 2;
-	//minimapnewy = resyn1w-256-2;
-	minimapnewx = 2;
-	minimapnewy = panely2[0] - 256 - 2;
-
-	panelminimap = panelcount++;
-	panelnew[panelminimap].offset_x = resxn1m + 2;
-	panelnew[panelminimap].offset_y = resyn1w-256-2;
-	panelnew[panelminimap].default_size_x = 256;
-	panelnew[panelminimap].default_size_y = 256;
-	panelnew[panelminimap].size_x = panelnew[panelminimap].default_size_x;
-	panelnew[panelminimap].size_y = panelnew[panelminimap].default_size_y;
-	panelnew[panelminimap].graphic = newsurf(panelnew[panelminimap].size_x, panelnew[panelminimap].size_y, SURF_SYSMEM16);
-	panelnew[panelminimap].scaling = FALSE;
-
-	if (panelnew[panelminimap].scaling) {
-		panelnew[panelminimap].scale_x = (float) panelnew[panelminimap].default_size_x / panelnew[panelminimap].size_x;
-		panelnew[panelminimap].scale_y = (float) panelnew[panelminimap].default_size_y / panelnew[panelminimap].size_y;
-	}
-
-	// r999 new
-	uipanelminimap = uipanelcount++;
-	uipi = uipanelminimap;
-	uipanelwidgetcount[uipi] = 1;
-
-	uiwi = UI_WIDGET_DEF;
-	uisi = UI_STATE_DEF;
-
-	uipanelsizex[uipi][uiwi][uisi] = 256;
-	uipanelsizey[uipi][uiwi][uisi] = 256;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = (uipanely[uipanelsidebar][uiwi][uisi] + uipanelsizey[uipanelsidebar][uiwi][uisi]) - (uipanelsizey[uipi][uiwi][uisi] + 2);
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-	uipanelsurf[uipi][uiwi][uisi] = minimap_surf_new;
-
-
-	if (minimaptype == 1) {
-		minimaptilexstart = 1;
-		minimaptilexend = 3;
-		minimaptileystart = 1;
-		minimaptileyend = 3;
-		minimaptilesurf = minimaptilesurf1;
-		//minimapplayerx = minimapnewx+128-13;
-		//minimapplayery = minimapnewy+128-24;
-		minimapplayerx = 128-13;
-		minimapplayery = 128-24;
-	} else if (minimaptype == 2) {
-		minimaptilexstart = 0;
-		minimaptilexend = 4;
-		minimaptileystart = 0;
-		minimaptileyend = 4;
-		minimaptilesurf = minimaptilesurf2;
-		//minimapplayerx = minimapnewx+128-9;
-		//minimapplayery = minimapnewy+128-21;
-		minimapplayerx = 128-9;
-		minimapplayery = 128-21;
-	}
-
-
-
-	// r666 init for actionbar
-	/*
-	ZeroMemory(&actionbarx, sizeof(actionbarx));
-	ZeroMemory(&actionbary, sizeof(actionbary));
-	ZeroMemory(&actionbuttonx, sizeof(actionbuttonx));
-	ZeroMemory(&actionbuttony, sizeof(actionbuttony));
-	ZeroMemory(&actiontalkx, sizeof(actiontalkx));
-	ZeroMemory(&actiontalky, sizeof(actiontalky));
-	ZeroMemory(&actiontalkbuttonx, sizeof(actiontalkbuttonx));
-	ZeroMemory(&actiontalkbuttony, sizeof(actiontalkbuttony));
-	actionbarx = (int*)malloc(sizeof(int*)*5);
-//            mmyobj=(mlobj*)malloc(sizeof(object*)*5);
-	*/
-/*
-
-	//actionbarx[0] = resxn1m + 2;
-	//actionbary[0] = 260;
-	//actionbarx[1] = actionbarx[0];
-	//actionbary[1] = actionbary[0] + ACTIONBAR_HEIGHT; // 314
-	actionbarx[0] = 2;
-	actionbary[0] = 260;
-	actionbarx[1] = actionbarx[0];
-	actionbary[1] = actionbary[0] + ACTIONBAR_HEIGHT; // 314
-
-	panelactionbar1 = panelcount++;
-	panelnew[panelactionbar1].offset_x = 2;
-	panelnew[panelactionbar1].offset_y = 260;
-	panelnew[panelactionbar1].default_size_x = 255;
-	panelnew[panelactionbar1].default_size_y = 51;
-	panelnew[panelactionbar1].size_x = panelnew[panelactionbar1].default_size_x;
-	panelnew[panelactionbar1].size_y = panelnew[panelactionbar1].default_size_y;
-	panelnew[panelactionbar1].graphic = actionbarsurf[0];
-	panelnew[panelactionbar1].scaling = FALSE;
-
-	if (panelnew[panelactionbar1].scaling) {
-		panelnew[panelactionbar1].scale_x = (float) panelnew[panelactionbar1].default_size_x / panelnew[panelactionbar1].size_x;
-		panelnew[panelactionbar1].scale_y = (float) panelnew[panelactionbar1].default_size_y / panelnew[panelactionbar1].size_y;
-	}
-
-	panelactionbar2 = panelcount++;
-	panelnew[panelactionbar2].offset_x = panelnew[panelactionbar1].offset_x;
-	panelnew[panelactionbar2].offset_y = panelnew[panelactionbar1].offset_y + ACTIONBAR_HEIGHT;
-	panelnew[panelactionbar2].default_size_x = 255;
-	panelnew[panelactionbar2].default_size_y = 51;
-	panelnew[panelactionbar2].size_x = panelnew[panelactionbar2].default_size_x;
-	panelnew[panelactionbar2].size_y = panelnew[panelactionbar2].default_size_y;
-	panelnew[panelactionbar2].graphic = actionbarsurf[1];
-	panelnew[panelactionbar2].scaling = FALSE;
-
-	if (panelnew[panelactionbar2].scaling) {
-		panelnew[panelactionbar2].scale_x = (float) panelnew[panelactionbar2].default_size_x / panelnew[panelactionbar2].size_x;
-		panelnew[panelactionbar2].scale_y = (float) panelnew[panelactionbar2].default_size_y / panelnew[panelactionbar2].size_y;
-	}
-
-	actionbuttonsizex = 51;
-	actionbuttonsizey = 51;
-	
-	for (int i2 = 0; i2 < ACTIONBAR_MAX; i2++) {
-		actionbuttonx[i2][0] = actionbarx[i2];
-		actionbuttony[i2][0] = actionbary[i2];
-		for (int i = 1; i < ACTIONBUTTON_MAX; i++) {
-			actionbuttonx[i2][i] = actionbuttonx[i2][i-1]+actionbuttonsizex;
-			actionbuttony[i2][i] = actionbary[i2];
-		}
-	}
-
-	// r999 new
-	uipanelactionbar1 = uipanelcount++;
-	uipi = uipanelactionbar1;
-	uipanelwidgetcount[uipi] = 1;
-
-	uiwi = UI_WIDGET_DEF;
-	uisi = UI_STATE_DEF;
-
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelsidebar][uiwi][uisi] + 260;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = actionbarsurf[0];
-
-	uipanelactionbar2 = uipanelcount++;
-	uipi = uipanelactionbar2;
-	uipanelwidgetcount[uipi] = 1;
-
-
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactionbar1][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactionbar1][uiwi][uisi] + uipanelsizey[uipanelactionbar1][uiwi][uisi] + 1;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = actionbarsurf[1];
-
-	//actionbuttonsizex = 51;
-	//actionbuttonsizey = 51;
-
-	uipi = uipanelactionbar1;
-	uiwi = uipanelwidgetcount[uipi];
-	for (int i = 1; i < UI_WIDGET_ACTIONBUTTON_MAX; i++) {
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 51;
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * (uiwi-1));
-		uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-		uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-		//uipanelsurf[uipi][uiwi][uisi] = actionbarsurf[1];
-		uiwi = ++uipanelwidgetcount[uipi];
-	}
-
-	uipi = uipanelactionbar2;
-	uiwi = uipanelwidgetcount[uipi];
-	for (int i = 1; i < UI_WIDGET_ACTIONBUTTON_MAX; i++) {
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 51;
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * (uiwi-1));
-		uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-		uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-		//uipanelsurf[uipi][uiwi][uisi] = actionbarsurf[1];
-		uiwi = ++uipanelwidgetcount[uipi];
-	}
-
-
-
-	// r666 init for actiontalk
-	actiontalkx[0] = actionbarx[0];
-	actiontalky[0] = actionbary[1] + ACTIONBAR_HEIGHT;
-	actiontalkx[1] = actionbarx[0];
-	actiontalky[1] = actiontalky[0] + ACTIONBAR_HEIGHT;
-
-	actiontalkbuttonsizex = 51;
-	actiontalkbuttonsizey = 26;
-
-	i2 = 0;
-	for (int i3 = 0; i3 < ACTIONTALKBAR_MAX; i3++) {
-		actiontalkbuttonx[i3][0] = actiontalkx[i3];
-		actiontalkbuttony[i3][0] = actiontalky[i3];
-		i2 = 0;
-		for (int i = 1; i < ACTIONTALKBUTTON_MAX; i++) {
-			if (i % 2 == 0) {
-				i2++;
-				actiontalkbuttony[i3][i] = actiontalky[i3];
-			}
-			else
-				actiontalkbuttony[i3][i] = actiontalky[i3] + actiontalkbuttonsizey;
-
-			actiontalkbuttonx[i3][i] = actiontalkx[i3] + (actiontalkbuttonsizex * i2);
-		}
-	}
-
-	//actiontalkbuttonx[8] = actiontalkx + (actiontalkbuttonsizex * 4);
-	//actiontalkbuttony[8] = actiontalky;
-
-
-	// r999 new
-	uipanelactiontalkbar1 = uipanelcount++;
-	uipi = uipanelactiontalkbar1;
-	uipanelwidgetcount[uipi] = 1;
-
-	uiwi = UI_WIDGET_DEF;
-	uisi = UI_STATE_DEF;
-
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelsidebar][uiwi][uisi] + 260 + 52 + 52;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = actiontalksurf[0];
-
-	uipanelactiontalkbar2 = uipanelcount++;
-	uipi = uipanelactiontalkbar2;
-	uipanelwidgetcount[uipi] = 1;
-
-
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactiontalkbar1][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar1][uiwi][uisi] + uipanelsizey[uipanelactiontalkbar1][uiwi][uisi] + 1;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = actiontalksurf[1];
-
-	//actionbuttonsizex = 51;
-	//actionbuttonsizey = 51;
-
-	uipi = uipanelactiontalkbar1;
-	i2 = 0;
-	for (int i = 1; i < UI_WIDGET_ACTIONTALKBUTTON_MAX; i++) {
-		uiwi = uipanelwidgetcount[uipi]++;
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 26;
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * i2);
-		//uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-		uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-
-		if (i % 2 == 0) {
-			i2++;
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + 26;
-		} else {
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		}
-
-		//uiwi = ++uipanelwidgetcount[uipi];
-	}
-
-	uipi = uipanelactiontalkbar2;
-	//uiwi = uipanelwidgetcount[uipi];
-	i2 = 0;
-	for (int i = 1; i < UI_WIDGET_ACTIONTALKBUTTON_MAX; i++) {
-		uiwi = uipanelwidgetcount[uipi]++;
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 26;
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * i2);
-		//uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-		uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-
-		if (i % 2 == 0) {
-			i2++;
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + 26;
-		} else {
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		}
-
-		//uiwi = ++uipanelwidgetcount[uipi];
-	}
-
-
-	// r999 new setup ui non-default states
-	// food
-	uipi = uipanelactionbar2;
-	uiwi = UI_WIDGET_ACTIONBUTTON_FOOD;
-
-	// food hungry
-	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = actionbuttonsurf[ACTIONBUTTON_FOOD][1];
-
-	// food full
-	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = actionbuttonsurf[ACTIONBUTTON_FOOD][2];
-
-	// drop
-	uipi = uipanelactionbar1;
-	uiwi = UI_WIDGET_ACTIONBUTTON_DROP;
-
-	// drop set
-	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = actionbuttonsurf[ACTIONBUTTON_DROP][0];
-
-	// drop up
-	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = actionbuttonsurf[ACTIONBUTTON_DROP][1];
-
-	// drop down
-	uisi = 3;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = actionbuttonsurf[ACTIONBUTTON_DROP][2];
-
-	// drop left
-	uisi = 4;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = actionbuttonsurf[ACTIONBUTTON_DROP][3];
-
-	// drop right
-	uisi = 5;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = actionbuttonsurf[ACTIONBUTTON_DROP][4];
-	*/
-/*
-*/
 
 	// r999 new init ui data
-	inituidatan1();
-	imguip(psnew1b, uipanelsidebar);
+    initializeUIPanels();
+	imguip(psnew1b, g_UI_SidebarPanelId);
 
 	// r777
 	int i = U6OK[U6OK_QUIT][0];
@@ -2531,107 +1919,96 @@ void newmodeinit() {
 }
 
 // r999 new init ui data
-void inituidatan1() {
+void initializeUIPanels() {
 	// r999 new
 	int uipi, uiwi, uisi;
-	float scalex, scaley;
+	float scale_x, scale_y;
 	int i, i2;
 	int sidebarstacky;
 
 	if (uiscaling) {
-		scalex = uiscalex;
-		scaley = uiscaley;
+        scale_x = uiscalex;
+        scale_y = uiscaley;
 	} else {
-		scalex = UI_NOSCALE;
-		scaley = UI_NOSCALE;
+        scale_x = UI_NOSCALE;
+        scale_y = UI_NOSCALE;
 	}
 
-	uipanelsidebar = uipanelcount++;
-	uipi = uipanelsidebar;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_SidebarPanelId = g_UI_PanelCount++;
+	uipi = g_UI_SidebarPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	//uipanelsizex[uipi][uiwi][uisi] = 260; // set in newmodeinit()
-	uipanelsizey[uipi][uiwi][uisi] = resyn1m;
+	//g_UI_PanelWidth[uipi][uiwi][uisi] = 260; // set in newModeInit()
+	g_UI_PanelHeight[uipi][uiwi][uisi] = g_ScaledClientGameWindowHeight;
 	//if (uiscaling) // not needed -- it's already scaled
 	//	applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = resxn1w - uipanelsizex[uipi][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = 0;
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-	sidebarstacky = uipanely[uipi][uiwi][uisi];
+    g_UI_PanelX[uipi][uiwi][uisi] = g_ScaledClientWindowWidth - g_UI_PanelWidth[uipi][uiwi][uisi];
+    g_UI_PanelY[uipi][uiwi][uisi] = 0;
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+    g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+	sidebarstacky = g_UI_PanelY[uipi][uiwi][uisi];
 
 	//img(uipanelsurf[uipi][uiwi][uisi], statusbar_b255);
-	cls(uipanelsurf[uipi][uiwi][uisi], (2 << 11) + (27 << 5) + 18);
-	
+	cls(g_UI_PanelSurface[uipi][uiwi][uisi], UI_SIDEBAR_COLOR);
+
 	// r999 new
 	// party member inventory parent
-	uipanelpartymemberparent = uipanelcount++;
-	uipi = uipanelpartymemberparent;
-	uipanelwidgetcount[uipi] = 1;
+    g_UI_PartyMemberParentPanelId = g_UI_PanelCount++;
+	uipi = g_UI_PartyMemberParentPanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 260;
-	uipanelsizey[uipi][uiwi][uisi] = 260;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 260;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 260;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi];
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_SidebarPanelId][uiwi][uisi];
 	//uipanely[uipi][uiwi][uisi] = uipanely[uipanelsidebar][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = sidebarstacky;
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	sidebarstacky += uipanelsizey[uipi][uiwi][uisi];
+    g_UI_PanelY[uipi][uiwi][uisi] = sidebarstacky;
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	sidebarstacky += g_UI_PanelY[uipi][uiwi][uisi];
 
 	// party member0 inventory
-	uipanelpartymember0 = uipanelcount++;
-	uipi = uipanelpartymember0;
-	uipanelwidgetcount[uipi] = 1;
+    g_UI_PartyMemberPanelId = g_UI_PanelCount++;
+	uipi = g_UI_PartyMemberPanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 256;
-	uipanelsizey[uipi][uiwi][uisi] = 256;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 256;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 256;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelpartymemberparent][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelpartymemberparent][uiwi][uisi] + 2;
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_PartyMemberParentPanelId][uiwi][uisi] + 2;
+    g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_PartyMemberParentPanelId][uiwi][uisi] + 2;
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
 	//uipanelsurf[uipi][uiwi][uisi] = party_frame[0]->graphic;
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
+    g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelX[uipi][uiwi][uisi], g_UI_PanelY[uipi][uiwi][uisi], SURF_SYSMEM16);
 
 	// mostly obsolete for the new mode
 	for (i = 0; i < partyframenewmax; i++) {
-		//party_surf[i] = newsurf(256, 256, SURF_SYSMEM16);
-		//party_surf[i] = newsurf(partyresxz, partyresxz, SURF_SYSMEM16);
 		party_frame_new[i] = FRMnew();
-		//party_frame_new[i]->graphic = party_surf[i];
-		//party_frame_new[i]->offset_x = resxn1m + 2; //startup offset off screen
-		//party_frame_new[i]->offset_y = 0 + 2; //startup offset off screen
-		//party_frame_new[i]->graphic_use0pixel = TRUE;
-		//party_frame_new[i]->mouse_over_transparent = TRUE;
-		//if (i2 = getsetting("INVENTORYWINDOW_TRANSPARENCYLEVEL")) party_frame[i]->mouse_over_transparent = i2 - 1;
 
-		//party_frame_new[i]->offset_x = resxn1m + 2;
-		//party_frame_new[i]->offset_y = 0 + 2;
 		party_frame_new[i]->offset_x = 2;
 		party_frame_new[i]->offset_y = 2;
 		party_frame_new[i]->default_size_x = 256;
 		party_frame_new[i]->default_size_y = 256;
-		//party_frame_new[i]->size_x = party_frame_new[i]->default_size_x;
-		//party_frame_new[i]->size_y = party_frame_new[i]->default_size_y;
+
 		party_frame_new[i]->graphic = NULL;
 		party_frame_new[i]->display = FALSE;
 		party_frame_new[i]->active = FALSE;
@@ -2643,43 +2020,33 @@ void inituidatan1() {
 			party_frame_new[i]->scale_x = (float) party_frame_new[i]->default_size_x / party_frame_new[i]->size_x;
 			party_frame_new[i]->scale_y = (float) party_frame_new[i]->default_size_y / party_frame_new[i]->size_y;
 		}
-
-		/*
-		party_spellbook_surf[i] = newsurf(245, 173, SURF_SYSMEM16);
-		party_spellbook_frame[i] = FRMnew();
-		party_spellbook_frame[i]->graphic = party_spellbook_surf[i];
-		party_spellbook_frame[i]->offset_x = 4096; //startup offset off screen
-		party_spellbook_frame[i]->offset_y = 0; //startup offset off screen
-		party_spellbook_frame[i]->mouse_over_transparent = TRUE;
-		if (i2 = getsetting("SPELLBOOKWINDOW_TRANSPARENCYLEVEL")) party_spellbook_frame[i]->mouse_over_transparent = i2 - 1;
-		spellbook_page[i] = 1; //default to first page (0=can't display spellbook, no spells)
-		spellbook_flags[i] = 0;
-		*/
 	}
 
 
 	// r999 new
-	uipanelminimap = uipanelcount++;
-	uipi = uipanelminimap;
-	uipanelwidgetcount[uipi] = 1;
+    g_UI_MinimapPanelId = g_UI_PanelCount++;
+	uipi = g_UI_MinimapPanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 256;
-	uipanelsizey[uipi][uiwi][uisi] = 256;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 256;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 256;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = (uipanely[uipanelsidebar][uiwi][uisi] + uipanelsizey[uipanelsidebar][uiwi][uisi]) - (uipanelsizey[uipi][uiwi][uisi] + 2);
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_SidebarPanelId][uiwi][uisi] + 2;
+    g_UI_PanelY[uipi][uiwi][uisi] = (g_UI_PanelY[g_UI_SidebarPanelId][uiwi][uisi] +
+                                        g_UI_PanelHeight[g_UI_SidebarPanelId][uiwi][uisi]) -
+                                                (g_UI_PanelHeight[uipi][uiwi][uisi] + 2);
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
 	if (uiscaling)
-		uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
+        g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
 	else
-		uipanelsurf[uipi][uiwi][uisi] = minimap_surf_new;
+        g_UI_PanelSurface[uipi][uiwi][uisi] = minimap_surf_new;
 
 
 	// r444 init for minimap
@@ -2708,285 +2075,285 @@ void inituidatan1() {
 	}
 
 	// s444 worldmap
-	uipanelworldmap = uipanelcount++;
-	uipi = uipanelworldmap;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_WorldmapPanelId = g_UI_PanelCount++;
+	uipi = g_UI_WorldmapPanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	if (resyn1m < resxn1m) {
-		uipanelsizex[uipi][uiwi][uisi] = resyn1m - 50;
-		uipanelsizey[uipi][uiwi][uisi] = resyn1m - 50;
+	if (g_ScaledClientGameWindowHeight < g_ScaledClientGameWindowWidth) {
+        g_UI_PanelWidth[uipi][uiwi][uisi] = g_ScaledClientGameWindowHeight - 50;
+        g_UI_PanelHeight[uipi][uiwi][uisi] = g_ScaledClientGameWindowHeight - 50;
 	} else {
-		uipanelsizex[uipi][uiwi][uisi] = resxn1m - 50;
-		uipanelsizey[uipi][uiwi][uisi] = resxn1m - 50;
+        g_UI_PanelWidth[uipi][uiwi][uisi] = g_ScaledClientGameWindowWidth - 50;
+        g_UI_PanelHeight[uipi][uiwi][uisi] = g_ScaledClientGameWindowWidth - 50;
 	}
 
-	uipanelx[uipi][uiwi][uisi] = resxn1m - uipanelsizex[uipi][uiwi][uisi] - 25; // old was 200
-	if (uipanelx[uipi][uiwi][uisi] < 25)
-		uipanelx[uipi][uiwi][uisi] = 25;
-	uipanely[uipi][uiwi][uisi] = 25;
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_ScaledClientGameWindowWidth - g_UI_PanelWidth[uipi][uiwi][uisi] - 25; // old was 200
+	if (g_UI_PanelX[uipi][uiwi][uisi] < 25)
+        g_UI_PanelX[uipi][uiwi][uisi] = 25;
+    g_UI_PanelY[uipi][uiwi][uisi] = 25;
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+    g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
 
 
 	// s444 worldmapbar
-	uipanelworldmapbar = uipanelcount++;
-	uipi = uipanelworldmapbar;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_WorldmapBarPanelId = g_UI_PanelCount++;
+	uipi = g_UI_WorldmapBarPanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 51;
-	uipanelsizey[uipi][uiwi][uisi] = 255;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelworldmap][uiwi][uisi] - uipanelsizex[uipi][uiwi][uisi] - 1;
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelworldmap][uiwi][uisi];
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+4];
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 255;
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_WorldmapPanelId][uiwi][uisi] - g_UI_PanelWidth[uipi][uiwi][uisi] - 1;
+    g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_WorldmapPanelId][uiwi][uisi];
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+    g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR + 4];
 
 	// worldmapbar widgets
-	uipi = uipanelworldmapbar;
-	uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_WorldmapBarPanelId;
+	uiwi = g_UI_PanelWidgetCount[uipi];
 	for (i = 1; i < UI_WIDGET_ACTIONBUTTON_MAX; i++) {
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 51;
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizey[uipi][uiwi][uisi] * (uiwi-1));
-		uipanelscalex[uipi][uiwi][uisi] = scalex;
-		uipanelscaley[uipi][uiwi][uisi] = scaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-		uiwi = ++uipanelwidgetcount[uipi];
+        g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+        g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
+        g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+        g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelHeight[uipi][uiwi][uisi] * (uiwi - 1));
+        g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+        g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+        g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+        g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+		uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 	// s777 partymemberlock
-	uipanelpartymemberlock = uipanelcount++;
-	uipi = uipanelpartymemberlock;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_PartyMemberLockPanelId = g_UI_PanelCount++;
+	uipi = g_UI_PartyMemberLockPanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 28;
-	uipanelsizey[uipi][uiwi][uisi] = 28;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 28;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 28;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelpartymember0][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelpartymember0][uiwi][uisi] + uipanelsizey[uipanelpartymember0][uiwi][uisi] - uipanelsizey[uipi][uiwi][uisi] - 2;
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_PartyMemberPanelId][uiwi][uisi] + 2;
+    g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_PartyMemberPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_PartyMemberPanelId][uiwi][uisi] - g_UI_PanelHeight[uipi][uiwi][uisi] - 2;
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
 
 	// partymemberlock widget
-	uipi = uipanelpartymemberlock;
-	uiwi = uipanelwidgetcount[uipi]++;
+	uipi = g_UI_PartyMemberLockPanelId;
+	uiwi = g_UI_PanelWidgetCount[uipi]++;
 
-	uipanelsizex[uipi][uiwi][uisi] = 28;
-	uipanelsizey[uipi][uiwi][uisi] = 28;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 28;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 28;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+    g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
 
 
 
 	// s777 partymemberbar1
-	uipanelpartymemberbar1 = uipanelcount++;
-	uipi = uipanelpartymemberbar1;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_PartyMemberBarPanelId = g_UI_PanelCount++;
+	uipi = g_UI_PartyMemberBarPanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 256;
-	uipanelsizey[uipi][uiwi][uisi] = 32;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 256;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 32;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi] + 2;
-	//uipanely[uipi][uiwi][uisi] = uipanely[uipanelsidebar][uiwi][uisi] + uipanelsizey[uipanelpartymemberparent][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = sidebarstacky;
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-	sidebarstacky += uipanelsizey[uipi][uiwi][uisi]+2;
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_SidebarPanelId][uiwi][uisi] + 2;
+	//g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_SidebarPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_PartyMemberParentPanelId][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = sidebarstacky;
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+    g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+	sidebarstacky += g_UI_PanelHeight[uipi][uiwi][uisi] + 2;
 
-	img(uipanelsurf[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONBAR + 5]);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONBAR + 5]);
 
 	// s777 partymemberbar1 widgets
-	uipi = uipanelpartymemberbar1;
-	uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_PartyMemberBarPanelId;
+	uiwi = g_UI_PanelWidgetCount[uipi];
 	for (i = 1; i < 9; i++) {
-		uipanelsizex[uipi][uiwi][uisi] = 32;
-		uipanelsizey[uipi][uiwi][uisi] = 32;
+        g_UI_PanelWidth[uipi][uiwi][uisi] = 32;
+        g_UI_PanelHeight[uipi][uiwi][uisi] = 32;
 		if (uiscaling)
-			applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * (uiwi-1));
-		uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = scalex;
-		uipanelscaley[uipi][uiwi][uisi] = scaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-		//uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-		uiwi = ++uipanelwidgetcount[uipi];
+			applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+        g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * (uiwi - 1));
+        g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+        g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+        g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+        g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+        g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+		//g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+		uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 
 	// r666 init for actionbar
 
 	// r999 new
-	// actionbar parent
-	uipanelactionbarparent = uipanelcount++;
-	uipi = uipanelactionbarparent;
-	uipanelwidgetcount[uipi] = 1;
+	// region: ActionBarParent
+	g_UI_ActionBarParentPanelId = g_UI_PanelCount++;
+	uipi = g_UI_ActionBarParentPanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 260;
-	uipanelsizey[uipi][uiwi][uisi] = 52 + 52 + 52;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 260;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 52 + 52 + 52;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi];
-	//uipanely[uipi][uiwi][uisi] = uipanely[uipanelsidebar][uiwi][uisi] + uipanelsizey[uipanelpartymemberparent][uiwi][uisi];
-	//uipanely[uipi][uiwi][uisi] = uipanely[uipanelpartymemberbar1][uiwi][uisi] + uipanelsizey[uipanelpartymemberbar1][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = sidebarstacky;
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+1];
-	sidebarstacky += uipanelsizey[uipi][uiwi][uisi];
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_SidebarPanelId][uiwi][uisi];
+	//g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_SidebarPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_PartyMemberParentPanelId][uiwi][uisi];
+	//g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_PartyMemberBarPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_PartyMemberBarPanelId][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = sidebarstacky;
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+1];
+	sidebarstacky += g_UI_PanelHeight[uipi][uiwi][uisi];
 
 	// actionbar1
-	uipanelactionbar1 = uipanelcount++;
-	uipi = uipanelactionbar1;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_ActionBarTopPanelId = g_UI_PanelCount++;
+	uipi = g_UI_ActionBarTopPanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 255;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactionbarparent][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactionbarparent][uiwi][uisi];
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+1];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONBAR + 1]);
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_ActionBarParentPanelId][uiwi][uisi] + 2;
+    g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_ActionBarParentPanelId][uiwi][uisi];
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+1];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONBAR + 1]);
 
 	// actionbar2
-	uipanelactionbar2 = uipanelcount++;
-	uipi = uipanelactionbar2;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_ActionBarBottomPanelId = g_UI_PanelCount++;
+	uipi = g_UI_ActionBarBottomPanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 255;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactionbar1][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactionbar1][uiwi][uisi] + uipanelsizey[uipanelactionbar1][uiwi][uisi] + 1;
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+2];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONBAR + 2]);
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_ActionBarTopPanelId][uiwi][uisi];
+    g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_ActionBarTopPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_ActionBarTopPanelId][uiwi][uisi] + 1;
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+2];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONBAR + 2]);
 
 	// optionbar1
-	uipaneloptionbar1 = uipanelcount++;
-	uipi = uipaneloptionbar1;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_OptionBarPanelId = g_UI_PanelCount++;
+	uipi = g_UI_OptionBarPanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 255;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactionbar2][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactionbar2][uiwi][uisi] + uipanelsizey[uipanelactionbar2][uiwi][uisi] + 1;
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+3];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONBAR + 3]);
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_ActionBarBottomPanelId][uiwi][uisi];
+    g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_ActionBarBottomPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_ActionBarBottomPanelId][uiwi][uisi] + 1;
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+3];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONBAR + 3]);
 
 	//actionbuttonsizex = 51;
 	//actionbuttonsizey = 51;
 
 	// actionbar1 widgets
-	uipi = uipanelactionbar1;
-	uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_ActionBarTopPanelId;
+	uiwi = g_UI_PanelWidgetCount[uipi];
 	for (i = 1; i < UI_WIDGET_ACTIONBUTTON_MAX; i++) {
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 51;
+        g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+        g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
 		if (uiscaling)
-			applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * (uiwi-1));
-		uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = scalex;
-		uipanelscaley[uipi][uiwi][uisi] = scaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-		//uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-		uiwi = ++uipanelwidgetcount[uipi];
+			applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+        g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * (uiwi - 1));
+        g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+        g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+        g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+        g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+        g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+		//g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+		uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 	// actionbar2 widgets
-	uipi = uipanelactionbar2;
-	uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_ActionBarBottomPanelId;
+	uiwi = g_UI_PanelWidgetCount[uipi];
 	for (i = 1; i < UI_WIDGET_ACTIONBUTTON_MAX; i++) {
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 51;
+        g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+        g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
 		if (uiscaling)
-			applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * (uiwi-1));
-		uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = scalex;
-		uipanelscaley[uipi][uiwi][uisi] = scaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-		//uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-		uiwi = ++uipanelwidgetcount[uipi];
+			applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+        g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * (uiwi - 1));
+        g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+        g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+        g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+        g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+        g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+		//g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+		uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 	// optionbar1 widgets
-	uipi = uipaneloptionbar1;
-	uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_OptionBarPanelId;
+	uiwi = g_UI_PanelWidgetCount[uipi];
 	for (i = 1; i < UI_WIDGET_ACTIONBUTTON_MAX; i++) {
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 51;
+        g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+        g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
 		if (uiscaling)
-			applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * (uiwi-1));
-		uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = scalex;
-		uipanelscaley[uipi][uiwi][uisi] = scaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-		//uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-		uiwi = ++uipanelwidgetcount[uipi];
+			applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+        g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * (uiwi - 1));
+        g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+        g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+        g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+        g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+        g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+		//g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+		uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 
@@ -2995,380 +2362,380 @@ void inituidatan1() {
 
 	// r999 new
 	// actiontalkbar parent
-	uipanelactiontalkbarparent = uipanelcount++;
-	uipi = uipanelactiontalkbarparent;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_ActionTalkBarParentPanelId = g_UI_PanelCount++;
+	uipi = g_UI_ActionTalkBarParentPanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 260;
-	uipanelsizey[uipi][uiwi][uisi] = 52 + 52 + 52;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 260;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 52 + 52 + 52;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi];
-	//uipanely[uipi][uiwi][uisi] = uipanely[uipanelsidebar][uiwi][uisi] + uipanelsizey[uipanelpartymemberparent][uiwi][uisi] + uipanelsizey[uipanelactionbarparent][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = sidebarstacky;
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = actiontalksurf[0];
-	sidebarstacky += uipanelsizey[uipi][uiwi][uisi];
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_SidebarPanelId][uiwi][uisi];
+	//g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_SidebarPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_PartyMemberParentPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_ActionBarParentPanelId][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = sidebarstacky;
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = actiontalksurf[0];
+	sidebarstacky += g_UI_PanelHeight[uipi][uiwi][uisi];
 
 	// actiontalkbar1
-	uipanelactiontalkbar1 = uipanelcount++;
-	uipi = uipanelactiontalkbar1;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_TalkActionBar1PanelId = g_UI_PanelCount++;
+	uipi = g_UI_TalkActionBar1PanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 255;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactiontalkbarparent][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbarparent][uiwi][uisi];
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+1];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONTALKBAR + 1]);
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_ActionTalkBarParentPanelId][uiwi][uisi] + 2;
+    g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_ActionTalkBarParentPanelId][uiwi][uisi];
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+1];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONTALKBAR + 1]);
 
 	// actiontalkbar2
-	uipanelactiontalkbar2 = uipanelcount++;
-	uipi = uipanelactiontalkbar2;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_TalkActionBar2PanelId = g_UI_PanelCount++;
+	uipi = g_UI_TalkActionBar2PanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 255;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactiontalkbar1][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar1][uiwi][uisi] + uipanelsizey[uipanelactiontalkbar1][uiwi][uisi] + 1;
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+2];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONTALKBAR + 2]);
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_TalkActionBar1PanelId][uiwi][uisi];
+    g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_TalkActionBar1PanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_TalkActionBar1PanelId][uiwi][uisi] + 1;
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+2];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONTALKBAR + 2]);
 
 	// actiontalkbar3
-	uipanelactiontalkbar3 = uipanelcount++;
-	uipi = uipanelactiontalkbar3;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_TalkActionBar3PanelId = g_UI_PanelCount++;
+	uipi = g_UI_TalkActionBar3PanelId;
+    g_UI_PanelWidgetCount[uipi] = 1;
 
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = 255;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
 	if (uiscaling)
-		applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactiontalkbar2][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar2][uiwi][uisi] + uipanelsizey[uipanelactiontalkbar2][uiwi][uisi] + 1;
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+3];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONTALKBAR + 3]);
+		applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+    g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_TalkActionBar2PanelId][uiwi][uisi];
+    g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_TalkActionBar2PanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_TalkActionBar2PanelId][uiwi][uisi] + 1;
+    g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+    g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+    g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+3];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uipanelimgsurf[UI_IMGI_ACTIONTALKBAR + 3]);
 
 	//actionbuttonsizex = 51;
 	//actionbuttonsizey = 51;
 
 	// actiontalkbar1 widgets
-	uipi = uipanelactiontalkbar1;
+	uipi = g_UI_TalkActionBar1PanelId;
 	i2 = 0;
 	for (i = 1; i < UI_WIDGET_ACTIONTALKBUTTON_MAX; i++) {
-		uiwi = uipanelwidgetcount[uipi]++;
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 26;
+		uiwi = g_UI_PanelWidgetCount[uipi]++;
+        g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+        g_UI_PanelHeight[uipi][uiwi][uisi] = 26;
 		if (uiscaling)
-			applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * i2);
-		//uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = scalex;
-		uipanelscaley[uipi][uiwi][uisi] = scaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
+			applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+        g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * i2);
+		//g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_TalkActionBar1PanelId][UI_WIDGET_DEF][UI_STATE_DEF];
+		g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+        g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+        g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+        g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
 
 		if (i % 2 == 0) {
 			i2++;
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + uipanelsizey[uipi][uiwi][uisi];
+            g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + g_UI_PanelHeight[uipi][uiwi][uisi];
 		} else {
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+            g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
 		}
 
-		//uiwi = ++uipanelwidgetcount[uipi];
+		//uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 	// actiontalkbar2 widgets
-	uipi = uipanelactiontalkbar2;
-	//uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_TalkActionBar2PanelId;
+	//uiwi = g_UI_PanelWidgetCount[uipi];
 	i2 = 0;
 	for (int i = 1; i < UI_WIDGET_ACTIONTALKBUTTON_MAX; i++) {
-		uiwi = uipanelwidgetcount[uipi]++;
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 26;
+		uiwi = g_UI_PanelWidgetCount[uipi]++;
+        g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+        g_UI_PanelHeight[uipi][uiwi][uisi] = 26;
 		if (uiscaling)
-			applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * i2);
-		//uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = scalex;
-		uipanelscaley[uipi][uiwi][uisi] = scaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
+			applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+        g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * i2);
+		//g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_TalkActionBar1PanelId][UI_WIDGET_DEF][UI_STATE_DEF];
+		g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+        g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+        g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+        g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
 
 		if (i % 2 == 0) {
 			i2++;
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + uipanelsizey[uipi][uiwi][uisi];
+            g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + g_UI_PanelHeight[uipi][uiwi][uisi];
 		} else {
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+            g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
 		}
 
-		//uiwi = ++uipanelwidgetcount[uipi];
+		//uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 	// actiontalkbar3 widgets
-	uipi = uipanelactiontalkbar3;
-	//uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_TalkActionBar3PanelId;
+	//uiwi = g_UI_PanelWidgetCount[uipi];
 	i2 = 0;
 	for (i = 1; i < UI_WIDGET_ACTIONTALKBUTTON_MAX; i++) {
-		uiwi = uipanelwidgetcount[uipi]++;
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 26;
+		uiwi = g_UI_PanelWidgetCount[uipi]++;
+        g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+        g_UI_PanelHeight[uipi][uiwi][uisi] = 26;
 		if (uiscaling)
-			applyscaleuipanelwidget(uipi, uiwi, uisi, scalex, scaley);
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * i2);
-		//uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = scalex;
-		uipanelscaley[uipi][uiwi][uisi] = scaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
+			applyscaleuipanelwidget(uipi, uiwi, uisi, scale_x, scale_y);
+        g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * i2);
+		//g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_TalkActionBar1PanelId][UI_WIDGET_DEF][UI_STATE_DEF];
+		g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+        g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+        g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+        g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
 
 		if (i % 2 == 0) {
 			i2++;
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + uipanelsizey[uipi][uiwi][uisi];
+            g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + g_UI_PanelHeight[uipi][uiwi][uisi];
 		} else {
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+            g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
 		}
 
-		//uiwi = ++uipanelwidgetcount[uipi];
+		//uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 
 	// s555 obsolete
 	/*
-	uipaneloptioninfo = uipanelcount++;
-	uipi = uipaneloptioninfo;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_OptionInfoPanelId = g_UI_PanelCount++;
+	uipi = g_UI_OptionInfoPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 260;
-	uipanelsizey[uipi][uiwi][uisi] = 16 * 5 + 10; //80
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelsidebar][uiwi][uisi] + uipanelsizey[uipanelpartymemberparent][uiwi][uisi] + uipanelsizey[uipanelactionbarparent][uiwi][uisi] + uipanelsizey[uipanelactiontalkbarparent][uiwi][uisi];
-	uipanelscalex[uipi][uiwi][uisi] = scalex;
-	uipanelscaley[uipi][uiwi][uisi] = scaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 260;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 16 * 5 + 10; //80
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_SidebarPanelId][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_SidebarPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_PartyMemberParentPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_ActionBarParentPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_ActionTalkBarParentPanelId][uiwi][uisi];
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = scale_x;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = scale_y;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
 	
 	updateoptioninfo();
 	*/
 
 	// r999 new setup ui non-default states
 	// -- drop
-	uipi = uipanelactionbar1;
+	uipi = g_UI_ActionBarTopPanelId;
 	uiwi = UI_WIDGET_ACTIONBUTTON_DROP;
 
 	// drop set
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][1];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 1][1]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][1];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 1][1]);
 
 	// drop up
 	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][2];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 1][2]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][2];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 1][2]);
 
 	// drop down
 	uisi = 3;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][3];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 1][3]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][3];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 1][3]);
 
 	// drop left
 	uisi = 4;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][4];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 1][4]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][4];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 1][4]);
 
 	// drop right
 	uisi = 5;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][5];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 1][5]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][5];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 1][5]);
 
 	// -- food
-	uipi = uipanelactionbar2;
+	uipi = g_UI_ActionBarBottomPanelId;
 	uiwi = UI_WIDGET_ACTIONBUTTON_FOOD;
 
 	// foods1 hungry
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+2][1];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 2][1]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+2][1];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 2][1]);
 
 	// foods2 full
 	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+2][2];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 2][2]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+2][2];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 2][2]);
 
 	// -- worldmap
-	uipi = uipanelactionbar2;
+	uipi = g_UI_ActionBarBottomPanelId;
 	uiwi = UI_WIDGET_ACTIONBUTTON_WORLDMAP;
 
 	// worldmaps1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+3][1];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 3][1]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+3][1];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 3][1]);
 
 	// -- combatlog
-	uipi = uipanelactionbar2;
+	uipi = g_UI_ActionBarBottomPanelId;
 	uiwi = UI_WIDGET_ACTIONBUTTON_COMBATLOG;
 
 	// combatlogs1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+4][1];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 4][1]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+4][1];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 4][1]);
 
 	// -- game enhancement
-	uipi = uipaneloptionbar1;
+	uipi = g_UI_OptionBarPanelId;
 	uiwi = UI_WIDGET_OPTIONBUTTON_ENHANCE;
 
 	// game enhancement s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+5][1];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 5][1]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+5][1];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 5][1]);
 
 	// game enhancement s2
 	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+5][2];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 5][2]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+5][2];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 5][2]);
 
 	// -- game sound enhancement
-	uipi = uipaneloptionbar1;
+	uipi = g_UI_OptionBarPanelId;
 	uiwi = UI_WIDGET_OPTIONBUTTON_SOUND;
 
 	// game sound enhancement s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+6][1];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 6][1]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+6][1];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 6][1]);
 
 	// game sound enhancement s2
 	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+6][2];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 6][2]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+6][2];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 6][2]);
 
 	// -- combat sound enhancement
-	uipi = uipaneloptionbar1;
+	uipi = g_UI_OptionBarPanelId;
 	uiwi = UI_WIDGET_OPTIONBUTTON_COMBATSOUND;
 
 	// combat sound enhancement s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+7][1];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 7][1]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+7][1];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 7][1]);
 
 	// combat sound enhancement s2
 	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+7][2];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 7][2]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+7][2];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 7][2]);
 
 	// -- minimap
-	uipi = uipaneloptionbar1;
+	uipi = g_UI_OptionBarPanelId;
 	uiwi = UI_WIDGET_OPTIONBUTTON_MINIMAP;
 
 	// minimaps1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	//uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+8][1];
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 8][1]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+8][1];
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 8][1]);
 
 	// -- worldmap map1
-	uipi = uipanelworldmapbar;
+	uipi = g_UI_WorldmapBarPanelId;
 	uiwi = UI_WIDGET_MAPBUTTON_U6CLOTH;
 
 	// map1s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+9][1];
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+    g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET + 9][1];
 
 	// -- worldmap map2
-	uipi = uipanelworldmapbar;
+	uipi = g_UI_WorldmapBarPanelId;
 	uiwi = UI_WIDGET_MAPBUTTON_U6P;
 
 	// map2s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+10][1];
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+    g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET + 10][1];
 
 	// -- worldmap map3
-	uipi = uipanelworldmapbar;
+	uipi = g_UI_WorldmapBarPanelId;
 	uiwi = UI_WIDGET_MAPBUTTON_U6G;
 
 	// map3s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+11][1];
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+    g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET + 11][1];
 
 	// -- worldmap map4
-	uipi = uipanelworldmapbar;
+	uipi = g_UI_WorldmapBarPanelId;
 	uiwi = UI_WIDGET_MAPBUTTON_U6RUNE;
 
 	// map4s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+12][1];
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+    g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET + 12][1];
 
 	// ui hover surfs
 	int sizex, sizey;
 
 	// hover for action buttons
-	sizex = uipanelsizex[uipanelactionbar1][UI_WIDGET_ACTIONBUTTON_ATTACK][UI_STATE_DEF];
-	sizey = uipanelsizey[uipanelactionbar1][UI_WIDGET_ACTIONBUTTON_ATTACK][UI_STATE_DEF];
+	sizex = g_UI_PanelWidth[g_UI_ActionBarTopPanelId][UI_WIDGET_ACTIONBUTTON_ATTACK][UI_STATE_DEF];
+	sizey = g_UI_PanelHeight[g_UI_ActionBarTopPanelId][UI_WIDGET_ACTIONBUTTON_ATTACK][UI_STATE_DEF];
 
 	if (uiscaling) {
 		sizex++;
@@ -3379,8 +2746,8 @@ void inituidatan1() {
 	img(uihoveractionbuttonsurf, uiwidgetimgsurf[UI_IMGI_WIDGET + 13][1]);
 
 	// hover for action talk buttons
-	sizex = uipanelsizex[uipanelactiontalkbar1][UI_WIDGET_ACTIONTALKBUTTON_NAME][UI_STATE_DEF];
-	sizey = uipanelsizey[uipanelactiontalkbar1][UI_WIDGET_ACTIONTALKBUTTON_NAME][UI_STATE_DEF];
+	sizex = g_UI_PanelWidth[g_UI_TalkActionBar1PanelId][UI_WIDGET_ACTIONTALKBUTTON_NAME][UI_STATE_DEF];
+	sizey = g_UI_PanelHeight[g_UI_TalkActionBar1PanelId][UI_WIDGET_ACTIONTALKBUTTON_NAME][UI_STATE_DEF];
 
 	if (uiscaling) {
 		sizex++;
@@ -3391,8 +2758,8 @@ void inituidatan1() {
 	img(uihoveractiontalkbuttonsurf, uiwidgetimgsurf[UI_IMGI_WIDGET + 13][2]);
 
 	// hover for party member buttons
-	sizex = uipanelsizex[uipanelpartymemberbar1][1][UI_STATE_DEF];
-	sizey = uipanelsizey[uipanelpartymemberbar1][1][UI_STATE_DEF];
+	sizex = g_UI_PanelWidth[g_UI_PartyMemberBarPanelId][1][UI_STATE_DEF];
+	sizey = g_UI_PanelHeight[g_UI_PartyMemberBarPanelId][1][UI_STATE_DEF];
 
 	if (uiscaling) {
 		sizex++;
@@ -3405,64 +2772,93 @@ void inituidatan1() {
 
 	// s777 ui data for party member lock
 	// -- party member lock
-	uipi = uipanelpartymemberlock;
+	uipi = g_UI_PartyMemberLockPanelId;
 	uiwi = 1;
 
 	// party member lock (not locked)
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET+14][1]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+    g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 14][1]);
 
 	// party member lock (locked)
 	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-	img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET+14][2]);
+    g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+    g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 14][2]);
 
 
 	// s777 ui data for party member buttons
 	// -- party member 1
-	uipi = uipanelpartymemberbar1;
+	uipi = g_UI_PartyMemberBarPanelId;
 	//uiwi = UI_WIDGET_PARTYMEMBER_1;
 	for (i = 1; i < 9; i++) {
 		uiwi = i;
 
 		// party member valid (member not selected)
 		uisi = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-		uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-		img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 15 + i - 1][1]);
+        g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+        g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+		img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 15 + i - 1][1]);
 
 		// party member *frame* selected (member not selected)
 		uisi = 2;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-		uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-		img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 15 + i - 1][2]);
+        g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+        g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+		img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 15 + i - 1][2]);
 
 		// party member valid (member selected)
 		uisi = 3;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-		uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-		img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 15 + i - 1][3]);
+        g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+        g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+		img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 15 + i - 1][3]);
 
 		// party member *frame* selected (member selected)
 		uisi = 4;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-		uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][UI_STATE_DEF], uipanelsizey[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
-		img(uipanelsurf[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 15 + i - 1][4]);
+        g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+        g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][UI_STATE_DEF], g_UI_PanelHeight[uipi][uiwi][UI_STATE_DEF], SURF_SYSMEM16);
+		img(g_UI_PanelSurface[uipi][uiwi][uisi], uiwidgetimgsurf[UI_IMGI_WIDGET + 15 + i - 1][4]);
 	}
 
 	// Remove hit enable on un-used buttons
-	uipi = uipanelactionbar2;
-	uipanelhitenable[uipi][2][UI_STATE_DEF] = 0;
-	uipanelhitenable[uipi][3][UI_STATE_DEF] = 0;
+	uipi = g_UI_ActionBarBottomPanelId;
+    g_UI_PanelClickable[uipi][2][UI_STATE_DEF] = 0;
+    g_UI_PanelClickable[uipi][3][UI_STATE_DEF] = 0;
 
 }
 
+int initializeActionBarParent(int widgetId, int sidebarStacky,
+                              int panelSizeX, int panelSizeY,
+                              float scaleX, float scaleY,
+                              int hitEnabled, int useDefaultState,
+                              bool surface) {
+    g_UI_PanelWidgetCount[widgetId] = 1;
+
+    g_UI_PanelWidth[widgetId][UI_WIDGET_DEF][UI_STATE_DEF] = panelSizeX;
+    int newStacky = g_UI_PanelHeight[widgetId][UI_WIDGET_DEF][UI_STATE_DEF] = panelSizeY;
+
+    if (uiscaling)
+        applyscaleuipanelwidget(widgetId, UI_WIDGET_DEF, UI_STATE_DEF, scaleX, scaleY);
+
+    g_UI_PanelX[widgetId][UI_WIDGET_DEF][UI_STATE_DEF] = g_UI_PanelX[widgetId][UI_WIDGET_DEF][UI_STATE_DEF];
+    g_UI_PanelY[widgetId][UI_WIDGET_DEF][UI_STATE_DEF] = sidebarStacky;
+    g_UI_PanelScaleX[widgetId][UI_WIDGET_DEF][UI_STATE_DEF] = scaleX;
+    g_UI_PanelScaleY[widgetId][UI_WIDGET_DEF][UI_STATE_DEF] = scaleY;
+    g_UI_PanelClickable[widgetId][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
+    g_UI_PanelUseDefaultStateData[widgetId][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
+
+    if (surface)
+        g_UI_PanelSurface[widgetId][UI_WIDGET_DEF][UI_STATE_DEF] =
+                newsurf(g_UI_PanelWidth[widgetId][UI_WIDGET_DEF][UI_STATE_DEF],
+                        g_UI_PanelHeight[widgetId][UI_WIDGET_DEF][UI_STATE_DEF],
+                        SURF_SYSMEM16);
+
+    return newStacky;
+}
+
 void applyscaleuipanelwidget(int uipi, int uiwi, int uisi, float scalex, float scaley) {
-	uipanelsizex[uipi][uiwi][uisi] = uipanelsizex[uipi][uiwi][uisi] * scalex;
-	uipanelsizey[uipi][uiwi][uisi] = uipanelsizey[uipi][uiwi][uisi] * scaley;
+    g_UI_PanelWidth[uipi][uiwi][uisi] = g_UI_PanelWidth[uipi][uiwi][uisi] * scalex;
+    g_UI_PanelHeight[uipi][uiwi][uisi] = g_UI_PanelHeight[uipi][uiwi][uisi] * scaley;
 }
 
 // obsolete
@@ -3470,7 +2866,7 @@ void updateoptioninfo() {
 	static txt *t = txtnew();
 	static txt *t2 = txtnew();
 	int x, y;
-	surf* optioninfosurf = uipanelsurf[uipaneloptioninfo][UI_WIDGET_DEF][UI_STATE_DEF];
+	surface* optioninfosurf = g_UI_PanelSurface[g_UI_OptionInfoPanelId][UI_WIDGET_DEF][UI_STATE_DEF];
 
 	img(optioninfosurf, statusbar_b255);
 
@@ -3493,9 +2889,9 @@ void updateoptioninfo() {
 		y += 16;
 	}
 
-	if (enhanceclientn1) {
+	if (g_EnhancedClient) {
 		txtset(t, "Client options: enabled");
-		//txtnumint(t2, enhanceclientn1);
+		//txtnumint(t2, g_EnhancedClient);
 		//txtadd(t, t2);
 	} else
 		txtset(t, "Client options: disabled");
@@ -3548,10 +2944,10 @@ int gethituipaneli(int x, int y) {
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	for (uipi = 0; uipi < uipanelcount; uipi++) {
-		if ((uipanelhitenable[uipi][uiwi][uisi] == 1)
-			&& (x >= uipanelx[uipi][uiwi][uisi]) && (x < uipanelx[uipi][uiwi][uisi] + uipanelsizex[uipi][uiwi][uisi])
-			&& (y >= uipanely[uipi][uiwi][uisi]) && (y < uipanely[uipi][uiwi][uisi] + uipanelsizey[uipi][uiwi][uisi])) {
+	for (uipi = 0; uipi < g_UI_PanelCount; uipi++) {
+		if ((g_UI_PanelClickable[uipi][uiwi][uisi] == 1)
+            && (x >= g_UI_PanelX[uipi][uiwi][uisi]) && (x < g_UI_PanelX[uipi][uiwi][uisi] + g_UI_PanelWidth[uipi][uiwi][uisi])
+            && (y >= g_UI_PanelY[uipi][uiwi][uisi]) && (y < g_UI_PanelY[uipi][uiwi][uisi] + g_UI_PanelHeight[uipi][uiwi][uisi])) {
 			uipaneli = uipi;
 			break;
 		}
@@ -3575,12 +2971,12 @@ int gethituipanelwidgeti(int x, int y, int uipaneli) {
 	if (uipaneli > 0)
 		uipi = uipaneli;
 	else
-		uipi = gethituipaneli(x, y);
+		uipi = gethituipaneli(x, y); // @CearDallben, wtf ?!!?
 
-	for (uiwi = 1; uiwi < uipanelwidgetcount[uipi]; uiwi++) {
-		if ((uipanelhitenable[uipi][uiwi][uisi] == 1)
-			&& (x >= uipanelx[uipi][uiwi][uisi]) && (x < uipanelx[uipi][uiwi][uisi] + uipanelsizex[uipi][uiwi][uisi])
-			&& (y >= uipanely[uipi][uiwi][uisi]) && (y < uipanely[uipi][uiwi][uisi] + uipanelsizey[uipi][uiwi][uisi])) {
+	for (uiwi = 1; uiwi < g_UI_PanelWidgetCount[uipi]; uiwi++) {
+		if ((g_UI_PanelClickable[uipi][uiwi][uisi] == 1)
+            && (x >= g_UI_PanelX[uipi][uiwi][uisi]) && (x < g_UI_PanelX[uipi][uiwi][uisi] + g_UI_PanelWidth[uipi][uiwi][uisi])
+            && (y >= g_UI_PanelY[uipi][uiwi][uisi]) && (y < g_UI_PanelY[uipi][uiwi][uisi] + g_UI_PanelHeight[uipi][uiwi][uisi])) {
 			uipanelwidgeti = uiwi;
 			break;
 		}
@@ -3620,8 +3016,8 @@ int testhituipanel(int x, int y, int uipaneli) {
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	if ((x >= uipanelx[uipi][uiwi][uisi]) && (x < uipanelx[uipi][uiwi][uisi] + uipanelsizex[uipi][uiwi][uisi])
-		&& (y >= uipanely[uipi][uiwi][uisi]) && (y < uipanely[uipi][uiwi][uisi] + uipanelsizey[uipi][uiwi][uisi])) {
+	if ((x >= g_UI_PanelX[uipi][uiwi][uisi]) && (x < g_UI_PanelX[uipi][uiwi][uisi] + g_UI_PanelWidth[uipi][uiwi][uisi])
+        && (y >= g_UI_PanelY[uipi][uiwi][uisi]) && (y < g_UI_PanelY[uipi][uiwi][uisi] + g_UI_PanelHeight[uipi][uiwi][uisi])) {
 		testhitresult = 1;
 	}
 
@@ -3631,7 +3027,7 @@ int testhituipanel(int x, int y, int uipaneli) {
 
 /*
 //old
-void inituidatan1() {
+void initializeUIPanels() {
 	// r999 new
 	int uipi, uiwi, uisi;
 	int uiscalex, uiscaley;
@@ -3640,60 +3036,60 @@ void inituidatan1() {
 	uiscalex = UI_NOSCALE;
 	uiscaley = UI_NOSCALE;
 
-	uipanelsidebar = uipanelcount++;
-	uipi = uipanelsidebar;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_SidebarPanelId = g_UI_PanelCount++;
+	uipi = g_UI_SidebarPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 260;
-	uipanelsizey[uipi][uiwi][uisi] = resyn1m;
-	uipanelx[uipi][uiwi][uisi] = resxn1w - uipanelsizex[uipi][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = 0;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 260;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = g_ScaledClientGameWindowHeight;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_ScaledClientWindowWidth - g_UI_PanelWidth[uipi][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = 0;
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
 
-	img(uipanelsurf[uipi][uiwi][uisi], statusbar_b255);
+	img(g_UI_PanelSurface[uipi][uiwi][uisi], statusbar_b255);
 	
 	// r999 new
 	// party member inventory parent
-	uipanelpartymemberparent = uipanelcount++;
-	uipi = uipanelpartymemberparent;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_PartyMemberParentPanelId = g_UI_PanelCount++;
+	uipi = g_UI_PartyMemberParentPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 260;
-	uipanelsizey[uipi][uiwi][uisi] = 260;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelsidebar][uiwi][uisi];
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 260;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 260;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_SidebarPanelId][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_SidebarPanelId][uiwi][uisi];
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
 
 	// party member0 inventory
-	uipanelpartymember0 = uipanelcount++;
-	uipi = uipanelpartymember0;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_PartyMemberPanelId = g_UI_PanelCount++;
+	uipi = g_UI_PartyMemberPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 256;
-	uipanelsizey[uipi][uiwi][uisi] = 256;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelpartymemberparent][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelpartymemberparent][uiwi][uisi] + 2;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = party_frame[0]->graphic;
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 256;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 256;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_PartyMemberParentPanelId][uiwi][uisi] + 2;
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_PartyMemberParentPanelId][uiwi][uisi] + 2;
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = party_frame[0]->graphic;
 
 
 	for (int i = 0; i < partyframenewmax; i++) {
@@ -3701,13 +3097,13 @@ void inituidatan1() {
 		//party_surf[i] = newsurf(partyresxz, partyresxz, SURF_SYSMEM16);
 		party_frame_new[i] = FRMnew();
 		//party_frame_new[i]->graphic = party_surf[i];
-		//party_frame_new[i]->offset_x = resxn1m + 2; //startup offset off screen
+		//party_frame_new[i]->offset_x = g_ScaledClientGameWindowWidth + 2; //startup offset off screen
 		//party_frame_new[i]->offset_y = 0 + 2; //startup offset off screen
 		//party_frame_new[i]->graphic_use0pixel = TRUE;
 		//party_frame_new[i]->mouse_over_transparent = TRUE;
 		//if (i2 = getsetting("INVENTORYWINDOW_TRANSPARENCYLEVEL")) party_frame[i]->mouse_over_transparent = i2 - 1;
 
-		//party_frame_new[i]->offset_x = resxn1m + 2;
+		//party_frame_new[i]->offset_x = g_ScaledClientGameWindowWidth + 2;
 		//party_frame_new[i]->offset_y = 0 + 2;
 		party_frame_new[i]->offset_x = 2;
 		party_frame_new[i]->offset_y = 2;
@@ -3742,23 +3138,23 @@ void inituidatan1() {
 
 
 	// r999 new
-	uipanelminimap = uipanelcount++;
-	uipi = uipanelminimap;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_MinimapPanelId = g_UI_PanelCount++;
+	uipi = g_UI_MinimapPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 256;
-	uipanelsizey[uipi][uiwi][uisi] = 256;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = (uipanely[uipanelsidebar][uiwi][uisi] + uipanelsizey[uipanelsidebar][uiwi][uisi]) - (uipanelsizey[uipi][uiwi][uisi] + 2);
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
-	uipanelsurf[uipi][uiwi][uisi] = minimap_surf_new;
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 256;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 256;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_SidebarPanelId][uiwi][uisi] + 2;
+	g_UI_PanelY[uipi][uiwi][uisi] = (g_UI_PanelY[g_UI_SidebarPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_SidebarPanelId][uiwi][uisi]) - (g_UI_PanelHeight[uipi][uiwi][uisi] + 2);
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
+	g_UI_PanelSurface[uipi][uiwi][uisi] = minimap_surf_new;
 
 
 	// r444 init for minimap
@@ -3787,55 +3183,55 @@ void inituidatan1() {
 	}
 
 	// s444 worldmap
-	uipanelworldmap = uipanelcount++;
-	uipi = uipanelworldmap;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_WorldmapPanelId = g_UI_PanelCount++;
+	uipi = g_UI_WorldmapPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = resyn1m - 50;
-	uipanelsizey[uipi][uiwi][uisi] = resyn1m - 50;
-	uipanelx[uipi][uiwi][uisi] = 200;
-	uipanely[uipi][uiwi][uisi] = 25;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
+	g_UI_PanelWidth[uipi][uiwi][uisi] = g_ScaledClientGameWindowHeight - 50;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = g_ScaledClientGameWindowHeight - 50;
+	g_UI_PanelX[uipi][uiwi][uisi] = 200;
+	g_UI_PanelY[uipi][uiwi][uisi] = 25;
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
 
 
 	// s444 worldmapbar
-	uipanelworldmapbar = uipanelcount++;
-	uipi = uipanelworldmapbar;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_WorldmapBarPanelId = g_UI_PanelCount++;
+	uipi = g_UI_WorldmapBarPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 51;
-	uipanelsizey[uipi][uiwi][uisi] = 255;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelworldmap][uiwi][uisi] - uipanelsizex[uipi][uiwi][uisi] - 1;
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelworldmap][uiwi][uisi];
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+4];
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 255;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_WorldmapPanelId][uiwi][uisi] - g_UI_PanelWidth[uipi][uiwi][uisi] - 1;
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_WorldmapPanelId][uiwi][uisi];
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+4];
 
 	// worldmapbar widgets
-	uipi = uipanelworldmapbar;
-	uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_WorldmapBarPanelId;
+	uiwi = g_UI_PanelWidgetCount[uipi];
 	for (int i = 1; i < UI_WIDGET_ACTIONBUTTON_MAX; i++) {
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 51;
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizey[uipi][uiwi][uisi] * (uiwi-1));
-		uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-		uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-		uiwi = ++uipanelwidgetcount[uipi];
+		g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+		g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
+		g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+		g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelHeight[uipi][uiwi][uisi] * (uiwi-1));
+		g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+		g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+		g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+		g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+		uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 
@@ -3843,120 +3239,120 @@ void inituidatan1() {
 
 	// r999 new
 	// actionbar parent
-	uipanelactionbarparent = uipanelcount++;
-	uipi = uipanelactionbarparent;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_ActionBarParentPanelId = g_UI_PanelCount++;
+	uipi = g_UI_ActionBarParentPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 260;
-	uipanelsizey[uipi][uiwi][uisi] = 52 + 52 + 52;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelsidebar][uiwi][uisi] + uipanelsizey[uipanelpartymemberparent][uiwi][uisi];
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+1];
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 260;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 52 + 52 + 52;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_SidebarPanelId][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_SidebarPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_PartyMemberParentPanelId][uiwi][uisi];
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+1];
 
 	// actionbar1
-	uipanelactionbar1 = uipanelcount++;
-	uipi = uipanelactionbar1;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_ActionBarTopPanelId = g_UI_PanelCount++;
+	uipi = g_UI_ActionBarTopPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactionbarparent][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactionbarparent][uiwi][uisi];
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+1];
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 255;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_ActionBarParentPanelId][uiwi][uisi] + 2;
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_ActionBarParentPanelId][uiwi][uisi];
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+1];
 
 	// actionbar2
-	uipanelactionbar2 = uipanelcount++;
-	uipi = uipanelactionbar2;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_ActionBarBottomPanelId = g_UI_PanelCount++;
+	uipi = g_UI_ActionBarBottomPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactionbar1][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactionbar1][uiwi][uisi] + uipanelsizey[uipanelactionbar1][uiwi][uisi] + 1;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+2];
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 255;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_ActionBarTopPanelId][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_ActionBarTopPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_ActionBarTopPanelId][uiwi][uisi] + 1;
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+2];
 
 	// optionbar1
-	uipaneloptionbar1 = uipanelcount++;
-	uipi = uipaneloptionbar1;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_OptionBarPanelId = g_UI_PanelCount++;
+	uipi = g_UI_OptionBarPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactionbar2][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactionbar2][uiwi][uisi] + uipanelsizey[uipanelactionbar2][uiwi][uisi] + 1;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+3];
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 255;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_ActionBarBottomPanelId][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_ActionBarBottomPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_ActionBarBottomPanelId][uiwi][uisi] + 1;
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONBAR+3];
 
 	//actionbuttonsizex = 51;
 	//actionbuttonsizey = 51;
 
 	// actionbar1 widgets
-	uipi = uipanelactionbar1;
-	uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_ActionBarTopPanelId;
+	uiwi = g_UI_PanelWidgetCount[uipi];
 	for (int i = 1; i < UI_WIDGET_ACTIONBUTTON_MAX; i++) {
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 51;
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * (uiwi-1));
-		uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-		uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-		//uipanelsurf[uipi][uiwi][uisi] = actionbarsurf[1];
-		uiwi = ++uipanelwidgetcount[uipi];
+		g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+		g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
+		g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * (uiwi-1));
+		g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+		g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+		g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+		g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+		g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+		//g_UI_PanelSurface[uipi][uiwi][uisi] = actionbarsurf[1];
+		uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 	// actionbar2 widgets
-	uipi = uipanelactionbar2;
-	uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_ActionBarBottomPanelId;
+	uiwi = g_UI_PanelWidgetCount[uipi];
 	for (int i = 1; i < UI_WIDGET_ACTIONBUTTON_MAX; i++) {
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 51;
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * (uiwi-1));
-		uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-		uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-		//uipanelsurf[uipi][uiwi][uisi] = actionbarsurf[1];
-		uiwi = ++uipanelwidgetcount[uipi];
+		g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+		g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
+		g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * (uiwi-1));
+		g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+		g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+		g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+		g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+		g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+		//g_UI_PanelSurface[uipi][uiwi][uisi] = actionbarsurf[1];
+		uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 	// optionbar1 widgets
-	uipi = uipaneloptionbar1;
-	uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_OptionBarPanelId;
+	uiwi = g_UI_PanelWidgetCount[uipi];
 	for (int i = 1; i < UI_WIDGET_ACTIONBUTTON_MAX; i++) {
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 51;
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * (uiwi-1));
-		uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-		uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-		//uipanelsurf[uipi][uiwi][uisi] = actionbarsurf[1];
-		uiwi = ++uipanelwidgetcount[uipi];
+		g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+		g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
+		g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * (uiwi-1));
+		g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+		g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+		g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+		g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+		g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+		//g_UI_PanelSurface[uipi][uiwi][uisi] = actionbarsurf[1];
+		uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 
@@ -3965,319 +3361,319 @@ void inituidatan1() {
 
 	// r999 new
 	// actiontalkbar parent
-	uipanelactiontalkbarparent = uipanelcount++;
-	uipi = uipanelactiontalkbarparent;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_ActionTalkBarParentPanelId = g_UI_PanelCount++;
+	uipi = g_UI_ActionTalkBarParentPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 260;
-	uipanelsizey[uipi][uiwi][uisi] = 52 + 52 + 52;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelsidebar][uiwi][uisi] + uipanelsizey[uipanelpartymemberparent][uiwi][uisi] + uipanelsizey[uipanelactionbarparent][uiwi][uisi];
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	//uipanelsurf[uipi][uiwi][uisi] = actiontalksurf[0];
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 260;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 52 + 52 + 52;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_SidebarPanelId][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_SidebarPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_PartyMemberParentPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_ActionBarParentPanelId][uiwi][uisi];
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	//g_UI_PanelSurface[uipi][uiwi][uisi] = actiontalksurf[0];
 
 	// actiontalkbar1
-	uipanelactiontalkbar1 = uipanelcount++;
-	uipi = uipanelactiontalkbar1;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_TalkActionBar1PanelId = g_UI_PanelCount++;
+	uipi = g_UI_TalkActionBar1PanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactiontalkbarparent][uiwi][uisi] + 2;
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbarparent][uiwi][uisi];
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+1];
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 255;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_ActionTalkBarParentPanelId][uiwi][uisi] + 2;
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_ActionTalkBarParentPanelId][uiwi][uisi];
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+1];
 
 	// actiontalkbar2
-	uipanelactiontalkbar2 = uipanelcount++;
-	uipi = uipanelactiontalkbar2;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_TalkActionBar2PanelId = g_UI_PanelCount++;
+	uipi = g_UI_TalkActionBar2PanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactiontalkbar1][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar1][uiwi][uisi] + uipanelsizey[uipanelactiontalkbar1][uiwi][uisi] + 1;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+2];
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 255;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_TalkActionBar1PanelId][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_TalkActionBar1PanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_TalkActionBar1PanelId][uiwi][uisi] + 1;
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+2];
 
 	// actiontalkbar3
-	uipanelactiontalkbar3 = uipanelcount++;
-	uipi = uipanelactiontalkbar3;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_TalkActionBar3PanelId = g_UI_PanelCount++;
+	uipi = g_UI_TalkActionBar3PanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
-	uipanelsizex[uipi][uiwi][uisi] = 255;
-	uipanelsizey[uipi][uiwi][uisi] = 51;
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelactiontalkbar2][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar2][uiwi][uisi] + uipanelsizey[uipanelactiontalkbar2][uiwi][uisi] + 1;
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+3];
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 255;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 51;
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_TalkActionBar2PanelId][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_TalkActionBar2PanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_TalkActionBar2PanelId][uiwi][uisi] + 1;
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uipanelimgsurf[UI_IMGI_ACTIONTALKBAR+3];
 
 	//actionbuttonsizex = 51;
 	//actionbuttonsizey = 51;
 
 	// actiontalkbar1 widgets
-	uipi = uipanelactiontalkbar1;
+	uipi = g_UI_TalkActionBar1PanelId;
 	i2 = 0;
 	for (int i = 1; i < UI_WIDGET_ACTIONTALKBUTTON_MAX; i++) {
-		uiwi = uipanelwidgetcount[uipi]++;
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 26;
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * i2);
-		//uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-		uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
+		uiwi = g_UI_PanelWidgetCount[uipi]++;
+		g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+		g_UI_PanelHeight[uipi][uiwi][uisi] = 26;
+		g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * i2);
+		//g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_TalkActionBar1PanelId][UI_WIDGET_DEF][UI_STATE_DEF];
+		g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+		g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+		g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+		g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
 
 		if (i % 2 == 0) {
 			i2++;
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + 26;
+			g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + 26;
 		} else {
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+			g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
 		}
 
-		//uiwi = ++uipanelwidgetcount[uipi];
+		//uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 	// actiontalkbar2 widgets
-	uipi = uipanelactiontalkbar2;
-	//uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_TalkActionBar2PanelId;
+	//uiwi = g_UI_PanelWidgetCount[uipi];
 	i2 = 0;
 	for (int i = 1; i < UI_WIDGET_ACTIONTALKBUTTON_MAX; i++) {
-		uiwi = uipanelwidgetcount[uipi]++;
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 26;
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * i2);
-		//uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-		uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
+		uiwi = g_UI_PanelWidgetCount[uipi]++;
+		g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+		g_UI_PanelHeight[uipi][uiwi][uisi] = 26;
+		g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * i2);
+		//g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_TalkActionBar1PanelId][UI_WIDGET_DEF][UI_STATE_DEF];
+		g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+		g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+		g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+		g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
 
 		if (i % 2 == 0) {
 			i2++;
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + 26;
+			g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + 26;
 		} else {
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+			g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
 		}
 
-		//uiwi = ++uipanelwidgetcount[uipi];
+		//uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 	// actiontalkbar3 widgets
-	uipi = uipanelactiontalkbar3;
-	//uiwi = uipanelwidgetcount[uipi];
+	uipi = g_UI_TalkActionBar3PanelId;
+	//uiwi = g_UI_PanelWidgetCount[uipi];
 	i2 = 0;
 	for (int i = 1; i < UI_WIDGET_ACTIONTALKBUTTON_MAX; i++) {
-		uiwi = uipanelwidgetcount[uipi]++;
-		uipanelsizex[uipi][uiwi][uisi] = 51;
-		uipanelsizey[uipi][uiwi][uisi] = 26;
-		uipanelx[uipi][uiwi][uisi] = uipanelx[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (uipanelsizex[uipi][uiwi][uisi] * i2);
-		//uipanely[uipi][uiwi][uisi] = uipanely[uipanelactiontalkbar1][UI_WIDGET_DEF][UI_STATE_DEF];
-		uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-		uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-		uipanelhitenable[uipi][uiwi][uisi] = 1;
-		uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
+		uiwi = g_UI_PanelWidgetCount[uipi]++;
+		g_UI_PanelWidth[uipi][uiwi][uisi] = 51;
+		g_UI_PanelHeight[uipi][uiwi][uisi] = 26;
+		g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + (g_UI_PanelWidth[uipi][uiwi][uisi] * i2);
+		//g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_TalkActionBar1PanelId][UI_WIDGET_DEF][UI_STATE_DEF];
+		g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+		g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+		g_UI_PanelClickable[uipi][uiwi][uisi] = 1;
+		g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
 
 		if (i % 2 == 0) {
 			i2++;
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + 26;
+			g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF] + 26;
 		} else {
-			uipanely[uipi][uiwi][uisi] = uipanely[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
+			g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[uipi][UI_WIDGET_DEF][UI_STATE_DEF];
 		}
 
-		//uiwi = ++uipanelwidgetcount[uipi];
+		//uiwi = ++g_UI_PanelWidgetCount[uipi];
 	}
 
 
 	// s555
 	/*
-	uipaneloptioninfo = uipanelcount++;
-	uipi = uipaneloptioninfo;
-	uipanelwidgetcount[uipi] = 1;
+	g_UI_OptionInfoPanelId = g_UI_PanelCount++;
+	uipi = g_UI_OptionInfoPanelId;
+	g_UI_PanelWidgetCount[uipi] = 1;
 
 	uiwi = UI_WIDGET_DEF;
 	uisi = UI_STATE_DEF;
 
-	uipanelsizex[uipi][uiwi][uisi] = 260;
-	uipanelsizey[uipi][uiwi][uisi] = 16 * 5 + 10; //80
-	uipanelx[uipi][uiwi][uisi] = uipanelx[uipanelsidebar][uiwi][uisi];
-	uipanely[uipi][uiwi][uisi] = uipanely[uipanelsidebar][uiwi][uisi] + uipanelsizey[uipanelpartymemberparent][uiwi][uisi] + uipanelsizey[uipanelactionbarparent][uiwi][uisi] + uipanelsizey[uipanelactiontalkbarparent][uiwi][uisi];
-	uipanelscalex[uipi][uiwi][uisi] = uiscalex;
-	uipanelscaley[uipi][uiwi][uisi] = uiscaley;
-	uipanelhitenable[uipi][uiwi][uisi] = 0;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 0;
-	uipanelsurf[uipi][uiwi][uisi] = newsurf(uipanelsizex[uipi][uiwi][uisi], uipanelsizey[uipi][uiwi][uisi], SURF_SYSMEM16);
+	g_UI_PanelWidth[uipi][uiwi][uisi] = 260;
+	g_UI_PanelHeight[uipi][uiwi][uisi] = 16 * 5 + 10; //80
+	g_UI_PanelX[uipi][uiwi][uisi] = g_UI_PanelX[g_UI_SidebarPanelId][uiwi][uisi];
+	g_UI_PanelY[uipi][uiwi][uisi] = g_UI_PanelY[g_UI_SidebarPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_PartyMemberParentPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_ActionBarParentPanelId][uiwi][uisi] + g_UI_PanelHeight[g_UI_ActionTalkBarParentPanelId][uiwi][uisi];
+	g_UI_PanelScaleX[uipi][uiwi][uisi] = uiscalex;
+	g_UI_PanelScaleY[uipi][uiwi][uisi] = uiscaley;
+	g_UI_PanelClickable[uipi][uiwi][uisi] = 0;
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 0;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = newsurf(g_UI_PanelWidth[uipi][uiwi][uisi], g_UI_PanelHeight[uipi][uiwi][uisi], SURF_SYSMEM16);
 	
 	updateoptioninfo();
 ///
 
 	// r999 new setup ui non-default states
 	// -- drop
-	uipi = uipanelactionbar1;
+	uipi = g_UI_ActionBarTopPanelId;
 	uiwi = UI_WIDGET_ACTIONBUTTON_DROP;
 
 	// drop set
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][1];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][1];
 
 	// drop up
 	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][2];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][2];
 
 	// drop down
 	uisi = 3;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][3];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][3];
 
 	// drop left
 	uisi = 4;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][4];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][4];
 
 	// drop right
 	uisi = 5;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][5];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+1][5];
 
 	// -- food
-	uipi = uipanelactionbar2;
+	uipi = g_UI_ActionBarBottomPanelId;
 	uiwi = UI_WIDGET_ACTIONBUTTON_FOOD;
 
 	// foods1 hungry
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+2][1];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+2][1];
 
 	// foods2 full
 	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+2][2];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+2][2];
 
 	// -- worldmap
-	uipi = uipanelactionbar2;
+	uipi = g_UI_ActionBarBottomPanelId;
 	uiwi = UI_WIDGET_ACTIONBUTTON_WORLDMAP;
 
 	// worldmaps1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+3][1];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+3][1];
 
 	// -- combatlog
-	uipi = uipanelactionbar2;
+	uipi = g_UI_ActionBarBottomPanelId;
 	uiwi = UI_WIDGET_ACTIONBUTTON_COMBATLOG;
 
 	// combatlogs1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+4][1];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+4][1];
 
 	// -- game enhancement
-	uipi = uipaneloptionbar1;
+	uipi = g_UI_OptionBarPanelId;
 	uiwi = UI_WIDGET_OPTIONBUTTON_ENHANCE;
 
 	// game enhancement s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+5][1];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+5][1];
 
 	// game enhancement s2
 	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+5][2];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+5][2];
 
 	// -- game sound enhancement
-	uipi = uipaneloptionbar1;
+	uipi = g_UI_OptionBarPanelId;
 	uiwi = UI_WIDGET_OPTIONBUTTON_SOUND;
 
 	// game sound enhancement s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+6][1];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+6][1];
 
 	// game sound enhancement s2
 	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+6][2];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+6][2];
 
 	// -- combat sound enhancement
-	uipi = uipaneloptionbar1;
+	uipi = g_UI_OptionBarPanelId;
 	uiwi = UI_WIDGET_OPTIONBUTTON_COMBATSOUND;
 
 	// combat sound enhancement s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+7][1];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+7][1];
 
 	// combat sound enhancement s2
 	uisi = 2;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+7][2];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+7][2];
 
 	// -- minimap
-	uipi = uipaneloptionbar1;
+	uipi = g_UI_OptionBarPanelId;
 	uiwi = UI_WIDGET_OPTIONBUTTON_MINIMAP;
 
 	// minimaps1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+8][1];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+8][1];
 
 	// -- worldmap map1
-	uipi = uipanelworldmapbar;
+	uipi = g_UI_WorldmapBarPanelId;
 	uiwi = UI_WIDGET_MAPBUTTON_U6CLOTH;
 
 	// map1s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+9][1];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+9][1];
 
 	// -- worldmap map2
-	uipi = uipanelworldmapbar;
+	uipi = g_UI_WorldmapBarPanelId;
 	uiwi = UI_WIDGET_MAPBUTTON_U6P;
 
 	// map2s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+10][1];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+10][1];
 
 	// -- worldmap map3
-	uipi = uipanelworldmapbar;
+	uipi = g_UI_WorldmapBarPanelId;
 	uiwi = UI_WIDGET_MAPBUTTON_U6G;
 
 	// map3s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+11][1];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+11][1];
 
 	// -- worldmap map4
-	uipi = uipanelworldmapbar;
+	uipi = g_UI_WorldmapBarPanelId;
 	uiwi = UI_WIDGET_MAPBUTTON_U6RUNE;
 
 	// map4s1
 	uisi = 1;
-	uipanelusedefaultstatedata[uipi][uiwi][uisi] = 1;
-	uipanelsurf[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+12][1];
+	g_UI_PanelUseDefaultStateData[uipi][uiwi][uisi] = 1;
+	g_UI_PanelSurface[uipi][uiwi][uisi] = uiwidgetimgsurf[UI_IMGI_WIDGET+12][1];
 
 
 }
@@ -4468,19 +3864,19 @@ void updatepartyframe1(FRAME* f, int partyindex, double scale) {
 #endif
 #define loadimage loadimage
 
-surf *loadimage2(LPCSTR name){
+surface *loadimage2(LPCSTR name){
   //txtset(li2_t,"Loading .BMP image ["); txtadd(li2_t,name); txtadd(li2_t,"]"); scrlog(li2_t->d);
   return loadimage(name);
 }
-surf *loadimage2(txt* name){
+surface *loadimage2(txt* name){
   //txtset(li2_t,"Loading .BMP image ["); txtadd(li2_t,name); txtadd(li2_t,"]"); scrlog(li2_t->d);
   return loadimage(name);
 }
-surf *loadimage2(LPCSTR name,long flags){
+surface *loadimage2(LPCSTR name, long flags){
   //txtset(li2_t,"Loading .BMP image ["); txtadd(li2_t,name); txtadd(li2_t,"]"); scrlog(li2_t->d);
   return loadimage(name,flags);
 }
-surf *loadimage2(txt* name,long flags){
+surface *loadimage2(txt* name, long flags){
   //txtset(li2_t,"Loading .BMP image ["); txtadd(li2_t,name); txtadd(li2_t,"]"); scrlog(li2_t->d);
   return loadimage(name,flags);
 }

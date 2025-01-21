@@ -1,3 +1,11 @@
+#include "myddraw.h"
+#include "define_both.h"
+
+#ifdef tempForIde
+#undef tempForIde
+#endif
+#define tempForIde 1
+
 ps640400=newsurf(640,400,SURF_SYSMEM16);//intro surfaces
 ps320200=newsurf(320,200,SURF_SYSMEM16);
 surf_tremor=newsurf(256,256,SURF_SYSMEM16);
@@ -183,8 +191,8 @@ not4sale=loadimage(".\\dr\\not4sale.bmp",SURF_SYSMEM16);
 not4salemask=loadimage(".\\dr\\n4smask.bmp",SURF_SYSMEM16);
 
 
-//surf* null_tr=loadimage(".\\dr\\null_tr.bmp",SURF_SYSMEM16);
-//surf* null_bl=loadimage(".\\dr\\null_bl.bmp",SURF_SYSMEM16);
+//surface* null_tr=loadimage(".\\dr\\null_tr.bmp",SURF_SYSMEM16);
+//surface* null_bl=loadimage(".\\dr\\null_bl.bmp",SURF_SYSMEM16);
 converse_arrows=loadimage(".\\dr\\arrows3.bmp",SURF_SYSMEM16);
 spellbook=loadimage(".\\dr\\spelbook.bmp",SURF_SYSMEM16);
 spellbookmini=loadimage(".\\dr\\sbmini.bmp",SURF_SYSMEM16);
@@ -238,32 +246,32 @@ dogearl=loadimage(".\\dr\\dogear2.bmp",SURF_SYSMEM16);
 spellbookline=loadimage(".\\dr\\line.bmp",SURF_SYSMEM16);
 
 /*
-surf *intro10=loadimage(".\\dr\\intro10.bmp",SURF_SYSMEM16);
-surf *intro11=loadimage(".\\dr\\intro11.bmp",SURF_SYSMEM16);
-surf *intro12=loadimage(".\\dr\\intro12.bmp",SURF_SYSMEM16);
-surf *intro13=loadimage(".\\dr\\intro13.bmp",SURF_SYSMEM16);
-surf *intro14=loadimage(".\\dr\\intro14.bmp",SURF_SYSMEM16);
-surf *intro15=loadimage(".\\dr\\intro15.bmp",SURF_SYSMEM16);
-surf *intro16=loadimage(".\\dr\\intro16.bmp",SURF_SYSMEM16);
-surf *intro17=loadimage(".\\dr\\intro17.bmp",SURF_SYSMEM16);
-surf *intro18=loadimage(".\\dr\\intro18.bmp",SURF_SYSMEM16);
-surf *intro19=loadimage(".\\dr\\intro19.bmp",SURF_SYSMEM16);
-surf *intro110=loadimage(".\\dr\\intro110.bmp",SURF_SYSMEM16);
-surf *intro111=loadimage(".\\dr\\intro111.bmp",SURF_SYSMEM16);
-surf *intro112=loadimage(".\\dr\\intro112.bmp",SURF_SYSMEM16);
-surf *intro113=loadimage(".\\dr\\intro113.bmp",SURF_SYSMEM16);
-surf *intro114=loadimage(".\\dr\\intro114.bmp",SURF_SYSMEM16);
-surf *intro115=newsurf(192,400,SURF_SYSMEM16); cls(intro115,0);
-surf *intro116=loadimage(".\\dr\\intro115.bmp",SURF_SYSMEM16);
+surface *intro10=loadimage(".\\dr\\intro10.bmp",SURF_SYSMEM16);
+surface *intro11=loadimage(".\\dr\\intro11.bmp",SURF_SYSMEM16);
+surface *intro12=loadimage(".\\dr\\intro12.bmp",SURF_SYSMEM16);
+surface *intro13=loadimage(".\\dr\\intro13.bmp",SURF_SYSMEM16);
+surface *intro14=loadimage(".\\dr\\intro14.bmp",SURF_SYSMEM16);
+surface *intro15=loadimage(".\\dr\\intro15.bmp",SURF_SYSMEM16);
+surface *intro16=loadimage(".\\dr\\intro16.bmp",SURF_SYSMEM16);
+surface *intro17=loadimage(".\\dr\\intro17.bmp",SURF_SYSMEM16);
+surface *intro18=loadimage(".\\dr\\intro18.bmp",SURF_SYSMEM16);
+surface *intro19=loadimage(".\\dr\\intro19.bmp",SURF_SYSMEM16);
+surface *intro110=loadimage(".\\dr\\intro110.bmp",SURF_SYSMEM16);
+surface *intro111=loadimage(".\\dr\\intro111.bmp",SURF_SYSMEM16);
+surface *intro112=loadimage(".\\dr\\intro112.bmp",SURF_SYSMEM16);
+surface *intro113=loadimage(".\\dr\\intro113.bmp",SURF_SYSMEM16);
+surface *intro114=loadimage(".\\dr\\intro114.bmp",SURF_SYSMEM16);
+surface *intro115=newsurf(192,400,SURF_SYSMEM16); cls(intro115,0);
+surface *intro116=loadimage(".\\dr\\intro115.bmp",SURF_SYSMEM16);
 
-surf *intro20=loadimage(".\\dr\\intro20.bmp",SURF_SYSMEM16);
-surf *intro21=loadimage(".\\dr\\intro21.bmp",SURF_SYSMEM16);
-surf *intro22=loadimage(".\\dr\\intro22.bmp",SURF_SYSMEM16);
-surf *intro23=loadimage(".\\dr\\intro23.bmp",SURF_SYSMEM16);
-surf *intro24=loadimage(".\\dr\\intro24.bmp",SURF_SYSMEM16);
-surf *intro25=loadimage(".\\dr\\intro25.bmp",SURF_SYSMEM16);
-surf *intro26=loadimage(".\\dr\\intro26.bmp",SURF_SYSMEM16);
-surf *intro27=loadimage(".\\dr\\intro27.bmp",SURF_SYSMEM16);
+surface *intro20=loadimage(".\\dr\\intro20.bmp",SURF_SYSMEM16);
+surface *intro21=loadimage(".\\dr\\intro21.bmp",SURF_SYSMEM16);
+surface *intro22=loadimage(".\\dr\\intro22.bmp",SURF_SYSMEM16);
+surface *intro23=loadimage(".\\dr\\intro23.bmp",SURF_SYSMEM16);
+surface *intro24=loadimage(".\\dr\\intro24.bmp",SURF_SYSMEM16);
+surface *intro25=loadimage(".\\dr\\intro25.bmp",SURF_SYSMEM16);
+surface *intro26=loadimage(".\\dr\\intro26.bmp",SURF_SYSMEM16);
+surface *intro27=loadimage(".\\dr\\intro27.bmp",SURF_SYSMEM16);
 */
 
 intro_gypsy=loadimage(".\\dr\\gypsy.bmp",SURF_SYSMEM16);
@@ -310,7 +318,7 @@ intro_ccsave1=loadimage(".\\dr\\ccsave1.bmp",SURF_SYSMEM16);
 intro_ccsave2=loadimage(".\\dr\\ccsave2.bmp",SURF_SYSMEM16);
 intro_ccsave3=loadimage(".\\dr\\ccsave3.bmp",SURF_SYSMEM16);
 
-//surf *intro_startup=loadimage(".\\dr\\startup.bmp",SURF_SYSMEM16);
+//surface *intro_startup=loadimage(".\\dr\\startup.bmp",SURF_SYSMEM16);
 
 
 intro_tacinfo=loadimage(".\\dr\\tacinfo.bmp",SURF_SYSMEM16);

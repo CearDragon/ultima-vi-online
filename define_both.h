@@ -707,8 +707,8 @@
 
 
 #define UI_NOSCALE -1.0f
-#define UI_WIDGET_DEF 0
-#define UI_STATE_DEF 0
+#define UI_WIDGET_DEF 0 // index of widgets
+#define UI_STATE_DEF 0  // index of widget state
 
 //#define ACTIONBAR_MAX 2
 //#define ACTIONTALKBAR_MAX 2
@@ -716,6 +716,8 @@
 #define UI_WIDGET_ACTIONTALKBUTTON_MAX 10+1			// +1 because widget[0] is the panel itself
 //#define UI_ACTIONBUTTON_SIZEX 51
 //#define UI_ACTIONBUTTON_SIZEY 51
+
+#define UI_SIDEBAR_COLOR 0x00001372 // converted from ((2 << 11) + (27 << 5) + 18) in function_client
 
 #define UI_WIDGET_ACTIONBUTTON_ATTACK 1
 #define UI_WIDGET_ACTIONBUTTON_TALK 2
