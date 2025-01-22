@@ -19915,15 +19915,22 @@ houselook_foundownersname:
                   }else{
                     txtadd(t,".");
                   }
-                  goto skiphorsewithowner;
+
+                  // send horse status to net player
+                  NET_send(NETplayer,tplayer->net,t);
+
+                  // inform player how to feed horse
+                  if (((crt2->respawn_x>>4)&3)==0) {
+                    txtset(t, "?");
+                    txtsetchar(t, 8);
+                    txtaddchar(t,255);
+                    txtadd(t,"Thy horse is famished, seek grain to fill its feed bag.");
+                    NET_send(NETplayer,tplayer->net,t);
+                  }
+
+                  goto skiphorsewithownernoprint;
                 }
               }
-
-
-
-
-
-
 
               i3=(obji[sprlnk[myobj->type&1023]].v8>>8)*4;
               txtset(t5,t2);
@@ -20252,6 +20259,7 @@ skiphorsewithowner:
 skip_playername:
             NET_send(NETplayer,tplayer->net,t);
 
+skiphorsewithownernoprint:
             //sign //scroll //picture //book //gsign //codex //circles //tombstone //cross
             if (((myobj->type&1023)==332)||((myobj->type&1023)==152)||((myobj->type&1023)==143)||((myobj->type&1023)==151)||((myobj->type&1023)==333)||((myobj->type&1023)==59)||((myobj->type&1023)==61)||((myobj->type&1023)==254)||((myobj->type&1023)==255)){
               if (myobj->more2){
