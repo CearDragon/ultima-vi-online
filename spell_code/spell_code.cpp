@@ -29,7 +29,7 @@ U6O_SPELL_FUNCTION(create_food) {
 }
 
 U6O_SPELL_FUNCTION(detect_magic) {
-  return SPELL_NOTDONE;
+    return SPELL_NOTDONE;
 }
 
 U6O_SPELL_FUNCTION(detect_trap) {
@@ -42,7 +42,7 @@ U6O_SPELL_FUNCTION(detect_trap) {
         return SPELL_INVALID;
     }
 
-    if ((int)(rnd * (8 + 5 * 1)) > (int)(rnd * (caster->intelligence + 1))) {
+    if ((int) (rnd * (8 + 5 * 1)) > (int) (rnd * (caster->intelligence + 1))) {
         return SPELL_FAILURE;
     }
 
@@ -73,232 +73,237 @@ U6O_SPELL_FUNCTION(detect_trap) {
 }
 
 U6O_SPELL_FUNCTION(dispel_magic) {
-  return SPELL_NOTDONE;
+    return SPELL_NOTDONE;
 }
 
 U6O_SPELL_FUNCTION(douse) {
-  object *myobj2;
-  unsigned long special_effect;
-  int x1;
-  int x2;
-  int x3;
-  int x4;
+    object *myobj2;
+    unsigned long special_effect;
+    int x1;
+    int x2;
+    int x3;
+    int x4;
 
-  if (stormcloakcheck2(x,y,myplr)) {
+    if (stormcloakcheck2(x, y, myplr)) {
+        return SPELL_INVALID;
+    }
+    if (myobj2 = OBJfindlast(x, y)) {
+        x3 = myobj2->type & 1023;
+        x4 = myobj2->type >> 10;
+
+        switch (x3) {
+            case 206: //brazier
+                if (x4 > 1) {
+                    //holy flames, no touch
+                    return SPELL_FAILURE;
+                }
+                //fall through on purpose
+            case 253: //campfire
+            case 164: //fireplace
+            case 122: //candle
+            case 145: //candelabra
+            case 223: //powder keg
+                x1 = (int) (rnd * (8 + 5 * 1));
+                x2 = (int) (rnd * (caster->intelligence + 1));
+                if (x2 < x1) {
+                    //fail
+                    return SPELL_FAILURE;
+                }
+                OBJsave(myobj2->x, myobj2->y);
+                if (x4 & 1) {
+                    if (x3 == 223) { //powder keg special more value.
+                        myobj2->more2 = myplr->id;
+                    }
+                    use_basic_toggle(NULL, myobj2);
+                }
+                break;
+            default:
+                return SPELL_INVALID;
+        }
+        special_effect = SFnew(x, y); //destination is more important than the source
+        special_effects[special_effect].type = SF_BLUE_BOLT;
+
+        if ((myobj2 = npc_to_obj(caster, myplr))) { // get the corresponding npc pointer.
+            special_effects[special_effect].x = myobj2->x; /* the caster's x and y */
+            special_effects[special_effect].y = myobj2->y;
+        } else {
+            special_effects[special_effect].x = x; /* appear right at the target instead */
+            special_effects[special_effect].y = y;
+        }
+        special_effects[special_effect].x2 = x;
+        special_effects[special_effect].y2 = y;
+        special_effects[special_effect].more = 0xFFFF;
+        special_effects[special_effect].wait = 1;
+        return SPELL_SUCCESS;
+    }
     return SPELL_INVALID;
-  }
-  if (myobj2=OBJfindlast(x,y)){
-    x3=myobj2->type&1023;
-    x4=myobj2->type>>10;
-
-    switch (x3) {
-      case 206: //brazier
-	if (x4>1) {
-	  //holy flames, no touch
-	  return SPELL_FAILURE;
-	}
-	//fall through on purpose
-      case 253: //campfire
-      case 164: //fireplace
-      case 122: //candle
-      case 145: //candelabra
-      case 223: //powder keg
-	x1=(int)(rnd*(8+5*1));
-	x2=(int)(rnd*(caster->intelligence + 1));
-	if (x2<x1){
-	  //fail
-	  return SPELL_FAILURE;
-	}
-	OBJsave(myobj2->x,myobj2->y);
-	if (x4&1) {
-	  if (x3==223) { //powder keg special more value.
-	    myobj2->more2=myplr->id;
-	  }
-	 use_basic_toggle(NULL,myobj2);
-	}
-	break;
-      default: 
-      return SPELL_INVALID;
-    }
-    special_effect=SFnew(x,y); //destination is more important than the source
-    sf[special_effect].type=SF_BLUE_BOLT;
-
-    if ( (myobj2=npc_to_obj(caster,myplr)) ) { // get the corresponding npc pointer.
-      sf[special_effect].x=myobj2->x; /* the caster's x and y */
-      sf[special_effect].y=myobj2->y;
-    } else {
-      sf[special_effect].x=x; /* appear right at the target instead */
-      sf[special_effect].y=y;
-    }
-    sf[special_effect].x2=x;
-    sf[special_effect].y2=y;
-    sf[special_effect].more=0xFFFF;
-    sf[special_effect].wait=1;
-    return SPELL_SUCCESS;
-  }
-  return SPELL_INVALID;
 }
 
 U6O_SPELL_FUNCTION(explosion) {
-  return 0;
+    return 0;
+}
+
+U6O_SPELL_FUNCTION(fire_field) {
+    return 0;
 }
 
 U6O_SPELL_FUNCTION(harm) {
-  return 0;
+    return 0;
 }
 
 U6O_SPELL_FUNCTION(heal) {
-  return 0;
+    return 0;
 }
 
 U6O_SPELL_FUNCTION(help) {
-  return 0;
+    return 0;
 }
 
 U6O_SPELL_FUNCTION(ignite) {
-  object *myobj2;
-  unsigned long special_effect;
-  int x1;
-  int x2;
-  int x3;
-  int x4;
+    object *myobj2;
+    unsigned long special_effect;
+    int x1;
+    int x2;
+    int x3;
+    int x4;
 
-  if (stormcloakcheck2(x,y,myplr)) {
+    if (stormcloakcheck2(x, y, myplr)) {
+        return SPELL_INVALID;
+    }
+    myobj2 = OBJfindlast(x, y);
+    if (myobj2) {
+        x3 = myobj2->type & 1023;
+        x4 = myobj2->type >> 10;
+
+        switch (x3) {
+            case 206: //brazier
+                if (x4 > 1) {
+                    //holy flames, no touch
+                    return SPELL_FAILURE;
+                }
+                //fall through on purpose
+            case 253: //campfire
+            case 164: //fireplace
+            case 122: //candle
+            case 145: //candelabra
+            case 223: //powder keg
+            case 53: //web
+                x1 = (int) (rnd * (8 + 5 * 1));
+                x2 = (int) (rnd * (caster->intelligence + 1));
+                if (x2 < x1) {
+                    //fail
+                    return SPELL_SUCCESS;
+                }
+                OBJsave(myobj2->x, myobj2->y);
+                //if (!x4&1){ //original thing. suspect operator precendence issues
+                //if (!x4&1 || ((x3==164) && (x4==2))){ //fix for fireplace
+                if (!(x4 &
+                      1)) { // fix for operator precedence thing. we want to check if bit 1 of x4 (0,1,2,3) is not set, not if bit 1 is set on the negated version of x4 (which will be 1 or 0)
+
+                    if (x3 == 223) { //powder keg
+                        myobj2->info |= 7680; //1111000000000 obj reserved timer
+                        myobj2->more2 = tplayer->id;
+                        stealing(tplayer, myobj2);
+                    } else if (x3 ==
+                               53) { //web  /* luteijn: does x4&1 have to be 0?  mose: doesn't have to be 0, but atm it doesn't get another values, but in future it might change so its probably a good idea to keep it inside the check */
+                        VLNKremove(myobj2);
+                        OBJremove(myobj2);
+                        myobj2 = NULL;
+                    } else {
+                        use_basic_toggle(NULL, myobj2);
+                    }
+                }
+                break;
+            default:
+                return SPELL_INVALID;
+        }
+        special_effect = SFnew(x, y); //destination is more important than the source
+        special_effects[special_effect].type = SF_RED_BOLT;
+        if ((myobj2 = npc_to_obj(caster, myplr))) { // get the corresponding npc pointer.
+            special_effects[special_effect].x = myobj2->x; /* the caster's x and y */
+            special_effects[special_effect].y = myobj2->y;
+        } else {
+            special_effects[special_effect].x = x; /* appear right at the target instead */
+            special_effects[special_effect].y = y;
+        }
+        special_effects[special_effect].x2 = x;
+        special_effects[special_effect].y2 = y;
+        special_effects[special_effect].more = 0xFFFF;
+        special_effects[special_effect].wait = 1;
+        return SPELL_SUCCESS;
+    }
     return SPELL_INVALID;
-  }
-  if (myobj2=OBJfindlast(x,y)){
-    x3=myobj2->type&1023;
-    x4=myobj2->type>>10;
-
-    switch (x3) {
-      case 206: //brazier
-	if (x4>1) {
-	  //holy flames, no touch
-	  return SPELL_FAILURE;
-	}
-	//fall through on purpose
-      case 253: //campfire
-      case 164: //fireplace
-      case 122: //candle
-      case 145: //candelabra
-      case 223: //powder keg
-      case 53: //web
-	x1=(int)(rnd*(8+5*1));
-	x2=(int)(rnd*(caster->intelligence + 1));
-	if (x2<x1){
-	  //fail
-	  return SPELL_SUCCESS;
-	}
-	OBJsave(myobj2->x,myobj2->y);
-	//if (!x4&1){ //original thing. suspect operator precendence issues
-	//if (!x4&1 || ((x3==164) && (x4==2))){ //fix for fireplace
-	if (!(x4&1)){ // fix for operator precedence thing. we want to check if bit 1 of x4 (0,1,2,3) is not set, not if bit 1 is set on the negated version of x4 (which will be 1 or 0)
-	  				
-	  if (x3==223) { //powder keg
-	    myobj2->info|=7680; //1111000000000 obj reserved timer
-	    myobj2->more2=tplayer->id;
-	    stealing(tplayer,myobj2);
-	  }
-	  else if (x3==53){ //web  /* luteijn: does x4&1 have to be 0?  mose: doesn't have to be 0, but atm it doesn't get another values, but in future it might change so its probably a good idea to keep it inside the check */ 
-	    VLNKremove(myobj2);
-	    OBJremove(myobj2);
-	    myobj2=NULL;
-	  }
-	  else {
-	    use_basic_toggle(NULL,myobj2);
-	  }
-	}
-	break;
-      default: 
-	return SPELL_INVALID;
-    }
-    special_effect=SFnew(x,y); //destination is more important than the source
-    sf[special_effect].type=SF_RED_BOLT;
-    if ( (myobj2=npc_to_obj(caster,myplr)) ) { // get the corresponding npc pointer.
-      sf[special_effect].x=myobj2->x; /* the caster's x and y */
-      sf[special_effect].y=myobj2->y;
-    } else {
-      sf[special_effect].x=x; /* appear right at the target instead */
-      sf[special_effect].y=y;
-    }
-    sf[special_effect].x2=x;
-    sf[special_effect].y2=y;
-    sf[special_effect].more=0xFFFF;
-    sf[special_effect].wait=1;
-    return SPELL_SUCCESS;
-  }
-  return SPELL_INVALID;
 }
 
 U6O_SPELL_FUNCTION(light) {
-  return 0;
+    return 0;
 }
 
 /* Second Circle */
 U6O_SPELL_FUNCTION(infravision) {
-  return 0;
+    return 0;
 }
 
 U6O_SPELL_FUNCTION(magic_arrow) {
-  return 0;
+    return 0;
 }
 
 U6O_SPELL_FUNCTION(poison) {
-  return 0;
+    return 0;
 }
 
 U6O_SPELL_FUNCTION(reappear) {
-  return 0;
+    return 0;
 }
 
 U6O_SPELL_FUNCTION(sleep) {
-  return 0;
+    return 0;
 }
 
 U6O_SPELL_FUNCTION(telekinesis) {
-  object *myobj2;
-  int x3;
-  int x4;
+    object *myobj2;
+    int x3;
+    int x4;
 
-  if (stormcloakcheck2(x,y,myplr)) {
-    return SPELL_INVALID; 
-  }
-  myobj2=OBJfindlast(x,y);
-  if (myobj2){
-    switch (myobj2->type&1023) {
-      case 268: //lever
-	  case 174: //switch
-      case 288: //crank
-	x3=(int)rnd*(8+5*2); 
-	x4=(int)rnd*(caster->intelligence + 1);
-	if (x4>=x3){
-	  use_toggle(NULL,myobj2);
-	  return SPELL_SUCCESS;
-	}
-	return SPELL_FAILURE;
-	break; //lever, switch or crank
-      
-      default: //other objects are not yet implemented. refund.
-	return SPELL_INVALID;
+    if (stormcloakcheck2(x, y, myplr)) {
+        return SPELL_INVALID;
     }
-  }//myobj2
-  return SPELL_INVALID; //should be targeting an object.
+    myobj2 = OBJfindlast(x, y);
+    if (myobj2) {
+        switch (myobj2->type & 1023) {
+            case 268: //lever
+            case 174: //switch
+            case 288: //crank
+                x3 = (int) rnd * (8 + 5 * 2);
+                x4 = (int) rnd * (caster->intelligence + 1);
+                if (x4 >= x3) {
+                    use_toggle(NULL, myobj2);
+                    return SPELL_SUCCESS;
+                }
+                return SPELL_FAILURE;
+                break; //lever, switch or crank
+
+            default: //other objects are not yet implemented. refund.
+                return SPELL_INVALID;
+        }
+    }//myobj2
+    return SPELL_INVALID; //should be targeting an object.
 }
 
 U6O_SPELL_FUNCTION(trap) {
-  return 0;
+    return 0;
 }
 
 U6O_SPELL_FUNCTION(unlock_magic) {
-  return 0;
+    return 0;
 }
 
 U6O_SPELL_FUNCTION(untrap) {
-  return 0;
+    return 0;
 }
 
 U6O_SPELL_FUNCTION(vanish) {
-  return 0;
+    return 0;
 }
 
 /* Third Circle */
@@ -308,8 +313,53 @@ U6O_SPELL_FUNCTION(vanish) {
 /* Seventh Circle */
 /* Eight Circle */
 U6O_SPELL_FUNCTION(armageddon) {
-  /* placeholder */
-  return 0;
+    /* placeholder */
+    return 0;
+}
+
+int fieldSpell(player* myplr , npc * caster, object* myobj, unsigned short x, unsigned short y, int spell_code, int dc) {
+    if (stormcloakcheck2(x, y, myplr)) {
+        return SPELL_INVALID;
+    }
+
+    object *spellTarget;
+    int targetType = 0;
+    int difficultyCheck = 0;
+    int playerInt = 0;
+
+    spellTarget = OBJfindlast(tpx + x, tpy + y);
+
+    if (spellTarget) {
+        targetType = spellTarget->type & OBJ_TYPE_BITMASK;
+    }
+    if ((targetType == OBJ_FIRE_FIELD) ||
+        (targetType == OBJ_POISON_FIELD) ||
+        (targetType == OBJ_SLEEP_FIELD) ||
+        (targetType == OBJ_TRAP) ||
+        (targetType == OBJ_WEB)) {
+        return SPELL_INVALID;
+    }
+
+    // check if location is walkable(1024)
+    int walkable = bt[tpy + y][tpx + x] & 1024;
+
+    if (walkable) {
+        difficultyCheck = rnd * dc; // roll rand difficulty check
+        playerInt = rnd * (tnpc->intelligence + 1); // get the caster's intelligence
+
+        if (playerInt >= difficultyCheck) { // success
+            object *fieldSpell = OBJnew();
+            fieldSpell->type = spell_code;
+            fieldSpell->more2 = tnpc->player->id;
+            OBJadd(tpx + x, tpy + y, fieldSpell);
+            fieldSpell->info += (2 << 4);
+            OBJcheckflags(fieldSpell->x, fieldSpell->y);
+            return SPELL_SUCCESS;
+        } else {
+            return SPELL_INVALID;
+        }
+    }
+    return SPELL_INVALID;
 }
 
 /* Original spells and reagents (using originals reagent bit values) 

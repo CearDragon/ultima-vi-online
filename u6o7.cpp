@@ -1,24 +1,19 @@
-//ws2_32.lib winmm.lib
 #include "stdafx.h"
 #include "u6o7.h"
 #include <stdio.h>
 #include <winsock2.h>
 #include <math.h>
-#include <direct.h>
-#include <wininet.h>
 #include <winreg.h>
 #include "dmusic.h"
 #include "myfile.h"
 #include "myddraw.h"
 #include "mytxt.h"
 #include "sound.h"
-#include "myddraw.h"
 #include "frame.h"
 #include "windows.h"
 
 #ifdef CONSOLE
 #include <conio.h>
-
 #endif
 
 /* define these in the project, as it also ties in with what to link
@@ -43,20 +38,14 @@ b) if "host" param absent; this is the "TESTING CLIENT" (house.cpp must be prese
 /*luteijn: Disabled these pragma's to help with cleaning code. Made me sad.*/
 #pragma warning(disable:4018) //signed/unsigned mismatch
 
-
-
-//#define TCHAR unsigned char
-
-
-
 #include "define_both.h"//host and client definitions
 #ifdef HOST
-#include "define_host.h"//host definitions
+    #include "define_host.h"//host definitions
 #include "use_code/use_code.h"  // host only
 #include "spell_code/spell_code.h"  // host only
 #endif
 #ifdef CLIENT
-#include "define_client.h"//client definitions
+    #include "define_client.h"//client definitions
 #endif
 
 
@@ -114,7 +103,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					   int       nCmdShow)
 {
 
-	//temporary use variables
+    // literally the worst fucking block of code to ever fucking exist
+    // you can just instantiate an object and free it when you're done.
+    //
+	// temporary use variables
 	static long i=0,i2=0,i3=0,i4=0,i5=0,i6=0,i7=0,i8=0,i9=0;
 	static long x=0,x2=0,x3=0,x4=0,x5=0,x6=0,x7=0,x8=0,x9=0;
 	static long y=0,y2=0,y3=0,y4=0,y5=0,y6=0,y7=0,y8=0,y9=0;

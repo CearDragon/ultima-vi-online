@@ -7874,7 +7874,7 @@ donesf:
         if (sfx[i3].wait<=0) sfx[i3].wait=0;
 donesf2:;
 
-        //check for more sf
+        //check for more special_effects
       }//=!0
     }//i3
 

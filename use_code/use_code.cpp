@@ -166,22 +166,22 @@ U6O_USE_FUNCTION(toggle) {
 
   x=myobj->x; y=myobj->y;
   sound_effect=SFnew(x,y);
-  sf[sound_effect].type=4;
-  sf[sound_effect].x=x;
-  sf[sound_effect].y=y;
-  sf[sound_effect].wait=1.0f; //NULL
+    special_effects[sound_effect].type=4;
+    special_effects[sound_effect].x=x;
+    special_effects[sound_effect].y=y;
+    special_effects[sound_effect].wait=1.0f; //NULL
   switch (myobj->type&1023) {
     case 268: // lever
-      sf[sound_effect].more=4;
+      special_effects[sound_effect].more=4;
       break;
     case 174: // switch
-      sf[sound_effect].more=3;
+      special_effects[sound_effect].more=3;
       break;
     case 288: // crank
-      sf[sound_effect].more=0; //TODO add effect
+      special_effects[sound_effect].more=0; //TODO add effect
       break;
     default: // default to lever, FIXME/TODO probably nice to add fire effect here (whoosh!) when toggling fire. (cool: light fire open related gate)
-      sf[sound_effect].more=4;
+      special_effects[sound_effect].more=4;
   }
   return;
 }

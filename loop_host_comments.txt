@@ -1,0 +1,2205 @@
+122 0DX1cyUuha
+
+  /*
+  for (i=0;i<=15;i++){
+  if (stolenitemwarning[i]){
+  stolenitemwarning_wait[i]-=et;
+  if (stolenitemwarning_wait[i]<=0.0f) stolenitemwarning[i]=NULL;
+  }//stolenitemwarning[i]
+  }//i
+  */
+
+170 0w7QjP9hva
+
+      //object *moongate[8][2];
+      //unsigned char showmoongates=0;
+      //unsigned short moongatex[8],moongatey[8];
+
+224 0wmrV0lmyc
+
+        /*
+        // luteijn: keep client in check, but this is too often?
+	// luteijn: it is, so now only sending it when saving.
+        //send time
+        txtset(t2,"?"); t2->d2[0]=32;
+        txtset(t3,"12345678"); t3->dd[0]=btime2;
+        txtadd(t2,t3);
+        NET_send(NETplayer,tplayer->net,t2);
+        */
+
+255 11MGgMl3FI
+
+	// luteijn: this updates the orb destinations a player has visited.
+	// visited means he was 8 or less squares from the spot.
+        //GNPCflags[22]: bitvector for available orb destinations
+
+501 zLEp7X2eu7
+
+        /*
+        if (t->d2[0]==11){ //type 11: set next midi
+        txtright(t,t->l-1);
+        nmidi=t->d2[0];
+        goto CLIENT_donemess;
+        }//11
+        */
+
+507 ycCHeFP1hG
+
+//if (tplayer->craft) {tnpc->hp=0; goto exitloop1;} //*2004 TEMP
+
+539 yPaz0ByA29
+
+                  /*VLNKremove(tplayer->party[0]); VLNKsremove(tplayer->party[0]); //remove vlnk(s)
+                  tplayer->party[0]->more=tplayer->craft_con;
+                  tplayer->party[0]->info=tplayer->party[0]->info&(1<<9);
+                  tplayer->party[0]=tplayer->craft;
+                  tplayer->craft=NULL;
+                  for (i4=7;i4>=0;i4--){
+                  if (tplayer->party[i4]!=NULL){
+                  OBJadd(myobj2->x,myobj2->y,tplayer->party[i4]);
+                  }
+                  }
+                  //remove balloon from map + return item to inventory
+                  static mlobj *mmyobj; //array size varies
+                  mmyobj=(mlobj*)myobj2->more;
+                  OBJremove(mmyobj->obj[0]); OBJrelease(mmyobj->obj[0]);
+                  OBJremove(mmyobj->obj[1]); OBJrelease(mmyobj->obj[1]);
+                  OBJremove(mmyobj->obj[2]); OBJrelease(mmyobj->obj[2]);
+                  myobj2->type=420; myobj2->info|=256;
+                  OBJremove(myobj2);
+                  //tnpc=(npc*)tplayer->party[0]->more; //already set!
+                  additemroot(tnpc,myobj2);
+                  tnpc->upflags|=32;*/
+
+656 xf3JVwLp8x
+
+                    //tplayer->party[x4]=NULL; ***other party members are not really gone!***
+
+706 bwrmlcxlQM
+
+                  /*
+                  //move player to castle!
+                  OBJmove_allow=TRUE;
+                  OBJmove2(tplayer->party[0],256+128-16,256+128+2); //place avatar on the map
+                  OBJmove_allow=FALSE;
+                  */
+
+712 w21MvBaraH
+
+                  //player *resu_player[65536]; //player object belongs to
+                  //unsigned char resu_partymember[65536]; //party member index
+
+
+                  //txtset(t,"?"); t->d2[0]=8; txtadd(t,"An unending darkness engulfs thee... A voice in the darkness intones, \x022KAL LOR!\x022");
+
+736 vjYt8hQWXa
+
+              //replace with dead bodies!!!, and blood!
+              //myobj=OBJnew();
+              //myobj->type=
+              //tplayer->party[x]=NULL;
+
+751 qhqqlecfm2
+
+        //metalhead*if ((exitrequest)&&(tpl!=0)) {playerlist[tpl]->save_update=-1; goto save_update1;} //update all players!
+
+759 vGV7emnKmq
+
+//MessageBox(NULL,"Saving #1","Ultima 6 Online",MB_OK);
+
+        //metalhead*if ((playerlist[tpl]->save_update>=512)&&(tpl!=0)) {playerlist[tpl]->save_update=-1; goto save_update1;}
+
+778 oFgJ8L6j8f
+
+          //static txt *u6o_user_name=txtnew(); txtset(u6o_user_name,"UNKNOWN");
+          //static txt *u6o_user_password=txtnew(); txtset(u6o_user_password,"UNKNOWN");
+
+          //save player
+
+781 rU65fqbpSB
+
+          //MessageBox(NULL,"Saving","Ultima 6 Online",MB_OK);
+
+          //U6O_ERRORTAG
+
+848 rzp0LYB39f
+
+          /*
+	     txtset(t,"??"); t->ds[0]=3; txtadd(t4,t);
+	   */
+
+900 hgQTEUmSG0
+
+            //MessageBox(NULL,"HOUSESTORAGECHECK: [28]=0","Ultima 6 Online",MB_OK);
+            //txtnumint(t9,houseowner_FAILVALUE);
+            //MessageBox(NULL,t9->d,"Ultima 6 Online",MB_OK);
+
+902 XUFJL1Mxj3
+
+          //if playerlist[tpl]->GNPCflags[28]!=0 house is valid
+
+927 tuDbErq3PO
+
+                  //z3=playerlist[tpl]->party[x8]->type>>11;//z3 is the direction of the horse
+929 jRg5dkigSD
+
+// exit(tnpc->originalobjtype);
+
+944 ucEqYkFouG
+
+                //FOLLOWING LINE REMOVED TO ALLOW FOR LOGGING BACK IN AS DEAD
+                //if (party_ok[x8]==0) t->dl[0]=tnpc->exp-int(tnpc->exp/8); //deduct xp required for ressurection ***FIXED 2005***
+
+1000 rcgwLtFHFl
+
+                  //if (housestorageadd){
+                  //txtnumint(t5,t2->ds[0]); txtadd(t5,":type"); MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
+                  //}
+
+                  //txtnumint(t5,OBJlist_list[y6]->type&1023);
+                  //MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
+
+1086 noR7qWuefa
+
+                                //t2->dl[0]=2097151;//111111111111111111111b
+
+                                //if (HORSEDISMOUNT_HORSEOBJECT){//send horse back to Britain's stables free of charge
+                                //OBJmove_allow=TRUE;
+                                //OBJmove2(HORSEDISMOUNT_HORSEOBJECT,430,280);
+                                //OBJmove2(HORSEDISMOUNT_HORSEOBJECT,429,280);
+                                //OBJmove_allow=FALSE;
+
+1176 Z6gtCtylOQ
+
+/* mose: disabling this new save format for now. I really don't have time to make this work.
+           luteijn a new format for naming the savegames
+          txtset(t2,"./save/");
+          txtset(t,"?/");
+          t->d[0]=playerlist[tpl]->name->d[0];
+          if ( (t->d[0] < 'A') || (t->d[0] > 'Z')) {
+            t->d[0]='@'; // weird character names go here
+          }
+          txtadd(t2,t);
+          txtadd(t2,playerlist[tpl]->name);
+          txtadd(t2,"-");
+          txtadd(t2,playerlist[tpl]->npcname);
+          txtadd(t2,".u6o");   /*idea is to atomically move this over the real save later
+          LOGadd(t2); // scrlog is client only!
+          tfh=open2(t2,OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
+          if (tfh->h!=HFILE_ERROR) {
+            put(tfh,t4->d2,t4->l); /* FIXME: NO RETURN CODE, HOW DO WE KNOW IT WORKED so we can overwrite the existing save?
+            close(tfh);
+
+            /* TODO: if saving went well, move the .u6o file to .sav
+          } else {
+            txtset(t,"Failed to open new format savefile");
+            LOGadd(t);
+            /* TODO: find out what went wrong and retry.
+          }*/
+
+1387 vjYt8hQWXa
+
+              //tpx=x-15; tpy=y-11;
+              //if (tpx<0) tpx=0; if (tpy<0) tpy=0;
+              //if (tpx>2016) tpx=2016;
+              //if (tpy>1000) tpy=1000;
+
+1439 gpD5MWVcOh
+
+        //2005 objects update message
+        //assume buffer needs to be resent
+
+        //shift buffer to new location
+        /*
+        short sobj_bufoffx,sobj_bufoffy; //x,y offset of left corner of entire buffer
+        unsigned short sobj_buf2bytes[96][72]; //number of 2 byte elements allocated
+        unsigned short sobj_bufsize[96][72]; //number of 2 byte elements actually used
+        unsigned short *sobj[96][72]; //scene object raw data
+        unsigned long  sobj_tempfixed[96][72]; //temp fixed objects
+        */
+
+1468 t9Z3xBvODM
+
+          //txtnumint(t3,t->d2[1]);
+          //MessageBox(NULL,t3->d,"Ultima 6 Online",MB_OK);
+
+1493 QCN2B1O77L
+
+//get screen offset
+          //tpx=x-15; tpy=y-11;
+          //if (tpx<0) tpx=0; if (tpy<0) tpy=0;
+          //if (tpx>2016) tpx=2016;
+          //if (tpy>1000) tpy=1000;
+
+1643 YDp2XSfVAD
+
+          //MessageBox(NULL,"shiftbuffer: buffer shifted","Ultima 6 Online",MB_OK);
+
+1645 Vg6PL4kQf5
+
+          //ERROR is it overwriting data it needs to read as it goes
+          //OPTOMIZATION!!! switch the pointers to the data and data buffer lengths instead of the data
+          //[17:25] galleondragon: and screen+8 area is reloaded in centre
+          /*
+          for (y9=0;y9<=71;y9++){
+          for (x9=0;x9<=95;x9++){
+          if (tplayer->sobj_tempfixed[x9][y9]||tplayer->sobj_bufsize[x9][y9]){
+          objbufferf->graphic->o2[x9+y9*96]=0xFFFF;
+          }else{
+          objbufferf->graphic->o2[x9+y9*96]=31;
+          }
+          }}
+          */
+
+          //MessageBox(NULL,"update required","Ultima 6 Online",MB_OK);
+
+1648 FOl81XAUpo
+
+          //refresh pathfinding array
+          //if (tplayer->xray){ //xray!
+          //for (x2=0;x2<=65535;x2++) pfa[x2]=PFs+PFd;
+          //}else{
+          //pathfind2(x,y,NULL);
+          //}
+
+1656 B98xn7ThHx
+
+            /*
+            x4=0; z4=2;
+            for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
+            if (pfa[x+y*256+257]&(PFs+PFd)) z5=1; else z5=0;
+            if (z5!=z4){
+            if (z4!=2){ //not the first pass
+            *p=x4+z4*128; p++;
+            }//z4!=2
+            x4=0; //number of squares in a row -1
+            z4=z5; //type (1 or 0)
+            }else{
+            if (x4==127){
+            *p=127+z4*128; p++;
+            x4=0;
+            }else{
+            x4++;
+            }
+            }
+            }}//x,y
+            *p=x4+z4*128; p++; //save last row
+            */
+
+1792 AJQonIf70W
+
+             //short sobj_bufoffx,sobj_bufoffy; //x,y offset of left corner of entire buffer
+             //unsigned short sobj_buf2bytes[96][72]; //number of 2 byte elements allocated
+             //unsigned short sobj_bufsize[96][72]; //number of 2 byte elements actually used
+             //unsigned short *sobj[96][72]; //scene object raw data
+             //unsigned long  sobj_tempfixed[96][72]; //temp fixed objects
+             //compare buffers
+
+             //length check
+
+1831 JwezcvXOk5
+
+             /*
+             1 edit objects of another square
+             {
+             11 screen offset of square
+             {
+             1 a/another object exists on this square
+             10 object graphic index (optomized)
+             1 object is flashing
+             }
+             }
+
+             */
+
+1835 J1mlUIXjQV
+
+             //***** DONT FORGET FLASHING OBJECTS HERE AND IN TEMPFIXED BUFFER
+             //***** DONT FORGET NOT TO UPDATE BLACKED OUT SQUARES
+             //or off screen
+
+1876 eRiDgyKKyg
+
+            //check for npc or crt pointer
+            //XXXX UNOCCUPIED BOATS, SKIFFS, RAFTS WON'T HAVE A CRT OR NPC POINTER
+            //if ((myobj->info&(2+4))==0){
+            //myobj=(object*)myobj->next;
+            //goto mvobjskip;
+            //}
+
+2281 HYxTmNGp1Y
+
+        /*
+        1. remove
+        2.1 change
+        2.2 move
+        3. add
+
+
+        ***1. REMOVE MOVER***
+        1 if =1 remove a/another mover
+        {
+        [?] index of mover to remove based on current buffer
+        }
+        ***2.1 CHANGE/TOGGLE STATE***
+        1 if =1 change/toggle a/another mover's state
+        {
+        [?] index of mover in current buffer
+        a:
+        4 state change id
+        0 LIGHTBRIGHT (LIGHTGLOW assumed off)
+        1 LIGHTGLOW (LIGHTBRIGHT assumed off)
+        2 INVISIBLE
+        3 PARALYZE
+        4 SLEEP
+        5 PROTECT
+        6 STORMCLOAK
+        7 TYPING
+        8 hpmp{		8 new hpmp byte		}
+        9 ktar{		4 new ktar number	}
+        1 if =1 another state needs to be changed, goto a
+        }
+        ***2.2 CHANGE FRAME (THIS IS ONLY SENT IF MOVER HAS NOT MOVED TO ANOTHER SQUARE, IN THAT CASE IT CAN BE ASSUMED)***
+        1 if =1 change animation frame of a/another mover
+        {
+        [?] index of mover to change the animation frame of
+        }
+        ***2.3 MOVE***
+        1 if =1 move a/another mover
+        {
+        [?] index of mover to move in current buffer
+        5 number representing a special x,y offset from current location to move to
+        }
+        ***3. ADD NEW MOVER***
+        1 if =1 add a/another mover
+        {
+        10 x,y offset to add mover
+        8-10 (number of bits will depend on yet to be implemented optomization) mover's object type
+        2 direction mover is facing
+        a:
+        1 if =1 a/another state change/toggle is required
+        {
+        4 state change id
+        0 LIGHTBRIGHT (LIGHTGLOW assumed off)
+        1 LIGHTGLOW (LIGHTBRIGHT assumed off)
+        2 INVISIBLE
+        3 PARALYZE
+        4 SLEEP
+        5 PROTECT
+        6 STORMCLOAK
+        7 TYPING
+        8 hpmp+playerid{	8  new hpmp byte
+        32 playerid			}
+        9 ktar{				4 new ktar number	}
+        goto a
+        }
+        }
+        */
+
+
+
+
+
+
+
+
+        //flags/pointers used while comparing buffers
+        //unsigned long mv_last[MVLISTLAST+1];
+        //unsigned long mv_new[MVLISTLAST+1];
+
+
+
+
+
+
+
+
+        /*
+        if (!playerlist[tpl]->updatemessage){
+        static unsigned char *p,*p2;
+        txtNEWLEN(t,-1048576); //create 1MB buffer
+        p=t->d2;
+
+        *p=1; p++;
+        *(float*)p=btime2; p+=4;
+
+        //central object offset->x,y
+        if (playerlist[tpl]->party[playerlist[tpl]->selected_partymember]){
+        x=playerlist[tpl]->party[playerlist[tpl]->selected_partymember]->x;
+        y=playerlist[tpl]->party[playerlist[tpl]->selected_partymember]->y;
+        }else{
+        x=playerlist[tpl]->px; y=playerlist[tpl]->py;
+        }
+        //screen offset->tpx,tpy
+        tpx=x-15; tpy=y-11;
+        if (tpx<0) tpx=0; if (tpy<0) tpy=0;
+        if (tpx>2016) tpx=2016;
+        if (tpy>1000) tpy=1000;
+
+        //add tpx,tpy to message
+        *(unsigned short*)p=tpx; p+=2;
+        *(unsigned short*)p=tpy; p+=2;
+
+        if (playerlist[tpl]->xray){ //xray!
+        for (x2=0;x2<=65535;x2++) pfa[x2]=PFs+PFd;
+        }else{
+        pathfind2(x,y,NULL);
+        }
+
+        //send blank squares
+        //with no obstructions this routine will still send 7 bytes (equivalent to only 2 objects!)
+        //BUT it is optomized basic obstructions caused by buildings/caves etc.
+        //OLD METHOD WAS: starting type(1), number of type(2), (assume type change)number of type(2)
+        //NEW METHOD: number of type+type*128(1), ...
+        //benefit: halved bandwidth in basic/complex situations
+        x4=0; z4=2;
+        for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
+        if (pfa[x+y*256+257]&(PFs+PFd)) z5=1; else z5=0;
+        if (z5!=z4){
+        if (z4!=2){ //not the first pass
+        *p=x4+z4*128; p++;
+        }//z4!=2
+        x4=0; //number of squares in a row -1
+        z4=z5; //type (1 or 0)
+        }else{
+        if (x4==127){
+        *p=127+z4*128; p++;
+        x4=0;
+        }else{
+        x4++;
+        }
+        }
+        }}//x,y
+        *p=x4+z4*128; p++; //save last row
+
+
+        //update basetiles message
+        //update objects message
+        static long updatex,updatey;
+        x2=0; x3=0;
+        p2=p; p+=2; //create 2 bytes space to set number of objects
+        for (y=0;y<=23;y++){ for (x=0;x<=31;x++){
+        updatex=tpx+x; updatey=tpy+y;
+
+        myobj=od[updatey][updatex];
+
+        nextobj: if (myobj){
+
+        if (myobj->type==416){//view redirector
+        if (myobj->more2){
+        bt[updatey][updatex]=bt[myobj->more2>>16][myobj->more2&65535]; //update basetile flags (is this best location?)
+        updatex=myobj->more2&65535; updatey=myobj->more2>>16;//change currect scan location
+        myobj=od[myobj->more2>>16][myobj->more2&65535];//change current object
+        goto nextobj;
+        }
+        }//view redirector
+
+
+
+        i2=myobj->type&1023; //get object identity
+
+        if (myobj->info&256){ //quest/don'tsend
+        if (obji[sprlnk[i2]].weight==0){
+        goto display_skip;
+        }
+
+        if (i2==73){ //moonstone
+        if (playerlist[tpl]->GNPCflags[4]&(1<<(myobj->type>>10))) goto display_skip;
+        }
+
+        if (myobj->type==(275+2*1024)){//yellow potion
+        if (myobj->info&256){//quest
+        if (playerlist[tpl]->GNPCflags[32]&myobj->more2) goto display_skip;
+        }//quest
+        }//yellow potion
+
+        if ((i2>=242)&&(i2<=249)){ //rune
+        if (playerlist[tpl]->GNPCflags[5]&(1<<(i2-242))) goto display_skip;
+        }
+        if ((i2>=400)&&(i2<=407)){ //map(0-7)
+        if (playerlist[tpl]->GNPCflags[7]&(1<<(i2-400))) goto display_skip;
+        }
+        if (i2==62){ //vortex cube
+        if ((myobj->x==923)&&(myobj->y==850)){
+        if ((playerlist[tpl]->GNPCflags[18]&1)==0) goto display_skip;
+        }
+        if ((myobj->x==1939)&&(myobj->y==57)){
+        if (playerlist[tpl]->GNPCflags[6]&(1<<1)) goto display_skip;
+        }
+        }
+        if (i2==389){ //silver tablet
+        if (playerlist[tpl]->GNPCflags[6]&(1<<2)) goto display_skip;
+        }
+        if (i2==390){ //silver tabletII
+        if (playerlist[tpl]->GNPCflags[6]&(1<<3)) goto display_skip;
+        }
+        if (i2==270){ //balloon plans
+        if (playerlist[tpl]->GNPCflags[6]&(1<<4)) goto display_skip;
+        }
+        if (i2==395){ //broken gargoyle lens
+        if (playerlist[tpl]->GNPCflags[6]&(1<<5)) goto display_skip;
+        }
+        if (i2==394){ //brit lens
+        if ((playerlist[tpl]->GNPCflags[18]&2)==0) goto display_skip;
+        }
+        if (i2==396){ //garg lens
+        if ((playerlist[tpl]->GNPCflags[18]&4)==0) goto display_skip;
+        }
+        }//quest/don't send
+
+        if (myobj==nuggetsfix){ //nuggets
+        if (playerlist[tpl]->online<1536) goto display_skip;
+        if (playerlist[tpl]->GNPCflags[6]&(1<<6)) goto display_skip;
+        }
+
+        if (i2==59){ //codex
+        if (playerlist[tpl]->GNPCflags[18]&8) goto display_skip;
+        }
+
+        if (i2==51){ //force field
+        myobj2=(object*)myobj->prev;
+        if (playerlist[tpl]->GNPCflags[3]&(1<<(myobj2->type>>10))) goto display_skip;
+        }//force field
+
+        if (i2==173){ //trap
+        if ((myobj->info&(1<<9))==0) goto display_skip;
+        }//trap
+
+        crt=NULL;
+        if (myobj->info&4){ //crt
+        crt=(creature*)myobj->more;
+        if (crt->flags&2) goto display_skip;
+        }else{//!crt
+        if (myobj->info&8){ //indirect crt
+        if (((object*)myobj->more)->info&4) crt=(creature*)((object*)myobj->more)->more;
+        }
+        }//crt
+
+        if (pfa[x+2+y*256+512]&(PFs+PFd)){
+
+        //DISPLAY DOORS ON RANGE EDGES???
+
+        //SUPPORT FOR VIEW REDIRECTORS
+        if (i2==334) goto display_override; //secret door
+        if (i2==213) goto display_override; //mousehole
+        if (myobj2=OBJfindlastall(updatex,updatey)){
+        if ((myobj2->type&1023)==301) goto display_override;
+        }
+        if (myobj2=OBJfindlastall(updatex,updatey+1)){
+        if ((myobj2->type&1023)==301) goto display_override;
+        }
+        if (myobj2=OBJfindlastall(updatex+1,updatey)){
+        if ((myobj2->type&1023)==301) goto display_override;
+        }
+
+
+
+
+        if (pfa[x+2+y*256+512+1]&(PFs+PFd)){
+        if (pfa[x+2+y*256+512+256]&(PFs+PFd)){
+        if (pfa[x+2+y*256+512+256+1]&(PFs+PFd)){
+        display_override:
+
+        //length from prev obj (stored extendable from 1 to 2 bytes)
+        if (x2<=127){
+        *p=x2; p++;
+        }else{ //>127
+        *p=(x2&127)+128; p++;
+        *p=x2>>7; p++;
+        }
+
+
+        if (myobj->info&128){//stolen item
+        for (z=0;z<=15;z++){
+        if (stolenitemwarning[z]==myobj){
+        if (stolenitemwarning_player[z]!=playerlist[tpl]){
+        *(unsigned short*)p=1023+7*1024; p+=2;
+        }
+        }//==myobj
+        }//z
+        }//stolen item
+
+
+        if (myobj->info&4){ //crt
+        if (crt->flags&8){ //paralyzed!
+        *(unsigned short*)p=1023+3*1024; p+=2;
+        }//8, paralyzed
+        if (playerlist[tpl]->ktar_display){
+        for (z=0;z<=9;z++){
+        if (playerlist[tpl]->ktar_wait[z]){
+        if ((object*)playerlist[tpl]->ktar[z]->more==myobj){
+        *(unsigned short*)p=1022+z*1024; p+=2;
+        }
+        }
+        }
+        }
+        }//crt
+
+        if (crt){ //direct or indirect crt
+        //sleeping?
+        if (crt->flags&4){
+        z=myobj->type&1023; z2=0;
+        if (z==376) z2=339+6*1024;
+        if (z==377) z2=339+5*1024;
+        if (z==378) z2=339+3*1024;
+        if (z==379) z2=339+2*1024;
+        if (z==380) z2=339+2*1024;
+        if (z==381) z2=339+8*1024;
+        if (z==382) z2=339+4*1024;
+        if (z==383) z2=339+8*1024;
+        if (z==384) z2=339+5*1024;
+        if (z==385) z2=339+8*1024;
+        if (z==386) z2=339+7*1024;
+        if (z==387) z2=339+3*1024;
+        if (z==410) z2=339+7*1024;
+        //monsters
+        if (z==370) z2=339+1*1024; //headless
+        if (z==371) z2=339+0*1024; //troll
+        if (z==424){ //cyclops
+        z2=340+((myobj->type>>10)&3)*1024;
+        if (((myobj->type>>10)&3)!=1){
+        if (bt[y+tpy][x+tpx]&1024) bt[y+tpy][x+tpx]-=1024; //set as blocked!
+        }
+        }
+        if (z2){
+        *(unsigned short*)p=z2; p+=2; goto type_or;
+        }
+        }//sleeping?
+        }//direct or indirect crt
+
+        if (myobj->info&2){
+        tnpc=(npc*)myobj->more;
+
+        if (tnpc->player){ //has player pointer
+        if (tnpc->protection){*(unsigned short*)p=1023+4*1024; p+=2;}
+
+        if (tnpc->light){
+        *(unsigned short*)p=1023+1*1024; p+=2;
+        }else{
+        if (tnpc->player==playerlist[tpl]){
+        *(unsigned short*)p=1023+2*1024; p+=2;
+        }//->light
+        }//tnpc->player
+
+        if (myobj3=tnpc->armour){
+        if (myobj3->type==81){ //storm cloak
+        *(unsigned short*)p=1023+6*1024; p+=2;
+        }//81
+        }//armour
+
+
+        if (obji[sprlnk[myobj->type&1023]].v4==1){ //humantype
+        tplayer2=(player*)tnpc->player;
+
+        if (tplayer2->party[0]==myobj){ //first player
+
+
+        //first player of their party
+        if (tplayer2->typing){
+        if (tplayer!=tplayer2){ //not the same party member
+        *(unsigned short*)p=1023+5*1024; p+=2;
+        }
+        }
+
+        *(unsigned short*)p=myobj->type+16384; //16384=extra info
+        if (tnpc->flags&4){ //if asleep switch to sleeping object
+        z=myobj->type&1023; z2=0;
+        //sleeping NPC schedule, but not in bed
+        if (z==376) z2=339+6*1024;
+        if (z==377) z2=339+5*1024;
+        if (z==378) z2=339+3*1024;
+        if (z==379) z2=339+2*1024;
+        if (z==380) z2=339+2*1024;
+        if (z==381) z2=339+8*1024; //2004
+        if (z==382) z2=339+4*1024;
+        if (z==383) z2=339+8*1024;
+        if (z==384) z2=339+5*1024;
+        if (z==385) z2=339+8*1024;
+        if (z==386) z2=339+7*1024;
+        if (z==387) z2=339+3*1024;
+        if (z==410) z2=339+7*1024;
+        if (z2!=0){
+        *(unsigned short*)p=z2+16384; //16384=extra info
+        }
+        }//asleep
+        if (tnpc->flags&2) *(unsigned short*)p|=32768; //invisible
+        p+=2;
+
+        //U6OID    4bytes vs name(10)+colour(2)+unique id for messaging
+        *(unsigned long*)p=tplayer2->id; p+=4;
+
+        //addhp&mp bars (uses 1 byte of code) 0-15, 0-7, 1bit stating poisioned
+        f=(float)tnpc->hp/(float)tnpc->hp_max; z=f*16; if (z==16) z=15;
+        f=(float)tnpc->mp/(float)tnpc->mp_max; z2=f*8; if (z2==8) z2=7;
+        z=z+(z2<<4); if (tnpc->flags&1) z+=128;
+        *p=z; p++;
+        goto type_or;
+        }
+
+        }
+        }
+
+        if (tnpc->flags&(2+4)){//2,4
+        *(unsigned short*)p=myobj->type;
+        if (tnpc->flags&4){ //if asleep switch to sleeping object
+        z=myobj->type&1023; z2=0;
+        //sleeping NPC schedule, but not in bed
+        if (z==376) z2=339+6*1024;
+        if (z==377) z2=339+5*1024;
+        if (z==378) z2=339+3*1024;
+        if (z==379) z2=339+2*1024;
+        if (z==380) z2=339+2*1024;
+        if (z==381) z2=339+8*1024; //2004
+        if (z==382) z2=339+4*1024;
+        if (z==383) z2=339+8*1024;
+        if (z==384) z2=339+5*1024;
+        if (z==385) z2=339+8*1024;
+        if (z==386) z2=339+7*1024;
+        if (z==387) z2=339+3*1024;
+        if (z==410) z2=339+7*1024;
+        if (z2!=0){
+        *(unsigned short*)p=z2;
+        }
+        }//asleep
+        if (tnpc->flags&2) *(unsigned short*)p|=32768; //invisible
+        p+=2;
+        goto type_or;
+        }//2,4
+
+        if (tnpc->schedule){ if (tnpc->schedule_i!=-1){ if (tnpc->schedule[tnpc->schedule_i].type==0x91){ //sleeping!
+        if (od[y+tpy][x+tpx]->type==163){
+        *(unsigned short*)p=146; p+=2; goto type_or;
+        }
+        if (od[y+tpy][x+tpx]->type==(163+6144)){
+        *(unsigned short*)p=146+1024; p+=2; goto type_or;
+        }
+        z=myobj->type&1023;
+        z2=0;
+        //sleeping NPC schedule, but not in bed
+        if (z==376) z2=339+6*1024;
+        if (z==377) z2=339+5*1024;
+        if (z==378) z2=339+3*1024;
+        if (z==379) z2=339+2*1024;
+        if (z==380) z2=339+2*1024;
+        if (z==381) z2=339+8*1024; //2004
+        if (z==382) z2=339+4*1024;
+        if (z==383) z2=339+8*1024;
+        if (z==384) z2=339+5*1024;
+        if (z==385) z2=339+8*1024;
+        if (z==386) z2=339+7*1024;
+        if (z==387) z2=339+3*1024;
+        if (z==410) z2=339+7*1024;
+        if (z2!=0){
+        *(unsigned short*)p=z2; p+=2; goto type_or;
+        }
+        }}} //sleeping!
+
+        }//->npc
+
+        *(unsigned short*)p=myobj->type;
+        if ((myobj->type&1023)==338) goto noflash; //blood
+        if ((myobj->type&1023)==317) goto noflash; //317		fire field
+        if ((myobj->type&1023)==318) goto noflash; //318		poison field
+        if ((myobj->type&1023)==319) goto noflash; //319		protection field
+        if ((myobj->type&1023)==320) goto noflash; //320		sleep field
+        if ((myobj->type&1023)==84){ //red gate flash
+        if (((myobj->info&112)>>4)>=2) goto flash;
+        goto noflash;
+        }
+        if ((myobj->info&112)==16){
+        flash:
+        *(unsigned short*)p|=32768; //flashing
+        }
+        noflash:
+
+        p+=2;
+        type_or:
+
+        x3++; //number of objects
+        x2=0;
+
+        }
+        }
+        }
+
+        }//pf2!
+
+        display_skip:
+        if (myobj->next!=NULL){myobj=(object*)myobj->next; goto nextobj;}
+        } //object exists
+        x2++;
+        }} //x,y loop
+        *(unsigned short*)p2=x3;
+
+        //selected partymember map position (if x==0 he is not onscreen)
+        if (myobj=playerlist[tpl]->party[playerlist[tpl]->selected_partymember]){
+        *(unsigned short*)p=myobj->x; p+=2;
+        *(unsigned short*)p=myobj->y; p+=2;
+        //selected partymember type
+        *(unsigned short*)p=myobj->type; p+=2;
+        }else{
+        *(unsigned short*)p=0; p+=2;
+        *(unsigned short*)p=0; p+=2;
+        //selected partymember type
+        *(unsigned short*)p=0; p+=2;
+        }
+
+
+
+        *p=0; t->l=(unsigned long)p-(unsigned long)t->d2; //finish direct string access
+
+
+        static unsigned long chksum;
+        chksum=0;
+        for (x=5;x<t->l;x++){
+        chksum=chksum+1+(t->d2[x]+1)*(x+1);
+        }
+        if (chksum!=playerlist[tpl]->MESSAGEupdate_chksum){
+        NET_send(NETplayer,playerlist[tpl]->net,t);
+        playerlist[tpl]->MESSAGEupdate_chksum=chksum;
+        playerlist[tpl]->updatemessage=1; //a basetile+object update message was sent last "clientframe"
+        } //chksum!=
+
+        }else{playerlist[tpl]->updatemessage=0;} //updatemessage
+        */
+
+2315 iFacKPFuzL
+
+          //tpx=x-15; tpy=y-11;
+          //if (tpx<0) tpx=0; if (tpy<0) tpy=0;
+          //if (tpx>2016) tpx=2016;
+          //if (tpy>1000) tpy=1000;
+
+2410 L8tjBHK3Gs
+
+      /*
+      unsigned short i;//u6o socket connection array index
+      OK txt *d[256];//array of txt*s
+      OK unsigned char next;
+      OK unsigned char nextfree;
+      //other variables for temp use?
+      ? long x4,x2,y2;
+      txt *t;
+      unsigned char exit_thread;
+      unsigned long thread_id;
+      */
+
+
+2496 1POqo6Cj89
+
+      //MessageBox(NULL,tusername->d,"Ultima 6 Online",MB_OK);
+      //MessageBox(NULL,tname->d,"Ultima 6 Online",MB_OK);
+
+2556 1QIvICcQMU
+
+    /*if (y9==0) {
+      txtucase(tuserpassword); //user_password
+    }*/
+
+2560 2UouOI8CPW
+
+/*if (y9==0) {
+      txtucase(tnewuserpassword); //new_user_password
+    }*/
+
+2929 1YQpRyAhn1
+
+    //txtnumint(t5,t4->dl[8]); txtadd(t5,":inv index"); MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
+
+2931 3btKSiU37S
+
+// txtnumint(t5,t4->dl[9]); txtadd(t5,":mobj index"); MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
+
+2934 3qUZi1JxFh
+
+    /*-7168
+    txtset(t2,"418.BIN");
+    tfh=open2(t2,OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
+    put(tfh,t4->d2,t4->l);
+    close(tfh);
+    exit2(4);
+    */
+
+2955 4FleMPK2N3
+
+      //if (housestoragerestore){
+      //txtnumint(t5,myobj2->type); txtadd(t5,":type"); MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
+      //txtnumint(t5,myobj2->more2); txtadd(t5,":more2"); MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
+      //}
+
+
+      //txtnumint(t5,myobj2->type&1023);
+      //MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
+
+2966 9EGOXE1Slc
+
+/*
+        myobj2=(object*)OBJlist_list[y6]->more;
+        if (myobj2->x){//horse is not being ridden
+        t2->dl[0]=myobj2->x+myobj2->y*2048;//use as few bits as possible(21 bits total)
+        }else{//horse is being ridden by a partymember
+        t2->dl[0]=0;
+        //scan to detect which partymember
+        for(z3=0;z3<7;z3++){
+        if (myobj3=playerlist[tpl]->party[z3]){
+        tnpc3=(npc*)myobj3->more;
+        if (tnpc3->horse==myobj2){
+        t2->dl[0]=z3;
+        }//tnpc3->horse==myobj2
+        }//party[z3]
+        }//z3
+        }//myobj2->x
+        */
+
+2969 4TUPhuJfjH
+
+        //2097151=111111111111111111111b (21bits in binary)
+        //static long hc=0;
+        //hc++;
+        //if (hc==4) exit(z2);
+        //if (z2!=903451) if (z2!=0) exit(z2);
+
+        //t->d2[t->l-1]&=225;//11100001b
+        //t->d2[t->l-1]+=(z4<<1);//npc#
+        //((myobj3->info>>9)&15)
+
+3199 5TSyBfc1Eh
+
+    //housestoragerestore1:
+
+    //for (x2=0;x2<playerlist[tpl]->GNPCflags[29];x2++){
+    //myobj=(object*)od[housestoragey[playerlist[tpl]->GNPCflags[28]][x2]][housestoragex[playerlist[tpl]->GNPCflags[28]][x2]]->next;
+    //x5=0;
+    //housestorageadd=1; goto housestorageadd0;
+    //housestorageadd1: housestorageadd=0;
+    //}
+
+3562 5lqljyMK3f
+
+	// r555 debug: give house key
+	/*
+	if (TRUE) {
+		//give key (256+housenumber)
+		static object *myobj3 = OBJnew(); myobj3->type = 64; myobj3->info = 256; myobj3->more2 = 256 + 47;
+		static object *myobj4 = tnpc3->items; static object *myobj5 = (object*)myobj4->more;
+		if (myobj5) {
+			myobj3->next = myobj5;
+			myobj5->prev = myobj3;
+			myobj3->prev = myobj4;
+			myobj4->more = myobj3;
+		}
+		else {
+			myobj3->next = NULL;
+			myobj3->prev = myobj4;
+			myobj4->more = myobj3;
+		}
+		tnpc3->upflags |= 32; //inv
+		//tplayer->GNPCflags[28]=x2; //set housenumber
+	}
+	*/
+
+
+    /*
+    //equipped items
+    txtset(t,"????????");
+    myobj=tnpc->helm; t->dl[0]=0; t->dl[1]=0; if (myobj) {t->ds[0]=myobj->type; t->ds[1]=myobj->info; t->dl[1]=myobj->more2;} txtadd(t4,t);
+    myobj=tnpc->wep_right; t->dl[0]=0; t->dl[1]=0; if (myobj) {t->ds[0]=myobj->type; t->ds[1]=myobj->info; t->dl[1]=myobj->more2;} txtadd(t4,t);
+    myobj=tnpc->wep_left; t->dl[0]=0; t->dl[1]=0; if (myobj) {t->ds[0]=myobj->type; t->ds[1]=myobj->info; t->dl[1]=myobj->more2;} txtadd(t4,t);
+    myobj=tnpc->armour; t->dl[0]=0; t->dl[1]=0; if (myobj) {t->ds[0]=myobj->type; t->ds[1]=myobj->info; t->dl[1]=myobj->more2;} txtadd(t4,t);
+    myobj=tnpc->boots; t->dl[0]=0; t->dl[1]=0; if (myobj) {t->ds[0]=myobj->type; t->ds[1]=myobj->info; t->dl[1]=myobj->more2;} txtadd(t4,t);
+    myobj=tnpc->neck; t->dl[0]=0; t->dl[1]=0; if (myobj) {t->ds[0]=myobj->type; t->ds[1]=myobj->info; t->dl[1]=myobj->more2;} txtadd(t4,t);
+    myobj=tnpc->ring_right; t->dl[0]=0; t->dl[1]=0; if (myobj) {t->ds[0]=myobj->type; t->ds[1]=myobj->info; t->dl[1]=myobj->more2;} txtadd(t4,t);
+    myobj=tnpc->ring_left; t->dl[0]=0; t->dl[1]=0; if (myobj) {t->ds[0]=myobj->type; t->ds[1]=myobj->info; t->dl[1]=myobj->more2;} txtadd(t4,t);
+    //items?
+    //light?
+    */
+
+3576 9S92AXPGWu
+
+    //create custom character portrait (if required)
+    /*
+    if (t5->d2[0]==1){//upload character portrait
+    tcustomportrait_upload=1; txtright(t5,t5->l-1);
+    memcpy(&tcustomportrait,t5->d,7168); txtright(t5,t5->l-7168);
+    goto getsetupmessageinfo_more;
+    }
+    */
+
+3900 9ckLO5LWPZ
+
+    //if (tpl==0){
+    //if (U6O_DEBUG){
+    //tnpc->lev=8;
+    //tnpc->strength=64; tnpc->dexterity=64; tnpc->intelligence=64;
+    //tnpc->mp_max=255; tnpc->mp=255;
+    //tnpc->hp_max=255; tnpc->hp=255;
+    //playerlist[tpl]->GNPCflags[6]=0;
+
+    //playerlist[tpl]->wizardeyetimeleft=0.0f;
+    //playerlist[tpl]->wizardeyex=0;
+    //playerlist[tpl]->wizardeyey=0;
+
+    //for (x=0;x<=2;x++){
+    //x2=88; x3=0; x4=0;
+    //if (x==0) {x2=58; x3=(6<<4)+9;}//spell
+    //if (x2==88) x3=20000;//<-1000 gold
+    //myobj3=OBJnew(); myobj3->type=x2; myobj3->more2=x3; myobj3->info=x4;//add item(s)
+    //additem(tnpc,myobj3);
+    //}//x
+
+    //}//U6O_DEBUG
+    //}//tpl==0
+
+3961 A47weckd3U
+
+    //send namecolour to client
+    /*
+    txtsetchar(t,246);
+    txtaddchar(t,playerlist[tpl]->GNPCflags[245]&255);
+    txtaddchar(t,(playerlist[tpl]->GNPCflags[245]>>8)&255);
+    txtaddchar(t,(playerlist[tpl]->GNPCflags[245]>>16)&255);
+    NET_send(NETplayer,playerlist[tpl]->net,t);
+    */
+
+4263 AOq1FhIQE2
+
+              //if ((b2>=b)&&(g2>=g)&&(r2>=r)){//ascending
+              //if (((b2-b)<=7)&&((g2-g)<=7)&&((r2-r)<=7)){//compression possible
+
+4277 AP5JTg6uHg
+
+              //if ((b2<=b)&&(g2<=g)&&(r2<=r)){//decending
+              //if (((b-b2)<=7)&&((g-g2)<=7)&&((r-r2)<=7)){//compression possible
+
+4300 AS31Mbi7vW
+
+        //exit(t2->l);
+        //4776
+
+
+        //BITSadd(t,&bitsi,z,8);//scene update
+        /*
+
+        3959 Kaldosh
+        4447 Mose
+        4714 Virtue
+
+        1	if on the last known colour value (default is black) should be repeated
+        if(on){
+
+        loop
+        }
+        1	if on the following colour can't be "created"
+        if (on){
+        5:5:5 fixed colour
+        loop
+        }
+        1   if on acending else decending
+
+        static unsigned short *sp;
+        txtNEWLEN(t2,-7168);
+        //memcpy(t2->d,HOST_portrait_data[x2],7168);
+
+        //6233
+
+        //11 11 11
+        /*
+        bit 0: rle compression (yes/no)
+        bit 1: increase brightness (yes/no)
+        bits [2-3]: blue
+        bits [4-5]: green
+        bits [6-7]: red
+
+
+        0 rle compression
+        1 increase brightness
+        2 decrease brightness
+        3 ?
+
+
+        bit 0
+        bit 1
+
+        (if sensitive compression means increase brightness)
+        bit 2-3 red (0-3)
+        bit 2-3 green (0-3)
+        bit 2-3 blue (0-3)
+
+        next 6 bits
+
+        sp=HOST_portrait_data[x2];
+        y2=-1;
+        y4=0;
+        x5=0;
+        for (x3=0;x3<=3584;x3++){
+        y3=sp[x3]; if (y3&32) y3-=32;
+        if ((y3!=y2)||(y4==128)||(x3==3584)){
+        if (y2!=-1){
+        if (y4){
+        //repeats
+        t2->d2[x5]=(y2&255)+32; x5++;
+        t2->d2[x5]=(y2>>8)&255; x5++;
+        t2->d2[x5]=y4-1; x5++;
+        }else{//y4
+        //no repeats
+        t2->d2[x5]=y2&255; x5++;
+        t2->d2[x5]=(y2>>8)&255; x5++;
+        }//y4
+        }//y2!=-1
+        y2=y3;
+        y4=0;
+        }else{
+        y4++;
+        }
+        }//x3
+        t2->d2[x5]=0;
+        t2->l=x5;
+
+        //rescan using sensitive compression avoiding rle content
+        static long r,g,b,r2,g2,b2;
+        txtNEWLEN(t3,-7168);
+        y2=-1;//last known colour value
+        x5=0;
+        for (x3=0;x3<t2->l;x3++){
+        y3=t2->d2[x3];
+        if (y3&32){//rle content
+        y2=-1; //(y3-32)+(t2->d2[x3+1]<<8);//last known color value
+        t3->d2[x5]=y3; x5++; x3++;
+        t3->d2[x5]=t2->d2[x3]; x5++; x3++;
+        t3->d2[x5]=t2->d2[x3]; x5++;
+        goto skiprlecontent;
+        }
+        if (y2!=-1){
+        //is y3 close to y2
+        b=y2&31; g=(y2>>6)&31; r=(y2>>11)&31;
+        b2=y3&31; g2=(y3>>6)&31; r2=(y3>>11)&31;
+        y4=0;
+        if ((b2>=b)&&(g2>=g)&&(r2>=r)) y4=1;
+        if ((b2<=b)&&(g2<=g)&&(r2<=r)) y4=-1;
+        if (y4==1){
+        if (((b2-b)<=3)&&((g2-g)<=3)&&((r-r2)<=3)){
+        MessageBox(NULL,"saved another assending byte","Ultima 6 Online",MB_OK);
+        }
+        }
+        if (y4==-1){
+        if (((b-b2)<=3)&&((g-g2)<=3)&&((r-r2)<=3)){
+        MessageBox(NULL,"saved another decending byte","Ultima 6 Online",MB_OK);
+        }
+        }
+        //add as is
+        t3->d2[x5]=y3; x5++; x3++;
+        t3->d2[x5]=t2->d2[x3]; x5++;
+        }else{
+        //add as is
+        t3->d2[x5]=y3; x5++; x3++;
+        t3->d2[x5]=t2->d2[x3]; x5++;
+        }
+        y2=y3;//last known colour value
+        skiprlecontent:;
+        }//x3
+        t3->d2[x5]=0;
+        t3->l=x5;
+
+        exit (t2->l);
+
+        */
+
+4361 BPY9819618
+
+    /*
+    if ((CLIENTplayer->key&KEYmbclick)&&(userkey==5)){
+    userkey=0; CLIENTplayer->key-=KEYmbclick;
+    //send message to host
+    if (CLIENTplayer->mf<=7){
+    txtsetchar(t2,45); txtaddchar(t2,CLIENTplayer->mf);
+    txtaddshort(t2,CLIENTplayer->mx); txtaddshort(t2,CLIENTplayer->my);
+    NET_send(NETplayer,NULL,t2);
+    }//CLIENTplayer->mf<=7
+    }//not4sale
+    */
+
+4435 BtMBf0Q2YU
+
+        /*
+        //set x6 to (0-2)privilege level required
+        if (x2&1){
+        x6=x2/2;
+        }else{
+        if (x2<=1) x6=1; else x6=2;
+        }
+        x4=x3/32;//DWORD privilege is stored at (0-3)
+        x5=x3&31;//bit privilege is stored at
+        x6=x4+x6*4+40;
+        if ((playerlist[tpl]->GNPCflags[x6]&(1<<x5))==0) goto privilege_denied;
+        x6=x4+(x2/2)*4+40;
+        */
+
+4811 DhTx3NKXKw
+
+        //txtsetchar(t,8); //txtaddchar(t,255);
+        //txtadd(t,"Mobs spawned!");
+		//NET_send(NETplayer,playerlist[tpl]->net,t);
+
+4816 Fva58nbu49
+
+		//int mi = 0;
+		//unsigned long moverflagbackup = MOVERNEW_GLOBALFLAGS;
+		//MOVERNEW_GLOBALFLAGS=0;
+		//int mobcountnew = 0;
+		//object* o;
+		//for (hi = 0; hi < mobcountnew; hi++) {
+			//OBJremove(moblistnew[hi]);
+			//OBJrelease(moblistnew[hi]);
+		//}
+
+		//mobcount = 0;
+		//mobcountnew = 0;
+
+		/*
+		//bucket
+		//hx=266; hy=448;
+		hx=basex+12; hy=basey;
+		OBJaddnew(hx+2,hy+3,OBJ_BUCKET+1024*0,0,0);//bucket
+		//OBJaddnew(hx+1,hy+6,OBJ_BUCKET+1024*0,0,0);//bucket
+		//mobs
+		//OBJaddnew(1132,655,OBJ_SWASHBUCKLER+1024*0,0,0);
+		//OBJaddnew(1135,655,OBJ_FIGHTER+1024*0,0,0);
+		//hx=255; hy=448+1;
+		hx=basex+2; hy=basey+1;
+		for (hi2=hy; hi2 < hy+7; hi2++) {
+			for (hi=hx; hi < hx+2; hi++) {
+				if (mobnum == 0) {
+					if (hi2 % 2 == 0)
+						//moblistnew[mi] = OBJaddnew(hi, hi2, OBJ_SWASHBUCKLER + 1024 * 0, 0, 0);
+					OBJaddnew(hi,hi2,OBJ_SWASHBUCKLER+1024*0,0,0);
+					//o=OBJaddnew(hi,hi2,OBJ_MAGIC_HELM+1024*0,0,0);
+					//OBJaddnew(hi,hi2,OBJ_DRAKE+1024*0,0,0);
+					else
+						//moblistnew[mi] = OBJaddnew(hi, hi2, OBJ_FIGHTER + 1024 * 0, 0, 0);
+					OBJaddnew(hi,hi2,OBJ_FIGHTER+1024*0,0,0);
+					//o=OBJaddnew(hi,hi2,OBJ_MAGIC_HELM+1024*0,0,0);
+				//ENHANCEnewn(o, 0, 2);
+				}
+				else
+					//moblistnew[mi] = OBJaddnew(hi, hi2, mobnum + 1024 * 0, 0, 0);
+					OBJaddnew(hi, hi2, mobnum + 1024 * 0, 0, 0);
+
+				//o=OBJaddnew(hi,hi2,OBJ_SWORD+1024*0,0,0);
+				//ENHANCEnewn(o, 0, 4);
+				mobcount++;
+				//mi++;
+
+				if (mobcount >= addmobnum)
+					break;
+			}
+
+			if (mobcount >= addmobnum)
+				break;
+		}
+		//mobcount = mi;
+		//mobcountnew = mi;
+		*/
+
+		/*
+		hx=basex+12; hy=basey;
+		OBJaddnew(hx+1,hy+1,OBJ_DEAD_BODY+1024*1,0,0);//bucket
+		OBJaddnew(hx+2,hy+1,OBJ_DEAD_BODY+1024*2,0,0);//bucket
+		OBJaddnew(hx+3,hy+1,OBJ_DEAD_BODY+1024*3,0,0);//bucket
+		OBJaddnew(hx+1,hy+2,OBJ_DEAD_BODY+1024*4,0,0);//bucket
+		OBJaddnew(hx+2,hy+2,OBJ_DEAD_BODY+1024*5,0,0);//bucket
+		OBJaddnew(hx+3,hy+2,OBJ_DEAD_BODY+1024*6,0,0);//bucket
+		OBJaddnew(hx+1,hy+3,OBJ_WOMAN+1024*0,0,0);//bucket
+		OBJaddnew(hx+2,hy+3,OBJ_MAGE+1024*0,0,0);//bucket
+		OBJaddnew(hx+3,hy+3,OBJ_PEASANT+1024*0,0,0);//bucket
+		*/
+
+4835 IByWAC0pzq
+
+	//moblistnew[mi] = OBJaddnew(hi, hi2, OBJ_SWASHBUCKLER + 1024 * 0, 0, 0);
+							OBJaddnew(hi, hi2, OBJ_SWASHBUCKLER + 1024 * 0, 0, 0);
+						//o=OBJaddnew(hi,hi2,OBJ_MAGIC_HELM+1024*0,0,0);
+						//OBJaddnew(hi,hi2,OBJ_DRAKE+1024*0,0,0);
+
+4847 IZ1bfWjebX
+
+//ccc = (creature*)mmm->more;
+					//ccc->al = 1;
+					//o=OBJaddnew(hi,hi2,OBJ_SWORD+1024*0,0,0);
+					//ENHANCEnewn(o, 0, 4);
+
+4919 IszCjqsbgQ
+
+		// 1076,620 to 74,84
+		//unsigned long zz = 5505098;
+		/*
+		unsigned long zz = 25231719;
+		txtset(t3, " Coord x=");
+		txtnumint(t4, zz&1023); txtadd(t3, t4); txtadd(t3, " y=");
+		txtnumint(t4, (zz>>16)&1023); txtadd(t3, t4);
+		LOGadd(t3);
+		*/
+		// 1330, 410
+		// 1310, 420 2nd floor view to 1st
+		// BTset(1310,420,111);
+		// OBJaddnew(1310,420,416+1024*0,0,25231719);//pointing at something // OBJ_NOTHING
+		// 1310,320 views to 359, 385
+		// 1308,411 2nd floor ladder
+
+
+5211 JTVMGMHCEk
+
+                //txtadd(t3,": \x022");
+                //txtadd(t3,t);
+                //txtadd(t3,"\x022");
+
+5239 KeRJ2lu0YK
+
+        /*
+        if (OBJcheckbolt(playerlist[tpl]->party[0]->x,playerlist[tpl]->party[0]->y,myobj->x,myobj->y)){
+        txtset(t,"?"); t->d2[0]=8; txtadd(t,"Blocked!"); NET_send(NETplayer,playerlist[tpl]->net,t);
+        goto doneclmess;
+        }
+        */
+
+5309 KwGoXrS6pv
+
+        //NPC converse interpreter
+        //<-NPC's object(myobj) + <-*player(tplayer)
+
+
+
+
+
+
+        //if (t->l<=2){
+        //txtset(t,"unknown");
+        //}
+        //next instruction
+
+5329 MitXE5HfrD
+
+            /*
+            i3=0;
+            txtset(t2,"dont"); if (txtsearch(t,t2)) i3=1;
+            txtset(t2,"stop"); if (txtsearch(t,t2)) i3=1;
+            txtset(t2,"not"); if (txtsearch(t,t2)) i3=1;
+            if (i3){
+
+            txtset(t2,"poti");
+            if (txtsearch(t,t2)){
+            txtset(t2,"yell");
+            if (txtsearch(t,t2)){
+            if (tnpc->command&1) tnpc->command-=1;
+            static txt *txttmp0;
+            txttmp0=txtnew();
+            txtset(txttmp0,"\x022I won't use yellow potions.\x022");
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
+            //addnpcport2sf(i3,tnpc);
+            special_effects[i3].p=txttmp0;
+            goto doneclmess;
+            }
+            txtset(t2,"red");
+            if (txtsearch(t,t2)){
+            if (tnpc->command&2) tnpc->command-=2;
+            static txt *txttmp0;
+            txttmp0=txtnew();
+            txtset(txttmp0,"\x022I won't use red potions.\x022");
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
+            //addnpcport2sf(i3,tnpc);
+            special_effects[i3].p=txttmp0;
+            goto doneclmess;
+            }
+            }//"poti"
+
+            txtset(t2,"eat");
+            if (txtsearch(t,t2)){
+            if (tnpc->command&4) tnpc->command-=4;
+            static txt *txttmp0;
+            txttmp0=txtnew();
+            txtset(txttmp0,"\x022I'll refrain from eating.\x022");
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
+            //addnpcport2sf(i3,tnpc);
+            special_effects[i3].p=txttmp0;
+            goto doneclmess;
+            }
+
+            txtset(t2,"cast");
+            if (txtsearch(t,t2)){
+            txtset(t2,"cure");
+            if (txtsearch(t,t2)){
+            if (tnpc->command&32) tnpc->command-=32;
+            if (tnpc->command&64) tnpc->command-=64;
+            static txt *txttmp0;
+            txttmp0=txtnew();
+            txtset(txttmp0,"\x022I won't cast cure.\x022");
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
+            //addnpcport2sf(i3,tnpc);
+            special_effects[i3].p=txttmp0;
+            goto doneclmess;
+            }
+            txtset(t2,"heal");
+            if (txtsearch(t,t2)){
+            if (tnpc->command&8) tnpc->command-=8;
+            if (tnpc->command&16) tnpc->command-=16;
+            static txt *txttmp0;
+            txttmp0=txtnew();
+            txtset(txttmp0,"\x022I won't cast heal spells.\x022");
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
+            //addnpcport2sf(i3,tnpc);
+            special_effects[i3].p=txttmp0;
+            goto doneclmess;
+            }
+            }//"cast"
+
+            }//negative
+
+            txtset(t2,"poti");
+            if (txtsearch(t,t2)){
+            txtset(t2,"yell");
+            if (txtsearch(t,t2)){
+            tnpc->command|=1;
+            static txt *txttmp0;
+            txttmp0=txtnew();
+            txtset(txttmp0,"\x022I shall use yellow potions if heavily wounded.\x022");
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
+            //addnpcport2sf(i3,tnpc);
+            special_effects[i3].p=txttmp0;
+            goto doneclmess;
+            }
+            txtset(t2,"red");
+            if (txtsearch(t,t2)){
+            tnpc->command|=2;
+            static txt *txttmp0;
+            txttmp0=txtnew();
+            txtset(txttmp0,"\x022I shall use red potions if poisoned.\x022");
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
+            //addnpcport2sf(i3,tnpc);
+            special_effects[i3].p=txttmp0;
+            goto doneclmess;
+            }
+            }//"poti"
+
+            txtset(t2,"eat");
+            if (txtsearch(t,t2)){
+            tnpc->command|=4;
+            static txt *txttmp0;
+            txttmp0=txtnew();
+            txtset(txttmp0,"\x022I shall eat or drink when hungry.\x022");
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
+            //addnpcport2sf(i3,tnpc);
+            special_effects[i3].p=txttmp0;
+            goto doneclmess;
+            }
+
+            txtset(t2,"cast");
+            if (txtsearch(t,t2)){
+            i3=0;
+            txtset(t2,"all"); if (txtsearch(t,t2)) i3=1;
+            txtset(t2,"ever"); if (txtsearch(t,t2)) i3=1;
+            txtset(t2,"part"); if (txtsearch(t,t2)) i3=1;
+            txtset(t2,"cure");
+            if (txtsearch(t,t2)){
+            if (!i3) tnpc->command|=32; else tnpc->command|=64;
+            static txt *txttmp0;
+            txttmp0=txtnew();
+            if (!i3) txtset(txttmp0,"\x022I shall cast cure if poisoned.\x022"); else txtset(txttmp0,"\x022I shall cast cure if anyone in our party is poisoned.\x022");
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
+            //addnpcport2sf(i3,tnpc);
+            special_effects[i3].p=txttmp0;
+            goto doneclmess;
+            }
+            txtset(t2,"heal");
+            if (txtsearch(t,t2)){
+            if (!i3) tnpc->command|=8; else tnpc->command|=16;
+            static txt *txttmp0;
+            txttmp0=txtnew();
+            if (!i3) txtset(txttmp0,"\x022I shall cast heal spells if heavily wounded.\x022"); else txtset(txttmp0,"\x022I shall cast heal spells if anyone in our party is heavily wounded.\x022");
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
+            //addnpcport2sf(i3,tnpc);
+            special_effects[i3].p=txttmp0;
+            goto doneclmess;
+            }
+            }//"cast"
+
+            */
+
+5356 MqBpenfpKN
+
+          //it is possible t2 is a truncated version of t if it is 4 characters long
+          //if (t2->l==4){ //short keyword
+          //txtset(t3,t); if (t3->l>4) txtleft(t3,4);
+          //if (txtsearch(t2,t3)){
+          //x++; goto nextinstruction;
+          //}
+          //}
+
+5403 PptONsS7IH
+
+          /*
+          if ((tnpc->intelligence>=tnpc->strength)&&(tnpc->intelligence>=tnpc->dexterity)) myobj->type=378; //i
+          if ((tnpc->dexterity>=tnpc->strength)&&(tnpc->dexterity>=tnpc->intelligence)) myobj->type=386; //d
+          if ((tnpc->strength>=tnpc->dexterity)&&(tnpc->strength>=tnpc->intelligence)) myobj->type=376; //s
+          if ((tnpc->intelligence>tnpc->strength)&&(tnpc->dexterity>tnpc->strength))  myobj->type=377; //i+d
+
+          txtset(t2,"$NAME"); //$NAME
+          if (x2=txtsearch(inouttxt2,t2)){
+          txtset(t2,inouttxt2); txtleft(t2,x2-1);
+          txtset(t3,inouttxt2); txtright(t3,inouttxt2->l-x2-2);
+
+          //txtnumint(t4,CONreg[0]); txtadd(t2,t4);
+          txtadd(t2,
+
+
+          txtadd(t2,t3); txtset(inouttxt2,t2);
+          goto insert_txt;
+          }
+          */
+          //CONnpc=tnpc; //only valid if #converse is derived from an NPC pointer!
+
+6175 RnaLtLClKx
+
+                    /*
+                    object *resu[65536]; //object
+                    object *resu_body[65536]; //dead body object
+                    float resu_wait[65536]; //time until object automatically resurrected
+                    player *resu_player[65536]; //player object belongs to
+                    unsigned char resu_partymember[65536]; //party member index
+                    long nresu=-1;
+                    */
+
+6650 SFrJN38W6E
+
+    /*
+    txtset(t,"?"); t->d2[0]=25; //play MIDI keys
+    txtset(t2,"?");
+    //multiple keys can point to a single sound
+    for (i=0;i<=255;i++){
+    if (keyhit(i)){
+    if (t->l<9){
+    t2->d2[0]=midikeyboard2[i];
+    txtadd(t,t2);
+    midikeyboard2_keyon[i]=1;
+    }
+    }//keyhit
+    }//i
+    if (t->l>1){
+    NET_send(NETplayer,NULL,t);
+    }
+
+    txtset(t,"?"); t->d2[0]=26; //stop MIDI keys
+    txtset(t2,"?");
+    for (i=0;i<=255;i++){
+    if (keyon[i]==NULL){
+    if (midikeyboard2_keyon[i]){
+    t2->d2[0]=midikeyboard2[i]; txtadd(t,t2);
+    midikeyboard2_keyon[i]=0;
+    }}}
+    if (t->l>1){
+    NET_send(NETplayer,NULL,t);
+    }
+    */
+
+    //if (playerlist[tpl]->net==1){
+    //goto U6Ohostlink1;
+    //U6Ohostlink1return:;
+    //}
+
+6689 SctsdnTGUe
+
+//if (ett>=86400){
+
+  /*
+  f=4.0f; if (int((ett/f))!=int((ett/f)-(et/f))){ //8min delay till removal
+  txtset(t,"!");
+  txtadd(t," vlnkb_last="); txtnumint(t2,vlnkb_last); txtadd(t,t2);
+  txtadd(t," vlnkb_free_last="); txtnumint(t2,vlnkb_free_last); txtadd(t,t2);
+  txtadd(t," framerate="); txtnumint(t2,framerate); txtadd(t,t2);
+  txtadd(t," ("); txtnumint(t2,ett); txtadd(t,t2); txtadd(t,")"); txtfileout(t,log2);
+  }
+  */
+
+
+  /*
+  long objsave_last=-1;
+  unsigned short objsave_x[65536];
+  unsigned short objsave_y[65536];
+  object *objsave_obj[65536]; //pointer to first saved object
+  float objsave_wait[65536];
+  */
+
+6834 TyupnOWHLg
+
+  //respawn info
+  //respawn_last++;
+  //respawn[respawn_last]=myobj2;
+  //respawn_delay[respawn_last]=16;
+  //fruit tart, dog lead?, dog home?
+  /*
+  void *respawn[16384];
+  unsigned short respawn_delay[16384]; //number of seconds till creature will respawn
+  //*note: creature will not respawn if player is too near (eg. 8 squares or less)
+  long respawn_last=-1;
+  */
+
+6925 UmHJfUow2M
+
+          /*
+          //add gold/items to inventory
+          //add gold
+          if (crt->al==1){
+          x9=obji[sprlnk[myobj2->type&1023]].v5>>2;
+          //x9++; //plus 1 for rookie luck
+          x9=rnd*(x9+1);
+          if (x9){
+          myobj8=OBJnew(); myobj8->type=88; myobj8->more2=x9;
+          //items<-gold
+          myobj6=crt->items; myobj7=(object*)myobj6->more;
+          if (myobj7!=NULL){
+          myobj8->next=myobj7; myobj7->prev=myobj8; myobj8->prev=myobj6; myobj6->more=myobj8;
+          }else{
+          myobj8->next=NULL; myobj8->prev=myobj6; myobj6->more=myobj8;
+          }
+          }//x9
+          }//al==1
+          //add meat
+          if (((myobj2->type&1023)==428)||((myobj2->type&1023)==348)||((myobj2->type&1023)==350)){//cow&sheep&deer
+          x9=rnd*2; if (x9){
+          myobj8=OBJnew(); myobj8->type=129; myobj8->more2=1; //<-meat
+          myobj6=crt->items; myobj7=(object*)myobj6->more;
+          if (myobj7!=NULL){
+          myobj8->next=myobj7; myobj7->prev=myobj8; myobj8->prev=myobj6; myobj6->more=myobj8;
+          }else{
+          myobj8->next=NULL; myobj8->prev=myobj6; myobj6->more=myobj8;
+          }
+          }//x9
+          }//cow
+          */
+
+7837 U0ESioYUDG
+
+                  //x5=rnd*(tnpc->arm+1);
+
+                  //x6=rnd*((obji[sprlnk[myobj->type&1023]].v5/2+1)+1);
+
+
+                  //old
+                  //x6=rnd*((obji[sprlnk[myobj->type&1023]].v5>>2)+1);
+
+                  //enemies have the same deficiets on their attacks as players
+
+                  //x6=rnd*(((obji[sprlnk[myobj->type&1023]].v8&255)+1)*2+1)-((obji[sprlnk[myobj->type&1023]].v8&255)+1);
+
+                  //damage enemy can do
+                  //x6=rnd*((obji[sprlnk[myobj->type&1023]].v8&255)+1+1); ***LATEST***
+
+7845 WEakl1UHv3
+
+                    //txtnumint(t7,x6);
+                    //txtadd(t7,"->");
+                    //txtnumint(t8,x7);
+                    //txtadd(t7,t8);
+                    //MessageBox(NULL,t7->d,"Ultima 6 Online",MB_OK);
+
+7977 WTVaO8GEBW
+
+                  /*
+                  WPF_OBJECT=myobj; wpf_pathfind(tnpc->path,myobj->x,myobj->y,x2,y2,16,0,0);
+                  if (WPF_RETURN==WPF_PATHFOUND){
+                  if (WPF_PATHLENGTH){
+                  tnpc->path_max=WPF_PATHLENGTH; tnpc->pathn=WPF_PATHLENGTH;
+                  playerlist[tpl]->pathfind=1; //use pathfinding formula!
+                  goto doneclmess;
+                  }
+                  playerlist[tpl]->pathfind=0; tnpc->path_max=0; tnpc->pathn=0;
+                  }
+                  }//party
+                  */
+
+8010 WekwqACc0u
+
+                  /*
+                  if (crt->path[0]==PFright) x3++;
+                  if (crt->path[0]==PFleft) x3--;
+                  if (crt->path[0]==PFup) y3--;
+                  if (crt->path[0]==PFdown) y3++;
+                  */
+
+8250 XUAHG58Pgr
+
+              //$rate$
+              //x2=37+3*CONnpc2->lev;
+              //if ((CONnpc2->strength+CONnpc2->dexterity+CONnpc2->intelligence)>x2) txtadd(t2,"16"); else txtadd(t2,"8");
+              //deduct gold
+
+8293 Y4LMJZJIrc
+
+                /* MOONGATES MUST BE USED 2005
+                if (myobj2->type==(84+1024)){ //red gate
+                if (tplayer->party[0]==myobj){ //primary player
+                if (tplayer->selected_partymember==0){
+                i4=(myobj2->info&112)>>4;
+                if (i4==1){
+                for (i4=7;i4>=0;i4--){
+                if (tplayer->party[i4]!=NULL){
+                OBJremove(tplayer->party[i4]);
+                OBJadd(256+128-16,256+128+2,tplayer->party[i4]);
+                }
+                }
+                }//i4
+                }//partymember
+                }//==party[0]
+                }//red gate
+
+                if (myobj2->type==(85+1024)){ //moongate
+                if (tplayer->party[0]==myobj){ //primary player
+                if (tplayer->selected_partymember==0){
+                //move party, if not already at correct phase!
+                if (moonphase!=255){
+                if ((myobj->x!=moongatex[moonphase])||(myobj->y!=moongatey[moonphase])){
+                for (i4=7;i4>=0;i4--){
+                if (tplayer->party[i4]!=NULL){
+                OBJremove(tplayer->party[i4]);
+                OBJadd(moongatex[moonphase],moongatey[moonphase],tplayer->party[i4]);
+                }
+                }
+                }//x!= y!=
+                }//moonphase
+                }//partymember
+                }//==party[0]
+                }//moongate
+                */
+
+8810 YFTm70vb83
+
+                  /*
+
+                  for (x2=0;x2<=31;x2++){ //find schedule
+                  if (x2==31) goto gotschedule; //last index
+
+
+                  if ((tnpc->schedule[x2].day==0)||(tnpc->schedule[x2].day==bday)){ //valid day
+                  f=tnpc->schedule[x2].hour;
+                  x3=1;
+                  sch_sametimeday:
+                  f2=tnpc->schedule[x2+x3].hour;
+                  if (f2==255) goto gotschedule; //next index is NULL (use the current schedule)
+                  if ((tnpc->schedule[x2+x3].day!=0)&&(tnpc->schedule[x2+x3].day!=bday)){x3++; goto sch_sametimeday;} //next sch is for a different day, ignore
+                  if (f2==f) {x3++; goto sch_sametimeday;} //next sch is for the same time, ignore
+                  if ((btime>=f)&&(btime<=f2)) goto gotschedule;
+                  } //valid day
+                  }//schedule 0-31 loop
+                  goto NPC_skip1; //schedule not found ->exit
+                  gotschedule: //index x2
+                  if (btime<tnpc->schedule[x2].hour) NPC_skip1; //false schedule read by accident!
+                  */
+
+                  //gotschedule:
+
+                  //goto .x,.y
+
+8817 Yhd6kVfKmy
+
+                    /*
+                    tnpc->path_max=pathfind(tnpc->path,myobj->x,myobj->y,tnpc->schedule[x2].x,tnpc->schedule[x2].y,NULL);
+                    //if (tnpc->path_max==0) tnpc->path_max=pathfind(tnpc->path,myobj->x,myobj->y,tnpc->schedule[x2].x,tnpc->schedule[x2].y,NULL);
+                    if (tnpc->path_max==0){ tnpc->pathn=0; tnpc->wait_walk+=1.0f+rnd*2.0f; goto NPC_skip1;}
+                    tnpc->pathn=tnpc->path_max;
+                    */
+                    /*
+                    z=abs(myobj2->x-myobj->x); z2=abs(myobj2->y-myobj->y); if (z2>z) z=z2;
+                    z+=32; if (z>250) z=250;
+                    WPF_OBJECT=myobj; wpf_pathfind(tnpc->path,myobj->x,myobj->y,myobj2->x,myobj2->y,z,0,1);//|1|PATHFIND THROUGH OWN PARTY+16
+                    if (WPF_RETURN==WPF_PATHFOUND){
+                    if (WPF_PATHLENGTH){
+                    tnpc->path_max=WPF_PATHLENGTH; tnpc->pathn=WPF_PATHLENGTH;
+                    goto follow_getpath;
+                    }
+                    }
+                    */
+                    /*
+                    x3=abs(tnpc->schedule[x2].x-myobj->x); y3=abs(tnpc->schedule[x2].y-myobj->y); if (y3>x3) x3=y3;
+                    x3+=32;
+                    //if (x2>250) exit2(55);
+
+                    if (x3>250){
+                    txtnumint(t5,tnpc->converse); MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
+                    tnpc->pathn=0; tnpc->wait_walk+=1.0f+rnd*2.0f; goto NPC_skip1;
+                    }
+                    */
+
+                    //if (x3>dv) dv=x3;
+
+8990 Znb4hwX6Fb
+
+                        //if ((abs(myobj->x-tnpc->schedule[x2].x)==0)&&(abs(myobj->y-tnpc->schedule[x2].y)==0)){
+                        //tnpc->schedule_i=x2;
+                        //if (schedule_i==0x91){
+
+9121 aBCfkCVNE1
+
+                  //f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
+                  //tnpc->wait_walk+=(0.25f-0.0625f-f*0.125f);
+
+                  //npc walk speed
+                  //tnpc->wait_walk+=0.0625f;
+                  //tnpc->wait_walk+=(rnd*0.125f);
+
+9490 coNjtQQg2q
+
+                  /*
+                  if (x4==3){
+                  x4=rnd*2; if (x4) goto dontmove;
+                  }
+                  if (x4==2){
+                  x4=rnd*3; if (x4) goto dontmove;
+                  }
+                  */
+
+                  //get path
+                  /*
+                  WPF_OBJECT=myobj; wpf_pathfind(tnpc->path,myobj->x,myobj->y,x2,y2,16,0,0);
+                  if (WPF_RETURN==WPF_PATHFOUND){
+                  if (WPF_PATHLENGTH){
+                  tnpc->path_max=WPF_PATHLENGTH; tnpc->pathn=WPF_PATHLENGTH;
+                  playerlist[tpl]->pathfind=1; //use pathfinding formula!
+                  goto doneclmess;
+                  }
+                  playerlist[tpl]->pathfind=0; tnpc->path_max=0; tnpc->pathn=0;
+                  }
+                  }//party
+                  if (tnpc->path[tnpc->path_max-tnpc->pathn]==PFright) x2=1;
+                  if (tnpc->path[tnpc->path_max-tnpc->pathn]==PFleft) x2=-1;
+                  if (tnpc->path[tnpc->path_max-tnpc->pathn]==PFup) y2=-1;
+                  if (tnpc->path[tnpc->path_max-tnpc->pathn]==PFdown) y2=1;
+                  tnpc->pathn--;
+                  */
+
+9599 e5iAg5inV6
+
+                    //if (selected_partymember){
+                    //f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
+                    //tnpc->wait_walk+=(0.25f-0.0625f-f*0.125f);
+                    //}else{
+                    ////tnpc->wait_walk+=(0.0625f+(rnd*0.125f));
+                    //f=(float)tnpc->dexterity/64.0f; if (f>1.0f) f=1.0f;
+                    //tnpc->wait_walk+=(0.25f-0.0625f-f*0.125f);
+                    //}
+
+10874 eVMecsDTO6
+
+ //OLD VALUES
+                    //if (wep_dt[i3]==1) f=(float)x/32.0f*(float)tnpc->strength; //100% STR
+                    //if (wep_dt[i3]==2) f=(float)x/32.0f*(((float)tnpc->strength/2.0f)+((float)tnpc->dexterity/2.0f)); //50% STR + 50% DEX
+                    //if (wep_dt[i3]==3) f=(float)x/32.0f*((float)tnpc->dexterity*2.0f); //200% DEX (bows, crossbows)
+
+10910 ectdH8pcdj
+
+                    //x7=rnd*32; //0-127
+                    //x8=rnd*(tnpc->dexterity+1);
+                    //if (x7>x8){ //couldn't dodge the attack!
+
+11027 gCcVq0NyPG
+
+                            /*
+                            if (((obj->type&1023)>=432)&&((obj->type&1023)<=447)){//blood of dead crt
+                            im32z(ps,GSx,GSy,spr84[3],171+((obj->type>>10)%3));
+                            }
+                            */
+
+11196 gfu6deqdDg
+
+                  /*
+                  x7=rnd*(tnpc->dexterity+1); x8=rnd*16; if (x7<x8) goto triplecrossbow_miss2;
+                  myobj2=OBJfindlast(triplecrossbow_shot_x3,triplecrossbow_shot_y3); if (myobj2==NULL) myobj2=OBJfindlastall(triplecrossbow_shot_x3,triplecrossbow_shot_y3);
+                  if (myobj2){
+                  //if (myobj2->info&8) myobj2=(object*)myobj2->more; //redirect
+                  if (myobj2->info&4){ //<-crt
+                  i3=1;
+                  x=12;
+                  wep_dt[0]=3; wep_dt[1]=3;
+                  i4=SFnew(myobj2->x,myobj2->y);
+                  special_effects[i4].type=1; //attack
+                  special_effects[i4].x=triplecrossbow_shot_x3;
+                  special_effects[i4].y=triplecrossbow_shot_y3;
+                  special_effects[i4].x2=0;
+                  special_effects[i4].wait=0.125f; //NULL
+                  special_effects[i4].more=1;
+                  goto triplecrossbow_refire;
+                  }
+                  }
+                  */
+
+11272 hOYWjWDLBN
+
+                /*
+                PATHFIND_NEXTTO=1; x3=pathfind(tnpc->path,myobj->x,myobj->y,myobj2->x,myobj2->y,1);
+                if ((x3>32)||(x3==0)) {PATHFIND_NEXTTO=1; x3=pathfind(tnpc->path,myobj->x,myobj->y,myobj2->x,myobj2->y,NULL);}
+                if ((x3>32)||(x3==0)){ //can't get within rage of target! or ALREADY THERE!
+                tnpc->order=1; tnpc->follow=tplayer->party[tplayer->selected_partymember]; goto skipnpcattack;
+                }
+                */
+
+11391 hbsRTmYDpC
+
+                /*
+                object *resu[65536]; //object
+                object *resu_body[65536]; //dead body object
+                float resu_wait[65536]; //time until object automatically resurrected
+                player *resu_player[65536]; //player object belongs to
+                unsigned char resu_partymember[65536]; //party member index
+                long nresu=-1;
+                */
+
+14956 jHsg66cIEF
+
+                      //GPF!
+
+
+                      //txtnumint(t5,myobj2->more2);
+                      //MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
+
+                      //txtnumint(t5,tplayer->mobj->more2);
+                      //MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
+
+15167 kGyOjJK2HP
+
+                  /*
+                  if (tplayer->mobj->info&128){//stolen item
+                  for (i3=0;i3<=15;i3++) if (stolenitemwarning[i3]==tplayer->mobj) goto stolenitem_alreadyadded;
+                  for (i3=0;i3<=15;i3++){
+                  if (stolenitemwarning[i3]==NULL){
+                  stolenitemwarning[i3]=tplayer->mobj;
+                  stolenitemwarning_wait[i3]=2.0f;
+                  stolenitemwarning_player[i3]=tplayer;
+                  goto stolenitem_alreadyadded;
+                  }//==NULL
+                  }//i3
+                  }//stolen item
+                  stolenitem_alreadyadded:
+                  */
+
+15292 nLSEUikZty
+
+                //myobj3=OBJnew(); myobj3->type=87; myobj3->more2=0; myobj3->info=256; //orb of moons
+                /*
+                myobj2=OBJnew();
+                myobj2->type=84+1024;
+                myobj2->info=3<<4; //set flags as temp OBJ
+                OBJadd(tpx+x,tpy+y,myobj2);
+                myobj2=OBJnew();
+                myobj2->type=84;
+                myobj2->info=3<<4; //set flags as temp OBJ
+                OBJadd(tpx+x-1,tpy+y,myobj2);
+                */
+
+15487 noxitKsgqN
+
+                //for (z=0;z<=7;z++){
+                //myobj2=tplayer->party[z];
+                //if (myobj2!=NULL){
+                //if (OBJcheckbolt(myobj2->x,myobj2->y,x,y)==FALSE){
+                //if ((abs(myobj2->x-x)<=8)&&(abs(myobj2->y-y)<=8)){
+
+15582 oBsoyEGofb
+
+                  /*
+                  if (tplayer->mobj->info&128){//stolen item
+                  for (i3=0;i3<=15;i3++) if (stolenitemwarning[i3]==tplayer->mobj) goto stolenitem_alreadyadded2;
+                  for (i3=0;i3<=15;i3++){
+                  if (stolenitemwarning[i3]==NULL){
+                  stolenitemwarning[i3]=tplayer->mobj;
+                  stolenitemwarning_wait[i3]=2.0f;
+                  stolenitemwarning_player[i3]=tplayer;
+                  goto stolenitem_alreadyadded2;
+                  }//==NULL
+                  }//i3
+                  }//stolen item
+                  stolenitem_alreadyadded2:
+                  */
+
+15910 p4JUWSh9Lw
+
+            //tnpc=(npc*)myobj->more;
+
+            /*
+            x2=myobj->x;
+            y2=myobj->y;
+            if (OBJcheckbolt(x2,y2,x,y)){
+            myobj=OBJnew();
+            myobj->type=338+2048;
+            OBJadd(OBJcheckbolt_x,OBJcheckbolt_y,myobj);
+            }else{
+            //u6ob
+            i3=SFnew(x,y); //destination is more important than the source
+            special_effects[i3].type=2; //arrow
+            special_effects[i3].x=x2;
+            special_effects[i3].y=y2;
+            special_effects[i3].x2=x;
+            special_effects[i3].y2=y;
+            special_effects[i3].more=0xFFFF;
+            special_effects[i3].wait=1;
+            }
+            */
+
+16836 rHktW8gAgL
+
+                /*
+                if (tplayer2!=tplayer){//not a member of our party
+                if (tnpc2->port){
+                txtset(t5,"?"); t5->d2[0]=2;
+                txtset(t7,"??"); t7->ds[0]=1; txtadd(t5,t7);
+                t7->ds[0]=28; txtadd(t5,t7);//type=portrait look
+                t7->ds[0]=myobj->x; txtadd(t5,t7);
+                t7->ds[0]=myobj->y; txtadd(t5,t7);
+                t7->ds[0]=0; txtadd(t5,t7); //unused
+                t7->ds[0]=0; txtadd(t5,t7); //unused
+                t7->ds[0]=tnpc2->port; txtadd(t5,t7);//more=port
+                txtset(t7,"????"); t7->df[0]=1.0f; txtadd(t5,t7); //wait
+                NET_send(NETplayer,tplayer->net,t5);
+                }
+                }
+                */
+
+                //send npc look message
+                /*
+                [44]
+                [portrait]
+                [length of name]
+                [name data(if any!)]
+                [1 byte value with bits indicating what is equipped]
+                order is:
+                helm,wep-right,wep-left,armour,boots,ring right, ring left,neck
+                2 bytes for type, and 1 byte for a plus value per item
+
+
+
+                */
+
+16984 rdcFG0o7Hv
+
+                /*
+                if (tnpc2->port){
+                txtset(t5,"?"); t5->d2[0]=2;
+                txtset(t7,"??"); t7->ds[0]=1; txtadd(t5,t7);
+                t7->ds[0]=28; txtadd(t5,t7);//type=portrait look
+                t7->ds[0]=myobj->x; txtadd(t5,t7);
+                t7->ds[0]=myobj->y; txtadd(t5,t7);
+                t7->ds[0]=0; txtadd(t5,t7); //unused
+                t7->ds[0]=0; txtadd(t5,t7); //unused
+                t7->ds[0]=tnpc2->port; txtadd(t5,t7);//more=port
+                txtset(t7,"????"); t7->df[0]=1.0f; txtadd(t5,t7); //wait
+                NET_send(NETplayer,tplayer->net,t5);
+                }
+                */
+
+
+ro5Y3xzYHw
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

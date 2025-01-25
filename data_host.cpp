@@ -23,7 +23,7 @@ void data_host_init(void) {
   format_usernames=0;
   objr_x=0; 
   objr_y=0;
-  sfn=-1; //last sf
+    prev_special_effect=-1; //last special_effects
   oln=0;
   objb_last=-1; //last objb
   objb_free_last=-1; //last free objb index

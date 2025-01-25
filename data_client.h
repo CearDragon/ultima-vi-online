@@ -468,7 +468,7 @@ extern int g_UI_ActionBarTopPanelId,
 extern int g_UI_PartyMemberPanelId;
 extern int g_UI_OptionInfoPanelId;
 
-extern int hituipaneli, hituiwidgeti;
+extern int g_UI_ClickedPanelId, g_UI_ClickedWidgetId;
 extern surface* uipanelimgsurf[UI_PANEL_IMG_MAX];
 extern surface* uiwidgetimgsurf[UI_PANELWIDGET_IMG_MAX][UI_WIDGETSTATE_IMG_MAX];
 extern float uiscalex, uiscaley;
@@ -513,8 +513,8 @@ extern surface* sfx8;
 extern surface* bt8[8];
 extern sound* SNDhit;
 
-//sf compatible information
-extern sfxtype sfx[256]; //local sf
+//special_effects compatible information
+extern sfxtype sfx[256]; //local special_effects
 
 extern unsigned char update[8]; //set to 1 if party frame needs updating
 extern unsigned char action; //active action key

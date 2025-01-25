@@ -3203,7 +3203,7 @@ addsf:
                 }
                 i++; //nsf
                 if (sf[i3].next) {i3=sf[i3].next; goto addsf;}
-              } //sfi!=NULL
+              } //special_effects_indices!=NULL
 
               if ((x==(2047>>3))&&(y==(1023>>3))) goto sfxglobal2;
               if ((y==tpy+3)&&(x==tpx+4)) {x=2047>>3; y=1023>>3; goto sfxglobal;}
@@ -3230,9 +3230,9 @@ idle_skip:;
   } //tpl loop
 
   if (sfbuffersend){
-    //clear sf buffer
-    sfn=0;//NULL sf pointer (0 is never used)
-    for (y=0;y<=255;y++){ for (x=0;x<=255;x++){ //clear sf buffer
+    //clear special_effects buffer
+    sfn=0;//NULL special_effects pointer (0 is never used)
+    for (y=0;y<=255;y++){ for (x=0;x<=255;x++){ //clear special_effects buffer
       if (i3=sfi[y][x]){
         if (sf[i3].type==SF_TXT_PORTRAIT) free((txt*)sf[i3].p); //free txt
         sfi[y][x]=0;
@@ -6119,7 +6119,7 @@ dglobal3:
 
         if (x5) i3=SFnew(2047,1023); else i3=SFnew(myobj->x,myobj->y);
 
-        //i3 points to new sf
+        //i3 points to new special_effects
         sf[i3].type=3; //message to users
 
         if (playerlist[tpl]->party[0]){sf[i3].x=myobj->x; sf[i3].y=myobj->y-2;}
@@ -6443,14 +6443,14 @@ npcmess_shrine2:
             static txt *txttmp0;
             txttmp0=txtnew();
             txtset(txttmp0,"\x022I won't use yellow potions.\x022");
-            i3=SFnew(myobj->x,myobj->y); //i3 points to new sf
-            sf[i3].type=3; //message to user
-            sf[i3].x=myobj->x;
-            sf[i3].y=myobj->y-2;
-            sf[i3].wait=5;
-            sf[i3].more=tnpc->port;
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
             //addnpcport2sf(i3,tnpc);
-            sf[i3].p=txttmp0;
+            special_effects[i3].p=txttmp0;
             goto doneclmess;
             }
             txtset(t2,"red");
@@ -6459,14 +6459,14 @@ npcmess_shrine2:
             static txt *txttmp0;
             txttmp0=txtnew();
             txtset(txttmp0,"\x022I won't use red potions.\x022");
-            i3=SFnew(myobj->x,myobj->y); //i3 points to new sf
-            sf[i3].type=3; //message to user
-            sf[i3].x=myobj->x;
-            sf[i3].y=myobj->y-2;
-            sf[i3].wait=5;
-            sf[i3].more=tnpc->port;
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
             //addnpcport2sf(i3,tnpc);
-            sf[i3].p=txttmp0;
+            special_effects[i3].p=txttmp0;
             goto doneclmess;
             }
             }//"poti"
@@ -6477,14 +6477,14 @@ npcmess_shrine2:
             static txt *txttmp0;
             txttmp0=txtnew();
             txtset(txttmp0,"\x022I'll refrain from eating.\x022");
-            i3=SFnew(myobj->x,myobj->y); //i3 points to new sf
-            sf[i3].type=3; //message to user
-            sf[i3].x=myobj->x;
-            sf[i3].y=myobj->y-2;
-            sf[i3].wait=5;
-            sf[i3].more=tnpc->port;
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
             //addnpcport2sf(i3,tnpc);
-            sf[i3].p=txttmp0;
+            special_effects[i3].p=txttmp0;
             goto doneclmess;
             }
 
@@ -6497,14 +6497,14 @@ npcmess_shrine2:
             static txt *txttmp0;
             txttmp0=txtnew();
             txtset(txttmp0,"\x022I won't cast cure.\x022");
-            i3=SFnew(myobj->x,myobj->y); //i3 points to new sf
-            sf[i3].type=3; //message to user
-            sf[i3].x=myobj->x;
-            sf[i3].y=myobj->y-2;
-            sf[i3].wait=5;
-            sf[i3].more=tnpc->port;
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
             //addnpcport2sf(i3,tnpc);
-            sf[i3].p=txttmp0;
+            special_effects[i3].p=txttmp0;
             goto doneclmess;
             }
             txtset(t2,"heal");
@@ -6514,14 +6514,14 @@ npcmess_shrine2:
             static txt *txttmp0;
             txttmp0=txtnew();
             txtset(txttmp0,"\x022I won't cast heal spells.\x022");
-            i3=SFnew(myobj->x,myobj->y); //i3 points to new sf
-            sf[i3].type=3; //message to user
-            sf[i3].x=myobj->x;
-            sf[i3].y=myobj->y-2;
-            sf[i3].wait=5;
-            sf[i3].more=tnpc->port;
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
             //addnpcport2sf(i3,tnpc);
-            sf[i3].p=txttmp0;
+            special_effects[i3].p=txttmp0;
             goto doneclmess;
             }
             }//"cast"
@@ -6536,14 +6536,14 @@ npcmess_shrine2:
             static txt *txttmp0;
             txttmp0=txtnew();
             txtset(txttmp0,"\x022I shall use yellow potions if heavily wounded.\x022");
-            i3=SFnew(myobj->x,myobj->y); //i3 points to new sf
-            sf[i3].type=3; //message to user
-            sf[i3].x=myobj->x;
-            sf[i3].y=myobj->y-2;
-            sf[i3].wait=5;
-            sf[i3].more=tnpc->port;
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
             //addnpcport2sf(i3,tnpc);
-            sf[i3].p=txttmp0;
+            special_effects[i3].p=txttmp0;
             goto doneclmess;
             }
             txtset(t2,"red");
@@ -6552,14 +6552,14 @@ npcmess_shrine2:
             static txt *txttmp0;
             txttmp0=txtnew();
             txtset(txttmp0,"\x022I shall use red potions if poisoned.\x022");
-            i3=SFnew(myobj->x,myobj->y); //i3 points to new sf
-            sf[i3].type=3; //message to user
-            sf[i3].x=myobj->x;
-            sf[i3].y=myobj->y-2;
-            sf[i3].wait=5;
-            sf[i3].more=tnpc->port;
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
             //addnpcport2sf(i3,tnpc);
-            sf[i3].p=txttmp0;
+            special_effects[i3].p=txttmp0;
             goto doneclmess;
             }
             }//"poti"
@@ -6570,14 +6570,14 @@ npcmess_shrine2:
             static txt *txttmp0;
             txttmp0=txtnew();
             txtset(txttmp0,"\x022I shall eat or drink when hungry.\x022");
-            i3=SFnew(myobj->x,myobj->y); //i3 points to new sf
-            sf[i3].type=3; //message to user
-            sf[i3].x=myobj->x;
-            sf[i3].y=myobj->y-2;
-            sf[i3].wait=5;
-            sf[i3].more=tnpc->port;
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
             //addnpcport2sf(i3,tnpc);
-            sf[i3].p=txttmp0;
+            special_effects[i3].p=txttmp0;
             goto doneclmess;
             }
 
@@ -6593,14 +6593,14 @@ npcmess_shrine2:
             static txt *txttmp0;
             txttmp0=txtnew();
             if (!i3) txtset(txttmp0,"\x022I shall cast cure if poisoned.\x022"); else txtset(txttmp0,"\x022I shall cast cure if anyone in our party is poisoned.\x022");
-            i3=SFnew(myobj->x,myobj->y); //i3 points to new sf
-            sf[i3].type=3; //message to user
-            sf[i3].x=myobj->x;
-            sf[i3].y=myobj->y-2;
-            sf[i3].wait=5;
-            sf[i3].more=tnpc->port;
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
             //addnpcport2sf(i3,tnpc);
-            sf[i3].p=txttmp0;
+            special_effects[i3].p=txttmp0;
             goto doneclmess;
             }
             txtset(t2,"heal");
@@ -6609,14 +6609,14 @@ npcmess_shrine2:
             static txt *txttmp0;
             txttmp0=txtnew();
             if (!i3) txtset(txttmp0,"\x022I shall cast heal spells if heavily wounded.\x022"); else txtset(txttmp0,"\x022I shall cast heal spells if anyone in our party is heavily wounded.\x022");
-            i3=SFnew(myobj->x,myobj->y); //i3 points to new sf
-            sf[i3].type=3; //message to user
-            sf[i3].x=myobj->x;
-            sf[i3].y=myobj->y-2;
-            sf[i3].wait=5;
-            sf[i3].more=tnpc->port;
+            i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
+            special_effects[i3].type=3; //message to user
+            special_effects[i3].x=myobj->x;
+            special_effects[i3].y=myobj->y-2;
+            special_effects[i3].wait=5;
+            special_effects[i3].more=tnpc->port;
             //addnpcport2sf(i3,tnpc);
-            sf[i3].p=txttmp0;
+            special_effects[i3].p=txttmp0;
             goto doneclmess;
             }
             }//"cast"
@@ -6674,7 +6674,7 @@ ifkey_next:
 
 
         if ((npcbin[x].l1==2)||(npcbin[x].l1==22)){ //display txt and exit || display txt and DONT exit
-          i3=SFnew(myobj->x,myobj->y); //i3 points to new sf
+          i3=SFnew(myobj->x,myobj->y); //i3 points to new special_effects
           sf[i3].type=3; //message to user
           sf[i3].x=myobj->x;
           sf[i3].y=myobj->y-2;
@@ -10826,7 +10826,7 @@ npc_walk:
 
                           x2=myobj2->x; y2=myobj2->y;
                           i3=SFnew(x2,y2);
-                          //i3 points to new sf
+                          //i3 points to new special_effects
                           sf[i3].type=4;
                           sf[i3].x=x2;
                           sf[i3].y=y2;
@@ -11080,7 +11080,7 @@ doneswap2:
 
                             x2=myobj2->x; y2=myobj2->y;
                             i3=SFnew(x2,y2);
-                            //i3 points to new sf
+                            //i3 points to new special_effects
                             sf[i3].type=4;
                             sf[i3].x=x2;
                             sf[i3].y=y2;
@@ -11417,7 +11417,7 @@ horse_finishdiagonalmove:
                       if (!tplayer->guardianstatuewait){
                         txttmp1=txtnew();
                         txtset(txttmp1,"\x022Thou art not upon a Sacred Quest!\x022\\\x022Passage denied!\x022");
-                        i3=SFnew(923,872); //i3 points to new sf
+                        i3=SFnew(923,872); //i3 points to new special_effects
                         sf[i3].type=3; //message to user
                         sf[i3].x=923;
                         sf[i3].y=872-2;
@@ -11444,7 +11444,7 @@ horse_finishdiagonalmove:
                       if (!tplayer->guardianstatuewait){
                         txttmp1=txtnew();
                         txtset(txttmp1,"\x022Passage granted!\x022");
-                        i3=SFnew(923,872); //i3 points to new sf
+                        i3=SFnew(923,872); //i3 points to new special_effects
                         sf[i3].type=3; //message to user
                         sf[i3].x=923;
                         sf[i3].y=872-2;
@@ -11963,7 +11963,7 @@ doneswap:
 
                               x2=myobj2->x; y2=myobj2->y;
                               i3=SFnew(x2,y2);
-                              //i3 points to new sf
+                              //i3 points to new special_effects
                               sf[i3].type=4;
                               sf[i3].x=x2;
                               sf[i3].y=y2;
@@ -13420,12 +13420,12 @@ triplecrossbow_miss:
                   x=12;
                   wep_dt[0]=3; wep_dt[1]=3;
                   i4=SFnew(myobj2->x,myobj2->y);
-                  sf[i4].type=1; //attack
-                  sf[i4].x=triplecrossbow_shot_x3;
-                  sf[i4].y=triplecrossbow_shot_y3;
-                  sf[i4].x2=0;
-                  sf[i4].wait=0.125f; //NULL
-                  sf[i4].more=1;
+                  special_effects[i4].type=1; //attack
+                  special_effects[i4].x=triplecrossbow_shot_x3;
+                  special_effects[i4].y=triplecrossbow_shot_y3;
+                  special_effects[i4].x2=0;
+                  special_effects[i4].wait=0.125f; //NULL
+                  special_effects[i4].more=1;
                   goto triplecrossbow_refire;
                   }
                   }
@@ -18360,13 +18360,13 @@ nopickup:;
             }else{
             //u6ob
             i3=SFnew(x,y); //destination is more important than the source
-            sf[i3].type=2; //arrow
-            sf[i3].x=x2;
-            sf[i3].y=y2;
-            sf[i3].x2=x;
-            sf[i3].y2=y;
-            sf[i3].more=0xFFFF;
-            sf[i3].wait=1;
+            special_effects[i3].type=2; //arrow
+            special_effects[i3].x=x2;
+            special_effects[i3].y=y2;
+            special_effects[i3].x2=x;
+            special_effects[i3].y2=y;
+            special_effects[i3].more=0xFFFF;
+            special_effects[i3].wait=1;
             }
             */
 
@@ -18911,7 +18911,7 @@ usehorse_gotpapers:
 
                   x2=myobj->x; y2=myobj->y;
                   i3=SFnew(x2,y2);
-                  //i3 points to new sf
+                  //i3 points to new special_effects
                   sf[i3].type=4;
                   sf[i3].x=x2;
                   sf[i3].y=y2;
@@ -18930,7 +18930,7 @@ usehorse_gotpapers:
 
                   x2=myobj->x; y2=myobj->y;
                   i3=SFnew(x2,y2);
-                  //i3 points to new sf
+                  //i3 points to new special_effects
                   sf[i3].type=4;
                   sf[i3].x=x2;
                   sf[i3].y=y2;

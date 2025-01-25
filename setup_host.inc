@@ -126,56 +126,82 @@ tfh=open(".\\ultima6\\map");
 get(tfh,&u6wci2,8*8*16*8*3);
 //unsigned char u6wci2[8][8][16][8][3];
 //unsigned short u6wci[128][128];
-for (y2=0;y2<=7;y2++){for (x2=0;x2<=7;x2++){
-  for (y=0;y<=15;y++){for (x=0;x<=7;x++){
-    i=u6wci2[y2][x2][y][x][0];
-    i2=u6wci2[y2][x2][y][x][1];
-    i3=u6wci2[y2][x2][y][x][2];
-    z=i+(i2&0xF)*256;
-    z2=i3*16+(i2>>4);
-    u6wci[y2*16+y][x2*16+x*2]=z;
-    u6wci[y2*16+y][x2*16+x*2+1]=z2;
-  }}
-}}
-for (y2=0;y2<=127;y2++){ for (x2=0;x2<=127;x2++){
-  for (y=0;y<=7;y++){ for (x=0;x<=7;x++){
-    bt[y2*8+y][x2*8+x]=chunks[u6wci[y2][x2]][y][x];
-  }}
-}}
+for (y2=0;y2<=7;y2++){
+    for (x2=0;x2<=7;x2++){
+        for (y=0;y<=15;y++){
+            for (x=0;x<=7;x++){
+                i=u6wci2[y2][x2][y][x][0];
+                i2=u6wci2[y2][x2][y][x][1];
+                i3=u6wci2[y2][x2][y][x][2];
+                z=i+(i2&0xF)*256;
+                z2=i3*16+(i2>>4);
+                u6wci[y2*16+y][x2*16+x*2]=z;
+                u6wci[y2*16+y][x2*16+x*2+1]=z2;
+            }
+        }
+    }
+}
+
+for (y2=0;y2<=127;y2++){
+    for (x2=0;x2<=127;x2++){
+        for (y=0;y<=7;y++){
+            for (x=0;x<=7;x++){
+                bt[y2*8+y][x2*8+x]=chunks[u6wci[y2][x2]][y][x];
+            }
+        }
+    }
+}
+
+get(tfh,&u60ci2,32*16*3);
+
+//unsigned char u60ci2[32][16][3];
+//unsigned short u60ci[32][32];
+for (y=0;y<=31;y++){
+    for (x=0;x<=15;x++){
+        i=u60ci2[y][x][0];
+        i2=u60ci2[y][x][1];
+        i3=u60ci2[y][x][2];
+        z=i+(i2&0xF)*256;
+        z2=i3*16+(i2>>4);
+        u60ci[y][x*2]=z;
+        u60ci[y][x*2+1]=z2;
+    }
+}
+
+for (y2=0;y2<=31;y2++){
+    for (x2=0;x2<=31;x2++){
+        for (y=0;y<=7;y++){
+            for (x=0;x<=7;x++){
+                bt[y2*8+y][x2*8+x+1024]=chunks[u60ci[y2][x2]][y][x];
+            }
+        }
+    }
+}
+
 get(tfh,&u60ci2,32*16*3);
 //unsigned char u60ci2[32][16][3];
 //unsigned short u60ci[32][32];
-for (y=0;y<=31;y++){for (x=0;x<=15;x++){
-  i=u60ci2[y][x][0];
-  i2=u60ci2[y][x][1];
-  i3=u60ci2[y][x][2];
-  z=i+(i2&0xF)*256;
-  z2=i3*16+(i2>>4);
-  u60ci[y][x*2]=z;
-  u60ci[y][x*2+1]=z2;
-}}
-for (y2=0;y2<=31;y2++){ for (x2=0;x2<=31;x2++){
-  for (y=0;y<=7;y++){ for (x=0;x<=7;x++){
-    bt[y2*8+y][x2*8+x+1024]=chunks[u60ci[y2][x2]][y][x];
-  }}
-}}
-get(tfh,&u60ci2,32*16*3);
-//unsigned char u60ci2[32][16][3];
-//unsigned short u60ci[32][32];
-for (y=0;y<=31;y++){for (x=0;x<=15;x++){
-  i=u60ci2[y][x][0];
-  i2=u60ci2[y][x][1];
-  i3=u60ci2[y][x][2];
-  z=i+(i2&0xF)*256;
-  z2=i3*16+(i2>>4);
-  u60ci[y][x*2]=z;
-  u60ci[y][x*2+1]=z2;
-}}
-for (y2=0;y2<=31;y2++){ for (x2=0;x2<=31;x2++){
-  for (y=0;y<=7;y++){ for (x=0;x<=7;x++){
-    bt[y2*8+y][x2*8+x+1024+256]=chunks[u60ci[y2][x2]][y][x];
-  }}
-}}
+for (y=0;y<=31;y++){
+    for (x=0;x<=15;x++){
+        i=u60ci2[y][x][0];
+        i2=u60ci2[y][x][1];
+        i3=u60ci2[y][x][2];
+        z=i+(i2&0xF)*256;
+        z2=i3*16+(i2>>4);
+        u60ci[y][x*2]=z;
+        u60ci[y][x*2+1]=z2;
+    }
+}
+
+for (y2=0;y2<=31;y2++){
+    for (x2=0;x2<=31;x2++){
+        for (y=0;y<=7;y++){
+            for (x=0;x<=7;x++){
+                bt[y2*8+y][x2*8+x+1024+256]=chunks[u60ci[y2][x2]][y][x];
+            }
+        }
+    }
+}
 get(tfh,&u60ci2,32*16*3);
 //unsigned char u60ci2[32][16][3];
 //unsigned short u60ci[32][32];

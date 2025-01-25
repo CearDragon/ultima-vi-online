@@ -61,6 +61,10 @@ bool keyhit(unsigned short k){ //returns TRUE if key has been pressed
   key[k]=FALSE; return TRUE;
 }
 
+bool u6oKeyHitOrOn(unsigned char i) {
+    return u6okeyhit(i) || u6okeyon(i);
+}
+
 bool u6okeyhit(unsigned char i){ //returns TRUE if key has been pressed
   if (U6OK[i][0]){
     if (U6OK[i][1]==0){ //only single key required
@@ -1807,12 +1811,12 @@ void updateoverlaysurfn1(surface* s) {
 			imguiw(s, g_UI_WorldmapBarPanelId, UI_WIDGET_MAPBUTTON_U6RUNE, 1);
 
 		if (uihover) {
-			if (hituipaneli == g_UI_WorldmapBarPanelId) {
-				if (hituiwidgeti < 0)
-					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
+			if (g_UI_ClickedPanelId == g_UI_WorldmapBarPanelId) {
+				if (g_UI_ClickedWidgetId < 0)
+                    g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
-				if (hituiwidgeti > 0)
-					img0(s, g_UI_PanelX[hituipaneli][hituiwidgeti][UI_STATE_DEF], g_UI_PanelY[hituipaneli][hituiwidgeti][UI_STATE_DEF], uiwidgetimgsurf[UI_IMGI_HOVER][1]);
+				if (g_UI_ClickedWidgetId > 0)
+					img0(s, g_UI_PanelX[g_UI_ClickedPanelId][g_UI_ClickedWidgetId][UI_STATE_DEF], g_UI_PanelY[g_UI_ClickedPanelId][g_UI_ClickedWidgetId][UI_STATE_DEF], uiwidgetimgsurf[UI_IMGI_HOVER][1]);
 			}
 		}
 	}

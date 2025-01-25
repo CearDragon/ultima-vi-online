@@ -109,7 +109,7 @@ if (smallwindow) {
 		g_MousePosY = my;
 
 		// r999 new
-		hituipaneli = -1;
+		g_UI_ClickedPanelId = -1;
 		//selectedpartymembern1 = tplay->selected_partymember;
 
 		// r999
@@ -221,39 +221,39 @@ if (smallwindow) {
             actionreset = 0;
             actionlast = 0;
         } else {
-			hituipaneli = -5;
-			hituiwidgeti = -5;
+			g_UI_ClickedPanelId = -5;
+			g_UI_ClickedWidgetId = -5;
 
 			// s444 process mouse clicks on worldmap and worldmapbar
 			if (mbclick) {
 				if (showworldmapn1 > 0) {
-					hituipaneli = gethituipaneli(g_MousePosX, g_MousePosY);
-					//hituiwidgeti = -1;
+					g_UI_ClickedPanelId = gethituipaneli(g_MousePosX, g_MousePosY);
+					//g_UI_ClickedWidgetId = -1;
 
 					// s444 cancel all mouse clicks on world map
-					if (hituipaneli == g_UI_WorldmapPanelId) {
-						hituipaneli = -2;
+					if (g_UI_ClickedPanelId == g_UI_WorldmapPanelId) {
+						g_UI_ClickedPanelId = -2;
 						mbclick = 0;
 						mbheld = 0;
-					} else if (hituipaneli == g_UI_WorldmapBarPanelId) {
+					} else if (g_UI_ClickedPanelId == g_UI_WorldmapBarPanelId) {
 						if (mbclick & 1)
-							hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_WorldmapBarPanelId);
+							g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_WorldmapBarPanelId);
 						else {
 							// s444 cancel non-left mouse clicks on world map bar
-							hituipaneli = -5;
+							g_UI_ClickedPanelId = -5;
 							mbclick = 0;
 							mbheld = 0;
 						}
 					} else if (!(mbclick & 1)) {
-						hituipaneli = -5;
+						g_UI_ClickedPanelId = -5;
 					}
 
 					// s444 cancel right mouse clicks on world map bar
 					/*
-					if (hituiwidgeti > 0) {
+					if (g_UI_ClickedWidgetId > 0) {
 						if (!(mbclick & 1)) {
-							hituipaneli = -2;
-							hituiwidgeti = -2;
+							g_UI_ClickedPanelId = -2;
+							g_UI_ClickedWidgetId = -2;
 							mbclick = 0;
 							mbheld = 0;
 						}
@@ -261,10 +261,10 @@ if (smallwindow) {
 					*/
 
 					// s444 worldmapbar
-					if (hituiwidgeti > 0) {
+					if (g_UI_ClickedWidgetId > 0) {
 						mbclick = 0;
 
-						if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6CLOTH) {
+						if (g_UI_ClickedWidgetId == UI_WIDGET_MAPBUTTON_U6CLOTH) {
 							if (worldmapindexn1 != 1)
 								updateworldmapn1 = 1;
 
@@ -273,7 +273,7 @@ if (smallwindow) {
 							if (soundn1 >= 2)
 								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
 						}
-						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6P) {
+						else if (g_UI_ClickedWidgetId == UI_WIDGET_MAPBUTTON_U6P) {
 							if (worldmapindexn1 != 2)
 								updateworldmapn1 = 1;
 
@@ -282,7 +282,7 @@ if (smallwindow) {
 							if (soundn1 >= 2)
 								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
 						}
-						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6G) {
+						else if (g_UI_ClickedWidgetId == UI_WIDGET_MAPBUTTON_U6G) {
 							if (worldmapindexn1 != 3)
 								updateworldmapn1 = 1;
 
@@ -291,7 +291,7 @@ if (smallwindow) {
 							if (soundn1 >= 2)
 								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
 						}
-						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6RUNE) {
+						else if (g_UI_ClickedWidgetId == UI_WIDGET_MAPBUTTON_U6RUNE) {
 							if (worldmapindexn1 != 4)
 								updateworldmapn1 = 1;
 
@@ -300,7 +300,7 @@ if (smallwindow) {
 							if (soundn1 >= 2)
 								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
 						}
-						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_CLOSE) {
+						else if (g_UI_ClickedWidgetId == UI_WIDGET_MAPBUTTON_CLOSE) {
 							showworldmapn1 = 0;
                             g_UI_PanelClickable[g_UI_WorldmapPanelId][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
 
@@ -312,13 +312,13 @@ if (smallwindow) {
 			} // mbclick
 
 			// r999 new
-			//hituipaneli = gethituipaneli(g_MousePosX, g_MousePosY);
-			//hituiwidgeti = -1;
+			//g_UI_ClickedPanelId = gethituipaneli(g_MousePosX, g_MousePosY);
+			//g_UI_ClickedWidgetId = -1;
 
 			// r999 new only process left mouse clicks if it was not previously canceled
 			if ((mbclick & 1) && (hituipaneli < -4)) {
-				hituipaneli = gethituipaneli(g_MousePosX, g_MousePosY);
-				//hituiwidgeti = -1;
+				g_UI_ClickedPanelId = gethituipaneli(g_MousePosX, g_MousePosY);
+				//g_UI_ClickedWidgetId = -1;
 
 				if (hituipaneli < 0)
 					actionreset = 1;
@@ -326,22 +326,22 @@ if (smallwindow) {
 
 			// s444 cancel mouse clicks on world map
 			/*
-			if (hituipaneli == g_UI_WorldmapPanelId) {
-				hituipaneli = -1;
+			if (g_UI_ClickedPanelId == g_UI_WorldmapPanelId) {
+				g_UI_ClickedPanelId = -1;
 				mbclick = 0;
 			}
 			*/
 
 			// process left mouse clicks on new ui
-			if (hituipaneli > 0) {
-				hituiwidgeti = -1;
+			if (g_UI_ClickedPanelId > 0) {
+				g_UI_ClickedWidgetId = -1;
 
 				// r999 new actionbar1
-				if (hituipaneli == g_UI_ActionBarTopPanelId) {
-					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
+				if (g_UI_ClickedPanelId == g_UI_ActionBarTopPanelId) {
+					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
-					if (hituiwidgeti > 0) {
-						if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_ATTACK) {
+					if (g_UI_ClickedWidgetId > 0) {
+						if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONBUTTON_ATTACK) {
 							// attack
 							actionreset = 0;
 							if (actionlast != 1) {
@@ -358,7 +358,7 @@ if (smallwindow) {
 							//txtset(t, "attack!");
 							//LOGadd(t);
 							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_TALK) {
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONBUTTON_TALK) {
 							// talk
 							actionreset = 0;
 							i=U6OK[U6OK_CANCEL][0];
@@ -372,7 +372,7 @@ if (smallwindow) {
 								actionreset = 1;
 
 							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_LOOK) {
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONBUTTON_LOOK) {
 							// look
 							actionreset = 0;
 							i=U6OK[U6OK_CANCEL][0];
@@ -386,7 +386,7 @@ if (smallwindow) {
 								actionreset = 1;
 
 							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_USE) {
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONBUTTON_USE) {
 							// use
 							actionreset = 0;
 							i=U6OK[U6OK_CANCEL][0];
@@ -405,7 +405,7 @@ if (smallwindow) {
 								actionreset = 1;
 
 							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_DROP) {
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONBUTTON_DROP) {
 							// drop item
 							actionreset = 0;
 							i=U6OK[U6OK_CANCEL][0];
@@ -416,10 +416,10 @@ if (smallwindow) {
 							if (CLIENTplayer->mobj)
 								actionpending = 510;
 							else {
-								if (setdroplocation)
-									setdroplocation = 0;
+								if (g_SetDropLocation)
+									g_SetDropLocation = 0;
 								else
-									setdroplocation = 1;
+									g_SetDropLocation = 1;
 
 								if (soundn1 >= 2)
 									soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
@@ -430,11 +430,11 @@ if (smallwindow) {
 					}
 				} // actionbar1
 				// actionbar2
-				else if (hituipaneli == g_UI_ActionBarBottomPanelId) {
-					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
+				else if (g_UI_ClickedPanelId == g_UI_ActionBarBottomPanelId) {
+					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
-					if (hituiwidgeti > 0) {
-						if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_FOOD) {
+					if (g_UI_ClickedWidgetId > 0) {
+						if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONBUTTON_FOOD) {
 							// food (use)
 							actionreset = 0;
 							i=U6OK[U6OK_CANCEL][0];
@@ -449,7 +449,7 @@ if (smallwindow) {
 								actionreset = 1;
 
 							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_WORLDMAP) {
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONBUTTON_WORLDMAP) {
 							// worldmap
 							showworldmapn1++;
 							if (showworldmapn1 > 1) {
@@ -461,7 +461,7 @@ if (smallwindow) {
 
 							if (soundn1 >= 2)
 								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_COMBATLOG) {
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONBUTTON_COMBATLOG) {
 							// combatlog
 							combatinfo++;
 							txtsetchar(t3, 255);
@@ -479,11 +479,11 @@ if (smallwindow) {
 					}
 				} // actionbar2
 				// optionbar1
-				else if (hituipaneli == g_UI_OptionBarPanelId) {
-					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
+				else if (g_UI_ClickedPanelId == g_UI_OptionBarPanelId) {
+					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
-					if (hituiwidgeti > 0) {
-						if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_ENHANCE) {
+					if (g_UI_ClickedWidgetId > 0) {
+						if (g_UI_ClickedWidgetId == UI_WIDGET_OPTIONBUTTON_ENHANCE) {
 							// game enhancement
 							enhancen1++;
 							if (enhancen1 > 2) {
@@ -496,7 +496,7 @@ if (smallwindow) {
 								soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
 							//updateoptioninfo();
 							updatepartyframen1 = 1;
-						} else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_SOUND) {
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_OPTIONBUTTON_SOUND) {
 							// game sound enhancement
 							soundn1++;
 							if (soundn1 > 2) {
@@ -508,7 +508,7 @@ if (smallwindow) {
 							if (soundn1)
 								soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
 							//updateoptioninfo();
-						} else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_COMBATSOUND) {
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_OPTIONBUTTON_COMBATSOUND) {
 							// combat sound enhancement
 							combatsoundn1++;
 							if (combatsoundn1 > 2) {
@@ -520,7 +520,7 @@ if (smallwindow) {
 							if (soundn1)
 								soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
 							//updateoptioninfo();
-						} else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_MINIMAP) {
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_OPTIONBUTTON_MINIMAP) {
 							// minimap toggle
 							actionreset = 0;
 							i = U6OK[U6OK_CANCEL][0];
@@ -532,7 +532,7 @@ if (smallwindow) {
 
 							if (soundn1 >= 2)
 								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-						} else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_QUIT) {
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_OPTIONBUTTON_QUIT) {
 							// quit
 							actionreset = 0;
 							i = U6OK[U6OK_CANCEL][0];
@@ -546,309 +546,141 @@ if (smallwindow) {
 					}
 				} // optionbar1
 				// actiontalkbar1
-				else if (hituipaneli == g_UI_TalkActionBar1PanelId) {
-					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
+				else if (g_UI_ClickedPanelId == g_UI_TalkActionBar1PanelId) {
+					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
-					if (hituiwidgeti > 0) {
-						if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_NAME) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+					if (g_UI_ClickedWidgetId > 0) {
+                        bool found = true;
+
+						if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_NAME) {
 							txtset(newt1, "name");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_JOB) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_JOB) {
 							txtset(newt1, "job");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_HEAL) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_HEAL) {
 							txtset(newt1, "heal");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_CURE) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_CURE) {
 							txtset(newt1, "cure");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_RESURRECT) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_RESURRECT) {
 							txtset(newt1, "resurrect");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_INSURANCE) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_INSURANCE) {
 							txtset(newt1, "insurance");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_SPELL) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_SPELL) {
 							txtset(newt1, "spell");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_REAGENT) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_REAGENT) {
 							txtset(newt1, "reagent");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_POTION) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_POTION) {
 							txtset(newt1, "potion");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_STAFF) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_STAFF) {
 							txtset(newt1, "staff");
-							mbclick = 0;
-						}
+						} else {
+                            found = false;
+                        }
+
+                        if (found) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            mbclick = 0;
+                        }
 					}
 				} // actiontalkbar1
 				// actiontalkbar2
-				else if (hituipaneli == g_UI_TalkActionBar2PanelId) {
-					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
+				else if (g_UI_ClickedPanelId == g_UI_TalkActionBar2PanelId) {
+					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
-					if (hituiwidgeti > 0) {
-						if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_YES) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+					if (g_UI_ClickedWidgetId > 0) {
+                        bool found = true;
+
+						if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_YES) {
 							txtset(newt1, "yes");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_NO) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_NO) {
 							txtset(newt1, "no");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_SELL) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_SELL) {
 							txtset(newt1, "sell");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BULK) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_BULK) {
 							txtset(newt1, "bulk");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BUY) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_BUY) {
 							txtset(newt1, "buy");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_ARMOR) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_ARMOR) {
 							txtset(newt1, "armor");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_ARMS) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_ARMS) {
 							txtset(newt1, "arms");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_WEAPON) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_WEAPON) {
 							txtset(newt1, "weapon");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_ARROWS) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_ARROWS) {
 							txtset(newt1, "arrows");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BOLTS) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_BOLTS) {
 							txtset(newt1, "bolts");
-							mbclick = 0;
-						}
+						} else {
+                            found = false;
+                        }
+
+                        if (found) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            mbclick = 0;
+                        }
 					}
 				} // actiontalkbar2
 				// actiontalkbar3
-				else if (hituipaneli == g_UI_TalkActionBar3PanelId) {
-					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
+				else if (g_UI_ClickedPanelId == g_UI_TalkActionBar3PanelId) {
+					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
-					if (hituiwidgeti > 0) {
-						if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_DEPOSIT) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+					if (g_UI_ClickedWidgetId > 0) {
+                        bool found = true;
+
+						if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_DEPOSIT) {
 							txtset(newt1, "deposit");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_WITHDRAW) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_WITHDRAW) {
 							txtset(newt1, "withdraw");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BALANCE) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_BALANCE) {
 							txtset(newt1, "balance");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_EXCHANGE) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_EXCHANGE) {
 							txtset(newt1, "exchange");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_HOUSE) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_HOUSE) {
 							txtset(newt1, "house");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_PAYMENT) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_PAYMENT) {
 							txtset(newt1, "payment");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_JOIN) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_JOIN) {
 							txtset(newt1, "join");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_LEAVE) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_LEAVE) {
 							txtset(newt1, "leave");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BAGS) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_BAGS) {
 							txtset(newt1, "bags");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_HELP) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
+						} else if (g_UI_ClickedWidgetId == UI_WIDGET_ACTIONTALKBUTTON_HELP) {
 							txtset(newt1, "kal lor <-- replace with all uppercase (i.e. \"KAL LOR\") and press Enter. WARNING: you will LOSE some (i.e. 1/16) of ... your (TOTAL) experience!  This help request will teleport you to the starting location.");
-							mbclick = 0;
-						}
+						} else {
+                            found = false;
+                        }
+
+                        if (found) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            mbclick = 0;
+                        }
 					}
 				} // actiontalkbar3
 				// partymemberbar1
-				else if (hituipaneli == g_UI_PartyMemberBarPanelId) {
-					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
+				else if (g_UI_ClickedPanelId == g_UI_PartyMemberBarPanelId) {
+					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
-					if (hituiwidgeti > 0) {
-						selectedpartymemberframen1 = hituiwidgeti - 1;
+					if (g_UI_ClickedWidgetId > 0) {
+						selectedpartymemberframen1 = g_UI_ClickedWidgetId - 1;
 					}
 				} // partymemberbar1
 				// party member inventory frame
-				else if (hituipaneli == g_UI_PartyMemberPanelId) {
+				else if (g_UI_ClickedPanelId == g_UI_PartyMemberPanelId) {
 					// partymemberlock
 					if (testhituipanel(g_MousePosX, g_MousePosY, g_UI_PartyMemberLockPanelId)) {
 						selectedpartymemberframelock++;
@@ -862,11 +694,11 @@ if (smallwindow) {
 
 			/*
 			txtset(t4, "hittest uipi=");
-			txtnumint(t5, hituipaneli);
+			txtnumint(t5, g_UI_ClickedPanelId);
 			txtadd(t4, t5);
 			txtset(t5, " uiwi=");
 			txtadd(t4, t5);
-			txtnumint(t5, hituiwidgeti);
+			txtnumint(t5, g_UI_ClickedWidgetId);
 			txtadd(t4, t5);
 			LOGadd(t4);
 			*/
@@ -1117,7 +949,7 @@ if (smallwindow && windowsizecyclenum == 1) {
 	else {
 		if (hituipaneli < -4)
 			if (testhituipanel(g_MousePosX, g_MousePosY, g_UI_PartyMemberPanelId))
-				hituipaneli = g_UI_PartyMemberPanelId;
+				g_UI_ClickedPanelId = g_UI_PartyMemberPanelId;
 
 		for (i = 0; i < partyframenewmax; i++) {
 			party_frame_new[i]->mouse_over = FALSE;
@@ -1129,7 +961,7 @@ if (smallwindow && windowsizecyclenum == 1) {
 			// not true anymore --> g_MousePosX and g_MousePosY does not need to be scaled because the (new) top-right inventory window is not scaled at all (it is always the 1024 res scaled-size; i.e. not scaled)
 			//if ((panelmx[0] >= party_frame_new[i]->offset_x) && (panelmx[0] <= party_frame_new[i]->offset_x + pmf->graphic->d.dwWidth)
 				//&& (panelmy[0] >= party_frame_new[i]->offset_y) && (panelmy[0] <= party_frame_new[i]->offset_y + pmf->graphic->d.dwHeight))
-			if (hituipaneli == g_UI_PartyMemberPanelId)
+			if (g_UI_ClickedPanelId == g_UI_PartyMemberPanelId)
 				party_frame_new[i]->mouse_over = TRUE;
 			//party_frame[0] = TRUE;
 			if (party_frame_new[i]->mouse_over == TRUE) {
@@ -4216,59 +4048,35 @@ directionalmove_force:
 mousemove_finish:
     vf_mb2_x=0xFFFF; vf_mb2_y=0xFFFF;
 
+    bool moved = false;
 
-	if (u6okeyhit(U6OK_RIGHT)) {
-		CLIENTplayer->key |= KEYright2;
+	if (u6oKeyHitOrOn(U6OK_RIGHT)) {
+        CLIENTplayer-> key := (u6okeyhit(U6OK_RIGHT) ? KEYright2 : KEYleft);
+
 		// r777 set drop location right
-		if (setdroplocation) {
-			setdroplocation = 0;
+		if (g_SetDropLocation) {
+			g_SetDropLocation = 0;
 			droplocation = 4;
-			if (soundn1 >= 2)
-				soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-		}
-	}
-	else {
-		if (u6okeyon(U6OK_RIGHT)) {
-			CLIENTplayer->key |= KEYright;
-			// r777 set drop location right
-			if (setdroplocation) {
-				setdroplocation = 0;
-				droplocation = 4;
-				if (soundn1 >= 2)
-					soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-			}
-		}
-
-	}
-
-	if (u6okeyhit(U6OK_LEFT)) {
-		CLIENTplayer->key |= KEYleft2;
-		// r777 set drop location left
-		if (setdroplocation) {
-			setdroplocation = 0;
-			droplocation = 3;
-			if (soundn1 >= 2)
-				soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-		}
-	}
-	else {
-		if (u6okeyon(U6OK_LEFT)) {
-			CLIENTplayer->key |= KEYleft;
-			// r777 set drop location left
-			if (setdroplocation) {
-				setdroplocation = 0;
-				droplocation = 3;
-				if (soundn1 >= 2)
-					soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-			}
+            moved = soundn1 >= 2
 		}
 	}
 
-	if (u6okeyhit(U6OK_UP)) {
-		CLIENTplayer->key |= KEYup2;
+    if (u6okeyhit(U6OK_LEFT) || u6okeyon(U6OK_LEFT)) {
+        CLIENTplayer->key |= (u6okeyhit(U6OK_LEFT) ? KEYleft2 : KEYleft);
+        if (g_SetDropLocation) {
+            g_SetDropLocation = 0;
+            droplocation = 3;
+            if (soundn1 >= 2) {
+                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+            }
+        }
+    }
+
+	if (u6oKeyHitOrOn(U6OK_UP)) {
+		CLIENTplayer->key |= (u6okeyhit(U6OK_UP)) ? KEYup2 : KEYup;
 		// r777 set drop location up
-		if (setdroplocation) {
-			setdroplocation = 0;
+		if (g_SetDropLocation) {
+			g_SetDropLocation = 0;
 			droplocation = 1;
 			if (soundn1 >= 2)
 				soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
@@ -4278,8 +4086,8 @@ mousemove_finish:
 		if (u6okeyon(U6OK_UP)) {
 			CLIENTplayer->key |= KEYup;
 			// r777 set drop location up
-			if (setdroplocation) {
-				setdroplocation = 0;
+			if (g_SetDropLocation) {
+				g_SetDropLocation = 0;
 				droplocation = 1;
 				if (soundn1 >= 2)
 					soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
@@ -4290,8 +4098,8 @@ mousemove_finish:
 	if (u6okeyhit(U6OK_DOWN)) {
 		CLIENTplayer->key |= KEYdown2;
 		// r777 set drop location down
-		if (setdroplocation) {
-			setdroplocation = 0;
+		if (g_SetDropLocation) {
+			g_SetDropLocation = 0;
 			droplocation = 2;
 			if (soundn1 >= 2)
 				soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
@@ -4301,8 +4109,8 @@ mousemove_finish:
 		if (u6okeyon(U6OK_DOWN)) {
 			CLIENTplayer->key |= KEYdown;
 			// r777 set drop location down
-			if (setdroplocation) {
-				setdroplocation = 0;
+			if (g_SetDropLocation) {
+				g_SetDropLocation = 0;
 				droplocation = 2;
 				if (soundn1 >= 2)
 					soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
@@ -6576,40 +6384,48 @@ CLIENT_donemess:
     static long mapx,mapy,bufx,bufy;
     static unsigned short *tp2;
     myobj=fakeobj;
-    for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
-      x2=tpx+x-1; y2=tpy+y-1; if ((x2>=0)&&(y2>=0)&&(x2<=2047)&&(y2<=1023)){
-        mapx=tpx+x-1; mapy=tpy+y-1; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
-        //get basetile-vis
-        i=bt[y2][x2]&1023;
-        i2=0;//visible
-        if ((i>=192)&&(i<=207)) vis_window[x+1][y+1]=1;//window basetile
-        if ((i>=140)&&(i<188)) i2=1;
-        if ((i>=240)&&(i<252)) i2=1;
-        if ((i>=192)&&(i<208)) i2=1;
-        vis[x+1][y+1]=i2;
-        //get fixedobj-vis
-        if (i=objfixed_index[tpy+y-1][tpx+x-1]){
-          i2=objfixed_type[i];
-          for (i3=i+1;i3<=(i+i2);i3++){
-            x3=objfixed_type[i3];
-            myobj->type=x3;
-            if ((x3>=29)&&(x3<=32)){//overlay floor: edit basetile 
-              if (x3==29) x4=108;
-              if (x3==30) x4=208;
-              if (x3==31) x4=210;
-              if (x3==32) x4=213;
-              bt[y2][x2]&=(0xFFFF-1023);
-              bt[y2][x2]|=x4;
-            }
-            if ((myobj->type&1023)==301){
-              if ((myobj->type&1024)==0) vis[x+1][y+1]=1;//top/left of doorframe always blocks
-            }
-            if ((myobj->type&1023)==213) vis[x+1][y+1]=1;//mousehole
-            if (myobj->type==(327+2048)) vis_chair[x+1][y+1]=3;//throne
-            if (myobj->type==163) vis_bed[x+1][y+1]=1;//bed (horizontal)
-            if (myobj->type==163+(6*1024)) vis_bed[x+1][y+1]=2;//bed (vertical)
-          }//i3
-        }//i
+    for (y=0;y<=25;y++){
+        for (x=0;x<=33;x++){
+            x2=tpx+x-1; y2=tpy+y-1;
+            if ((x2>=0)&&(y2>=0)&&(x2<=2047)&&(y2<=1023)){
+                mapx=tpx+x-1; mapy=tpy+y-1;
+                bufx=mapx-tplayer->sobj_bufoffx;
+                bufy=mapy-tplayer->sobj_bufoffy;
+                //get basetile-vis
+                i=bt[y2][x2]&1023;
+                i2=0;//visible
+                if ((i>=192)&&(i<=207))
+                    vis_window[x+1][y+1]=1;//window basetile
+                if ((i>=140)&&(i<188))
+                    i2=1;
+                if ((i>=240)&&(i<252))
+                    i2=1;
+                if ((i>=192)&&(i<208))
+                    i2=1;
+                vis[x+1][y+1]=i2;
+                //get fixedobj-vis
+                if (i=objfixed_index[tpy+y-1][tpx+x-1]){
+                  i2=objfixed_type[i];
+                  for (i3=i+1;i3<=(i+i2);i3++){
+                    x3=objfixed_type[i3];
+                    myobj->type=x3;
+                    if ((x3>=29)&&(x3<=32)){//overlay floor: edit basetile
+                      if (x3==29) x4=108;
+                      if (x3==30) x4=208;
+                      if (x3==31) x4=210;
+                      if (x3==32) x4=213;
+                      bt[y2][x2]&=(0xFFFF-1023);
+                      bt[y2][x2]|=x4;
+                    }
+                    if ((myobj->type&1023)==301){
+                      if ((myobj->type&1024)==0) vis[x+1][y+1]=1;//top/left of doorframe always blocks
+                    }
+                    if ((myobj->type&1023)==213) vis[x+1][y+1]=1;//mousehole
+                    if (myobj->type==(327+2048)) vis_chair[x+1][y+1]=3;//throne
+                    if (myobj->type==163) vis_bed[x+1][y+1]=1;//bed (horizontal)
+                    if (myobj->type==163+(6*1024)) vis_bed[x+1][y+1]=2;//bed (vertical)
+                  }//i3
+                }//i
         //get tfixedobj-vis
         if (i=tobjfixed_index[tpy+y-1][tpx+x-1]){
           i2=tobjfixed_type[i];
@@ -9822,7 +9638,7 @@ donesf:
         if (sfx[i3].wait<=0) sfx[i3].wait=0;
 donesf2:;
 
-        //check for more sf
+        //check for more special_effects
       }//=!0
     }//i3
 
@@ -10660,7 +10476,7 @@ diskip:
 		img(panelsurf[0], actionbuttonx[1][ACTIONBUTTON_FOOD], actionbuttony[1][ACTIONBUTTON_FOOD], actionbuttonsurf[ACTIONBUTTON_FOOD][2]);
 
 		// r777 display proper drop location action button
-		if (setdroplocation)
+		if (g_SetDropLocation)
 			//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][0]);
 			img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][0]);
 		else {
@@ -10862,7 +10678,7 @@ diskip:
 		//img(psnew1b, g_UI_PanelX[g_UI_ActionBarBottomPanelId][UI_WIDGET_ACTIONBUTTON_FOOD][UI_STATE_DEF], g_UI_PanelY[g_UI_ActionBarBottomPanelId][UI_WIDGET_ACTIONBUTTON_FOOD][UI_STATE_DEF], g_UI_PanelSurface[g_UI_ActionBarBottomPanelId][0][0]);
 
 		// r777 display proper drop location action button
-		if (setdroplocation)
+		if (g_SetDropLocation)
 			//img(psnew1b, actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][0]);
 			//img(panelsurf[0], actionbuttonx[0][ACTIONBUTTON_DROP], actionbuttony[0][ACTIONBUTTON_DROP], actionbuttonsurf[ACTIONBUTTON_DROP][0]);
 			imguiw(psnew1b, g_UI_ActionBarTopPanelId, UI_WIDGET_ACTIONBUTTON_DROP, 1);
@@ -11000,26 +10816,26 @@ diskip:
 		// r999 hover
 		if (uihover) {
 			if (hituipaneli < -4)
-				hituipaneli = gethituipaneli(g_MousePosX, g_MousePosY);
+				g_UI_ClickedPanelId = gethituipaneli(g_MousePosX, g_MousePosY);
 
-			if ((hituipaneli == g_UI_ActionBarTopPanelId) || (hituipaneli == g_UI_ActionBarBottomPanelId) || (hituipaneli == g_UI_OptionBarPanelId)) {
+			if ((g_UI_ClickedPanelId == g_UI_ActionBarTopPanelId) || (g_UI_ClickedPanelId == g_UI_ActionBarBottomPanelId) || (g_UI_ClickedPanelId == g_UI_OptionBarPanelId)) {
 				if (hituiwidgeti < 0)
-					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
+					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
-				if (hituiwidgeti > 0)
-					img0(psnew1b, g_UI_PanelX[hituipaneli][hituiwidgeti][UI_STATE_DEF], g_UI_PanelY[hituipaneli][hituiwidgeti][UI_STATE_DEF], uihoveractionbuttonsurf);
-			} else if ((hituipaneli == g_UI_TalkActionBar1PanelId) || (hituipaneli == g_UI_TalkActionBar2PanelId) || (hituipaneli == g_UI_TalkActionBar3PanelId)) {
+				if (g_UI_ClickedWidgetId > 0)
+					img0(psnew1b, g_UI_PanelX[g_UI_ClickedPanelId][g_UI_ClickedWidgetId][UI_STATE_DEF], g_UI_PanelY[g_UI_ClickedPanelId][g_UI_ClickedWidgetId][UI_STATE_DEF], uihoveractionbuttonsurf);
+			} else if ((g_UI_ClickedPanelId == g_UI_TalkActionBar1PanelId) || (g_UI_ClickedPanelId == g_UI_TalkActionBar2PanelId) || (g_UI_ClickedPanelId == g_UI_TalkActionBar3PanelId)) {
 				if (hituiwidgeti < 0)
-					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
+					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
-				if (hituiwidgeti > 0)
-					img0(psnew1b, g_UI_PanelX[hituipaneli][hituiwidgeti][UI_STATE_DEF], g_UI_PanelY[hituipaneli][hituiwidgeti][UI_STATE_DEF], uihoveractiontalkbuttonsurf);
-			} else if ((hituipaneli == g_UI_PartyMemberBarPanelId)) {
+				if (g_UI_ClickedWidgetId > 0)
+					img0(psnew1b, g_UI_PanelX[g_UI_ClickedPanelId][g_UI_ClickedWidgetId][UI_STATE_DEF], g_UI_PanelY[g_UI_ClickedPanelId][g_UI_ClickedWidgetId][UI_STATE_DEF], uihoveractiontalkbuttonsurf);
+			} else if ((g_UI_ClickedPanelId == g_UI_PartyMemberBarPanelId)) {
 				if (hituiwidgeti < 0)
-					hituiwidgeti = gethituipanelwidgeti(g_MousePosX, g_MousePosY, hituipaneli);
+					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
-				if (hituiwidgeti > 0)
-					img0(psnew1b, g_UI_PanelX[hituipaneli][hituiwidgeti][UI_STATE_DEF], g_UI_PanelY[hituipaneli][hituiwidgeti][UI_STATE_DEF], uihoverpartymemberbuttonsurf);
+				if (g_UI_ClickedWidgetId > 0)
+					img0(psnew1b, g_UI_PanelX[g_UI_ClickedPanelId][g_UI_ClickedWidgetId][UI_STATE_DEF], g_UI_PanelY[g_UI_ClickedPanelId][g_UI_ClickedWidgetId][UI_STATE_DEF], uihoverpartymemberbuttonsurf);
 			}
 		}
 

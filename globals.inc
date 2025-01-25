@@ -29,7 +29,6 @@ FRM_TXT *ttxt;
 static unsigned int g_Static_EnhancedSideBarWidth = 260;
 static unsigned int g_Static_ScaledHeightModifier = 3 / 4;
 
-// rrr
 static unsigned int g_Static_EnhancedClientWindowWidth = 1024;
 static unsigned int g_Static_EnhancedClientWindowHeight = 768;
 
@@ -743,7 +742,10 @@ char windx2;
 char windy2;
 
 //light arrays
-unsigned long ls_off,ls_off_add,ls2_off,ls2_off_add;
+unsigned long ls_off;
+unsigned long ls_off_add;
+unsigned long ls2_off;
+unsigned long ls2_off_add;
 unsigned char *ls2_p;
 unsigned short lval[16][65536];
 unsigned char ls[1024*768];
@@ -775,7 +777,6 @@ unsigned char shiftnum_show;
 
 unsigned long idlst[1024];
 txt *idlst_name[1024];
-//surface *idlst_port[1024];
 unsigned char idlst_volume[1024];
 unsigned long idlst_namecolour[1024];
 
@@ -819,20 +820,9 @@ surface *ps320200;
 surface* psnew1;
 surface* psnew1b;
 
-// r999
-/*
-surface* panelsurf[PANEL_MAX];
-int panelx[PANEL_MAX], panely[PANEL_MAX], panelx2[PANEL_MAX], panely2[PANEL_MAX];
-long panelmx[PANEL_MAX], panelmy[PANEL_MAX];
-double panelscalex[PANEL_MAX], panelscaley[PANEL_MAX];
-
-FRAME panelnew[PANEL_MAX];
-int panelcount = 0;
-int panelsideui, panelactionbar1, panelactionbar2, panelactiontalkbar1, panelactiontalkbar2, panelminimap;
-*/
-
 // r999 new
-int hituipaneli, hituiwidgeti;
+int g_UI_ClickedPanelId;
+int g_UI_ClickedWidgetId;
 surface* uipanelimgsurf[UI_PANEL_IMG_MAX];
 surface* uiwidgetimgsurf[UI_PANELWIDGET_IMG_MAX][UI_WIDGETSTATE_IMG_MAX];
 float uiscalex, uiscaley;
@@ -885,7 +875,7 @@ surface* actionfoodfullbuttonsurf;
 int itemtoinv = 0;
 int checkstatusmessage = 0;
 int foodstatus = 0;
-int setdroplocation = 0;
+int g_SetDropLocation = 0;
 int droplocation = 1;
 int droploc = 0;
 int playeronscreenxn1, playeronscreenyn1;
@@ -958,12 +948,8 @@ surface* bt8[8];
 sound* SNDhit;
 
 
-
-
-//sf compatible information
-
-
-sfxtype sfx[256]; //local sf
+//special_effects compatible information
+sfxtype sfx[256]; //local special_effects
 
 unsigned char update[8]; //set to 1 if party frame needs updating
 unsigned char action; //active action key
@@ -1256,10 +1242,17 @@ unsigned long npci[256];
 unsigned char *npcinf;
 npcbin_i *npcbin;
 
-unsigned long sfi[256][256]; //pointer to first sf
-sfxtype sf[65536]; //clear every cycle
+/**
+ * \brief Array of pointers to the first special_effects (special function) for each index.
+ *
+ * This array holds pointers to the first special function (special_effects) for each index.
+ * The first dimension represents the index, and the second dimension represents
+ * the specific special_effects within that index.
+ */
+unsigned long special_effects_indices[256][256]; //pointer to first special_effects
+sfxtype special_effects[65536]; //clear every cycle
 unsigned long sf_playerid[65536];//only valid for text messages where top bit of port is set
-long sfn; //last sf
+long prev_special_effect; //last special_effects
 unsigned long sfx_playerid[256];
 
 unsigned char btu6[1024][1024];

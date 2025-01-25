@@ -112,10 +112,10 @@ extern unsigned long npci[256];
 extern unsigned char *npcinf;
 extern npcbin_i *npcbin;
 
-extern unsigned long sfi[256][256]; //pointer to first sf
-extern sfxtype sf[65536]; //clear every cycle
+extern unsigned long special_effects_indices[256][256]; //pointer to first special_effects
+extern sfxtype special_effects[65536]; //clear every cycle
 extern unsigned long sf_playerid[65536];//only valid for text messages where top bit of port is set
-extern long sfn; //last sf
+extern long prev_special_effect; //last special_effects
 extern unsigned long sfx_playerid[256];
 
 extern unsigned char btu6[1024][1024];

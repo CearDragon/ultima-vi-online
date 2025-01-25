@@ -3689,17 +3689,27 @@ bool OBJcheckbolt(unsigned short x, unsigned short y, unsigned short x2, unsigne
     return FALSE;
 }
 
+/**
+ * \brief Creates a new entry in the spatial hash table.
+ *
+ * This function creates a new entry in the spatial hash table based on the given coordinates.
+ * It increments the global counter `prev_special_effect` and updates the hash table accordingly.
+ *
+ * \param x The x-coordinate.
+ * \param y The y-coordinate.
+ * \return The index of the new entry.
+ */
 unsigned long SFnew(unsigned short x, unsigned short y) {
-    if (sfi[y >> 3][x >> 3]) {
-        sfn++;
-        sf[sfn].next = sfi[y >> 3][x >> 3];
-        sfi[y >> 3][x >> 3] = sfn;
+    if (special_effects_indices[y >> 3][x >> 3]) {
+        prev_special_effect++;
+        special_effects[prev_special_effect].next = special_effects_indices[y >> 3][x >> 3];
+        special_effects_indices[y >> 3][x >> 3] = prev_special_effect;
     } else {
-        sfn++;
-        sfi[y >> 3][x >> 3] = sfn;
-        sf[sfn].next = 0;
+        prev_special_effect++;
+        special_effects_indices[y >> 3][x >> 3] = prev_special_effect;
+        special_effects[prev_special_effect].next = 0;
     }
-    return sfn;
+    return prev_special_effect;
 }
 
 unsigned long WTfind(object *obj) {

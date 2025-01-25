@@ -43,7 +43,7 @@ struct sfxtype {
         float wait; //wait time or display time remaining
         unsigned char wait2[4];
     };
-    unsigned long next; //next sf
+    unsigned long next; //next special_effects
 };
 
 struct object {
