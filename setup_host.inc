@@ -275,4 +275,5 @@ close(tfh);
 house();
 #include "host_setup.h"
 
+RunFixes();
 

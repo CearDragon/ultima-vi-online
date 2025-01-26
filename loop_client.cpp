@@ -316,11 +316,11 @@ if (smallwindow) {
 			//g_UI_ClickedWidgetId = -1;
 
 			// r999 new only process left mouse clicks if it was not previously canceled
-			if ((mbclick & 1) && (hituipaneli < -4)) {
+			if ((mbclick & 1) && (g_UI_ClickedPanelId < -4)) {
 				g_UI_ClickedPanelId = gethituipaneli(g_MousePosX, g_MousePosY);
 				//g_UI_ClickedWidgetId = -1;
 
-				if (hituipaneli < 0)
+				if (g_UI_ClickedPanelId < 0)
 					actionreset = 1;
 			}
 
@@ -947,7 +947,7 @@ if (smallwindow && windowsizecyclenum == 1) {
 		}
 	}
 	else {
-		if (hituipaneli < -4)
+		if (g_UI_ClickedPanelId < -4)
 			if (testhituipanel(g_MousePosX, g_MousePosY, g_UI_PartyMemberPanelId))
 				g_UI_ClickedPanelId = g_UI_PartyMemberPanelId;
 
@@ -3427,13 +3427,13 @@ inpf_scroll_failed:
         tnpc=(npc*)tplay->party[0]->more;
         txtsetshort(t,tnpc->port);
         txtset(t5,tnpc->name); txtadd(t5,":");
-        txtaddcolouredname(t4,t5,tplay);
+        txtAddColorToName(t4,t5,tplay);
         txtaddchar(t,t4->l);
         txtadd(t,t4);
       }else{
         txtsetshort(t,portlast);
         txtset(t5,namelast); txtadd(t5,":");
-        txtaddcolouredname(t4,t5,tplay);
+        txtAddColorToName(t4,t5,tplay);
         txtaddchar(t,t4->l);
         txtadd(t,t4);
       }
@@ -5277,7 +5277,7 @@ scene_update_message:
 
         x=tplayer->x; y=tplayer->y;
 
-        getscreenoffset(x,y,&tpx,&tpy);
+        getScreenOffset(x,y,&tpx,&tpy);
 
 
         ctpx2=tplayer->x; ctpy2=tplayer->y;
@@ -6358,7 +6358,7 @@ CLIENT_donemess:
     if (moonlight==4) memcpy(&ls,&ls_moon4,1024*768);
 
     //calculate tpx,tpy from current x,y
-    getscreenoffset(tplayer->x,tplayer->y,&tpx,&tpy);
+    getScreenOffset(tplayer->x,tplayer->y,&tpx,&tpy);
 
 
 
@@ -10815,23 +10815,23 @@ diskip:
 
 		// r999 hover
 		if (uihover) {
-			if (hituipaneli < -4)
+			if (g_UI_ClickedPanelId < -4)
 				g_UI_ClickedPanelId = gethituipaneli(g_MousePosX, g_MousePosY);
 
 			if ((g_UI_ClickedPanelId == g_UI_ActionBarTopPanelId) || (g_UI_ClickedPanelId == g_UI_ActionBarBottomPanelId) || (g_UI_ClickedPanelId == g_UI_OptionBarPanelId)) {
-				if (hituiwidgeti < 0)
+				if (g_UI_ClickedWidgetId < 0)
 					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
 				if (g_UI_ClickedWidgetId > 0)
 					img0(psnew1b, g_UI_PanelX[g_UI_ClickedPanelId][g_UI_ClickedWidgetId][UI_STATE_DEF], g_UI_PanelY[g_UI_ClickedPanelId][g_UI_ClickedWidgetId][UI_STATE_DEF], uihoveractionbuttonsurf);
 			} else if ((g_UI_ClickedPanelId == g_UI_TalkActionBar1PanelId) || (g_UI_ClickedPanelId == g_UI_TalkActionBar2PanelId) || (g_UI_ClickedPanelId == g_UI_TalkActionBar3PanelId)) {
-				if (hituiwidgeti < 0)
+				if (g_UI_ClickedWidgetId < 0)
 					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
 				if (g_UI_ClickedWidgetId > 0)
 					img0(psnew1b, g_UI_PanelX[g_UI_ClickedPanelId][g_UI_ClickedWidgetId][UI_STATE_DEF], g_UI_PanelY[g_UI_ClickedPanelId][g_UI_ClickedWidgetId][UI_STATE_DEF], uihoveractiontalkbuttonsurf);
 			} else if ((g_UI_ClickedPanelId == g_UI_PartyMemberBarPanelId)) {
-				if (hituiwidgeti < 0)
+				if (g_UI_ClickedWidgetId < 0)
 					g_UI_ClickedWidgetId = gethituipanelwidgeti(g_MousePosX, g_MousePosY, g_UI_ClickedPanelId);
 
 				if (g_UI_ClickedWidgetId > 0)

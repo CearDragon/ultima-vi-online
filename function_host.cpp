@@ -4983,8 +4983,7 @@ object *npc_to_obj(npc *tnpc, player *tplayer) { // find the object related to t
     return NULL;
 }
 
-unsigned long
-randomchestlocation(bool tmap) { //randomizes overland random treasurechest location and treasuremap chest locations
+unsigned long randomchestlocation(bool tmap) { //randomizes overland random treasurechest location and treasur emap chest locations
     static short x3, x2, y2;
     static long x8, y8;
     x3 = 1;
@@ -5013,6 +5012,7 @@ randomchestlocation(bool tmap) { //randomizes overland random treasurechest loca
     }
     x8 = 32 + x2 * 64 + (unsigned short) (rnd * 64);
     y8 = 26 + y2 * 64 + (unsigned short) (rnd * 64);
+
     //two different while loop checks for treasure map and the overland random treasure chest
     while ((!tmap && (bt[y8][x8] & 1024) == 0) || (tmap && (bt[y8][x8] & 1024) == 0) ||
            !(((bt[y8][x8] & 1023) == 1) || (((bt[y8][x8] & 1023) >= 52) && ((bt[y8][x8] & 1023) < 64)) ||
@@ -5022,14 +5022,6 @@ randomchestlocation(bool tmap) { //randomizes overland random treasurechest loca
         y8 = 26 + y2 * 64 + (unsigned short) (rnd * 64);
     }
 
-    /*x8=408+(unsigned short)(rnd*57)-28;
-  y8=535+(unsigned short)(rnd*45)-22;
-  while ((bt[y8][x8]&1024)==0) {
-  x8=408+(unsigned short)(rnd*57)-28;
-  y8=535+(unsigned short)(rnd*45)-22;
-  }*/
-    //x8=349;
-    //y8=349;
     x8 = x8 + y8 * 1024;
     return (x8);
 }

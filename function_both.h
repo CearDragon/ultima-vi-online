@@ -27,7 +27,7 @@ DWORD WINAPI sockets_receive(LPVOID i);
 DWORD WINAPI sockets_disconnect(LPVOID i);
 
 bool NET_send(void *s,unsigned long d,txt *t);
-void getscreenoffset(long x,long y,long *mapx,long *mapy);
+void getScreenOffset(long x, long y, long *mapx, long *mapy);
 
 //getnbits returns the number of bits required to store n combinations
 //if combinations is 1, getnbits returns 0 (only 1 combination requires 0 bits represent)
@@ -43,8 +43,8 @@ void getscreenoffset(long x,long y,long *mapx,long *mapy);
 #define getnbits(x) ((unsigned char) ceil(x?((logf((float)x)/logf(2.0))):0))
 // the way this is used, this makes sense. FIXME still ugly.  
 
-unsigned char objgetdir(unsigned short type);
-void txtaddcolouredname(txt *t,txt *name,player *p);
+unsigned char getObjectDirection(unsigned short type);
+void txtAddColorToName(txt *t, txt *name, player *p);
 
 
 void SHA2(txt* t,txt* t2);

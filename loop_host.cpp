@@ -1,5 +1,17 @@
 #include "define_both.h" /* luteijn: won't really be included again, but helps with auto-completion of variable names. */
 
+void Run() {
+    if (!NEThost) {
+        // TODO: cocoa - put a message on screen that this build is not host
+        abort();
+    }
+
+    btime2+=et/150.0f; //non-rolled over btime!
+    static long x=btime2/24;
+    btime=btime2-(float)x*24.0f;
+    x%=7; bday=x+1;
+}
+
 if (NEThost){ //host
   //U6O_ERRORTAG
 
@@ -13,20 +25,6 @@ if (NEThost){ //host
     lastsecond=x; framerate=framecount; framecount=0;
   }
   framecount++;
-
-  bool hasRun = false;
-
-  if (!hasRun) {
-      for (int i = 0; i < 1024; ++i) {
-          for (int j = 0; j < 2048; ++j) {
-              _cprintf("%d  %d %d\n", i, j, bt[i][j]);
-              _cprintf("%d  %d %d\n", i, j, bt[i][j]);
-          }
-      }
-
-      hasRun = true;
-  }
-
 
   // Adjust economy values
   for (i=0;i<=1023;i++){ for (i2=0;i2<=3;i2++){
@@ -1400,7 +1398,7 @@ addupdateobjs_wizardeye:
             if (x||y){ //must not be at 0,0, if so it's not on map
 
               // vjYt8hQWXa
-              getscreenoffset(x,y,&tpx,&tpy);
+              getScreenOffset(x,y,&tpx,&tpy);
 
               for (y=-8;y<=(23+8);y++){ for (x=-8;x<=(31+8);x++){
                 if (((x+tpx)<0)||((y+tpy)<0)||((x+tpx)>2047)||((y+tpy)>1023))
@@ -1506,7 +1504,7 @@ nextobj2:           if (myobj!=NULL){
           }
 
           // QCN2B1O77L
-          getscreenoffset(x,y,&tpx,&tpy);
+          getScreenOffset(x,y,&tpx,&tpy);
 
           //does screen+1 fit inside current buffer?
           x3=tpx-1; y3=tpy-1; x4=tpx+32; y4=tpy+24;//screen+1
@@ -1900,7 +1898,7 @@ mvobjskip: if (myobj){
             mv_object[i]=myobj;
             mv_x[i]=tpx+x-1; mv_y[i]=tpy+y-1;
             mv_type[i]=myobj->type&1023;
-            mv_dir[i]=objgetdir(myobj->type);
+            mv_dir[i]=getObjectDirection(myobj->type);
             mv_frame[i]=OBJGETDIR_FRAME;
             mv_flags[i]=0; mv_playerid[i]=0; mv_hpmp[i]=0; mv_ktar[i]=0; mv_more[i]=0;
             if (mv_type[i]==366) mv_frame[i]=myobj->type>>10;//EXCEPTION: tanglevine tendril
@@ -2328,7 +2326,7 @@ mover_add_special:
           }
 
           // iFacKPFuzL
-          getscreenoffset(x,y,&tpx,&tpy);
+          getScreenOffset(x,y,&tpx,&tpy);
 
           tpx>>=3; tpy>>=3;
           for (y=tpy;y<=tpy+3;y++){
@@ -4072,7 +4070,7 @@ foundclient:
         inouttxt=txtnew();
         txtset(inouttxt,"");
         txtset(t2,tnpc->name); txtadd(t2," is leaving Britannia.");
-        txtaddcolouredname(inouttxt,t2,playerlist[tpl]);
+        txtAddColorToName(inouttxt,t2,playerlist[tpl]);
         special_effects[i3].p=inouttxt;
       }//party[0]
       goto doneclmess;
@@ -4133,7 +4131,8 @@ foundclient:
           txtaddshort(t2,tnpc->port);
 
           txtset(t4,tnpc->name); txtadd(t4,":");
-          txtset(t3,""); txtaddcolouredname(t3,t4,playerlist[tpl]);
+          txtset(t3,"");
+          txtAddColorToName(t3,t4,playerlist[tpl]);
           txtaddchar(t2,t3->l); txtadd(t2,t3);
 
           txtaddshort(t2,playerlist[tpl]->x); txtaddshort(t2,playerlist[tpl]->y);
@@ -4147,7 +4146,7 @@ foundclient:
 
             //x3=playerlist[z]->x-15; y3=playerlist[z]->y-11;
             //if (x3<0) x3=0; if (y3<0) y3=0; if (x3>2016) x3=2016; if (y3>1000) y3=1000;
-            getscreenoffset(playerlist[z]->x,playerlist[z]->y,&x3,&y3);
+            getScreenOffset(playerlist[z]->x,playerlist[z]->y,&x3,&y3);
 
             if ((x2>=x3)&&(x2<(x3+32))){ if ((y2>=y3)&&(y2<(y3+24))){
               if (playerlist[z]->mixer_volume){
@@ -4174,7 +4173,7 @@ foundclient:
       t->d2[0]=41;
       //(x2,y2)=top-left corner of requesting player's screen
       //x2=playerlist[tpl]->x-15; y2=playerlist[tpl]->y-11; if (x2<0) x2=0; if (y2<0) y2=0; if (x2>2016) x2=2016; if (y2>1000) y2=1000;
-      getscreenoffset(playerlist[tpl]->x,playerlist[tpl]->y,&x2,&y2);
+      getScreenOffset(playerlist[tpl]->x,playerlist[tpl]->y,&x2,&y2);
 
       for (z=0;z<=playerlist_last;z++){ if (z!=tpl){ if (playerlist[z]){ if (playerlist[z]->net){
         x3=playerlist[z]->x; y3=playerlist[z]->y;
@@ -5091,12 +5090,12 @@ dglobal3:
         txtset(inouttxt,"");
 
         if (me_message){
-          txtaddcolouredname(inouttxt,t2,playerlist[tpl]);
+          txtAddColorToName(inouttxt,t2,playerlist[tpl]);
           txtadd(inouttxt," ");
           txtadd(inouttxt,t);
         }else{
           txtadd(t2,":");
-          txtaddcolouredname(inouttxt,t2,playerlist[tpl]);
+          txtAddColorToName(inouttxt,t2,playerlist[tpl]);
           txtadd(inouttxt," \x022");
           txtadd(inouttxt,t);
           txtadd(inouttxt,"\x022");
@@ -5118,7 +5117,7 @@ dglobal3:
       if (myobj=(object*)playerlist[tpl]->talk_target->more){
         //check if target is onscreen
         //tpx=playerlist[tpl]->x-15; tpy=playerlist[tpl]->y-11; if (tpx<0) tpx=0; if (tpy<0) tpy=0; if (tpx>2016) tpx=2016; if (tpy>1000) tpy=1000;
-        getscreenoffset(playerlist[tpl]->x,playerlist[tpl]->y,&tpx,&tpy);
+        getScreenOffset(playerlist[tpl]->x,playerlist[tpl]->y,&tpx,&tpy);
 
         x=myobj->x; y=myobj->y;
         if ((x>=tpx)&&(y>=tpy)&&(x<=(tpx+31))&&(y<=(tpy+23))){
@@ -5145,7 +5144,7 @@ dglobal3:
 
 chat:
       //tpx=playerlist[tpl]->x-15; tpy=playerlist[tpl]->y-11; if (tpx<0) tpx=0; if (tpy<0) tpy=0; if (tpx>2016) tpx=2016; if (tpy>1000) tpy=1000;
-      getscreenoffset(playerlist[tpl]->x,playerlist[tpl]->y,&tpx,&tpy);
+      getScreenOffset(playerlist[tpl]->x,playerlist[tpl]->y,&tpx,&tpy);
 
       myobj=OBJfindlast(tpx+x,tpy+y); if (!myobj) myobj=OBJfindlastall(tpx+x,tpy+y);
       if (myobj){
@@ -5205,12 +5204,12 @@ talk_privatemessage:
                 txtset(t3,"");
 
                 if (me_message){
-                  txtaddcolouredname(t3,t4,playerlist[tpl]);
+                  txtAddColorToName(t3,t4,playerlist[tpl]);
                   txtadd(t3," ");
                   txtadd(t3,t);
                 }else{
                   txtadd(t4,":");
-                  txtaddcolouredname(t3,t4,playerlist[tpl]);
+                  txtAddColorToName(t3,t4,playerlist[tpl]);
                   txtadd(t3," \x022");
                   txtadd(t3,t);
                   txtadd(t3,"\x022");
@@ -11452,7 +11451,7 @@ resurrect_failed:
         //move selected party member
         myobj=tplayer->party[tplayer->selected_partymember];
         tnpc=(npc*)myobj->more;
-        getscreenoffset(myobj->x,myobj->y,&tpx,&tpy);
+        getScreenOffset(myobj->x,myobj->y,&tpx,&tpy);
 
         //cast spell
         if (tplayer->key&KEYmbclick){

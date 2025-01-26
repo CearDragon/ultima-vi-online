@@ -851,28 +851,28 @@ eggskip:;
 						myobj->more2/=4; if (myobj->more2==0) myobj->more2=1;
 					}
 				}
-				if (myobj->type==389) myobj->info|=256; //silver tablet
-				if (myobj->type==390) myobj->info|=256; //silver tablet
-				if (myobj->type==62) myobj->info|=256; //vortex cube <-quest item
-				if (myobj->type==406) myobj->info|=256; //dungeon1 map <-quest item
+				if (myobj->type==389) myobj->info|=OBJ_QUEST_ITEM; //silver tablet
+				if (myobj->type==390) myobj->info|=OBJ_QUEST_ITEM; //silver tablet
+				if (myobj->type==62) myobj->info|=OBJ_QUEST_ITEM; //vortex cube <-quest item
+				if (myobj->type==406) myobj->info|=OBJ_QUEST_ITEM; //dungeon1 map <-quest item
 				if ((myobj->type&1023)==73){
-					myobj->info|=256; //moonstone <-quest item
-					moongatex[myobj->type>>10]=x; moongatey[myobj->type>>10]=y-1;
-					moongate[myobj->type>>10][0]=OBJnew(); moongate[myobj->type>>10][0]->type=85+1024;
-					moongate[myobj->type>>10][1]=OBJnew(); moongate[myobj->type>>10][1]->type=85;
+					myobj->info|=OBJ_QUEST_ITEM; //moonstone <-quest item
+					moongatex[myobj->type>>10]=x;
+					moongatey[myobj->type>>10]=y-1;
+					moongate[myobj->type>>10][0]=OBJnew();
+					moongate[myobj->type>>10][0]->type=85+1024;
+					moongate[myobj->type>>10][1]=OBJnew();
+					moongate[myobj->type>>10][1]->type=85;
 				}
-				if ((myobj->type>=242)&&(myobj->type<=249)) myobj->info|=256; //rune <-quest item
-				if (myobj->type==395) myobj->info|=256; //broken gargoyle lens <-quest item
+				if ((myobj->type>=242)&&(myobj->type<=249))
+				    myobj->info|=OBJ_QUEST_ITEM; //rune <-quest item
+				if (myobj->type==395)
+				    myobj->info|=OBJ_QUEST_ITEM; //broken gargoyle lens <-quest item
 
 
-				if ((myobj->type&1023)==182) myobj->info|=(15<<9); //beehive!
+				if ((myobj->type&1023)==182)
+				    myobj->info|=(15<<9); //beehive!
 
-				//if (myobj->type==(98+2048)){  //locked chest
-				//txtnumint(t5,ol[i].qty);
-				//MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
-				//myobj->more2=ol[i].tag; //more2<-
-				//x2=1; //locked
-				//}
 
 				if ((myobj->type&1023)==332){ //sign
 					myobj->more2=ol[i].tag; //more2<-
