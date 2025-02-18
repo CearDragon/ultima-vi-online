@@ -404,7 +404,7 @@ unsigned char getObjectDirection(unsigned short type) {
             direction = (type >> 13) & 3;
             break;
         default:
-            switch (obji[sprlnk[baseType]].v4) {
+            switch (objectInfo[sprlnk[baseType]].v4) {
                 case 2: // rat
                     OBJGETDIR_FRAME = (type >> 10) & 1;
                     direction = (type >> 11) & 3;

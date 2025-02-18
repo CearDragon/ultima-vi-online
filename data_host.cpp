@@ -1,6 +1,6 @@
 #include "data_host.h" /*SAVESLOTLAST etc */
 
-void data_host_init(void) {
+void data_host_init() {
   save_dump=0;
   save_version=0;
   login_dead_callback=0;
@@ -69,5 +69,6 @@ void data_host_init(void) {
   ol_tag_prev=0;
 
 }
+
 
 /* */

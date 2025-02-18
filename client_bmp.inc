@@ -21,22 +21,6 @@ PORTRAIT_UNAVAILABLE=newsurf(1,1,SURF_SYSMEM16); PORTRAIT_UNAVAILABLE->o2[0]=0;
 bt32=newsurf(32,32,SURF_SYSMEM16);
 bt16=newsurf(16,16,SURF_SYSMEM16);
 
-// r666 loadimage actionbar.bmp
-/*
-actionbarsurf[0]=loadimage(".\\dr\\actionbar1.bmp",SURF_SYSMEM16);
-actionbarsurf[1]=loadimage(".\\dr\\actionbar2.bmp",SURF_SYSMEM16);
-actiontalksurf[0]=loadimage(".\\dr\\actiontalk1.bmp",SURF_SYSMEM16);
-actiontalksurf[1]=loadimage(".\\dr\\actiontalk2.bmp",SURF_SYSMEM16);
-
-actionbuttonsurf[ACTIONBUTTON_DROP][0]=loadimage(".\\dr\\actiondropsetbutton.bmp",SURF_SYSMEM16);
-actionbuttonsurf[ACTIONBUTTON_DROP][1]=loadimage(".\\dr\\actiondropupbutton.bmp",SURF_SYSMEM16);
-actionbuttonsurf[ACTIONBUTTON_DROP][2]=loadimage(".\\dr\\actiondropdownbutton.bmp",SURF_SYSMEM16);
-actionbuttonsurf[ACTIONBUTTON_DROP][3]=loadimage(".\\dr\\actiondropleftbutton.bmp",SURF_SYSMEM16);
-actionbuttonsurf[ACTIONBUTTON_DROP][4]=loadimage(".\\dr\\actiondroprightbutton.bmp",SURF_SYSMEM16);
-actionbuttonsurf[ACTIONBUTTON_FOOD][1]=loadimage(".\\dr\\actionfoodhungrybutton.bmp",SURF_SYSMEM16);
-actionbuttonsurf[ACTIONBUTTON_FOOD][2]=loadimage(".\\dr\\actionfoodfullbutton.bmp",SURF_SYSMEM16);
-*/
-
 // r999 new
 uipanelimgsurf[UI_IMGI_ACTIONBAR+1] = loadimage(".\\dr\\n1actionbar1.bmp",SURF_SYSMEM16);
 uipanelimgsurf[UI_IMGI_ACTIONBAR+2] = loadimage(".\\dr\\n1actionbar2.bmp",SURF_SYSMEM16);
@@ -378,8 +362,12 @@ horsemask2dress=loadimage(".\\dr\\horseml2.bmp",SURF_SYSMEM16);
 horsemaskdressb=loadimage(".\\dr\\horsebu2.bmp",SURF_SYSMEM16);
 horsemask2dressb=loadimage(".\\dr\\horsebl2.bmp",SURF_SYSMEM16);
 
-tfh=open(".\\dr\\sc480a2.raw"); get(tfh,&stormcloak[0][0],lof(tfh)); close(tfh);
-tfh=open(".\\dr\\sc480b2.raw"); get(tfh,&stormcloak[7][0],lof(tfh)); close(tfh);
+tfh=open(".\\dr\\sc480a2.raw");
+get(tfh,&stormcloak[0][0],fileLen(tfh));
+close(tfh);
+tfh=open(".\\dr\\sc480b2.raw");
+get(tfh,&stormcloak[7][0],fileLen(tfh));
+close(tfh);
 for (i=1;i<=6;i++){
 for (i2=0;i2<230400;i2++){
 stormcloak[i][i2]=((unsigned long)stormcloak[0][i2]*(7-i)+(unsigned long)stormcloak[7][i2]*i)/7;

@@ -363,7 +363,7 @@ txt *li2_t;
 WSAData wsaData;
 struct sockaddr_in server;
 bitstream *currentbitstream;
-objectinfo obji[4096];
+objectinfo objectInfo[4096];
 unsigned long oldtime;
 unsigned long newtime;
 float et;
@@ -1261,7 +1261,7 @@ unsigned char btu60[256][256];
 unsigned short npcobj[256];
 
 
-objentry ol[32768]; //modify to allow for more complex base maps
+objentry objectList[32768]; //modify to allow for more complex base maps
 long oln;
 
 unsigned char btflags[256];

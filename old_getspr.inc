@@ -9,18 +9,18 @@ void getspr(object* obj){ //loads bt32 with a spr (uses keyframe) FIXME: candida
     gs_i=sprlnk[354]-1;
   }
 
-  if (obji[sprlnk[obj->type&1023]].v4==6){ //drake
+  if (objectInfo[sprlnk[obj->type&1023]].v4==6){ //drake
 
     gs_x=((obj->type>>10)&(7-1))+(keyframe>>2);
     gs_i=sprlnk[obj->type&1023]-1+gs_x;
     goto sprnopal;
   }
 
-  if (obji[sprlnk[obj->type&1023]].v4==3){ //cycling objects
+  if (objectInfo[sprlnk[obj->type&1023]].v4==3){ //cycling objects
     gs_i=sprlnk[obj->type&1023]+(keyframe>>1)-1;
   }
 
-  if (obji[sprlnk[obj->type&1023]].v4==11){ //cycling objects
+  if (objectInfo[sprlnk[obj->type&1023]].v4==11){ //cycling objects
     gs_i=sprlnk[obj->type&1023]+(obj->type>>10)+(keyframe>>1)-1;
   }
 
@@ -51,7 +51,7 @@ void getspr(object* obj){ //loads bt32 with a spr (uses keyframe) FIXME: candida
     if (keyframe==7) gs_i+=0;
   }
 
-  if (obji[sprlnk[obj->type&1023]].v4==9){ //dragon wings
+  if (objectInfo[sprlnk[obj->type&1023]].v4==9){ //dragon wings
     gs_x=obj->type>>13;
     if ((gs_x>=3)||(gs_x==0)){
       gs_x=obj->type;

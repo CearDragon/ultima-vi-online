@@ -6,7 +6,7 @@ void data_both_init(void) {
   et=0.0f;
   ett=0.0f;
   file *log2=NULL;
-  U6O_SIGNATURE=85+54*256+79*65536+50*16777216;
+  U6O_SIGNATURE=85+54*256+79*65536+50*16777216; // 85+54*256+79*65536+50*16777216 = "U6O2"?? = 1432778637
   NEThost=0;
 
   socketclientlast=0;
@@ -64,4 +64,3 @@ void data_both_init(void) {
   framerate=0;
   framecount=0; //framerate frames/sec
 }
-

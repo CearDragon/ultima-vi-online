@@ -1,11 +1,11 @@
 #include "function_host.h"
 #include "function_both.h" /* LOGadd etc */
-#include <math.h> /* fabs etc. */
+#include "cmath"
+#include "random"
 
 #pragma warning(disable: 4018 4244)
 
 void function_host_init(void) { /* this groups all the initialisation stuff that was floating around the .h file */
-
     //sockets_accept sets new_socket to new sockets id and waits till user sets
     //new_socket=INVALID_SOCKET before accepting new sockets
     //shared global variables
@@ -16,6 +16,7 @@ void function_host_init(void) { /* this groups all the initialisation stuff that
     tmp_new_socket_ip = 0;
     hsockets_accept = NULL;
     idsockets_accept = NULL;
+
 
     AUTOPICKUPfirst = 0;
     AUTOPICKUPnextfree = 0;
@@ -126,7 +127,7 @@ DWORD WINAPI sockets_accept(LPVOID null_value) {
     tfh = open2("banip.txt", OF_READWRITE | OF_SHARE_COMPAT);
     if (tfh->h != HFILE_ERROR) {
         banip_nextip:
-        if (seek(tfh) < lof(tfh)) {
+        if (seek(tfh) < fileLen(tfh)) {
             txtfilein(t, tfh);
             if (t->l) {
                 txtset(t2, t);
@@ -338,7 +339,7 @@ void free(npc *tnpc) {
     }
     OBJlist_last = NULL;
     for (y6 = 0; y6 < x5; y6++) {
-        if ((OBJlist_list[y6]->type & 1023) ==
+        if ((OBJlist_list[y6]->Type()) ==
             OBJ_HORSE_PAPERS) { /* if item being relesed is horse paper, remove the horse also */
             myobj = (object *) ((creature *) ((object *) OBJlist_list[y6]->more)->more)->more;
             OBJremove(myobj);
@@ -346,9 +347,9 @@ void free(npc *tnpc) {
             free((creature *) ((object *) OBJlist_list[y6]->more)->more);
             OBJremove((object *) OBJlist_list[y6]->more);
             OBJrelease((object *) OBJlist_list[y6]->more);
-        } else if ((OBJlist_list[y6]->type & 1023) == OBJ_SHIP_DEED) { /* remove the ship */
+        } else if ((OBJlist_list[y6]->Type()) == OBJ_SHIP_DEED) { /* remove the ship */
             myobj = (object *) OBJlist_list[y6]->more;
-            if ((myobj->type & 1023) == OBJ_SHIP) { //ship
+            if ((myobj->Type()) == OBJ_SHIP) { //ship
                 static mlobj *mmyobj;
                 if (myobj->info & 2) { /* If on board the ship */
                     tnpc = (npc *) myobj->more;
@@ -387,49 +388,40 @@ void OBJcheckflags(unsigned long x, unsigned long y) {
     //32=view OK (can be seen past)
     OBJcheckflags_flags = btflags[bt[y][x] & 1023]; //reset using basetile flags
     OBJcheckflags_flags += 32; //look ok
-    if (((bt[y][x] & 1023) >= 140) && ((bt[y][x] & 1023) < 188)) OBJcheckflags_flags &= (255 - 32); //look NOT ok wall
-    if (((bt[y][x] & 1023) >= 240) && ((bt[y][x] & 1023) < 252)) OBJcheckflags_flags &= (255 - 32); //look NOT ok cave
-    if (((bt[y][x] & 1023) >= 192) && ((bt[y][x] & 1023) < 208)) OBJcheckflags_flags &= (255 - 32); //look NOT ok win
 
+    if (((bt[y][x] & 1023) >= 140 && (bt[y][x] & 1023) < 188) || // wall
+        ((bt[y][x] & 1023) >= 240 && (bt[y][x] & 1023) < 252) || // cave
+        ((bt[y][x] & 1023) >= 192 && (bt[y][x] & 1023) < 208)) { // win
+        OBJcheckflags_flags &= ~32; // look NOT ok
+    }
 
     OBJtmp = od[y][x];
     OBJcf1:
-    if (OBJtmp != NULL) { //object exists
-        OBJcheckflags_td = objpassflags[(OBJtmp->type >> 10) + sprlnk[OBJtmp->type & 1023]];
+    if (OBJtmp != nullptr) { //object exists
+        OBJcheckflags_td = objpassflags[(OBJtmp->type >> 10) + sprlnk[OBJtmp->Type()]];
 
 
         if ((OBJcheckflags_td & 1) == 0) {
             OBJcheckflags_flags = OBJcheckflags_flags & (255 - 1 - 2);
         } //remove bottom bit from byte value
-        //*if item can be picked up include the NPCpassable flag else remove it (todo)
+        //*if item can be picked up include the NPC passable flag else remove it (todo)
         //skiff and ship can go on top of chests and probably some other items too needs fixing.
         if (OBJcheckflags_td & 2) {
             OBJcheckflags_flags = OBJcheckflags_flags | 1 | 2;
             if (OBJcheckflags_flags & 4) OBJcheckflags_flags -= 4;
         } //override
 
-
-
         if (OBJcheckflags_td & 4) {
             OBJcheckflags_flags = OBJcheckflags_flags & (255 - 8);
             //if a bolt can't pass through it may affect our vision too
             //is it a door?
-            if (((OBJtmp->type & 1023) >= 297) && ((OBJtmp->type & 1023) <= 300)) OBJcheckflags_flags &= (255 - 32);
+            if (((OBJtmp->Type()) >= 297) && ((OBJtmp->Type()) <= 300)) OBJcheckflags_flags &= (255 - 32);
 
-            if ((OBJtmp->type & 1023) == 334) {
+            if ((OBJtmp->Type()) == 334) {
                 if ((OBJtmp->type & 1024) == 0) OBJcheckflags_flags &= (255 - 32); //secret door
             }
-            if ((OBJtmp->type & 1023) == 213) OBJcheckflags_flags &= (255 - 32); //mousehole
-
-
+            if ((OBJtmp->Type()) == 213) OBJcheckflags_flags &= (255 - 32); //mouse hole
         } //remove bolt passable flag
-
-        //make back of horse passable
-        //if ((OBJtmp->type&1023)==431){
-        //if ((OBJtmp->type>>10)>=8){
-        //OBJcheckflags_flags|=16;
-        //}
-        //}
 
         if (OBJcheckflags_td & 8) { //NPC passable
             OBJcheckflags_flags |= 16;
@@ -444,7 +436,6 @@ void OBJcheckflags(unsigned long x, unsigned long y) {
             }
         }
 
-
         OBJtmp = (object *) OBJtmp->next;
         goto OBJcf1;
     }
@@ -453,10 +444,10 @@ void OBJcheckflags(unsigned long x, unsigned long y) {
 }
 
 unsigned char OBJadd(unsigned long x, unsigned long y, object *obj) {
-    if (od[y][x] == NULL) {
+    if (od[y][x] == nullptr) {
         od[y][x] = obj;
-        obj->prev = NULL;
-        obj->next = NULL;
+        obj->prev = nullptr;
+        obj->next = nullptr;
         obj->x = x;
         obj->y = y;
     } else {
@@ -464,16 +455,15 @@ unsigned char OBJadd(unsigned long x, unsigned long y, object *obj) {
         OBJtmp = od[y][x];
         OBJadd_j1:
 
-        //if ((objfloatflags[(OBJtmp->type>>10)+sprlnk[OBJtmp->type&1023]])&&((objfloatflags[(obj->type>>10)+sprlnk[obj->type&1023]] )==0)){
-        if (objfloatflags[(OBJtmp->type >> 10) + sprlnk[OBJtmp->type & 1023]]) {
+        if (objfloatflags[(OBJtmp->type >> 10) + sprlnk[OBJtmp->Type()]]) {
 
             OBJtmp2 = (object *) OBJtmp->prev;
-            if (OBJtmp2 != NULL) {
+            if (OBJtmp2 != nullptr) {
                 OBJtmp2->next = obj;
                 obj->prev = OBJtmp2;
             } else {
                 od[y][x] = obj;
-                obj->prev = NULL;
+                obj->prev = nullptr;
             }
             obj->next = OBJtmp;
             OBJtmp->prev = obj;
@@ -481,14 +471,14 @@ unsigned char OBJadd(unsigned long x, unsigned long y, object *obj) {
             obj->y = y;
             goto OBJaddflt1;
         }
-        if (OBJtmp->next != NULL) {
+        if (OBJtmp->next != nullptr) {
             OBJtmp = (object *) OBJtmp->next;
             goto OBJadd_j1;
         }
 
         OBJtmp->next = obj;
         obj->prev = OBJtmp;
-        obj->next = NULL;
+        obj->next = nullptr;
         obj->x = x;
         obj->y = y;
     }
@@ -500,7 +490,7 @@ unsigned char OBJadd(unsigned long x, unsigned long y, object *obj) {
 
 
 void OBJaddtocontainer(object *container, object *objecttoadd) {
-    if (obji[sprlnk[objecttoadd->type & 1023]].weight == NULL) {
+    if (objectInfo[sprlnk[objecttoadd->Type()]].weight == NULL) {
         if (U6O_DEBUG) {
             static txt *errortext = txtnew();
             MessageBox(NULL, "ERROR CORRECTION: NULL WEIGHT ITEM TO PUT INTO CONTAINER PLACED ABOVE CONTAINER!",
@@ -602,7 +592,7 @@ void addu6monsterdropitems(object *crtobj) {
 
     static unsigned short type;
     static unsigned char wepn, armn, invn, chestn;
-    type = crtobj->type & 1023;
+    type = crtobj->Type();
     crt = (creature *) crtobj->more;
     wepn = 0;
     armn = 0;
@@ -1087,7 +1077,7 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
     MOVERNEW_ERROR = 0;
     if (!tclass_mover[type]) {
         MOVERNEW_ERROR = 1;
-        if (obji[sprlnk[type & 1023]].v4) {
+        if (objectInfo[sprlnk[type & 1023]].v4) {
             MOVERNEW_ERROR = 2;
         }
     }
@@ -1112,25 +1102,25 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
     crt->crt_struct = TRUE;
     MOVERNEW_OBJECT->info |= 4; //<-crt
 
-    crt->hp = (obji[sprlnk[MOVERNEW_OBJECT->type & 1023]].v8 >> 8) * 4;
+    crt->hp = (objectInfo[sprlnk[MOVERNEW_OBJECT->Type()]].v8 >> 8) * 4;
     crt->mp = rnd * 9;
 
     allegiance = 1;
     //friendly
-    if ((MOVERNEW_OBJECT->type & 1023) == 382) { //guard
+    if ((MOVERNEW_OBJECT->Type()) == 382) { //guard
         if (x < 1024) allegiance = 4; //not underground
     }
     //passive
-    if ((MOVERNEW_OBJECT->type & 1023) == 373) allegiance = 0; //wisp
-    if ((MOVERNEW_OBJECT->type & 1023) == 430) allegiance = 0; //horse
-    if ((MOVERNEW_OBJECT->type & 1023) == 428) allegiance = 0; //cow
-    if ((MOVERNEW_OBJECT->type & 1023) == 356) allegiance = 0; //bird
-    if ((MOVERNEW_OBJECT->type & 1023) == 348) allegiance = 0; //sheep
-    if ((MOVERNEW_OBJECT->type & 1023) == 350) allegiance = 0; //deer
-    if ((MOVERNEW_OBJECT->type & 1023) == 388) { //cat
+    if ((MOVERNEW_OBJECT->Type()) == 373) allegiance = 0; //wisp
+    if ((MOVERNEW_OBJECT->Type()) == 430) allegiance = 0; //horse
+    if ((MOVERNEW_OBJECT->Type()) == 428) allegiance = 0; //cow
+    if ((MOVERNEW_OBJECT->Type()) == 356) allegiance = 0; //bird
+    if ((MOVERNEW_OBJECT->Type()) == 348) allegiance = 0; //sheep
+    if ((MOVERNEW_OBJECT->Type()) == 350) allegiance = 0; //deer
+    if ((MOVERNEW_OBJECT->Type()) == 388) { //cat
         if ((x >= 400) && (y >= 576) && (x <= 415) && (y <= 591)) allegiance = 0; //Dr Cat's cats
     }
-    if ((MOVERNEW_OBJECT->type & 1023) == 352) { //ghost
+    if ((MOVERNEW_OBJECT->Type()) == 352) { //ghost
         if ((x == 139) && (y == 196)) allegiance = 0; //abby ghosts
     }
 
@@ -1147,7 +1137,7 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
     if (crt->al == 1) {//aggressive
 
 
-        //x2=obji[sprlnk[MOVERNEW_OBJECT->type&1023]].v5>>2;
+        //x2=objectInfo[sprlnk[MOVERNEW_OBJECT->type&1023]].v5>>2;
         //x2=rnd*(x2+1);
         //if (x2){
         //invobj=OBJnew(); invobj->type=88; invobj->more2=x2;//add x2 gold coins
@@ -1158,7 +1148,7 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
         //integrate XP based gold
         x2 = rnd * 8;
         if (x2 == 0) {
-            x2 = obji[sprlnk[MOVERNEW_OBJECT->type & 1023]].v5;
+            x2 = objectInfo[sprlnk[MOVERNEW_OBJECT->Type()]].v5;
             x2 = rnd * (x2 + 1);
             if (x2) {
                 if (myobj = (object *) invbag->more) {
@@ -1178,15 +1168,15 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
                 invobj->prev = invbag;
                 invbag->more = invobj;
                 if (invobj->next) ((object *) invobj->next)->prev = invobj;
-            }//x2=obji[sprlnk[MOVERNEW_OBJECT->type&1023]].v5; x2=rnd*(x2+1); if (x2==0){
+            }//x2=objectInfo[sprlnk[MOVERNEW_OBJECT->type&1023]].v5; x2=rnd*(x2+1); if (x2==0){
         }//x2=rnd*8; if (x2==0){
         movernew_goldadded:
 
         goto movernew_u6inventoryadded;
     }//al==1
 
-    if (((MOVERNEW_OBJECT->type & 1023) == 428) || ((MOVERNEW_OBJECT->type & 1023) == 348) ||
-        ((MOVERNEW_OBJECT->type & 1023) == 350)) {//cow/sheep/deer
+    if (((MOVERNEW_OBJECT->Type()) == 428) || ((MOVERNEW_OBJECT->Type()) == 348) ||
+        ((MOVERNEW_OBJECT->Type()) == 350)) {//cow/sheep/deer
         x2 = rnd * 2;
         if (x2) {
             invobj = OBJnew();
@@ -1202,7 +1192,7 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
 
     movernew_u6inventoryadded:
 
-    if (obji[sprlnk[MOVERNEW_OBJECT->type & 1023]].v4 == 8) { //2-part creature
+    if (objectInfo[sprlnk[MOVERNEW_OBJECT->Type()]].v4 == 8) { //2-part creature
         myobj3 = OBJnew();
         myobj3->more = MOVERNEW_OBJECT;
         myobj3->type = MOVERNEW_OBJECT->type + 8 * 1024;
@@ -1216,11 +1206,11 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
         if (z) crt->hp *= 4;
     }
 
-    if (obji[sprlnk[MOVERNEW_OBJECT->type & 1023]].v4 == 5) { //cyclops/winged gargoyle
+    if (objectInfo[sprlnk[MOVERNEW_OBJECT->Type()]].v4 == 5) { //cyclops/winged gargoyle
         static mlobj *mmyobj; //array size varies
         mmyobj = (mlobj *) malloc(sizeof(object *) * 3);
         crt->more = mmyobj;
-        MOVERNEW_OBJECT->type = (MOVERNEW_OBJECT->type & 1023) + 3 * 1024;
+        MOVERNEW_OBJECT->type = (MOVERNEW_OBJECT->Type()) + 3 * 1024;
         myobj3 = OBJnew();
         myobj3->more = MOVERNEW_OBJECT;
         mmyobj->obj[0] = myobj3;
@@ -1241,7 +1231,7 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
         OBJadd(x - 1, y, myobj3);
     }
 
-    if (obji[sprlnk[MOVERNEW_OBJECT->type & 1023]].v4 == 11) { //hydra
+    if (objectInfo[sprlnk[MOVERNEW_OBJECT->Type()]].v4 == 11) { //hydra
         static mlobj *mmyobj; //array size varies
         mmyobj = (mlobj *) malloc(sizeof(object *) * 8);
         crt->more = mmyobj;
@@ -1297,11 +1287,11 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
     }
 
 
-    if (obji[sprlnk[MOVERNEW_OBJECT->type & 1023]].v4 == 10) { //silver serpent
+    if (objectInfo[sprlnk[MOVERNEW_OBJECT->Type()]].v4 == 10) { //silver serpent
         static mlobj *mmyobj; //array size varies
         mmyobj = (mlobj *) malloc(sizeof(object *) * 7);
         crt->more = mmyobj;
-        MOVERNEW_OBJECT->type = (MOVERNEW_OBJECT->type & 1023) + 4 * 1024;
+        MOVERNEW_OBJECT->type = (MOVERNEW_OBJECT->Type()) + 4 * 1024;
         myobj3 = OBJnew();
         myobj3->more = MOVERNEW_OBJECT;
         mmyobj->obj[0] = myobj3;
@@ -1346,7 +1336,7 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
         OBJadd(x - 1, y, myobj3);
     }
 
-    if (obji[sprlnk[MOVERNEW_OBJECT->type & 1023]].v4 == 9) { //dragon
+    if (objectInfo[sprlnk[MOVERNEW_OBJECT->Type()]].v4 == 9) { //dragon
         static mlobj *mmyobj; //array size varies
         mmyobj = (mlobj *) malloc(sizeof(object *) * 4);
         crt->more = mmyobj;
@@ -1377,7 +1367,7 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
         OBJadd(x + 1, y, myobj3);
     }
 
-    if (obji[sprlnk[MOVERNEW_OBJECT->type & 1023]].v4 == 13) { //tangle vine
+    if (objectInfo[sprlnk[MOVERNEW_OBJECT->Type()]].v4 == 13) { //tangle vine
         static mlobj *mmyobj; //array size varies
         mmyobj = (mlobj *) malloc(sizeof(object *) * 4);
         crt->more = mmyobj;
@@ -1469,7 +1459,7 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
     }//tangle vine
 
     //slime
-    if ((MOVERNEW_OBJECT->type & 1023) == 375) MOVERNEW_OBJECT->info |= (3 << 9);//slime divide value
+    if ((MOVERNEW_OBJECT->Type()) == 375) MOVERNEW_OBJECT->info |= (3 << 9);//slime divide value
 
     //respawn info
     crt->respawn_hp = crt->hp;
@@ -1484,7 +1474,7 @@ object *OBJaddnew(unsigned long x, unsigned long y, unsigned short type, unsigne
     if (MOVERNEW_ERROR == 2) return NULL;//IGNORED (object is not the primary part of a mover)
 
     //check for multiple quantity items with NULL quantity and set to 1
-    if (obji[sprlnk[type & 1023] + (type >> 10)].flags & 4096) {//multiple quantity
+    if (objectInfo[sprlnk[type & 1023] + (type >> 10)].flags & 4096) {//multiple quantity
         if (more2 == NULL) {
             //if (U6O_DEBUG){
             if (0) {
@@ -1521,7 +1511,7 @@ object *OBJaddnew(unsigned long x, unsigned long y, unsigned short type, unsigne
         OBJadd_j1new:
 
         //if ((objfloatflags[(OBJtmp->type>>10)+sprlnk[OBJtmp->type&1023]])&&((objfloatflags[(obj->type>>10)+sprlnk[obj->type&1023]] )==0)){
-        if (objfloatflags[(OBJtmp->type >> 10) + sprlnk[OBJtmp->type & 1023]]) {
+        if (objfloatflags[(OBJtmp->type >> 10) + sprlnk[OBJtmp->Type()]]) {
 
             OBJtmp2 = (object *) OBJtmp->prev;
             if (OBJtmp2 != NULL) {
@@ -1638,12 +1628,12 @@ object *OBJfindlast(unsigned long x, unsigned long y) {
         if (OBJtmp->next != NULL) {
             OBJtmp2 = (object *) OBJtmp->next;
 
-            if ((objfloatflags[(OBJtmp2->type >> 10) + sprlnk[OBJtmp2->type & 1023]] & 1) == 0) {
+            if ((objfloatflags[(OBJtmp2->type >> 10) + sprlnk[OBJtmp2->Type()]] & 1) == 0) {
                 OBJtmp = (object *) OBJtmp->next;
                 goto OBJfindlast_next;
             }
         }
-        if ((objfloatflags[(OBJtmp->type >> 10) + sprlnk[OBJtmp->type & 1023]] & 1) != 0) OBJtmp = NULL;
+        if ((objfloatflags[(OBJtmp->type >> 10) + sprlnk[OBJtmp->Type()]] & 1) != 0) OBJtmp = NULL;
     }
     return OBJtmp;
 }
@@ -1679,14 +1669,14 @@ unsigned long OBJlist(object *obj) {
     OBJlist_list[OBJlist_last] = myobj; //add object to list
     OBJlist_last++;
     if (myobj->more) { //container
-        if (obji[sprlnk[myobj->type & 1023]].flags & 1024) {
+        if (objectInfo[sprlnk[myobj->Type()]].flags & 1024) {
             l_last++;
             l[l_last] = (object *) myobj->more; //add unchecked container
         }
     }
     if (myobj->next) {
         if ((myobj->next != myobj->more) ||
-            ((obji[sprlnk[myobj->type & 1023]].flags & 1024) == 0)) { //avoid reverse linked inventory containers
+            ((objectInfo[sprlnk[myobj->Type()]].flags & 1024) == 0)) { //avoid reverse linked inventory containers
             myobj = (object *) myobj->next;
             goto OBJlist_nextobject; //get next object
         }
@@ -1717,7 +1707,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
     if (OBJmove_allow) goto move2allow;
 
     pass = 0;
-    type = obj->type & 1023;
+    type = obj->Type();
     if (type == 345) pass = 2; //squid
     if (type == 346) pass = 2; //sea serpent
     if (type == 343) pass = 3; //insects
@@ -1743,11 +1733,11 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
     if (type == 354) { //mouse
         if ((bt[y][x] & 1024) == 0) { //blocked!
             if (obj2 = OBJfindlastall(x, y)) {
-                if ((obj2->type & 1023) == 213) goto move2allow; //mousehole
+                if ((obj2->Type()) == 213) goto move2allow; //mousehole
             }
             if (obj2 = OBJfindlastall(x, y)) {
                 if (obj2 = (object *) obj2->prev) {
-                    if (((obj2->type & 1023) == 310) && (obj2->type & 1024)) goto move2allow; //portcullis
+                    if (((obj2->Type()) == 310) && (obj2->type & 1024)) goto move2allow; //portcullis
                 }
             }
         }//blocked!
@@ -1779,7 +1769,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
         return 1;
     }
 
-    if ((obj->type & 1023) == 423) { //balloon
+    if (obj->Type() == 423) { //balloon
         if (obj2 = OBJfindlast(x, y)) { //can't move on top of other creature/player!
             if (obj2->info & (2 + 4)) return 1;
         }
@@ -1788,12 +1778,12 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
         if (bt[y][x] & 1024) {
             //if walking passable and NOT a doorway or a door allow entry
             if (obj2 = OBJfindlastall(x, y)) { //can't move on top of other creature/player!
-                if (((obj2->type & 1023) >= 297) && ((obj2->type & 1023) <= 302)) return 1;
+                if (((obj2->Type()) >= 297) && ((obj2->Type()) <= 302)) return 1;
             }
             goto move2allow; //land passable
         }
         if (od[y][x]) {
-            if ((od[y][x]->type & 1023) == 423) {
+            if ((od[y][x]->Type()) == 423) {
                 if ((bt[y][x] & 1023) <= 124) goto move2allow;
             }
         }
@@ -1804,7 +1794,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
     }
 
     //ships
-    if ((obj->type & 1023) == 412) {
+    if ((obj->Type()) == 412) {
         if (obj2 = OBJfindlast(x, y)) { //can't move on top of other creature
             if (obj2->info & 4) return 1;
         }
@@ -1812,14 +1802,14 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
         if (((xx >= 8) && (xx < 16)) && (bt[y][x] & (4 * 1024))) goto move2allow;
         return 1;
     }
-    if ((obj->type & 1023) == 414) {
+    if ((obj->Type()) == 414) {
         if (obj2 = OBJfindlast(x, y)) { //can't move on top of other creature
             if (obj2->info & 4) return 1;
         }
         if (bt[y][x] & (4 * 1024)) goto move2allow;
         return 1;
     }
-    if ((obj->type & 1023) == 415) {
+    if ((obj->Type()) == 415) {
         if (obj2 = OBJfindlast(x, y)) { //can't move on top of other creature
             if (obj2->info & 4) return 1;
         }
@@ -1827,10 +1817,10 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
         return 1;
     }
 
-    if (obji[sprlnk[obj->type & 1023]].v4 == 10) { //serpent 2003: allow serpent to cross over it's tail!
+    if (objectInfo[sprlnk[obj->Type()]].v4 == 10) { //serpent 2003: allow serpent to cross over it's tail!
         m2obj = OBJfindlast(x, y);
         if (m2obj != NULL) {
-            if (obji[sprlnk[m2obj->type & 1023]].v4 == 10) {
+            if (objectInfo[sprlnk[m2obj->Type()]].v4 == 10) {
                 if (m2obj->info & 8) {
                     if (m2obj->more == obj) goto move2allow;
                 }
@@ -1839,16 +1829,16 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
     }
 
     //check for animals and fences
-    if (((obj->type & 1023) == 428) || ((obj->type & 1023) == 430) || ((obj->type & 1023) == 348)) {
+    if (((obj->Type()) == 428) || ((obj->Type()) == 430) || ((obj->Type()) == 348)) {
         if (od[y][x] != NULL) {
-            if ((od[y][x]->type & 1023) == 281) return 1;
+            if ((od[y][x]->Type()) == 281) return 1;
         }
     }
 
-    if (obji[sprlnk[obj->type & 1023]].v4 == 8) { //2-part
+    if (objectInfo[sprlnk[obj->Type()]].v4 == 8) { //2-part
         m2obj = OBJfindlast(x, y);
         if (m2obj != NULL) {
-            if (obji[sprlnk[m2obj->type & 1023]].v4 == 8) {
+            if (objectInfo[sprlnk[m2obj->Type()]].v4 == 8) {
                 if (m2obj->info & 8) {
                     if (m2obj->more == obj) goto move2allow;
                 }//has redirect
@@ -1884,7 +1874,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
 
         OBJremove(obj); //remove
 
-        if ((obj->type & 1023) == 423) { //balloon (remove)
+        if ((obj->Type()) == 423) { //balloon (remove)
             static mlobj *mmyobj;
             if (obj->info & 2) {
                 tnpc = (npc *) obj->more;
@@ -1898,76 +1888,76 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
             }
         }
 
-        if ((obj->type & 1023) == 375) { //slime (remove)
+        if ((obj->Type()) == 375) { //slime (remove)
             xx = 0;
             if (obj2 = OBJfindlast(ox, oy - 1)) {
-                if ((obj2->type & 1023) == 375) {
+                if ((obj2->Type()) == 375) {
                     xx3 = 0;
                     if (obj3 = OBJfindlast(obj2->x, obj2->y - 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 1;
+                        if ((obj3->Type()) == 375) xx3 |= 1;
                     }
                     if (obj3 = OBJfindlast(obj2->x + 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 2;
+                        if ((obj3->Type()) == 375) xx3 |= 2;
                     }
                     if (obj3 = OBJfindlast(obj2->x, obj2->y + 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 4;
+                        if ((obj3->Type()) == 375) xx3 |= 4;
                     }
                     if (obj3 = OBJfindlast(obj2->x - 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 8;
+                        if ((obj3->Type()) == 375) xx3 |= 8;
                     }
                     obj2->type = 375 + xx3 * 1024;
                 }
             }
             if (obj2 = OBJfindlast(ox + 1, oy)) {
-                if ((obj2->type & 1023) == 375) {
+                if ((obj2->Type()) == 375) {
                     xx3 = 0;
                     if (obj3 = OBJfindlast(obj2->x, obj2->y - 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 1;
+                        if ((obj3->Type()) == 375) xx3 |= 1;
                     }
                     if (obj3 = OBJfindlast(obj2->x + 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 2;
+                        if ((obj3->Type()) == 375) xx3 |= 2;
                     }
                     if (obj3 = OBJfindlast(obj2->x, obj2->y + 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 4;
+                        if ((obj3->Type()) == 375) xx3 |= 4;
                     }
                     if (obj3 = OBJfindlast(obj2->x - 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 8;
+                        if ((obj3->Type()) == 375) xx3 |= 8;
                     }
                     obj2->type = 375 + xx3 * 1024;
                 }
             }
             if (obj2 = OBJfindlast(ox, oy + 1)) {
-                if ((obj2->type & 1023) == 375) {
+                if ((obj2->Type()) == 375) {
                     xx3 = 0;
                     if (obj3 = OBJfindlast(obj2->x, obj2->y - 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 1;
+                        if ((obj3->Type()) == 375) xx3 |= 1;
                     }
                     if (obj3 = OBJfindlast(obj2->x + 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 2;
+                        if ((obj3->Type()) == 375) xx3 |= 2;
                     }
                     if (obj3 = OBJfindlast(obj2->x, obj2->y + 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 4;
+                        if ((obj3->Type()) == 375) xx3 |= 4;
                     }
                     if (obj3 = OBJfindlast(obj2->x - 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 8;
+                        if ((obj3->Type()) == 375) xx3 |= 8;
                     }
                     obj2->type = 375 + xx3 * 1024;
                 }
             }
             if (obj2 = OBJfindlast(ox - 1, oy)) {
-                if ((obj2->type & 1023) == 375) {
+                if ((obj2->Type()) == 375) {
                     xx3 = 0;
                     if (obj3 = OBJfindlast(obj2->x, obj2->y - 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 1;
+                        if ((obj3->Type()) == 375) xx3 |= 1;
                     }
                     if (obj3 = OBJfindlast(obj2->x + 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 2;
+                        if ((obj3->Type()) == 375) xx3 |= 2;
                     }
                     if (obj3 = OBJfindlast(obj2->x, obj2->y + 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 4;
+                        if ((obj3->Type()) == 375) xx3 |= 4;
                     }
                     if (obj3 = OBJfindlast(obj2->x - 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 8;
+                        if ((obj3->Type()) == 375) xx3 |= 8;
                     }
                     obj2->type = 375 + xx3 * 1024;
                 }
@@ -1977,7 +1967,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
 
         //remove other constructs
         static object *myobj;
-        xx = obj->type & 1023;
+        xx = obj->Type();
 
         if (xx == 412) { //boat
             static mlobj *mmyobj;
@@ -1993,7 +1983,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
             }
         }
 
-        if (obji[sprlnk[xx]].v4 == 5) { //cyclops/winged gargoyle
+        if (objectInfo[sprlnk[xx]].v4 == 5) { //cyclops/winged gargoyle
             tnpc3 = (npc *) obj->more;
             static mlobj *mmyobj;
             mmyobj = (mlobj *) tnpc3->more;
@@ -2002,7 +1992,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
             }
         }
 
-        if (obji[sprlnk[xx]].v4 == 9) { //dragon
+        if (objectInfo[sprlnk[xx]].v4 == 9) { //dragon
             tnpc3 = (npc *) obj->more;
             static mlobj *mmyobj;
             mmyobj = (mlobj *) tnpc3->more;
@@ -2012,7 +2002,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
         }
 
         /*
-    if (obji[sprlnk[xx]].v4==10){ //serpent
+    if (objectInfo[sprlnk[xx]].v4==10){ //serpent
     tnpc3=(npc*)obj->more;
     static mlobj *mmyobj;
     mmyobj=(mlobj*)tnpc3->more;
@@ -2022,7 +2012,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
     }
     */
 
-        if (obji[sprlnk[xx]].v4 == 11) { //hydra
+        if (objectInfo[sprlnk[xx]].v4 == 11) { //hydra
             tnpc3 = (npc *) obj->more;
             static mlobj *mmyobj;
             mmyobj = (mlobj *) tnpc3->more;
@@ -2035,21 +2025,21 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
         skipremove:
 
         //adjust flags accordingly
-        xx = obj->type & 1023;
+        xx = obj->Type();
         xx2 = 0;
-        if (obji[sprlnk[obj->type & 1023]].v4 == 1) xx2 = 1; //person
+        if (objectInfo[sprlnk[obj->Type()]].v4 == 1) xx2 = 1; //person
         if (xx == 412) xx2 = 254; //boat
-        if (obji[sprlnk[obj->type & 1023]].v4 == 2) xx2 = 2; //demon,mongbat,gargoyle
-        if (obji[sprlnk[obj->type & 1023]].v4 == 6) xx2 = 2; //drake
-        if (obji[sprlnk[obj->type & 1023]].v4 == 8) xx2 = 3; //2-part
-        if (obji[sprlnk[obj->type & 1023]].v4 == 5) xx2 = 4; //4-part
-        if (obji[sprlnk[obj->type & 1023]].v4 == 9) xx2 = 9; //dragon
-        if (obji[sprlnk[obj->type & 1023]].v4 == 10) xx2 = 10; //dragon
-        if (obji[sprlnk[obj->type & 1023]].v4 == 11) xx2 = 11; //hydra
-        if (obji[sprlnk[obj->type & 1023]].v4 == 4) xx2 = 5; //mouse/rabbit
+        if (objectInfo[sprlnk[obj->Type()]].v4 == 2) xx2 = 2; //demon,mongbat,gargoyle
+        if (objectInfo[sprlnk[obj->Type()]].v4 == 6) xx2 = 2; //drake
+        if (objectInfo[sprlnk[obj->Type()]].v4 == 8) xx2 = 3; //2-part
+        if (objectInfo[sprlnk[obj->Type()]].v4 == 5) xx2 = 4; //4-part
+        if (objectInfo[sprlnk[obj->Type()]].v4 == 9) xx2 = 9; //dragon
+        if (objectInfo[sprlnk[obj->Type()]].v4 == 10) xx2 = 10; //dragon
+        if (objectInfo[sprlnk[obj->Type()]].v4 == 11) xx2 = 11; //hydra
+        if (objectInfo[sprlnk[obj->Type()]].v4 == 4) xx2 = 5; //mouse/rabbit
         if (xx == 414) xx2 = 255; //skiff
 
-        if ((obj->type & 1023) == 423) { //balloon
+        if ((obj->Type()) == 423) { //balloon
             static mlobj *mmyobj;
             if (obj->info & 2) {
                 tnpc = (npc *) obj->more;
@@ -2064,7 +2054,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
         }
 
         //tangle vine?
-        if ((obj->type & 1023) == 365) { //remove tendrils NOW! and add at new destination!
+        if ((obj->Type()) == 365) { //remove tendrils NOW! and add at new destination!
             static mlobj *mmyobj;
             tcrt = (creature *) obj->more;
             mmyobj = (mlobj *) tcrt->more;
@@ -2133,7 +2123,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
 
         }//hack away my friends
 
-        if ((obj->type & 1023) == 366) { //tanglevine tendril!
+        if ((obj->Type()) == 366) { //tanglevine tendril!
 
             xx = obj->type >> 10;
             obj2 = OBJnew();
@@ -2369,7 +2359,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
 
 
         /*
-    if (obji[sprlnk[myobj2->type&1023]].v4==9){ //dragon
+    if (objectInfo[sprlnk[myobj2->type&1023]].v4==9){ //dragon
 
     static mlobj *mmyobj; //array size varies
     mmyobj=(mlobj*)malloc(sizeof(object*)*4);
@@ -2489,7 +2479,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
 
 
             /*
-      if (obji[sprlnk[myobj2->type&1023]].v4==8){ //2-part creature
+      if (objectInfo[sprlnk[myobj2->type&1023]].v4==8){ //2-part creature
       myobj3=OBJnew(); myobj3->more=myobj2;
       myobj3->type=myobj2->type+8*1024; myobj3->info|=8; //<-base object
       OBJadd(x,y+1,myobj3);
@@ -2658,7 +2648,7 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
 
         OBJadd(x, y, obj);
 
-        if ((obj->type & 1023) == 375) { //slime (combine)
+        if ((obj->Type()) == 375) { //slime (combine)
             //need a grid addition array!
             /*
       ka1dosh: ok.. label each connection clockwise
@@ -2692,80 +2682,80 @@ unsigned char OBJmove2(object *obj, unsigned long x, unsigned long y) {
 
             xx = 0;
             if (obj2 = OBJfindlast(x, y - 1)) {
-                if ((obj2->type & 1023) == 375) {
+                if ((obj2->Type()) == 375) {
                     xx |= 1;
                     xx3 = 0;
                     if (obj3 = OBJfindlast(obj2->x, obj2->y - 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 1;
+                        if ((obj3->Type()) == 375) xx3 |= 1;
                     }
                     if (obj3 = OBJfindlast(obj2->x + 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 2;
+                        if ((obj3->Type()) == 375) xx3 |= 2;
                     }
                     if (obj3 = OBJfindlast(obj2->x, obj2->y + 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 4;
+                        if ((obj3->Type()) == 375) xx3 |= 4;
                     }
                     if (obj3 = OBJfindlast(obj2->x - 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 8;
+                        if ((obj3->Type()) == 375) xx3 |= 8;
                     }
                     obj2->type = 375 + xx3 * 1024;
                 }
             }
 
             if (obj2 = OBJfindlast(x + 1, y)) {
-                if ((obj2->type & 1023) == 375) {
+                if ((obj2->Type()) == 375) {
                     xx |= 2;
                     xx3 = 0;
                     if (obj3 = OBJfindlast(obj2->x, obj2->y - 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 1;
+                        if ((obj3->Type()) == 375) xx3 |= 1;
                     }
                     if (obj3 = OBJfindlast(obj2->x + 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 2;
+                        if ((obj3->Type()) == 375) xx3 |= 2;
                     }
                     if (obj3 = OBJfindlast(obj2->x, obj2->y + 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 4;
+                        if ((obj3->Type()) == 375) xx3 |= 4;
                     }
                     if (obj3 = OBJfindlast(obj2->x - 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 8;
+                        if ((obj3->Type()) == 375) xx3 |= 8;
                     }
                     obj2->type = 375 + xx3 * 1024;
                 }
             }
 
             if (obj2 = OBJfindlast(x, y + 1)) {
-                if ((obj2->type & 1023) == 375) {
+                if ((obj2->Type()) == 375) {
                     xx |= 4;
                     xx3 = 0;
                     if (obj3 = OBJfindlast(obj2->x, obj2->y - 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 1;
+                        if ((obj3->Type()) == 375) xx3 |= 1;
                     }
                     if (obj3 = OBJfindlast(obj2->x + 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 2;
+                        if ((obj3->Type()) == 375) xx3 |= 2;
                     }
                     if (obj3 = OBJfindlast(obj2->x, obj2->y + 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 4;
+                        if ((obj3->Type()) == 375) xx3 |= 4;
                     }
                     if (obj3 = OBJfindlast(obj2->x - 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 8;
+                        if ((obj3->Type()) == 375) xx3 |= 8;
                     }
                     obj2->type = 375 + xx3 * 1024;
                 }
             }
 
             if (obj2 = OBJfindlast(x - 1, y)) {
-                if ((obj2->type & 1023) == 375) {
+                if ((obj2->Type()) == 375) {
                     xx |= 8;
                     xx3 = 0;
                     if (obj3 = OBJfindlast(obj2->x, obj2->y - 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 1;
+                        if ((obj3->Type()) == 375) xx3 |= 1;
                     }
                     if (obj3 = OBJfindlast(obj2->x + 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 2;
+                        if ((obj3->Type()) == 375) xx3 |= 2;
                     }
                     if (obj3 = OBJfindlast(obj2->x, obj2->y + 1)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 4;
+                        if ((obj3->Type()) == 375) xx3 |= 4;
                     }
                     if (obj3 = OBJfindlast(obj2->x - 1, obj2->y)) {
-                        if ((obj3->type & 1023) == 375) xx3 |= 8;
+                        if ((obj3->Type()) == 375) xx3 |= 8;
                     }
                     obj2->type = 375 + xx3 * 1024;
                 }
@@ -2789,9 +2779,9 @@ unsigned char OBJdir(object *obj, unsigned long x, unsigned long y) {
     static creature *crt;
     static object *obj2;
 
-    movertype = obj->type & 1023;
+    movertype = obj->Type();
 
-    if (obji[sprlnk[movertype]].v4 == 8) {//two part movers (only frame change)
+    if (objectInfo[sprlnk[movertype]].v4 == 8) {//two part movers (only frame change)
         if (obj->info & (2 + 4)) {//crt or npc
             crt = (creature *) obj->more;
             obj2 = (object *) crt->more;
@@ -3035,7 +3025,7 @@ wpf_pathfind(unsigned char *d, long sourcex, long sourcey, long destx, long dest
                                 if (x4 == 223) z2 = 52;//heavy lava
                                 if (obj = od[y2][x2]) {
                                     wpft0next2:
-                                    z4 = obj->type & 1023;
+                                    z4 = obj->Type();
                                     if (z4 == 172) z2 = 36;//spikes
                                     if (z4 == 173) {//trap
                                         if (obj->info & (1 << 9)) z2 = 44;
@@ -3092,7 +3082,7 @@ wpf_pathfind(unsigned char *d, long sourcex, long sourcey, long destx, long dest
     ZeroMemory(&wpf_nweight, sizeof(wpf_nweight));
 
     //allow squares belonging to parts of the mover calling the pathfind to be passable
-    if (obji[sprlnk[WPF_OBJECT->type & 1023]].v4 == 8) {//2-part mover
+    if (objectInfo[sprlnk[WPF_OBJECT->Type()]].v4 == 8) {//2-part mover
         obj = WPF_OBJECT;
         if (obj->info & 8) obj = (object *) obj->more;//get "head" of mover
         wpf_npc = (npc *) obj->more;
@@ -3102,7 +3092,7 @@ wpf_pathfind(unsigned char *d, long sourcex, long sourcey, long destx, long dest
         wpf_weight[obj->x - WPF_OFFSETX][obj->y - WPF_OFFSETY] = 1;
 
     }//8
-    if (obji[sprlnk[WPF_OBJECT->type & 1023]].v4 == 10) {//silver serpent
+    if (objectInfo[sprlnk[WPF_OBJECT->Type()]].v4 == 10) {//silver serpent
         obj = WPF_OBJECT;
         if (obj->info & 8) obj = (object *) obj->more;//get "head" of mover
         wpf_npc = (npc *) obj->more;
@@ -3639,7 +3629,7 @@ unsigned char wpf_dangercheck(short x, short y, object *mover) {
                     if (z4 == 223) z = 52;//heavy lava
                     if (obj = od[y][x]) {
                         wpfdc:
-                        z4 = obj->type & 1023;
+                        z4 = obj->Type();
                         if (z4 == 172) z = 36;//spikes
                         if (z4 == 173) {//trap
                             if (obj->info & (1 << 9)) z = 44;
@@ -3659,34 +3649,43 @@ unsigned char wpf_dangercheck(short x, short y, object *mover) {
     return z;
 }//wpf_dangercheck
 
+/**
+ * @brief Checks if a bolt can travel from one point to another.
+ *
+ * This function checks if a bolt can travel from one point to another without being obstructed by any obstacles.
+ *
+ * @param x
+ * @param y
+ * @param x2
+ * @param y2
+ * @return
+ */
 bool OBJcheckbolt(unsigned short x, unsigned short y, unsigned short x2, unsigned short y2) {
-    OBJcheckbolt_x = x2;
-    OBJcheckbolt_y = y2;
-    Ocb_x = x;
-    Ocb_y = y;
-    Ocb_ix = abs(x2 - x);
-    Ocb_iy = abs(y2 - y);
-    Ocb_l = sqrt((float) (Ocb_ix * Ocb_ix + Ocb_iy * Ocb_iy)); //*lookup table
-    Ocb_gx = ((float) x2 - x) / Ocb_l;
-    Ocb_gy = ((float) y2 - y) / Ocb_l;
-    Ocb_il = Ocb_l;
-    for (Ocb_i = 0; Ocb_i < Ocb_il; Ocb_i++) {
-        Ocb_x += Ocb_gx;
-        Ocb_y += Ocb_gy;
-        Ocb_ix = Ocb_x + 0.5f;
-        Ocb_iy = Ocb_y + 0.5f;
-        if ((bt[Ocb_iy][Ocb_ix] & 8192) == 0) {
-            if ((Ocb_ix == x2) && (Ocb_iy == y2)) return FALSE;
-            OBJcheckbolt_x = Ocb_ix;
-            OBJcheckbolt_y = Ocb_iy;
-            return TRUE;
+    float dx = x2 - x;
+    float dy = y2 - y;
+    float distance = sqrt(dx * dx + dy * dy);
+    float stepX = dx / distance;
+    float stepY = dy / distance;
+    float currentX = x;
+    float currentY = y;
+
+    for (int i = 0; i < distance; i++) {
+        currentX += stepX;
+        currentY += stepY;
+        int ix = static_cast<int>(currentX + 0.5f);
+        int iy = static_cast<int>(currentY + 0.5f);
+
+        if ((bt[iy][ix] & 8192) == 0) {
+            if (ix == x2 && iy == y2)
+                return false;
+            OBJcheckbolt_x = ix;
+            OBJcheckbolt_y = iy;
+            return true;
         }
-        if ((Ocb_ix == x2) && (Ocb_iy == y2)) return FALSE; //*remove later
-        //Ocbo=OBJnew();
-        //Ocbo->type=2;
-        //OBJadd(Ocb_ix,Ocb_iy,Ocbo);
-    } //i loop
-    return FALSE;
+        if (ix == x2 && iy == y2)
+            return false;
+    }
+    return false;
 }
 
 /**
@@ -3720,14 +3719,14 @@ unsigned long WTfind(object *obj) {
     WTf_itemn = 0;
     WTf_next:
     WTf_itemn++;
-    WTf_w2 = obji[sprlnk[obj->type & 1023]].weight;
-    if (obji[sprlnk[obj->type & 1023] + (obj->type >> 10)].flags & 4096) {
-        WTf_w2 = obji[sprlnk[obj->type & 1023]].weight * obj->more2; //multiple objects
+    WTf_w2 = objectInfo[sprlnk[obj->Type()]].weight;
+    if (objectInfo[sprlnk[obj->Type()] + (obj->type >> 10)].flags & 4096) {
+        WTf_w2 = objectInfo[sprlnk[obj->Type()]].weight * obj->more2; //multiple objects
     }
     if (WTf_w2 == 0) return 0;
     WTf_w += WTf_w2;
     //1024 container (general)
-    if (obji[sprlnk[obj->type & 1023]].flags & 1024) {
+    if (objectInfo[sprlnk[obj->Type()]].flags & 1024) {
         if (obj->more) {
             OBJtl[WTf_n] = (object *) obj->more; //add container to todo list
             WTf_n++;
@@ -3868,7 +3867,7 @@ long CON_gv(long v) {
         } //!=NULL,x6
         OBJlist_last = NULL;
         for (y6 = 0; y6 < x5; y6++) {
-            if ((OBJlist_list[y6]->type & 1023) == 339) { //dead body
+            if ((OBJlist_list[y6]->Type()) == 339) { //dead body
                 //scan resurrect list
                 for (i3 = 0; i3 <= nresu; i3++) {
                     if (resu[i3]) {
@@ -4024,7 +4023,7 @@ void stealing(player *tplayer, object *obj) {
                     tplayer->karma -= ((float) obj2->more2 / 16.0f);
                     goto karma_spec;
                 } //bolts
-                if (obji[sprlnk[obj2->type & 1023] + (obj2->type >> 10)].flags & 4096) {
+                if (objectInfo[sprlnk[obj2->Type()] + (obj2->type >> 10)].flags & 4096) {
                     tplayer->karma -= ((float) obj2->more2 / 4.0f);
                     goto karma_spec;
                 } //multiple
@@ -4146,16 +4145,16 @@ void inbritanniacheck() {
 unsigned char ENHANCEget_attack(object *obj) {
     static long x2;
     //EXCEPTIONS!
-    x2 = obj->type & 1023;
-    if (obji[sprlnk[x2]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64)) { //can be worn
-        if (obji[sprlnk[x2]].flags & 4096) return 0; //multiple
+    x2 = obj->Type();
+    if (objectInfo[sprlnk[x2]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64)) { //can be worn
+        if (objectInfo[sprlnk[x2]].flags & 4096) return 0; //multiple
         if (x2 == 78) return 0; //staff
         if (x2 == 79) return 0; //lightning
         if (x2 == 80) return 0; //fire
         if (x2 == 48) return 0; //glass sword
         if (x2 == 256) return 0; //protection ring
         if (x2 == 141) return 0; //decorative sword
-        if (obji[sprlnk[x2]].v1) { //weapon
+        if (objectInfo[sprlnk[x2]].v1) { //weapon
             return obj->more2 & 15;
         }
     }
@@ -4165,16 +4164,16 @@ unsigned char ENHANCEget_attack(object *obj) {
 unsigned char ENHANCEget_defense(object *obj) {
     static long x2;
     //EXCEPTIONS!
-    x2 = obj->type & 1023;
-    if (obji[sprlnk[x2]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64)) { //can be worn
-        if (obji[sprlnk[x2]].flags & 4096) return 0; //multiple
+    x2 = obj->Type();
+    if (objectInfo[sprlnk[x2]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64)) { //can be worn
+        if (objectInfo[sprlnk[x2]].flags & 4096) return 0; //multiple
         if (x2 == 78) return 0; //staff
         if (x2 == 79) return 0; //lightning
         if (x2 == 80) return 0; //fire
         if (x2 == 48) return 0; //glass sword
         if (x2 == 256) return 0; //protection ring
         if (x2 == 141) return 0; //decorative sword
-        if (obji[sprlnk[x2]].v2) { //armour
+        if (objectInfo[sprlnk[x2]].v2) { //armour
             return (obj->more2 & 0xF0) >> 4;
         }
     }
@@ -4222,7 +4221,7 @@ void OBJsave(unsigned short x, unsigned short y) {
         //add it?
         if ((obj->info & 112) == 0) {//permanent object
             if ((obj->info & 16384) &&
-                !(obji[sprlnk[obj->type & 1023]].flags & 1024)) {//treasurechest object and not chest
+                !(objectInfo[sprlnk[obj->Type()]].flags & 1024)) {//treasurechest object and not chest
                 x4 = randchestitem();
                 x5 = x4 >> 10;
                 x4 = x4 & 1023;
@@ -4230,12 +4229,12 @@ void OBJsave(unsigned short x, unsigned short y) {
                 obj->more2 = x5;
                 ENHANCEnewn(obj, 4, 4);
             }
-            if ((obji[sprlnk[obj->type & 1023]].weight) || (obji[sprlnk[obj->type & 1023]].flags & 1024) ||
-                ((obj->type & 1023) == OBJ_WEB) || ((obj->type & 1023) >= OBJ_FIRE_FIELD && (obj->type & 1023) <=
+            if ((objectInfo[sprlnk[obj->Type()]].weight) || (objectInfo[sprlnk[obj->Type()]].flags & 1024) ||
+                ((obj->Type()) == OBJ_WEB) || ((obj->Type()) >= OBJ_FIRE_FIELD && (obj->Type()) <=
                                                                                             OBJ_SLEEP_FIELD)) { //weight or container, spider web or field
                 //floating object with weight SHOULD BE ADDED, dont ignore floating
                 //EXCEPTIONS!
-                if ((obj->type & 1023) == 414) goto skipsaveobj; //skiff
+                if ((obj->Type()) == 414) goto skipsaveobj; //skiff
                 if (obj->info & 256) goto skipsaveobj; //quest item
                 if (obj == nuggetsfix) goto skipsaveobj; //newbie nuggets cannot respawn
                 //add save obj
@@ -4247,7 +4246,7 @@ void OBJsave(unsigned short x, unsigned short y) {
                 obj2->prev = obj3;
                 if (obj3) obj3->next = obj2; //link
                 if (obj2->more2 = obj->more2) { //!=NULL
-                    if (obji[sprlnk[obj->type & 1023]].flags & 1024) { //container
+                    if (objectInfo[sprlnk[obj->Type()]].flags & 1024) { //container
                         objsave_node_last++;
                         objsave_node[objsave_node_last] = obj2;
                     }
@@ -4266,7 +4265,7 @@ void OBJsave(unsigned short x, unsigned short y) {
                 obj4 = NULL;
                 //NEWCODE
                 if ((obj2->info & 16384) &&
-                    ((obj2->type & 1023) == OBJ_CHEST)) { //random new location for treasure chest
+                    ((obj2->Type()) == OBJ_CHEST)) { //random new location for treasure chest
                     objsave_wait[x2] = 1.0f; //respawn new chest immediately
                     x8 = randomchestlocation(false);
                     y8 = x8 >> 10;
@@ -4360,7 +4359,7 @@ unsigned short get_mp_max(unsigned short i) {
 unsigned char objvisible(player *p, object *myobj) {
     static long i2;
     static object *myobj2;
-    i2 = myobj->type & 1023; //get object identity
+    i2 = myobj->Type(); //get object identity
     if (myobj->info & 256) {//quest
         if (i2 == 73) { //moonstone
             if (p->GNPCflags[4] & (1 << (myobj->type >> 10))) return 0;
@@ -4700,12 +4699,12 @@ long getequiparmourvalue(object *obj) {
     armourvalue = 0;
     armourmask = 0;//used stop usaage of 2 or more similar armour types (eg. 2 helms)
     getequiparmourvalue_next:
-    if (obji[sprlnk[obj->type & 1023]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64)) {//equipable
-        if ((obji[sprlnk[obj->type & 1023]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64)) & armourmask)
+    if (objectInfo[sprlnk[obj->Type()]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64)) {//equipable
+        if ((objectInfo[sprlnk[obj->Type()]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64)) & armourmask)
             goto getequiparmourvalue_alreadyusing;
-        if (obji[sprlnk[obj->type & 1023]].v2) {
-            armourvalue += (obji[sprlnk[obj->type & 1023]].v2 + ENHANCEget_defense(obj));
-            armourmask |= (obji[sprlnk[obj->type & 1023]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64));
+        if (objectInfo[sprlnk[obj->Type()]].v2) {
+            armourvalue += (objectInfo[sprlnk[obj->Type()]].v2 + ENHANCEget_defense(obj));
+            armourmask |= (objectInfo[sprlnk[obj->Type()]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64));
         }//v2
     }//equippable flags
     getequiparmourvalue_alreadyusing:
@@ -4721,31 +4720,31 @@ long getequiph2hwepdamage(object *obj) {
     getequiph2hwepdamage_next:
 
     /*
-  if (obji[sprlnk[obj->type&1023]].flags&(1+2+4+8+16+32+64)){//equipable
-  if ((obji[sprlnk[obj->type&1023]].flags&(1+2+4+8+16+32+64))&armourmask) goto getequiparmourvalue_alreadyusing;
-  if (obji[sprlnk[obj->type&1023]].v2){
-  armourvalue+=(obji[sprlnk[obj->type&1023]].v2+ENHANCEget_defense(obj));
-  armourmask|=(obji[sprlnk[obj->type&1023]].flags&(1+2+4+8+16+32+64));
+  if (objectInfo[sprlnk[obj->type&1023]].flags&(1+2+4+8+16+32+64)){//equipable
+  if ((objectInfo[sprlnk[obj->type&1023]].flags&(1+2+4+8+16+32+64))&armourmask) goto getequiparmourvalue_alreadyusing;
+  if (objectInfo[sprlnk[obj->type&1023]].v2){
+  armourvalue+=(objectInfo[sprlnk[obj->type&1023]].v2+ENHANCEget_defense(obj));
+  armourmask|=(objectInfo[sprlnk[obj->type&1023]].flags&(1+2+4+8+16+32+64));
   }//v2
 
   }//equippable flags
   getequiparmourvalue_alreadyusing:
   */
 
-    if (obji[sprlnk[obj->type & 1023]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64)) {//equipable?
-        if (obji[sprlnk[obj->type & 1023]].v1) {//can do damage
-            if ((obji[sprlnk[obj->type & 1023]].v1 + ENHANCEget_attack(obj)) >
+    if (objectInfo[sprlnk[obj->Type()]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64)) {//equipable?
+        if (objectInfo[sprlnk[obj->Type()]].v1) {//can do damage
+            if ((objectInfo[sprlnk[obj->Type()]].v1 + ENHANCEget_attack(obj)) >
                 weapondamage) {//greater than currently known weapon?
 
                 //eliminate certain types
-                if ((obj->type & 1023) == 33) goto getequiph2hwepdamage_skip;//sling
-                if ((obj->type & 1023) == 41) goto getequiph2hwepdamage_skip;//bow
-                if ((obj->type & 1023) == 42) goto getequiph2hwepdamage_skip;//crossbow
-                if ((obj->type & 1023) == 49) goto getequiph2hwepdamage_skip;//boomerang
-                if ((obj->type & 1023) == 50) goto getequiph2hwepdamage_skip;//triple crossbow!
-                if ((obj->type & 1023) == 49) goto getequiph2hwepdamage_skip;//boomerang
-                if ((obj->type & 1023) == 54) goto getequiph2hwepdamage_skip;//magic bow
-                weapondamage = (obji[sprlnk[obj->type & 1023]].v1 + ENHANCEget_attack(obj));
+                if ((obj->Type()) == 33) goto getequiph2hwepdamage_skip;//sling
+                if ((obj->Type()) == 41) goto getequiph2hwepdamage_skip;//bow
+                if ((obj->Type()) == 42) goto getequiph2hwepdamage_skip;//crossbow
+                if ((obj->Type()) == 49) goto getequiph2hwepdamage_skip;//boomerang
+                if ((obj->Type()) == 50) goto getequiph2hwepdamage_skip;//triple crossbow!
+                if ((obj->Type()) == 49) goto getequiph2hwepdamage_skip;//boomerang
+                if ((obj->Type()) == 54) goto getequiph2hwepdamage_skip;//magic bow
+                weapondamage = (objectInfo[sprlnk[obj->Type()]].v1 + ENHANCEget_attack(obj));
             }
         }
     }
@@ -4905,7 +4904,7 @@ void horsedismount(object *myobj) {//forces npc to dismount horse
     myobj5 = tnpc2->horse;
     tnpc2->horse = NULL;
     OBJadd(myobj->x, myobj->y, myobj5);
-    if ((myobj->type & 1023) == 412) {
+    if ((myobj->Type()) == 412) {
         myobj5->type = myobj->type - 431 + 430 + 19;
     } else {
         myobj5->type = myobj->type - 431 + 430;
@@ -4983,7 +4982,8 @@ object *npc_to_obj(npc *tnpc, player *tplayer) { // find the object related to t
     return NULL;
 }
 
-unsigned long randomchestlocation(bool tmap) { //randomizes overland random treasurechest location and treasur emap chest locations
+unsigned long
+randomchestlocation(bool tmap) { //randomizes overland random treasurechest location and treasur emap chest locations
     static short x3, x2, y2;
     static long x8, y8;
     x3 = 1;
@@ -5075,19 +5075,23 @@ unsigned long randchestitem() { //random item types and quantity for treasure ch
 }
 
 void ENHANCEnewn(object *obj, unsigned short n, unsigned short n2) {
-    static long x, x2, x3;
+    static long v1, v2, x, x2, x3;
     static unsigned long temp;
     //EXCEPTIONS!
-    x2 = obj->type & 1023;
-    if (obji[sprlnk[x2]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64)) { //can be worn
-        if (obji[sprlnk[x2]].flags & 4096) return; //multiple
+    x2 = obj->Type();
+    if (objectInfo[sprlnk[x2]].flags & (1 + 2 + 4 + 8 + 16 + 32 + 64)) { //can be worn
+        if (objectInfo[sprlnk[x2]].flags & 4096) return; //multiple
         if (x2 == 78) return; //staff
         if (x2 == 79) return; //lightning
         if (x2 == 80) return; //fire
         if (x2 == 48) return; //glass sword
         if (x2 == 256) return; //protection ring
         if (x2 == 141) return; //decorative sword
-        if (x = obji[sprlnk[x2]].v2) { //armour
+
+        v1 = objectInfo[sprlnk[x2]].v1;
+        v2 = objectInfo[sprlnk[x2]].v2;
+
+        if (v1 || v2) { // weapon or armour
             obj->more2 &= 0xFFFFFF00;
             x = 0;
             temp = 0;
@@ -5108,131 +5112,133 @@ void ENHANCEnewn(object *obj, unsigned short n, unsigned short n2) {
                         temp /= n2;
                     }
                 }
-            }//x2
-            obj->more2 |= (x << 4);
-            //list2[x]++; //for debugging
+            }
+
+            if (v1) {
+                obj->more2 |= x;
+            }
+
+            if (v2) {
+                obj->more2 |= (x << 4);
+            }
             return;
-        }//armour
-        if (x = obji[sprlnk[x2]].v1) { //weapon
-            obj->more2 &= 0xFFFFFF00;
-            x = 0;
-            x2 = rnd * n;
-            if (x2 == 0) {
-                x++;
-                x3 = 1;
-                while ((x2 == 0) && (x != 15)) {
-                    temp = n2;
-                    x3++;
-                    while ((temp < 32769) && (x3 != 15)) {
-                        temp *= n2;
-                        x3++;
-                    }
-                    x2 = rnd * temp;
-                    while ((x2 < temp / n2) && (x != 15)) {
-                        x++;
-                        temp /= n2;
-                    }
-                }
-            }//x2
-            //list2[x]++; //for debugging
-            obj->more2 |= x;
-        }//weapon
+        }
     }//can be worn
 }//ENHANCEnew
 
+struct pos {
+    unsigned short x;
+    unsigned short y;
+};
+
+const pos HirelingLocations[] = {
+        {383, 406}, // britain
+        {404, 589}, // paws
+        {423, 733}, // trinsic
+        {157, 847}, // jhelom
+        {592, 930}, // serpent's hold
+        {926, 527}, // moonglow
+        {567, 615}, // buccaneer's den
+        {739, 691}, // new magincia
+        {233, 152}, // yew
+};
+
 /* adds new hireling npc to specified position, if there is a hireling already in that position do nothing*/
-void addhireling(unsigned long x3, schedule_i *sched) {
-    static unsigned long x, x2, x4, x5, x6;
-    static object *myobj, *myobj2;
+void addHireling(unsigned long hirelingIndex, schedule_i *sched) {
+    // Check that we are not out of bounds or if there is already a hireling in that position
+    if ((hirelingIndex > HIRELINGS_MAX) || (hirl_obj[hirelingIndex]))
+        return;
+
+    unsigned long tmpHirelingIndex = hirelingIndex;
+    static unsigned long x2, x4, x5, x6;
+    static object *newHirelingObj;
+    static object *hirelingBagObj;
     static file *tfh;
     static txt *t = txtnew();
-    ///NEW npc
-    if ((x3 > HIRELINGS_MAX) || (hirl_obj[x3])) { return; }
-    myobj = OBJnew();
-    x6 = x3;
+
+    //create new hireling object
+    newHirelingObj = OBJnew();
     x2 = rnd * 2; //x2=0 male 1=female
-    myobj->type = OBJ_AVATAR; //type
+    newHirelingObj->type = OBJ_AVATAR; //type
     OBJmove_allow = TRUE;
-    if (x3 >= 11) { x3 = rnd * 11; } //
-    if (x3 <= 1) { OBJmove2(myobj, 383, 406); }  //add to map, <-needs NPC pointer //britain
-    else if (x3 == 2) { OBJmove2(myobj, 404, 589); } //paws
-    else if (x3 == 3) { OBJmove2(myobj, 423, 733); } //trinsic
-    else if (x3 == 4) { OBJmove2(myobj, 157, 847); } //jhelom
-    else if (x3 == 5) { OBJmove2(myobj, 592, 930); } //serpent's hold
-    else if (x3 == 6 || x3 == 7) { OBJmove2(myobj, 926, 527); } //moonglow
-    else if (x3 == 8) { OBJmove2(myobj, 567, 615); } //buccaneer's den
-    else if (x3 == 9) { OBJmove2(myobj, 739, 691); } //new magincia
-    else if (x3 == 10) { OBJmove2(myobj, 233, 152); } //yew
+
+    while (tmpHirelingIndex >= 11) {
+        if (tmpHirelingIndex >= 11) tmpHirelingIndex = rnd * 11;
+
+        // For some reason 0-1 is brit and 6-7 is moonglow.
+        // I am wondering if there are two locations for hirelings
+        // in these locations.
+        if (hirelingIndex == 0 || hirelingIndex == 6) {
+            hirelingIndex++;
+        } else if (hirelingIndex >= 11) {
+            continue;
+        }
+
+        OBJmove2(newHirelingObj,
+                 HirelingLocations[hirelingIndex].x,
+                 HirelingLocations[hirelingIndex].y);
+    }
+
     OBJmove_allow = FALSE;
     tnpc = (npc *) malloc(sizeof(npc));
     ZeroMemory(tnpc, sizeof(npc));
 
-    myobj->more = tnpc;
-    myobj->info |= 2; //<-
+    newHirelingObj->more = tnpc;
+    newHirelingObj->info |= 2; //<-
 
+    int randPort = rnd * 6;
 
-    tnpc->port = 0;
-    //choose port based on x2
-    x3 = rnd * 6;
+    //choose port based on x2 (0,1) male of female
+    unsigned short malePorts[] = {194, 195, 197, 198, 202, 203};
+    unsigned short femalePorts[] = {196, 199, 200, 201, 204, 205};
+
     if (x2) {
-        if (x3 == 0) tnpc->port = 194;
-        if (x3 == 1) tnpc->port = 195;
-        if (x3 == 2) tnpc->port = 197;
-        if (x3 == 3) tnpc->port = 198;
-        if (x3 == 4) tnpc->port = 202;
-        if (x3 == 5) tnpc->port = 203;
+        tnpc->port = femalePorts[randPort];
     } else {
-        if (x3 == 0) tnpc->port = 196;
-        if (x3 == 1) tnpc->port = 199;
-        if (x3 == 2) tnpc->port = 200;
-        if (x3 == 3) tnpc->port = 201;
-        if (x3 == 4) tnpc->port = 204;
-        if (x3 == 5) tnpc->port = 205;
+        tnpc->port = malePorts[randPort];
     }
-
 
     tnpc->converse = 201;
     tnpc->name = txtnew();
 
     //select name for character
     //enumerate names
-    x3 = 0;
-    if (x2) tfh = open(".\\host\\female.txt"); else tfh = open(".\\host\\male.txt");
-    enunam_next:
-    txtfilein(t, tfh);
-    if (t->l) {
-        x3++;
-        goto enunam_next;
+    int txtLen = 0;
+    tfh = open(x2 ? ".\\host\\female.txt" : ".\\host\\male.txt");
+    while (txtfilein(t, tfh), t->l) {
+        txtLen++;
     }
     close(tfh);
-    x3 = rnd * x3;
-    if (x2) tfh = open(".\\host\\female.txt"); else tfh = open(".\\host\\male.txt");
-    for (x = 0; x <= x3; x++) {
+
+    int writeCount = rnd * txtLen;
+    tfh = open(x2 ? ".\\host\\female.txt" : ".\\host\\male.txt");
+    for (int x = 0; x <= writeCount; x++) {
         txtfilein(tnpc->name, tfh);
     }
     close(tfh);
 
     if (!sched) {
         newschedule2++;
-        for (x = 0; x <= 31; x++) schedule2[newschedule2][x].hour = 255;
+        for (int x = 0; x <= 31; x++)
+            schedule2[newschedule2][x].hour = 255;
         schedule2[newschedule2][0].hour = 1;
-        schedule2[newschedule2][0].x = myobj->x;
-        schedule2[newschedule2][0].y = myobj->y;
+        schedule2[newschedule2][0].x = newHirelingObj->x;
+        schedule2[newschedule2][0].y = newHirelingObj->y;
         schedule2[newschedule2][0].type = 0x8F;
         tnpc->schedule = &schedule2[newschedule2][0];
     } else {
-        sched->x = myobj->x;
-        sched->y = myobj->y;
+        sched->x = newHirelingObj->x;
+        sched->y = newHirelingObj->y;
         tnpc->schedule = sched;
     }
     tnpc->schedule_i = -1; //unknown
     tnpc->order = 2; //schedule
 
     //create an INVISIBLE container for player's items
-    myobj2 = OBJnew();
-    myobj2->type = OBJ_BAG; //bag (INVISIBLE)
-    tnpc->items = myobj2;
-    tnpc->baseitem = myobj2;
+    hirelingBagObj = OBJnew();
+    hirelingBagObj->type = OBJ_BAG; //bag (INVISIBLE)
+    tnpc->items = hirelingBagObj;
+    tnpc->baseitem = hirelingBagObj;
 
     tnpc->upflags |= 1; //full update
 
@@ -5244,8 +5250,7 @@ void addhireling(unsigned long x3, schedule_i *sched) {
         tnpc->strength = 16;
         tnpc->dexterity = 16;
         tnpc->intelligence = 16;
-    }
-    else {
+    } else {
         tnpc->strength = 8;
         tnpc->dexterity = 8;
         tnpc->intelligence = 8;
@@ -5287,7 +5292,7 @@ void addhireling(unsigned long x3, schedule_i *sched) {
         fbodytype_retry:
         x5 = rnd * 6;
         if (!bodytype[x5]) goto fbodytype_retry;
-        myobj->type = bodytype[x5];
+        newHirelingObj->type = bodytype[x5];
     } else { //male
         bodytype[0] = OBJ_FIGHTER;
         bodytype[1] = OBJ_SWASHBUCKLER;
@@ -5301,13 +5306,12 @@ void addhireling(unsigned long x3, schedule_i *sched) {
         if (x4) {
             bodytype[3] = 0;
             bodytype[4] = 0;
-        }
-        else { bodytype[6] = 0; }
+        } else { bodytype[6] = 0; }
         if ((tnpc->dexterity < tnpc->strength) && (tnpc->dexterity < tnpc->intelligence)) bodytype[5] = 0;
         mbodytype_retry:
         x5 = rnd * 7;
         if (!bodytype[x5]) goto mbodytype_retry;
-        myobj->type = bodytype[x5];
+        newHirelingObj->type = bodytype[x5];
         /*
     Honesty (Truth - Mage) i3
     Compassion (Love - Bard)  d3
@@ -5327,7 +5331,7 @@ void addhireling(unsigned long x3, schedule_i *sched) {
     #define U6O_HUMILITY farmer
     */
     }
-    hirl_obj[x6] = myobj;
+    hirl_obj[x6] = newHirelingObj;
     hirl_wait[x6] = 8192.0f + rnd * 8192.0f; //default values ~2 to ~4h
     //hirl_wait[x6]=150.0f+rnd*150.0f; //debug
 }

@@ -19,6 +19,7 @@ long bl; //length of current buffer
 
 //basic operations
 txt* txtnew();
+txt *txtNew(const char *d);
 void txtNEWLEN(txt*t,long l);
 void txtset(txt*t,const char*d);
 void txtset(txt*t,txt*t2);

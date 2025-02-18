@@ -18,6 +18,12 @@ txt* txtnew() //*externally available
   return t;
 }
 
+txt *txtNew(const char *d) {
+  txt *t = txtnew();
+  txtset(t, d);
+  return t;
+}
+
 void txtNEWLEN(txt*t,long l) //*externally available
 {
   bool keepmem;
@@ -339,7 +345,7 @@ void txtfilein(txt* t,file* f)
   static unsigned char b[1024];
   static long i,i2,i3,l;
   i=seek(f);
-  l=lof(f);
+  l=fileLen(f);
   if (i>=l)
   {
     txtNEWLEN(t,0);

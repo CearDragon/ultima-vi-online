@@ -423,7 +423,7 @@ int getobjtypen1(player* tplayer, int mapx, int mapy) {
 		*/
 
 	} //else {
-		//if (obji[sprlnk[objtype & 1023]].v4 == 1) //"avatar"
+		//if (objectInfo[sprlnk[objtype & 1023]].v4 == 1) //"avatar"
 			//objtype = OBJ_AVATAR;
 	//}
 
@@ -445,7 +445,7 @@ int getobjtypen1(player* tplayer, int mapx, int mapy) {
 						//if (tplayer->mv_flags[i] & MV_PARALYZE) keyframe = 0;
 						//check if sleeping
 						//if (tplayer->mv_flags[i] & MV_SLEEP) {
-						z3 = myobj->type & 1023; z2 = 0;
+						z3 = myobj->Type(); z2 = 0;
 						//	if (z3 == 376) z2 = 339 + 6 * 1024;
 						//}
 						txtset(t3, "[");
@@ -931,7 +931,7 @@ unsigned short objgettype(unsigned short type,unsigned char dir,unsigned char fr
   case OBJ_BALLOON:
     return type+3*1024;//hot air balloon
   }
-  switch (obji[sprlnk[type]].v4) {
+  switch (objectInfo[sprlnk[type]].v4) {
     case 1: //"avatar"
       return type+(dir<<12)+((frm&3)<<10);
     case 4: //"rabbit"
@@ -957,7 +957,7 @@ unsigned char objgetnextframe(unsigned short type,unsigned char frm){
     case OBJ_CYCLOPS:
       frm++; if (frm>1) frm=0;
   }
-  switch (obji[sprlnk[type]].v4) {
+  switch (objectInfo[sprlnk[type]].v4) {
     case 1://"avatar" type
       if (frm&128){//special frame check
 	frm=0; return frm;
@@ -1527,7 +1527,7 @@ long getsetting(const char*d){
   if (tfh->h!=HFILE_ERROR){
 getsetting_readnextline:
     i3=seek(tfh);
-    if (i3<lof(tfh)){
+    if (i3<fileLen(tfh)){
       txtfilein(t,tfh);
       if (t->l){
 	txtset(t2,"{"); i=txtsearch(t,t2); txtright(t,t->l-i);

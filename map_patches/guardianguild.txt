@@ -950,6 +950,10 @@ housestoragex[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchx+128
 housestoragey[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchy+333;
 housestoragenext[basehousenumber+0]++;
 
+#ifdef CONSOLE
+    _cprintf("guardian guild base house number %d\n", basehousenumber);
+#endif
+
 OBJaddnew(1288,332,210+1024*0,0,0);
 
 OBJaddnew(1288,331,210+1024*0,0,0);
@@ -1089,4 +1093,7 @@ housestoragenext[basehousenumber+26]++;
 housenumber=basehousenumber+26; houseinitialcost[housenumber]=1; housecost[housenumber]=1;
 houseentrancex[basehousenumber+26]=368; houseentrancey[basehousenumber+26]=386;
 
+#ifdef CONSOLE
+    _cprintf("guardian guild base house number %d\n", basehousenumber);
+#endif
 }//NEThost

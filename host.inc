@@ -21,16 +21,11 @@ for (x=0;x<=4;x++){ for (y=0;y<=4;y++){
 	orby[x][y]=386;
 }}
 //outer circle
-orbx[0][0]=899;
-orby[0][0]=499;
-orbx[1][0]=935;
-orby[1][0]=262;
-orbx[2][0]=435;
-orby[2][0]=395;
-orbx[3][0]=503;
-orby[3][0]=358;
-orbx[4][0]=147;
-orby[4][0]=883;
+orbx[0][0]=899; orby[0][0]=499;
+orbx[1][0]=935; orby[1][0]=262;
+orbx[2][0]=435; orby[2][0]=395;
+orbx[3][0]=503; orby[3][0]=358;
+orbx[4][0]=147; orby[4][0]=883;
 orbx[4][1]=159;
 orby[4][1]=942;
 orbx[4][2]=227;
@@ -66,13 +61,31 @@ orbx[2][3]=1132;
 orby[2][3]=477;
 orbx[1][3]=1152;
 orby[1][3]=342;
+
 //25 locations=25 bits used out of 32, only 1 global flag needs alloocation
-tfh=open(".\\host\\crtenum.bin"); get(tfh,&crtenum,1073*2); close(tfh);
+tfh=open(".\\host\\crtenum.bin");
+get(tfh,&crtenum,1073*2);
+close(tfh);
+
 u6orevive_fh=open(".\\host\\revive.bin");
-motd=txtnew(); tfh=open("motd.txt"); txtfilein(motd,tfh); close(tfh);
-tfh=open(".\\host\\sc888.raw"); get(tfh,&stormcloak_mask,64); close(tfh);
-tfh=open(".\\host\\u6bt.flg"); get(tfh,&btflags,lof(tfh)); close(tfh);
-FillMemory(&objpassflags,sizeof(objpassflags),1); tfh=open(".\\host\\objpass.flg"); get(tfh,&objpassflags,lof(tfh)); close(tfh);
+
+motd=txtnew();
+tfh=open("motd.txt");
+txtfilein(motd,tfh);
+close(tfh);
+
+tfh=open(".\\host\\sc888.raw");
+get(tfh,&stormcloak_mask,64);
+close(tfh);
+
+tfh=open(".\\host\\u6bt.flg");
+get(tfh,&btflags,fileLen(tfh));
+close(tfh);
+
+FillMemory(&objpassflags,sizeof(objpassflags),1);
+tfh=open(".\\host\\objpass.flg");
+get(tfh,&objpassflags,fileLen(tfh));
+close(tfh);
 //update flags for world map (based on basetiles)
 for (y=0;y<1024;y++){ for (x=0;x<2048;x++){
 	OBJcheckflags(x,y);
@@ -84,9 +97,9 @@ for (y=0;y<1024;y++){ for (x=0;x<2048;x++){
 
 
 
-tfh=open(".\\host\\schedule.bin"); get(tfh,&schedule,lof(tfh));
+tfh=open(".\\host\\schedule.bin"); get(tfh,&schedule,fileLen(tfh));
 //fix indexing
-i3=lof(tfh)/8/32-1;
+i3=fileLen(tfh)/8/32-1;
 for (i2=0;i2<=i3;i2++){
 	for (i=0;i<=31;i++){
 		if (schedule[i2][i].hour!=255){
@@ -102,28 +115,34 @@ for (i2=0;i2<=i3;i2++){
 	}
 }
 close(tfh);
-tfh=open(".\\host\\npcobj.bin"); get(tfh,&npcobj,lof(tfh)); close(tfh);
+
+///////// npc
+
+tfh=open(".\\host\\npcobj.bin"); get(tfh,&npcobj,fileLen(tfh)); close(tfh);
 
 tfh=open(".\\host\\objname.bin");
-objname=(unsigned long*)malloc(lof(tfh));
+objname=(unsigned long*)malloc(fileLen(tfh));
 objname2=(unsigned char*)objname;
-get(tfh,objname,lof(tfh)); close(tfh);
-
-tfh=open(".\\host\\sign.bin");
-tsign=(unsigned long*)malloc(lof(tfh));
-tsign2=(unsigned char*)tsign;
-get(tfh,tsign,lof(tfh)); close(tfh);
-
+get(tfh,objname,fileLen(tfh)); close(tfh);
 
 //load converse
 tfh=open(".\\host\\npc.bin");
-npcbin=(npcbin_i*)malloc(lof(tfh));
-get(tfh,npcbin,lof(tfh)); close(tfh);
+npcbin=(npcbin_i*)malloc(fileLen(tfh));
+get(tfh,npcbin,fileLen(tfh)); close(tfh);
 tfh=open(".\\host\\npc.inf");
-npcinf=(unsigned char*)malloc(lof(tfh));
-get(tfh,npcinf,lof(tfh)); close(tfh);
+npcinf=(unsigned char*)malloc(fileLen(tfh));
+get(tfh,npcinf,fileLen(tfh)); close(tfh);
 tfh=open(".\\host\\npci.bin");
-get(tfh,&npci,lof(tfh)); close(tfh);
+get(tfh,&npci,fileLen(tfh)); close(tfh);
+
+/////// signs
+
+tfh=open(".\\host\\sign.bin");
+tsign=(unsigned long*)malloc(fileLen(tfh));
+tsign2=(unsigned char*)tsign;
+get(tfh,tsign,fileLen(tfh)); close(tfh);
+
+////// I think this is world map data ?
 
 txtset(t,"  ");
 txtset(t2,".\\ultima6\\savegame\\objblk");
@@ -136,49 +155,68 @@ yyyi:
 		tfh=open(t3);
 		i=0; get(tfh,&i,2);
 		if (i>0){
-			get(tfh,&ol[oln],lof(tfh)-2);
+			get(tfh,&objectList[oln],fileLen(tfh)-2);
 			oln+=i;
 		}
 		close(tfh);
-		if ((y==7)&&(x<=4)) {y++; goto yyyi;}
-	}}
+		if ((y==7)&&(x<=4)) {
+		    y++;
+		    goto yyyi;
+		}
+	}
+}
 
 
 //first pass
 for (i=oln-1;i>=0;i--){
-	x=ol[i].unk_h; //get coordinates x,y
-	y=ol[i].unk_d1;
+	x=objectList[i].unk_h; //get coordinates x,y
+	y=objectList[i].unk_d1;
 	x=x+(y&3)*256; y=y/4; //fix coordinates
-	y=y+(ol[i].unk_d2&15)*64;
-	i6=ol[i].unk_d2>>4; //i6<-level
-	if (x<1024){ if (y<1024){ //avoid non-coordinate based objects
-		if (i6==1) x=x+1024; //set U6O pos
-		if (i6==2) x=x+1024+256;
-		if (i6==3) x=x+1024+256*2;
-		if (i6==4) x=x+1024+256*3;
-		if (i6==5) {x=x+1024; y=y+256;}
-		i2=ol[i].type&1023; //get object identity
-		x2=0;
-		if ((i2>=29)&&(i2<=32)) x2=1; //overlay floors
-		if (i2==229) x2=1; //shadow
-		if (i2==231) x2=1;
-		if (i2==238) x2=1;
-		if (i2==240) x2=1;
-		if (i2==251) x2=1;
-		if (i2==260) x2=1;
-		if (i2==262) x2=1;
-		if ((i2==303)&&(x==122)&&(y==196)) x2=1; //carpet
-		//*the healers bed has a table object on top!
-		if (x2){
-			myobj=OBJnew();
-			myobj->type=ol[i].type;
-			OBJadd(x,y,myobj);
-			x2=ol[i].type>>10;
-			i3=sprlnk[i2];
-			i3+=x2;
-			i4=i3;
-			myobj2=myobj;
-		}
+	y=y+(objectList[i].unk_d2&15)*64;
+	i6=objectList[i].unk_d2>>4; //i6<-level
+	if (x<1024){
+	    if (y<1024){ //avoid non-coordinate based objects
+            switch (i6) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                x = x + 1024 + ((i6 - 1) * 256);
+            case 5:
+                x = x + 1024;
+                y = y + 256;
+            }
+
+            i2 = objectList[i].type & 1023; //get object identity
+
+		    if (i6==1) x=x+1024; //set U6O pos
+		    if (i6==2) x=x+1024+256;
+		    if (i6==3) x=x+1024+256*2;
+		    if (i6==4) x=x+1024+256*3;
+		    if (i6==5) {x=x+1024; y=y+256;}
+		    i2 = objectList[i].type & 1023; //get object identity
+		    x2=0;
+		    if ((i2>=29)&&(i2<=32)) x2=1; //overlay floors
+		    if (i2==229) x2=1; //shadow
+		    if (i2==231) x2=1;
+		    if (i2==238) x2=1;
+		    if (i2==240) x2=1;
+		    if (i2==251) x2=1;
+		    if (i2==260) x2=1;
+		    if (i2==262) x2=1;
+		    if ((i2==303)&&(x==122)&&(y==196)) x2=1; //carpet
+
+		    //*the healers bed has a table object on top!
+		    if (x2) {
+			    myobj=OBJnew();
+			    myobj->type=objectList[i].type;
+			    OBJadd(x,y,myobj);
+			    x2=objectList[i].type>>10;
+			    i3=sprlnk[i2];
+			    i3+=x2;
+			    i4=i3;
+			    myobj2=myobj;
+		    }
 	}} //x<1024,y<1024
 } //i
 //first pass end
@@ -189,14 +227,14 @@ static unsigned long ox,oy;
 
 //add objects to the map
 for (i=oln-1;i>=0;i--){
-	i2=ol[i].type&1023; //get object identity
+	i2=objectList[i].type&1023; //get object identity
 	if (i2>431) exit(901); //invalid range
 
 	x2=0; //skip objects
 	if (i2==397) x2=1; //minax, exodus, mondain
 	if (i2==398) x2=1;
 	if (i2==399) x2=1;
-	if ((i2==412)&&((ol[i].type>>13)!=1)) x2=1; //non-core parts of boat
+	if ((i2==412)&&((objectList[i].type>>13)!=1)) x2=1; //non-core parts of boat
 	if (i2==337) x2=1; //effect
 	if (i2==248) x2=1; //rune of spirituality!
 	if (i2==242) x2=1; //rune of honesty!
@@ -207,31 +245,31 @@ for (i=oln-1;i>=0;i--){
 
 
 	if (i2==173){
-		ol[i].status=0; //trap
+		objectList[i].status=0; //trap
 	}
 
 
 	if (x2) goto skipobj;
 
-	if ((ol[i].status&16)==0){ //16=object in party inventory *skip
+	if ((objectList[i].status&16)==0){ //16=object in party inventory *skip
 
-		if (ol[i].status&8){ //8=container
+		if (objectList[i].status&8){ //8=container
 			//object in a container
 			//2003: note: first pass objects won't be inside containers! check unnecessary
 			myobj=OBJnew();
-			myobj->type=ol[i].type;
-			if ((ol[i].status&1)==0) myobj->info|=128; //128 1=stealing, 0=ok to take
-			if (obji[sprlnk[myobj->type&1023]].v4) myobj->more2=i; //*temp reference value
-			if (obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){
-				myobj->more2=ol[i].qty; //set quantity in more2
+			myobj->type=objectList[i].type;
+			if ((objectList[i].status&1)==0) myobj->info|=128; //128 1=stealing, 0=ok to take
+			if (objectInfo[sprlnk[myobj->type&1023]].v4) myobj->more2=i; //*temp reference value
+			if (objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){
+				myobj->more2=objectList[i].qty; //set quantity in more2
 				if (myobj->more2==0) myobj->more2=1;
 			}
 			if ((myobj->type&1023)==64){ //key, set type!
-				myobj->more2=ol[i].tag; //more2<-
+				myobj->more2=objectList[i].tag; //more2<-
 			}
 
 			if ((myobj->type&1023)==58){ //spell, set type!
-				myobj->more2=ol[i].tag; //more2<-
+				myobj->more2=objectList[i].tag; //more2<-
 				if (spellname[myobj->more2]->l==0) myobj->more2=(0<<4)+7;
 			}
 
@@ -239,35 +277,35 @@ for (i=oln-1;i>=0;i--){
 			//if ((myobj->type>=242)&&(myobj->type<=249)) myobj->info|=256; //rune <-quest item
 
 			if ((myobj->type&1023)==332){ //sign
-				myobj->more2=ol[i].tag; //more2<-
+				myobj->more2=objectList[i].tag; //more2<-
 			}
 			if ((myobj->type&1023)==333){ //gargoyle sign
-				myobj->more2=ol[i].tag; //more2<-
+				myobj->more2=objectList[i].tag; //more2<-
 			}
 			if ((myobj->type&1023)==152){ //scroll
-				myobj->more2=ol[i].tag; //more2<-
+				myobj->more2=objectList[i].tag; //more2<-
 			}
 			if ((myobj->type&1023)==143){ //picture
-				myobj->more2=ol[i].tag; //more2<-
+				myobj->more2=objectList[i].tag; //more2<-
 			}
 			if ((myobj->type&1023)==151){ //book
-				myobj->more2=ol[i].tag; //more2<-
+				myobj->more2=objectList[i].tag; //more2<-
 			}
 			if ((myobj->type&1023)==333){ //gsign
-				myobj->more2=ol[i].tag; //more2<-
+				myobj->more2=objectList[i].tag; //more2<-
 			}
 			if ((myobj->type&1023)==59){ //codex
 				myobj->more2=128;
 			}
 			if ((myobj->type&1023)==61){ //circles
-				myobj->more2=ol[i].tag; //more2<-
+				myobj->more2=objectList[i].tag; //more2<-
 			}
 
 			if ((myobj->type&1023)==254){ //cross
-				myobj->more2=ol[i].tag; //more2<-
+				myobj->more2=objectList[i].tag; //more2<-
 			}
 			if ((myobj->type&1023)==255){ //tombstone
-				myobj->more2=ol[i].tag; //more2<-
+				myobj->more2=objectList[i].tag; //more2<-
 			}
 
 			if (newll==NULL){ //newll is a linked list, object is added to the start of this list
@@ -283,13 +321,13 @@ for (i=oln-1;i>=0;i--){
 		} //8
 	} //16
 
-	if (ol[i].status<=1){ //not in container, not party member item
+	if (objectList[i].status<=1){ //not in container, not party member item
 
-		x=ol[i].unk_h; //get coordinates x,y
-		y=ol[i].unk_d1;
+		x=objectList[i].unk_h; //get coordinates x,y
+		y=objectList[i].unk_d1;
 		x=x+(y&3)*256; y=y/4; //fix coordinates
-		y=y+(ol[i].unk_d2&15)*64;
-		i6=ol[i].unk_d2>>4; //i6<-level
+		y=y+(objectList[i].unk_d2&15)*64;
+		i6=objectList[i].unk_d2>>4; //i6<-level
 		if (x<1024){ if (y<1024){
 			if (i6==1) x=x+1024; //set U6O pos
 			if (i6==2) x=x+1024+256;
@@ -320,9 +358,9 @@ for (i=oln-1;i>=0;i--){
 
 				//add basic object
 				myobj=OBJnew();
-				myobj->type=ol[i].type;
+				myobj->type=objectList[i].type;
 				if (x<1024){
-					if ((ol[i].status&1)==0) myobj->info|=128; //128 1=stealing, 0=ok to take
+					if ((objectList[i].status&1)==0) myobj->info|=128; //128 1=stealing, 0=ok to take
 				}
 
 				if ((x>=288)&&(x<=326)&&(y>=344)&&(y<=382)) myobj->info|=128; //castle
@@ -342,7 +380,7 @@ for (i=oln-1;i>=0;i--){
 
 
 				ol_tag_prev=ol_tag;
-				ol_tag=ol[i].tag;
+				ol_tag=objectList[i].tag;
 
 				//if (ol_tag_prev==0xe){
 				//txtnumint(t5,ol_tag_prev);
@@ -358,7 +396,7 @@ for (i=oln-1;i>=0;i--){
 					newll->prev=myobj;
 
 					myobj2=newll;
-castle_obj:
+                    //castle_obj:
 					if ((x>=288)&&(x<=326)&&(y>=344)&&(y<=382)) myobj2->info|=128; //castle
 					if ((x==138)&&(y==185)) myobj2->info|=128; //abby loot
 					if ((x==140)&&(y==185)) myobj2->info|=128; //abby loot
@@ -372,15 +410,19 @@ castle_obj:
 						myobj2->info|=128;
 					}
 					if ((x>=1940)&&(x<=1954)&&(y>=212)&&(y<=218)){ //treasure room
-						if (obji[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].flags&4096){
+						if (objectInfo[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].flags&4096){
 							myobj2->more2/=4; if (myobj2->more2==0) myobj2->more2=1;
 						}
 					}
 
-					if ((x==1642)&&(y==64)) myobj2->more2=10; //gold nuggets in theif's house
+					if ((x==1642)&&(y==64))
+						myobj2->more2=10; //gold nuggets in theif's house
 
 					ENHANCEnewn(myobj2,8,4);
-					if (myobj2->next) {myobj2=(object*)myobj2->next; goto castle_obj;}
+					if (myobj2->next) {
+						myobj2=(object*)myobj2->next;
+						goto castle_obj;
+					}
 
 
 
@@ -397,19 +439,19 @@ castle_obj:
 
 
 						myobj2=newll;
-extractobj2:
+                        // extractobj2:
 						myobj4=(object*)myobj2->next;
 
 
 
-						z2=ol[myobj2->more2].qty;
+						z2=objectList[myobj2->more2].qty;
 						if (z2==0) z2=1;
 						if (z2>8) z2=8;
 						if (z2>2){
 							z2=int((z2-2)/2)+2;
 						}
 
-multiple_enemy:
+                        // multiple_enemy:
 						z2--;
 						if (z2){
 							myobj5=OBJnew();
@@ -423,7 +465,7 @@ multiple_enemy:
 						myobj2->prev=NULL;
 
 
-						if (obji[sprlnk[myobj2->type&1023]].v4){
+						if (objectInfo[sprlnk[myobj2->type&1023]].v4){
 							y8=1;
 							x8=myobj2->type&1023;
 							//EXCLUDE tandglevines(365), reapers(347),squid&serpent(345&346),413(silver serp),2part movers(426-431)
@@ -436,13 +478,13 @@ multiple_enemy:
 							if (y8){
 								//check original square for a crt
 								if (myobj3=od[y][x]){
-spreadoutchecknext:
+                                    // spreadoutchecknext:
 									if (myobj3->info&4) goto spreadoutcrt;
 									if (myobj3->next){myobj3=(object*)myobj3->next; goto spreadoutchecknext;}
 								}
 								goto spreadoutcrtnotneeded;
 								//spread out
-spreadoutcrt:
+                                // spreadoutcrt:
 								static unsigned short spreadoutx[32];
 								static unsigned short spreadouty[32];
 								static long spreadouti;
@@ -464,15 +506,16 @@ spreadoutcrt:
 								}}
 								if (spreadouti==0) goto spreadoutcrtnotneeded;
 								spreadouti=rnd*spreadouti;
-								OBJadd(spreadoutx[spreadouti],spreadouty[spreadouti],myobj2); goto scatteradd;
+								OBJadd(spreadoutx[spreadouti],spreadouty[spreadouti],myobj2);
+								goto scatteradd;
 							}
 						}//.v4
-spreadoutcrtnotneeded:
+                        // spreadoutcrtnotneeded:
 
 
 						//scatter if stationary enemy
 						if (((myobj2->type&1023)==365)||((myobj2->type&1023)==347)){
-scatter_retry:
+                            // scatter_retry:
 							x8=x+(unsigned short)(rnd*7)-3; y8=y+(unsigned short)(rnd*7)-3;
 							if (od[y8][x8]) goto scatter_retry;
 							OBJcheckflags(x8,y8);
@@ -483,15 +526,15 @@ scatter_retry:
 
 						//if ((myobj2->type&1023)==352) {OBJadd(x+(unsigned short)(rnd*7)-3,y+(unsigned short)(rnd*7)-3,myobj2); goto scatteradd;} //ghost
 						OBJadd(x,y,myobj2);
-scatteradd:
+                        // scatteradd:
 
-						if (obji[sprlnk[myobj2->type&1023]].v4==0){ //gold nugget(s)/reagent(s)/..
+						if (objectInfo[sprlnk[myobj2->type&1023]].v4==0){ //gold nugget(s)/reagent(s)/..
 							myobj2->info=0;
 							z=myobj2->more2; z=rnd*(z+1); if (z==0) z=1;
 							myobj2->more2=z;
 						}
 
-						if (obji[sprlnk[myobj2->type&1023]].v4){//check if egg/spawn item is a monster
+						if (objectInfo[sprlnk[myobj2->type&1023]].v4){//check if egg/spawn item is a monster
 
 							//2006: use movernew(unsigned short type,unsigned short x,unsigned short y,unsigned long flags)
 							x8=myobj2->x; y8=myobj2->y;
@@ -508,322 +551,10 @@ scatteradd:
 							//exit(78);
 						}
 
-						/*
-
-
-						myobj2->more=malloc(sizeof(creature));
-						ZeroMemory(myobj2->more,sizeof(creature));
-						crt=(creature*)myobj2->more;
-						crt->crt_struct=TRUE;
-
-						//OLD VERSION
-						//crt->hp=obji[sprlnk[myobj2->type&1023]].v5*8;
-						//if (crt->hp<8) crt->hp=8; //*unknown
-
-						crt->hp=(obji[sprlnk[myobj2->type&1023]].v8>>8)*4;
-						crt->mp=rnd*9;
-
-						//if (crt->hp==(150*8)){
-						//txtnumint(t5,crt->hp);
-						//MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
-						//}
-
-
-						//if ((myobj2->type&1023)==384){
-						//txtnumint(t5,x);
-						//MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
-						//txtnumint(t5,y);
-						//MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
-						//}
-
-
-						z=1; //passive?
-						if ((myobj2->type&1023)==382){ //guard
-						if (x<1024) z=4; //not underground
-						}
-						if ((myobj2->type&1023)==373) z=0; //wisp
-						if ((myobj2->type&1023)==430) z=0; //horse
-						if ((myobj2->type&1023)==428) z=0; //cow
-						if ((myobj2->type&1023)==356) z=0; //bird
-						if ((myobj2->type&1023)==348) z=0; //sheep
-						if ((myobj2->type&1023)==350) z=0; //deer
-
-						if ((myobj2->type&1023)==388){ //cat
-						if ((x==402)&&(y==583)) z=0; //Dr Cat's cats
-						}
-
-						if ((myobj2->type&1023)==352){ //ghost
-						if ((x==139)&&(y==196)) z=0; //abby ghosts
-						}
-
-
-						crt->al=z;
-						//if (rnd*4.0f<1.0f) crt->al=4; //*************************************
-
-
-						myobj9=OBJnew(); myobj9->type=188; crt->items=myobj9; //(not included)bag
-
-						//add gold
-						if (crt->al==1){
-						x9=obji[sprlnk[myobj2->type&1023]].v5>>2;
-						//x9++; //plus 1 for rookie luck
-						x9=rnd*(x9+1);
-						if (x9){
-						myobj8=OBJnew(); myobj8->type=88; myobj8->more2=x9;
-						//items<-gold
-						myobj6=crt->items; myobj7=(object*)myobj6->more;
-						if (myobj7!=NULL){
-						myobj8->next=myobj7; myobj7->prev=myobj8; myobj8->prev=myobj6; myobj6->more=myobj8;
-						}else{
-						myobj8->next=NULL; myobj8->prev=myobj6; myobj6->more=myobj8;
-						}
-						}//x9
-						}//al==1
-						//add meat
-						if (((myobj2->type&1023)==428)||((myobj2->type&1023)==348)||((myobj2->type&1023)==350)){//cow&sheep&deer
-						x9=rnd*2; if (x9){
-						myobj8=OBJnew(); myobj8->type=129; myobj8->more2=1; //<-meat
-						myobj6=crt->items; myobj7=(object*)myobj6->more;
-						if (myobj7!=NULL){
-						myobj8->next=myobj7; myobj7->prev=myobj8; myobj8->prev=myobj6; myobj6->more=myobj8;
-						}else{
-						myobj8->next=NULL; myobj8->prev=myobj6; myobj6->more=myobj8;
-						}
-						}//x9
-						}//cow
-
-
-						//if ((myobj2->type&1023)==349) z=0; //dog
-
-
-
-						myobj2->info|=4; //<-crt
-						}
-
-
-
-
-						if (obji[sprlnk[myobj2->type&1023]].v4==8){ //2-part creature
-						myobj3=OBJnew(); myobj3->more=myobj2;
-						myobj3->type=myobj2->type+8*1024; myobj3->info|=8; //<-base object
-						OBJadd(x,y+1,myobj3);
-						crt->more=myobj3;
-
-						//sutek's animals
-						z=0;
-						if ((x>=747)&&(x<=829)&&(y>=905)&&(y<=983)) z=1; //on island
-						if ((x>=792)&&(x<=796)&&(y>=937)&&(y<=938)) z=0; //in cage
-						if (z) crt->hp*=4;
-
-						}
-
-						if (obji[sprlnk[myobj2->type&1023]].v4==5){ //cyclops/winged gargoyle
-
-						static mlobj *mmyobj; //array size varies
-						mmyobj=(mlobj*)malloc(sizeof(object*)*3);
-						crt->more=mmyobj;
-						myobj2->type=(myobj2->type&1023)+3*1024;
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[0]=myobj3;
-						myobj3->type=myobj2->type-3*1024; myobj3->info|=8; //<-base object
-						OBJadd(x-1,y-1,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[1]=myobj3;
-						myobj3->type=myobj2->type-2*1024; myobj3->info|=8; //<-base object
-						OBJadd(x,y-1,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[2]=myobj3;
-						myobj3->type=myobj2->type-1*1024; myobj3->info|=8; //<-base object
-						OBJadd(x-1,y,myobj3);
-
-						//crt->more=myobj3;
-
-
-						}
-
-
-						if (obji[sprlnk[myobj2->type&1023]].v4==11){ //hydra
-
-						static mlobj *mmyobj; //array size varies
-						mmyobj=(mlobj*)malloc(sizeof(object*)*8);
-						crt->more=mmyobj;
-						//myobj2->type=(myobj2->type&1023)+3*1024;
-
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[0]=myobj3;
-						myobj3->type=425+28*1024; myobj3->info|=8; //<-base object
-						OBJadd(x-1,y-1,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[1]=myobj3;
-						myobj3->type=425+0*1024; myobj3->info|=8; //<-base object
-						OBJadd(x,y-1,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[2]=myobj3;
-						myobj3->type=425+4*1024; myobj3->info|=8; //<-base object
-						OBJadd(x+1,y-1,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[3]=myobj3;
-						myobj3->type=425+8*1024; myobj3->info|=8; //<-base object
-						OBJadd(x+1,y,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[4]=myobj3;
-						myobj3->type=425+12*1024; myobj3->info|=8; //<-base object
-						OBJadd(x+1,y+1,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[5]=myobj3;
-						myobj3->type=425+16*1024; myobj3->info|=8; //<-base object
-						OBJadd(x,y+1,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[6]=myobj3;
-						myobj3->type=425+20*1024; myobj3->info|=8; //<-base object
-						OBJadd(x-1,y+1,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[7]=myobj3;
-						myobj3->type=425+24*1024; myobj3->info|=8; //<-base object
-						OBJadd(x-1,y,myobj3);
-
-						}
-
-
-						if (obji[sprlnk[myobj2->type&1023]].v4==10){ //silver serpent
-
-						static mlobj *mmyobj; //array size varies
-						mmyobj=(mlobj*)malloc(sizeof(object*)*7);
-						crt->more=mmyobj;
-						myobj2->type=(myobj2->type&1023)+4*1024;
-
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[0]=myobj3;
-						myobj3->type=myobj2->type+8*1024; myobj3->info|=8; //<-base object
-						OBJadd(x,y-1,myobj3);
-
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[1]=myobj3;
-						myobj3->type=myobj2->type+7*1024; myobj3->info|=8; //<-base object
-						OBJadd(x-1,y-1,myobj3);
-
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[2]=myobj3;
-						myobj3->type=myobj2->type+6*1024; myobj3->info|=8; //<-base object
-						OBJadd(x-1,y,myobj3);
-
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[3]=myobj3;
-						myobj3->type=myobj2->type+9*1024; myobj3->info|=8; //<-base object
-						OBJadd(x,y,myobj3);
-
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[4]=myobj3;
-						myobj3->type=myobj2->type+8*1024; myobj3->info|=8; //<-base object
-						OBJadd(x,y-1,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[5]=myobj3;
-						myobj3->type=myobj2->type+7*1024; myobj3->info|=8; //<-base object
-						OBJadd(x-1,y-1,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[6]=myobj3;
-						myobj3->type=myobj2->type-3*1024; myobj3->info|=8; //<-base object
-						OBJadd(x-1,y,myobj3);
-
-
-
-						//crt->more=myobj3;
-
-
-						}
-
-						if (obji[sprlnk[myobj2->type&1023]].v4==9){ //dragon
-
-						static mlobj *mmyobj; //array size varies
-						mmyobj=(mlobj*)malloc(sizeof(object*)*4);
-						crt->more=mmyobj;
-						myobj2->type=411; //(myobj2->type&1023)+3*1024;
-
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[0]=myobj3;
-						myobj3->type=myobj2->type+8*1024; myobj3->info|=8; //<-base object
-						OBJadd(x,y-1,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[1]=myobj3;
-						myobj3->type=myobj2->type+16*1024; myobj3->info|=8; //<-base object
-						OBJadd(x,y+1,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[2]=myobj3;
-						myobj3->type=myobj2->type+24*1024; myobj3->info|=8; //<-base object
-						OBJadd(x-1,y,myobj3);
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[3]=myobj3;
-						myobj3->type=myobj2->type+32*1024; myobj3->info|=8; //<-base object
-						OBJadd(x+1,y,myobj3);
-
-						//crt->more=myobj3;
-
-
-						}
-
-						if (obji[sprlnk[myobj2->type&1023]].v4==13){ //tangle vine
-
-						static mlobj *mmyobj; //array size varies
-						mmyobj=(mlobj*)malloc(sizeof(object*)*4);
-						crt->more=mmyobj;
-						myobj2->type=365; //(myobj2->type&1023)+3*1024;
-
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[0]=myobj3;
-						myobj3->type=366+1*1024; //myobj3->info|=8; //<-base object
-						OBJadd(myobj2->x,myobj2->y-1,myobj3);
-						//myobj3->info|=4; myobj3->more=crt; //myobj2->more;
-						myobj3->more=malloc(sizeof(creature));
-						ZeroMemory(myobj3->more,sizeof(creature));
-						crt2=(creature*)myobj3->more;
-						crt2->crt_struct=TRUE;
-						crt2->al=crt->al;
-						crt2->hp=32767; //maximum allowed
-						crt2->mp=0;
-						crt2->more=myobj2;
-						myobj3->info|=4; //<-crt
-						crt2->respawn_hp=crt2->hp; crt2->respawn_x=myobj3->x; crt2->respawn_y=myobj3->y;
-
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[1]=myobj3;
-						myobj3->type=366+1*1024; //myobj3->info|=8; //<-base object
-						OBJadd(myobj2->x,myobj2->y+1,myobj3);
-						//myobj3->info|=4; myobj3->more=crt; //myobj2->more;
-						myobj3->more=malloc(sizeof(creature));
-						ZeroMemory(myobj3->more,sizeof(creature));
-						crt2=(creature*)myobj3->more;
-						crt2->crt_struct=TRUE;
-						crt2->al=crt->al;
-						crt2->hp=32767; //maximum allowed
-						crt2->mp=0;
-						crt2->more=myobj2;
-						myobj3->info|=4; //<-crt
-						crt2->respawn_hp=crt2->hp; crt2->respawn_x=myobj3->x; crt2->respawn_y=myobj3->y;
-
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[2]=myobj3;
-						myobj3->type=366; //myobj3->info|=8; //<-base object
-						OBJadd(myobj2->x-1,myobj2->y,myobj3);
-						//myobj3->info|=4; myobj3->more=crt; //myobj2->more;
-						myobj3->more=malloc(sizeof(creature));
-						ZeroMemory(myobj3->more,sizeof(creature));
-						crt2=(creature*)myobj3->more;
-						crt2->crt_struct=TRUE;
-						crt2->al=crt->al;
-						crt2->hp=32767; //maximum allowed
-						crt2->mp=0;
-						crt2->more=myobj2;
-						myobj3->info|=4; //<-crt
-						crt2->respawn_hp=crt2->hp; crt2->respawn_x=myobj3->x; crt2->respawn_y=myobj3->y;
-
-
-						myobj3=OBJnew(); myobj3->more=myobj2; mmyobj->obj[3]=myobj3;
-						myobj3->type=366; //myobj3->info|=8; //<-base object
-						OBJadd(myobj2->x+1,myobj2->y,myobj3);
-						//myobj3->info|=4; myobj3->more=crt; //myobj2->more;
-
-						myobj3->more=malloc(sizeof(creature));
-						ZeroMemory(myobj3->more,sizeof(creature));
-						crt2=(creature*)myobj3->more;
-						crt2->crt_struct=TRUE;
-						crt2->al=crt->al;
-						crt2->hp=32767; //maximum allowed
-						crt2->mp=0;
-						crt2->more=myobj2;
-						myobj3->info|=4; //<-crt
-						crt2->respawn_hp=crt2->hp; crt2->respawn_x=myobj3->x; crt2->respawn_y=myobj3->y;
-
-						//respawn info?
-
-
-						}//tangle vine
-
-						if ((myobj2->type&1023)==375) myobj2->info|=(3<<9); //slime divide!
-
-						//respawn info
-						crt->respawn_hp=crt->hp; crt->respawn_x=myobj2->x; crt->respawn_y=myobj2->y;
-
-						*/
-
 						if (myobj5) {myobj2=myobj5; goto multiple_enemy;}
 
 						if (myobj4!=NULL) {myobj2=myobj4; goto extractobj2;}
-eggskip:;
+                    // eggskip:;
 					}//egg
 
 
@@ -833,21 +564,21 @@ eggskip:;
 
 				if (myobj->type==78) myobj->more=NULL; //staff cannot hold original ultima6 type spells
 
-				if (obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){ //set quantity
-					myobj->more2=ol[i].qty; //more2<-
+				if (objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){ //set quantity
+					myobj->more2=objectList[i].qty; //more2<-
 					if (myobj->more2==0) myobj->more2=1;
 				}
 				if ((myobj->type&1023)==64){ //key, set type!
-					myobj->more2=ol[i].tag; //more2<-
+					myobj->more2=objectList[i].tag; //more2<-
 				}
 				if ((myobj->type&1023)==58){ //spell, set type!
-					myobj->more2=ol[i].tag; //more2<-
+					myobj->more2=objectList[i].tag; //more2<-
 					if (spellname[myobj->more2]->l==0) myobj->more2=(0<<4)+7;
 				}
 
 				ENHANCEnewn(myobj,8,4);
 				if ((x>=1940)&&(x<=1954)&&(y>=212)&&(y<=218)){ //treasure room
-					if (obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){
+					if (objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){
 						myobj->more2/=4; if (myobj->more2==0) myobj->more2=1;
 					}
 				}
@@ -875,34 +606,34 @@ eggskip:;
 
 
 				if ((myobj->type&1023)==332){ //sign
-					myobj->more2=ol[i].tag; //more2<-
+					myobj->more2=objectList[i].tag; //more2<-
 				}
 				if ((myobj->type&1023)==333){ //gargoyle sign
-					myobj->more2=ol[i].tag; //more2<-
+					myobj->more2=objectList[i].tag; //more2<-
 				}
 				if ((myobj->type&1023)==152){ //scroll
-					myobj->more2=ol[i].tag; //more2<-
+					myobj->more2=objectList[i].tag; //more2<-
 				}
 				if ((myobj->type&1023)==143){ //picture
-					myobj->more2=ol[i].tag; //more2<-
+					myobj->more2=objectList[i].tag; //more2<-
 				}
 				if ((myobj->type&1023)==151){ //book
-					myobj->more2=ol[i].tag; //more2<-
+					myobj->more2=objectList[i].tag; //more2<-
 				}
 				if ((myobj->type&1023)==333){ //gsign
-					myobj->more2=ol[i].tag; //more2<-
+					myobj->more2=objectList[i].tag; //more2<-
 				}
 				if ((myobj->type&1023)==59){ //codex
 					myobj->more2=128;
 				}
 				if ((myobj->type&1023)==61){ //circles
-					myobj->more2=ol[i].tag; //more2<-
+					myobj->more2=objectList[i].tag; //more2<-
 				}
 				if ((myobj->type&1023)==254){ //cross
-					myobj->more2=ol[i].tag; //more2<-
+					myobj->more2=objectList[i].tag; //more2<-
 				}
 				if ((myobj->type&1023)==255){ //tombstone
-					myobj->more2=ol[i].tag; //more2<-
+					myobj->more2=objectList[i].tag; //more2<-
 				}
 
 				//skiff (stealing or not?)
@@ -927,7 +658,7 @@ eggskip:;
 
 
 
-				x2=ol[i].type>>10; //x2 sub-index
+				x2=objectList[i].type>>10; //x2 sub-index
 				i4=sprlnk[i2]+x2;
 
 				if ((myobj->type&1023)==338){ //blood (remove&insert)
@@ -950,14 +681,15 @@ eggskip:;
 
 
 
-				//if ((i2==412)&&((ol[i].type>>11)&2)==2) exit(myobj->x);
+				//if ((i2==412)&&((objectList[i].type>>11)&2)==2) exit(myobj->x);
 
 				//fix ladders
 				if (i2==305){
 					if ((x>=1024)&&(y<=256)){ //dungeon ladders
 						if (x2==0){ //down
 							myobj->more2=myobj->x+256+(myobj->y<<16);
-							if (x>=(1024+768)) myobj->more2=myobj->x-768+((myobj->y+256)<<16);
+							if (x>=(1024+768))
+								myobj->more2=myobj->x-768+((myobj->y+256)<<16);
 						}else{ //up
 							myobj->more2=myobj->x-256+(myobj->y<<16);
 						}
@@ -1149,71 +881,90 @@ eggskip:;
 					myobj2->more=mmyobj;
 
 					if (x3==0){
-						myobj=OBJnew(); mmyobj->obj[0]=myobj; //middle
-						myobj->type=ol[i].type-1*1024; myobj->info|=8; //<-base object
-						OBJadd(x-1,y,myobj); myobj->more=myobj2;
-						myobj=OBJnew(); mmyobj->obj[1]=myobj; //front
-						myobj->type=ol[i].type-8*1024; myobj->info|=8; //<-base object
-						OBJadd(x,y-1,myobj); myobj->more=myobj2;
-						myobj=OBJnew(); mmyobj->obj[2]=myobj;
-						myobj->type=ol[i].type-9*1024; myobj->info|=8; //<-base object
-						OBJadd(x-1,y-1,myobj); myobj->more=myobj2;
-						myobj=OBJnew(); mmyobj->obj[3]=myobj; //back
-						myobj->type=ol[i].type+8*1024; myobj->info|=8; //<-base object
-						OBJadd(x,y+1,myobj); myobj->more=myobj2;
-						myobj=OBJnew(); mmyobj->obj[4]=myobj;
-						myobj->type=ol[i].type+7*1024; myobj->info|=8; //<-base object
-						OBJadd(x-1,y+1,myobj); myobj->more=myobj2;
+						myobj=OBJnew();
+						mmyobj->obj[0]=myobj; //middle
+						myobj->type=objectList[i].type-1*1024;
+						myobj->info|=8; //<-base object
+						OBJadd(x-1,y,myobj);
+						myobj->more=myobj2;
+
+						myobj=OBJnew();
+						mmyobj->obj[1]=myobj; //front
+						myobj->type=objectList[i].type-8*1024;
+						myobj->info|=8; //<-base object
+						OBJadd(x,y-1,myobj);
+						myobj->more=myobj2;
+
+						myobj=OBJnew();
+						mmyobj->obj[2]=myobj;
+						myobj->type=objectList[i].type-9*1024;
+						myobj->info|=8; //<-base object
+						OBJadd(x-1,y-1,myobj);
+						myobj->more=myobj2;
+
+						myobj=OBJnew();
+						mmyobj->obj[3]=myobj; //back
+						myobj->type=objectList[i].type+8*1024;
+						myobj->info|=8; //<-base object
+						OBJadd(x,y+1,myobj);
+						myobj->more=myobj2;
+
+						myobj=OBJnew();
+						mmyobj->obj[4]=myobj;
+						myobj->type=objectList[i].type+7*1024;
+						myobj->info|=8; //<-base object
+						OBJadd(x-1,y+1,myobj);
+						myobj->more=myobj2;
 					}
 					if (x3==1){
 						myobj=OBJnew(); mmyobj->obj[0]=myobj; //middle
-						myobj->type=ol[i].type-1*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type-1*1024; myobj->info|=8; //<-base object
 						OBJadd(x,y-1,myobj); myobj->more=myobj2;
 						myobj=OBJnew(); mmyobj->obj[1]=myobj; //front
-						myobj->type=ol[i].type-8*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type-8*1024; myobj->info|=8; //<-base object
 						OBJadd(x+1,y,myobj); myobj->more=myobj2;
 						myobj=OBJnew(); mmyobj->obj[2]=myobj;
-						myobj->type=ol[i].type-9*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type-9*1024; myobj->info|=8; //<-base object
 						OBJadd(x+1,y-1,myobj); myobj->more=myobj2;
 						myobj=OBJnew(); mmyobj->obj[3]=myobj; //back
-						myobj->type=ol[i].type+8*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type+8*1024; myobj->info|=8; //<-base object
 						OBJadd(x-1,y,myobj); myobj->more=myobj2;
 						myobj=OBJnew(); mmyobj->obj[4]=myobj;
-						myobj->type=ol[i].type+7*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type+7*1024; myobj->info|=8; //<-base object
 						OBJadd(x-1,y-1,myobj); myobj->more=myobj2;
 					}
 					if (x3==2){
 						myobj=OBJnew(); mmyobj->obj[0]=myobj; //middle
-						myobj->type=ol[i].type-1*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type-1*1024; myobj->info|=8; //<-base object
 						OBJadd(x-1,y,myobj); myobj->more=myobj2;
 						myobj=OBJnew(); mmyobj->obj[1]=myobj; //front
-						myobj->type=ol[i].type-8*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type-8*1024; myobj->info|=8; //<-base object
 						OBJadd(x,y+1,myobj); myobj->more=myobj2;
 						myobj=OBJnew(); mmyobj->obj[2]=myobj;
-						myobj->type=ol[i].type-9*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type-9*1024; myobj->info|=8; //<-base object
 						OBJadd(x-1,y+1,myobj); myobj->more=myobj2;
 						myobj=OBJnew(); mmyobj->obj[3]=myobj; //back
-						myobj->type=ol[i].type+8*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type+8*1024; myobj->info|=8; //<-base object
 						OBJadd(x,y-1,myobj); myobj->more=myobj2;
 						myobj=OBJnew(); mmyobj->obj[4]=myobj;
-						myobj->type=ol[i].type+7*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type+7*1024; myobj->info|=8; //<-base object
 						OBJadd(x-1,y-1,myobj); myobj->more=myobj2;
 					}
 					if (x3==3){
 						myobj=OBJnew(); mmyobj->obj[0]=myobj; //middle
-						myobj->type=ol[i].type-1*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type-1*1024; myobj->info|=8; //<-base object
 						OBJadd(x,y-1,myobj); myobj->more=myobj2;
 						myobj=OBJnew(); mmyobj->obj[1]=myobj; //front
-						myobj->type=ol[i].type-8*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type-8*1024; myobj->info|=8; //<-base object
 						OBJadd(x-1,y,myobj); myobj->more=myobj2;
 						myobj=OBJnew(); mmyobj->obj[2]=myobj;
-						myobj->type=ol[i].type-9*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type-9*1024; myobj->info|=8; //<-base object
 						OBJadd(x-1,y-1,myobj); myobj->more=myobj2;
 						myobj=OBJnew(); mmyobj->obj[3]=myobj; //back
-						myobj->type=ol[i].type+8*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type+8*1024; myobj->info|=8; //<-base object
 						OBJadd(x+1,y,myobj); myobj->more=myobj2;
 						myobj=OBJnew(); mmyobj->obj[4]=myobj;
-						myobj->type=ol[i].type+7*1024; myobj->info|=8; //<-base object
+						myobj->type=objectList[i].type+7*1024; myobj->info|=8; //<-base object
 						OBJadd(x+1,y-1,myobj); myobj->more=myobj2;
 					}
 
@@ -1230,25 +981,25 @@ eggskip:;
 
 				if (i4==(sprlnk[163]+1)){ //h bed
 					myobj=OBJnew();
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[163]+7)){ //v bed
 					myobj=OBJnew();
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[176]+1)){ //h draw
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 					myobj->info|=8;
 				}
 				if (i4==(sprlnk[176]+3)){ //v draw
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 					myobj->info|=8;
 				}
@@ -1256,66 +1007,66 @@ eggskip:;
 				i5=85; //blue gate
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew(); myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				i5=84; //red gate
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew(); myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 
 				i5=325; //bookstand
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew(); myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				i5=134; //roast horse carcass
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew(); myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024; myobj->info|=8;
+					myobj->type=objectList[i].type-1*1024; myobj->info|=8;
 					OBJadd(x-1,y,myobj);
 				}
 
 				i5=168; //remains
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew(); myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024; myobj->info|=8;
+					myobj->type=objectList[i].type-1*1024; myobj->info|=8;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+3)){
 					myobj=OBJnew(); myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024; myobj->info|=8;
+					myobj->type=objectList[i].type-1*1024; myobj->info|=8;
 					OBJadd(x,y-1,myobj);
 				}
 
 				i5=136; //skewer
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew(); myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+3)){
 					myobj=OBJnew(); myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				i5=326; //mineshaft
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew(); myobj->more=myobj2; myobj->info|=8;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+3)){
 					myobj=OBJnew(); myobj->more=myobj2; myobj->info|=8;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+5)){
 					myobj=OBJnew(); myobj->more=myobj2; myobj->info|=8;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 
@@ -1323,7 +1074,7 @@ eggskip:;
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 					if ((x==253)&&(y==169)) {myobj2->type=263+3*1024; myobj->type=263+2*1024;} //man in stocks
 				}
@@ -1331,13 +1082,13 @@ eggskip:;
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+3)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 
@@ -1345,14 +1096,14 @@ eggskip:;
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				i5=313; //horn
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 
@@ -1361,13 +1112,13 @@ eggskip:;
 				if (i4==(sprlnk[i5]+1)){
 				myobj=OBJnew();
 				myobj->more=myobj2;
-				myobj->type=ol[i].type-1*1024;
+				myobj->type=objectList[i].type-1*1024;
 				OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+3)){
 				myobj=OBJnew();
 				myobj->more=myobj2;
-				myobj->type=ol[i].type-1*1024;
+				myobj->type=objectList[i].type-1*1024;
 				OBJadd(x,y-1,myobj);
 				}
 				*/
@@ -1377,7 +1128,7 @@ eggskip:;
 					myobj=OBJnew();
 					myobj->more=myobj2;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				i5=280;
@@ -1385,7 +1136,7 @@ eggskip:;
 					myobj=OBJnew();
 					myobj->more=myobj2;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 
@@ -1393,13 +1144,13 @@ eggskip:;
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+4)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 
@@ -1407,7 +1158,7 @@ eggskip:;
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 
@@ -1417,13 +1168,13 @@ eggskip:;
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+3)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 
@@ -1432,45 +1183,47 @@ eggskip:;
 				i5=297;
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew();
-					myobj->more=myobj2; myobj->info|=8;
+					myobj->more=myobj2;
+					myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 
 				if (i4==(sprlnk[i5]+3)){
 					myobj=OBJnew();
-					myobj->more=myobj2; myobj->info|=8;
+					myobj->more=myobj2;
+					myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+5)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+7)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+9)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+11)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 
 					//unlock peer's door
@@ -1484,14 +1237,14 @@ eggskip:;
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+15)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 
@@ -1500,21 +1253,21 @@ eggskip:;
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+3)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+5)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 					//exit(9);
 				}
@@ -1522,35 +1275,35 @@ eggskip:;
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+9)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+11)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+13)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+15)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 
@@ -1559,56 +1312,56 @@ eggskip:;
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+3)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+5)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+7)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+9)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+11)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+13)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+15)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 
@@ -1617,57 +1370,57 @@ eggskip:;
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+3)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+5)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+7)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+9)){
-					//if (ol[i].tag==1) exit(y);
+					//if (objectList[i].tag==1) exit(y);
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+11)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+13)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+15)){
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
 					myobj2->more=myobj; //back link
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 
@@ -1676,21 +1429,21 @@ eggskip:;
 				//lever pointer
 				i5=268; //lever type
 				if ((myobj2->type&1023)==i5){
-					if (ol[i].tag!=0){
+					if (objectList[i].tag!=0){
 						for (i6=0;i6<=15;i6++){
-							if (lever[ol[i].tag][i6]==NULL) {lever[ol[i].tag][i6]=myobj2; goto mullev;}
+							if (lever[objectList[i].tag][i6]==NULL) {lever[objectList[i].tag][i6]=myobj2; goto mullev;}
 						}
-mullev:;
+                        // mullev:;
 					}
 				}
 				//switch pointer
 				i5=174; //switch type
 				if ((myobj2->type&1023)==i5){
-					if (ol[i].tag!=0){
+					if (objectList[i].tag!=0){
 						for (i6=0;i6<=15;i6++){
-							if (eswitch[ol[i].tag][i6]==NULL) {eswitch[ol[i].tag][i6]=myobj2; goto mullev2;}
+							if (eswitch[objectList[i].tag][i6]==NULL) {eswitch[objectList[i].tag][i6]=myobj2; goto mullev2;}
 						}
-mullev2:;
+                    // mullev2:;
 					}
 				}
 
@@ -1698,56 +1451,56 @@ mullev2:;
 				i5=301;
 
 				if ((myobj2->type&1023)==i5){
-					if (ol[i].tag!=0){
+					if (objectList[i].tag!=0){
 						for (i6=0;i6<=15;i6++){
-							if (portcullis[ol[i].tag][i6]==NULL) {portcullis[ol[i].tag][i6]=myobj2;goto gotport;}
+							if (portcullis[objectList[i].tag][i6]==NULL) {portcullis[objectList[i].tag][i6]=myobj2;goto gotport;}
 						}
-gotport:;
+                        // gotport:;
 					}
 				}
 
 				//2003: doorway, doesn't need back linking, stores value of door lock in more2
 
 				if (i4==(sprlnk[i5]+1)){
-					myobj2->more2=ol[i-1].tag;
+					myobj2->more2=objectList[i-1].tag;
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+3)){
-					myobj2->more2=ol[i-1].tag;
+					myobj2->more2=objectList[i-1].tag;
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+5)){
-					myobj2->more2=ol[i-1].tag;
+					myobj2->more2=objectList[i-1].tag;
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+7)){
-					myobj2->more2=ol[i-1].tag;
+					myobj2->more2=objectList[i-1].tag;
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+9)){
-					myobj2->more2=ol[i-1].tag;
+					myobj2->more2=objectList[i-1].tag;
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				if (i4==(sprlnk[i5]+11)){
-					myobj2->more2=ol[i-1].tag;
+					myobj2->more2=objectList[i-1].tag;
 					myobj=OBJnew();
 					myobj->more=myobj2; myobj->info|=8;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 
@@ -1756,21 +1509,21 @@ gotport:;
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				i5=304; //fireplace
 				if (i4==(sprlnk[i5]+5)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				i5=304; //fireplace
 				if (i4==(sprlnk[i5]+3)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 
@@ -1778,21 +1531,21 @@ gotport:;
 				if (i4==(sprlnk[i5]+7)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);
 				}
 				i5=304; //fireplace
 				if (i4==(sprlnk[i5]+11)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				i5=304; //fireplace
 				if (i4==(sprlnk[i5]+9)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 
@@ -1800,300 +1553,301 @@ gotport:;
 				if (i4==(sprlnk[i5]+1)){
 					myobj=OBJnew();
 					myobj->more=myobj2;
-					myobj->type=ol[i].type-1*1024;
+					myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
 				}
 				i5=159; //clock
 				if (i4==(sprlnk[i5]+1)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);}
 				i5=162; //stove
 				if (i4==(sprlnk[i5]+1)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);}
 				i5=216; //bookcase
 				if (i4==(sprlnk[i5]+1)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);}
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);}
 				if (i4==(sprlnk[i5]+5)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);}
 				if (i4==(sprlnk[i5]+7)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);}
 				if (i4==(sprlnk[i5]+9)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);}
 				if (i4==(sprlnk[i5]+11)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);}
 
 
 
 				i5=331; //sign
 				if (i4==(sprlnk[i5]+1)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);}
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);}
 				if (i4==(sprlnk[i5]+5)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);}
 				if (i4==(sprlnk[i5]+7)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);}
 				if (i4==(sprlnk[i5]+9)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);}
 				if (i4==(sprlnk[i5]+11)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);}
 				if (i4==(sprlnk[i5]+13)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);}
 				if (i4==(sprlnk[i5]+15)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);}
 				if (i4==(sprlnk[i5]+17)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);}
 				if (i4==(sprlnk[i5]+19)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);}
 				if (i4==(sprlnk[i5]+21)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x,y-1,myobj);}
 
 
 				i5=341; //4xdead flying gargoyle
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024; myobj->info|=8;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024; myobj->info|=8;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024; myobj->info|=8;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024; myobj->info|=8;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024; myobj->info|=8;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024; myobj->info|=8;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=340; //4xdead cyclops
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024; myobj->info|=8;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024; myobj->info|=8;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024; myobj->info|=8;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024; myobj->info|=8;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024; myobj->info|=8;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024; myobj->info|=8;
 					OBJadd(x-1,y-1,myobj);
 				}
 
 				i5=324; //4xpillar
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=322; //4xwater pool
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=329; //4xsingularity
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 
 				i5=323; //4xmonolith
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=328; //4xalter
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=321; //4xstatue
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+7)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+11)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 
 
 				i5=195;
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=196;
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=197;
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=201;
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=214;
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=233;
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=316;
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=330;
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=200;
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 
 				i5=198;
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				i5=199;
 				if (i4==(sprlnk[i5]+3)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 
 				i5=267; //gilotene
 				if (i4==(sprlnk[i5]+4)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 
 				i5=163; //nicebed
 				if (i4==(sprlnk[i5]+5)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 				if (i4==(sprlnk[i5]+11)){ 
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-1*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-1*1024;
 					OBJadd(x-1,y,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-2*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-2*1024;
 					OBJadd(x,y-1,myobj);
-					myobj=OBJnew(); myobj->more=myobj2; myobj->type=ol[i].type-3*1024;
+					myobj=OBJnew(); myobj->more=myobj2; myobj->type=objectList[i].type-3*1024;
 					OBJadd(x-1,y-1,myobj);
 				}
 
 
-skipobj:;
-			} //1st pass exception
-		}} //x<1024,y<1024
+                // skipobj:;
+			    } //1st pass exception
+		    }
+		} //x<1024,y<1024
 	} //flag check
 
 	//skipitem:; //UNUSED?
@@ -2193,17 +1947,17 @@ for (i=0;i<=255;i++){
 /****************
 //add internal objects to the map, backwards scan
 for (i=0;i<=oln-1;i++){
-x=ol[i].unk_h;
-y=ol[i].unk_d1;
+x=objectList[i].unk_h;
+y=objectList[i].unk_d1;
 x2=y&3;
 x=x+x2*256;
 y=y/4;
-y=y+(ol[i].unk_d2&15)*64;
-i6=ol[i].unk_d2>>4; //level
+y=y+(objectList[i].unk_d2&15)*64;
+i6=objectList[i].unk_d2>>4; //level
 
-if ((ol[i].status&16)==0){
-if ((ol[i].status<=1)||(ol[i].status&8)){
-if (ol[i].status&8){
+if ((objectList[i].status&16)==0){
+if ((objectList[i].status<=1)||(objectList[i].status&8)){
+if (objectList[i].status&8){
 x=ox;
 y=oy;
 goto yyyy;
@@ -2219,14 +1973,14 @@ ox=x; oy=y;
 
 goto skipitem;
 yyyy:
-i2=ol[i].type&1023; //get object identity
+i2=objectList[i].type&1023; //get object identity
 
 //i2<=334
 if ((i2<=375)||(i2>=411)){ //exclude creatures/characters
 
 if ((i2<29)||(i2>32)){ //exclude first pass objects
 myobj=OBJnew();
-myobj->type=ol[i].type;
+myobj->type=objectList[i].type;
 OBJadd(x,y,myobj);
 skipitem:;
 
@@ -2280,7 +2034,7 @@ for (i=0;i<=255;i++){
 
 
 
-		//tfh=open(".\\host\\npcobj.bin"); get(tfh,&npcobj,lof(tfh)); close(tfh);
+		//tfh=open(".\\host\\npcobj.bin"); get(tfh,&npcobj,fileLen(tfh)); close(tfh);
 		//myobj->type=386; //person male/female
 		myobj->type=npcobj[i]; //person male/female
 
@@ -2497,7 +2251,7 @@ for (i=0;i<=255;i++){
 		//1475 244
 
 		myobj2=myobj;
-		if (obji[sprlnk[myobj2->type&1023]].v4==5){ //winged gargoyle
+		if (objectInfo[sprlnk[myobj2->type&1023]].v4==5){ //winged gargoyle
 			OBJadd(x,y,myobj);
 			static mlobj *mmyobj; //array size varies
 			mmyobj=(mlobj*)malloc(sizeof(object*)*3);
@@ -2532,7 +2286,7 @@ ZeroMemory(&schedule2,sizeof(schedule2));
 for (y5=0;y5<=HIRELINGS_MAX-1;y5++){
   hirl_obj[y5]=0;
   hirl_wait[y5]=0;
-  addhireling(y5,0);
+  addHireling(y5,0);
 }//y5
 
 i=-1; cmdline_length2: i++; if ((unsigned char*)lpCmdLine[i]) goto cmdline_length2;
@@ -2553,10 +2307,10 @@ for (i=0;i<=SAVESLOTLAST;i++){
 	if (tfh->h==HFILE_ERROR){
 		save_buffer[i]=0;
 	}else{
-		if (lof(tfh)==0){save_buffer[i]=0; close(tfh); goto save_0bytes;}
+		if (fileLen(tfh)==0){save_buffer[i]=0; close(tfh); goto save_0bytes;}
 		save_buffer[i]=1;
-		txtNEWLEN(t4,save_bytes[i]=lof(tfh)); get(tfh,t4->d2,t4->l);
-		static unsigned long save_lof; save_lof=lof(tfh);
+		txtNEWLEN(t4,save_bytes[i]=fileLen(tfh)); get(tfh,t4->d2,t4->l);
+		static unsigned long save_lof; save_lof=fileLen(tfh);
 		close(tfh);
 		i2=t4->ds[0]; //savegame version
 
@@ -2857,7 +2611,7 @@ autoformat_password_cull:
 		tfh2=open2(t2,OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE); //iN.QRT
 		txtset(t2,".\\save\\"); txtnumint(t,i3); txtadd(t,".sav"); txtadd(t2,t);
 		tfh3=open2(t2,OF_READWRITE|OF_SHARE_COMPAT); //i.sav
-		txtNEWLEN(t4,lof(tfh3)); get(tfh3,t4->d2,t4->l);
+		txtNEWLEN(t4,fileLen(tfh3)); get(tfh3,t4->d2,t4->l);
 		close(tfh3);
 		DeleteFile(t2->d);
 		save_buffer[i3]=0;
@@ -2989,7 +2743,7 @@ autousername_free:
 ZeroMemory(&housesav,sizeof(housesav));
 tfh=open2(".\\save\\house.sav",OF_READWRITE|OF_SHARE_COMPAT);
 if (tfh->h!=HFILE_ERROR){
-	txtNEWLEN(t,-lof(tfh)); get(tfh,&t->d2[0],t->l); close(tfh);
+	txtNEWLEN(t,-fileLen(tfh)); get(tfh,&t->d2[0],t->l); close(tfh);
 	/* luteijn: no decryption needed anymore */
 	/* decrypt(t); */
     if (t->ds[0]==12345){ //not crypted

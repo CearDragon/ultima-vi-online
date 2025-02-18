@@ -76,19 +76,21 @@ struct object {
 
 #pragma region
 
-    bool IsStealing() { return info & 128; }
+    bool IsStealing() const { return info & 128; }
 
-    bool IsQuestItem() { return info & 256; }
+    bool IsQuestItem() const { return info & 256; }
 
-    bool IsNotForSale() { return info & 32768; }
+    bool IsNotForSale() const { return info & 32768; }
 
-    bool IsStackable();
+    bool IsStackable() const;
 
-    bool IsContainer();
+    bool IsContainer() const;
 
-    uint4 GetQuantity() { return more2; }
+    uint4 GetQuantity() const { return more2; }
 
     void SetQuantity(uint4 q) { more2 = q; }
+
+    unsigned short Type() const { return type & 1023; }
 
 #pragma endregion Bulk sell patch, Xenkan 2010-12-05
 };
@@ -207,7 +209,7 @@ struct player {
     uint2 bulkqty[32];
     uint2 bulkprice;
 
-    void GetPartyInventory(object ***Items, uint4 *ItemCount);
+    static void GetPartyInventory(object ***Items, uint4 *ItemCount);
 
 #pragma endregion Bulk sell patch, Xenkan 2010-12-04
 };
@@ -380,7 +382,7 @@ struct sockets_info {
 extern WSAData wsaData;
 extern struct sockaddr_in server;
 extern bitstream *currentbitstream;
-extern objectinfo obji[4096];
+extern objectinfo objectInfo[4096];
 extern unsigned long oldtime;
 extern unsigned long newtime;
 extern float et;
@@ -554,6 +556,6 @@ extern int g_EnhancedClient;
 
 
 /* init_function */
-void data_both_init(void);
+void data_both_init();
 
 #endif /* DATA_BOTH_H */

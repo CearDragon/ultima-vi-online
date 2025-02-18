@@ -353,14 +353,14 @@ scrlog(">con_txt");
 
 
 //load index in pal emu spr8 (used by getspr)
-FillMemory(&sprpi,sizeof(sprpi),255); tfh=open(".\\dr\\objsprpi.u6o"); get(tfh,&sprpi,lof(tfh)); close(tfh);
+FillMemory(&sprpi,sizeof(sprpi),255); tfh=open(".\\dr\\objsprpi.u6o"); get(tfh,&sprpi,fileLen(tfh)); close(tfh);
 scrlog(">sprpi [objsprpi.u6o]");
 
 
 //unsigned char visalways[256][1024];//bit array, if =1 force visibility
 ZeroMemory(visalways,sizeof(visalways));
 tfh=open(".\\dr\\vis.bin");
-i2=lof(tfh)/4;
+i2=fileLen(tfh)/4;
 for(i=0;i<i2;i++){
 x=0; get(tfh,&x,2);
 y=0; get(tfh,&y,2);

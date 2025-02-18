@@ -1,46 +1,89 @@
-#ifndef DATA_HOST_H
-#define DATA_HOST_H
+//
+// Created by Cocoa-AP on 1/26/2025.
+//
 
-#include "define_host.h" /*SAVESLOTLAST etc */
-#include "mytxt.h" /* txt* etc */
-#include "data_both.h" /* schedule* etc. */
+#ifndef DEFAULT_CMAKE_DATA_HOST_H
+#define DEFAULT_CMAKE_DATA_HOST_H
 
+#include "../define_host.h" /*SAVESLOTLAST etc */
+#include "../mytxt.h" /* txt* etc */
+#include "../data_both.h" /* schedule* etc. */
+
+#define DEFINE_HOST_H
+#define DEATHPOSX 2032
+#define DEATHPOSY 1012
+#define SAVESLOTLAST 6143
+
+//save version 3.0 ENCRYPTED3.0
+//save version 4.0 UNENCRYPTED3.0
+//save ver 5 is same as 4, but with sha2 encrypted pw and 1 extra byte to indicate what encryption is used
+#define SAVEVER 5
+#define ADMINSMAX 8
+
+//shrine stat improvements
+#define U6O_HONESTY tnpc->intelligence+=3;
+#define U6O_COMPASSION tnpc->dexterity+=3;
+#define U6O_VALOR tnpc->strength+=3;
+#define U6O_JUSTICE tnpc->dexterity+=1; tnpc->intelligence+=1;
+#define U6O_SACRIFICE tnpc->strength+=1; tnpc->dexterity+=1;
+#define U6O_HONOR tnpc->strength+=1; tnpc->intelligence+=1;
+#define U6O_SPIRITUALITY tnpc->strength+=1; tnpc->dexterity+=1; tnpc->intelligence+=1;
+#define U6O_HUMILITY
+
+/* spell return values */
+#define SPELL_NOTDONE (0)
+#define SPELL_SUCCESS (1)
+#define SPELL_INVALID (2)
+#define SPELL_FAILURE (3)
+
+#define HIRELINGS_MAX (16) //should be at least 11 to get hirelings to all taverns after that they get random positions
+#define MOVER_FOUND 65536
+#define HOUSEMAX 256
+#define HOUSESTORAGESLOTMAX 600
+#ifdef CLIENT
+#define FIRST_CLIENT 1
+#else
+#define FIRST_CLIENT 0
+#endif
 
 /* structure definitions */
 struct housesav_info{
-  unsigned short flags;
-  //1 occupied (vacant if NULL)
-  //*EXCEPTION*: array index 0: flags set to day of month)
-  unsigned char username[32];
-  unsigned char charactername[32];
-  unsigned short gold;
+    unsigned short flags;
+    //1 occupied (vacant if NULL)
+    //*EXCEPTION*: array index 0: flags set to day of month)
+    unsigned char username[32];
+    unsigned char charactername[32];
+    unsigned short gold;
 };
 
 //converse information
 struct npcbin_i{ //npcbin information/instruction
-  long l1;
-  long l2;
-  long l3;
-  long l4;
+    long l1;
+    long l2;
+    long l3;
+    long l4;
 };
 
 struct objentry {
-  unsigned char status;
-  unsigned char unk_h;
-  unsigned char unk_d1;
-  unsigned char unk_d2;
-  unsigned short type;
-  unsigned char qty;
-  unsigned char tag;
+    unsigned char status;
+    unsigned char unk_h;
+    unsigned char unk_d1;
+    unsigned char unk_d2;
+    unsigned short type;
+    unsigned char qty;
+    unsigned char tag;
+    unsigned short Type() const { return type & 1023; }
+    bool isContainer() const { return status & 8; }
+    bool inPartyInventory() const { return (status & 16) != 0; }
 };
 
 struct mlobj{ //multi-object index array
-  object *obj[1]; //use 1 to avoid compile warning
+    object *obj[1]; //use 1 to avoid compile warning
 };
 
 struct crtenum_struct{
-  char x;
-  char y;
+    char x;
+    char y;
 };
 
 /* external variables globals.h */
@@ -170,9 +213,9 @@ extern object* eswitch[256][16]; //electric switch
 extern crtenum_struct crtenum[1073];
 extern object* crtenum_pathok_castok[1024];
 extern short crtenum_pathok_castok_i;
-extern object* crtenum_pathok[1024]; 
+extern object* crtenum_pathok[1024];
 extern short crtenum_pathok_i;
-extern object* crtenum_castok[1024]; 
+extern object* crtenum_castok[1024];
 extern short crtenum_castok_i;
 
 //resurrect info
@@ -281,7 +324,29 @@ extern object* newll;
 extern unsigned long ol_tag;
 extern unsigned long ol_tag_prev;
 
-/* function prototypes */
-void data_host_init();
+/// TODO: move to new host_functions file
+bool isCreatureOrNPC(object *obj) {
+    return objectInfo[sprlnk[obj->Type()]].v4 != 0;
+}
 
-#endif /* DATA_HOST_H */
+bool isCreatureOrNPC(unsigned short type) {
+    return objectInfo[sprlnk[type & 1023]].v4 == 0;
+}
+
+bool isCreateStationary(object *obj) {
+    return (obj->Type() == OBJ_TANGLE_VINE_POD || obj->Type() == OBJ_REAPER);
+}
+
+bool isInBounds(long x, long y) {
+    return x >= 0 && x < 2048 && y >= 0 && y < 1024;
+}
+
+bool locationWalkable(long x, long y) {
+    return bt[y][x] & 1024;
+}
+
+bool locationBlocked(long x, long y) {
+    return od[y][x] != nullptr;
+}
+
+#endif //DEFAULT_CMAKE_DATA_HOST_H

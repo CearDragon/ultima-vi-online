@@ -11,7 +11,7 @@ U6O_SPELL_FUNCTION(create_food) {
     }
 
     object *myobj2 = OBJfindlast(x, y);
-    if (myobj2 && !(obji[sprlnk[myobj2->type & 1023] + (myobj2->type >> 10)].flags & 512)) {
+    if (myobj2 && !(objectInfo[sprlnk[myobj2->Type()] + (myobj2->type >> 10)].flags & 512)) {
         return SPELL_INVALID;
     }
 
@@ -88,7 +88,7 @@ U6O_SPELL_FUNCTION(douse) {
         return SPELL_INVALID;
     }
     if (myobj2 = OBJfindlast(x, y)) {
-        x3 = myobj2->type & 1023;
+        x3 = myobj2->Type();
         x4 = myobj2->type >> 10;
 
         switch (x3) {
@@ -172,7 +172,7 @@ U6O_SPELL_FUNCTION(ignite) {
     }
     myobj2 = OBJfindlast(x, y);
     if (myobj2) {
-        x3 = myobj2->type & 1023;
+        x3 = myobj2->Type();
         x4 = myobj2->type >> 10;
 
         switch (x3) {
@@ -270,7 +270,7 @@ U6O_SPELL_FUNCTION(telekinesis) {
     }
     myobj2 = OBJfindlast(x, y);
     if (myobj2) {
-        switch (myobj2->type & 1023) {
+        switch (myobj2->Type()) {
             case 268: //lever
             case 174: //switch
             case 288: //crank

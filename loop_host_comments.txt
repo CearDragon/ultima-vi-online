@@ -499,7 +499,7 @@
         i2=myobj->type&1023; //get object identity
 
         if (myobj->info&256){ //quest/don'tsend
-        if (obji[sprlnk[i2]].weight==0){
+        if (objectInfo[sprlnk[i2]].weight==0){
         goto display_skip;
         }
 
@@ -688,7 +688,7 @@
         }//armour
 
 
-        if (obji[sprlnk[myobj->type&1023]].v4==1){ //humantype
+        if (objectInfo[sprlnk[myobj->type&1023]].v4==1){ //humantype
         tplayer2=(player*)tnpc->player;
 
         if (tplayer2->party[0]==myobj){ //first player
@@ -1697,7 +1697,7 @@
           //add gold/items to inventory
           //add gold
           if (crt->al==1){
-          x9=obji[sprlnk[myobj2->type&1023]].v5>>2;
+          x9=objectInfo[sprlnk[myobj2->type&1023]].v5>>2;
           //x9++; //plus 1 for rookie luck
           x9=rnd*(x9+1);
           if (x9){
@@ -1729,18 +1729,18 @@
 
                   //x5=rnd*(tnpc->arm+1);
 
-                  //x6=rnd*((obji[sprlnk[myobj->type&1023]].v5/2+1)+1);
+                  //x6=rnd*((objectInfo[sprlnk[myobj->type&1023]].v5/2+1)+1);
 
 
                   //old
-                  //x6=rnd*((obji[sprlnk[myobj->type&1023]].v5>>2)+1);
+                  //x6=rnd*((objectInfo[sprlnk[myobj->type&1023]].v5>>2)+1);
 
                   //enemies have the same deficiets on their attacks as players
 
-                  //x6=rnd*(((obji[sprlnk[myobj->type&1023]].v8&255)+1)*2+1)-((obji[sprlnk[myobj->type&1023]].v8&255)+1);
+                  //x6=rnd*(((objectInfo[sprlnk[myobj->type&1023]].v8&255)+1)*2+1)-((objectInfo[sprlnk[myobj->type&1023]].v8&255)+1);
 
                   //damage enemy can do
-                  //x6=rnd*((obji[sprlnk[myobj->type&1023]].v8&255)+1+1); ***LATEST***
+                  //x6=rnd*((objectInfo[sprlnk[myobj->type&1023]].v8&255)+1+1); ***LATEST***
 
 7845 WEakl1UHv3
 

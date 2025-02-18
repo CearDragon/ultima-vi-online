@@ -93,9 +93,9 @@ stereo=0;
 get(fh,&stereo,2);
 if (stereo==(bits/8))
 {stereo=1;}else{stereo=2;}
-ts=soundnew(freq,bits,stereo,lof(fh)-58-16-16-32-32);
+ts=soundnew(freq,bits,stereo,fileLen(fh)-58-16-16-32-32);
 seek(fh,58);
-get(fh,ts->o,lof(fh)-58-16-16-32-32);
+get(fh,ts->o,fileLen(fh)-58-16-16-32-32);
 close(fh);
 return ts;
 }

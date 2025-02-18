@@ -367,7 +367,7 @@ unsigned long randchestitem();
 
 void ENHANCEnewn(object* obj,unsigned short n, unsigned short n2);
 
-void addhireling(unsigned long x3, schedule_i *sched);
+void addHireling(unsigned long hirelingIndex, schedule_i *sched);
 
 
 // c111

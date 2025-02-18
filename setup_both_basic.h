@@ -160,9 +160,9 @@ BITSleftmask[i]=x;
 x+=x2; x2<<=1;
 }
 
-ZeroMemory(&objfloatflags,sizeof(objfloatflags)); tfh=open(".\\dr\\objfloat.flg"); get(tfh,&objfloatflags,lof(tfh)); close(tfh);
+ZeroMemory(&objfloatflags,sizeof(objfloatflags)); tfh=open(".\\dr\\objfloat.flg"); get(tfh,&objfloatflags,fileLen(tfh)); close(tfh);
 
-ZeroMemory(&sprlnk,sizeof(sprlnk)); tfh=open(".\\dr\\u6spr.lnk"); get(tfh,&sprlnk,lof(tfh)); close(tfh);
+ZeroMemory(&sprlnk,sizeof(sprlnk)); tfh=open(".\\dr\\u6spr.lnk"); get(tfh,&sprlnk,fileLen(tfh)); close(tfh);
 
 //load class info
 ZeroMemory(&tclass_object,65536); ZeroMemory(&tclass_mover,65536); ZeroMemory(&tclass_fixed,65536); ZeroMemory(&tclass_build,65536);
@@ -194,4 +194,4 @@ for (i2=0;i2<=3;i2++){
 tclass_fixed[i+i2*1024]=1;
 }
 
-ZeroMemory(&obji,sizeof(obji)); tfh=open(".\\dr\\objinfo.u6o"); get(tfh,&obji,lof(tfh)); close(tfh);
+ZeroMemory(&objectInfo, sizeof(objectInfo)); tfh=open(".\\dr\\objinfo.u6o"); get(tfh,&objectInfo,fileLen(tfh)); close(tfh);

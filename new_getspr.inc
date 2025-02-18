@@ -15,17 +15,17 @@ void getspr(object* obj){ //loads bt32 with a spr (uses keyframe)
   } 
 
 
-  if (obji[sprlnk[obj_type]].v4==3){ //cycling objects
+  if (objectInfo[sprlnk[obj_type]].v4==3){ //cycling objects
     gs_i=sprlnk[obj_type]+(keyframe>>1)-1;
   }
-  if (obji[sprlnk[obj_type]].v4==6){ //drake
+  if (objectInfo[sprlnk[obj_type]].v4==6){ //drake
 
     gs_x=((obj_index)&(7-1))+(keyframe>>2);
     gs_i=sprlnk[obj_type]-1+gs_x;
     goto sprnopal;
   }
 
-  if (obji[sprlnk[obj_type]].v4==9){ //dragon wings
+  if (objectInfo[sprlnk[obj_type]].v4==9){ //dragon wings
     gs_x=obj->type>>13;
     if ((gs_x>=3)||(gs_x==0)){
       gs_x=obj->type;
@@ -34,7 +34,7 @@ void getspr(object* obj){ //loads bt32 with a spr (uses keyframe)
     }
   }
 
-  if (obji[sprlnk[obj_type]].v4==11){ //cycling objects
+  if (objectInfo[sprlnk[obj_type]].v4==11){ //cycling objects
     gs_i=sprlnk[obj_type]+(obj_index)+(keyframe>>1)-1;
   }
 

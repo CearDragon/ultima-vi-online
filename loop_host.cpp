@@ -49,22 +49,24 @@ if (NEThost){ //host
   }}//i,i2
 
   // deduct house payments from housesav
-  f=300.0f; if (int((ett/f))!=int((ett/f)-(et/f))){
+  f=300.0f;
+  if (int((ett/f))!=int((ett/f)-(et/f))){
     housesav[0].flags+=5;
     if (housesav[0].flags>=1440){
       housesav[0].flags=0;
       for (i=1;i<=255;i++){
         if (housesav[i].flags&1){ //currently occupied
           x=housesav[i].gold-housecost[i];
-          if (x<=0) x=0;
+          if (x<=0)
+              x=0;
           housesav[i].gold=x;
           if (housesav[i].gold==0){
-            for (x2=0;x2<=playerlist_last;x2++){ if (playerlist[x2]){ //if (playerlist[x2]->net!=INVALID_NET){
-              if (playerlist[x2]->GNPCflags[28]==i) goto skipevict; //can't evict online player
-              //}
-            }}//x2,...
-            //evict owner
-            //MessageBox(NULL,"HOUSESTORAGECHECK: EVICT","Ultima 6 Online",MB_OK);
+            for (x2=0;x2<=playerlist_last;x2++) {
+                if (playerlist[x2]) { //if (playerlist[x2]->net!=INVALID_NET){
+                    if (playerlist[x2]->GNPCflags[28]==i)
+                        goto skipevict; //can't evict online player
+                }
+            }
             housesav[i].flags--; //remove house occupied flag
             housesav_update();
           }//gold==0
@@ -83,10 +85,10 @@ skipevict:;
         hirl_obj[i]->info|=112;
         tnpc=(npc*)hirl_obj[i]->more;
         hirl_obj[i]=0;
-        addhireling(i,tnpc->schedule);
+        addHireling(i,tnpc->schedule);
       }
       else {
-        addhireling(i,0);
+        addHireling(i,0);
       }
     }
   }
@@ -991,8 +993,8 @@ housestorageadd0:
                   t2->ds[1]=OBJlist_list[y6]->info;
 
                   //invalid item!
-                  if (obji[sprlnk[OBJlist_list[y6]->type&1023]].weight==0){
-                    if (obji[sprlnk[OBJlist_list[y6]->type&1023]].flags&1024){//CONTAINER!
+                  if (objectInfo[sprlnk[OBJlist_list[y6]->type&1023]].weight==0){
+                    if (objectInfo[sprlnk[OBJlist_list[y6]->type&1023]].flags&1024){//CONTAINER!
                       //bag
                       t2->ds[0]=OBJ_BAG;//change item type to a bag
                       t2->ds[1]=112;//set info to avoid conflict
@@ -1013,7 +1015,7 @@ housestorageadd0:
                   // rcgwLtFHFl
 
                   if (t2->dl[0]){ //->more!=NULL
-                    if (obji[sprlnk[OBJlist_list[y6]->type&1023]].flags&1024){ //container
+                    if (objectInfo[sprlnk[OBJlist_list[y6]->type&1023]].flags&1024){ //container
                       for(y7=0;y7<x5;y7++){ //link
                         if ((object*)OBJlist_list[y6]->more==OBJlist_list[y7]) t2->dl[0]=y7+1;
                       }//y7
@@ -2222,7 +2224,7 @@ MV_LIGHTGLOW_assumed:
                             }
                             //check if direction is required (z3 is number of bits to use to send direction)
                             z3=2;
-                            if (obji[sprlnk[z]].v4==3) z3=0;//"bird"
+                            if (objectInfo[sprlnk[z]].v4==3) z3=0;//"bird"
                             if (z==365) z3=0;//tanglevine core
                             if (z==374) z3=0;//hydra core
                             if (z==375) z3=0;//slime
@@ -2831,7 +2833,7 @@ gotfreeindex:
 
     i=journeyonward_i;
     txtset(t2,".\\save\\"); txtnumint(t,i); txtadd(t,".sav"); txtadd(t2,t);
-    tfh=open2(t2,OF_READWRITE|OF_SHARE_COMPAT); txtNEWLEN(t4,lof(tfh)); get(tfh,t4->d2,t4->l); close(tfh);
+    tfh=open2(t2,OF_READWRITE|OF_SHARE_COMPAT); txtNEWLEN(t4,fileLen(tfh)); get(tfh,t4->d2,t4->l); close(tfh);
 
     save_version=t4->ds[0];
     if (save_version==3){ //DECRYPT3.0
@@ -3092,7 +3094,7 @@ ideed_done:
 
     //but what about container links?
     for (x=0;x<=x2;x++){
-      if (obji[sprlnk[sv2o[x]->type&1023]].flags&1024){ //container
+      if (objectInfo[sprlnk[sv2o[x]->type&1023]].flags&1024){ //container
         if (sv2o[x]->type==57) playerlist[tpl]->GNPCflags[30]=1; //spellbook exists?
         if (sv2o[x]->more2){
           myobj2=sv2o[sv2o[x]->more2-1];
@@ -3184,7 +3186,7 @@ housestoragerestore1: housestoragerestore=0;
 housestoragerestore2:
           myobj3=(object*)myobj2->next;
 
-          if (obji[sprlnk[myobj2->type&1023]].weight){//FIX for red gate/balloon and other issues
+          if (objectInfo[sprlnk[myobj2->type&1023]].weight){//FIX for red gate/balloon and other issues
             OBJadd(housestoragex[playerlist[tpl]->GNPCflags[28]][housestoragerestorei],housestoragey[playerlist[tpl]->GNPCflags[28]][housestoragerestorei],myobj2);
           }
           if (myobj3) {myobj2=myobj3; goto housestoragerestore2;}
@@ -3624,7 +3626,7 @@ saveportindex_loop:
             }//txtsame(t3,t4)
             goto saveportindex_loop;
           }
-          seek(tfh,lof(tfh));
+          seek(tfh,fileLen(tfh));
           z++; txtnumint(t,z); txtadd(t,t2); txtadd(t,t4);
           txtfileout(t,tfh);
 saveportindex_found:
@@ -4329,7 +4331,7 @@ setnot4sale:
                 goto setnot4sale;
               }
 
-              if ((obji[sprlnk[myobj->type&1023]].flags&(1+2+4+8+16+32+64))==0){
+              if ((objectInfo[sprlnk[myobj->type&1023]].flags&(1+2+4+8+16+32+64))==0){
                 txtsetchar(t2,8); txtaddchar(t2,255); txtadd(t2,"Only wieldable items may be marked as not for sale."); NET_send(NETplayer,playerlist[tpl]->net,t2);
                 goto doneclmess;
               }
@@ -4339,12 +4341,12 @@ setnot4sale:
                 goto doneclmess;
               }
 
-              if (obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){
+              if (objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){
                 txtsetchar(t2,8); txtaddchar(t2,255); txtadd(t2,"That cannot be marked as not for sale."); NET_send(NETplayer,playerlist[tpl]->net,t2);
                 goto doneclmess;
               }
 
-              if (obji[sprlnk[myobj->type&1023]].flags&1024){ //container
+              if (objectInfo[sprlnk[myobj->type&1023]].flags&1024){ //container
                 txtsetchar(t2,8); txtaddchar(t2,255); txtadd(t2,"That cannot be marked as not for sale."); NET_send(NETplayer,playerlist[tpl]->net,t2);
                 goto doneclmess;
               }
@@ -4469,7 +4471,7 @@ privelegechange_gotcommand:
             txtset(t2,"UNKNOWN"); if (myobj2=getprimarypartymemberobj(playerlist[tpl])){ tnpc2=(npc*)myobj2->more; txtset(t2,tnpc2->name);}
             txtadd(t2,": "); txtadd(t2,t);
             tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_SHARE_COMPAT); if (tfh->h==HFILE_ERROR) tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_CREATE);
-            seek(tfh,lof(tfh)); txtfileout(t2,tfh); close(tfh);
+            seek(tfh,fileLen(tfh)); txtfileout(t2,tfh); close(tfh);
             goto doneclmess;
           }//name==t2
           }//party[0]
@@ -4502,7 +4504,7 @@ privelegechange_skip:
           }
           x5=1;
         }}}}
-        tfh=open2("ban.txt",OF_READWRITE|OF_SHARE_COMPAT); seek(tfh,lof(tfh)); txtfileout(t2,tfh); close(tfh);
+        tfh=open2("ban.txt",OF_READWRITE|OF_SHARE_COMPAT); seek(tfh,fileLen(tfh)); txtfileout(t2,tfh); close(tfh);
         if (x5){
           txtset(t3,"?"); t3->d2[0]=8; txtadd(t3,t2); txtadd(t3," has been banned!"); NET_send(NETplayer,playerlist[tpl]->net,t3);
         }else{
@@ -4511,7 +4513,7 @@ privelegechange_skip:
         txtset(t2,"UNKNOWN"); if (myobj2=getprimarypartymemberobj(playerlist[tpl])){ tnpc2=(npc*)myobj2->more; txtset(t2,tnpc2->name);}
         txtadd(t2,": "); txtadd(t2,t);
         tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_SHARE_COMPAT); if (tfh->h==HFILE_ERROR) tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_CREATE);
-        seek(tfh,lof(tfh)); txtfileout(t2,tfh); close(tfh);
+        seek(tfh,fileLen(tfh)); txtfileout(t2,tfh); close(tfh);
         goto doneclmess;
         }
 
@@ -4531,7 +4533,7 @@ unban_loop:
             txtfileout(t3,tfh);
           }//txtsame(t2,t3)
         }//t3->l
-        if (x4<lof(tfh)) goto unban_loop;
+        if (x4<fileLen(tfh)) goto unban_loop;
         close(tfh);
         if (y){
           txtset(t4,"?"); t4->d2[0]=8; txtadd(t4,t2); txtadd(t4," was unbanned successfully!"); NET_send(NETplayer,playerlist[tpl]->net,t4);
@@ -4541,7 +4543,7 @@ unban_loop:
         txtset(t2,"UNKNOWN"); if (myobj2=getprimarypartymemberobj(playerlist[tpl])){ tnpc2=(npc*)myobj2->more; txtset(t2,tnpc2->name);}
         txtadd(t2,": "); txtadd(t2,t);
         tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_SHARE_COMPAT); if (tfh->h==HFILE_ERROR) tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_CREATE);
-        seek(tfh,lof(tfh)); txtfileout(t2,tfh); close(tfh);
+        seek(tfh,fileLen(tfh)); txtfileout(t2,tfh); close(tfh);
         goto doneclmess;
         }
 
@@ -4557,7 +4559,7 @@ unban_loop:
             txtset(t2,"UNKNOWN"); if (myobj2=getprimarypartymemberobj(playerlist[tpl])){ tnpc2=(npc*)myobj2->more; txtset(t2,tnpc2->name);}
             txtadd(t2,": "); txtadd(t2,t);
             tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_SHARE_COMPAT); if (tfh->h==HFILE_ERROR) tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_CREATE);
-            seek(tfh,lof(tfh)); txtfileout(t2,tfh); close(tfh);
+            seek(tfh,fileLen(tfh)); txtfileout(t2,tfh); close(tfh);
             txtset(t,"??"); t->d2[0]=250; t->d2[1]=7; NET_send(NETplayer,playerlist[x4]->net,t);
           }else{
             txtset(t4,"?"); t4->d2[0]=8; txtadd(t4,t2); txtadd(t4," is not using a custom portrait!"); NET_send(NETplayer,playerlist[tpl]->net,t4);
@@ -4578,7 +4580,7 @@ unban_loop:
             txtset(t2,"UNKNOWN"); if (myobj2=getprimarypartymemberobj(playerlist[tpl])){ tnpc2=(npc*)myobj2->more; txtset(t2,tnpc2->name);}
             txtadd(t2,": "); txtadd(t2,t);
             tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_SHARE_COMPAT); if (tfh->h==HFILE_ERROR) tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_CREATE);
-            seek(tfh,lof(tfh)); txtfileout(t2,tfh); close(tfh);
+            seek(tfh,fileLen(tfh)); txtfileout(t2,tfh); close(tfh);
           }else{
             txtset(t4,"?"); t4->d2[0]=8; txtadd(t4,t2); txtadd(t4," already cannot upload custom portraits!"); NET_send(NETplayer,playerlist[tpl]->net,t4);
           }
@@ -4596,7 +4598,7 @@ unban_loop:
             txtset(t2,"UNKNOWN"); if (myobj2=getprimarypartymemberobj(playerlist[tpl])){ tnpc2=(npc*)myobj2->more; txtset(t2,tnpc2->name);}
             txtadd(t2,": "); txtadd(t2,t);
             tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_SHARE_COMPAT); if (tfh->h==HFILE_ERROR) tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_CREATE);
-            seek(tfh,lof(tfh)); txtfileout(t2,tfh); close(tfh);
+            seek(tfh,fileLen(tfh)); txtfileout(t2,tfh); close(tfh);
           }else{
             txtset(t4,"?"); t4->d2[0]=8; txtadd(t4,t2); txtadd(t4," can already upload custom portraits!"); NET_send(NETplayer,playerlist[tpl]->net,t4);
           }
@@ -4617,7 +4619,7 @@ unban_loop:
             txtset(t2,"UNKNOWN"); if (myobj2=getprimarypartymemberobj(playerlist[tpl])){ tnpc2=(npc*)myobj2->more; txtset(t2,tnpc2->name);}
             txtadd(t2,": "); txtadd(t2,t);
             tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_SHARE_COMPAT); if (tfh->h==HFILE_ERROR) tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_CREATE);
-            seek(tfh,lof(tfh)); txtfileout(t2,tfh); close(tfh);
+            seek(tfh,fileLen(tfh)); txtfileout(t2,tfh); close(tfh);
           }else{
             txtset(t4,"?"); t4->d2[0]=8; txtadd(t4,t2); txtadd(t4," is already banned from using voice chat!"); NET_send(NETplayer,playerlist[tpl]->net,t4);
           }
@@ -4635,7 +4637,7 @@ unban_loop:
             txtset(t2,"UNKNOWN"); if (myobj2=getprimarypartymemberobj(playerlist[tpl])){ tnpc2=(npc*)myobj2->more; txtset(t2,tnpc2->name);}
             txtadd(t2,": "); txtadd(t2,t);
             tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_SHARE_COMPAT); if (tfh->h==HFILE_ERROR) tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_CREATE);
-            seek(tfh,lof(tfh)); txtfileout(t2,tfh); close(tfh);
+            seek(tfh,fileLen(tfh)); txtfileout(t2,tfh); close(tfh);
           }else{
             txtset(t4,"?"); t4->d2[0]=8; txtadd(t4,t2); txtadd(t4," can already use voice chat!"); NET_send(NETplayer,playerlist[tpl]->net,t4);
           }
@@ -4685,7 +4687,7 @@ unban_loop:
           if (playerlist[x4]){ if (myobj2=getprimarypartymemberobj(playerlist[x4])){ tnpc2=(npc*)myobj2->more; if (txtsamewithoutcase(tnpc2->name,t2)){
           tfh=open2("banip.txt",OF_READWRITE|OF_SHARE_COMPAT);
           if (tfh->h==HFILE_ERROR) tfh=open2("banip.txt",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
-          seek(tfh,lof(tfh));
+          seek(tfh,fileLen(tfh));
           txtset(t4,"");
           txtnumint(t3,playerlist[x4]->GNPCflags[242]&255); txtadd(t4,t3); txtadd(t4,".");
           txtnumint(t3,(playerlist[x4]->GNPCflags[242]>>8)&255); txtadd(t4,t3); txtadd(t4,".");
@@ -4697,7 +4699,7 @@ unban_loop:
           txtset(t2,"UNKNOWN"); if (myobj2=getprimarypartymemberobj(playerlist[tpl])){ tnpc2=(npc*)myobj2->more; txtset(t2,tnpc2->name);}
           txtadd(t2,": "); txtadd(t2,t);
           tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_SHARE_COMPAT); if (tfh->h==HFILE_ERROR) tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_CREATE);
-          seek(tfh,lof(tfh)); txtfileout(t2,tfh); close(tfh);
+          seek(tfh,fileLen(tfh)); txtfileout(t2,tfh); close(tfh);
           goto doneclmess;
         }}}}
         txtset(t,"?"); t->d2[0]=8; txtadd(t,"No player named "); txtadd(t,t2); txtadd(t," is in Britannia! (check uppercase/lowercase)"); NET_send(NETplayer,playerlist[tpl]->net,t); goto doneclmess;
@@ -4723,14 +4725,14 @@ unbanip_loop:
             txtfileout(t3,tfh);
           }//txtsame(t2,t3)
         }//t3->l
-        if (x4<lof(tfh)) goto unbanip_loop;
+        if (x4<fileLen(tfh)) goto unbanip_loop;
         close(tfh);
         if (y){
           txtset(t4,"?"); t4->d2[0]=8; txtadd(t4,"The IP "); txtadd(t4,t2); txtadd(t4," was unbanned successfully!"); NET_send(NETplayer,playerlist[tpl]->net,t4);
           txtset(t2,"UNKNOWN"); if (myobj2=getprimarypartymemberobj(playerlist[tpl])){ tnpc2=(npc*)myobj2->more; txtset(t2,tnpc2->name);}
           txtadd(t2,": "); txtadd(t2,t);
           tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_SHARE_COMPAT); if (tfh->h==HFILE_ERROR) tfh=open2(".\\save\\adminlog.txt",OF_READWRITE|OF_CREATE);
-          seek(tfh,lof(tfh)); txtfileout(t2,tfh); close(tfh);
+          seek(tfh,fileLen(tfh)); txtfileout(t2,tfh); close(tfh);
         }else{
           txtset(t4,"?"); t4->d2[0]=8; txtadd(t4,"The IP "); txtadd(t4,t2); txtadd(t4," is not currently banned!"); NET_send(NETplayer,playerlist[tpl]->net,t4);
         }
@@ -5641,7 +5643,7 @@ buy_newitem:
 
           myobj3=OBJnew(); myobj3->type=x2;
 
-          if (obji[sprlnk[x2&1023]+(x2>>10)].flags&4096) myobj3->more2=1; //temp =1 to find weight of single object
+          if (objectInfo[sprlnk[x2&1023]+(x2>>10)].flags&4096) myobj3->more2=1; //temp =1 to find weight of single object
           f=WTfind(myobj3)*x3;
           myobj3->more2=0; //*can override
 
@@ -5651,7 +5653,7 @@ buy_newitem:
           }
 
 
-          if (obji[sprlnk[x2&1023]+(x2>>10)].flags&4096){
+          if (objectInfo[sprlnk[x2&1023]+(x2>>10)].flags&4096){
             myobj3->more2=x3;
             x3=1;
           }
@@ -5840,7 +5842,7 @@ buy_nogold:
 ifitem_clothtype:
               if ((CONqual==0xFFFFFFFF)||(CONqual==OBJlist_list[y6]->more2)){
                 if ((OBJlist_list[y6]->info&32768)==0){//skip if not for sale
-                  if (obji[sprlnk[OBJlist_list[y6]->type&1023]+(OBJlist_list[y6]->type>>10)].flags&4096) y7+=OBJlist_list[y6]->more2; else y7++;
+                  if (objectInfo[sprlnk[OBJlist_list[y6]->type&1023]+(OBJlist_list[y6]->type>>10)].flags&4096) y7+=OBJlist_list[y6]->more2; else y7++;
                 }
               }//qual
             }
@@ -5873,7 +5875,7 @@ ifitem_clothtype:
 sell_clothtype:
               if ((CONqual==0xFFFFFFFF)||(CONqual==OBJlist_list[y6]->more2)){
                 if ((OBJlist_list[y6]->info&32768)==0){//skip if not for sale
-                  if (obji[sprlnk[OBJlist_list[y6]->type&1023]+(OBJlist_list[y6]->type>>10)].flags&4096) y7+=OBJlist_list[y6]->more2; else y7++;
+                  if (objectInfo[sprlnk[OBJlist_list[y6]->type&1023]+(OBJlist_list[y6]->type>>10)].flags&4096) y7+=OBJlist_list[y6]->more2; else y7++;
                 }
               }//qual
             }
@@ -5893,7 +5895,7 @@ sell_clothtype2:
                 if ((OBJlist_list[y6]->info&32768)==0){//skip if not for sale
                   myobj5=OBJlist_list[y6];
                   if (myobj5->info&128) y8=1; //stealing!
-                  if (obji[sprlnk[OBJlist_list[y6]->type&1023]+(OBJlist_list[y6]->type>>10)].flags&4096) x8=OBJlist_list[y6]->more2; else x8=1;
+                  if (objectInfo[sprlnk[OBJlist_list[y6]->type&1023]+(OBJlist_list[y6]->type>>10)].flags&4096) x8=OBJlist_list[y6]->more2; else x8=1;
                   x7=x8;
                   x7-=x3;
                   x3-=x8;
@@ -6712,7 +6714,7 @@ addsaveclear:
           }else{
             //object wasn't removed!
             if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]==NULL){
-              if (obji[sprlnk[myobj->type&1023]].v4==NULL){ //not crt/npc
+              if (objectInfo[sprlnk[myobj->type&1023]].v4==NULL){ //not crt/npc
                 myobj3=myobj; //set as base item if NOT floating
               }//not crt/npc
             }//float==NULL
@@ -6791,12 +6793,12 @@ tempcheck:
         if ((myobj->type&1023)==414) goto skiptempobj; //skiff
         if ((myobj->type&1023)==149) goto skiptempobj; //deed
         if (myobj->type==OBJ_HORSE_PAPERS) goto skiptempobj; //horse papers
-        if (obji[sprlnk[myobj->type&1023]].flags&1024){ //container
+        if (objectInfo[sprlnk[myobj->type&1023]].flags&1024){ //container
           if ((myobj->type&1023)!=OBJ_DEAD_CYCLOPS){
             if ((myobj->type&1023)!=OBJ_DEAD_GARGOYLE){
               if ((myobj->type&1023)!=OBJ_DEAD_REAPER){
                 if ((myobj->type&1023)!=OBJ_HORSE_CARCASS){//carcass
-                  if (obji[sprlnk[myobj->type&1023]].weight==NULL) goto skiptempobj; //NULL weight container
+                  if (objectInfo[sprlnk[myobj->type&1023]].weight==NULL) goto skiptempobj; //NULL weight container
                 }
               }
             }
@@ -6903,8 +6905,13 @@ skiptempobj:
             addu6monsterdropitems(myobj2);
 
             //integrate XP based gold
-            x9=rnd*8; if (x9==0){
-              x9=obji[sprlnk[myobj2->type&1023]].v5; x9=rnd*(x9+1); if (x9){
+            x9=rnd*8;
+
+            if (x9==0){
+                /// ????
+              x9=objectInfo[sprlnk[myobj2->type&1023]].v5;
+              x9=rnd*(x9+1);
+              if (x9){
                 if (xpgoldobj=(object*)invbag->more){
 respawn_goldscan:
                   if (xpgoldobj->type==OBJ_GOLD_COIN){
@@ -7287,7 +7294,7 @@ dropgoldmore2:
                 }//x2==0
               }//cast
 
-              f=8.0f-((float)(obji[sprlnk[myobj->type&1023]].v7&255))/8.0f; //mp+ interval
+              f=8.0f-((float)(objectInfo[sprlnk[myobj->type&1023]].v7&255))/8.0f; //mp+ interval
               if (int((ett/f))!=int((ett/f)-(et/f))) { //increase mp
                 crt->mp++; if (crt->mp>8) crt->mp=8;
                 if (crt->mp==8) crt->cast=1; //force cast on max mp
@@ -7522,7 +7529,7 @@ crtenum_gottarget:
                   if (myobj2->info&2){ //play battle music!
                     tnpc=(npc*)myobj2->more;
                     if (tnpc->player){
-                      if (obji[sprlnk[myobj->type&1023]].v5>=10){
+                      if (objectInfo[sprlnk[myobj->type&1023]].v5>=10){
                         //battle music: melee
                         txtset(t,"????");
                         t->d2[0]=30;
@@ -7593,7 +7600,7 @@ revalidatetargetok:
                       ZeroMemory(myobj3->more,sizeof(creature));
                       crt=(creature*)myobj3->more;
                       crt->crt_struct=TRUE;
-                      crt->hp=(obji[sprlnk[myobj3->type&1023]].v8>>8)*4;
+                      crt->hp=(objectInfo[sprlnk[myobj3->type&1023]].v8>>8)*4;
                       crt->mp=rnd*9;
                       crt->al=1;
                       x4=rnd*4; if (x4==0) crt->al=4; //25% chance of good allegiance!
@@ -7654,7 +7661,7 @@ revalidatetargetok:
                         special_effects[i3].y2=y2;
                         special_effects[i3].more=0xFFFF;
                         special_effects[i3].wait=1;
-                        x3=obji[sprlnk[myobj->type&1023]].v7&255;
+                        x3=objectInfo[sprlnk[myobj->type&1023]].v7&255;
                         x3/=4;
                         x3=x3+(rnd*x3);
                         if (target_struct==2){
@@ -7698,14 +7705,14 @@ already_paralyzed:
                         // doesn't reduce the damage it didn't in U6 so why it should in u6o.
                         // maybe armour should reduce some damage, but definitely not much.
 
-                        //x3=rnd*(16+((obji[sprlnk[myobj->type&1023]].v7&255)/2));
-                        //x3=rnd*(obji[sprlnk[myobj->type&1023]].v7&255);
+                        //x3=rnd*(16+((objectInfo[sprlnk[myobj->type&1023]].v7&255)/2));
+                        //x3=rnd*(objectInfo[sprlnk[myobj->type&1023]].v7&255);
 
-                        if (target_struct==2) x5=rnd*(tnpc->arm+1); else x5=rnd*((obji[sprlnk[crt->target->type&1023]].v7>>8)+1+1+getequiparmourvalue((object*)crt2->items->more));
+                        if (target_struct==2) x5=rnd*(tnpc->arm+1); else x5=rnd*((objectInfo[sprlnk[crt->target->type&1023]].v7>>8)+1+1+getequiparmourvalue((object*)crt2->items->more));
                         x3-=x5/4; if (x3<0) x3=0; //npc armour!
 
                         //repel!
-                        //if (target_struct==2) x5=rnd*tnpc->intelligence; else x5=rnd*(obji[sprlnk[crt->target->type&1023]].v7&255);
+                        //if (target_struct==2) x5=rnd*tnpc->intelligence; else x5=rnd*(objectInfo[sprlnk[crt->target->type&1023]].v7&255);
                         //x6=rnd*(32+4*5);
                         //if (x5>=x6) x3=0;
                         if (x3){
@@ -7753,14 +7760,14 @@ already_paralyzed:
                           goto donemove;
                         }
                         x3=rnd*24;
-                        //x3=rnd*(8+((obji[sprlnk[myobj->type&1023]].v7&255)/4));
-                        //x3=rnd*((obji[sprlnk[myobj->type&1023]].v7&255)/2);
+                        //x3=rnd*(8+((objectInfo[sprlnk[myobj->type&1023]].v7&255)/4));
+                        //x3=rnd*((objectInfo[sprlnk[myobj->type&1023]].v7&255)/2);
 
-                        if (target_struct==2) x5=rnd*(tnpc->arm+1); else x5=rnd*((obji[sprlnk[crt->target->type&1023]].v7>>8)+1+1+getequiparmourvalue((object*)crt2->items->more));
+                        if (target_struct==2) x5=rnd*(tnpc->arm+1); else x5=rnd*((objectInfo[sprlnk[crt->target->type&1023]].v7>>8)+1+1+getequiparmourvalue((object*)crt2->items->more));
                         x3-=x5/4; if (x3<0) x3=0; //npc armour!
 
                         //repel!
-                        //if (target_struct==2) x5=rnd*tnpc->intelligence; else x5=rnd*(obji[sprlnk[crt->target->type&1023]].v7&255);
+                        //if (target_struct==2) x5=rnd*tnpc->intelligence; else x5=rnd*(objectInfo[sprlnk[crt->target->type&1023]].v7&255);
                         //x6=rnd*(32+4*2);
                         //if (x5>=x6) x3=0;
 
@@ -7801,17 +7808,17 @@ already_paralyzed:
                           goto donemove;
                         }
                         x3=rnd*32;
-                        //x3=rnd*(12+((obji[sprlnk[myobj->type&1023]].v7&255)/3));
-                        //x3=rnd*((obji[sprlnk[myobj->type&1023]].v7&255)*24/32);
+                        //x3=rnd*(12+((objectInfo[sprlnk[myobj->type&1023]].v7&255)/3));
+                        //x3=rnd*((objectInfo[sprlnk[myobj->type&1023]].v7&255)*24/32);
 
                         //txtnumint(t5,tnpc->arm);
                         //MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
 
-                        if (target_struct==2) x5=rnd*(tnpc->arm+1); else x5=rnd*((obji[sprlnk[crt->target->type&1023]].v7>>8)+1+1+getequiparmourvalue((object*)crt2->items->more));
+                        if (target_struct==2) x5=rnd*(tnpc->arm+1); else x5=rnd*((objectInfo[sprlnk[crt->target->type&1023]].v7>>8)+1+1+getequiparmourvalue((object*)crt2->items->more));
                         x3-=x5/4; if (x3<0) x3=0; //npc armour!
 
                         //repel!
-                        //if (target_struct==2) x5=rnd*tnpc->intelligence; else x5=rnd*(obji[sprlnk[crt->target->type&1023]].v7&255);
+                        //if (target_struct==2) x5=rnd*tnpc->intelligence; else x5=rnd*(objectInfo[sprlnk[crt->target->type&1023]].v7&255);
                         //x6=rnd*(32+4*3);
                         //if (x5>=x6) x3=0;
 
@@ -7838,11 +7845,11 @@ crtcantcast:
                   //lower hp of target
                   //tnpc=(npc*)crt->target->more; THERE IS NO PURPOSE FOR THIS LINE OF CODE!
 
-                  if (target_struct==2) x5=rnd*(tnpc->arm+1); else x5=rnd*((obji[sprlnk[crt->target->type&1023]].v7>>8)+1+1+getequiparmourvalue((object*)crt2->items->more));
+                  if (target_struct==2) x5=rnd*(tnpc->arm+1); else x5=rnd*((objectInfo[sprlnk[crt->target->type&1023]].v7>>8)+1+1+getequiparmourvalue((object*)crt2->items->more));
 
                   // U0ESioYUDG
 
-                  x6=obji[sprlnk[myobj->type&1023]].v8&255;
+                  x6=objectInfo[sprlnk[myobj->type&1023]].v8&255;
 
                   //GPF!
                   //if (((object*)crt->items)==NULL) exit( 789);
@@ -7876,7 +7883,7 @@ crtcantcast:
                     if (target_struct==2)
                         x8=rnd*(tnpc->dexterity + 1);
                     else
-                        x8= rnd * ((obji[sprlnk[crt->target->type & 1023]].v6 >> 8) + 1);
+                        x8= rnd * ((objectInfo[sprlnk[crt->target->Type()]].v6 >> 8) + 1);
 
                     if (x7>x8){ //couldn't dodge the attack!
                       tnpc->hp-=x6;
@@ -7945,7 +7952,7 @@ crtcantcast:
                   //change direction
                   OBJdir(myobj,x2,y2);
 
-                  f=(float)(obji[sprlnk[myobj->type&1023]].v6>>8)/64.0f; if (f>1) f=1;
+                  f=(float)(objectInfo[sprlnk[myobj->type&1023]].v6>>8)/64.0f; if (f>1) f=1;
                   crt->wait+=2.0-(f*0.25f);
                   //crt->wait+=1.0f;
 
@@ -8042,7 +8049,7 @@ crt_walk:
                     f=0.5f+rnd*0.5f; if (crt->wait<f) crt->wait=f;
                     VLNKsremove(myobj); crt->target=NULL; crt->pathn=0; goto donemove;
                   }
-                  f=(float)(obji[sprlnk[myobj->type&1023]].v6>>8)/64.0f; if (f>1.0f) f=1.0f;
+                  f=(float)(objectInfo[sprlnk[myobj->type&1023]].v6>>8)/64.0f; if (f>1.0f) f=1.0f;
                   crt->wait+=(0.125f+0.25f-0.0625f-f*0.125);
                 } //move towards
               } //wait
@@ -8205,7 +8212,7 @@ castcure_done:
                         OBJlist_last = NULL;
                         for (y6 = 0; y6 < x6; y6++) {
                             x2 = 0;
-                            x3 = OBJlist_list[y6]->type & 1023;
+                            x3 = OBJlist_list[y6]->Type();
                             for (int i = 0; i < sizeof(food_types) / sizeof(food_types[0]); i++) {
                                 if (x3 == food_types[i]) { // food type match
                                     x2 = food_values[i];
@@ -8222,15 +8229,15 @@ castcure_done:
                                 txtaddchar(t, 255);
                                 txtadd(t, tnpc->name);
                                 txtadd(t, x5 ? " drinks the " : " eats the ");
-                                y2 = objname[(OBJlist_list[y6]->type & 1023) * 2];
-                                y3 = objname[(OBJlist_list[y6]->type & 1023) * 2 + 1];
+                                y2 = objname[(OBJlist_list[y6]->Type()) * 2];
+                                y3 = objname[(OBJlist_list[y6]->Type()) * 2 + 1];
                                 txtNEWLEN(t2, y3);
                                 memcpy(&t2->d2[0], &objname2[y2], y3);
                                 txtadd(t, t2);
                                 txtadd(t, ".");
                                 NET_send(NETplayer, tnpc->player->net, t);
                                 tnpc->upflags |= 32;
-                                if (obji[sprlnk[OBJlist_list[y6]->type & 1023] + (OBJlist_list[y6]->type >> 10)].flags & 4096) {
+                                if (objectInfo[sprlnk[OBJlist_list[y6]->Type()] + (OBJlist_list[y6]->type >> 10)].flags & 4096) {
                                     if (OBJlist_list[y6]->more2 != 1) {
                                         OBJlist_list[y6]->more2--;
                                         goto npcactiondone;
@@ -9176,7 +9183,7 @@ doneswap2:
                         tnpc3->upflags|=32;//inv
 
                         //join/combine items in inventory
-                        if (obji[sprlnk[invobj->type&1023]+(invobj->type>>10)].flags&4096){//multiple/stackable
+                        if (objectInfo[sprlnk[invobj->type&1023]+(invobj->type>>10)].flags&4096){//multiple/stackable
                           if (myobj5=(object*)invbag->more){
 joinitem2:
                             if (myobj5->type==invobj->type){//same type
@@ -9194,13 +9201,13 @@ cantjoin2:
                         invobj->info|=112; invobj->next=invbag->more; invobj->prev=invbag; invbag->more=invobj; if (invobj->next) ((object*)invobj->next)->prev=invobj;
 
                         //autoready item?
-                        if (obji[sprlnk[invobj->type&1023]].flags&8){
+                        if (objectInfo[sprlnk[invobj->type&1023]].flags&8){
                           //check for any two handed weapons!
                           if (myobj5=tnpc3->wep_left){
-                            if (obji[sprlnk[myobj5->type&1023]].flags&16) goto cantautoready;
+                            if (objectInfo[sprlnk[myobj5->type&1023]].flags&16) goto cantautoready;
                           }
                           if (myobj5=tnpc3->wep_right){
-                            if (obji[sprlnk[myobj5->type&1023]].flags&16) goto cantautoready;
+                            if (objectInfo[sprlnk[myobj5->type&1023]].flags&16) goto cantautoready;
                           }
                           //ready item if possible
                           if (tnpc3->wep_left==NULL){
@@ -9918,11 +9925,11 @@ dontmove:
               myobj3=tnpc->wep_left; myobj4=tnpc->wep_right;
               if (myobj3&&myobj4){ //object in both hands
                 //can't attack with equiped items!
-                if ((spikedhelm_attack==0)&&(obji[sprlnk[myobj3->type&1023]].v1==0)&&(obji[sprlnk[myobj4->type&1023]].v1==0))
+                if ((spikedhelm_attack==0)&&(objectInfo[sprlnk[myobj3->type&1023]].v1==0)&&(objectInfo[sprlnk[myobj4->type&1023]].v1==0))
                     goto skipnpcattack;
 
                 if (spikedhelm_attack){
-                  if ((obji[sprlnk[myobj3->type&1023]].v1==0)&&(obji[sprlnk[myobj4->type&1023]].v1==0)) spikedhelm_onlyattack=1;
+                  if ((objectInfo[sprlnk[myobj3->type&1023]].v1==0)&&(objectInfo[sprlnk[myobj4->type&1023]].v1==0)) spikedhelm_onlyattack=1;
                 }
               }
 
@@ -9945,7 +9952,7 @@ dontmove:
                   if (x3==0) myobj3=tnpc->wep_right; //right hand weapon
                   if (x3==1) myobj3=tnpc->wep_left; //left hand weapon
                   if (myobj3){
-                    if (obji[sprlnk[myobj3->type&1023]].v1) x4=1; else x4=65536;
+                    if (objectInfo[sprlnk[myobj3->type&1023]].v1) x4=1; else x4=65536;
                     x5=myobj3->type&1023;
                     if (x5==OBJ_BOW) x4=8;
                     if (x5==OBJ_MAGIC_BOW) x4=8;
@@ -9961,7 +9968,7 @@ dontmove:
                     if (x5==OBJ_SPEAR) x4=8;
                     if (x5==OBJ_HALBERD) x4=2;//halberd
                     if (x5==OBJ_MORNING_STAR) x4=2;//morning star
-                    if (obji[sprlnk[myobj3->type&1023]].flags&16){
+                    if (objectInfo[sprlnk[myobj3->type&1023]].flags&16){
                       x2=x4; goto npcattack2hnd;
                     }
                     if (x4<x2) x2=x4;
@@ -10064,9 +10071,9 @@ npcattack2hnd:
                   npcattackweptype=myobj3->type&1023;
 
                   if (x3)
-                      wep_dt[0]=obji[sprlnk[myobj3->type&1023]].v5;
+                      wep_dt[0]=objectInfo[sprlnk[myobj3->type&1023]].v5;
                   else
-                      wep_dt[1]=obji[sprlnk[myobj3->type&1023]].v5;
+                      wep_dt[1]=objectInfo[sprlnk[myobj3->type&1023]].v5;
 
                   //special case(s)
 
@@ -10200,7 +10207,7 @@ morningstar_failedcheck:;
                             special_effects[i3].y2=myobj2->y;
                             special_effects[i3].more=0xFFFF;
                             special_effects[i3].wait=1;
-                            x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                            x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
                             if (x3) wep_dt[0]=3; else wep_dt[1]=3;
                             goto skip_hth2;
                           }//->type==55
@@ -10229,7 +10236,7 @@ morningstar_failedcheck:;
                             special_effects[i3].y2=myobj2->y;
                             special_effects[i3].more=0xFFFF;
                             special_effects[i3].wait=1;
-                            x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                            x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
                             if (x3) wep_dt[0]=3; else wep_dt[1]=3;
                             goto skip_hth2;
                           }//->type==55
@@ -10295,7 +10302,7 @@ crossbow0:
                               special_effects[i3].more=0xFFFF;
                               special_effects[i3].wait=1;
 
-                              x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                              x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
                               if (x3) wep_dt[0]=3; else wep_dt[1]=3;
 
                               goto skip_hth2;
@@ -10320,7 +10327,7 @@ crossbow0:
                           special_effects[i3].y2=myobj2->y;
                           special_effects[i3].more=0xFFFF;
                           special_effects[i3].wait=1;
-                          x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                          x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
 
                         }//OBJcheckbolt
                       }//short range
@@ -10340,7 +10347,7 @@ crossbow0:
                         special_effects[i3].y2=myobj2->y;
                         special_effects[i3].more=0xFFFF;
                         special_effects[i3].wait=1;
-                        x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                        x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
                         if (x3) wep_dt[0]=5; else wep_dt[1]=5;
                         //destroy item???
                         x8=myobj3->more2;
@@ -10370,7 +10377,7 @@ crossbow0:
                         special_effects[i3].y2=myobj2->y;
                         special_effects[i3].more=0xFFFF;
                         special_effects[i3].wait=1;
-                        x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                        x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
                         if (x3) wep_dt[0]=5; else wep_dt[1]=5;
                         //destroy item???
                         x8=myobj3->more2;
@@ -10409,7 +10416,7 @@ crossbow0:
                             special_effects[i3].y2=myobj2->y;
                             special_effects[i3].more=0xFFFF;
                             special_effects[i3].wait=1;
-                            x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                            x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
                             if (x3) wep_dt[0]=3; else wep_dt[1]=3;
                             goto skip_hth2;
                           }//==56
@@ -10432,7 +10439,7 @@ crossbow0:
                         special_effects[i3].y2=myobj2->y;
                         special_effects[i3].more=0xFFFF;
                         special_effects[i3].wait=2;
-                        x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                        x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
 
                         //drop it by accident?
                         x8=rnd*(tnpc->dexterity + 1);
@@ -10482,7 +10489,7 @@ boomerang_new:;
                         special_effects[i3].more=0xFFFF;
                         special_effects[i3].wait=83;
 
-                        x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                        x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
 
                         if (x3==0)
                             tnpc->wep_right=NULL; //right hand weapon
@@ -10537,7 +10544,7 @@ oilflask_new:
                       if (OBJcheckbolt(myobj->x,myobj->y,myobj2->x,myobj2->y)){
                         //blocked!
                       }else{
-                        x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                        x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
                         if (x2>1){ //throw
                           i3=SFnew(myobj2->x,myobj2->y); //destination is more important than the source
                           special_effects[i3].type=10; //dagger
@@ -10583,7 +10590,7 @@ dagger_new:;
                       if (OBJcheckbolt(myobj->x,myobj->y,myobj2->x,myobj2->y)){
                         //blocked!
                       }else{
-                        x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                        x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
                         if (x2>1){ //throw
                           i3=SFnew(myobj2->x,myobj2->y); //destination is more important than the source
                           special_effects[i3].type=11; //throwing axe
@@ -10629,7 +10636,7 @@ axe_new:;
                       if (OBJcheckbolt(myobj->x,myobj->y,myobj2->x,myobj2->y)){
                         //blocked!
                       }else{
-                        x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                        x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
                         if (x2>1){ //throw
                           i3=SFnew(myobj2->x,myobj2->y); //destination is more important than the source
                           special_effects[i3].type=12; //spear
@@ -10721,7 +10728,7 @@ skip_hthx: //not a long range weapon
 
                   if (x2<=1){
 hth_norangecheck:
-                    if (x==0) x+=obji[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
+                    if (x==0) x+=objectInfo[sprlnk[myobj3->type&1023]].v1+ENHANCEget_attack(myobj3);
                     if (myobj3->type==48) x=1023;
                   }//x2<=1
 
@@ -10858,7 +10865,7 @@ slimedivide:
                       ZeroMemory(myobj3->more,sizeof(creature));
                       crt3=(creature*)myobj3->more;
                       crt3->crt_struct=TRUE;
-                      crt3->hp=(obji[sprlnk[myobj3->type&1023]].v8>>8)*4;
+                      crt3->hp=(objectInfo[sprlnk[myobj3->type&1023]].v8>>8)*4;
                       crt3->mp=0;
                       crt3->al=1;
                       crt3->respawn_x=1024; //seconds till spawned crt will disappear
@@ -10896,12 +10903,12 @@ slimedivide_failed:;
                     if (tplayer->craft)
                         x2=rnd*31.0f; //cannons (can't graze target!)
 
-                    x2-=(int)(rnd*((obji[sprlnk[myobj2->type&1023]].v7>>8)+1+1+getequiparmourvalue((object*)crt->items->more))); //enemy arm +1
+                    x2-=(int)(rnd*((objectInfo[sprlnk[myobj2->type&1023]].v7>>8)+1+1+getequiparmourvalue((object*)crt->items->more))); //enemy arm +1
                     if (x2<0) x2=0;
 
                     if (tplayer->craft) goto nododge;
                     if (wep_dt[i3]==3) goto nododge;
-                    if (int(rnd*32)<=int(rnd*((obji[sprlnk[myobj2->type&1023]].v6>>8)+1))){
+                    if (int(rnd*32)<=int(rnd*((objectInfo[sprlnk[myobj2->type&1023]].v6>>8)+1))){
                       x2=0; //enemy dodged the attack!
                     }
 nododge:
@@ -10960,7 +10967,7 @@ spellattcrt0:
                             ZeroMemory(myobj4->more,sizeof(creature));
                             crt3=(creature*)myobj4->more;
                             crt3->crt_struct=TRUE;
-                            crt3->hp=(obji[sprlnk[myobj4->type&1023]].v8>>8)*4;
+                            crt3->hp=(objectInfo[sprlnk[myobj4->type&1023]].v8>>8)*4;
                             crt3->mp=rnd*9;
                             crt3->al=1;
                             crt3->respawn_x=1024; //seconds till spawned crt will disappear
@@ -11096,7 +11103,7 @@ dropgoldmore:
                                 }}}}//x,y,x,y
                             }//gargoyle
 
-                            tnpc->exp+=obji[sprlnk[myobj2->type&1023]].v5; //*needs to change
+                            tnpc->exp+=objectInfo[sprlnk[myobj2->type&1023]].v5; //*needs to change
                             //Inexperienced character armour bonus changed to 50%
                             if (tnpc->player){ if (tnpc->player->party[0]){ if ((npc*)tnpc->player->party[0]->more==tnpc){ if (tnpc->exp<1600){ if (tnpc->lev<=2){
                               //tnpc->arm+=(20-tnpc->exp/80);
@@ -13043,7 +13050,7 @@ invisibilityblocked:;
                 ZeroMemory(myobj2->more,sizeof(creature));
                 crt=(creature*)myobj2->more;
                 crt->crt_struct=TRUE;
-                crt->hp=(obji[sprlnk[myobj2->type&1023]].v8>>8)*4;
+                crt->hp=(objectInfo[sprlnk[myobj2->type&1023]].v8>>8)*4;
                 crt->mp=rnd*9;
                 crt->al=1; x3=rnd*4; //25% chance of evil allegiance!
                 if (x3) crt->al=4;
@@ -13103,7 +13110,7 @@ dropgoldmore3:
                             ZeroMemory(myobj2->more,sizeof(creature));
                             crt=(creature*)myobj2->more;
                             crt->crt_struct=TRUE;
-                            crt->hp=(obji[sprlnk[myobj2->type&1023]].v8>>8)*4;
+                            crt->hp=(objectInfo[sprlnk[myobj2->type&1023]].v8>>8)*4;
                             crt->mp=rnd*9;
                             crt->al=1;
                             crt->respawn_x=1024; //seconds till spawned crt will disappear
@@ -13147,7 +13154,7 @@ slimeblocked:;
                 ZeroMemory(myobj2->more,sizeof(creature));
                 crt=(creature*)myobj2->more;
                 crt->crt_struct=TRUE;
-                crt->hp=(obji[sprlnk[myobj2->type&1023]].v8>>8)*4;
+                crt->hp=(objectInfo[sprlnk[myobj2->type&1023]].v8>>8)*4;
                 crt->mp=rnd*9;
                 crt->al=4;
                 crt->respawn_x=1024; //seconds till spawned crt will disappear
@@ -13181,7 +13188,7 @@ isretry: spellx=tpx+x+rnd*5-2; spelly=tpy+y+rnd*5-2;
                   ZeroMemory(myobj2->more,sizeof(creature));
                   crt=(creature*)myobj2->more;
                   crt->crt_struct=TRUE;
-                  crt->hp=(obji[sprlnk[myobj2->type&1023]].v8>>8)*4;
+                  crt->hp=(objectInfo[sprlnk[myobj2->type&1023]].v8>>8)*4;
                   crt->mp=rnd*9;
                   crt->al=4;
                   crt->respawn_x=1024; //seconds till spawned crt will disappear
@@ -13201,11 +13208,11 @@ isretry: spellx=tpx+x+rnd*5-2; spelly=tpy+y+rnd*5-2;
 
               if (myobj2=OBJfindlast(tpx+x,tpy+y)){
                 if (myobj2->info&256) goto cantreplicate; //quest item
-                if (obji[sprlnk[myobj2->type&1023]].weight==0) goto cantreplicate; //no weight!
-                if (obji[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].v1) goto cantreplicate; //v1 (damage)
-                if (obji[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].v2) goto cantreplicate; //v2 (armour)
-                if (obji[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].flags&127) goto cantreplicate; //can be equipped
-                if (obji[sprlnk[myobj2->type&1023]].flags&1024) goto cantreplicate; //container
+                if (objectInfo[sprlnk[myobj2->type&1023]].weight==0) goto cantreplicate; //no weight!
+                if (objectInfo[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].v1) goto cantreplicate; //v1 (damage)
+                if (objectInfo[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].v2) goto cantreplicate; //v2 (armour)
+                if (objectInfo[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].flags&127) goto cantreplicate; //can be equipped
+                if (objectInfo[sprlnk[myobj2->type&1023]].flags&1024) goto cantreplicate; //container
                 //EXCEPTIONS!
                 if ((myobj2->type&1023)==87) goto cantreplicate; //orb of the moons(kals)
                 if (myobj2->type==(223+1024)) goto cantreplicate; //lit powderkeg
@@ -13230,27 +13237,27 @@ isretry: spellx=tpx+x+rnd*5-2; spelly=tpy+y+rnd*5-2;
                 //find safe location for replicated object!
                 x3=tpx+x; x4=tpy+y; x3++;
                 if (myobj3=OBJfindlast(x3,x4)){
-                  if (obji[sprlnk[myobj3->type&1023]+(myobj3->type>>10)].flags&512) goto gotreploc;
+                  if (objectInfo[sprlnk[myobj3->type&1023]+(myobj3->type>>10)].flags&512) goto gotreploc;
                 }
                 if (bt[x4][x3]&1024) goto gotreploc;
                 x3=tpx+x; x4=tpy+y; x3--;
                 if (myobj3=OBJfindlast(x3,x4)){
-                  if (obji[sprlnk[myobj3->type&1023]+(myobj3->type>>10)].flags&512) goto gotreploc;
+                  if (objectInfo[sprlnk[myobj3->type&1023]+(myobj3->type>>10)].flags&512) goto gotreploc;
                 }
                 if (bt[x4][x3]&1024) goto gotreploc;
                 x3=tpx+x; x4=tpy+y; x4++;
                 if (myobj3=OBJfindlast(x3,x4)){
-                  if (obji[sprlnk[myobj3->type&1023]+(myobj3->type>>10)].flags&512) goto gotreploc;
+                  if (objectInfo[sprlnk[myobj3->type&1023]+(myobj3->type>>10)].flags&512) goto gotreploc;
                 }
                 if (bt[x4][x3]&1024) goto gotreploc;
                 x3=tpx+x; x4=tpy+y; x4--;
                 if (myobj3=OBJfindlast(x3,x4)){
-                  if (obji[sprlnk[myobj3->type&1023]+(myobj3->type>>10)].flags&512) goto gotreploc;
+                  if (objectInfo[sprlnk[myobj3->type&1023]+(myobj3->type>>10)].flags&512) goto gotreploc;
                 }
                 if (bt[x4][x3]&1024) goto gotreploc;
                 x3=tpx+x; x4=tpy+y;
                 if (myobj3=OBJfindlast(x3,x4)){
-                  if (obji[sprlnk[myobj3->type&1023]+(myobj3->type>>10)].flags&512) goto gotreploc;
+                  if (objectInfo[sprlnk[myobj3->type&1023]+(myobj3->type>>10)].flags&512) goto gotreploc;
                 }
                 if (bt[x4][x3]&1024) goto gotreploc;
                 goto cantreplicate; //no space!
@@ -13264,7 +13271,7 @@ gotreploc:
                   myobj3->type=myobj2->type;
                   myobj3->info=myobj2->info;
                   myobj3->more2=myobj2->more2;
-                  if (obji[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].flags&4096) myobj3->more2=1;
+                  if (objectInfo[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].flags&4096) myobj3->more2=1;
                   myobj3->info|=112; //set flags as temp OBJ
                   if (myobj3->info&128) myobj3->info-=128; //remove stealing flag!
                   OBJadd(x3,x4,myobj3);
@@ -14144,7 +14151,7 @@ diskipz2:;
                   myobj2=tnpc->baseitem;
                   myobj=(object*)tnpc->baseitem->prev;
 getprev9:
-                  if ((myobj->more!=myobj2)||((obji[sprlnk[myobj->type&1023]].flags&1024)==0)) {myobj2=myobj; myobj=(object*)myobj->prev; goto getprev9;}
+                  if ((myobj->more!=myobj2)||((objectInfo[sprlnk[myobj->type&1023]].flags&1024)==0)) {myobj2=myobj; myobj=(object*)myobj->prev; goto getprev9;}
                   tnpc->baseitem=myobj;
                   tnpc->baseitem_offset=0;
                   tnpc->upflags|=32;
@@ -14184,7 +14191,7 @@ fo2c:
                       }
                     }
 
-                    if (obji[sprlnk[myobj->type&1023]].flags&1024){ //2003: check container flag
+                    if (objectInfo[sprlnk[myobj->type&1023]].flags&1024){ //2003: check container flag
                       tnpc->baseitem=myobj;
                       tnpc->baseitem_offset=0;
                       goto skip_pickup;
@@ -14323,7 +14330,7 @@ questitem_skipweightcheck:
 
                     if (myobj2!=NULL){
                       //scan for multiple item
-                      if (obji[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&4096){ //multiple
+                      if (objectInfo[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&4096){ //multiple
                         myobj3=myobj2;
 joinitem:
                         if (myobj3->type==tplayer->mobj->type){ //same type
@@ -14370,7 +14377,7 @@ debug_skipweightcheck:;
                 x3=helmx; y3=helmy;
                 if ((x2>=x3)&&(y2>=y3)&&(x2<(x3+32))&&(y2<(y3+32))){
                   if (tnpc->helm==NULL){
-                    if (obji[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&1){
+                    if (objectInfo[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&1){
                       if ((tnpc->wt2+WTfind(tplayer->mobj))<=tnpc->wt2_max){
                         if (tplayer->mobj->info&256){ if (i){ //quest item->party member
                           txtset(t,"?"); t->d2[0]=8; txtadd(t,"You cannot put a quest item here!"); NET_send(NETplayer,tplayer->net,t);
@@ -14389,12 +14396,12 @@ debug_skipweightcheck:;
                 x3=wep_rightx; y3=wep_righty;
                 if ((x2>=x3)&&(y2>=y3)&&(x2<(x3+32))&&(y2<(y3+32))){
                   if (tnpc->wep_right==NULL){
-                    if (obji[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&(8+16)){
+                    if (objectInfo[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&(8+16)){
                       if ((tnpc->wt2+WTfind(tplayer->mobj))<=tnpc->wt2_max){
                         if (tnpc->wep_left!=NULL){
-                          if (obji[sprlnk[tnpc->wep_left->type&1023]+(tnpc->wep_left->type>>10)].flags&16) goto skip_pickup;
+                          if (objectInfo[sprlnk[tnpc->wep_left->type&1023]+(tnpc->wep_left->type>>10)].flags&16) goto skip_pickup;
                         }
-                        if (obji[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&16){ //2 handed
+                        if (objectInfo[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&16){ //2 handed
                           if (tnpc->wep_left!=NULL) goto skip_pickup;
                         }
                         if (tplayer->mobj->info&256){ if (i){ //quest item->party member
@@ -14450,12 +14457,12 @@ wep_right_skip:
                 x3=wep_leftx; y3=wep_lefty;
                 if ((x2>=x3)&&(y2>=y3)&&(x2<(x3+32))&&(y2<(y3+32))){
                   if (tnpc->wep_left==NULL){
-                    if (obji[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&(8+16)){
+                    if (objectInfo[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&(8+16)){
                       if ((tnpc->wt2+WTfind(tplayer->mobj))<=tnpc->wt2_max){
                         if (tnpc->wep_right!=NULL){
-                          if (obji[sprlnk[tnpc->wep_right->type&1023]+(tnpc->wep_right->type>>10)].flags&16) goto skip_pickup;
+                          if (objectInfo[sprlnk[tnpc->wep_right->type&1023]+(tnpc->wep_right->type>>10)].flags&16) goto skip_pickup;
                         }
-                        if (obji[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&16){ //2 handed
+                        if (objectInfo[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&16){ //2 handed
                           if (tnpc->wep_right!=NULL) goto skip_pickup;
                         }
                         if (tplayer->mobj->info&256){ if (i){ //quest item->party member
@@ -14511,7 +14518,7 @@ wep_left_skip:
                 x3=armourx; y3=armoury;
                 if ((x2>=x3)&&(y2>=y3)&&(x2<(x3+32))&&(y2<(y3+32))){
                   if (tnpc->armour==NULL){
-                    if (obji[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&4){
+                    if (objectInfo[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&4){
                       if ((tnpc->wt2+WTfind(tplayer->mobj))<=tnpc->wt2_max){
                         if (tplayer->mobj->info&256){
                             if (i){ //quest item->party member
@@ -14536,7 +14543,7 @@ wep_left_skip:
                 x3=bootsx; y3=bootsy;
                 if ((x2>=x3)&&(y2>=y3)&&(x2<(x3+32))&&(y2<(y3+32))){
                   if (tnpc->boots==NULL){
-                    if (obji[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&64){
+                    if (objectInfo[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&64){
                       if ((tnpc->wt2+WTfind(tplayer->mobj))<=tnpc->wt2_max){
                         if (tplayer->mobj->info&256){
                             if (i) { //quest item->party member
@@ -14560,7 +14567,7 @@ wep_left_skip:
                 x3=neckx; y3=necky;
                 if ((x2>=x3)&&(y2>=y3)&&(x2<(x3+32))&&(y2<(y3+32))){
                   if (tnpc->neck==NULL){
-                    if (obji[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&2){
+                    if (objectInfo[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&2){
                       if ((tnpc->wt2+WTfind(tplayer->mobj))<=tnpc->wt2_max){
                         if (tplayer->mobj->info&256){
                             if (i){ //quest item->party member
@@ -14585,7 +14592,7 @@ wep_left_skip:
                 y3=ring_lefty;
                 if ((x2>=x3)&&(y2>=y3)&&(x2<(x3+32))&&(y2<(y3+32))){
                   if (tnpc->ring_left==NULL){
-                    if (obji[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&32){
+                    if (objectInfo[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&32){
                       if ((tnpc->wt2+WTfind(tplayer->mobj))<=tnpc->wt2_max){
                         if (tplayer->mobj->info&256){
                             if (i){ //quest item->party member
@@ -14610,7 +14617,7 @@ wep_left_skip:
                 x3=ring_rightx; y3=ring_righty;
                 if ((x2>=x3)&&(y2>=y3)&&(x2<(x3+32))&&(y2<(y3+32))){
                   if (tnpc->ring_right==NULL){
-                    if (obji[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&32){
+                    if (objectInfo[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&32){
                       if ((tnpc->wt2+WTfind(tplayer->mobj))<=tnpc->wt2_max){
                         if (tplayer->mobj->info&256){
                             if (i){ //quest item->party member
@@ -14903,7 +14910,7 @@ wep_left_skip:
                       stealing(tplayer,tplayer->mobj);
 
                       //change or destroy item?
-                      if (obji[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&4096){
+                      if (objectInfo[sprlnk[tplayer->mobj->type&1023]+(tplayer->mobj->type>>10)].flags&4096){
                         if (tplayer->mobj->more2!=1){ //more than 1!
                           tplayer->mobj->more2--; goto skip_pickup;
                         }
@@ -15039,7 +15046,7 @@ lockpick2:
                     goto dropallow;
                   }}}
 
-              if (obji[i2].flags&512){
+              if (objectInfo[i2].flags&512){
 dropallow:
                 z2=9; myobj2=NULL;
                 for (z=0;z<=7;z++){
@@ -15695,7 +15702,7 @@ itemdropped:;
               //i2=i>>10; //26/11/2004 removed for Sherry compatibility
               i2=sprlnk[i&1023];
 
-              if (((obji[i2].flags&128)!=0)||(keyon[VK_SPACE]&&U6O_DEBUG)){
+              if (((objectInfo[i2].flags&128)!=0)||(keyon[VK_SPACE]&&U6O_DEBUG)){
                 //check if item is next to player
                 static unsigned char pickup_partymember;
                 z2=0;
@@ -15876,7 +15883,7 @@ skiffpickup:
                   //if (keyon[VK_SHIFT]) CLIENTplayer->key|=KEYquan;
                   if (tplayer->key&KEYquan){
                     if (tplayer->quan){
-                      if (obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){
+                      if (objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){
                         if (tplayer->quan<myobj->more2){
                           myobj2=OBJnew();
                           myobj2->type=myobj->type;
@@ -15940,7 +15947,7 @@ retryuse:
 use_getprevitem:
             if ((myobj->type&1023)!=430){//horses excepted(because you can use a horse)
               if ((myobj->type&1023)!=431){//horses excepted(because you can use a horse)
-                if (obji[sprlnk[myobj->type&1023]].v4){
+                if (objectInfo[sprlnk[myobj->type&1023]].v4){
                   myobj=(object*)myobj->prev;
                   if (myobj) goto use_getprevitem;
                   goto  finishuse;
@@ -16799,7 +16806,7 @@ leaveitems3:
               x2=myobj->type&1023;
               x3=myobj->type>>10;
               x4=0;
-              if ((obji[sprlnk[x2]].flags&1024)&&(x3==0)) x4=1;
+              if ((objectInfo[sprlnk[x2]].flags&1024)&&(x3==0)) x4=1;
               if (x2==168) x4=1; //remains
               if (x2==339) x4=1; //dead body
               if (x2==176) x4=1; //drawers
@@ -17054,7 +17061,7 @@ houselook_foundownersname:
                 }
               }
 
-              i3=(obji[sprlnk[myobj->type&1023]].v8>>8)*4;
+              i3=(objectInfo[sprlnk[myobj->type&1023]].v8>>8)*4;
               txtset(t5,t2);
               txtset(t2,"");
               if (crt2->hp<i3) txtset(t2,"grazed ");
@@ -17210,12 +17217,12 @@ houselook_foundownersname:
             if ((myobj->type&1023)==375) {txtadd(t,"Thou dost see "); goto gotgrammar;} //slime
             if ((myobj->type&1023)==135) {txtadd(t,"Thou dost see "); goto gotgrammar;} //horse chops
             //monsters
-            if (obji[sprlnk[myobj->type&1023]].v4) goto amonster;
+            if (objectInfo[sprlnk[myobj->type&1023]].v4) goto amonster;
             //nc non-countable
-            if (obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].v6&1){
+            if (objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].v6&1){
               txtadd(t,"Thou dost see "); goto gotgrammar;
             }
-            if (obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){ //multiple
+            if (objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){ //multiple
               if (myobj->more2>1){
                 txtadd(t,"Thou dost see ");
                 txtnumint(t3,myobj->more2);
@@ -17301,13 +17308,13 @@ gotgrammar:
 
             txtadd(t,".");
 
-            if ((obji[sprlnk[myobj->type&1023]].v1)&&(obji[sprlnk[myobj->type&1023]].v2)){
+            if ((objectInfo[sprlnk[myobj->type&1023]].v1)&&(objectInfo[sprlnk[myobj->type&1023]].v2)){
               txtadd(t," It can do ");
-              x2=obji[sprlnk[myobj->type&1023]].v1+ENHANCEget_attack(myobj);
+              x2=objectInfo[sprlnk[myobj->type&1023]].v1+ENHANCEget_attack(myobj);
               txtnumint(t2,x2);
               txtadd(t,t2);
               txtadd(t," and absorb ");
-              x2=obji[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
+              x2=objectInfo[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
               txtnumint(t2,x2);
               txtadd(t,t2);
               if (x2==1) txtadd(t," point of damage"); else txtadd(t," points of damage");
@@ -17315,24 +17322,24 @@ gotgrammar:
               goto complex_done;
             }
 
-            if (obji[sprlnk[myobj->type&1023]].v1){
+            if (objectInfo[sprlnk[myobj->type&1023]].v1){
               txtadd(t," It can do ");
-              x2=obji[sprlnk[myobj->type&1023]].v1+ENHANCEget_attack(myobj);
+              x2=objectInfo[sprlnk[myobj->type&1023]].v1+ENHANCEget_attack(myobj);
               txtnumint(t2,x2);
               txtadd(t,t2);
               if (x2==1) txtadd(t," point of damage"); else txtadd(t," points of damage");
               txtadd(t,".");
             }
 
-            if (obji[sprlnk[myobj->type&1023]].v2+ ENHANCEget_defense(myobj)){
+            if (objectInfo[sprlnk[myobj->type&1023]].v2+ ENHANCEget_defense(myobj)){
               if ((myobj->type&1023)==27) txtadd(t," They can absorb "); else txtadd(t," It can absorb "); //boots exception
-              x2=obji[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
+              x2=objectInfo[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
               txtnumint(t2,x2);
               txtadd(t,t2);
               if (x2==1) txtadd(t," point of damage"); else txtadd(t," points of damage");txtadd(t,".");
             }
 complex_done:
-            //if ((ol[i].type&1)==0) myobj->info|=128; //128 1=stealing, 0=ok to take
+            //if ((objectList[i].type&1)==0) myobj->info|=128; //128 1=stealing, 0=ok to take
             if (myobj->info&128){
               if (f9){ //has weight
                 txtadd(t," Taking this is stealing!");
@@ -17555,7 +17562,7 @@ targetitem:
                 myobj=(object*)tnpc->baseitem->prev;
 getprev10:
                 //TROLL GPF NEXT LINE (BACKSCANNING THROUGH INVENTORY?)
-                if ((myobj->more!=myobj2)||((obji[sprlnk[myobj->type&1023]].flags&1024)==0)) {myobj2=myobj; myobj=(object*)myobj->prev; goto getprev10;}
+                if ((myobj->more!=myobj2)||((objectInfo[sprlnk[myobj->type&1023]].flags&1024)==0)) {myobj2=myobj; myobj=(object*)myobj->prev; goto getprev10;}
 
                 tnpc->baseitem=myobj;
                 tnpc->baseitem_offset=0;
@@ -17623,7 +17630,7 @@ fo2:
                   if (myobj){
                     if (tplayer->key&KEYquan){
                       if (tplayer->quan){
-                        if (obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){
+                        if (objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){
                           if (tplayer->quan<myobj->more2){
                             myobj2=OBJnew();
                             myobj2->type=myobj->type;
@@ -17763,7 +17770,7 @@ fo2b:
                       if (resu_body[i3]==myobj){
                         goto inventory_look; //block looking inside resurrectable bodies
                       }}}
-                  if (obji[sprlnk[myobj->type&1023]].flags&1024){ //2003: check container flag
+                  if (objectInfo[sprlnk[myobj->type&1023]].flags&1024){ //2003: check container flag
                     tnpc->baseitem=myobj;
                     tnpc->baseitem_offset=0;
                     goto inventory_look;
@@ -17997,7 +18004,7 @@ dnib:
                 txtadd(t,t2);
                 //quantity,keys and item + can't exist in same object so changed to else if this should fix oild flask bug also
                 i6=0;
-                if (obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){ //items that have quantity
+                if (objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){ //items that have quantity
                   t2->ds[0]=myobj->more2;
                   txtadd(t,t2);
                 }
@@ -18005,7 +18012,7 @@ dnib:
                   t2->ds[0]=myobj->more2;
                   txtadd(t,t2);
                 }
-                else if (obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].v1 || obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].v2){ //v1 (damage), send + info to client
+                else if (objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].v1 || objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].v2){ //v1 (damage), send + info to client
                   i6=ENHANCEget_attack(myobj);
                   if (i6==0) {
                     i6=ENHANCEget_defense(myobj);
@@ -18068,14 +18075,14 @@ diskipb:;
               //as equipment has changed recalculate arm value!
               static unsigned short npc_arm;
               npc_arm=0;
-              myobj=tnpc->helm; if (myobj!=NULL) npc_arm+=obji[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
-              myobj=tnpc->wep_right; if (myobj!=NULL) npc_arm+=obji[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
-              myobj=tnpc->wep_left; if (myobj!=NULL) npc_arm+=obji[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
-              myobj=tnpc->armour; if (myobj!=NULL) npc_arm+=obji[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
-              myobj=tnpc->boots; if (myobj!=NULL) npc_arm+=obji[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
-              myobj=tnpc->neck; if (myobj!=NULL) npc_arm+=obji[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
-              myobj=tnpc->ring_right; if (myobj!=NULL) npc_arm+=obji[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
-              myobj=tnpc->ring_left; if (myobj!=NULL) npc_arm+=obji[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
+              myobj=tnpc->helm; if (myobj!=NULL) npc_arm+=objectInfo[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
+              myobj=tnpc->wep_right; if (myobj!=NULL) npc_arm+=objectInfo[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
+              myobj=tnpc->wep_left; if (myobj!=NULL) npc_arm+=objectInfo[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
+              myobj=tnpc->armour; if (myobj!=NULL) npc_arm+=objectInfo[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
+              myobj=tnpc->boots; if (myobj!=NULL) npc_arm+=objectInfo[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
+              myobj=tnpc->neck; if (myobj!=NULL) npc_arm+=objectInfo[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
+              myobj=tnpc->ring_right; if (myobj!=NULL) npc_arm+=objectInfo[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
+              myobj=tnpc->ring_left; if (myobj!=NULL) npc_arm+=objectInfo[sprlnk[myobj->type&1023]].v2+ENHANCEget_defense(myobj);
               tnpc->arm=npc_arm;
               if (tnpc->protection) tnpc->arm+=10;
               if (tnpc->player){ if (tnpc->player->party[0]){ if ((npc*)tnpc->player->party[0]->more==tnpc){ if (tnpc->exp<1600){ if (tnpc->lev<=2){

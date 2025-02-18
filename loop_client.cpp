@@ -3410,8 +3410,8 @@ inpf_scroll_failed:
 
       //get buffered sound
       tfh=open(".\\voice\\voice.spx");
-      txtNEWLEN(t2,lof(tfh));
-      get(tfh,t2->d,lof(tfh));
+      txtNEWLEN(t2,fileLen(tfh));
+      get(tfh,t2->d,fileLen(tfh));
       close(tfh);
 
       if (voicechat_listeningplayers){
@@ -3600,7 +3600,7 @@ skipignoreremove:
         txtright(t3,t3->l-8);
         txtset(t2,"[IGNORE]"); txtadd(t2,t3);
         tfh=open2("ignore.txt",OF_READWRITE|OF_SHARE_COMPAT);
-        seek(tfh,lof(tfh));
+        seek(tfh,fileLen(tfh));
         txtfileout(t2,tfh);
         close(tfh);
         txtright(t,t->l-8); txtadd(t," ignored!");
@@ -3612,7 +3612,7 @@ skipignoreremove:
         txtright(t3,t3->l-6);
         txtset(t2,"[MUTE]"); txtadd(t2,t3);
         tfh=open2("ignore.txt",OF_READWRITE|OF_SHARE_COMPAT);
-        seek(tfh,lof(tfh));
+        seek(tfh,fileLen(tfh));
         txtfileout(t2,tfh);
         close(tfh);
         txtright(t,t->l-6); txtadd(t," muted!");
@@ -4630,7 +4630,7 @@ dbg1:
             myobj2=tobj_i[i2][x2];
             ZeroMemory(tobj_i[i2][x2],sizeof(object));
             myobj2->type=x;
-            if (obji[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].flags&4096){ //temp quantity
+            if (objectInfo[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].flags&4096){ //temp quantity
               txtright(t,t->l-2);
               myobj2->more2=t->ds[0];
             }
@@ -4638,8 +4638,8 @@ dbg1:
               txtright(t,t->l-2);
               myobj2->more2=t->ds[0];
             }
-            else if (obji[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].v1 ||  //v1 (damage) + info
-              obji[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].v2 || (myobj2->type&1023)==448) { //v2 (armour) + info and horse papers + info
+            else if (objectInfo[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].v1 ||  //v1 (damage) + info
+              objectInfo[sprlnk[myobj2->type&1023]+(myobj2->type>>10)].v2 || (myobj2->type&1023)==448) { //v2 (armour) + info and horse papers + info
                 txtright(t,t->l-2);
                 myobj2->more2=t->d2[0];
                 i5=1;
@@ -5675,7 +5675,7 @@ mover_add_next: if (BITSget(t,&bitsi,1)){
                         }
                         //check if direction is required (z3 is number of bits to use to send direction)
                         z3=2;
-                        if (obji[sprlnk[z]].v4==3) z3=0;//"bird"
+                        if (objectInfo[sprlnk[z]].v4==3) z3=0;//"bird"
                         if (z==365) z3=0;//tanglevine core
                         if (z==374) z3=0;//hydra core
                         if (z==375) z3=0;//slime
@@ -7164,7 +7164,7 @@ passok:
               if (((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)&&(z==2))||((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]==0)&&(z==1))||(z==0)){//floating check
 
                 if (vis_chair[x2+2][y2+2]){
-                  if (obji[sprlnk[myobj->type&1023]].v4==1){//"avatar"
+                  if (objectInfo[sprlnk[myobj->type&1023]].v4==1){//"avatar"
                     if ((myobj->type&1023)!=363){//not a gargoyle!
                       myobj->type=objgettype(tplayer->mv_type[i],vis_chair[x2+2][y2+2]-1,3);
                     }
@@ -8463,7 +8463,7 @@ osdisplay_ktar_skip:;
 									//if (tplayer->mv_flags[i] & MV_PARALYZE) keyframe = 0;
 									//check if sleeping
 									//if (tplayer->mv_flags[i] & MV_SLEEP) {
-										z3 = myobj->type & 1023; z2 = 0;
+										z3 = myobj->Type(); z2 = 0;
 									//	if (z3 == 376) z2 = 339 + 6 * 1024;
 									//}
 									txtset(t3, "[");
@@ -8939,7 +8939,7 @@ updatetextdisplay:
             }
 
             seek(messagelog,0);
-            x2=lof(messagelog);
+            x2=fileLen(messagelog);
 seekmore:
             txtfilein(t,messagelog);
             x5++;
@@ -9712,7 +9712,7 @@ walkthru_pos_skip0:
 
 
         i2=seek(walkthru_fh);
-        if (seek(walkthru_fh)<lof(walkthru_fh)){
+        if (seek(walkthru_fh)<fileLen(walkthru_fh)){
           txtfilein(t,walkthru_fh); if (walkthru_pos_skip) walkthru_pos_skip--; 
           walkthru_pos++;
           if ((t->d2[0]>=48)&&(t->d2[0]<=57)){
@@ -9766,7 +9766,7 @@ shiftdown2:
             }//!walkthru_pos_skip
 
           }
-        }else{//seek(walkthru_fh)<lof(walkthru_fh)
+        }else{//seek(walkthru_fh)<fileLen(walkthru_fh)
           U6O_WALKTHRU=FALSE;
         }
       }//i
@@ -10295,7 +10295,7 @@ dni:
           if (x2<=26){txtset(t,"?"); t->d2[0]=x2+64; goto keyjmp;}
           txtset(t,"??"); t->d2[1]=(x2%26)+64; t->d2[0]=(x2/26)+64; goto keyjmp;
         }
-        else if (obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){
+        else if (objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].flags&4096){
           txtnumint(t,myobj->more2);
 keyjmp:
           txtfnt=fnt2;
@@ -10311,8 +10311,8 @@ keyjmp:
           txtfnt=fnt1;
         }
         //display item +
-		 else if ((obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].v1 || 
-          obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].v2 || (myobj->type&1023)==448) && myobj->more2) {
+		 else if ((objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].v1 ||
+          objectInfo[sprlnk[myobj->type&1023]+(myobj->type>>10)].v2 || (myobj->type&1023)==448) && myobj->more2) {
             x2=x+16;
             y2=y+2;
             txtset(t,"+");
@@ -10359,7 +10359,7 @@ diskip:
         myobj=tnpc->wep_right;
         getspr(myobj);
         img0(party_frame[i]->graphic,wep_rightx,wep_righty,bt32);
-        if (obji[sprlnk[tnpc->wep_right->type&1023]+(tnpc->wep_right->type>>10)].flags&16){
+        if (objectInfo[sprlnk[tnpc->wep_right->type&1023]+(tnpc->wep_right->type>>10)].flags&16){
           img0(party_frame[i]->graphic,wep_leftx+8,wep_lefty+8,dhno);
         }
       }
@@ -10367,7 +10367,7 @@ diskip:
         myobj=tnpc->wep_left;
         getspr(myobj);
         img0(party_frame[i]->graphic,wep_leftx,wep_lefty,bt32);
-        if (obji[sprlnk[tnpc->wep_left->type&1023]+(tnpc->wep_left->type>>10)].flags&16){
+        if (objectInfo[sprlnk[tnpc->wep_left->type&1023]+(tnpc->wep_left->type>>10)].flags&16){
           img0(party_frame[i]->graphic,wep_rightx+8,wep_righty+8,dhno);
         }
       }

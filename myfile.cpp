@@ -2,13 +2,6 @@
 #include "myfile.h"
 #include "mytxt.h"
 
-/*
-typedef struct file
-{
-HFILE h;
-} file;
-*/
-
 txt *file_error;
 txt *file_error_name;
 
@@ -25,7 +18,7 @@ file *open(LPCSTR name) {
         txtset(file_error, "File ");
         txtadd(file_error, file_error_name);
         txtadd(file_error, " not found");
-        MessageBox(NULL, file_error->d, "Ultima 6 Online", MB_OK);
+        MessageBox(nullptr, file_error->d, "Ultima 6 Online", MB_OK);
     }
     return tf;
 }
@@ -48,15 +41,6 @@ file *open2(txt *t, unsigned long flags) {
     return tf;
 }
 
-/*
-typedef struct txt
-{
-char* d; //pointer to data
-long l; //length of text in buffer
-long bl; //length of current buffer
-} txt;
-*/
-
 file *open(txt *t) {
     static file *tf;
     static OFSTRUCT fs;
@@ -69,54 +53,103 @@ file *open(txt *t) {
         txtset(file_error, "File ");
         txtadd(file_error, file_error_name);
         txtadd(file_error, " not found");
-        MessageBox(NULL, file_error->d, "Ultima 6 Online", MB_OK);
+        MessageBox(nullptr, file_error->d, "Ultima 6 Online", MB_OK);
     }
     return tf;
 }
 
-void get(file *filepointer, void *destoffset, long bytes) {
-    if (filepointer->h != HFILE_ERROR) _hread(filepointer->h, destoffset, bytes);
-    return;
+void get(file *filePtr, void *dest, long bytesToRead) {
+    if (filePtr->h != HFILE_ERROR)
+        _hread(filePtr->h, dest, bytesToRead);
 }
 
-void put(file *filepointer, void *sourceoffset, long bytes) {
-    if (filepointer->h != HFILE_ERROR) _hwrite(filepointer->h, (LPCSTR) sourceoffset, bytes);
-    return;
+void loadFromFile(LPCSTR name, void *dest, long bytesToRead) {
+    static file *f;
+    f = open(name);
+
+    if (bytesToRead == MAXLONG) {
+        bytesToRead = fileLen(f);
+    }
+
+    if (f->h != HFILE_ERROR) {
+        _hread(f->h, dest, bytesToRead);
+    }
+    close(f);
 }
 
-void seek(file *filepointer, long fileoffset) {
-    if (filepointer->h != HFILE_ERROR) _llseek(filepointer->h, fileoffset, FILE_BEGIN);
-    return;
+file *loadFromFileAndReturn(LPCSTR name, void *dest, long bytesToRead) {
+    static file *f;
+    f = open(name);
+
+    if (bytesToRead == MAXLONG) {
+        bytesToRead = fileLen(f);
+    }
+
+    if (f->h != HFILE_ERROR) {
+        _hread(f->h, dest, bytesToRead);
+    }
+
+    return f;
 }
 
-void close(file *filepointer) {
-    if (filepointer->h != HFILE_ERROR) _lclose(filepointer->h);
-    free((void *) filepointer);
-    return;
+template<typename T>
+void loadFromFileMalloc(LPCSTR name, T *dest, long bytesToRead) {
+    static file *f;
+    f = open(name);
+    if (f->h != HFILE_ERROR) {
+        dest=(T*)malloc(fileLen(f));
+        _hread(f->h, dest, bytesToRead);
+    }
+    close(f);
 }
 
-long seek(file *filepointer) {
-    if (filepointer->h == HFILE_ERROR) return 0;
-    return _llseek(filepointer->h, 0, FILE_CURRENT);
+void put(file *filePtr, void *src, long bytesToWrite) {
+    if (filePtr->h != HFILE_ERROR)
+        _hwrite(filePtr->h, (LPCSTR) src, bytesToWrite);
 }
 
-long lof(file *filepointer) {
-    if (filepointer->h == HFILE_ERROR) return 0;
+void seek(file *filePtr, long bytesToSeek) {
+    if (filePtr->h != HFILE_ERROR)
+        _llseek(filePtr->h, bytesToSeek, FILE_BEGIN);
+}
+
+void close(file *filePtr) {
+    if (filePtr->h != HFILE_ERROR)
+        _lclose(filePtr->h);
+    free((void *) filePtr);
+}
+
+long seek(file *filePtr) {
+    if (filePtr->h == HFILE_ERROR)
+        return 0;
+    return _llseek(filePtr->h, 0, FILE_CURRENT);
+}
+
+long fileLen(file *filePtr) {
+    if (filePtr->h == HFILE_ERROR) return 0;
+    long currentPos = _llseek(filePtr->h, 0, FILE_CURRENT);
+    long endPos = _llseek(filePtr->h, 0, FILE_END);
+    _llseek(filePtr->h, currentPos, FILE_BEGIN);
+    return endPos;
+}
+
+long lof(file *filePtr) {
+    if (filePtr->h == HFILE_ERROR) return 0;
     static long i, i2;
-    i = _llseek(filepointer->h, 0, FILE_CURRENT);
-    i2 = _llseek(filepointer->h, 0, FILE_END);
-    _llseek(filepointer->h, i, FILE_BEGIN);
+    i = _llseek(filePtr->h, 0, FILE_CURRENT);
+    i2 = _llseek(filePtr->h, 0, FILE_END);
+    _llseek(filePtr->h, i, FILE_BEGIN);
     return i2;
 }
 
-long loadfile_FILESIZE;
-
 void *loadfile(LPCSTR name) {
+    long loadfile_FILESIZE;
     static file *f;
     static void *v;
     f = open(name);
-    if (f->h != HFILE_ERROR) return NULL;
-    loadfile_FILESIZE = lof(f);
+    if (f->h != HFILE_ERROR)
+        return nullptr;
+    loadfile_FILESIZE = fileLen(f);
     v = malloc(loadfile_FILESIZE);
     get(f, v, loadfile_FILESIZE);
     close(f);
@@ -126,14 +159,29 @@ void *loadfile(LPCSTR name) {
 void waitforfile(LPCSTR name) {
     static OFSTRUCT fs;
     static HFILE hfile;
-    waitforfile_retry:
-    hfile = OpenFile(name, &fs, OF_SHARE_EXCLUSIVE | OF_READWRITE);
-    if (hfile == HFILE_ERROR) goto waitforfile_retry;
+    bool retry = true;
+
+    /// Cocoa - This needs to be evaluated for how long some files need to load.
+    ///         We can get stuck here forever if the file is not available.
+    ///         We should add a sleep and a retry limit. \n\n
+    ///
+    ///
+    ///         Additionally, I am unsure what the purpose of this function is.
+    ///         It seems to be opening a file and then immediately closing it.
+    ///         If we are just checking for the existence of a file, why are
+    ///         we continually retrying to open it and not returning an error?
+    while (retry) {
+        hfile = OpenFile(name, &fs, OF_SHARE_EXCLUSIVE | OF_READWRITE);
+        if (hfile == HFILE_ERROR)
+            retry = true;
+        else
+            retry = false;
+    }
+
     _lclose(hfile);
 }
 
 void deletefile(LPCSTR name) {
     static OFSTRUCT fs;
     OpenFile(name, &fs, OF_DELETE);
-    return;
 }
