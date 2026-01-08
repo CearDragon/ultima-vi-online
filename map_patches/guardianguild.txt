@@ -1,5 +1,5 @@
 patchx=0; patchy=0;
-housenumber=65535;//Non house tiles
+housenumber=basehousenumber+26;//Guardian Guild
 BTset(1280,319,146);
 BTset(1281,319,144);
 BTset(1282,319,144);
@@ -829,7 +829,6 @@ BTset(423,351,117);
 
 //house tiles (tiles sorted by position, not number)
 
-housenumber=65535;
 if (NEThost){
 
 //Objects
@@ -909,46 +908,46 @@ OBJaddnew(1288,329,148+1024*0,128,0);
 
 OBJaddnew(1289,330,334+1024*0,0,0);
 
-OBJaddnew(1283,330,301+1024*0,0,256+basehousenumber+0);//doorframe
+OBJaddnew(1283,330,301+1024*0,0,256+basehousenumber+26);//doorframe
 
-OBJaddnew(1284,330,301+1024*1,0,256+basehousenumber+0);//doorframe
+OBJaddnew(1284,330,301+1024*1,0,256+basehousenumber+26);//doorframe
 
 OBJaddnew(1285,332,70+1024*0,0,3);
 
 OBJaddnew(1281,331,279+1024*1,0,0);
-housestoragex[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchx+1281;
-housestoragey[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchy+331;
-housestoragenext[basehousenumber+0]++;
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1281;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+331;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(1281,332,279+1024*1,0,0);
-housestoragex[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchx+1281;
-housestoragey[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchy+332;
-housestoragenext[basehousenumber+0]++;
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1281;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+332;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(1284,333,279+1024*5,0,0);
-housestoragex[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchx+1284;
-housestoragey[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchy+333;
-housestoragenext[basehousenumber+0]++;
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1284;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+333;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(1281,333,279+1024*9,0,0);
-housestoragex[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchx+1281;
-housestoragey[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchy+333;
-housestoragenext[basehousenumber+0]++;
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1281;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+333;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(1281,330,279+1024*12,0,0);
-housestoragex[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchx+1281;
-housestoragey[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchy+330;
-housestoragenext[basehousenumber+0]++;
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1281;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+330;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(1282,333,279+1024*4,0,0);
-housestoragex[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchx+1282;
-housestoragey[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchy+333;
-housestoragenext[basehousenumber+0]++;
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1282;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+333;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(1283,333,279+1024*4,0,0);
-housestoragex[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchx+1283;
-housestoragey[basehousenumber+0][housestoragenext[basehousenumber+0]]=patchy+333;
-housestoragenext[basehousenumber+0]++;
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1283;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+333;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(1288,332,210+1024*0,0,0);
 
@@ -998,21 +997,39 @@ OBJaddnew(1283,320,159+1024*1,0,0);
 
 OBJaddnew(401,339,305+1024*0,0,1286+323*65536);//ladder top
 
-OBJaddnew(404,343,301+1024*8,0,256+basehousenumber+0);//doorframe
+OBJaddnew(404,343,301+1024*8,0,256+basehousenumber+26);//doorframe
 
-OBJaddnew(405,343,301+1024*9,0,256+basehousenumber+0);//doorframe
+OBJaddnew(405,343,301+1024*9,0,256+basehousenumber+26);//doorframe
 
 OBJaddnew(403,340,216+1024*0,0,0);
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+403;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+340;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(404,340,216+1024*1,0,0);
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+404;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+340;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(404,341,216+1024*3,0,0);
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+404;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+341;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(403,341,216+1024*2,0,0);
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+403;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+341;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(403,342,216+1024*4,0,0);
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+403;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+342;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(404,342,216+1024*5,0,0);
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+404;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+342;
+housestoragenext[basehousenumber+26]++;
 
 OBJaddnew(406,342,252+1024*3,128,0);
 
@@ -1021,6 +1038,9 @@ OBJaddnew(406,341,252+1024*3,128,0);
 OBJaddnew(406,340,252+1024*3,128,0);
 
 myobj=OBJaddnew(405,339,177+1024*0,0,0); //Desk + candle
+housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+405;
+housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+339;
+housestoragenext[basehousenumber+26]++;
 myobj2=OBJnew();
 myobj2->type=122;
 myobj2->info=128;
@@ -1044,7 +1064,7 @@ OBJaddnew(401,343,331+1024*0,0,0);
 
 OBJaddnew(402,343,331+1024*9,0,0);
 
-OBJaddnew(402,344,332+1024*4,0,65536+basehousenumber+0);//sign
+OBJaddnew(402,344,332+1024*4,0,65536+basehousenumber+26);//sign
 
 OBJaddnew(401,338,338+1024*0,0,0);
 
@@ -1058,33 +1078,9 @@ OBJaddnew(400,338,164+1024*1,0,0);
 
 OBJaddnew(405,339,151+1024*0,128,129);
 
-OBJaddnew(408,346,301+1024*2,0,256+basehousenumber+0);//doorframe
+OBJaddnew(408,346,301+1024*2,0,256+basehousenumber+26);//doorframe
 
-OBJaddnew(408,347,301+1024*3,0,256+basehousenumber+0);//doorframe
-
-housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1281;
-housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+331;
-housestoragenext[basehousenumber+26]++;
-
-housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1281;
-housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+332;
-housestoragenext[basehousenumber+26]++;
-
-housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1281;
-housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+333;
-housestoragenext[basehousenumber+26]++;
-
-housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1282;
-housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+333;
-housestoragenext[basehousenumber+26]++;
-
-housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1283;
-housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+333;
-housestoragenext[basehousenumber+26]++;
-
-housestoragex[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchx+1284;
-housestoragey[basehousenumber+26][housestoragenext[basehousenumber+26]]=patchy+333;
-housestoragenext[basehousenumber+26]++;
+OBJaddnew(408,347,301+1024*3,0,256+basehousenumber+26);//doorframe
 
 housenumber=basehousenumber+26; houseinitialcost[housenumber]=1; housecost[housenumber]=1;
 houseentrancex[basehousenumber+26]=368; houseentrancey[basehousenumber+26]=386;
