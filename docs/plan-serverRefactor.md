@@ -38,7 +38,7 @@ Each phase has an **Exit criteria** that must be green before starting the next 
 ## P3 — Encapsulate global state (`data_host.h` / `data_host.cpp`)
 
 - ✅ P3.1 Inventory every `extern` in `data_host.h`; classify into: WorldGrid, ObjectPool, VlnkPool, ResurrectQueue, RespawnQueue, MoongateState, WindState, HouseSaves, EconomyTables, ScheduleTables, NpcRegistry, SfxBuffer, WizardEyeState, AutoSetupState, KeybTarget, MoverNew, ReviveLoopExit, Misc. _(Completed: Saved to `docs/ExternInventory.md`.)_
-- ⬜ P3.2 For each group, create a struct (e.g. `struct ObjectPool { std::vector<object> buffer; std::vector<uint32_t> freeList; ... };`) in its own header.
+- [x] **P3.2:** For each group, create a struct (e.g. `struct ObjectPool { std::vector<object> buffer; std::vector<uint32_t> freeList; ... };`) in its own header.
 - ⬜ P3.3 Aggregate all groups in a `ServerState` singleton (constructed at startup); replace `extern` access with `ServerState::Get().objectPool.…` via a deprecation shim (inline references mapping old names to new accessors during transition).
 - ⬜ P3.4 Remove the `#ifndef CLIENT` Win32 stub block from `data_host.h` — move to a server-only `WindowsStubs.cpp` or delete if truly unused.
 - ✅ P3.5 Fix bug in `data_host_init`: local `object* nuggetsfix = NULL;` shadowed the global. _(Fixed; also modernised the whole function to `nullptr`/`bool`/`()` arg list — eliminates 14 clang-tidy warnings.)_
