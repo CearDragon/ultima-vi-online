@@ -1,6 +1,7 @@
 #include "define_both.h" /* luteijn: won't really be included again, but helps with auto-completion of variable names. */
 
 
+
 if
 (NEThost)
 {
@@ -525,8 +526,9 @@ if
                                         myobj2 = tplayer->party[0]; //boat (temp, used for positioning)
                                         VLNKremove(tplayer->party[0]);
                                         VLNKsremove(tplayer->party[0]); //remove vlnk(s)
-                                        if ((tplayer->party[0]->type & 1023) == 412) tplayer->party[0]->more = tplayer->
-                                            craft_con;
+                                        if ((tplayer->party[0]->type & 1023) == 412)
+                                            tplayer->party[0]->more = tplayer->
+                                                craft_con;
                                         else tplayer->party[0]->more = NULL;
                                         tplayer->party[0]->info = tplayer->party[0]->info & (1 << 9);
                                         tplayer->party[0] = tplayer->craft;
@@ -762,8 +764,9 @@ if
                                     //exit raft/skiff/boat
                                     VLNKremove(tplayer->party[0]);
                                     VLNKsremove(tplayer->party[0]); //remove vlnk(s)
-                                    if ((tplayer->party[0]->type & 1023) == 412) tplayer->party[0]->more = tplayer->
-                                        craft_con;
+                                    if ((tplayer->party[0]->type & 1023) == 412)
+                                        tplayer->party[0]->more = tplayer->
+                                            craft_con;
                                     else tplayer->party[0]->more = NULL;
                                     tplayer->party[0]->info = tplayer->party[0]->info & (1 << 9);
                                     tplayer->party[0] = tplayer->craft;
@@ -1030,7 +1033,7 @@ if
                                     txtadd(t, "An unending darkness engulfs thee...");
                                     NET_send(NETplayer, tplayer->net, t);
                                     //tplayer->idle_connect=64;
-                                    /* if player owns a house, then free the house, but don't make a house chest so that its possible to recover the house items. 
+                                    /* if player owns a house, then free the house, but don't make a house chest so that its possible to recover the house items.
                   and making the house chest would be a problem, because its made when logging in*/
                                     if (houseowner(tplayer, tplayer->GNPCflags[28]))
                                     {
@@ -1167,12 +1170,15 @@ if
 #ifdef CLIENT
                 if ((playerlist[tpl]->idle_connect >= x) && (tpl != 0)) goto connect_failed; //(16sec)
 
-                if ((playerlist[tpl]->idle >= 8192) && (tpl != 0)) {  //remove idle player (not host) (~2 hours)
-#else
-                if ((playerlist[tpl]->idle_connect >= x)) goto connect_failed; //(16sec)
-
-                if ((playerlist[tpl]->idle >= 8192))
+                if ((playerlist[tpl]->idle >= 8192) && (tpl != 0))
                 {
+                    //remove idle player (not host) (~2 hours)
+#else
+                    if ((playerlist[tpl]->idle_connect >= x)) goto connect_failed; //(16sec)
+
+                    if ((playerlist[tpl]->idle >= 8192))
+                    {
+
                     //remove idle player (not host) (~2 hours)
 #endif
                 connect_failed:
@@ -1288,11 +1294,11 @@ if
 
                     txtset(t4, "");
                     /*
-	     txtset(t,"??"); t->ds[0]=3; txtadd(t4,t); //save version 3.0 ENCRYPTED3.0 
+	     txtset(t,"??"); t->ds[0]=3; txtadd(t4,t); //save version 3.0 ENCRYPTED3.0
 	   */
                     txtset(t, "??");
                     t->ds[0] = 4;
-                    txtadd(t4, t); //save version 4.0 UNENCRYPTED3.0 
+                    txtadd(t4, t); //save version 4.0 UNENCRYPTED3.0
 
                     txtset(t, "?");
                     t->d2[0] = playerlist[tpl]->name->l;
@@ -1550,8 +1556,9 @@ if
                                             for (y7 = 0; y7 < x5; y7++)
                                             {
                                                 //link
-                                                if ((object*)OBJlist_list[y6]->more == OBJlist_list[y7]) t2->dl[0] = y7
-                                                    + 1;
+                                                if ((object*)OBJlist_list[y6]->more == OBJlist_list[y7])
+                                                    t2->dl[0] = y7
+                                                        + 1;
                                             } //y7
                                         } //multiple
                                     } //->more!=NULL
@@ -1771,7 +1778,7 @@ if
                         } //playerlist[tpl]->save_update!=-1
                     } //x2
 
-                    /* luteijn 20080731: as of version 4.0 (=2.0), skip encrypting the file! 
+                    /* luteijn 20080731: as of version 4.0 (=2.0), skip encrypting the file!
           //ENCRYPT3.0
           encrypt(t4);
           */
@@ -1784,33 +1791,33 @@ if
                     put(tfh, t4->d2, t4->l);
                     close(tfh);
                     /* mose: disabling this new save format for now. I really don't have time to make this work.
-           luteijn a new format for naming the savegames 
-          txtset(t2,"./save/"); 
-          txtset(t,"?/"); 
+           luteijn a new format for naming the savegames
+          txtset(t2,"./save/");
+          txtset(t,"?/");
           t->d[0]=playerlist[tpl]->name->d[0];
           if ( (t->d[0] < 'A') || (t->d[0] > 'Z')) {
             t->d[0]='@'; // weird character names go here
           }
-          txtadd(t2,t); 
-          txtadd(t2,playerlist[tpl]->name); 
-          txtadd(t2,"-"); 
-          txtadd(t2,playerlist[tpl]->npcname); 
-          txtadd(t2,".u6o");   /*idea is to atomically move this over the real save later 
+          txtadd(t2,t);
+          txtadd(t2,playerlist[tpl]->name);
+          txtadd(t2,"-");
+          txtadd(t2,playerlist[tpl]->npcname);
+          txtadd(t2,".u6o");   /*idea is to atomically move this over the real save later
           LOGadd(t2); // scrlog is client only!
           tfh=open2(t2,OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
           if (tfh->h!=HFILE_ERROR) {
-            put(tfh,t4->d2,t4->l); /* FIXME: NO RETURN CODE, HOW DO WE KNOW IT WORKED so we can overwrite the existing save?  
+            put(tfh,t4->d2,t4->l); /* FIXME: NO RETURN CODE, HOW DO WE KNOW IT WORKED so we can overwrite the existing save?
             close(tfh);
 
-            /* TODO: if saving went well, move the .u6o file to .sav 
+            /* TODO: if saving went well, move the .u6o file to .sav
           } else {
-            txtset(t,"Failed to open new format savefile"); 
-            LOGadd(t); 
-            /* TODO: find out what went wrong and retry.  
+            txtset(t,"Failed to open new format savefile");
+            LOGadd(t);
+            /* TODO: find out what went wrong and retry.
           }*/
 
 
-                    // luteijn: sent a time update message at this point 
+                    // luteijn: sent a time update message at this point
                     // This is done to keep the times reasonably in sync without sending time too often
                     // FIXME: use a small function for this eventually.
                     //send time
@@ -2048,7 +2055,7 @@ if
                                 OBJremove(OBJlist_list[y6]);
                                 OBJrelease(OBJlist_list[y6]);
                             }
-                            free(tnpc);
+                            destroyNpc(tnpc);
                             //remove from object update list
                             if (ouln != -1)
                             {
@@ -2065,7 +2072,7 @@ if
                         } //->party
                     } //i
                     //free player structure
-                    free(playerlist[tpl]);
+                    destroyPlayer(playerlist[tpl]);
                     playerlist[tpl] = NULL;
                     inbritanniacheck();
 
@@ -2815,8 +2822,9 @@ if
                                         {
                                             if (tplayer->wizardeyetimeleft)
                                             {
-                                                if ((tplayer->wizardeyex == mapx) && (tplayer->wizardeyey == mapy)) goto
-                                                    wizardeyesloopnext;
+                                                if ((tplayer->wizardeyex == mapx) && (tplayer->wizardeyey == mapy))
+                                                    goto
+                                                        wizardeyesloopnext;
                                             }
                                             wizardeyesadded = 1;
                                             myobj = wizardeyesobj;
@@ -3077,8 +3085,9 @@ if
                                         {
                                             if (tnpc->schedule_i != -1)
                                             {
-                                                if (tnpc->schedule[tnpc->schedule_i].type == 0x91) mv_flags[i] |=
-                                                    MV_SLEEP; //0x91=sleeping!
+                                                if (tnpc->schedule[tnpc->schedule_i].type == 0x91)
+                                                    mv_flags[i] |=
+                                                        MV_SLEEP; //0x91=sleeping!
                                             } //tnpc->schedule_i!=-1
                                         } //tnpc->schedule
                                     } //no player pointer
@@ -4154,7 +4163,7 @@ if
 
                 if (sfbuffersend)
                 {
-                    //create SF message 
+                    //create SF message
                     // send sfx message
                     //[2]how many sfx
                     //[sfx2]
@@ -5486,7 +5495,7 @@ host_gotmessage:
                 }
                 else
                 {
-                    //put items in a chest and 
+                    //put items in a chest and
                     myobj3 = OBJnew();
                     myobj3->type = 98 + 1024;
                     myobj3->more = myobj2;
@@ -6439,7 +6448,7 @@ host_gotmessage:
         tnpc->wt2 = 0;
         tnpc->wt2_max = tnpc->s * 50;
 
-        //Debug new players get high stats, gold, exp, all spells, 
+        //Debug new players get high stats, gold, exp, all spells,
         if (U6O_DEBUG)
         {
             tnpc->lev = 6;
@@ -7413,7 +7422,7 @@ host_gotmessage:
         3 ?
 
 
-        bit 0 
+        bit 0
         bit 1
 
         (if sensitive compression means increase brightness)
@@ -7842,8 +7851,9 @@ host_gotmessage:
                                 //PRIVILEGES: check requesting player's privilege level is equal or higher than target player's privilege level
                                 static unsigned char privileges_targetplayerlevel;
                                 privileges_targetplayerlevel = (playerlist[y2]->GNPCflags[x3 + 40] >> x4) & 3;
-                                if (privileges_requestingplayerlevel < privileges_targetplayerlevel) goto
-                                    privilege_denied;
+                                if (privileges_requestingplayerlevel < privileges_targetplayerlevel)
+                                    goto
+                                        privilege_denied;
                                 x5 = privileges_targetplayerlevel;
                                 //PRIVILEGES: edit privileges
                                 if (privileges_set)
@@ -7896,8 +7906,9 @@ host_gotmessage:
                                 txtadd(t2, ": ");
                                 txtadd(t2, t);
                                 tfh = open2(".\\save\\adminlog.txt", OF_READWRITE | OF_SHARE_COMPAT);
-                                if (tfh->h == HFILE_ERROR) tfh = open2(".\\save\\adminlog.txt",
-                                                                       OF_READWRITE | OF_CREATE);
+                                if (tfh->h == HFILE_ERROR)
+                                    tfh = open2(".\\save\\adminlog.txt",
+                                                OF_READWRITE | OF_CREATE);
                                 seek(tfh, lof(tfh));
                                 txtfileout(t2, tfh);
                                 close(tfh);
@@ -7922,7 +7933,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 2;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     for (x4 = FIRST_CLIENT; x4 <= playerlist_last; x4++)
                     {
                         if (playerlist[x4])
@@ -7934,7 +7946,8 @@ host_gotmessage:
                                 {
                                     if (((playerlist[x4]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index %
                                         16) * 2)) & 3) > ((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((
-                                        privileges_index % 16) * 2)) & 3)) goto privilege_denied2;
+                                        privileges_index % 16) * 2)) & 3))
+                                        goto privilege_denied2;
                                     playerlist[x4]->GNPCflags[253] |= 1;
                                     txtset(t, "??");
                                     t->d2[0] = 250;
@@ -7960,7 +7973,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 0;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     txtset(t9, "Kalour");
                     if (txtsamewithoutcase(t9, t2)) goto privilege_denied2;
                     x5 = 0;
@@ -8030,7 +8044,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 1;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     txtucase(t2);
                     tfh = open2("ban.txt", OF_READWRITE | OF_SHARE_COMPAT);
                     y = 0;
@@ -8089,7 +8104,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 3;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     for (x4 = 0; x4 <= playerlist_last; x4++)
                     {
                         if (playerlist[x4])
@@ -8101,7 +8117,8 @@ host_gotmessage:
                                 {
                                     if (((playerlist[x4]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index %
                                         16) * 2)) & 3) > ((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((
-                                        privileges_index % 16) * 2)) & 3)) goto privilege_denied2;
+                                        privileges_index % 16) * 2)) & 3))
+                                        goto privilege_denied2;
                                     if (playerlist[x4]->GNPCflags[33] & 1)
                                     {
                                         playerlist[x4]->GNPCflags[33]--;
@@ -8122,8 +8139,9 @@ host_gotmessage:
                                         txtadd(t2, ": ");
                                         txtadd(t2, t);
                                         tfh = open2(".\\save\\adminlog.txt", OF_READWRITE | OF_SHARE_COMPAT);
-                                        if (tfh->h == HFILE_ERROR) tfh = open2(
-                                            ".\\save\\adminlog.txt", OF_READWRITE | OF_CREATE);
+                                        if (tfh->h == HFILE_ERROR)
+                                            tfh = open2(
+                                                ".\\save\\adminlog.txt", OF_READWRITE | OF_CREATE);
                                         seek(tfh, lof(tfh));
                                         txtfileout(t2, tfh);
                                         close(tfh);
@@ -8160,7 +8178,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 4;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     for (x4 = FIRST_CLIENT; x4 <= playerlist_last; x4++)
                     {
                         if (playerlist[x4])
@@ -8172,7 +8191,8 @@ host_gotmessage:
                                 {
                                     if (((playerlist[x4]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index %
                                         16) * 2)) & 3) > ((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((
-                                        privileges_index % 16) * 2)) & 3)) goto privilege_denied2;
+                                        privileges_index % 16) * 2)) & 3))
+                                        goto privilege_denied2;
                                     if ((playerlist[x4]->GNPCflags[33] & 2) == 0)
                                     {
                                         playerlist[x4]->GNPCflags[33] |= 2;
@@ -8190,8 +8210,9 @@ host_gotmessage:
                                         txtadd(t2, ": ");
                                         txtadd(t2, t);
                                         tfh = open2(".\\save\\adminlog.txt", OF_READWRITE | OF_SHARE_COMPAT);
-                                        if (tfh->h == HFILE_ERROR) tfh = open2(
-                                            ".\\save\\adminlog.txt", OF_READWRITE | OF_CREATE);
+                                        if (tfh->h == HFILE_ERROR)
+                                            tfh = open2(
+                                                ".\\save\\adminlog.txt", OF_READWRITE | OF_CREATE);
                                         seek(tfh, lof(tfh));
                                         txtfileout(t2, tfh);
                                         close(tfh);
@@ -8224,7 +8245,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 5;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     for (x4 = 0; x4 <= playerlist_last; x4++)
                     {
                         if (playerlist[x4])
@@ -8251,8 +8273,9 @@ host_gotmessage:
                                         txtadd(t2, ": ");
                                         txtadd(t2, t);
                                         tfh = open2(".\\save\\adminlog.txt", OF_READWRITE | OF_SHARE_COMPAT);
-                                        if (tfh->h == HFILE_ERROR) tfh = open2(
-                                            ".\\save\\adminlog.txt", OF_READWRITE | OF_CREATE);
+                                        if (tfh->h == HFILE_ERROR)
+                                            tfh = open2(
+                                                ".\\save\\adminlog.txt", OF_READWRITE | OF_CREATE);
                                         seek(tfh, lof(tfh));
                                         txtfileout(t2, tfh);
                                         close(tfh);
@@ -8286,7 +8309,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 6;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     for (x4 = FIRST_CLIENT; x4 <= playerlist_last; x4++)
                     {
                         if (playerlist[x4])
@@ -8298,7 +8322,8 @@ host_gotmessage:
                                 {
                                     if (((playerlist[x4]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index %
                                         16) * 2)) & 3) > ((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((
-                                        privileges_index % 16) * 2)) & 3)) goto privilege_denied2;
+                                        privileges_index % 16) * 2)) & 3))
+                                        goto privilege_denied2;
                                     if ((playerlist[x4]->GNPCflags[33] & 4) == 0)
                                     {
                                         playerlist[x4]->GNPCflags[33] |= 4;
@@ -8316,8 +8341,9 @@ host_gotmessage:
                                         txtadd(t2, ": ");
                                         txtadd(t2, t);
                                         tfh = open2(".\\save\\adminlog.txt", OF_READWRITE | OF_SHARE_COMPAT);
-                                        if (tfh->h == HFILE_ERROR) tfh = open2(
-                                            ".\\save\\adminlog.txt", OF_READWRITE | OF_CREATE);
+                                        if (tfh->h == HFILE_ERROR)
+                                            tfh = open2(
+                                                ".\\save\\adminlog.txt", OF_READWRITE | OF_CREATE);
                                         seek(tfh, lof(tfh));
                                         txtfileout(t2, tfh);
                                         close(tfh);
@@ -8350,7 +8376,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 7;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     for (x4 = 0; x4 <= playerlist_last; x4++)
                     {
                         if (playerlist[x4])
@@ -8377,8 +8404,9 @@ host_gotmessage:
                                         txtadd(t2, ": ");
                                         txtadd(t2, t);
                                         tfh = open2(".\\save\\adminlog.txt", OF_READWRITE | OF_SHARE_COMPAT);
-                                        if (tfh->h == HFILE_ERROR) tfh = open2(
-                                            ".\\save\\adminlog.txt", OF_READWRITE | OF_CREATE);
+                                        if (tfh->h == HFILE_ERROR)
+                                            tfh = open2(
+                                                ".\\save\\adminlog.txt", OF_READWRITE | OF_CREATE);
                                         seek(tfh, lof(tfh));
                                         txtfileout(t2, tfh);
                                         close(tfh);
@@ -8411,7 +8439,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 8;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     txtset(motd, t2);
                     tfh = open2("motd.txt", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
                     txtfileout(motd, tfh);
@@ -8432,7 +8461,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 9;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     for (x4 = FIRST_CLIENT; x4 <= playerlist_last; x4++)
                     {
                         if (playerlist[x4])
@@ -8444,7 +8474,8 @@ host_gotmessage:
                                 {
                                     if (((playerlist[x4]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index %
                                         16) * 2)) & 3) > ((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((
-                                        privileges_index % 16) * 2)) & 3)) goto privilege_denied2;
+                                        privileges_index % 16) * 2)) & 3))
+                                        goto privilege_denied2;
                                     txtsetchar(t, 247);
                                     txtaddchar(t, 1);
                                     NET_send(NETplayer, playerlist[x4]->net, t); //SYSBAN ON
@@ -8473,7 +8504,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 9;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     for (x4 = 0; x4 <= playerlist_last; x4++)
                     {
                         if (playerlist[x4])
@@ -8485,7 +8517,8 @@ host_gotmessage:
                                 {
                                     if (((playerlist[x4]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index %
                                         16) * 2)) & 3) > ((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((
-                                        privileges_index % 16) * 2)) & 3)) goto privilege_denied2;
+                                        privileges_index % 16) * 2)) & 3))
+                                        goto privilege_denied2;
                                     txtsetchar(t, 247);
                                     txtaddchar(t, 0);
                                     NET_send(NETplayer, playerlist[x4]->net, t); //SYSBAN OFF
@@ -8516,7 +8549,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 10;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     txtset(t9, "Kalour");
                     if (txtsamewithoutcase(t9, t2)) goto privilege_denied2;
                     for (x4 = FIRST_CLIENT; x4 <= playerlist_last; x4++)
@@ -8529,8 +8563,9 @@ host_gotmessage:
                                 if (txtsamewithoutcase(tnpc2->name, t2))
                                 {
                                     tfh = open2("banip.txt", OF_READWRITE | OF_SHARE_COMPAT);
-                                    if (tfh->h == HFILE_ERROR) tfh = open2(
-                                        "banip.txt", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+                                    if (tfh->h == HFILE_ERROR)
+                                        tfh = open2(
+                                            "banip.txt", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
                                     seek(tfh, lof(tfh));
                                     txtset(t4, "");
                                     txtnumint(t3, playerlist[x4]->GNPCflags[242] & 255);
@@ -8560,8 +8595,9 @@ host_gotmessage:
                                     txtadd(t2, ": ");
                                     txtadd(t2, t);
                                     tfh = open2(".\\save\\adminlog.txt", OF_READWRITE | OF_SHARE_COMPAT);
-                                    if (tfh->h == HFILE_ERROR) tfh = open2(
-                                        ".\\save\\adminlog.txt", OF_READWRITE | OF_CREATE);
+                                    if (tfh->h == HFILE_ERROR)
+                                        tfh = open2(
+                                            ".\\save\\adminlog.txt", OF_READWRITE | OF_CREATE);
                                     seek(tfh, lof(tfh));
                                     txtfileout(t2, tfh);
                                     close(tfh);
@@ -8585,7 +8621,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 11;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     txtucase(t2);
                     tfh = open2("banip.txt", OF_READWRITE | OF_SHARE_COMPAT);
                     if (tfh->h == HFILE_ERROR)
@@ -8655,7 +8692,8 @@ host_gotmessage:
                     txtright(t2, t2->l - t3->l);
                     privileges_index = 12;
                     if (((playerlist[tpl]->GNPCflags[privileges_index / 16 + 40] >> ((privileges_index % 16) * 2)) & 3)
-                        == 0) goto privilege_denied;
+                        == 0)
+                        goto privilege_denied;
                     for (x4 = 0; x4 <= playerlist_last; x4++)
                     {
                         if (playerlist[x4])
@@ -9075,8 +9113,9 @@ host_gotmessage:
                 {
                     //force field
                     myobj2 = (object*)myobj->prev;
-                    if (playerlist[tpl]->GNPCflags[3] & (1 << (myobj2->type >> 10))) npcmess_shrine = 190 + (myobj2->
-                        type >> 10);
+                    if (playerlist[tpl]->GNPCflags[3] & (1 << (myobj2->type >> 10)))
+                        npcmess_shrine = 190 + (myobj2->
+                            type >> 10);
                 } //force field
                 if ((myobj->type & 1023) == OBJ_WISP) npcmess_shrine = 199; //wisp
                 if ((myobj->type & 1023) == OBJ_STOCKS)
@@ -9114,8 +9153,9 @@ host_gotmessage:
                     if (tnpc->player == playerlist[tpl])
                     {
                         //send message to OUR OWN PARTY MEMBER
-                        if (playerlist[tpl]->party[playerlist[tpl]->selected_partymember] != myobj) goto
-                            talk_skipprivatemessage; //to SELECTED PARTY MEMBER
+                        if (playerlist[tpl]->party[playerlist[tpl]->selected_partymember] != myobj)
+                            goto
+                                talk_skipprivatemessage; //to SELECTED PARTY MEMBER
                         goto talk_privatemessage;
                     }
 
@@ -9243,8 +9283,9 @@ host_gotmessage:
                 }
 
                 //turn and face talker and begin "listening!"
-                if (myobj != playerlist[tpl]->party[0]) OBJdir(myobj, playerlist[tpl]->party[0]->x,
-                                                               playerlist[tpl]->party[0]->y);
+                if (myobj != playerlist[tpl]->party[0])
+                    OBJdir(myobj, playerlist[tpl]->party[0]->x,
+                           playerlist[tpl]->party[0]->y);
 
                 if (tnpc->player == NULL)
                 {
@@ -10117,10 +10158,12 @@ host_gotmessage:
                                     }
                                 }
                             }
-                            if (CONnpc == 25) ((creature*)MOVERNEW_OBJECT->more)->respawn_x = horseval + (2 << 4) + (1
-                                << 6);
-                            if (CONnpc == 78) ((creature*)MOVERNEW_OBJECT->more)->respawn_x = horseval + (1 << 4) + (0
-                                << 6);
+                            if (CONnpc == 25)
+                                ((creature*)MOVERNEW_OBJECT->more)->respawn_x = horseval + (2 << 4) + (1
+                                    << 6);
+                            if (CONnpc == 78)
+                                ((creature*)MOVERNEW_OBJECT->more)->respawn_x = horseval + (1 << 4) + (0
+                                    << 6);
 
                             myobj3->more = MOVERNEW_OBJECT;
                             //the fact that this is a player's horse needs to be set somewhere...
@@ -10329,7 +10372,8 @@ host_gotmessage:
                                 {
                                     //skip if not for sale
                                     if (obji[sprlnk[OBJlist_list[y6]->type & 1023] + (OBJlist_list[y6]->type >> 10)].
-                                        flags & 4096) y7 += OBJlist_list[y6]->more2;
+                                        flags & 4096)
+                                        y7 += OBJlist_list[y6]->more2;
                                     else y7++;
                                 }
                             } //qual
@@ -10384,7 +10428,8 @@ host_gotmessage:
                                 {
                                     //skip if not for sale
                                     if (obji[sprlnk[OBJlist_list[y6]->type & 1023] + (OBJlist_list[y6]->type >> 10)].
-                                        flags & 4096) y7 += OBJlist_list[y6]->more2;
+                                        flags & 4096)
+                                        y7 += OBJlist_list[y6]->more2;
                                     else y7++;
                                 }
                             } //qual
@@ -10417,7 +10462,8 @@ host_gotmessage:
                                     myobj5 = OBJlist_list[y6];
                                     if (myobj5->info & 128) y8 = 1; //stealing!
                                     if (obji[sprlnk[OBJlist_list[y6]->type & 1023] + (OBJlist_list[y6]->type >> 10)].
-                                        flags & 4096) x8 = OBJlist_list[y6]->more2;
+                                        flags & 4096)
+                                        x8 = OBJlist_list[y6]->more2;
                                     else x8 = 1;
                                     x7 = x8;
                                     x7 -= x3;
@@ -11086,8 +11132,9 @@ host_gotmessage:
                         x3 *= economy_change[CONnpc][x2];
                         economy_value[CONnpc][x2] += x3;
                         if (economy_value[CONnpc][x2] < 0) economy_value[CONnpc][x2] = 0;
-                        if (economy_value[CONnpc][x2] > economy_limit[CONnpc][x2]) economy_value[CONnpc][x2] =
-                            economy_limit[CONnpc][x2];
+                        if (economy_value[CONnpc][x2] > economy_limit[CONnpc][x2])
+                            economy_value[CONnpc][x2] =
+                                economy_limit[CONnpc][x2];
                     }
                     x++;
                     goto nextinstruction;
@@ -11109,8 +11156,9 @@ host_gotmessage:
                     x3 = CON_gv(npcbin[x].l3); //new value
                     economy_value[CONnpc][x2] = x3;
                     if (economy_value[CONnpc][x2] < 0) economy_value[CONnpc][x2] = 0;
-                    if (economy_value[CONnpc][x2] > economy_limit[CONnpc][x2]) economy_value[CONnpc][x2] = economy_limit
-                        [CONnpc][x2];
+                    if (economy_value[CONnpc][x2] > economy_limit[CONnpc][x2])
+                        economy_value[CONnpc][x2] = economy_limit
+                            [CONnpc][x2];
                     x++;
                     goto nextinstruction;
                 }
@@ -11756,7 +11804,7 @@ if
                         {
                             //NPC
                             tnpc = (npc*)myobj->more;
-                            free(tnpc);
+                            destroyNpc(tnpc);
                         }
                         OBJremove(myobj);
                         OBJrelease(myobj);
@@ -11862,7 +11910,8 @@ if
                     {
                         //cat
                         if ((crt->respawn_x >= 400) && (crt->respawn_y >= 576) && (crt->respawn_x <= 415) && (crt->
-                            respawn_y <= 591)) crt->al = 0; //Dr Cat's cats
+                            respawn_y <= 591))
+                            crt->al = 0; //Dr Cat's cats
                     }
                     if ((respawn[i]->type & 1023) == 352)
                     {
@@ -12054,11 +12103,13 @@ if
                                     if ((abs(spellx) + abs(spelly)) != 4)
                                     {
                                         if (OBJcheckbolt(powderkeg->x, powderkeg->y, powderkeg->x + spellx,
-                                                         powderkeg->y + spelly)) goto explosionblocked2;
+                                                         powderkeg->y + spelly))
+                                            goto explosionblocked2;
 
                                         myobj2 = OBJfindlast(powderkeg->x + spellx, powderkeg->y + spelly);
-                                        if (myobj2 == NULL) myobj2 = OBJfindlastall(
-                                            powderkeg->x + spellx, powderkeg->y + spelly);
+                                        if (myobj2 == NULL)
+                                            myobj2 = OBJfindlastall(
+                                                powderkeg->x + spellx, powderkeg->y + spelly);
                                         if (myobj2)
                                         {
                                             if ((myobj2->info & 8) == 0)
@@ -12722,15 +12773,20 @@ if
                                                         }
                                                         i5 = 1;
                                                         if (wpf_sourcedest[myobj2->x - WPF_OFFSETX][myobj2->y -
-                                                            WPF_OFFSETY] & 1) i5 = 0;
+                                                            WPF_OFFSETY] & 1)
+                                                            i5 = 0;
                                                         if (wpf_sourcedest[myobj2->x - WPF_OFFSETX - 1][myobj2->y -
-                                                            WPF_OFFSETY] & 1) i5 = 0;
+                                                            WPF_OFFSETY] & 1)
+                                                            i5 = 0;
                                                         if (wpf_sourcedest[myobj2->x - WPF_OFFSETX + 1][myobj2->y -
-                                                            WPF_OFFSETY] & 1) i5 = 0;
+                                                            WPF_OFFSETY] & 1)
+                                                            i5 = 0;
                                                         if (wpf_sourcedest[myobj2->x - WPF_OFFSETX][myobj2->y -
-                                                            WPF_OFFSETY - 1] & 1) i5 = 0;
+                                                            WPF_OFFSETY - 1] & 1)
+                                                            i5 = 0;
                                                         if (wpf_sourcedest[myobj2->x - WPF_OFFSETX][myobj2->y -
-                                                            WPF_OFFSETY + 1] & 1) i5 = 0;
+                                                            WPF_OFFSETY + 1] & 1)
+                                                            i5 = 0;
                                                         i3 -= i5;
                                                     crtenum_close:
                                                         //check casting
@@ -13118,8 +13174,9 @@ if
                                                     //x3=rnd*(obji[sprlnk[myobj->type&1023]].v7&255);
 
                                                     if (target_struct == 2) x5 = rnd * (tnpc->arm + 1);
-                                                    else x5 = rnd * ((obji[sprlnk[crt->target->type & 1023]].v7 >> 8) +
-                                                        1 + 1 + getequiparmourvalue((object*)crt2->items->more));
+                                                    else
+                                                        x5 = rnd * ((obji[sprlnk[crt->target->type & 1023]].v7 >> 8) +
+                                                            1 + 1 + getequiparmourvalue((object*)crt2->items->more));
                                                     x3 -= x5 / 4;
                                                     if (x3 < 0) x3 = 0; //npc armour!
 
@@ -13191,8 +13248,9 @@ if
                                                     //x3=rnd*((obji[sprlnk[myobj->type&1023]].v7&255)/2);
 
                                                     if (target_struct == 2) x5 = rnd * (tnpc->arm + 1);
-                                                    else x5 = rnd * ((obji[sprlnk[crt->target->type & 1023]].v7 >> 8) +
-                                                        1 + 1 + getequiparmourvalue((object*)crt2->items->more));
+                                                    else
+                                                        x5 = rnd * ((obji[sprlnk[crt->target->type & 1023]].v7 >> 8) +
+                                                            1 + 1 + getequiparmourvalue((object*)crt2->items->more));
                                                     x3 -= x5 / 4;
                                                     if (x3 < 0) x3 = 0; //npc armour!
 
@@ -13252,8 +13310,9 @@ if
                                                     //MessageBox(NULL,t5->d,"Ultima 6 Online",MB_OK);
 
                                                     if (target_struct == 2) x5 = rnd * (tnpc->arm + 1);
-                                                    else x5 = rnd * ((obji[sprlnk[crt->target->type & 1023]].v7 >> 8) +
-                                                        1 + 1 + getequiparmourvalue((object*)crt2->items->more));
+                                                    else
+                                                        x5 = rnd * ((obji[sprlnk[crt->target->type & 1023]].v7 >> 8) +
+                                                            1 + 1 + getequiparmourvalue((object*)crt2->items->more));
                                                     x3 -= x5 / 4;
                                                     if (x3 < 0) x3 = 0; //npc armour!
 
@@ -13294,8 +13353,9 @@ if
 
 
                                     if (target_struct == 2) x5 = rnd * (tnpc->arm + 1);
-                                    else x5 = rnd * ((obji[sprlnk[crt->target->type & 1023]].v7 >> 8) + 1 + 1 +
-                                        getequiparmourvalue((object*)crt2->items->more));
+                                    else
+                                        x5 = rnd * ((obji[sprlnk[crt->target->type & 1023]].v7 >> 8) + 1 + 1 +
+                                            getequiparmourvalue((object*)crt2->items->more));
 
 
                                     //x5=rnd*(tnpc->arm+1);
@@ -14096,7 +14156,8 @@ if
                                                 if (tplayer->party[x2] == myobj)
                                                 {
                                                     if ((myobj->x == tplayer->trapx[x2]) && (myobj->y == tplayer->trapy[
-                                                        x2])) goto trap_alreadyhurt;
+                                                        x2]))
+                                                        goto trap_alreadyhurt;
                                                     goto trap_gotpartymemberindex;
                                                 }
                                             }
@@ -14758,7 +14819,7 @@ if
                                 {
                                     //schedule
 
-                                    //*IMPORTANT* needs to check for nearest schedule, regardless of order, 
+                                    //*IMPORTANT* needs to check for nearest schedule, regardless of order,
                                     //*MORE IMPORTANTLY* it needs to be day indepentant, reading a schedule from the prev
                                     //day if necessary
 
@@ -15485,7 +15546,8 @@ if
                                                                     if ((myobj5->info & 128) == (invobj->info & 128))
                                                                     {
                                                                         if (((invobj->type & 1023) == 90) && (myobj5->
-                                                                            info != invobj->info)) goto cantjoin2;
+                                                                            info != invobj->info))
+                                                                            goto cantjoin2;
                                                                         //cant join half burnt torches
                                                                         myobj5->more2 += invobj->more2;
                                                                         OBJrelease(invobj);
@@ -15512,13 +15574,15 @@ if
                                                             //check for any two handed weapons!
                                                             if (myobj5 = tnpc3->wep_left)
                                                             {
-                                                                if (obji[sprlnk[myobj5->type & 1023]].flags & 16) goto
-                                                                    cantautoready;
+                                                                if (obji[sprlnk[myobj5->type & 1023]].flags & 16)
+                                                                    goto
+                                                                        cantautoready;
                                                             }
                                                             if (myobj5 = tnpc3->wep_right)
                                                             {
-                                                                if (obji[sprlnk[myobj5->type & 1023]].flags & 16) goto
-                                                                    cantautoready;
+                                                                if (obji[sprlnk[myobj5->type & 1023]].flags & 16)
+                                                                    goto
+                                                                        cantautoready;
                                                             }
                                                             //ready item if possible
                                                             if (tnpc3->wep_left == NULL)
@@ -15636,8 +15700,9 @@ if
                                                             {
                                                             wizeye_laddercheck:
                                                                 myobj3 = myobj2;
-                                                                if ((myobj3->info & 8) == 8) myobj3 = (object*)myobj3->
-                                                                    more; //redirector
+                                                                if ((myobj3->info & 8) == 8)
+                                                                    myobj3 = (object*)myobj3->
+                                                                        more; //redirector
                                                                 x4 = myobj3->type & 1023;
                                                                 if ((x4 == 305) || (x4 == 326) || (x4 == 308))
                                                                 {
@@ -16029,7 +16094,8 @@ if
                                         if (tplayer->craft == NULL)
                                         {
                                             if ((bt[myobj->y + y2][myobj->x] & 1024) + (bt[myobj->y][myobj->x + x2] &
-                                                1024) == 0) goto NPC_skip1;
+                                                1024) == 0)
+                                                goto NPC_skip1;
                                         }
                                     }
                                     if (OBJmove2(myobj, myobj->x + x2, myobj->y + y2) == 0) x3 = 1;
@@ -16643,12 +16709,14 @@ if
                                 //object in both hands
                                 //can't attack with equiped items!
                                 if ((spikedhelm_attack == 0) && (obji[sprlnk[myobj3->type & 1023]].v1 == 0) && (obji[
-                                    sprlnk[myobj4->type & 1023]].v1 == 0)) goto skipnpcattack;
+                                    sprlnk[myobj4->type & 1023]].v1 == 0))
+                                    goto skipnpcattack;
 
                                 if (spikedhelm_attack)
                                 {
                                     if ((obji[sprlnk[myobj3->type & 1023]].v1 == 0) && (obji[sprlnk[myobj4->type &
-                                        1023]].v1 == 0)) spikedhelm_onlyattack = 1;
+                                        1023]].v1 == 0))
+                                        spikedhelm_onlyattack = 1;
                                 }
                             }
 
@@ -17098,8 +17166,9 @@ if
                                                         {
                                                             //3 bolts
                                                             OBJlist_list[y6]->more2 -= 3;
-                                                            if (OBJlist_list[y6]->more2 == 0) OBJremove(
-                                                                OBJlist_list[y6]);
+                                                            if (OBJlist_list[y6]->more2 == 0)
+                                                                OBJremove(
+                                                                    OBJlist_list[y6]);
                                                             tnpc->upflags |= 32;
 
                                                             i3 = SFnew(myobj2->x, myobj2->y);
@@ -17751,8 +17820,9 @@ if
                                                         myobj9 = OBJnew();
                                                         AUTOPICKUPadd(myobj, myobj9);
                                                         myobj9->type = 55; //arrow
-                                                        if ((npcattackweptype == 42) || (npcattackweptype == 50)) myobj9
-                                                            ->type = 56; //bolt
+                                                        if ((npcattackweptype == 42) || (npcattackweptype == 50))
+                                                            myobj9
+                                                                ->type = 56; //bolt
                                                         myobj9->more2 = 1;
                                                         //insert object9
                                                         myobj9->prev = myobj2->prev;
@@ -17794,8 +17864,9 @@ if
                                     if (x2 <= 1)
                                     {
                                     hth_norangecheck:
-                                        if (x == 0) x += obji[sprlnk[myobj3->type & 1023]].v1 + ENHANCEget_attack(
-                                            myobj3);
+                                        if (x == 0)
+                                            x += obji[sprlnk[myobj3->type & 1023]].v1 + ENHANCEget_attack(
+                                                myobj3);
                                         if (myobj3->type == 48) x = 1023;
                                     } //x2<=1
                                 } //myobj3
@@ -17911,7 +17982,7 @@ if
                                                         }
                                                     }
 
-                                                    x2 = rnd * (x + 1); //attack 
+                                                    x2 = rnd * (x + 1); //attack
                                                     x3 = rnd * (256 + 1); //chest
                                                     if (x2 > x3)
                                                     {
@@ -17977,20 +18048,24 @@ if
                                             //test surrounding squares
                                             slimex = myobj2->x + 1;
                                             slimey = myobj2->y;
-                                            if ((od[slimey][slimex] == NULL) && ((bt[slimey][slimex] >> 10) & 1)) goto
-                                                slimedivide;
+                                            if ((od[slimey][slimex] == NULL) && ((bt[slimey][slimex] >> 10) & 1))
+                                                goto
+                                                    slimedivide;
                                             slimex = myobj2->x - 1;
                                             slimey = myobj2->y;
-                                            if ((od[slimey][slimex] == NULL) && ((bt[slimey][slimex] >> 10) & 1)) goto
-                                                slimedivide;
+                                            if ((od[slimey][slimex] == NULL) && ((bt[slimey][slimex] >> 10) & 1))
+                                                goto
+                                                    slimedivide;
                                             slimex = myobj2->x;
                                             slimey = myobj2->y + 1;
-                                            if ((od[slimey][slimex] == NULL) && ((bt[slimey][slimex] >> 10) & 1)) goto
-                                                slimedivide;
+                                            if ((od[slimey][slimex] == NULL) && ((bt[slimey][slimex] >> 10) & 1))
+                                                goto
+                                                    slimedivide;
                                             slimex = myobj2->x;
                                             slimey = myobj2->y - 1;
-                                            if ((od[slimey][slimex] == NULL) && ((bt[slimey][slimex] >> 10) & 1)) goto
-                                                slimedivide;
+                                            if ((od[slimey][slimex] == NULL) && ((bt[slimey][slimex] >> 10) & 1))
+                                                goto
+                                                    slimedivide;
                                             goto slimedivide_failed;
                                         slimedivide:
                                             myobj3 = OBJnew();
@@ -18025,10 +18100,12 @@ if
                                         //if (wep_dt[i3]==1) f=(float)x/32.0f*(float)tnpc->s; //100% STR
                                         //if (wep_dt[i3]==2) f=(float)x/32.0f*(((float)tnpc->s/2.0f)+((float)tnpc->d/2.0f)); //50% STR + 50% DEX
                                         //if (wep_dt[i3]==3) f=(float)x/32.0f*((float)tnpc->d*2.0f); //200% DEX (bows, crossbows)
-                                        if (wep_dt[i3] == 1) f = (float)x / 32.0f * ((float)tnpc->s + (float)tnpc->d *
-                                            0.25f); //STR*100%+DEX*25%
-                                        if (wep_dt[i3] == 2) f = (float)x / 32.0f * ((float)tnpc->d * 0.75f + (float)
-                                            tnpc->s * 0.25f); //DEX*75%+STR*25%
+                                        if (wep_dt[i3] == 1)
+                                            f = (float)x / 32.0f * ((float)tnpc->s + (float)tnpc->d *
+                                                0.25f); //STR*100%+DEX*25%
+                                        if (wep_dt[i3] == 2)
+                                            f = (float)x / 32.0f * ((float)tnpc->d * 0.75f + (float)
+                                                tnpc->s * 0.25f); //DEX*75%+STR*25%
                                         if (wep_dt[i3] == 3) f = (float)x / 32.0f * ((float)tnpc->d * 1.75f); //DEX*175%
                                         if (wep_dt[i3] == 4)
                                         {
@@ -18189,14 +18266,16 @@ if
                                                             if ((btflags[bt[myobj2->y][myobj2->x - 1] & 1023] & 1) == 0)
                                                                 goto nospaceforbody;
                                                             if ((btflags[bt[myobj2->y - 1][myobj2->x - 1] & 1023] & 1)
-                                                                == 0) goto nospaceforbody;
+                                                                == 0)
+                                                                goto nospaceforbody;
                                                             //RULE 2: only 1 object may exist on the square at the time of the drop
                                                             //FACT: the object is a 4 part mover, there WILL be a first object on each square
                                                             if (od[myobj2->y][myobj2->x]->next) goto nospaceforbody;
                                                             if (od[myobj2->y - 1][myobj2->x]->next) goto nospaceforbody;
                                                             if (od[myobj2->y][myobj2->x - 1]->next) goto nospaceforbody;
-                                                            if (od[myobj2->y - 1][myobj2->x - 1]->next) goto
-                                                                nospaceforbody;
+                                                            if (od[myobj2->y - 1][myobj2->x - 1]->next)
+                                                                goto
+                                                                    nospaceforbody;
                                                         }
                                                         if (mover_body[myobj2->type & 1023] == (134 + 1024 * 1))
                                                         {
@@ -18497,8 +18576,9 @@ if
                                         //2nd shot
                                         x6 = 4; //75% chance of bolt recovery
                                         myobj2 = OBJfindlast(triplecrossbow_shot_x2, triplecrossbow_shot_y2);
-                                        if (myobj2 == NULL) myobj2 = OBJfindlastall(
-                                            triplecrossbow_shot_x2, triplecrossbow_shot_y2);
+                                        if (myobj2 == NULL)
+                                            myobj2 = OBJfindlastall(
+                                                triplecrossbow_shot_x2, triplecrossbow_shot_y2);
                                         if (myobj2)
                                         {
                                             //if (myobj2->info&8) myobj2=(object*)myobj2->more; //redirect
@@ -18604,8 +18684,9 @@ if
 
                                     x6 = 4; //75% chance of bolt recovery
                                     myobj2 = OBJfindlast(triplecrossbow_shot_x3, triplecrossbow_shot_y3);
-                                    if (myobj2 == NULL) myobj2 = OBJfindlastall(
-                                        triplecrossbow_shot_x3, triplecrossbow_shot_y3);
+                                    if (myobj2 == NULL)
+                                        myobj2 = OBJfindlastall(
+                                            triplecrossbow_shot_x3, triplecrossbow_shot_y3);
                                     if (myobj2)
                                     {
                                         //if (myobj2->info&8) myobj2=(object*)myobj2->more; //redirect
@@ -19406,7 +19487,7 @@ if
                         //txtset(spellname[(1<<4)+5],"Telekinesis"); spellreagent[(1<<4)+5]=BLOO|MAND|BLAC;
                         if (CASTSPELL_SPELLTYPE == ((1 << 4) + 5))
                         {
-                            //telekinesis   
+                            //telekinesis
                             i2 = spell_telekinesis(tplayer, tnpc, NULL, tpx + x, tpy + y);
                             goto spelldone;
                         } //telekinesis
@@ -19976,8 +20057,9 @@ if
                                 {
                                     if ((abs(spellx) + abs(spelly)) != 4)
                                     {
-                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer)) goto
-                                            masskillblocked;
+                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer))
+                                            goto
+                                                masskillblocked;
 
                                         myobj2 = OBJfindlast(tpx + x + spellx, tpy + y + spelly);
                                         if (myobj2 == NULL) myobj2 = OBJfindlastall(tpx + x + spellx, tpy + y + spelly);
@@ -20316,8 +20398,9 @@ if
                                                                 if (!OBJcheckbolt(spellx, spelly, spellx2, spelly2))
                                                                 {
                                                                     myobj2 = OBJfindlast(spellx2, spelly2);
-                                                                    if (myobj2 == NULL) myobj2 = OBJfindlastall(
-                                                                        spellx2, spelly2);
+                                                                    if (myobj2 == NULL)
+                                                                        myobj2 = OBJfindlastall(
+                                                                            spellx2, spelly2);
                                                                     if (myobj2)
                                                                     {
                                                                         if (myobj2->info & 4)
@@ -20430,8 +20513,9 @@ if
                                 {
                                     if ((abs(spellx) + abs(spelly)) != 4)
                                     {
-                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer)) goto
-                                            explosionblocked;
+                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer))
+                                            goto
+                                                explosionblocked;
 
                                         myobj2 = OBJfindlast(tpx + x + spellx, tpy + y + spelly);
                                         if (myobj2 == NULL) myobj2 = OBJfindlastall(tpx + x + spellx, tpy + y + spelly);
@@ -20743,8 +20827,9 @@ if
                                 {
                                     if ((abs(spellx) + abs(spelly)) != 4)
                                     {
-                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer)) goto
-                                            masscharmblocked;
+                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer))
+                                            goto
+                                                masscharmblocked;
 
                                         myobj2 = OBJfindlast(tpx + x + spellx, tpy + y + spelly);
                                         if (myobj2 == NULL) myobj2 = OBJfindlastall(tpx + x + spellx, tpy + y + spelly);
@@ -20866,8 +20951,9 @@ if
                             {
                                 for (spelly = -32; spelly <= 32; spelly++)
                                 {
-                                    if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer)) goto
-                                        timestopblocked;
+                                    if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer))
+                                        goto
+                                            timestopblocked;
 
                                     myobj2 = OBJfindlast(tpx + x + spellx, tpy + y + spelly);
                                     if (myobj2 == NULL) myobj2 = OBJfindlastall(tpx + x + spellx, tpy + y + spelly);
@@ -21149,11 +21235,13 @@ if
                                     {
                                         if ((abs(spellx) + abs(spelly)) != 4)
                                         {
-                                            if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer)) goto
-                                                massprotectblocked;
+                                            if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer))
+                                                goto
+                                                    massprotectblocked;
                                             myobj2 = OBJfindlast(tpx + x + spellx, tpy + y + spelly);
-                                            if (myobj2 == NULL) myobj2 = OBJfindlastall(
-                                                tpx + x + spellx, tpy + y + spelly);
+                                            if (myobj2 == NULL)
+                                                myobj2 = OBJfindlastall(
+                                                    tpx + x + spellx, tpy + y + spelly);
                                             if (myobj2)
                                             {
                                                 if (myobj2->info & 2)
@@ -21209,12 +21297,14 @@ if
                                     {
                                         if ((abs(spellx) + abs(spelly)) != 4)
                                         {
-                                            if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer)) goto
-                                                invisibilityblocked;
+                                            if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer))
+                                                goto
+                                                    invisibilityblocked;
 
                                             myobj2 = OBJfindlast(tpx + x + spellx, tpy + y + spelly);
-                                            if (myobj2 == NULL) myobj2 = OBJfindlastall(
-                                                tpx + x + spellx, tpy + y + spelly);
+                                            if (myobj2 == NULL)
+                                                myobj2 = OBJfindlastall(
+                                                    tpx + x + spellx, tpy + y + spelly);
                                             if (myobj2)
                                             {
                                                 if (myobj2->info & 2)
@@ -21476,8 +21566,9 @@ if
                                 {
                                     if ((abs(spellx) + abs(spelly)) != 4)
                                     {
-                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer)) goto
-                                            slimeblocked;
+                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer))
+                                            goto
+                                                slimeblocked;
 
                                         myobj2 = OBJfindlast(tpx + x + spellx, tpy + y + spelly);
                                         if (myobj2 == NULL) myobj2 = OBJfindlastall(tpx + x + spellx, tpy + y + spelly);
@@ -21493,15 +21584,19 @@ if
                                                     if (crt->al == 1)
                                                     {
                                                         if (((tpx + x + spellx) < 0) || ((tpx + x + spellx) > 2047) || (
-                                                            (tpy + y + spelly) < 0) || ((tpy + y + spelly) > 1023)) goto
-                                                            slimefail;
+                                                            (tpy + y + spelly) < 0) || ((tpy + y + spelly) > 1023))
+                                                            goto
+                                                                slimefail;
                                                         if ((btflags[bt[tpy + y + spelly][tpx + x + spellx] & 1023] & 1)
-                                                            == 0) goto slimefail; //land passable
+                                                            == 0)
+                                                            goto slimefail; //land passable
 
                                                         if ((myobj2->type & 1023) == 366) goto slimefail;
                                                         //invincible tanglevine tendril!
-                                                        if ((myobj2->type & 1023) == 430) if (crt->flags & 128) goto
-                                                            slimefail; //invincible horse
+                                                        if ((myobj2->type & 1023) == 430)
+                                                            if (crt->flags & 128)
+                                                                goto
+                                                                    slimefail; //invincible horse
 
 
                                                         x3 = rnd * (640 + tnpc->i * 10); //128 better than kill spell!
@@ -21631,8 +21726,9 @@ if
                                 x5--;
                                 if (x5)
                                 {
-                                    if ((spellx < 0) || (spellx > 2047) || (spelly < 0) || (spelly > 1023)) goto isretry
-                                        ;
+                                    if ((spellx < 0) || (spellx > 2047) || (spelly < 0) || (spelly > 1023))
+                                        goto isretry
+                                            ;
                                     if (((bt[spelly][spellx] >> 10) & (1 + 2 + 4)) == 0) goto isretry;
                                     //land, air OR sea passable
                                     if (od[spelly][spellx]) goto isretry;
@@ -21675,8 +21771,9 @@ if
                                 //v1 (damage)
                                 if (obji[sprlnk[myobj2->type & 1023] + (myobj2->type >> 10)].v2) goto cantreplicate;
                                 //v2 (armour)
-                                if (obji[sprlnk[myobj2->type & 1023] + (myobj2->type >> 10)].flags & 127) goto
-                                    cantreplicate; //can be equipped
+                                if (obji[sprlnk[myobj2->type & 1023] + (myobj2->type >> 10)].flags & 127)
+                                    goto
+                                        cantreplicate; //can be equipped
                                 if (obji[sprlnk[myobj2->type & 1023]].flags & 1024) goto cantreplicate; //container
                                 //EXCEPTIONS!
                                 if ((myobj2->type & 1023) == 87) goto cantreplicate; //orb of the moons(kals)
@@ -21706,8 +21803,9 @@ if
                                 x3++;
                                 if (myobj3 = OBJfindlast(x3, x4))
                                 {
-                                    if (obji[sprlnk[myobj3->type & 1023] + (myobj3->type >> 10)].flags & 512) goto
-                                        gotreploc;
+                                    if (obji[sprlnk[myobj3->type & 1023] + (myobj3->type >> 10)].flags & 512)
+                                        goto
+                                            gotreploc;
                                 }
                                 if (bt[x4][x3] & 1024) goto gotreploc;
                                 x3 = tpx + x;
@@ -21715,8 +21813,9 @@ if
                                 x3--;
                                 if (myobj3 = OBJfindlast(x3, x4))
                                 {
-                                    if (obji[sprlnk[myobj3->type & 1023] + (myobj3->type >> 10)].flags & 512) goto
-                                        gotreploc;
+                                    if (obji[sprlnk[myobj3->type & 1023] + (myobj3->type >> 10)].flags & 512)
+                                        goto
+                                            gotreploc;
                                 }
                                 if (bt[x4][x3] & 1024) goto gotreploc;
                                 x3 = tpx + x;
@@ -21724,8 +21823,9 @@ if
                                 x4++;
                                 if (myobj3 = OBJfindlast(x3, x4))
                                 {
-                                    if (obji[sprlnk[myobj3->type & 1023] + (myobj3->type >> 10)].flags & 512) goto
-                                        gotreploc;
+                                    if (obji[sprlnk[myobj3->type & 1023] + (myobj3->type >> 10)].flags & 512)
+                                        goto
+                                            gotreploc;
                                 }
                                 if (bt[x4][x3] & 1024) goto gotreploc;
                                 x3 = tpx + x;
@@ -21733,16 +21833,18 @@ if
                                 x4--;
                                 if (myobj3 = OBJfindlast(x3, x4))
                                 {
-                                    if (obji[sprlnk[myobj3->type & 1023] + (myobj3->type >> 10)].flags & 512) goto
-                                        gotreploc;
+                                    if (obji[sprlnk[myobj3->type & 1023] + (myobj3->type >> 10)].flags & 512)
+                                        goto
+                                            gotreploc;
                                 }
                                 if (bt[x4][x3] & 1024) goto gotreploc;
                                 x3 = tpx + x;
                                 x4 = tpy + y;
                                 if (myobj3 = OBJfindlast(x3, x4))
                                 {
-                                    if (obji[sprlnk[myobj3->type & 1023] + (myobj3->type >> 10)].flags & 512) goto
-                                        gotreploc;
+                                    if (obji[sprlnk[myobj3->type & 1023] + (myobj3->type >> 10)].flags & 512)
+                                        goto
+                                            gotreploc;
                                 }
                                 if (bt[x4][x3] & 1024) goto gotreploc;
                                 goto cantreplicate; //no space!
@@ -21758,8 +21860,9 @@ if
                                     myobj3->type = myobj2->type;
                                     myobj3->info = myobj2->info;
                                     myobj3->more2 = myobj2->more2;
-                                    if (obji[sprlnk[myobj2->type & 1023] + (myobj2->type >> 10)].flags & 4096) myobj3->
-                                        more2 = 1;
+                                    if (obji[sprlnk[myobj2->type & 1023] + (myobj2->type >> 10)].flags & 4096)
+                                        myobj3->
+                                            more2 = 1;
                                     myobj3->info |= 112; //set flags as temp OBJ
                                     if (myobj3->info & 128) myobj3->info -= 128; //remove stealing flag!
                                     OBJadd(x3, x4, myobj3);
@@ -22462,8 +22565,9 @@ if
                                 {
                                     if ((abs(spellx) + abs(spelly)) != 4)
                                     {
-                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer)) goto
-                                            masscureblocked;
+                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer))
+                                            goto
+                                                masscureblocked;
                                         myobj2 = OBJfindlast(tpx + x + spellx, tpy + y + spelly);
                                         if (myobj2 == NULL) myobj2 = OBJfindlastall(tpx + x + spellx, tpy + y + spelly);
                                         if (myobj2)
@@ -22526,8 +22630,9 @@ if
                                     if ((abs(spellx) + abs(spelly)) != 4)
                                     {
                                         myobj2 = OBJfindlast(tpx + x + spellx, tpy + y + spelly);
-                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer)) goto
-                                            massawakenblocked;
+                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer))
+                                            goto
+                                                massawakenblocked;
                                         if (myobj2)
                                         {
                                             if (myobj2->info & 2)
@@ -22543,14 +22648,18 @@ if
                                                     {
                                                         if (tnpc2->schedule_last == 0x91)
                                                         {
-                                                            if (((tpx + x) == 568) && ((tpy + y) == 364)) goto
-                                                                massawaken_npca;
-                                                            if (((tpx + x) == 570) && ((tpy + y) == 364)) goto
-                                                                massawaken_npca;
-                                                            if (((tpx + x) == 572) && ((tpy + y) == 364)) goto
-                                                                massawaken_npca;
-                                                            if (((tpx + x) == 574) && ((tpy + y) == 364)) goto
-                                                                massawaken_npca;
+                                                            if (((tpx + x) == 568) && ((tpy + y) == 364))
+                                                                goto
+                                                                    massawaken_npca;
+                                                            if (((tpx + x) == 570) && ((tpy + y) == 364))
+                                                                goto
+                                                                    massawaken_npca;
+                                                            if (((tpx + x) == 572) && ((tpy + y) == 364))
+                                                                goto
+                                                                    massawaken_npca;
+                                                            if (((tpx + x) == 574) && ((tpy + y) == 364))
+                                                                goto
+                                                                    massawaken_npca;
                                                             tnpc2->schedule_i = -1;
                                                             tnpc2->schedule_last = 0;
                                                             tnpc2->wait_walk += 64; //1mins
@@ -22609,8 +22718,9 @@ if
                                 {
                                     if ((abs(spellx) + abs(spelly)) != 4)
                                     {
-                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer)) goto
-                                            masssleepblocked;
+                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer))
+                                            goto
+                                                masssleepblocked;
 
                                         myobj2 = OBJfindlast(tpx + x + spellx, tpy + y + spelly);
                                         if (myobj2 == NULL) myobj2 = OBJfindlastall(tpx + x + spellx, tpy + y + spelly);
@@ -22722,8 +22832,9 @@ if
                                     if (spelly <= -3) { spelly = rnd * (3) - 1; }
                                     if ((abs(spellx) + abs(spelly)) != 4)
                                     {
-                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer)) goto
-                                            hailstorm_blocked;
+                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer))
+                                            goto
+                                                hailstorm_blocked;
                                         myobj2 = OBJfindlast(tpx + x + spellx, tpy + y + spelly);
                                         if (myobj2 == NULL) myobj2 = OBJfindlastall(tpx + x + spellx, tpy + y + spelly);
                                         if (myobj2)
@@ -22808,8 +22919,9 @@ if
                                         if ((abs(spellx) + abs(spelly)) <= 10)
                                         {
                                             myobj2 = OBJfindlast(tpx + x + spellx, tpy + y + spelly);
-                                            if (myobj2 == NULL) myobj2 = OBJfindlastall(
-                                                tpx + x + spellx, tpy + y + spelly);
+                                            if (myobj2 == NULL)
+                                                myobj2 = OBJfindlastall(
+                                                    tpx + x + spellx, tpy + y + spelly);
                                             if (myobj2)
                                             {
                                                 if (myobj2->info & 4)
@@ -22852,8 +22964,9 @@ if
                                 {
                                     for (spelly = -1; spelly <= 1; spelly++)
                                     {
-                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer)) goto
-                                            web_blocked;
+                                        if (stormcloakcheck2(tpx + x + spellx, tpy + y + spelly, tplayer))
+                                            goto
+                                                web_blocked;
                                         if ((x3 == 317) || (x3 == 318) || (x3 == 320) || (x3 == 173) || (x3 == 53))
                                         {
                                             goto web_blocked;
@@ -22865,7 +22978,7 @@ if
                                             myobj2->type = 53; //web
                                             myobj2->more2 = tnpc->player->id;
                                             myobj2->info |= 32;
-                                            //if tile has an object, place web under it 
+                                            //if tile has an object, place web under it
                                             OBJtmp = od[tpy + y + spelly][tpx + x + spellx];
                                             if (OBJtmp)
                                             {
@@ -22881,6 +22994,7 @@ if
                                             }
                                         }
                                         else if (myobj2&& myobj2
+
                                         ->
                                         info & 4
                                         )
@@ -22896,7 +23010,7 @@ if
                                             myobj2->type = 53; //web
                                             myobj2->more2 = tnpc->player->id;
                                             myobj2->info |= 112; //set flags as temp OBJ
-                                            //if tile has an object, place web under it 
+                                            //if tile has an object, place web under it
                                             OBJtmp = od[tpy + y + spelly][tpx + x + spellx];
                                             if (OBJtmp)
                                             {
@@ -23159,7 +23273,8 @@ if
                                         if (myobj != NULL)
                                         {
                                             if ((myobj->type == (OBJ_CHEST + 1024 * 2)) || (myobj->type == (OBJ_CHEST +
-                                                1024 * 3))) goto inventory_look; //magically/locked chests
+                                                1024 * 3)))
+                                                goto inventory_look; //magically/locked chests
 
                                             for (i3 = 0; i3 <= nresu; i3++)
                                             {
@@ -23410,7 +23525,8 @@ if
                                                         if ((tplayer->mobj->info & 128) == (myobj3->info & 128))
                                                         {
                                                             if (((myobj3->type & 1023) == 90) && (myobj3->info !=
-                                                                tplayer->mobj->info)) goto cantjoin;
+                                                                tplayer->mobj->info))
+                                                                goto cantjoin;
                                                             //cant join half burnt torches
                                                             myobj3->more2 += tplayer->mobj->more2;
                                                             OBJrelease(tplayer->mobj);
@@ -23513,7 +23629,8 @@ if
                                                     if (tnpc->wep_left != NULL)
                                                     {
                                                         if (obji[sprlnk[tnpc->wep_left->type & 1023] + (tnpc->wep_left->
-                                                            type >> 10)].flags & 16) goto skip_pickup;
+                                                            type >> 10)].flags & 16)
+                                                            goto skip_pickup;
                                                     }
                                                     if (obji[sprlnk[tplayer->mobj->type & 1023] + (tplayer->mobj->type
                                                         >> 10)].flags & 16)
@@ -23600,7 +23717,8 @@ if
                                                     if (tnpc->wep_right != NULL)
                                                     {
                                                         if (obji[sprlnk[tnpc->wep_right->type & 1023] + (tnpc->wep_right
-                                                            ->type >> 10)].flags & 16) goto skip_pickup;
+                                                            ->type >> 10)].flags & 16)
+                                                            goto skip_pickup;
                                                     }
                                                     if (obji[sprlnk[tplayer->mobj->type & 1023] + (tplayer->mobj->type
                                                         >> 10)].flags & 16)
@@ -25538,8 +25656,9 @@ if
                             {
                                 //force field
                                 myobj2 = (object*)myobj->prev;
-                                if (playerlist[tpl]->GNPCflags[3] & (1 << (myobj2->type >> 10))) myobj = (object*)myobj
-                                    ->prev;
+                                if (playerlist[tpl]->GNPCflags[3] & (1 << (myobj2->type >> 10)))
+                                    myobj = (object*)myobj
+                                        ->prev;
                             } //force field
 
 
@@ -26348,8 +26467,9 @@ if
                                                 if (OBJlist_list[y6]->type == 448)
                                                 {
                                                     //horse papers
-                                                    if ((object*)OBJlist_list[y6]->more == myobj) goto
-                                                        usehorse_gotpapers;
+                                                    if ((object*)OBJlist_list[y6]->more == myobj)
+                                                        goto
+                                                            usehorse_gotpapers;
                                                 }
                                             }
                                             x5 = 0;
@@ -27233,8 +27353,9 @@ if
                         if (myobj == nuggetsfix)
                         {
                             //nuggets
-                            if ((tplayer->GNPCflags[6] & (1 << 6)) || (tplayer->online < 1536)) myobj = (object*)myobj->
-                                prev;
+                            if ((tplayer->GNPCflags[6] & (1 << 6)) || (tplayer->online < 1536))
+                                myobj = (object*)myobj->
+                                    prev;
                             if (myobj == NULL) goto looknullobject;
                         }
 
@@ -28252,12 +28373,14 @@ if
                                 t2->ds[0] = 3;
                                 txtadd(t, t2);
                                 t2->ds[0] = myobj->x - 1;
-                                if (myobj->x == 0) t2->ds[0] = tnpc->player->party[tnpc->player->selected_partymember]->
-                                    x - 1;
+                                if (myobj->x == 0)
+                                    t2->ds[0] = tnpc->player->party[tnpc->player->selected_partymember]->
+                                        x - 1;
                                 txtadd(t, t2);
                                 t2->ds[0] = myobj->y - 1;
-                                if (myobj->y == 0) t2->ds[0] = tnpc->player->party[tnpc->player->selected_partymember]->
-                                    y - 1;
+                                if (myobj->y == 0)
+                                    t2->ds[0] = tnpc->player->party[tnpc->player->selected_partymember]->
+                                        y - 1;
                                 txtadd(t, t2);
                                 t2->ds[0] = t3->l;
                                 txtadd(t, t2);
@@ -28744,8 +28867,9 @@ if
                                     }
                                     if (myobj)
                                     {
-                                        if ((myobj->type == (98 + 1024 * 2)) || (myobj->type == (98 + 1024 * 3))) goto
-                                            inventory_look; //magically/locked chests
+                                        if ((myobj->type == (98 + 1024 * 2)) || (myobj->type == (98 + 1024 * 3)))
+                                            goto
+                                                inventory_look; //magically/locked chests
                                         for (i3 = 0; i3 <= nresu; i3++)
                                         {
                                             if (resu[i3])
@@ -29110,7 +29234,7 @@ if
                                     }
                                     else if ((myobj->type & 1023) == 448)
                                     {
-                                        //horse papers, send + info to client 
+                                        //horse papers, send + info to client
                                         myobj2 = (object*)myobj->more;
                                         crt2 = (creature*)myobj2->more;
                                         if (crt2->respawn_x & 15)
@@ -29186,29 +29310,37 @@ if
                                 static unsigned short npc_arm;
                                 npc_arm = 0;
                                 myobj = tnpc->helm;
-                                if (myobj != NULL) npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
-                                    myobj);
+                                if (myobj != NULL)
+                                    npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
+                                        myobj);
                                 myobj = tnpc->wep_right;
-                                if (myobj != NULL) npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
-                                    myobj);
+                                if (myobj != NULL)
+                                    npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
+                                        myobj);
                                 myobj = tnpc->wep_left;
-                                if (myobj != NULL) npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
-                                    myobj);
+                                if (myobj != NULL)
+                                    npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
+                                        myobj);
                                 myobj = tnpc->armour;
-                                if (myobj != NULL) npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
-                                    myobj);
+                                if (myobj != NULL)
+                                    npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
+                                        myobj);
                                 myobj = tnpc->boots;
-                                if (myobj != NULL) npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
-                                    myobj);
+                                if (myobj != NULL)
+                                    npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
+                                        myobj);
                                 myobj = tnpc->neck;
-                                if (myobj != NULL) npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
-                                    myobj);
+                                if (myobj != NULL)
+                                    npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
+                                        myobj);
                                 myobj = tnpc->ring_right;
-                                if (myobj != NULL) npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
-                                    myobj);
+                                if (myobj != NULL)
+                                    npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
+                                        myobj);
                                 myobj = tnpc->ring_left;
-                                if (myobj != NULL) npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
-                                    myobj);
+                                if (myobj != NULL)
+                                    npc_arm += obji[sprlnk[myobj->type & 1023]].v2 + ENHANCEget_defense(
+                                        myobj);
                                 tnpc->arm = npc_arm;
                                 if (tnpc->protection) tnpc->arm += 10;
                                 if (tnpc->player)

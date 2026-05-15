@@ -330,7 +330,7 @@ void OBJrelease(object* obj)
     ZeroMemory(obj, sizeof(object));
 }
 
-void free(player* player_ptr)
+void destroyPlayer(player* player_ptr)
 {
     if (!player_ptr) return;
 
@@ -357,7 +357,7 @@ void free(player* player_ptr)
     free((void*)player_ptr);
 }
 
-void free(creature* creature_ptr)
+void destroyCreature(creature* creature_ptr)
 {
     if (!creature_ptr) return;
 
@@ -375,7 +375,7 @@ void free(creature* creature_ptr)
     free((void*)creature_ptr);
 }
 
-void free(npc* npc_ptr)
+void destroyNpc(npc* npc_ptr)
 {
     if (!npc_ptr) return;
 
@@ -429,7 +429,7 @@ void free(npc* npc_ptr)
                     object* horseObj = (object*)horseCrt->more;
                     OBJremove(horseObj);
                     OBJrelease(horseObj);
-                    free(horseCrt);
+                    destroyCreature(horseCrt);
                 }
                 OBJremove(paperMore);
                 OBJrelease(paperMore);
@@ -1184,7 +1184,7 @@ static void Initialize2PartCreature(object* obj, creature* crt, unsigned short x
 
 static void Initialize4PartCreature(object* obj, creature* crt, unsigned short x, unsigned short y)
 {
-    mlobj* mmyobj = (mlobj*)malloc(sizeof(object*) * 3);
+    mlobj* mmyobj = ::u6o::server::makeMultiObject(3);
     crt->more = mmyobj;
     obj->type = (obj->type & 1023) + 3 * 1024;
 
@@ -1217,7 +1217,7 @@ static void Initialize4PartCreature(object* obj, creature* crt, unsigned short x
 
 static void InitializeHydra(object* obj, creature* crt, unsigned short x, unsigned short y)
 {
-    mlobj* mmyobj = (mlobj*)malloc(sizeof(object*) * 8);
+    mlobj* mmyobj = ::u6o::server::makeMultiObject(8);
     crt->more = mmyobj;
     int types[8] = {28, 0, 4, 8, 12, 16, 20, 24};
     int offX[8] = {-1, 0, 1, 1, 1, 0, -1, -1};
@@ -1236,7 +1236,7 @@ static void InitializeHydra(object* obj, creature* crt, unsigned short x, unsign
 
 static void InitializeSerpent(object* obj, creature* crt, unsigned short x, unsigned short y)
 {
-    mlobj* mmyobj = (mlobj*)malloc(sizeof(object*) * 7);
+    mlobj* mmyobj = ::u6o::server::makeMultiObject(7);
     crt->more = mmyobj;
     obj->type = (obj->type & 1023) + 4 * 1024;
     int types[7] = {8, 7, 6, 9, 8, 7, -3};
@@ -1256,7 +1256,7 @@ static void InitializeSerpent(object* obj, creature* crt, unsigned short x, unsi
 
 static void InitializeDragon(object* obj, creature* crt, unsigned short x, unsigned short y)
 {
-    mlobj* mmyobj = (mlobj*)malloc(sizeof(object*) * 4);
+    mlobj* mmyobj = ::u6o::server::makeMultiObject(4);
     crt->more = mmyobj;
     obj->type = 411;
     int types[4] = {8, 16, 24, 32};
@@ -1276,7 +1276,7 @@ static void InitializeDragon(object* obj, creature* crt, unsigned short x, unsig
 
 static void InitializeTanglevine(object* obj, creature* crt)
 {
-    mlobj* mmyobj = (mlobj*)malloc(sizeof(object*) * 4);
+    mlobj* mmyobj = ::u6o::server::makeMultiObject(4);
     crt->more = mmyobj;
     obj->type = 365;
 
@@ -1309,7 +1309,7 @@ static void InitializeTanglevine(object* obj, creature* crt)
 
         OBJadd(obj->x + offsetX, obj->y + offsetY, tendril);
 
-        creature* tendrilCrt = (creature*)malloc(sizeof(creature));
+        creature* tendrilCrt = ::u6o::server::makeCreature();
         ZeroMemory(tendrilCrt, sizeof(creature));
         tendril->more = tendrilCrt;
         tendril->info |= 4;
@@ -1355,7 +1355,7 @@ unsigned char movernew(unsigned short type, unsigned short x, unsigned short y, 
     MOVERNEW_OBJECT->type = type;
     OBJadd(x, y, MOVERNEW_OBJECT);
 
-    MOVERNEW_OBJECT->more = malloc(sizeof(creature));
+    MOVERNEW_OBJECT->more = ::u6o::server::makeCreature();
     ZeroMemory(MOVERNEW_OBJECT->more, sizeof(creature));
 
     creature* crt = (creature*)MOVERNEW_OBJECT->more;
@@ -5240,7 +5240,7 @@ void addhireling(unsigned long x3, schedule_i* sched)
     else if (x3 == 9) { OBJmove2(myobj, 739, 691); } //new magincia
     else if (x3 == 10) { OBJmove2(myobj, 233, 152); } //yew
     OBJmove_allow = FALSE;
-    tnpc = (npc*)malloc(sizeof(npc));
+    tnpc = ::u6o::server::makeNpc();
     ZeroMemory(tnpc, sizeof(npc));
 
     myobj->more = tnpc;
@@ -5466,7 +5466,7 @@ void crtrespawn(object* obj)
     else
     {
         /* free summoned creatures and split slimes*/
-        free(crt);
+        destroyCreature(crt);
         OBJremove(obj);
         OBJrelease(obj);
     }

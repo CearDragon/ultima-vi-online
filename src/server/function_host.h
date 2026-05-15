@@ -8,6 +8,8 @@
 #include "define_host.h" /* HOUSEMAX etc */
 #include "data_host.h"  /* od[][] etc. */
 #include "data_both.h" /*types*/
+#include "ShrineEffects.h" /* P1.4: applyHonestyShrine etc. */
+#include "MemoryHelpers.h" /* P2.2: makeMultiObject / makeCreature / makeNpc */
 
 // --- Socket and Connection Variables ---
 extern unsigned long newsocket;
@@ -155,9 +157,12 @@ void VLNKsremove(void* lnks);
 object* OBJnew();
 unsigned char OBJadd(unsigned long x, unsigned long y, object* obj);
 void OBJrelease(object * obj);
-void free(player * plr);
-void free(creature * crt);
-void free(npc * tnpc);
+// P2.1: renamed from `free(player*/creature*/npc*)` overloads to avoid
+// collision with the C library `free(void*)` (the recursive cleanup paths
+// for the embedded `txt*` fields rely on the real `std::free`).
+void destroyPlayer(player * plr);
+void destroyCreature(creature * crt);
+void destroyNpc(npc * tnpc);
 void OBJcheckflags(unsigned long x, unsigned long y);
 void OBJaddtocontainer(object * container, object * objecttoadd);
 void BTset(long x, long y, unsigned short i);
@@ -198,4 +203,4 @@ unsigned int new1_getexpdeduction(npc* npc, int option);
 int getarenaid(player * player);
 
 
-#endif FUNCTION_HOST_H
+#endif // FUNCTION_HOST_H

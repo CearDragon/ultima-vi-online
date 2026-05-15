@@ -2100,7 +2100,7 @@ if
                                 OBJremove(OBJlist_list[y6]);
                                 OBJrelease(OBJlist_list[y6]);
                             }
-                            free(tnpc);
+                            destroyNpc(tnpc);
                             //remove from object update list
                             if (ouln != -1)
                             {
@@ -2117,7 +2117,7 @@ if
                         } //->party
                     } //i
                     //free player structure
-                    free(playerlist[tpl]);
+                    destroyPlayer(playerlist[tpl]);
                     playerlist[tpl] = NULL;
                     inbritanniacheck();
 
@@ -2904,8 +2904,8 @@ if
                             //update allocated buffer size
                             if (tplayer->sobj_buf2bytes[bufx][bufy] < i)
                             {
-                                if (tplayer->sobj[bufx][bufy]) free(tplayer->sobj[bufx][bufy]);
-                                tplayer->sobj[bufx][bufy] = (unsigned short*)malloc(i * 2);
+                                if (tplayer->sobj[bufx][bufy]) u6o::server::releaseShortBuffer(tplayer->sobj[bufx][bufy]);
+                                tplayer->sobj[bufx][bufy] = u6o::server::makeShortBuffer(i);
                                 tplayer->sobj_buf2bytes[bufx][bufy] = i;
                             }
 
@@ -4403,8 +4403,8 @@ if
         {
             //init thread info
 
-            socketclient_si[i] = (sockets_info*)malloc(sizeof(sockets_info));
-            socketclient_ri[i] = (sockets_info*)malloc(sizeof(sockets_info));
+            socketclient_si[i] = u6o::server::makeSocketsInfo();
+            socketclient_ri[i] = u6o::server::makeSocketsInfo();
             ZeroMemory(socketclient_si[i], sizeof(sockets_info));
             ZeroMemory(socketclient_ri[i], sizeof(sockets_info));
             socketclient_si[i]->i = newsocket;
@@ -4989,7 +4989,7 @@ host_gotmessage:
         i = tpl; //no free index, allocate new index
     gotfreeindex:
 
-        playerlist[tpl] = (player*)malloc(sizeof(player));
+        playerlist[tpl] = u6o::server::makePlayer();
         ZeroMemory(playerlist[tpl], sizeof(player));
 
 
@@ -5017,7 +5017,7 @@ host_gotmessage:
         OBJadd(256 + 128 - 16, 256 + 128 + 2, myobj); //place avatar on the map
 
         //Step 3: create a NPC structure, the player's stats
-        tnpc = (npc*)malloc(sizeof(npc));
+        tnpc = ::u6o::server::makeNpc();
         ZeroMemory(tnpc, sizeof(npc));
         myobj->more = tnpc;
         myobj->info |= 2; //myobj<-
@@ -5403,7 +5403,7 @@ host_gotmessage:
                         myobj5->type = 412 + 9 * 1024;
                         OBJadd(myobj3->more2 & 65535, myobj3->more2 >> 16, myobj5);
                         static mlobj* mmyobj; //array size varies
-                        mmyobj = (mlobj*)malloc(sizeof(object*) * 5);
+                        mmyobj = ::u6o::server::makeMultiObject(5);
                         myobj5->more = mmyobj;
                         myobj = OBJnew();
                         mmyobj->obj[0] = myobj;
@@ -5530,7 +5530,7 @@ host_gotmessage:
             myobj = OBJnew();
             playerlist[tpl]->party[x8] = myobj; //player<-
 
-            tnpc = (npc*)malloc(sizeof(npc));
+            tnpc = ::u6o::server::makeNpc();
             ZeroMemory(tnpc, sizeof(npc));
             myobj->more = tnpc;
             myobj->info |= 2; //myobj<-
@@ -5790,7 +5790,7 @@ host_gotmessage:
                         myobj5->type = 412 + 9 * 1024;
                         OBJadd(myobj3->more2 & 65535, myobj3->more2 >> 16, myobj5);
                         static mlobj* mmyobj; //array size varies
-                        mmyobj = (mlobj*)malloc(sizeof(object*) * 5);
+                        mmyobj = ::u6o::server::makeMultiObject(5);
                         myobj5->more = mmyobj;
                         myobj = OBJnew();
                         mmyobj->obj[0] = myobj;
@@ -5957,7 +5957,7 @@ host_gotmessage:
                 OBJadd(playerlist[tpl]->party[0]->x, playerlist[tpl]->party[0]->y, myobj3);
 
                 static mlobj* mmyobj; //array size varies
-                mmyobj = (mlobj*)malloc(sizeof(object*) * 5);
+                mmyobj = ::u6o::server::makeMultiObject(5);
                 myobj3->more = mmyobj;
 
                 myobj = OBJnew();
@@ -6065,7 +6065,7 @@ host_gotmessage:
                 myobj2->type = 423 + 1024 * 3;
                 OBJadd(x, y, myobj2);
                 static mlobj* mmyobj; //array size varies
-                mmyobj = (mlobj*)malloc(sizeof(object*) * 3);
+                mmyobj = ::u6o::server::makeMultiObject(3);
                 myobj2->more = mmyobj;
                 myobj = OBJnew();
                 mmyobj->obj[0] = myobj; //middle
@@ -6364,8 +6364,8 @@ host_gotmessage:
                     {
                         tnpc3->exp -= 1000;
 
-                        HOST_portrait_data[HOST_portrait_next] = (unsigned short*)malloc(7168);
-                        memcpy(HOST_portrait_data[HOST_portrait_next], &tcustomportrait, 7168);
+                        HOST_portrait_data[HOST_portrait_next] = u6o::server::makePortraitBuffer();
+                        memcpy(HOST_portrait_data[HOST_portrait_next], &tcustomportrait, u6o::server::kPortraitDataBytes);
                         HOST_portrait_loaded[HOST_portrait_next] = 1;
                         tnpc3->port = HOST_portrait_next;
                         HOST_portrait_next++;
@@ -6461,8 +6461,8 @@ host_gotmessage:
                     custromportraitload_surf = loadimage(t->d, SURF_SYSMEM16);
                     if (custromportraitload_surf)
                     {
-                        HOST_portrait_data[HOST_portrait_next] = (unsigned short*)malloc(7168);
-                        memcpy(HOST_portrait_data[HOST_portrait_next], custromportraitload_surf->o, 7168);
+                        HOST_portrait_data[HOST_portrait_next] = u6o::server::makePortraitBuffer();
+                        memcpy(HOST_portrait_data[HOST_portrait_next], custromportraitload_surf->o, u6o::server::kPortraitDataBytes);
                         HOST_portrait_loaded[HOST_portrait_next] = 1;
                         tnpc3->port = HOST_portrait_next;
                         HOST_portrait_next++;
@@ -6488,89 +6488,89 @@ host_gotmessage:
         tnpc->i = 0;
         x = -1;
         x++;
-        if (t6->d[x] == 0) { U6O_HONESTY }
-        else { U6O_COMPASSION } //i3,d3
+        if (t6->d[x] == 0) { ::u6o::server::applyHonestyShrine(*tnpc); }
+        else { ::u6o::server::applyCompassionShrine(*tnpc); } //i3,d3
         x++;
-        if (t6->d[x] == 0) { U6O_HONESTY }
-        else { U6O_VALOR } //i3,s3
+        if (t6->d[x] == 0) { ::u6o::server::applyHonestyShrine(*tnpc); }
+        else { ::u6o::server::applyValorShrine(*tnpc); } //i3,s3
         x++;
-        if (t6->d[x] == 0) { U6O_HONESTY }
-        else { U6O_JUSTICE } //i3,X
+        if (t6->d[x] == 0) { ::u6o::server::applyHonestyShrine(*tnpc); }
+        else { ::u6o::server::applyJusticeShrine(*tnpc); } //i3,X
         x++;
-        if (t6->d[x] == 0) { U6O_HONESTY }
-        else { U6O_SACRIFICE } //i3,X
+        if (t6->d[x] == 0) { ::u6o::server::applyHonestyShrine(*tnpc); }
+        else { ::u6o::server::applySacrificeShrine(*tnpc); } //i3,X
         x++;
-        if (t6->d[x] == 0) { U6O_HONESTY }
-        else { U6O_HONOR } //i3,X
+        if (t6->d[x] == 0) { ::u6o::server::applyHonestyShrine(*tnpc); }
+        else { ::u6o::server::applyHonorShrine(*tnpc); } //i3,X
         x++;
-        if (t6->d[x] == 0) { U6O_HONESTY }
-        else { U6O_SPIRITUALITY } //i3,a1
+        if (t6->d[x] == 0) { ::u6o::server::applyHonestyShrine(*tnpc); }
+        else { ::u6o::server::applySpiritualityShrine(*tnpc); } //i3,a1
         x++;
-        if (t6->d[x] == 0) { U6O_HONESTY }
-        else { U6O_HUMILITY } //i3,X
+        if (t6->d[x] == 0) { ::u6o::server::applyHonestyShrine(*tnpc); }
+        else { ::u6o::server::applyHumilityShrine(*tnpc); } //i3,X
         x++;
-        if (t6->d[x] == 0) { U6O_COMPASSION }
-        else { U6O_VALOR } //d3,s3
+        if (t6->d[x] == 0) { ::u6o::server::applyCompassionShrine(*tnpc); }
+        else { ::u6o::server::applyValorShrine(*tnpc); } //d3,s3
         x++;
-        if (t6->d[x] == 0) { U6O_COMPASSION }
-        else { U6O_JUSTICE } //d3,X
+        if (t6->d[x] == 0) { ::u6o::server::applyCompassionShrine(*tnpc); }
+        else { ::u6o::server::applyJusticeShrine(*tnpc); } //d3,X
         x++;
-        if (t6->d[x] == 0) { U6O_COMPASSION }
-        else { U6O_SACRIFICE } //d3,X
+        if (t6->d[x] == 0) { ::u6o::server::applyCompassionShrine(*tnpc); }
+        else { ::u6o::server::applySacrificeShrine(*tnpc); } //d3,X
         x++;
-        if (t6->d[x] == 0) { U6O_COMPASSION }
-        else { U6O_HONOR } //d3,X
+        if (t6->d[x] == 0) { ::u6o::server::applyCompassionShrine(*tnpc); }
+        else { ::u6o::server::applyHonorShrine(*tnpc); } //d3,X
         x++;
-        if (t6->d[x] == 0) { U6O_COMPASSION }
-        else { U6O_SPIRITUALITY } //d3,a1
+        if (t6->d[x] == 0) { ::u6o::server::applyCompassionShrine(*tnpc); }
+        else { ::u6o::server::applySpiritualityShrine(*tnpc); } //d3,a1
         x++;
-        if (t6->d[x] == 0) { U6O_COMPASSION }
-        else { U6O_HUMILITY } //d3,X
+        if (t6->d[x] == 0) { ::u6o::server::applyCompassionShrine(*tnpc); }
+        else { ::u6o::server::applyHumilityShrine(*tnpc); } //d3,X
         x++;
-        if (t6->d[x] == 0) { U6O_VALOR }
-        else { U6O_JUSTICE } //s3,X
+        if (t6->d[x] == 0) { ::u6o::server::applyValorShrine(*tnpc); }
+        else { ::u6o::server::applyJusticeShrine(*tnpc); } //s3,X
         x++;
-        if (t6->d[x] == 0) { U6O_VALOR }
-        else { U6O_SACRIFICE } //s3,X
+        if (t6->d[x] == 0) { ::u6o::server::applyValorShrine(*tnpc); }
+        else { ::u6o::server::applySacrificeShrine(*tnpc); } //s3,X
         x++;
-        if (t6->d[x] == 0) { U6O_VALOR }
-        else { U6O_HONOR } //s3,X
+        if (t6->d[x] == 0) { ::u6o::server::applyValorShrine(*tnpc); }
+        else { ::u6o::server::applyHonorShrine(*tnpc); } //s3,X
         x++;
-        if (t6->d[x] == 0) { U6O_VALOR }
-        else { U6O_SPIRITUALITY } //s3,a1
+        if (t6->d[x] == 0) { ::u6o::server::applyValorShrine(*tnpc); }
+        else { ::u6o::server::applySpiritualityShrine(*tnpc); } //s3,a1
         x++;
-        if (t6->d[x] == 0) { U6O_VALOR }
-        else { U6O_HUMILITY } //s3,X
+        if (t6->d[x] == 0) { ::u6o::server::applyValorShrine(*tnpc); }
+        else { ::u6o::server::applyHumilityShrine(*tnpc); } //s3,X
         x++;
-        if (t6->d[x] == 0) { U6O_JUSTICE }
-        else { U6O_SACRIFICE } //i,d
+        if (t6->d[x] == 0) { ::u6o::server::applyJusticeShrine(*tnpc); }
+        else { ::u6o::server::applySacrificeShrine(*tnpc); } //i,d
         x++;
-        if (t6->d[x] == 0) { U6O_JUSTICE }
-        else { U6O_HONOR } //s,d
+        if (t6->d[x] == 0) { ::u6o::server::applyJusticeShrine(*tnpc); }
+        else { ::u6o::server::applyHonorShrine(*tnpc); } //s,d
         x++;
-        if (t6->d[x] == 0) { U6O_JUSTICE }
-        else { U6O_SPIRITUALITY } //X,a1
+        if (t6->d[x] == 0) { ::u6o::server::applyJusticeShrine(*tnpc); }
+        else { ::u6o::server::applySpiritualityShrine(*tnpc); } //X,a1
         x++;
-        if (t6->d[x] == 0) { U6O_JUSTICE }
-        else { U6O_HUMILITY } //OK,X
+        if (t6->d[x] == 0) { ::u6o::server::applyJusticeShrine(*tnpc); }
+        else { ::u6o::server::applyHumilityShrine(*tnpc); } //OK,X
         x++;
-        if (t6->d[x] == 0) { U6O_SACRIFICE }
-        else { U6O_HONOR } //s,i
+        if (t6->d[x] == 0) { ::u6o::server::applySacrificeShrine(*tnpc); }
+        else { ::u6o::server::applyHonorShrine(*tnpc); } //s,i
         x++;
-        if (t6->d[x] == 0) { U6O_SACRIFICE }
-        else { U6O_SPIRITUALITY } //X,OK
+        if (t6->d[x] == 0) { ::u6o::server::applySacrificeShrine(*tnpc); }
+        else { ::u6o::server::applySpiritualityShrine(*tnpc); } //X,OK
         x++;
-        if (t6->d[x] == 0) { U6O_SACRIFICE }
-        else { U6O_HUMILITY } //a1,X
+        if (t6->d[x] == 0) { ::u6o::server::applySacrificeShrine(*tnpc); }
+        else { ::u6o::server::applyHumilityShrine(*tnpc); } //a1,X
         x++;
-        if (t6->d[x] == 0) { U6O_HONOR }
-        else { U6O_SPIRITUALITY } //X,a1
+        if (t6->d[x] == 0) { ::u6o::server::applyHonorShrine(*tnpc); }
+        else { ::u6o::server::applySpiritualityShrine(*tnpc); } //X,a1
         x++;
-        if (t6->d[x] == 0) { U6O_HONOR }
-        else { U6O_HUMILITY } //OK,X
+        if (t6->d[x] == 0) { ::u6o::server::applyHonorShrine(*tnpc); }
+        else { ::u6o::server::applyHumilityShrine(*tnpc); } //OK,X
         x++;
-        if (t6->d[x] == 0) { U6O_SPIRITUALITY }
-        else { U6O_HUMILITY } //a1,X
+        if (t6->d[x] == 0) { ::u6o::server::applySpiritualityShrine(*tnpc); }
+        else { ::u6o::server::applyHumilityShrine(*tnpc); } //a1,X
         x = tnpc->s - 8;
         if (x < 1) x = 1;
         tnpc->s = x;
@@ -10559,7 +10559,7 @@ host_gotmessage:
                                 if (CONnpc == 70) OBJadd(603, 119, myobj5); //trebor
 
                                 static mlobj* mmyobj; //array size varies
-                                mmyobj = (mlobj*)malloc(sizeof(object*) * 5);
+                                mmyobj = ::u6o::server::makeMultiObject(5);
                                 myobj5->more = mmyobj;
                                 myobj = OBJnew();
                                 mmyobj->obj[0] = myobj;
@@ -12325,7 +12325,7 @@ if
                         {
                             //NPC
                             tnpc = (npc*)myobj->more;
-                            free(tnpc);
+                            destroyNpc(tnpc);
                         }
                         OBJremove(myobj);
                         OBJrelease(myobj);
@@ -13545,7 +13545,7 @@ if
                                             {
                                                 myobj3 = OBJnew();
                                                 myobj3->type = 367; //daemon!
-                                                myobj3->more = malloc(sizeof(creature));
+                                                myobj3->more = ::u6o::server::makeCreature();
                                                 ZeroMemory(myobj3->more, sizeof(creature));
                                                 crt = (creature*)myobj3->more;
                                                 crt->crt_struct = TRUE;
@@ -18625,7 +18625,7 @@ if
                                         slimedivide:
                                             myobj3 = OBJnew();
                                             myobj3->type = 375;
-                                            myobj3->more = malloc(sizeof(creature));
+                                            myobj3->more = ::u6o::server::makeCreature();
                                             ZeroMemory(myobj3->more, sizeof(creature));
                                             crt3 = (creature*)myobj3->more;
                                             crt3->crt_struct = TRUE;
@@ -18780,7 +18780,7 @@ if
                                                     {
                                                         myobj4 = OBJnew();
                                                         myobj4->type = 343; //insects
-                                                        myobj4->more = malloc(sizeof(creature));
+                                                        myobj4->more = ::u6o::server::makeCreature();
                                                         ZeroMemory(myobj4->more, sizeof(creature));
                                                         crt3 = (creature*)myobj4->more;
                                                         crt3->crt_struct = TRUE;
@@ -22129,7 +22129,7 @@ if
                                 i2 = 1;
                                 myobj2 = OBJnew();
                                 myobj2->type = 367; //daemon!
-                                myobj2->more = malloc(sizeof(creature));
+                                myobj2->more = ::u6o::server::makeCreature();
                                 ZeroMemory(myobj2->more, sizeof(creature));
                                 crt = (creature*)myobj2->more;
                                 crt->crt_struct = TRUE;
@@ -22220,7 +22220,7 @@ if
 
                                                             myobj2 = OBJnew();
                                                             myobj2->type = 375; //slime
-                                                            myobj2->more = malloc(sizeof(creature));
+                                                            myobj2->more = ::u6o::server::makeCreature();
                                                             ZeroMemory(myobj2->more, sizeof(creature));
                                                             crt = (creature*)myobj2->more;
                                                             crt->crt_struct = TRUE;
@@ -22277,7 +22277,7 @@ if
                                 if (x3 == 2) myobj2->type = 344; //bat
                                 if (x3 == 3) myobj2->type = 371; //troll
                                 if (x3 == 4) myobj2->type = 361; //spider
-                                myobj2->more = malloc(sizeof(creature));
+                                myobj2->more = ::u6o::server::makeCreature();
                                 ZeroMemory(myobj2->more, sizeof(creature));
                                 crt = (creature*)myobj2->more;
                                 crt->crt_struct = TRUE;
@@ -22326,7 +22326,7 @@ if
 
                                     myobj2 = OBJnew();
                                     myobj2->type = 343; //insects
-                                    myobj2->more = malloc(sizeof(creature));
+                                    myobj2->more = ::u6o::server::makeCreature();
                                     ZeroMemory(myobj2->more, sizeof(creature));
                                     crt = (creature*)myobj2->more;
                                     crt->crt_struct = TRUE;
@@ -27813,7 +27813,7 @@ if
                                         myobj2->type = 423 + 1024 * 3;
                                         OBJadd(x, y, myobj2);
                                         static mlobj* mmyobj; //array size varies
-                                        mmyobj = (mlobj*)malloc(sizeof(object*) * 3);
+                                        mmyobj = ::u6o::server::makeMultiObject(3);
                                         myobj2->more = mmyobj;
                                         myobj = OBJnew();
                                         mmyobj->obj[0] = myobj; //middle

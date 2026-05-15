@@ -1,3 +1,4 @@
+#pragma once
 #ifndef DATA_HOST_H
 #define DATA_HOST_H
 

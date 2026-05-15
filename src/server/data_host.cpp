@@ -1,6 +1,6 @@
 #include "data_host.h" /*SAVESLOTLAST etc */
 
-void data_host_init(void)
+void data_host_init()
 {
     save_dump = 0;
     save_version = 0;
@@ -9,8 +9,8 @@ void data_host_init(void)
     sfbufferwait = 0.0f;
     cast_spell = 0;
     staff_cast_spell = 0;
-    motd = NULL;
-    inbritannia = NULL;
+    motd = nullptr;
+    inbritannia = nullptr;
     inbritannia_totalplayers = 0;
     U6ONEWID = 1; //never 0
     //wind direction (global)
@@ -32,32 +32,32 @@ void data_host_init(void)
     leverchange_last = -1;
     showmoongates = 0;
     moonphase = 255;
-    object* nuggetsfix = NULL;
+    nuggetsfix = nullptr; // P3.5: was shadowed by a local `object*` declaration; now correctly assigns the global.
     vlnkb_last = -1; //last
     vlnkb_free_last = -1; //last free vlnkb index
     nresu = -1;
     wizardeyesi2 = 0;
     wizardeyesadded = 0;
-    wizardeyesobj = NULL;
+    wizardeyesobj = nullptr;
     respawn_last = -1;
     playerlist_last = -1;
     ouln = -1;
     f_ouln = -1;
-    tname = NULL;
-    tusername = NULL;
-    tuserpassword = NULL;
-    tnewuserpassword = NULL;
+    tname = nullptr;
+    tusername = nullptr;
+    tuserpassword = nullptr;
+    tnewuserpassword = nullptr;
     MOVERNEW_GLOBALFLAGS = 0;
 
 #ifndef CLIENT
     //STUBS TO SUPPORT EXTERNAL LINKING (DATA NOT ACTUALLY USED!)
-    u6omidisetup = NULL;
-    hWnd = NULL;
-    hWnd2 = NULL;
-    hWnd3 = NULL;
-    hWnd4 = NULL;
-    smallwindow = NULL;
-    u6ovolume = NULL;
+    u6omidisetup = 0;
+    hWnd = nullptr;
+    hWnd2 = nullptr;
+    hWnd3 = nullptr;
+    hWnd4 = nullptr;
+    smallwindow = false;
+    u6ovolume = 0;
 #endif
 
     revive_infiniteloopexit_i = 0;
@@ -65,7 +65,7 @@ void data_host_init(void)
     revive_infiniteloopexit_i3 = 0;
     mycount = 0;
     newschedule2 = -1;
-    newll = NULL;
+    newll = nullptr;
     ol_tag = 0;
     ol_tag_prev = 0;
 }

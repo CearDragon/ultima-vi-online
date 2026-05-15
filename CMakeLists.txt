@@ -36,6 +36,17 @@ if (MSVC)
 endif ()
 
 ################################################################################
+# Global C++ standard (required by server modernization phase P1: inline
+# constexpr, nested namespaces, enum class). See docs/plan-serverRefactor.md.
+################################################################################
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+if (MSVC)
+    add_compile_options(/std:c++17)
+endif ()
+
+################################################################################
 # Global linker options
 ################################################################################
 if (MSVC)
@@ -99,6 +110,7 @@ set(Header_Files
         "src/client/function_client.h"
         "src/server/function_host.h"
         "src/server/host_setup.h"
+        "src/server/ShrineEffects.h"
         "src/common/random/rand.h"
         "src/common/random/random.h"
         "src/common/random/standard.h"
@@ -316,6 +328,7 @@ set(Header_Files
         "src/server/define_host.h"
         "src/common/function_both.h"
         "src/server/function_host.h"
+        "src/server/ShrineEffects.h"
         "src/common/random/rand.h"
         "src/common/random/random.h"
         "src/common/random/standard.h"
