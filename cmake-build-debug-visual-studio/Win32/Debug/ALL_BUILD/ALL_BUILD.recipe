@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>C:\repos\ultima-vi-online\cmake-build-debug-visual-studio\Debug\ZERO_CHECK</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>C:\repos\ultima-vi-online\cmake-build-debug-visual-studio\src\bin\client\debug\Ultima VI Online Full.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>C:\repos\ultima-vi-online\cmake-build-debug-visual-studio\src\bin\client\debug\Ultima VI Online.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>C:\repos\ultima-vi-online\cmake-build-debug-visual-studio\src\bin\host\debug\Ultima VI Online Host.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>C:\repos\ultima-vi-online\cmake-build-debug-visual-studio\Debug\ALL_BUILD</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles />
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>

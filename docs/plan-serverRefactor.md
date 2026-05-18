@@ -38,8 +38,8 @@ Each phase has an **Exit criteria** that must be green before starting the next 
 ## P3 — Encapsulate global state (`data_host.h` / `data_host.cpp`)
 
 - ✅ P3.1 Inventory every `extern` in `data_host.h`; classify into: WorldGrid, ObjectPool, VlnkPool, ResurrectQueue, RespawnQueue, MoongateState, WindState, HouseSaves, EconomyTables, ScheduleTables, NpcRegistry, SfxBuffer, WizardEyeState, AutoSetupState, KeybTarget, MoverNew, ReviveLoopExit, Misc. _(Completed: Saved to `docs/ExternInventory.md`.)_
-- [x] **P3.2:** For each group, create a struct (e.g. `struct ObjectPool { std::vector<object> buffer; std::vector<uint32_t> freeList; ... };`) in its own header.
-- ⬜ P3.3 Aggregate all groups in a `ServerState` singleton (constructed at startup); replace `extern` access with `ServerState::Get().objectPool.…` via a deprecation shim (inline references mapping old names to new accessors during transition).
+- ✅ P3.2 For each group, create a struct (e.g. `struct ObjectPool { std::vector<object> buffer; std::vector<uint32_t> freeList; ... };`) in its own header.
+- ✅ P3.3 Aggregate all groups in a `ServerState` singleton (constructed at startup); replace `extern` access with `ServerState::Get().objectPool.…` via a deprecation shim (inline references mapping old names to new accessors during transition).
 - ⬜ P3.4 Remove the `#ifndef CLIENT` Win32 stub block from `data_host.h` — move to a server-only `WindowsStubs.cpp` or delete if truly unused.
 - ✅ P3.5 Fix bug in `data_host_init`: local `object* nuggetsfix = NULL;` shadowed the global. _(Fixed; also modernised the whole function to `nullptr`/`bool`/`()` arg list — eliminates 14 clang-tidy warnings.)_
 - ⬜ P3.6 Replace `unsigned char btu6[1024][1024]`, `od[1024][2048]`, etc. with strongly-typed `Grid2D<T, W, H>` template (bounds-checked in Debug).
@@ -100,7 +100,7 @@ Each phase has an **Exit criteria** that must be green before starting the next 
 | Largest function (lines) | ~750 (`wpf_pathfind`) | ~750 | ≤150 |
 | `goto` occurrences (server) | 17+ (function_host) + loop_host labels | TBD | 0 |
 | `.inc` files in `src/server` | 3 + `host_setup.h` | 3 + 1 | 0 |
-| `extern` count in `data_host.h` | ~120 | ~120 | 0 |
+| `extern` count in `data_host.h` | ~120 | 0 | 0 |
 | Magic literals (numeric > 9) | very high | TBD | <50 (data tables only) |
 
 Update this table at the end of every phase.
@@ -124,3 +124,5 @@ Update this table at the end of every phase.
 - 2026-05-12 — copilot — P2.2 (partial) — New `src/server/MemoryHelpers.h` with `makeMultiObject(n)` / `makeCreature()` / `makeNpc()` helpers in `u6o::server` namespace. Replaced 8 raw mallocs in `function_host.cpp` and 14/20 in `loop_host.cpp`. Remaining 6 mallocs are non-mlobj/creature/npc types (`sockets_info`, portrait buffers, raw `player*`) — flagged for follow-up.
 - 2026-05-12 — copilot — P2.2 (complete for `.cpp`) — Added `makePlayer`, `makeSocketsInfo`, `makePortraitBuffer`, `makeShortBuffer` (+ matching `releaseXxx`) and `kPortraitDataBytes` constant. Migrated the last 6 mallocs in `loop_host.cpp`. **All compiled server `.cpp` files are now raw-malloc free.** Discovered `loop_host.inc` is dead code (no `#include` references it — orphaned by the earlier `loop_host.cpp` split); its 30+ mallocs do not compile. `host.inc` (17 mallocs, real) deferred to P4.3.
 - 2026-05-15 — copilot — P3.1 — inventoried and classified all ~120 `extern` declarations from `data_host.h` into the 18 targeted struct groupings. Saved mapping to `docs/ExternInventory.md`. Unblocks the remainder of P3.
+- 2026-05-16 — copilot — P3.2/P3.3 — Generated 24 state struct headers and integrated them into `ServerState` singleton. Replaced 120 `extern` declarations with `ServerState::Get()` shims in `data_host.h` securely handling memory migrations, and removed previous static globals from `globals.inc`. Updated CMake scripts.
+- 2026-05-18 — copilot — P3 — Replaced `#define` shims with C++17 `inline auto&` variables in `data_shims_host.h` to prevent severe C++ macro collisions (e.g., local structs having members like `schedule` identical to macro tokens). Removed duplicate variable allocations from `globals.inc` that were breaking the combined `u6o7` client component build. Both `u6oh` (dedicated server) and `u6o7` (full client/server) now compile successfully.

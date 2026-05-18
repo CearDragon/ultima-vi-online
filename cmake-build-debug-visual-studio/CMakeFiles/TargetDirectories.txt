@@ -1,0 +1,5 @@
+C:/repos/ultima-vi-online/cmake-build-debug-visual-studio/CMakeFiles/u6o7.dir
+C:/repos/ultima-vi-online/cmake-build-debug-visual-studio/CMakeFiles/u6oh.dir
+C:/repos/ultima-vi-online/cmake-build-debug-visual-studio/CMakeFiles/u6oclient2.dir
+C:/repos/ultima-vi-online/cmake-build-debug-visual-studio/CMakeFiles/ALL_BUILD.dir
+C:/repos/ultima-vi-online/cmake-build-debug-visual-studio/CMakeFiles/ZERO_CHECK.dir

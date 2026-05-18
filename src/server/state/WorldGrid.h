@@ -1,6 +1,6 @@
 #pragma once
 #include "../data_both.h"
-#include "../data_host.h"
+#include "../data_structs_host.h"
 
 namespace u6o::server::state {
     struct WorldGrid {
