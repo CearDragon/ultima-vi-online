@@ -49,16 +49,6 @@ void data_host_init()
     tnewuserpassword = nullptr;
     MOVERNEW_GLOBALFLAGS = 0;
 
-#ifndef CLIENT
-    //STUBS TO SUPPORT EXTERNAL LINKING (DATA NOT ACTUALLY USED!)
-    u6omidisetup = 0;
-    hWnd = nullptr;
-    hWnd2 = nullptr;
-    hWnd3 = nullptr;
-    hWnd4 = nullptr;
-    smallwindow = false;
-    u6ovolume = 0;
-#endif
 
     revive_infiniteloopexit_i = 0;
     revive_infiniteloopexit_i2 = 0xFFFFFFFF;

@@ -385,6 +385,7 @@ source_group("Resource Files" FILES ${Resource_Files})
 set(Source_Files
         "src/common/data_both.cpp"
         "src/server/data_host.cpp"
+        "src/server/state/ServerState.cpp"
         "src/client/dmusic.cpp"
         "src/client/frame.cpp"
         "src/common/function_both.cpp"
