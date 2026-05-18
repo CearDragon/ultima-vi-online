@@ -1,0 +1,67 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CMakePredefinedTargets", "CMakePredefinedTargets", "{BC202892-CFFD-3A07-BB71-225B6636C56A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ALL_BUILD", "ALL_BUILD.vcxproj", "{04CADD08-D57F-3829-B9D1-8C591A7B70E3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C51323F8-45E5-378D-96D0-D3DF60FE589F} = {C51323F8-45E5-378D-96D0-D3DF60FE589F}
+		{2F8E95AD-60AB-3190-92E8-CB66E4C7294B} = {2F8E95AD-60AB-3190-92E8-CB66E4C7294B}
+		{6E49E5E7-1E85-3958-8426-EB7CC9172682} = {6E49E5E7-1E85-3958-8426-EB7CC9172682}
+		{558C79FD-4BE2-3232-88DB-A72EA55C235E} = {558C79FD-4BE2-3232-88DB-A72EA55C235E}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZERO_CHECK", "ZERO_CHECK.vcxproj", "{C51323F8-45E5-378D-96D0-D3DF60FE589F}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "u6o7", "u6o7.vcxproj", "{2F8E95AD-60AB-3190-92E8-CB66E4C7294B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C51323F8-45E5-378D-96D0-D3DF60FE589F} = {C51323F8-45E5-378D-96D0-D3DF60FE589F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "u6oclient2", "u6oclient2.vcxproj", "{6E49E5E7-1E85-3958-8426-EB7CC9172682}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C51323F8-45E5-378D-96D0-D3DF60FE589F} = {C51323F8-45E5-378D-96D0-D3DF60FE589F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "u6oh", "u6oh.vcxproj", "{558C79FD-4BE2-3232-88DB-A72EA55C235E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C51323F8-45E5-378D-96D0-D3DF60FE589F} = {C51323F8-45E5-378D-96D0-D3DF60FE589F}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{04CADD08-D57F-3829-B9D1-8C591A7B70E3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{04CADD08-D57F-3829-B9D1-8C591A7B70E3}.Release|Win32.ActiveCfg = Release|Win32
+		{C51323F8-45E5-378D-96D0-D3DF60FE589F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C51323F8-45E5-378D-96D0-D3DF60FE589F}.Debug|Win32.Build.0 = Debug|Win32
+		{C51323F8-45E5-378D-96D0-D3DF60FE589F}.Release|Win32.ActiveCfg = Release|Win32
+		{C51323F8-45E5-378D-96D0-D3DF60FE589F}.Release|Win32.Build.0 = Release|Win32
+		{2F8E95AD-60AB-3190-92E8-CB66E4C7294B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2F8E95AD-60AB-3190-92E8-CB66E4C7294B}.Debug|Win32.Build.0 = Debug|Win32
+		{2F8E95AD-60AB-3190-92E8-CB66E4C7294B}.Release|Win32.ActiveCfg = Release|Win32
+		{2F8E95AD-60AB-3190-92E8-CB66E4C7294B}.Release|Win32.Build.0 = Release|Win32
+		{6E49E5E7-1E85-3958-8426-EB7CC9172682}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6E49E5E7-1E85-3958-8426-EB7CC9172682}.Debug|Win32.Build.0 = Debug|Win32
+		{6E49E5E7-1E85-3958-8426-EB7CC9172682}.Release|Win32.ActiveCfg = Release|Win32
+		{6E49E5E7-1E85-3958-8426-EB7CC9172682}.Release|Win32.Build.0 = Release|Win32
+		{558C79FD-4BE2-3232-88DB-A72EA55C235E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{558C79FD-4BE2-3232-88DB-A72EA55C235E}.Debug|Win32.Build.0 = Debug|Win32
+		{558C79FD-4BE2-3232-88DB-A72EA55C235E}.Release|Win32.ActiveCfg = Release|Win32
+		{558C79FD-4BE2-3232-88DB-A72EA55C235E}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{04CADD08-D57F-3829-B9D1-8C591A7B70E3} = {BC202892-CFFD-3A07-BB71-225B6636C56A}
+		{C51323F8-45E5-378D-96D0-D3DF60FE589F} = {BC202892-CFFD-3A07-BB71-225B6636C56A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0C55312D-F01A-3FF8-B4E7-3C99A2B92D74}
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

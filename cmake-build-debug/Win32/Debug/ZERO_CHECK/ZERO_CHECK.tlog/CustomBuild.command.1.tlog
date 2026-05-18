@@ -1,0 +1,10 @@
+^C:\REPOS\ULTIMA-VI-ONLINE\CMAKE-BUILD-DEBUG\CMAKEFILES\785B1BC8E2C6751855109BA35A7E7D7B\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/repos/ultima-vi-online -BC:/repos/ultima-vi-online/cmake-build-debug --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/repos/ultima-vi-online/cmake-build-debug/u6o7.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

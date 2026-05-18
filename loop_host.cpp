@@ -12919,6 +12919,10 @@ morningstar_failedcheck:;
                               if (y6<myobj->y){x6--; x7++; goto crossbow0;}
                               if (y6>myobj->y){x6++; x7--; goto crossbow0;}
 crossbow0:
+                              if (x6 >= 2048) x6 = myobj2->x;
+                              if (y6 >= 1024) y6 = myobj2->y;
+                              if (x7 >= 2048) x7 = myobj2->x;
+                              if (y7 >= 1024) y7 = myobj2->y;
                               triplecrossbow_shot_x2=x6; triplecrossbow_shot_y2=y6;
                               triplecrossbow_shot_x3=x7; triplecrossbow_shot_y3=y7;
 
