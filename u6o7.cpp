@@ -7,6 +7,8 @@
 #include <direct.h>
 #include <wininet.h>
 #include <winreg.h>
+#include <dbghelp.h>
+#pragma comment(lib, "dbghelp.lib")
 #include "dmusic.h"
 #include "myfile.h"
 #include "myddraw.h"
@@ -107,11 +109,52 @@ void KeyEventProc(KEY_EVENT_RECORD ker) {
 }
 #endif
 
+extern "C" WORD __stdcall RtlCaptureStackBackTrace(DWORD, DWORD, PVOID*, PDWORD);
+
+LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo)
+{
+    FILE *f = fopen("crash.txt", "a");
+    if (f) {
+        fprintf(f, "Unhandled Exception Crash!\n");
+        fprintf(f, "Exception Code: 0x%08X\n", ExceptionInfo->ExceptionRecord->ExceptionCode);
+        fprintf(f, "Exception Address: %p\n", ExceptionInfo->ExceptionRecord->ExceptionAddress);
+
+        void* stack[100];
+        WORD frames = CaptureStackBackTrace(0, 100, stack, NULL);
+        fprintf(f, "Call Stack (Pointers):\n");
+        for (WORD i = 0; i < frames; i++) {
+            fprintf(f, "  [%d] %p\n", i, stack[i]);
+        }
+        fprintf(f, "Generated crash.dmp for detailed debugging.\n");
+        fclose(f);
+    }
+
+    HANDLE hFile = CreateFileA("crash.dmp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile != INVALID_HANDLE_VALUE) {
+        MINIDUMP_EXCEPTION_INFORMATION mdei;
+        mdei.ThreadId = GetCurrentThreadId();
+        mdei.ExceptionPointers = ExceptionInfo;
+        mdei.ClientPointers = FALSE;
+        MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &mdei, NULL, NULL);
+        CloseHandle(hFile);
+    }
+
+    // Also try to write standard LOGadd with format if available
+    static txt *tcrash = txtnew();
+    txtNEWLEN(tcrash, 256);
+    sprintf((char *)tcrash->d2, "CRASH! Code: 0x%08X Address: %p", ExceptionInfo->ExceptionRecord->ExceptionCode, ExceptionInfo->ExceptionRecord->ExceptionAddress);
+    tcrash->l = strlen((const char *)tcrash->d2);
+    LOGadd(tcrash);
+
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
 int APIENTRY _tWinMain(HINSTANCE hInstance,
 					   HINSTANCE hPrevInstance,
 					   LPTSTR    lpCmdLine,
 					   int       nCmdShow)
 {
+    SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
 
 	//temporary use variables
 	static long i=0,i2=0,i3=0,i4=0,i5=0,i6=0,i7=0,i8=0,i9=0;
