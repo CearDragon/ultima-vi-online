@@ -3524,6 +3524,7 @@ void inbritanniacheck(){
 }//inbritanniacheck
 
 unsigned char ENHANCEget_attack(object* obj){
+  if (obj == NULL) return 0;
   static long x2;
   //EXCEPTIONS!
   x2=obj->type&1023;
@@ -3543,6 +3544,7 @@ unsigned char ENHANCEget_attack(object* obj){
 }
 
 unsigned char ENHANCEget_defense(object* obj){
+  if (obj == NULL) return 0;
   static long x2;
   //EXCEPTIONS!
   x2=obj->type&1023;
