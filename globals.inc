@@ -98,8 +98,8 @@ unsigned long BITSleftmask[33];//mask of index-many bits to keep
 
 #ifdef HOST
 /* variables originally from function_host.h */
-unsigned long newsocket;
-unsigned long newsocket_ip;
+volatile unsigned long newsocket;
+volatile unsigned long newsocket_ip;
 unsigned long tnewsocket;
 unsigned long tnewsocket_ip;
 HANDLE hsockets_accept;
@@ -330,16 +330,16 @@ unsigned long u6osocket2;//client?
 long socketclientlast;
 unsigned long socketclient[SOCKETLAST+1];
 unsigned long socketclient_ip[SOCKETLAST+1];
-unsigned char socketclient_verified[SOCKETLAST+1];
+volatile unsigned char socketclient_verified[SOCKETLAST+1];
 sockets_info *socketclient_si[SOCKETLAST+1];
 sockets_info *socketclient_ri[SOCKETLAST+1];
 unsigned short socketclient_packetsizedownloaded[SOCKETLAST+1];
 unsigned short socketclient_packetsize[SOCKETLAST+1];
-unsigned char socket_timeout[SOCKETLAST+1];
-unsigned char socket_disconnect[SOCKETLAST+1];
+volatile unsigned char socket_timeout[SOCKETLAST+1];
+volatile unsigned char socket_disconnect[SOCKETLAST+1];
 //temp wait value used by sockets_disconnect to force thread closure if necessary
-unsigned char socket_disconnect_wait[SOCKETLAST+1];
-bool endprogram; //TRUE if program is ending
+volatile unsigned char socket_disconnect_wait[SOCKETLAST+1];
+volatile bool endprogram; //TRUE if program is ending
 
 HINSTANCE hInst;
 TCHAR szWindowClass[100];

@@ -12,8 +12,8 @@
 //sockets_accept sets newsocket to new sockets id and waits till user sets
 //newsocket=INVALID_SOCKET before accepting new sockets
 //shared global variables
-extern unsigned long newsocket;
-extern unsigned long newsocket_ip;
+extern volatile unsigned long newsocket;
+extern volatile unsigned long newsocket_ip;
 //temp local variables (transferred to globals after successful connection)
 extern unsigned long tnewsocket;
 extern unsigned long tnewsocket_ip;

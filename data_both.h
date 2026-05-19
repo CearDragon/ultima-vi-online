@@ -354,12 +354,12 @@ struct npc{ //used for all people, including players (characters can use weapons
 struct sockets_info{
 	unsigned short i;//u6o socket connection array index
 	txt *d[256];//array of txt*s
-	unsigned char next;
-	unsigned char nextfree;
+	volatile unsigned char next;
+	volatile unsigned char nextfree;
 	//other variables for temp use?
 	long x4,x2,y2;
 	txt *t;
-	unsigned char exit_thread;
+	volatile unsigned char exit_thread;
 	unsigned long thread_id;
 };
 
@@ -384,16 +384,16 @@ extern unsigned long u6osocket2;//client?
 extern long socketclientlast;
 extern unsigned long socketclient[SOCKETLAST+1];
 extern unsigned long socketclient_ip[SOCKETLAST+1];
-extern unsigned char socketclient_verified[SOCKETLAST+1];
+extern volatile unsigned char socketclient_verified[SOCKETLAST+1];
 extern sockets_info *socketclient_si[SOCKETLAST+1];
 extern sockets_info *socketclient_ri[SOCKETLAST+1];
 extern unsigned short socketclient_packetsizedownloaded[SOCKETLAST+1];
 extern unsigned short socketclient_packetsize[SOCKETLAST+1];
-extern unsigned char socket_timeout[SOCKETLAST+1];
-extern unsigned char socket_disconnect[SOCKETLAST+1];
+extern volatile unsigned char socket_timeout[SOCKETLAST+1];
+extern volatile unsigned char socket_disconnect[SOCKETLAST+1];
 //temp wait value used by sockets_disconnect to force thread closure if necessary
-extern unsigned char socket_disconnect_wait[SOCKETLAST+1];
-extern bool endprogram; //TRUE if program is ending
+extern volatile unsigned char socket_disconnect_wait[SOCKETLAST+1];
+extern volatile bool endprogram; //TRUE if program is ending
 
 extern HINSTANCE hInst;
 extern TCHAR szWindowClass[100];
