@@ -26,14 +26,15 @@
 
 
 #ifndef DEFINE_BOTH_H
-#define U6O_VERSION 10.0 //version 5.5
+#define DEFINE_BOTH_H
+
+#define U6O_VERSION 9
 #define U6O_DEBUG FALSE/* should probably put this on the compiler command line instead of here!! */
 #include "random/random.h"
 
 #define VIEW_X_SIZE 32; // to be 24 sooner or later, black area for stats screens etc.
 #define VIEW_Y_SIZE 24;
 
-#define U6O_VERSION 1.0 //version 5.5
 #define SHA2_ENCRYPTION 1
 #define PW_ENCRYPTION 1
 
