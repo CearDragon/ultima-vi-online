@@ -694,8 +694,11 @@ return;
 
 void img(surf* d,surf* s)
 {
+if (s==NULL) return;
+if (d==NULL) return;
 d->s->Blt(NULL,s->s,NULL,DDBLT_WAIT,NULL);
 }
+
 
 // r999 img to handle resizing and positioning
 void img(surf* d, surf* s, int x, int y, int x2, int y2) {
@@ -1420,3 +1423,4 @@ pop esi
 }
 
 }//img(...)
+
