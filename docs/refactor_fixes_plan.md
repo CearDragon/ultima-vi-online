@@ -31,7 +31,16 @@ When the game crashes, there are no error outputs printed to `log.txt` or the co
 - Added textual stack trace dumping using `CaptureStackBackTrace` to print out execution frame pointers.
 - Integrated `MiniDumpWriteDump` from `<dbghelp.h>` to generate a full `crash.dmp` file whenever an unhandled exception occurs. This allows opening the crash in Visual Studio or WinDbg to see exact lines of code, variable states, and threads at the exact moment of the crash.
 
-## 4. Deployment
+## 4. Networking Build Configuration Fix
+**Issue:**
+Previously, networking changes were implemented such that networking features only worked correctly in debug builds when the project was managed solely by Visual Studio.
+
+**Action Plan:**
+- Target Files: CMake configuration / Initialization headers (to be audited based on previous Visual Studio `_DEBUG` macros or linker settings)
+- Eliminate Visual Studio specific debug flags guarding the winsock/networking code.
+- Ensure the socket initialization (`WSAStartup`) and networking data streams function correctly in Release (`NDEBUG`) mode under the new CMake build system.
+
+## 5. Deployment
 - Checkout the `refactor` branch.
 - Apply the Slime patch to both `.cpp` and `.inc`.
 - Apply the Tripe Crossbow bug patch.
