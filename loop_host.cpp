@@ -13558,35 +13558,34 @@ extractobj5:
                       if ((myobj2->info&(15<<9))==0) goto slimedivide_failed;
                       //test surrounding squares
                       slimex=myobj2->x+1; slimey=myobj2->y;
-                      if ((od[slimey][slimex]==NULL)&&((bt[slimey][slimex]>>10)&1)) goto slimedivide;
+                      if (slimex < 2048 && slimey < 1024) if ((od[slimey][slimex]==NULL)&&((bt[slimey][slimex]>>10)&1)) goto slimedivide;
                       slimex=myobj2->x-1; slimey=myobj2->y;
-                      if ((od[slimey][slimex]==NULL)&&((bt[slimey][slimex]>>10)&1)) goto slimedivide;
+                      if (slimex < 2048 && slimey < 1024) if ((od[slimey][slimex]==NULL)&&((bt[slimey][slimex]>>10)&1)) goto slimedivide;
                       slimex=myobj2->x; slimey=myobj2->y+1;
-                      if ((od[slimey][slimex]==NULL)&&((bt[slimey][slimex]>>10)&1)) goto slimedivide;
+                      if (slimex < 2048 && slimey < 1024) if ((od[slimey][slimex]==NULL)&&((bt[slimey][slimex]>>10)&1)) goto slimedivide;
                       slimex=myobj2->x; slimey=myobj2->y-1;
-                      if ((od[slimey][slimex]==NULL)&&((bt[slimey][slimex]>>10)&1)) goto slimedivide;
+                      if (slimex < 2048 && slimey < 1024) if ((od[slimey][slimex]==NULL)&&((bt[slimey][slimex]>>10)&1)) goto slimedivide;
                       goto slimedivide_failed;
 slimedivide:
-                      myobj3=OBJnew();
-                      myobj3->type=375;
-                      myobj3->more=malloc(sizeof(creature));
-                      ZeroMemory(myobj3->more,sizeof(creature));
-                      crt3=(creature*)myobj3->more;
-                      crt3->crt_struct=TRUE;
-                      crt3->hp=(obji[sprlnk[myobj3->type&1023]].v8>>8)*4;
-                      crt3->mp=0;
-                      crt3->al=1;
-                      crt3->respawn_x=1024; //seconds till spawned crt will disappear
-                      myobj9=OBJnew(); myobj9->type=188; crt3->items=myobj9; //(not included)bag
-                      myobj3->info|=4; //<-crt
-                      OBJmove2(myobj3,slimex,slimey);
-
-                      x2=(myobj2->info>>9)&15; x2--;
-                      myobj2->info&=(0xFFFF-(15<<9));
-                      myobj2->info|=(x2<<9);
-
-                      myobj3->info|=(x2<<9);
-
+                      {
+                        object* newSlimeObj = OBJnew();
+                        newSlimeObj->type=375;
+                        newSlimeObj->more=malloc(sizeof(creature));
+                        ZeroMemory(newSlimeObj->more,sizeof(creature));
+                        crt3=(creature*)newSlimeObj->more;
+                        crt3->crt_struct=TRUE;
+                        crt3->hp=(obji[sprlnk[newSlimeObj->type&1023]].v8>>8)*4;
+                        crt3->mp=0;
+                        crt3->al=1;
+                        crt3->respawn_x=1024; //seconds till spawned crt will disappear
+                        myobj9=OBJnew(); myobj9->type=188; crt3->items=myobj9; //(not included)bag
+                        newSlimeObj->info|=4; //<-crt
+                        OBJmove2(newSlimeObj,slimex,slimey);
+                        x2=(myobj2->info>>9)&15; x2--;
+                        myobj2->info&=(0xFFFF-(15<<9));
+                        myobj2->info|=(x2<<9);
+                        newSlimeObj->info|=(x2<<9);
+                      }
 slimedivide_failed:;
                     }
 
