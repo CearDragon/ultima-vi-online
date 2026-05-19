@@ -13988,6 +13988,7 @@ triplecrossbow_miss:
                         sf[i4].x2=0;
                         sf[i4].wait=0.125f; //NULL
                         sf[i4].more=1;
+                        crt=(creature*)myobj2->more; attack_item=0;
                         goto triplecrossbow_refire;
                       }//didn't miss
                       x6=2; //50% chance of bolt recovery
