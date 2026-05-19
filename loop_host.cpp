@@ -3448,7 +3448,10 @@ player_add: //add new player
 
     if (t5->ds[0]!=U6O_VERSION){ //version 5.5 check
       txtset(t,"?"); t->d2[0]=254; NET_send(NETplayer,tnet,t); //incorrect version
-      txtset(t,"Add_Player->Failed:Incorrect_Version"); LOGadd(t);
+      char version_msg[256];
+      sprintf(version_msg, "Add_Player->Failed:Incorrect_Version (Client: %d, Host: %d)", (int)t5->ds[0], (int)U6O_VERSION);
+      txtset(t, version_msg); LOGadd(t);
+      printf("%s\n", version_msg);
       goto doneclmess;
     }
     txtright(t5,t5->l-2);
