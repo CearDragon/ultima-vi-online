@@ -31,6 +31,73 @@ extern double scaleym;
 extern unsigned int resxo;
 extern unsigned int resyo;
 
+// Letterbox blit transform globals (defined in globals.inc, declared in
+// data_both.h). refresh() updates these every frame so WndProc can translate
+// raw client-pixel mouse coordinates back into source-surface coordinates.
+extern long   blit_offx;
+extern long   blit_offy;
+extern double blit_scale;
+
+// Blit the source-surface DC `srcdc` (size srcW x srcH) into window `hWndDst`
+// while preserving the source aspect ratio. Letterbox bars are filled black.
+// Also publishes the resulting transform via blit_offx/blit_offy/blit_scale
+// so mouse input maps back to source coordinates correctly.
+static void blit_letterbox(HWND hWndDst, HDC srcdc, long srcW, long srcH)
+{
+	RECT cr;
+	GetClientRect(hWndDst, &cr);
+	long clientW = cr.right  - cr.left;
+	long clientH = cr.bottom - cr.top;
+	if (clientW < 1) clientW = 1;
+	if (clientH < 1) clientH = 1;
+
+	double sx = (double)clientW / (double)srcW;
+	double sy = (double)clientH / (double)srcH;
+	double s  = (sx < sy) ? sx : sy;
+	if (s <= 0.0) s = 1.0;
+
+	long dstW = (long)(srcW * s + 0.5);
+	long dstH = (long)(srcH * s + 0.5);
+	long dstX = (clientW - dstW) / 2;
+	long dstY = (clientH - dstH) / 2;
+
+	HDC winhdc = GetDC(hWndDst);
+
+	// Letterbox bars (black). Only fill the bars that exist.
+	HBRUSH black = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	if (dstY > 0) {
+		RECT r = { 0, 0, clientW, dstY };
+		FillRect(winhdc, &r, black);
+	}
+	if (dstY + dstH < clientH) {
+		RECT r = { 0, dstY + dstH, clientW, clientH };
+		FillRect(winhdc, &r, black);
+	}
+	if (dstX > 0) {
+		RECT r = { 0, dstY, dstX, dstY + dstH };
+		FillRect(winhdc, &r, black);
+	}
+	if (dstX + dstW < clientW) {
+		RECT r = { dstX + dstW, dstY, clientW, dstY + dstH };
+		FillRect(winhdc, &r, black);
+	}
+
+	if (dstW == srcW && dstH == srcH) {
+		BitBlt(winhdc, dstX, dstY, srcW, srcH, srcdc, 0, 0, SRCCOPY);
+	} else {
+		SetStretchBltMode(winhdc, HALFTONE);
+		SetBrushOrgEx(winhdc, 0, 0, NULL);
+		StretchBlt(winhdc, dstX, dstY, dstW, dstH, srcdc, 0, 0, srcW, srcH, SRCCOPY);
+	}
+
+	ReleaseDC(hWndDst, winhdc);
+
+	// Publish transform for input mapping.
+	blit_offx  = dstX;
+	blit_offy  = dstY;
+	blit_scale = s;
+}
+
 
 
 
@@ -234,10 +301,7 @@ return;
 // rrr refresh(surf* s)
 void refresh(surf* s)
 {
-static HDC winhdc,ddhdc;
-static RECT clrect,wrect; //,drect;
-static long x,x2,y;
-static HWND ohWnd;
+static HDC ddhdc;
 if (smallwindow){
 //switch to 512x384 window if not currently displayed
 /*
@@ -278,65 +342,11 @@ hWnd = hWnd3;
 	}
 
 
-// title bar window refresh
-GetWindowRect(hWnd,&wrect);
-GetClientRect(hWnd,&clrect);
-//resxz = clrect.right;
-//resyz = clrect.bottom;
-x=wrect.right-wrect.left; //full window width
-x2=(x-clrect.right)/2; //width of single border
-x=x2;
-y=(wrect.bottom-wrect.top)-clrect.bottom-x2;
-winhdc=GetWindowDC(hWnd);
-s->s->GetDC(&ddhdc);
-
-/*
-typedef struct BITMAPINFO656 {
-BITMAPINFOHEADER bmiHeader;
-DWORD red;
-DWORD green;
-DWORD blue;
-};
-
-static BITMAPINFO656 bmi;
-ZeroMemory(&bmi,sizeof(BITMAPINFO656));
-bmi.bmiHeader.biSize=sizeof(BITMAPINFO656);
-bmi.bmiHeader.biWidth=512;
-bmi.bmiHeader.biHeight=384;
-bmi.bmiHeader.biPlanes=1;
-bmi.bmiHeader.biBitCount=16;
-bmi.bmiHeader.biCompression=BI_BITFIELDS;
-bmi.bmiHeader.biSizeImage=0;
-bmi.bmiHeader.biXPelsPerMeter=0;
-bmi.bmiHeader.biYPelsPerMeter=0;
-bmi.bmiHeader.biClrUsed=0;
-bmi.bmiHeader.biClrImportant=0;
-bmi.red=0xF800;
-bmi.green=0x7E0;
-bmi.blue=0x1F;
-
-////
-SetDIBitsToDevice(
-  winhdc,                 // handle to DC
-  x,               // x-coord of destination upper-left corner
-  y,               // y-coord of destination upper-left corner 
-  512,           // source rectangle width
-  384,          // source rectangle height
-  0,                // x-coord of source lower-left corner
-  0,                // y-coord of source lower-left corner
-  0,         // first scan line in array
-  384,         // number of scan lines
-  s->o,     // array of DIB bits
-  (BITMAPINFO*)&bmi, // bitmap information
-  DIB_RGB_COLORS          // RGB or palette indexes
-);
-*/
-
-BitBlt(winhdc,x,y,s->d.dwWidth,s->d.dwHeight,ddhdc,0,0,SRCCOPY);
-
-s->s->ReleaseDC(ddhdc);
-ReleaseDC(hWnd,winhdc);
-return;
+	// letterbox-scale into the small-window client area
+	s->s->GetDC(&ddhdc);
+	blit_letterbox(hWnd, ddhdc, (long)s->d.dwWidth, (long)s->d.dwHeight);
+	s->s->ReleaseDC(ddhdc);
+	return;
 
 
 }
@@ -352,109 +362,19 @@ hWnd=hWnd2;
 }
 //1024x768 title bar window refresh
 if ((desktop_rect.right>1024)&&(desktop_rect.bottom>768)){
-GetWindowRect(hWnd,&wrect);
-GetClientRect(hWnd,&clrect);
-x=wrect.right-wrect.left; //full window width
-x2=(x-clrect.right)/2; //width of single border
-x=x2;
-y=(wrect.bottom-wrect.top)-clrect.bottom-x2;
-winhdc=GetWindowDC(hWnd);
 s->s->GetDC(&ddhdc);
-BitBlt(winhdc,x,y,s->d.dwWidth,s->d.dwHeight,ddhdc,0,0,SRCCOPY);
+blit_letterbox(hWnd, ddhdc, (long)s->d.dwWidth, (long)s->d.dwHeight);
 s->s->ReleaseDC(ddhdc);
-ReleaseDC(hWnd,winhdc);
 return;
 }
-//1024x768 full screen refresh
-
-/*
-static unsigned long screen_offset,buffer_offset;
-screen_offset=(unsigned long)vs->o;
-buffer_offset=(unsigned long)s->o;
-_asm{
-push esi
-push edi
-push ebx
-mov esi,buffer_offset
-mov edi,screen_offset
-sub edi,8
-mov ebx,buffer_offset
-add ebx,4
-sub ebx,8
-mov edx,screen_offset
-add edx,4
-sub edx,8
-push ebp
-mov ebp,196608
-refresh0:
-add ebx,8
-mov eax,[esi]
-add edi,8
-mov ecx,[ebx]
-add edx,8
-mov [edi],eax
-add esi,8
-mov [edx],ecx
-dec ebp
-jnz refresh0
-pop ebp
-pop ebx
-pop edi
-pop esi
-};
-*/
-
-/*
-typedef struct BITMAPINFO656 {
-BITMAPINFOHEADER bmiHeader;
-DWORD red;
-DWORD green;
-DWORD blue;
-};
-
-static BITMAPINFO656 bmi;
-ZeroMemory(&bmi,sizeof(BITMAPINFO656));
-bmi.bmiHeader.biSize=sizeof(BITMAPINFO656);
-bmi.bmiHeader.biWidth=1024;
-bmi.bmiHeader.biHeight=768;
-bmi.bmiHeader.biPlanes=1;
-bmi.bmiHeader.biBitCount=16;
-bmi.bmiHeader.biCompression=BI_BITFIELDS;
-bmi.bmiHeader.biSizeImage=0;
-bmi.bmiHeader.biXPelsPerMeter=0;
-bmi.bmiHeader.biYPelsPerMeter=0;
-bmi.bmiHeader.biClrUsed=0;
-bmi.bmiHeader.biClrImportant=0;
-bmi.red=0xF800;
-bmi.green=0x7E0;
-bmi.blue=0x1F;
-
-////BitBlt(winhdc,x,y,s->d.dwWidth,s->d.dwHeight,ddhdc,0,0,SRCCOPY);
-SetDIBitsToDevice(
-  winhdc,                 // handle to DC
-  0,               // x-coord of destination upper-left corner
-  0,               // y-coord of destination upper-left corner 
-  1024,           // source rectangle width
-  768,          // source rectangle height
-  0,                // x-coord of source lower-left corner
-  0,                // y-coord of source lower-left corner
-  0,         // first scan line in array
-  768,         // number of scan lines
-  s->o,     // array of DIB bits
-  (BITMAPINFO*)&bmi, // bitmap information
-  DIB_RGB_COLORS          // RGB or palette indexes
-);
-*/
-
-
-winhdc=GetWindowDC(hWnd);
+//1024x768 full screen refresh (WS_POPUP, no title bar; client == 1024x768)
 s->s->GetDC(&ddhdc);
-BitBlt(winhdc,0,0,s->d.dwWidth,s->d.dwHeight,ddhdc,0,0,SRCCOPY);
+blit_letterbox(hWnd, ddhdc, (long)s->d.dwWidth, (long)s->d.dwHeight);
 s->s->ReleaseDC(ddhdc);
-ReleaseDC(hWnd,winhdc);
 
 
 }//refresh end
+
 
 
 //ebx/edi/esi are NOT backed up!!

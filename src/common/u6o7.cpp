@@ -589,8 +589,20 @@ syskeyup:
 		break;
 
 	case WM_MOUSEMOVE:
-		mx=LOWORD(lParam);
-		my=HIWORD(lParam);
+		{
+			// Raw client-area pixel coordinates from Windows.
+			long raw_mx = (long)(short)LOWORD(lParam);
+			long raw_my = (long)(short)HIWORD(lParam);
+			// Translate from window-client space into source-surface space
+			// based on the current letterbox blit transform (set by refresh()).
+			if (blit_scale > 0.0) {
+				mx = (long)((raw_mx - blit_offx) / blit_scale);
+				my = (long)((raw_my - blit_offy) / blit_scale);
+			} else {
+				mx = raw_mx;
+				my = raw_my;
+			}
+		}
 		break;
 
 	case WM_CHAR:

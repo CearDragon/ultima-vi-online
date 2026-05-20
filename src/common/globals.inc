@@ -62,6 +62,14 @@ long omy3;
 double scalexm = 1.0f;
 double scaleym = 1.0f;
 
+// Letterbox blit transform: how the source surface is mapped onto the window
+// client area in refresh(). Used to translate client-pixel mouse coordinates
+// back into source-surface coordinates so input stays aligned when the window
+// is resized/maximized.
+long   blit_offx  = 0;
+long   blit_offy  = 0;
+double blit_scale = 1.0;
+
 // r999 new
 surf* uipanelsurf[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
 int uipanelx[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];

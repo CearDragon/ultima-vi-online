@@ -420,6 +420,11 @@ extern bool key_gotrelease[65536]; //UNUSED?
 extern bool keyasc[65536]; //TRUE if the ASCII indexed key has been pressed 
 extern long mx;
 extern long my;
+// Letterbox blit transform (see globals.inc). Used by WndProc to translate
+// mouse coordinates from window client space back into source-surface space.
+extern long   blit_offx;
+extern long   blit_offy;
+extern double blit_scale;
 extern long mb; //mouse input values (mb returns the button status)
 extern unsigned long mbclick; //mbclick: recieved mouse_down message for mouse button
 extern unsigned long mbheld; //set if the physical mouse button is being held down and has not been released
