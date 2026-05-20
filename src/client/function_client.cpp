@@ -1778,10 +1778,12 @@ void refresh(){
 	static unsigned long pebx,pecx;
 	pebx=(unsigned long)ps->o;
 	pecx=(unsigned long)ps3->o;
+	// RW-P2.3: route pixel count through viewport.h accessor.
+	unsigned long _pxCount = (unsigned long)lightingTotalBytes();
 	_asm{
 	  mov ebx,pebx
 	    mov ecx,pecx
-	    mov esi,786432
+	    mov esi,_pxCount
 	    p16to32:
 	    mov ax,[ebx]
 	    mov dx,ax

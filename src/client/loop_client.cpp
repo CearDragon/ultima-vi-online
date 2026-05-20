@@ -6583,11 +6583,15 @@ CLIENT_donemess:
     if (nodisplay) goto skiprefresh2;
 
 
-    if (moonlight==0) ZeroMemory(&ls,sizeof(ls)); //clear array
-    if (moonlight==1) memcpy(&ls,&ls_moon1,1024*768);
-    if (moonlight==2) memcpy(&ls,&ls_moon2,1024*768);
-    if (moonlight==3) memcpy(&ls,&ls_moon3,1024*768);
-    if (moonlight==4) memcpy(&ls,&ls_moon4,1024*768);
+    // RW-P2.3: route lighting buffer copy size through viewport.h accessor.
+    {
+      const unsigned long lsBytes = (unsigned long)lightingTotalBytes();
+      if (moonlight==0) ZeroMemory(&ls,sizeof(ls)); //clear array
+      if (moonlight==1) memcpy(&ls,&ls_moon1,lsBytes);
+      if (moonlight==2) memcpy(&ls,&ls_moon2,lsBytes);
+      if (moonlight==3) memcpy(&ls,&ls_moon3,lsBytes);
+      if (moonlight==4) memcpy(&ls,&ls_moon4,lsBytes);
+    }
 
     //calculate tpx,tpy from current x,y
     getscreenoffset(tplayer->x,tplayer->y,&tpx,&tpy);
@@ -8052,9 +8056,11 @@ flash_skip:;
       ls2_p=(unsigned char*)&stormcloak[z][0]; z2=7;
       x7=(x-z2)*32; y7=(y-z2)*32; x8=(x+z2+1)*32; y8=(y+z2+1)*32; //screen rect
       x9=-x7; y9=-y7; //offset inside lsX array
-      if (x7<0) x7=0; if (y7<0) y7=0; if (x8>1024) x8=1024; if (y8>768) y8=768; //crop rect
-      ls_off=(y7<<10)+x7; ls_off_add=1024-(x8-x7); //starting offset/add
-      ls2_off=(y7+y9)*((z2*2+1)*32)+x7+x9; ls2_off_add=((z2*2+1)*32)-(x8-x7); 
+      // RW-P2.3: route crop bounds and ls stride through viewport.h accessors.
+      { const long bbW=backbufferW(), bbH=backbufferH();
+        if (x7<0) x7=0; if (y7<0) y7=0; if (x8>bbW) x8=bbW; if (y8>bbH) y8=bbH; }
+      ls_off=(y7<<10)+x7; ls_off_add=lightingStride()-(x8-x7); //starting offset/add
+      ls2_off=(y7+y9)*((z2*2+1)*32)+x7+x9; ls2_off_add=((z2*2+1)*32)-(x8-x7);
       for (y6=y7;y6<y8;y6++){ for (x6=x7;x6<x8;x6++){
         if (z=ls2_p[ls2_off]){
           z+=ls_off;
@@ -8271,6 +8277,9 @@ cloudadded:
       i=(unsigned long)&ls;
       i2=(unsigned long)ps->o;
       i3=(unsigned long)lval;
+      // RW-P2.3: load total pixel count from viewport.h accessor instead of
+      // hard-coding 786432 (=1024*768) into the inline asm immediate.
+      unsigned long _lsTotal = (unsigned long)lightingTotalBytes();
       _asm{
         ;preserve registers
           push ebx
@@ -8282,7 +8291,7 @@ cloudadded:
           mov edx,i3
           mov ecx,x5
           push ebp
-          mov ebp,786432
+          mov ebp,_lsTotal
           ;main loop
 asm_lightshow0:
         mov al,[esi]

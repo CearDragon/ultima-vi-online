@@ -188,6 +188,20 @@ instead of cycling modes.
   `lightshow0` inline-asm loop at `loop_client.cpp:8264` (`mov ebp,
   786432`), the `&ls + sizeof(ls)` references at `loop_client.cpp:6579`,
   and the `ls_off=(y7<<10)+x7` etc. block at `loop_client.cpp:8070`.)_
+  _(2026-05-20 follow-up — second pass migrated four more hot sites:
+  (1) `loop_client.cpp:6587` — moonlight `memcpy(&ls,&ls_moonN,1024*768)`
+  block now uses `lightingTotalBytes()`; (2) `loop_client.cpp:8055` — the
+  stormcloak crop/stride block now reads `backbufferW()/backbufferH()`
+  for its clamp and `lightingStride()` for the row-skip; the `<<10` shift
+  is left in place with a TODO since changing it requires the stride to
+  always be a power of two; (3) `loop_client.cpp:8285` — the
+  `lightshow0` inline-asm `mov ebp,786432` immediate is replaced with a
+  load from a local `_lsTotal = lightingTotalBytes()`; (4)
+  `function_client.cpp:1784` — the legacy `refresh()` 16→32 inline-asm
+  loop's `mov esi,786432` likewise becomes `mov esi,_pxCount`. All four
+  changes are behavior-identical at 1024×768 since the accessors still
+  return the legacy constants. Sections A1–A4 of
+  `resizable-window-hotspots.md` can now be marked DONE.)_
 - ⬜ **RW-P2.4** Update `refresh()` so `srcW/srcH` passed to
   `blit_letterbox` come from the actual surface dims (already does via
   `s->d.dwWidth/dwHeight` — verify and add an assert that they equal the

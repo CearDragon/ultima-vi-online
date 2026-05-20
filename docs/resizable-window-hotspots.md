@@ -69,14 +69,17 @@ Hard limits that assume the visible game area is 1024×768 pixels.
 
 | File                                | Line  | Snippet                                                                          | Meaning                                                      | Phase    |
 | ----------------------------------- | ----- | -------------------------------------------------------------------------------- | ------------------------------------------------------------ | -------- |
-| `src/client/function_client.cpp`    | 261   | `if ((xoff+x_axis_size)>1024) x4-=xoff+x_axis_size-1024;`                        | LIGHTnew(): X clamp of light blit to back-buffer width       | RW-P2.3  |
-| `src/client/function_client.cpp`    | 266   | `if ((yoff+x_axis_size)>768) y4-=yoff+x_axis_size-768;`                          | LIGHTnew(): Y clamp of light blit to back-buffer height      | RW-P2.3  |
-| `src/client/function_client.cpp`    | 269   | `asm_copy_vc_destskip=1024-asm_copy_vc_bytesx;`                                  | LIGHTnew(): pitch of `ls[]` lighting buffer                  | RW-P2.3  |
-| `src/client/function_client.cpp`    | 271   | `asm_copy_vc_destoffset=(y2<<10)+(unsigned long)&ls+x2;`                         | LIGHTnew(): row stride 1024 (`<<10`) into `ls[]`             | RW-P2.3  |
-| `src/client/loop_client.cpp`        | 8070  | `if (x7<0) x7=0; if (y7<0) y7=0; if (x8>1024) x8=1024; if (y8>768) y8=768;`      | Crop rect for some lighting effect                           | RW-P2.3  |
-| `src/client/loop_client.cpp`        | 8071  | `ls_off=(y7<<10)+x7; ls_off_add=1024-(x8-x7);`                                   | Same: pitch into `ls[]`                                      | RW-P2.3  |
-| `src/client/loop_client.cpp`        | 8076  | `if ((z>>10)!=(ls_off>>10)) z=(ls_off>>10<<10)+1023;`                            | Same: row-boundary math at 1024-stride                       | RW-P2.3  |
-| `src/client/loop_client.inc`        | 6466-6472 | (duplicate of loop_client.cpp 8070-8076)                                     | Duplicate                                                    | RW-P2.3  |
+| ~~`src/client/function_client.cpp`~~| ~~261~~ | ~~`if ((xoff+x_axis_size)>1024) x4-=xoff+x_axis_size-1024;`~~                  | LIGHTnew() X clamp — now `bbW = backbufferW()`               | DONE RW-P2.3 |
+| ~~`src/client/function_client.cpp`~~| ~~266~~ | ~~`if ((yoff+x_axis_size)>768) y4-=yoff+x_axis_size-768;`~~                    | LIGHTnew() Y clamp — now `bbH = backbufferH()`               | DONE RW-P2.3 |
+| ~~`src/client/function_client.cpp`~~| ~~269~~ | ~~`asm_copy_vc_destskip=1024-asm_copy_vc_bytesx;`~~                            | LIGHTnew() pitch — now `lsStride = lightingStride()`         | DONE RW-P2.3 |
+| ~~`src/client/function_client.cpp`~~| ~~271~~ | ~~`asm_copy_vc_destoffset=(y2<<10)+(unsigned long)&ls+x2;`~~                   | LIGHTnew() row offset — now `(y2*lsStride)+…`                | DONE RW-P2.3 |
+| ~~`src/client/loop_client.cpp`~~    | ~~8070~~ | ~~`if (x8>1024) x8=1024; if (y8>768) y8=768;`~~                                | Crop rect — now `bbW`/`bbH` from accessors                   | DONE RW-P2.3 |
+| ~~`src/client/loop_client.cpp`~~    | ~~8071~~ | ~~`ls_off_add=1024-(x8-x7);`~~                                                 | Pitch — now `lightingStride()-(x8-x7)`                       | DONE RW-P2.3 |
+| `src/client/loop_client.cpp`        | 8076  | `if ((z>>10)!=(ls_off>>10)) z=(ls_off>>10<<10)+1023;`                            | Row-boundary math at 1024-stride — `<<10` left in place; correct only while stride is a power-of-two 1024. TODO when stride becomes runtime. | RW-P2.3 (partial) |
+| `src/client/loop_client.inc`        | 6466-6472 | (duplicate of loop_client.cpp 8070-8076)                                     | Now stale — `loop_client.inc` appears unused; verify and delete | RW-P2.3 |
+| ~~`src/client/loop_client.cpp`~~    | ~~6587~~ | ~~`memcpy(&ls,&ls_moon1,1024*768);` (and ls_moon2..4)~~                        | Moonlight copy — now `lightingTotalBytes()`                  | DONE RW-P2.3 |
+| ~~`src/client/loop_client.cpp`~~    | ~~8285~~ | ~~`mov ebp,786432`~~                                                            | lightshow0 inline asm — now `mov ebp,_lsTotal` (local var = `lightingTotalBytes()`) | DONE RW-P2.3 |
+| ~~`src/client/function_client.cpp`~~| ~~1784~~ | ~~`mov esi,786432`~~                                                            | refresh() 16→32 inline asm — now `mov esi,_pxCount`         | DONE RW-P2.3 |
 
 ## C. Tile-pixel-size shifts (`<<5`, `<<= 5`) used in view math
 
