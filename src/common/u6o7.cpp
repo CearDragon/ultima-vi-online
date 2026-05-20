@@ -486,8 +486,8 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 		// rrr can't change this; it will be broken
 //		clrect.top=0; clrect.left=0; clrect.bottom=768; clrect.right=1024;
 		clrect.top = 0; clrect.left = 0; clrect.bottom = resyo; clrect.right = resxo;
-		AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,FALSE);
-		hWnd2 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,
+		AdjustWindowRect(&clrect,(WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX),FALSE);
+		hWnd2 = CreateWindow(szWindowClass,window_name,(WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX),
 			0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
 	}else{
 
@@ -497,9 +497,9 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 	}
 
 	clrect.top=0; clrect.left=0; clrect.bottom= resys; clrect.right= resxs;
-	AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,FALSE);
+	AdjustWindowRect(&clrect,(WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX),FALSE);
 
-	hWnd3 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,
+	hWnd3 = CreateWindow(szWindowClass,window_name,(WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX),
 		0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
 
 	// rrr moved to newmodeinit
@@ -532,6 +532,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_SETFOCUS:
 		break;
+
+	case WM_SIZING:
+	{
+		RECT* rect = (RECT*)lParam;
+		int reqW = rect->right - rect->left;
+		int reqH = rect->bottom - rect->top;
+
+		RECT wrect, clrect;
+		GetWindowRect(hWnd, &wrect);
+		GetClientRect(hWnd, &clrect);
+		int borderW = (wrect.right - wrect.left) - clrect.right;
+		int borderH = (wrect.bottom - wrect.top) - clrect.bottom;
+
+		int clW = reqW - borderW;
+		int clH = reqH - borderH;
+
+		double ratio = 1024.0 / 768.0;
+		if (wParam == WMSZ_LEFT || wParam == WMSZ_RIGHT || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_TOPLEFT) {
+			clH = (int)(clW / ratio);
+		} else {
+			clW = (int)(clH * ratio);
+		}
+
+		if (wParam == WMSZ_LEFT || wParam == WMSZ_TOPLEFT || wParam == WMSZ_BOTTOMLEFT) {
+			rect->left = rect->right - (clW + borderW);
+		} else {
+			rect->right = rect->left + clW + borderW;
+		}
+
+		if (wParam == WMSZ_TOP || wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOPRIGHT) {
+			rect->top = rect->bottom - (clH + borderH);
+		} else {
+			rect->bottom = rect->top + clH + borderH;
+		}
+		return TRUE;
+	}
 
 	case WM_KEYDOWN:
 syskeydown:

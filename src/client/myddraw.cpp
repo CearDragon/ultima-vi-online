@@ -332,11 +332,12 @@ SetDIBitsToDevice(
 );
 */
 
-BitBlt(winhdc,x,y,s->d.dwWidth,s->d.dwHeight,ddhdc,0,0,SRCCOPY);
+  SetStretchBltMode(winhdc, HALFTONE);
+  StretchBlt(winhdc, x, y, clrect.right, clrect.bottom, ddhdc, 0, 0, s->d.dwWidth, s->d.dwHeight, SRCCOPY);
 
-s->s->ReleaseDC(ddhdc);
-ReleaseDC(hWnd,winhdc);
-return;
+  s->s->ReleaseDC(ddhdc);
+  ReleaseDC(hWnd,winhdc);
+  return;
 
 
 }
@@ -354,16 +355,23 @@ hWnd=hWnd2;
 if ((desktop_rect.right>1024)&&(desktop_rect.bottom>768)){
 GetWindowRect(hWnd,&wrect);
 GetClientRect(hWnd,&clrect);
-x=wrect.right-wrect.left; //full window width
-x2=(x-clrect.right)/2; //width of single border
-x=x2;
-y=(wrect.bottom-wrect.top)-clrect.bottom-x2;
-winhdc=GetWindowDC(hWnd);
-s->s->GetDC(&ddhdc);
-BitBlt(winhdc,x,y,s->d.dwWidth,s->d.dwHeight,ddhdc,0,0,SRCCOPY);
-s->s->ReleaseDC(ddhdc);
-ReleaseDC(hWnd,winhdc);
-return;
+
+	resxz = clrect.right;
+	resyz = clrect.bottom;
+	scalexm = (double)resxo / resxz;
+	scaleym = (double)resyo / resyz;
+
+	x=wrect.right-wrect.left; //full window width
+	x2=(x-clrect.right)/2; //width of single border
+	x=x2;
+	y=(wrect.bottom-wrect.top)-clrect.bottom-x2;
+	winhdc=GetWindowDC(hWnd);
+	s->s->GetDC(&ddhdc);
+	SetStretchBltMode(winhdc, HALFTONE);
+	StretchBlt(winhdc, x, y, clrect.right, clrect.bottom, ddhdc, 0, 0, s->d.dwWidth, s->d.dwHeight, SRCCOPY);
+	s->s->ReleaseDC(ddhdc);
+	ReleaseDC(hWnd,winhdc);
+	return;
 }
 //1024x768 full screen refresh
 
@@ -517,30 +525,63 @@ asm_copy0:
 mov eax,[esi]
 add esi,4
 
-//and eax,4158584798
-//shr eax,1
-//and DWORD PTR [edi],4158584798
-//shr DWORD PTR [edi],1
-//add [edi],eax
+and ax,ax
+jz asm_copy_imgt0_1
+and bp,63454
+and ax,63454
+shr bp,1
+shr ax,1
+add ax,bp
+mov [edi],ax
+asm_copy_imgt0_1:
 
-mov [edi],eax
+shr ebp,16
+shr eax,16
+add edi,2
 
+and ax,ax
+jz asm_copy_imgt0_2
+and bp,63454
+and ax,63454
+shr bp,1
+shr ax,1
+add ax,bp
+mov [edi],ax
+asm_copy_imgt0_2:
 
-add edi,4
+add edi,2
+
 cmp esi,ebx
 jne asm_copy0
 cmp asm_copy_vc_extra2bytes,0
 je asm_copy3
 asm_copy7:
+
+
+
+
+
 mov ax,[esi]
+mov bp,[edi]
 add esi,2
+
+and ax,ax
+jz asm_copy_imgt0_3
+and bp,63454
+and ax,63454
+shr bp,1
+shr ax,1
+add ax,bp
 mov [edi],ax
+asm_copy_imgt0_3:
+
 add edi,2
 asm_copy3:
 add esi,asm_copy_vc_sourceskip
 add edi,asm_copy_vc_destskip
 dec ecx
 jnz asm_copy1
+pop ebp
 pop ebx
 pop edi
 pop esi
@@ -1146,27 +1187,70 @@ asm_copy0:
 mov eax,[esi]
 mov ebp,[edi]
 add esi,4
-and eax,4158584798
-and ebp,4158584798
-shr eax,1
-shr ebp,1
-add eax,ebp
-mov [edi],eax
-add edi,4
+
+and ax,ax
+jz asm_copy_imgt0_1
+and bp,59292
+and ax,63454
+shr bp,2 //bp=25% of dest
+shr ax,1 //ax=50% of source
+add bp,ax //bp=25%(bp)+50%(ax)=75%
+and ax,63454
+shr ax,1 //ax=25% of source
+add bp,ax //bp=75%(bp)+25%(ax)=100%
+mov [edi],bp
+asm_copy_imgt0_1:
+
+shr ebp,16
+shr eax,16
+add edi,2
+
+and ax,ax
+jz asm_copy_imgt0_2
+
+and bp,59292
+and ax,63454
+shr bp,2 //25%
+shr ax,1 //50%
+add bp,ax
+and ax,63454
+shr ax,1 //50%
+add bp,ax
+mov [edi],bp
+
+asm_copy_imgt0_2:
+
+add edi,2
+
 cmp esi,ebx
 jne asm_copy0
 cmp asm_copy_vc_extra2bytes,0
 je asm_copy3
 asm_copy7:
+
+
+
+
+
 mov ax,[esi]
 mov bp,[edi]
 add esi,2
+
+and ax,ax
+jz asm_copy_imgt0_3
+
+and bp,59292
 and ax,63454
-and bp,63454
-shr ax,1
-shr bp,1
-add ax,bp
-mov [edi],ax
+shr bp,2 //25%
+shr ax,1 //50%
+add bp,ax
+and ax,63454
+shr ax,1 //50%
+add bp,ax
+mov [edi],bp
+
+asm_copy_imgt0_3:
+
 add edi,2
 asm_copy3:
 add esi,asm_copy_vc_sourceskip
@@ -1180,6 +1264,10 @@ pop esi
 }
 
 }//img(...)
+
+
+
+
 
 
 //75% transparency!
@@ -1376,30 +1464,30 @@ add ebx,edx
 and edx,edx
 jz asm_copy7
 asm_copy0:
-
 mov eax,[esi]
 mov ebp,[edi]
-and eax,4158584798 //11110111110111101111011111011110
-and ebp,3885819804 //11100111100111001110011110011100
-shr eax,1 //eax=50% of source
-shr ebp,2 //ebp=25% of dest
 add esi,4
-add ebp,eax //ebp=25%(ebp)+50%(eax)=75%
-and eax,4158584798 //11110111110111101111011111011110
-shr eax,1 //eax=25% of source
-add ebp,eax //bp=75%(bp)+25%(ax)=100%
-mov [edi],ebp
-add edi,4
 
-cmp esi,ebx
-jne asm_copy0
-cmp asm_copy_vc_extra2bytes,0
-je asm_copy3
-asm_copy7:
+and ax,ax
+jz asm_copy_imgt0_1
+and bp,59292
+and ax,63454
+shr bp,2 //bp=25% of dest
+shr ax,1 //ax=50% of source
+add bp,ax //bp=25%(bp)+50%(ax)=75%
+and ax,63454
+shr ax,1 //ax=25% of source
+add bp,ax //bp=75%(bp)+25%(ax)=100%
+mov [edi],bp
+asm_copy_imgt0_1:
 
-mov ax,[esi]
-mov bp,[edi]
-add esi,2
+shr ebp,16
+shr eax,16
+add edi,2
+
+and ax,ax
+jz asm_copy_imgt0_2
+
 and bp,59292
 and ax,63454
 shr bp,2 //25%
@@ -1409,8 +1497,41 @@ and ax,63454
 shr ax,1 //50%
 add bp,ax
 mov [edi],bp
+
+asm_copy_imgt0_2:
+
 add edi,2
 
+cmp esi,ebx
+jne asm_copy0
+cmp asm_copy_vc_extra2bytes,0
+je asm_copy3
+asm_copy7:
+
+
+
+
+
+mov ax,[esi]
+mov bp,[edi]
+add esi,2
+
+and ax,ax
+jz asm_copy_imgt0_3
+
+and bp,59292
+and ax,63454
+shr bp,2 //25%
+shr ax,1 //50%
+add bp,ax
+and ax,63454
+shr ax,1 //50%
+add bp,ax
+mov [edi],bp
+
+asm_copy_imgt0_3:
+
+add edi,2
 asm_copy3:
 add esi,asm_copy_vc_sourceskip
 add edi,asm_copy_vc_destskip
