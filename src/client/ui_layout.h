@@ -64,6 +64,49 @@ struct UiRect {
 // placement intentionally hide a panel by anchoring it off-screen.
 UiRect ResolveRect(const UiPlacement& p, int clientW, int clientH);
 
+// ---------------------------------------------------------------------
+// RW-P3.2: built-in panel inventory.
+//
+// Identifies every UI element with a *static* default position in the
+// legacy 1024x768 layout. Panels that are positioned dynamically at
+// runtime (party inventory windows, spellbook overlays, the input
+// portrait when the chat box pops open) are NOT in this table — those
+// stay off-screen until activated and are placed by the same code that
+// activates them. The table covers the "always-visible" / "comes back
+// to a known spot" panels that need to follow the window edges as it
+// resizes.
+//
+// A `sizeX`/`sizeY` of 0 means "use the panel's surface dimensions" —
+// the panel's `graphic` surface knows its own size and is the source
+// of truth. The table is concerned with position only. ResolveRect()
+// will still produce a valid rect; consumers that need accurate
+// right/bottom edges should override sizeX/sizeY from the surface
+// before calling.
+// ---------------------------------------------------------------------
+enum class UiPanelId : int {
+    // Conversation log scroll arrows (`con_frm`).
+    ConvoArrows = 0,
+    // Conversation log history image overlay (`con_frm_img`).
+    ConvoHistory,
+    // Party-list quick-stats panel (`qkstf`) — top-right corner block.
+    PartyList,
+    // Volume control sliders (`volcontrol`) — bottom-right.
+    VolumeControl,
+    // "View previous status message" up-arrow (`statusmessage_viewprev`)
+    // anchored to the bottom-left.
+    StatusViewPrev,
+
+    // Sentinel.
+    Count
+};
+
+// Default placement for each UiPanelId. Indexed by the integer value of
+// the enum; size == int(UiPanelId::Count). Defined in ui_layout.cpp.
+extern const UiPlacement kBuiltinPanels[];
+
+// Convenience accessor with bounds check.
+const UiPlacement& GetBuiltinPanel(UiPanelId id);
+
 }} // namespace u6o::client
 
 #endif // UI_LAYOUT_H

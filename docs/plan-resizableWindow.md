@@ -249,12 +249,29 @@ instead of cycling modes.
   `ResolveRect(p, clientW, clientH)` function. Added to both client
   CMake targets. Module is unused so far — P3.2 will populate the
   `kBuiltinPanels[]` table that consumes these types.)_
-- ⬜ **RW-P3.2** Inventory every absolute panel/widget coordinate (sidebar,
+- 🟡 **RW-P3.2** Inventory every absolute panel/widget coordinate (sidebar,
   minimap, status bar, action bar, action-talk bar, party-member panels,
   spellbook overlays, message log, character/inventory screen, intro
   overlays). Output: a static `kBuiltinPanels[]` table mapping each panel
   to a `UiPlacement` whose offsets reproduce **exact** legacy positions
   when `clientW=1024, clientH=768`.
+  _(2026-05-20 — first batch landed: `kBuiltinPanels[]` in
+  `src/client/ui_layout.cpp` covers the five always-on / known-spot
+  panels with edge-relative arithmetic in setup_client.inc:
+  `ConvoArrows` (TopLeft, +0,+92), `ConvoHistory` (TopLeft, +0,-256),
+  `PartyList` (TopRight, -128,+112), `VolumeControl` (BottomRight,
+  -128,-112), `StatusViewPrev` (BottomLeft, +0,-48). `UiPanelId` enum
+  + `GetBuiltinPanel()` accessor added to `ui_layout.h`. `sizeX`/`sizeY`
+  are 0 — the panel's `graphic` surface is the size source of truth;
+  the table tracks position only. Panels positioned dynamically at
+  runtime (`party_frame[i]`, `party_spellbook_frame[i]`, `inpf`,
+  `musickeyboard`, `voicechat_frame`, `minimap_frame`, `tmap_frame`,
+  `statusmessage_viewnpc`) are intentionally NOT in the table — they
+  use `+2048`/`4096` off-screen sentinels and are placed by the same
+  code that activates them, plus user-saved `cltset.*_offset_x` values.
+  Those will be handled in P3.3 by routing the activation code through
+  the same anchor scheme. The table is unused so far — P3.3 wires it
+  in.)_
 - ⬜ **RW-P3.3** Reroute every panel's draw call through
   `ResolveRect(...)`. Keep legacy globals (`panelx[i]`, `panely[i]`,
   `panelnew[i].offset_x/y`) but recompute them every frame from the
