@@ -13,6 +13,7 @@ if (wheel_move){
     key_gotrelease[i]=FALSE;
   }
 }
+
 if (playinstrument){
 
   txtset(t,"?"); t->d2[0]=25; //play MIDI keys

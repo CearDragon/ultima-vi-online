@@ -27,3 +27,4 @@ CMakeFiles/
 *.dir/
 *.tlog/
 *.log
+test/client/*

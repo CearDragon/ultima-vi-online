@@ -512,6 +512,7 @@ _asm{
 push esi
 push edi
 push ebx
+push ebp
 mov ecx,asm_copy_vc_rows
 mov edx,asm_copy_vc_bytesx
 mov esi,asm_copy_vc_sourceoffset
@@ -523,6 +524,7 @@ and edx,edx
 jz asm_copy7
 asm_copy0:
 mov eax,[esi]
+mov ebp,[edi]
 add esi,4
 
 and ax,ax
@@ -645,6 +647,7 @@ _asm{
 push esi
 push edi
 push ebx
+push ebp
 mov ecx,asm_copy_vc_rows
 mov edx,asm_copy_vc_bytesx
 mov esi,asm_copy_vc_sourceoffset
@@ -685,6 +688,7 @@ add esi,asm_copy_vc_sourceskip
 add edi,asm_copy_vc_destskip
 dec ecx
 jnz asm_copy1
+pop ebp
 pop ebx
 pop edi
 pop esi
