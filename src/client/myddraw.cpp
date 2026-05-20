@@ -54,6 +54,11 @@ static void blit_letterbox(HWND hWndDst, HDC srcdc, long srcW, long srcH)
 	double sx = (double)clientW / (double)srcW;
 	double sy = (double)clientH / (double)srcH;
 	double s  = (sx < sy) ? sx : sy;
+	// Never upscale beyond native pixels. When the client area is larger than
+	// the source surface (e.g. the window was maximized), keep the game image
+	// at 1:1 zoom and let the extra space become black border. This preserves
+	// the original art scale instead of stretching it.
+	if (s > 1.0) s = 1.0;
 	if (s <= 0.0) s = 1.0;
 
 	long dstW = (long)(srcW * s + 0.5);
