@@ -70,6 +70,20 @@ long   blit_offx  = 0;
 long   blit_offy  = 0;
 double blit_scale = 1.0;
 
+// Resizable-window plan (see docs/plan-resizableWindow.md).
+// Master feature flag for everything in that plan. When false, the client
+// behaves exactly as it did before the resizable-window work began. Set via
+// the WINDOW_RESIZE setting in settings.txt and parsed during client init.
+// Phase: RW-P0.4.
+bool windowResize = false;
+
+// Most recently observed window-client dimensions (RW-P1.3) and a flag set
+// by WM_SIZE that the main loop uses to trigger OnClientResized() outside of
+// WndProc. clientW/clientH start at 0 and are populated on first refresh.
+long clientW = 0;
+long clientH = 0;
+bool dirtyClientSize = false;
+
 // r999 new
 surf* uipanelsurf[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
 int uipanelx[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];

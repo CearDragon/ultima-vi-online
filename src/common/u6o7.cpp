@@ -486,8 +486,12 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 		// rrr can't change this; it will be broken
 //		clrect.top=0; clrect.left=0; clrect.bottom=768; clrect.right=1024;
 		clrect.top = 0; clrect.left = 0; clrect.bottom = resyo; clrect.right = resxo;
-		AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER|WS_SYSMENU|WS_MINIMIZEBOX|WS_MAXIMIZEBOX,FALSE);
-		hWnd2 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER|WS_SYSMENU|WS_MINIMIZEBOX|WS_MAXIMIZEBOX,
+		// RW-P1.1: WS_THICKFRAME enables drag-resize; combined with the
+		// minimize/maximize boxes added earlier this gives the player a fully
+		// resizable game window. The renderer letterboxes whatever client
+		// area Windows reports (see blit_letterbox in myddraw.cpp).
+		AdjustWindowRect(&clrect,WS_OVERLAPPEDWINDOW,FALSE);
+		hWnd2 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPEDWINDOW,
 			0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
 	}else{
 
@@ -531,6 +535,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_KILLFOCUS:
 		break;
 	case WM_SETFOCUS:
+		break;
+
+	// RW-P1.2: enforce a sensible minimum client size when the window is
+	// resizable, so the renderer never has to cope with degenerate dims.
+	case WM_GETMINMAXINFO:
+		{
+			MINMAXINFO* mmi = (MINMAXINFO*)lParam;
+			// Approximate non-client overhead (frame + caption); good enough
+			// for a floor — Windows will refuse smaller drag-resizes.
+			const long minClientW = 800;
+			const long minClientH = 600;
+			const long ncxOverhead = GetSystemMetrics(SM_CXSIZEFRAME) * 2;
+			const long ncyOverhead = GetSystemMetrics(SM_CYSIZEFRAME) * 2 +
+			                         GetSystemMetrics(SM_CYCAPTION);
+			mmi->ptMinTrackSize.x = minClientW + ncxOverhead;
+			mmi->ptMinTrackSize.y = minClientH + ncyOverhead;
+		}
+		return 0;
+
+	// RW-P1.3: capture new client dimensions and signal the main loop to
+	// run its OnClientResized handling. Surfaces are NOT touched from in
+	// here — that work is deferred to the next tick of the main loop.
+	case WM_SIZE:
+		if (wParam != SIZE_MINIMIZED) {
+			long newW = (long)LOWORD(lParam);
+			long newH = (long)HIWORD(lParam);
+			if (newW != clientW || newH != clientH) {
+				clientW = newW;
+				clientH = newH;
+				dirtyClientSize = true;
+			}
+		}
 		break;
 
 	case WM_KEYDOWN:

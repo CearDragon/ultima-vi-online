@@ -425,6 +425,12 @@ extern long my;
 extern long   blit_offx;
 extern long   blit_offy;
 extern double blit_scale;
+
+// Resizable-window plan (docs/plan-resizableWindow.md).
+extern bool windowResize;
+extern long clientW;
+extern long clientH;
+extern bool dirtyClientSize;
 extern long mb; //mouse input values (mb returns the button status)
 extern unsigned long mbclick; //mbclick: recieved mouse_down message for mouse button
 extern unsigned long mbheld; //set if the physical mouse button is being held down and has not been released

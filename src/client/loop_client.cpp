@@ -937,8 +937,48 @@ if (!NEThost) {
   if (lastsecond==-1) lastsecond=ett; x=ett; //detect frame rate
   if (x!=lastsecond){
     lastsecond=x; framerate=framecount; framecount=0;
+#ifdef _DEBUG
+    // RW-P0.2: per-second client-metrics log to make it easy to verify
+    // window-resize plumbing during development. Cheap (one OutputDebugString
+    // per second) and Debug-only so it never ships to release builds.
+    {
+      char dbgbuf[256];
+      _snprintf(dbgbuf, sizeof(dbgbuf),
+        "[u6o] client=%ldx%ld src=%ux%u blit_off=%ld,%ld blit_scale=%.3f "
+        "wsc=%u smallwin=%d resize=%d hWnd=%p\n",
+        clientW, clientH, resxo, resyo,
+        blit_offx, blit_offy, blit_scale,
+        windowsizecyclenum, (int)smallwindow, (int)windowResize,
+        (void*)hWnd);
+      dbgbuf[sizeof(dbgbuf)-1] = '\0';
+      OutputDebugStringA(dbgbuf);
+    }
+#endif
   }
   framecount++;
+}
+
+// RW-P1.4: react to WM_SIZE-driven client-area changes outside of WndProc.
+// At this point the renderer is unchanged (back buffer is still 1024x768),
+// so the only useful work this hook does today is give the rest of the
+// codebase one well-defined seam through which all future surface/UI
+// re-layout work in RW-P2..RW-P4 will be plumbed.
+if (dirtyClientSize) {
+  dirtyClientSize = false;
+  // refresh()/blit_letterbox already recomputes blit_offx/offy/scale every
+  // frame from GetClientRect, so input mapping stays correct without any
+  // extra work here. Reserved for future surface recreation (RW-P2.2) and
+  // UI anchor recomputation (RW-P3.3).
+#ifdef _DEBUG
+  {
+    char dbgbuf[160];
+    _snprintf(dbgbuf, sizeof(dbgbuf),
+      "[u6o] OnClientResized: %ldx%ld (windowResize=%d)\n",
+      clientW, clientH, (int)windowResize);
+    dbgbuf[sizeof(dbgbuf)-1] = '\0';
+    OutputDebugStringA(dbgbuf);
+  }
+#endif
 }
 
 // rrr moved fix mouse logic to (near) top of source file

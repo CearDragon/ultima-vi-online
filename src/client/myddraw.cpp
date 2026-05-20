@@ -37,6 +37,10 @@ extern unsigned int resyo;
 extern long   blit_offx;
 extern long   blit_offy;
 extern double blit_scale;
+extern long   clientW;
+extern long   clientH;
+extern bool   dirtyClientSize;
+extern bool   windowResize;
 
 // Blit the source-surface DC `srcdc` (size srcW x srcH) into window `hWndDst`
 // while preserving the source aspect ratio. Letterbox bars are filled black.
@@ -46,13 +50,18 @@ static void blit_letterbox(HWND hWndDst, HDC srcdc, long srcW, long srcH)
 {
 	RECT cr;
 	GetClientRect(hWndDst, &cr);
-	long clientW = cr.right  - cr.left;
-	long clientH = cr.bottom - cr.top;
-	if (clientW < 1) clientW = 1;
-	if (clientH < 1) clientH = 1;
+	long cW = cr.right  - cr.left;
+	long cH = cr.bottom - cr.top;
+	// Publish the live client dimensions for OnClientResized / debug logging
+	// (RW-P1.3). Use the raw GetClientRect values; clamping below is purely
+	// for the StretchBlt math that follows.
+	clientW = cW;
+	clientH = cH;
+	if (cW < 1) cW = 1;
+	if (cH < 1) cH = 1;
 
-	double sx = (double)clientW / (double)srcW;
-	double sy = (double)clientH / (double)srcH;
+	double sx = (double)cW / (double)srcW;
+	double sy = (double)cH / (double)srcH;
 	double s  = (sx < sy) ? sx : sy;
 	// Never upscale beyond native pixels. When the client area is larger than
 	// the source surface (e.g. the window was maximized), keep the game image
@@ -63,27 +72,27 @@ static void blit_letterbox(HWND hWndDst, HDC srcdc, long srcW, long srcH)
 
 	long dstW = (long)(srcW * s + 0.5);
 	long dstH = (long)(srcH * s + 0.5);
-	long dstX = (clientW - dstW) / 2;
-	long dstY = (clientH - dstH) / 2;
+	long dstX = (cW - dstW) / 2;
+	long dstY = (cH - dstH) / 2;
 
 	HDC winhdc = GetDC(hWndDst);
 
 	// Letterbox bars (black). Only fill the bars that exist.
 	HBRUSH black = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	if (dstY > 0) {
-		RECT r = { 0, 0, clientW, dstY };
+		RECT r = { 0, 0, cW, dstY };
 		FillRect(winhdc, &r, black);
 	}
-	if (dstY + dstH < clientH) {
-		RECT r = { 0, dstY + dstH, clientW, clientH };
+	if (dstY + dstH < cH) {
+		RECT r = { 0, dstY + dstH, cW, cH };
 		FillRect(winhdc, &r, black);
 	}
 	if (dstX > 0) {
 		RECT r = { 0, dstY, dstX, dstY + dstH };
 		FillRect(winhdc, &r, black);
 	}
-	if (dstX + dstW < clientW) {
-		RECT r = { dstX + dstW, dstY, clientW, dstY + dstH };
+	if (dstX + dstW < cW) {
+		RECT r = { dstX + dstW, dstY, cW, dstY + dstH };
 		FillRect(winhdc, &r, black);
 	}
 

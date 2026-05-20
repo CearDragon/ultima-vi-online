@@ -1949,6 +1949,12 @@ void newmodeinit() {
 		windowsizecyclenum = 0;
 	}
 
+	// RW-P0.4: master feature flag for the resizable-window plan
+	// (docs/plan-resizableWindow.md). Defaults to FALSE so the client
+	// remains bit-identical to legacy behavior unless the user opts in
+	// via "WINDOW_RESIZE [1]" in settings.txt.
+	windowResize = (getsetting("WINDOW_RESIZE") == 1);
+
 	/*
 		if (resysettingoption == 2) {
 			resysettingraw = (unsigned int)txtnum(GETSETTING_RAW);
@@ -2030,9 +2036,12 @@ void newmodeinit() {
 
 	static RECT clrect;
 	clrect.top = 0; clrect.left = 0; clrect.bottom = resyn1w; clrect.right = resxn1w;
-	AdjustWindowRect(&clrect, WS_OVERLAPPED | WS_CAPTION | WS_BORDER, FALSE);
+	// RW-P1.1: full overlapped window style with sysmenu/min/max boxes and
+	// drag-resize frame. Letterbox in blit_letterbox handles whatever client
+	// dims Windows reports.
+	AdjustWindowRect(&clrect, WS_OVERLAPPEDWINDOW, FALSE);
 
-	hWnd4 = CreateWindow(szWindowClass, window_name, WS_OVERLAPPED | WS_CAPTION | WS_BORDER,
+	hWnd4 = CreateWindow(szWindowClass, window_name, WS_OVERLAPPEDWINDOW,
 		0, 0, clrect.right - clrect.left, clrect.bottom - clrect.top, NULL, NULL, hInst, NULL);
 
 	// s555
