@@ -272,11 +272,29 @@ instead of cycling modes.
   Those will be handled in P3.3 by routing the activation code through
   the same anchor scheme. The table is unused so far — P3.3 wires it
   in.)_
-- ⬜ **RW-P3.3** Reroute every panel's draw call through
+- 🟡 **RW-P3.3** Reroute every panel's draw call through
   `ResolveRect(...)`. Keep legacy globals (`panelx[i]`, `panely[i]`,
   `panelnew[i].offset_x/y`) but recompute them every frame from the
   placements + current client size. Verify against golden screenshots from
   RW-P0.3.
+  _(2026-05-20 — first batch landed: `RepositionAnchoredPanels(int
+  clientW, int clientH)` in `src/client/ui_panels_apply.cpp` writes
+  `offset_x`/`offset_y` for the five P3.2 panels (`con_frm`,
+  `con_frm_img`, `qkstf`, `volcontrol`, `statusmessage_viewprev`) from
+  `ResolveRect(GetBuiltinPanel(id), clientW, clientH)`. Called once at
+  the end of `setup_client.inc` and again from the `dirtyClientSize`
+  handler in `loop_client.cpp`, both gated by `if (windowResize)`. At
+  the legacy 1024×768 client size the resolved positions equal the
+  legacy literal arithmetic exactly, so behavior with windowResize
+  enabled at 1024×768 is bit-identical. At any other client size, the
+  five panels follow the window edges. Trade-off: when windowResize is
+  on, this overwrites any user-saved `cltset.qkstf_offset_x` etc. for
+  those five panels — drag-saving will become anchor-aware in a later
+  commit. Dynamic panels (`party_frame[i]`, `party_spellbook_frame[i]`,
+  `inpf`, `musickeyboard`, `voicechat_frame`, `minimap_frame`,
+  `tmap_frame`, `statusmessage_viewnpc`) are NOT rerouted yet — they
+  use off-screen sentinels and are placed by the same code that
+  activates them. RW-P3.5 / a follow-up commit converts those.)_
 - ⬜ **RW-P3.4** Convert hard-coded equipment-slot offsets in
   `define_both.h` (`helmx=52`, `wep_rightx=20`, `armourx=52`, `bootsx=52`,
   …) into a `kEquipSlotLayout` table relative to the inventory panel's

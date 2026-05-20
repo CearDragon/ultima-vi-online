@@ -854,6 +854,19 @@ U6O_WALKTHRU_REC=TRUE;
 
 scrlog("Beginning main loop!");
 
+// RW-P3.3: when WINDOW_RESIZE is enabled, snap the five anchored
+// panels (con_frm, con_frm_img, qkstf, volcontrol,
+// statusmessage_viewprev) to their UiPlacement-resolved positions for
+// the current client size. At the legacy 1024x768 size this is a
+// no-op (the placements were authored to reproduce the legacy literals
+// exactly), so behavior at the default window size is bit-identical.
+// At any other client size, the panels follow the window edges. The
+// call is a no-op when windowResize is off — existing positions
+// (including any cltset-saved overrides) stay untouched.
+if (windowResize) {
+    RepositionAnchoredPanels((int)clientW, (int)clientH);
+}
+
 tfh=open(".\\dr\\objfixed.bin"); get(tfh,&objfixed_index,2048*1024*2); get(tfh,&objfixed_type,65536*2); close(tfh);
 //scrlog(">Fixed map objects loaded [objfixed.bin]");
 

@@ -107,7 +107,25 @@ extern const UiPlacement kBuiltinPanels[];
 // Convenience accessor with bounds check.
 const UiPlacement& GetBuiltinPanel(UiPanelId id);
 
+// RW-P3.3: re-apply the kBuiltinPanels[] placements to the live panel
+// globals (`con_frm`, `qkstf`, `volcontrol`, `statusmessage_viewprev`,
+// `con_frm_img`) using the supplied client size. Called once at startup
+// (end of setup_client.inc) and again from the dirtyClientSize handler
+// when the window is resized. Implemented in ui_panels_apply.cpp where
+// the panel globals are visible (via data_client.h).
+//
+// Caller is responsible for the `windowResize` feature gate — this
+// function unconditionally writes the offsets when called. When the
+// flag is off, callers skip it so legacy positions stay untouched.
+void RepositionAnchoredPanels(int clientW, int clientH);
+
 }} // namespace u6o::client
+
+// Unqualified shim so existing C-style call sites in setup_client.inc /
+// loop_client.cpp can use the name without the `u6o::client::` prefix.
+inline void RepositionAnchoredPanels(int clientW, int clientH) {
+    u6o::client::RepositionAnchoredPanels(clientW, clientH);
+}
 
 #endif // UI_LAYOUT_H
 

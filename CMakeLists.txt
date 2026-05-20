@@ -155,6 +155,7 @@ set(Source_Files
         "src/common/txt.cpp"
         "src/client/viewport.cpp"
         "src/client/ui_layout.cpp"
+        "src/client/ui_panels_apply.cpp"
         "src/common/u6o7.cpp"
         "src/common/use_code/use_code.cpp"
         "src/common/Xenkan.cpp"
@@ -571,6 +572,7 @@ set(Source_Files
         "src/common/Xenkan.cpp"
         "src/client/viewport.cpp"
         "src/client/ui_layout.cpp"
+        "src/client/ui_panels_apply.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
 

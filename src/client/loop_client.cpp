@@ -975,6 +975,12 @@ if (dirtyClientSize) {
   // next RW-P2 commit, after manual testing of the centralized accessors.
   if (windowResize) {
     recreateBackbuffers((int)clientW, (int)clientH);
+    // RW-P3.3: re-anchor the five static UI panels to the new client
+    // size so they follow the window edges. No-op for any panel that
+    // was repositioned by the user via cltset since this writes
+    // unconditionally — that gap is documented in the plan and will be
+    // closed when drag-saving becomes anchor-aware.
+    RepositionAnchoredPanels((int)clientW, (int)clientH);
   }
 #ifdef _DEBUG
   {
