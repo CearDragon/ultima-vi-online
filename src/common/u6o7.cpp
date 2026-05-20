@@ -486,8 +486,8 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 		// rrr can't change this; it will be broken
 //		clrect.top=0; clrect.left=0; clrect.bottom=768; clrect.right=1024;
 		clrect.top = 0; clrect.left = 0; clrect.bottom = resyo; clrect.right = resxo;
-		AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,FALSE);
-		hWnd2 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,
+		AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER|WS_SYSMENU|WS_MINIMIZEBOX|WS_MAXIMIZEBOX,FALSE);
+		hWnd2 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER|WS_SYSMENU|WS_MINIMIZEBOX|WS_MAXIMIZEBOX,
 			0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
 	}else{
 
@@ -497,9 +497,9 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 	}
 
 	clrect.top=0; clrect.left=0; clrect.bottom= resys; clrect.right= resxs;
-	AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,FALSE);
+	AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER|WS_SYSMENU|WS_MINIMIZEBOX|WS_MAXIMIZEBOX,FALSE);
 
-	hWnd3 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,
+	hWnd3 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER|WS_SYSMENU|WS_MINIMIZEBOX|WS_MAXIMIZEBOX,
 		0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
 
 	// rrr moved to newmodeinit
