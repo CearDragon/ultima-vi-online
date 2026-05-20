@@ -6592,6 +6592,22 @@ CLIENT_donemess:
     if (nodisplay) goto skiprefresh2;
 
 
+    // RW-P2.2 / RW-P3.3 trails fix: when WINDOW_RESIZE is on and the
+    // active back-buffer is larger than the legacy 1024x768 world view,
+    // clear the whole back-buffer to black at the start of each frame.
+    // The world tile renderer overdraws the upper-left 1024x768 area
+    // every frame, but anything outside that rect (extended right/
+    // bottom strips when the window has been enlarged) is never
+    // overwritten by the world pass — so stale pixels (UI panels'
+    // previous positions, drifted clouds) accumulated as visible
+    // trails. A single DD COLORFILL is hardware-fast.
+    //
+    // Gated on windowResize so legacy 1024x768 users see no behavior
+    // change and don't pay the (small) per-frame cls cost.
+    if (windowResize && (backbufferW() > 1024 || backbufferH() > 768)) {
+        cls(ps, 0);
+    }
+
     // RW-P2.3: route lighting buffer copy size through viewport.h accessor.
     // RW-P2.1: ls/ls_moonN are now heap pointers (lighting_alloc), so we
     // pass the pointers directly instead of `&ls`/`&ls_moonN`.
@@ -8396,7 +8412,7 @@ asm_lightshow2:
           if (z2==10) z2=0;
           x=osx[z];
           y=osy[z]-8;
-          if ((timelval-ls[x+(y+8+16)*1024])==15) goto osdisplay_ktar_skip;
+          if ((timelval-ls[x+(y+8+16)*lightingStride()])==15) goto osdisplay_ktar_skip;
           txtnumint(t,z2);
           txtfnt=fnt2;
           goto osdisplay_ktar;

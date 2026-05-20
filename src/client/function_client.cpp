@@ -327,14 +327,6 @@ bool recreateBackbuffers(int newW, int newH) {
         return true; // already at requested size
     }
 
-    // Re-allocate the lighting buffers FIRST so any code path that
-    // reads ls during the surface free/recreate window sees a valid
-    // (zero-initialized) buffer of the new size. lighting_alloc is
-    // idempotent and bumps storage to match the new dims.
-    if (!lighting_alloc(newW, newH)) {
-        return false;
-    }
-
     // Whether the 32-bpp helper surface ps3 currently exists. It's
     // only created on non-16bpp displays in setup_client.inc, so we
     // re-create it only if it was there to begin with.
@@ -357,6 +349,25 @@ bool recreateBackbuffers(int newW, int newH) {
 
     if (!ps || (had_ps3 && !ps3) || !ps5) {
         return false; // allocation failure — leave dims at old values
+    }
+
+    // Pitch correctness: DirectDraw may pad the row stride beyond
+    // newW*2 (16-byte alignment etc.). Adopt the actual pitch reported
+    // by DD as our canonical width — every subsequent renderer hot
+    // path that reads `lightingStride()` / `backbufferW()` for memory
+    // arithmetic will then match the surface's true row stride. The
+    // visible image width (`ps->d.dwWidth`) is unchanged, so
+    // blit_letterbox still shows exactly the requested area in the
+    // window; padding pixels at the right edge are inside the surface
+    // but outside dwWidth and are simply not rendered.
+    int pitchPx = (int)(ps->d.lPitch / sizeof(unsigned short));
+    if (pitchPx > newW) newW = pitchPx;
+
+    // Re-allocate the lighting buffers at the actual stride so the
+    // linear-walk inline asm in the lighting compose pass at
+    // loop_client.cpp:8294ff stays in lockstep with `ps->o`.
+    if (!lighting_alloc(newW, newH)) {
+        return false;
     }
 
     // Patch FRAME pointers that held a reference to the old ps. vf
