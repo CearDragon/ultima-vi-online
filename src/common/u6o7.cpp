@@ -540,7 +540,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	// RW-P1.3: capture new client dimensions and signal the main loop to
 	// run its OnClientResized handling. Surfaces are NOT touched from in
 	// here — that work is deferred to the next tick of the main loop.
+	//
+	// Also drives the `nodisplay` flag from the actual window state so the
+	// game pauses while minimized and resumes on restore — without this,
+	// minimizing left the client frozen because the previous M-key handler
+	// was the only thing that ever cleared `nodisplay`.
 	case WM_SIZE:
+#ifdef CLIENT
+		if (wParam == SIZE_MINIMIZED) {
+			nodisplay = TRUE;
+		} else {
+			nodisplay = FALSE;
+		}
+#endif
 		if (wParam != SIZE_MINIMIZED) {
 			long newW = (long)LOWORD(lParam);
 			long newH = (long)HIWORD(lParam);

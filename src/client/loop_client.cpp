@@ -3054,21 +3054,24 @@ intro_done:
     exitrequest=TRUE;
   }
 
-  if ((NEThost)&&(host_minimize)){host_minimize=FALSE; goto host_minimize_goto;}
-  if (u6okeyhit(U6OK_MAXMIN)){ //"M" minimize
-    // Option A (single-window-mode cleanup, 2026-05-20): Mode 1 is the only
-    // window mode now. The "M" key used to cycle through small-window /
-    // N1-enhanced / restored variants by toggling smallwindow and
-    // windowsizecyclenum. With those modes gone, "M" simply minimizes the
-    // game window. The user can drag-resize, maximize, or restore via the
-    // standard system menu (and via WS_THICKFRAME / the maximize button).
-    if (nodisplay==FALSE){
-host_minimize_goto:
-      nodisplay=TRUE;
-      ShowWindow(hWnd2,SW_MINIMIZE);
-      for (i=0;i<=65535;i++) keyon[i]=FALSE;
-    }
+  if ((NEThost)&&(host_minimize)){
+    // Programmatic minimize from host startup (or anywhere else that sets
+    // the host_minimize flag). The actual `nodisplay` toggle is now driven
+    // by WM_SIZE in WndProc, so all this needs to do is ask Windows to
+    // minimize the window — restore via the taskbar will resume the game.
+    host_minimize=FALSE;
+    ShowWindow(hWnd2,SW_MINIMIZE);
+    for (i=0;i<=65535;i++) keyon[i]=FALSE;
   }
+  // Option A follow-up (2026-05-20): the "M" / U6OK_MAXMIN hotkey is
+  // removed entirely. Its previous behavior (cycle through window modes)
+  // is meaningless now that only one mode exists, and the simplified
+  // "minimize on M" version had a bug where pressing M to minimize froze
+  // the game because nothing reset `nodisplay` on restore. Standard
+  // window chrome (minimize button, taskbar) is the supported way to
+  // minimize/restore — that path is wired through WM_SIZE in WndProc.
+  // The U6OK_MAXMIN keybinding in setup_client.inc is left in place but
+  // is no longer consulted anywhere in the main loop.
 maxminmini:
 
 
