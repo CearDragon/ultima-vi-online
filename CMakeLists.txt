@@ -107,6 +107,7 @@ set(Header_Files
         "src/common/stdafx.h"
         "src/common/u6o7.h"
         "src/common/use_code/use_code.h"
+        "src/client/viewport.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -530,6 +531,7 @@ set(Header_Files
         "src/common/stdafx.h"
         "src/common/u6o7.h"
         "src/common/use_code/use_code.h"
+        "src/client/viewport.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 

@@ -1,4 +1,5 @@
 #include "function_client.h"
+#include "viewport.h" // RW-P2: backbufferW/H, lightingStride, lightingTotalBytes
 //#include <windows.h>
 #pragma warning(disable: 4018 4244)
 void function_client_init(void){
@@ -246,9 +247,16 @@ void midiup(unsigned char instrument,unsigned char key){
 
 void LIGHTnew(unsigned short x,unsigned short y,unsigned long light_data_offset, unsigned short x_axis_size){
   if (timelval==0) return;
+  // RW-P2.3: read back-buffer dims through the viewport.h accessors so this
+  // function tracks the active back-buffer size when it eventually becomes
+  // dynamic. Today the accessors return the legacy 1024/768 constants and
+  // behavior is identical to the previous hard-coded literals.
   static long asm_copy_vc_bytesx,asm_copy_vc_sourceoffset,asm_copy_vc_destoffset,asm_copy_vc_sourceskip,asm_copy_vc_destskip,asm_copy_vc_rows;
   static long x2,y2,x3,y3,x4,y4;
   static long xoff,yoff;
+  const long bbW = backbufferW();
+  const long bbH = backbufferH();
+  const long lsStride = lightingStride();
   xoff=x-x_axis_size/2;
   xoff<<=5;
   yoff=y-x_axis_size/2;
@@ -258,17 +266,17 @@ void LIGHTnew(unsigned short x,unsigned short y,unsigned long light_data_offset,
   x3=0;//start source x offset
   x4=x_axis_size; //displayed "pixels" of x axis
   if (xoff<0){x4+=xoff; x2=0; x3=-xoff;}
-  if ((xoff+x_axis_size)>1024) x4-=xoff+x_axis_size-1024;
+  if ((xoff+x_axis_size)>bbW) x4-=xoff+x_axis_size-bbW;
   y2=yoff;//starting dest y offset
   y3=0;//starting source y offset
   y4=x_axis_size; //rows on screen
   if (yoff<0){y4+=yoff; y2=0; y3=-yoff;}
-  if ((yoff+x_axis_size)>768) y4-=yoff+x_axis_size-768;
+  if ((yoff+x_axis_size)>bbH) y4-=yoff+x_axis_size-bbH;
   asm_copy_vc_bytesx=x4;
   asm_copy_vc_sourceskip=x_axis_size-asm_copy_vc_bytesx;
-  asm_copy_vc_destskip=1024-asm_copy_vc_bytesx;
+  asm_copy_vc_destskip=lsStride-asm_copy_vc_bytesx;
   asm_copy_vc_sourceoffset=y3*x_axis_size+light_data_offset+x3;
-  asm_copy_vc_destoffset=(y2<<10)+(unsigned long)&ls+x2;
+  asm_copy_vc_destoffset=(y2*lsStride)+(unsigned long)&ls+x2;
   asm_copy_vc_rows=y4;
   _asm{
     push esi

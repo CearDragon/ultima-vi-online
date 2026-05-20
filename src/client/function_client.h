@@ -6,6 +6,7 @@
  */
 #include "data_client.h"
 #include "function_both.h"
+#include "viewport.h" // RW-P2: backbufferW/H, lightingStride, recreateBackbuffers
 
 /* external global variables */
 	//GetInput variables 

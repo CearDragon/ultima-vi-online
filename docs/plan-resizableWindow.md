@@ -147,21 +147,47 @@ instead of cycling modes.
 
 ## RW-P2 — Dynamic back buffer (`ps`, `ps3`, `ps5`, lighting buffers)
 
-- ⬜ **RW-P2.1** Replace fixed-size lighting arrays with heap-allocated
+- 🟡 **RW-P2.1** Replace fixed-size lighting arrays with heap-allocated
   buffers sized `clientW * clientH` (or rounded up to a tile multiple):
   - `ls`, `ls_moon1..4` (currently `unsigned char[1024*768]`).
   - Centralize size + (re)allocation in a new `ViewportBuffers` struct in
     `src/client/viewport_buffers.{h,cpp}`. No behavior change while size
     stays at 1024×768.
-- ⬜ **RW-P2.2** Wrap `newsurf(1024,768,…)` calls in `setup_client.inc` with
+  _(2026-05-20 — partial: created `src/client/viewport.h` as the
+  centralization seam with accessors `backbufferW()`, `backbufferH()`,
+  `lightingStride()`, `lightingTotalBytes()`, plus a `recreateBackbuffers()`
+  no-op stub. Today the accessors return the legacy `1024`/`768`
+  constants, so behavior is bit-identical. The actual heap allocation of
+  the `ls`/`ls_moon*` buffers and the inline-asm `mov ebp, 786432` pixel
+  count in the lighting-compose pass are **not yet dynamic** — those land
+  in the next RW-P2 commit after manual testing of the seam.)_
+- 🟡 **RW-P2.2** Wrap `newsurf(1024,768,…)` calls in `setup_client.inc` with
   `newsurf(currentBackbufferW(), currentBackbufferH(), …)`. Provide
   `RecreateBackbuffers(newW, newH)` that frees and reallocates `ps`, `ps3`,
   `ps5`, `psnew1`, `psnew1b`. Call from `OnClientResized` (gated by
   `windowResize` flag).
-- ⬜ **RW-P2.3** Audit `function_client.cpp` blits and clamps for hard-coded
+  _(2026-05-20 — partial: `recreateBackbuffers(int newW, int newH)` is now
+  called from the `OnClientResized` block in `loop_client.cpp` whenever
+  `dirtyClientSize` flips and `windowResize` is on. The call is currently
+  a no-op stub in `viewport.h`. The real work — releasing the DirectDraw
+  surfaces and reallocating at the new client size — is the next step.
+  `setup_client.inc` `newsurf(1024,768,…)` calls have **not** been
+  rewritten yet; they should become `newsurf(backbufferW(), backbufferH(),
+  …)` in the same commit that flips the seam to dynamic.)_
+- 🟡 **RW-P2.3** Audit `function_client.cpp` blits and clamps for hard-coded
   `1024` / `768` / `>1024` / `>=768` checks; replace with
   `currentBackbufferW()` / `currentBackbufferH()`. Hotspots already known:
   view-blit clamp at ~line 332 (`(xoff + x_axis_size) > 1024`).
+  _(2026-05-20 — first hot path converted: `LIGHTnew()` in
+  `function_client.cpp` now reads `backbufferW()`, `backbufferH()`, and
+  `lightingStride()` for its row-stride math (`y2 * lsStride` replacing
+  `y2<<10`), the row-pitch skip, and both edge clamps. Behavior at the
+  legacy 1024×768 is identical (compiler folds the constants). The
+  remaining hot paths still to convert are the ones listed in
+  `docs/resizable-window-hotspots.md` Section A — most importantly the
+  `lightshow0` inline-asm loop at `loop_client.cpp:8264` (`mov ebp,
+  786432`), the `&ls + sizeof(ls)` references at `loop_client.cpp:6579`,
+  and the `ls_off=(y7<<10)+x7` etc. block at `loop_client.cpp:8070`.)_
 - ⬜ **RW-P2.4** Update `refresh()` so `srcW/srcH` passed to
   `blit_letterbox` come from the actual surface dims (already does via
   `s->d.dwWidth/dwHeight` — verify and add an assert that they equal the
@@ -172,6 +198,16 @@ instead of cycling modes.
 - **Exit:** Back buffer size follows client size at runtime. With
   `windowResize` enabled, the maximized window paints correctly to its full
   client area (UI in original positions, no upscale, no black bars).
+  _(Status 2026-05-20: P2.1/P2.2/P2.3 partial — centralization seam in
+  place, one hot path migrated, no behavior change at default
+  resolution. Next RW-P2 commit must (a) flip the accessors in
+  `viewport.h` from constants to `extern` runtime variables published by
+  `recreateBackbuffers()`, (b) heap-allocate `ls`/`ls_moon*` and rewrite
+  the asm pixel count + the `&ls`-vs-`ls` idiom at the 4 sites in
+  `loop_client.cpp`, (c) free/recreate the DirectDraw surfaces inside
+  `recreateBackbuffers()`, (d) finish converting the remaining hot paths
+  in `loop_client.cpp` and `function_client.cpp`. Manual testing required
+  between (a)+(b) and (c)+(d) since each step changes runtime behavior.)_
 
 ---
 

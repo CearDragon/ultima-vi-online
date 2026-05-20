@@ -969,6 +969,13 @@ if (dirtyClientSize) {
   // frame from GetClientRect, so input mapping stays correct without any
   // extra work here. Reserved for future surface recreation (RW-P2.2) and
   // UI anchor recomputation (RW-P3.3).
+  // RW-P2.2: when windowResize is on, ask the viewport seam to (eventually)
+  // re-create back buffers at the new client size. Today this is a no-op
+  // stub in viewport.h; the actual surface free/realloc work lands in the
+  // next RW-P2 commit, after manual testing of the centralized accessors.
+  if (windowResize) {
+    recreateBackbuffers((int)clientW, (int)clientH);
+  }
 #ifdef _DEBUG
   {
     char dbgbuf[160];
