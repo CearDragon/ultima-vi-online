@@ -3055,44 +3055,19 @@ intro_done:
   }
 
   if ((NEThost)&&(host_minimize)){host_minimize=FALSE; goto host_minimize_goto;}
-  if (u6okeyhit(U6OK_MAXMIN)){ //"M" maximize/minimize/mini_window
-    if ((smallwindow==FALSE)&&(nodisplay==FALSE)&&NEThost){
+  if (u6okeyhit(U6OK_MAXMIN)){ //"M" minimize
+    // Option A (single-window-mode cleanup, 2026-05-20): Mode 1 is the only
+    // window mode now. The "M" key used to cycle through small-window /
+    // N1-enhanced / restored variants by toggling smallwindow and
+    // windowsizecyclenum. With those modes gone, "M" simply minimizes the
+    // game window. The user can drag-resize, maximize, or restore via the
+    // standard system menu (and via WS_THICKFRAME / the maximize button).
+    if (nodisplay==FALSE){
 host_minimize_goto:
       nodisplay=TRUE;
       ShowWindow(hWnd2,SW_MINIMIZE);
       for (i=0;i<=65535;i++) keyon[i]=FALSE;
-      goto maxminmini;
     }
-
-	// rrr cycle through resolution modes; added the new resolution mode into the cycle
-	if (enhanceclientn1) { // s555
-		if ((smallwindow == TRUE) && (nodisplay == FALSE)) {
-			windowsizecyclenum++;
-			if (windowsizecyclenum > windowsizecyclemax) {
-				windowsizecyclenum = 0;
-			}
-			else {
-				for (i = 0; i <= 65535; i++) keyon[i] = FALSE;
-				goto maxminmini;
-			}
-		}
-	}
-
-    if ((smallwindow==FALSE)&&(nodisplay==FALSE)){
-      smallwindow=TRUE;
-      for (i=0;i<=65535;i++) keyon[i]=FALSE;
-      goto maxminmini;
-    }
-    if (nodisplay==TRUE){
-      //nodisplay_maximize:
-      nodisplay=FALSE;
-      ShowWindow(hWnd3,SW_SHOW);
-      smallwindow=TRUE;
-      for (i=0;i<=65535;i++) keyon[i]=FALSE;
-      goto maxminmini;
-    }
-    smallwindow=FALSE;
-    for (i=0;i<=65535;i++) keyon[i]=FALSE;
   }
 maxminmini:
 

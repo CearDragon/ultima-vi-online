@@ -481,40 +481,23 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 	static RECT clrect;
 	hInst = hInstance;
 
-	if ((desktop_rect.right>1024)&&(desktop_rect.bottom>768)){
-		//create 1024x768 window with title bar
-		// rrr can't change this; it will be broken
-//		clrect.top=0; clrect.left=0; clrect.bottom=768; clrect.right=1024;
-		clrect.top = 0; clrect.left = 0; clrect.bottom = resyo; clrect.right = resxo;
-		// RW-P1.1: WS_THICKFRAME enables drag-resize; combined with the
-		// minimize/maximize boxes added earlier this gives the player a fully
-		// resizable game window. The renderer letterboxes whatever client
-		// area Windows reports (see blit_letterbox in myddraw.cpp).
-		AdjustWindowRect(&clrect,WS_OVERLAPPEDWINDOW,FALSE);
-		hWnd2 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPEDWINDOW,
-			0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
-	}else{
-
-		//create a 1024x768 window (not movable, full screen window)
-		hWnd2 = CreateWindow(szWindowClass,window_name,WS_POPUP,
-			0, 0, 1024, 768, NULL, NULL, hInstance, NULL);
-	}
-
-	clrect.top=0; clrect.left=0; clrect.bottom= resys; clrect.right= resxs;
-	AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER|WS_SYSMENU|WS_MINIMIZEBOX|WS_MAXIMIZEBOX,FALSE);
-
-	hWnd3 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER|WS_SYSMENU|WS_MINIMIZEBOX|WS_MAXIMIZEBOX,
+	// Option A (single-window-mode cleanup, 2026-05-20):
+	//   - Mode 1 (main classic 1024x768, hWnd2) is the only window mode now.
+	//   - The desktop<=1024x768 WS_POPUP fullscreen fallback is gone; on a
+	//     too-small desktop the window will simply be partially off-screen
+	//     and the user can drag/resize it (we now have WS_THICKFRAME).
+	//   - hWnd3 (small classic 512x384) is no longer created.
+	//   - hWnd4 (N1 enhanced) is created (or rather, NOT created) over in
+	//     function_client.cpp's newmodeinit; it's pinned to NULL.
+	clrect.top = 0; clrect.left = 0; clrect.bottom = resyo; clrect.right = resxo;
+	// WS_OVERLAPPEDWINDOW = caption + sysmenu + thickframe + min/max boxes,
+	// giving the player full drag-resize, maximize, and minimize.
+	AdjustWindowRect(&clrect,WS_OVERLAPPEDWINDOW,FALSE);
+	hWnd2 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPEDWINDOW,
 		0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
 
-	// rrr moved to newmodeinit
-	/*
-	static RECT clrect;
-	clrect.top = 0; clrect.left = 0; clrect.bottom = resyn1w; clrect.right = resxn1w;
-	AdjustWindowRect(&clrect, WS_OVERLAPPED | WS_CAPTION | WS_BORDER, FALSE);
-
-	hWnd4 = CreateWindow(szWindowClass, window_name, WS_OVERLAPPED | WS_CAPTION | WS_BORDER,
-		0, 0, clrect.right - clrect.left, clrect.bottom - clrect.top, NULL, NULL, hInstance, NULL);
-	*/
+	hWnd3 = NULL;
+	// hWnd4 set NULL in function_client.cpp newmodeinit.
 
 	hWnd=hWnd2;
 	ShowWindow(hWnd,nCmdShow);

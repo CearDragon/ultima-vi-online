@@ -313,79 +313,21 @@ return;
 }
 
 // rrr refresh(surf* s)
+//
+// Option A (single-window-mode cleanup, 2026-05-20): the client now has only
+// one window (hWnd2 / hWnd) so refresh() collapses to a single
+// blit_letterbox call. The previous multi-branch implementation switched
+// between hWnd2 / hWnd3 / hWnd4 based on smallwindow + windowsizecyclenum
+// and recomputed scalexm/scaleym for mouse mapping. None of that is needed
+// any more — blit_letterbox already publishes blit_offx/offy/scale every
+// frame, and the WndProc mouse handler maps client coords back through
+// those globals.
 void refresh(surf* s)
 {
-static HDC ddhdc;
-if (smallwindow){
-//switch to 512x384 window if not currently displayed
-/*
-if (hWnd != hWnd3) {
-ShowWindow(hWnd3, SW_SHOW);
-UpdateWindow(hWnd3);
-ShowWindow(hWnd2, SW_HIDE); //hide current window
-hWnd = hWnd3;
-}
-*/
-	
-	if (windowsizecyclenum == 0) {
-		if (hWnd != hWnd3) {
-			ShowWindow(hWnd3, SW_SHOW);
-			UpdateWindow(hWnd3);
-			//ShowWindow(hWnd2, SW_HIDE); //hide current window
-			ShowWindow(hWnd, SW_HIDE); //hide current window
-			hWnd = hWnd3;
-
-			resxz = resxs;
-			resyz = resys;
-			scalexm = (double)resxo / resxz;
-			scaleym = (double)resyo / resyz;
-		}
-	}
-	else if (windowsizecyclenum == 1) {
-		if (hWnd != hWnd4) {
-			ShowWindow(hWnd4, SW_SHOW);
-			UpdateWindow(hWnd4);
-			ShowWindow(hWnd, SW_HIDE); //hide current window
-			hWnd = hWnd4;
-
-			resxz = resxn1m;
-			resyz = resyn1m;
-			scalexm = (double)resxo / resxz;
-			scaleym = (double)resyo / resyz;
-		}
-	}
-
-
-	// letterbox-scale into the small-window client area
+	HDC ddhdc;
 	s->s->GetDC(&ddhdc);
 	blit_letterbox(hWnd, ddhdc, (long)s->d.dwWidth, (long)s->d.dwHeight);
 	s->s->ReleaseDC(ddhdc);
-	return;
-
-
-}
-
-
-//switch to 1024x768 window if not currently displayed
-if (hWnd!=hWnd2){
-ShowWindow(hWnd2,SW_SHOW);
-UpdateWindow(hWnd2);
-//ShowWindow(hWnd3,SW_HIDE); //hide current window
-ShowWindow(hWnd, SW_HIDE); //hide current window
-hWnd=hWnd2;
-}
-//1024x768 title bar window refresh
-if ((desktop_rect.right>1024)&&(desktop_rect.bottom>768)){
-s->s->GetDC(&ddhdc);
-blit_letterbox(hWnd, ddhdc, (long)s->d.dwWidth, (long)s->d.dwHeight);
-s->s->ReleaseDC(ddhdc);
-return;
-}
-//1024x768 full screen refresh (WS_POPUP, no title bar; client == 1024x768)
-s->s->GetDC(&ddhdc);
-blit_letterbox(hWnd, ddhdc, (long)s->d.dwWidth, (long)s->d.dwHeight);
-s->s->ReleaseDC(ddhdc);
-
 
 }//refresh end
 

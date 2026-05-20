@@ -11,6 +11,14 @@
 > The "Phase" column ties each row to a phase ID in
 > `docs/plan-resizableWindow.md`.
 
+> **Scope reduction 2026-05-20 (Option A applied):** the small classic
+> 512×384 mode (`hWnd3`), the "N1 enhanced" alternate window (`hWnd4`),
+> and the WS_POPUP fullscreen fallback have been removed from the runtime
+> path. As a result, several rows below that targeted those modes are now
+> moot and have been struck through. The remaining rows are the work
+> needed to make the **single remaining** Mode 1 (main classic 1024×768)
+> resizable.
+
 ## Summary
 
 - 6 categories (A–G).
@@ -38,17 +46,17 @@ world-map widths or other unrelated meanings).
 
 | File                                        | Line  | Snippet                                                                                | Meaning                                                | Phase    |
 | ------------------------------------------- | ----- | -------------------------------------------------------------------------------------- | ------------------------------------------------------ | -------- |
-| `src/client/setup_client.inc`               | 23    | `ps=newsurf(1024,768,SURF_SYSMEM16);`                                                  | Back buffer alloc (legacy branch, before resxo/resyo)  | RW-P2.2  |
-| `src/client/setup_client.inc`               | 25    | `ps2=newsurf(1024/2,768/2,SURF_SYSMEM);`                                               | Half-res helper surface                                | RW-P2.2  |
-| `src/client/setup_client.inc`               | 26    | `ps3=newsurf(1024,768,SURF_SYSMEM);`                                                   | Back buffer alloc                                      | RW-P2.2  |
-| `src/client/setup_client.inc`               | 27    | `ps4=newsurf(1024/2,768/2,SURF_SYSMEM16);`                                             | Half-res helper                                        | RW-P2.2  |
-| `src/client/setup_client.inc`               | 29    | `ps2=newsurf(1024/2,768/2,SURF_SYSMEM16);`                                             | Half-res helper                                        | RW-P2.2  |
-| `src/client/setup_client.inc`               | 31    | `ps5=newsurf(1024,768,SURF_SYSMEM16);`                                                 | Unconverted minimap surface                            | RW-P2.2  |
+| ~~`src/client/setup_client.inc`~~           | ~~23~~| ~~`ps=newsurf(1024,768,SURF_SYSMEM16);`~~                                              | ~~Back buffer alloc (legacy branch)~~ — Mode 1 always uses the `resxo/resyo` branch on lines 40-48 | DEAD (Option A) |
+| ~~`src/client/setup_client.inc`~~           | ~~25~~| ~~`ps2=newsurf(1024/2,768/2,SURF_SYSMEM);`~~                                           | ~~Half-res helper~~                                    | DEAD (Option A) |
+| ~~`src/client/setup_client.inc`~~           | ~~26~~| ~~`ps3=newsurf(1024,768,SURF_SYSMEM);`~~                                               | ~~Back buffer alloc~~                                  | DEAD (Option A) |
+| ~~`src/client/setup_client.inc`~~           | ~~27~~| ~~`ps4=newsurf(1024/2,768/2,SURF_SYSMEM16);`~~                                         | ~~Half-res helper~~                                    | DEAD (Option A) |
+| ~~`src/client/setup_client.inc`~~           | ~~29~~| ~~`ps2=newsurf(1024/2,768/2,SURF_SYSMEM16);`~~                                         | ~~Half-res helper~~                                    | DEAD (Option A) |
+| ~~`src/client/setup_client.inc`~~           | ~~31~~| ~~`ps5=newsurf(1024,768,SURF_SYSMEM16);`~~                                             | ~~Unconverted minimap surface~~                        | DEAD (Option A) |
 | `src/client/setup_client.inc`               | 40-48 | `ps=newsurf(resxo,resyo,…)` etc.                                                       | "New" branch already uses `resxo/resyo` — keep         | RW-P2.2  |
-| `src/common/u6o7.cpp`                       | 484   | `if ((desktop_rect.right>1024)&&(desktop_rect.bottom>768)){ … }`                       | Desktop big-enough check at window create              | RW-P1.1  |
-| `src/client/myddraw.cpp`                    | 378   | `if ((desktop_rect.right>1024)&&(desktop_rect.bottom>768)){ … }`                       | Same desktop check in refresh()                        | RW-P2.4  |
-| `src/client/setup_client.inc`               | 11    | `if ((desktop_rect.right<1024)\|\|(desktop_rect.bottom<768)) MessageBox(…recommended…)`| User-facing minimum-resolution warning                 | RW-P0.4  |
-| `src/client/function_client.cpp`            | 1962  | `// rrr can't change this; it will be broken` (commented `>1024`/`>768` check)         | Commented block; document & remove                     | TBD      |
+| ~~`src/common/u6o7.cpp`~~                   | ~~484~~ | ~~`if ((desktop_rect.right>1024)&&(desktop_rect.bottom>768)){ … }`~~                 | ~~Desktop big-enough check~~ — replaced by single create | DONE (Option A) |
+| ~~`src/client/myddraw.cpp`~~                | ~~378~~ | ~~`if ((desktop_rect.right>1024)&&(desktop_rect.bottom>768)){ … }`~~                 | ~~refresh() desktop check~~                            | DONE (Option A) |
+| ~~`src/client/setup_client.inc`~~           | ~~11~~  | ~~`if ((desktop_rect.right<1024)…) MessageBox(…recommended…)`~~                      | ~~User-facing min-resolution warning~~ — should also be deleted | DEAD (Option A) |
+| ~~`src/client/function_client.cpp`~~        | ~~1962~~| ~~`// rrr can't change this; it will be broken`~~                                    | ~~Commented block~~                                    | DEAD (Option A) |
 
 `globals.inc` line 30 (`unsigned int resya = 768;`) and line 40
 (`unsigned int resxo = resxa;`) define the canonical "old" resolution. These

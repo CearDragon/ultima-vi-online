@@ -1934,20 +1934,16 @@ void newmodeinit() {
 	respn1m = resxn1m * resyn1m;
 
 	// s888 load startup mode
-	windowsizecyclenum = getsetting("WINDOW_MODE");
-	if (windowsizecyclenum == 1) {
-		smallwindow = FALSE;
-		windowsizecyclenum = 0;
-	} else if (windowsizecyclenum == 2) {
-		smallwindow = TRUE;
-		windowsizecyclenum = 0;
-	} else if (windowsizecyclenum == 3) {
-		smallwindow = TRUE;
-		windowsizecyclenum = 1;
-	} else {
-		smallwindow = FALSE;
-		windowsizecyclenum = 0;
-	}
+	// Option A (single-window-mode cleanup, 2026-05-20): the client now
+	// supports only Mode 1 (the main classic 1024x768 window, hWnd2). The
+	// legacy 512x384 small-classic mode (hWnd3) and the "N1 enhanced"
+	// alternate mode (hWnd4) have been removed from the runtime path. The
+	// WINDOW_MODE setting in settings.txt is therefore ignored. The flags
+	// below are still defined so existing references compile, but they are
+	// pinned to "main classic" and never change at runtime.
+	(void)getsetting("WINDOW_MODE"); // tolerate legacy setting without using it
+	smallwindow = FALSE;
+	windowsizecyclenum = 0;
 
 	// RW-P0.4: master feature flag for the resizable-window plan
 	// (docs/plan-resizableWindow.md). Defaults to FALSE so the client
@@ -2034,15 +2030,13 @@ void newmodeinit() {
 	//pspartytemp=newsurf(256,256,SURF_SYSMEM16);
 	//pspartynew=newsurf(resxn1m,256,SURF_SYSMEM16);
 
-	static RECT clrect;
-	clrect.top = 0; clrect.left = 0; clrect.bottom = resyn1w; clrect.right = resxn1w;
-	// RW-P1.1: full overlapped window style with sysmenu/min/max boxes and
-	// drag-resize frame. Letterbox in blit_letterbox handles whatever client
-	// dims Windows reports.
-	AdjustWindowRect(&clrect, WS_OVERLAPPEDWINDOW, FALSE);
-
-	hWnd4 = CreateWindow(szWindowClass, window_name, WS_OVERLAPPEDWINDOW,
-		0, 0, clrect.right - clrect.left, clrect.bottom - clrect.top, NULL, NULL, hInst, NULL);
+	// Option A (2026-05-20): hWnd4 (the "N1 enhanced" alternate window) is
+	// no longer created — only Mode 1 / hWnd2 is used. Left as NULL so any
+	// stale reference fails fast in Debug rather than blitting to a bogus
+	// window. The N1 panel surfaces are still allocated below for now;
+	// they're harmless when the window that would display them no longer
+	// exists. A future cleanup sweep can remove them.
+	hWnd4 = NULL;
 
 	// s555
 	if (!enhanceclientn1) {

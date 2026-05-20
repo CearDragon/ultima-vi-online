@@ -28,18 +28,39 @@ while:
 - Not adding HiDPI / DPI-aware scaling (separate future effort).
 - Not introducing a new graphics backend (DirectDraw stays for now).
 
+## Single-window-mode cleanup (Option A, 2026-05-20)
+
+Before this plan started P2 work, the client supported **four window modes**
+that all had to be considered for resize:
+
+1. Main classic 1024×768 (`hWnd2`) — kept.
+2. Small classic 512×384 (`hWnd3`) — **removed**.
+3. "N1 enhanced" alternate window (`hWnd4`) at ~1200×900 — **removed**.
+4. WS_POPUP fullscreen fallback (`hWnd2` alt) — **removed**.
+
+Locking to Mode 1 only halved the surface area of subsequent phases
+(one back buffer to make dynamic, one UI layout to retarget). The
+`smallwindow` and `windowsizecyclenum` globals still exist (pinned to
+`FALSE` / `0`); the dead `if (smallwindow) { … }` and
+`if (windowsizecyclenum == 1) { … }` branches in `loop_client.cpp` and
+`function_client.cpp` are left in place as a follow-up cleanup sweep
+rather than ripped out in the same commit (they're harmless because the
+gate is permanently false). The "M" key now plainly minimizes the window
+instead of cycling modes.
+
 ## What is already in place (baseline, May 2026)
 
-- ✅ `WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX` added to `hWnd2`,
-  `hWnd3`, `hWnd4` in `src/common/u6o7.cpp` and `src/client/function_client.cpp`.
+- ✅ `WS_OVERLAPPEDWINDOW` style (sysmenu + min/max + thickframe) on
+  `hWnd2`.
 - ✅ `blit_letterbox(hWndDst, srcdc, srcW, srcH)` helper in
-  `src/client/myddraw.cpp`: aspect-preserving blit with black bars, never
-  upscales beyond 1:1.
+  `src/client/myddraw.cpp`: aspect-preserving blit with black bars,
+  never upscales beyond 1:1.
 - ✅ `blit_offx`, `blit_offy`, `blit_scale` globals
-  (`src/common/globals.inc`, `src/common/data_both.h`) published every frame
-  by `refresh()`.
+  (`src/common/globals.inc`, `src/common/data_both.h`) published every
+  frame by `refresh()`.
 - ✅ `WM_MOUSEMOVE` in `WndProc` translates raw client-pixel coordinates
   back to source-surface coordinates using those globals.
+- ✅ Single-window-mode cleanup completed (Modes 2/3/4 removed; see above).
 - ⏳ The back buffer is **still fixed at 1024×768**, so maximize currently
   produces native-pixel rendering centered with black margin (no extra
   game content in the margin yet — that's what this plan addresses).
@@ -89,7 +110,8 @@ while:
   `hWnd2` in `u6o7.cpp:494` and `hWnd4` in `function_client.cpp:2041` to
   `WS_OVERLAPPEDWINDOW`. The `WS_POPUP` fullscreen-fallback variant in
   `u6o7.cpp:499` and `hWnd3` in `u6o7.cpp:506` are intentionally
-  unchanged.)_
+  unchanged. **Superseded 2026-05-20 by Option A**: `hWnd3`/`hWnd4`/popup
+  fallback are now removed; only `hWnd2` is created.)_
 - ✅ **RW-P1.2** Handle `WM_GETMINMAXINFO` in `WndProc` to enforce a sane
   minimum client size (e.g. 800×600) so the renderer never has to cope with
   tiny windows during early development. _(2026-05-20: enforced 800×600
