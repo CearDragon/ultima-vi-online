@@ -7,6 +7,7 @@
 #include "commdlg.h"
 // r999
 #include "define_both.h"
+#include "viewport.h" // RW-P2.4: backbufferW()/H() for blit_letterbox sanity check
 
 
 //darklight.cpp extern
@@ -48,6 +49,22 @@ extern bool   windowResize;
 // so mouse input maps back to source coordinates correctly.
 static void blit_letterbox(HWND hWndDst, HDC srcdc, long srcW, long srcH)
 {
+	// RW-P2.4: defensive check — the only surfaces we currently letterbox are
+	// back-buffer-sized (ps/psnew1/psnew1b), so srcW/srcH should equal the
+	// current viewport.h-published back-buffer size. If they ever diverge
+	// (e.g. someone passes a half-res or minimap surface), we want a loud
+	// warning in debug builds rather than silently producing the wrong
+	// blit_scale. In release builds this is a no-op so there's zero cost on
+	// the hot path.
+#ifdef _DEBUG
+	if (srcW != backbufferW() || srcH != backbufferH()) {
+		char dbgbuf[160];
+		wsprintfA(dbgbuf,
+			"[u6o] blit_letterbox: srcW/H=%ldx%ld != backbuffer=%dx%d\n",
+			srcW, srcH, backbufferW(), backbufferH());
+		OutputDebugStringA(dbgbuf);
+	}
+#endif
 	RECT cr;
 	GetClientRect(hWndDst, &cr);
 	long cW = cr.right  - cr.left;

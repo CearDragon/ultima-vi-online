@@ -161,6 +161,17 @@ instead of cycling modes.
   the `ls`/`ls_moon*` buffers and the inline-asm `mov ebp, 786432` pixel
   count in the lighting-compose pass are **not yet dynamic** — those land
   in the next RW-P2 commit after manual testing of the seam.)_
+  _(2026-05-20 follow-up — `ls`/`ls_moon1..4` flipped from static
+  `unsigned char[1024*768]` arrays in `globals.inc` to heap-allocated
+  `unsigned char*` pointers. New file `src/client/viewport.cpp` provides
+  `lighting_alloc(w,h)` + `lighting_free()`, called from
+  `setup_client.inc` (start of file) before the moon-buffer populate
+  loop. All call sites updated: `&ls`/`&ls_moonN` → `ls`/`ls_moonN`,
+  `sizeof(ls)` → `lightingTotalBytes()`, `(unsigned long)&ls` →
+  `(unsigned long)ls`. Buffer dimensions still come from the constant
+  accessors, so behavior at 1024×768 is unchanged. The seam is now ready
+  for `recreateBackbuffers()` to call `lighting_alloc(newW, newH)` once
+  the accessors return runtime values.)_
 - 🟡 **RW-P2.2** Wrap `newsurf(1024,768,…)` calls in `setup_client.inc` with
   `newsurf(currentBackbufferW(), currentBackbufferH(), …)`. Provide
   `RecreateBackbuffers(newW, newH)` that frees and reallocates `ps`, `ps3`,

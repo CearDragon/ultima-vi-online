@@ -5,6 +5,17 @@
 SCRLOG_FILEONLY=FALSE;
 JDISABLED=FALSE;
 
+// RW-P2.1: heap-allocate ls/ls_moon1..4 before any code touches them. The
+// moon-light populating loop further down (~line 623) and the
+// lighting-compose pass in loop_client.cpp both assume these are non-null
+// and sized to backbufferW()*backbufferH(). When the back buffer becomes
+// dynamic in P2.2, recreateBackbuffers() will call lighting_alloc() again
+// with the new dims.
+if (!lighting_alloc(backbufferW(), backbufferH())) {
+    MessageBox(NULL,"Failed to allocate lighting buffers","Ultima 6 Online",MB_OK);
+    exit(0);
+}
+
 
 GetWindowRect(GetDesktopWindow(),&desktop_rect);
 if (!NEThost){

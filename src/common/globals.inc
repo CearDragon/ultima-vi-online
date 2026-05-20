@@ -718,11 +718,15 @@ char windy2;
 unsigned long ls_off,ls_off_add,ls2_off,ls2_off_add;
 unsigned char *ls2_p;
 unsigned short lval[16][65536];
-unsigned char ls[1024*768];
-unsigned char ls_moon1[1024*768];
-unsigned char ls_moon2[1024*768];
-unsigned char ls_moon3[1024*768];
-unsigned char ls_moon4[1024*768];
+// RW-P2.1: lighting buffers are now heap-allocated by lighting_alloc()
+// (viewport.cpp), called from setup_client.inc at startup. Sizing is
+// driven by viewport.h::backbufferW()/H() so these can grow with the
+// window in the next step.
+unsigned char* ls       = 0;
+unsigned char* ls_moon1 = 0;
+unsigned char* ls_moon2 = 0;
+unsigned char* ls_moon3 = 0;
+unsigned char* ls_moon4 = 0;
 unsigned char ls3[32*3][32*3];
 unsigned char ls3b[32*3][32*3];
 unsigned char ls5[32*5][32*5];

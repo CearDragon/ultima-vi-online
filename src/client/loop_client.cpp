@@ -6584,13 +6584,15 @@ CLIENT_donemess:
 
 
     // RW-P2.3: route lighting buffer copy size through viewport.h accessor.
+    // RW-P2.1: ls/ls_moonN are now heap pointers (lighting_alloc), so we
+    // pass the pointers directly instead of `&ls`/`&ls_moonN`.
     {
       const unsigned long lsBytes = (unsigned long)lightingTotalBytes();
-      if (moonlight==0) ZeroMemory(&ls,sizeof(ls)); //clear array
-      if (moonlight==1) memcpy(&ls,&ls_moon1,lsBytes);
-      if (moonlight==2) memcpy(&ls,&ls_moon2,lsBytes);
-      if (moonlight==3) memcpy(&ls,&ls_moon3,lsBytes);
-      if (moonlight==4) memcpy(&ls,&ls_moon4,lsBytes);
+      if (moonlight==0) ZeroMemory(ls,lsBytes); //clear array
+      if (moonlight==1) memcpy(ls,ls_moon1,lsBytes);
+      if (moonlight==2) memcpy(ls,ls_moon2,lsBytes);
+      if (moonlight==3) memcpy(ls,ls_moon3,lsBytes);
+      if (moonlight==4) memcpy(ls,ls_moon4,lsBytes);
     }
 
     //calculate tpx,tpy from current x,y
@@ -8274,7 +8276,7 @@ cloudadded:
     }
 
     if (x5=timelval){
-      i=(unsigned long)&ls;
+      i=(unsigned long)ls; // RW-P2.1: ls is now a heap pointer.
       i2=(unsigned long)ps->o;
       i3=(unsigned long)lval;
       // RW-P2.3: load total pixel count from viewport.h accessor instead of

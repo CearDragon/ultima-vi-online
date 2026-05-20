@@ -183,14 +183,18 @@ Fixed-size global arrays sized for 1024×768 pixels or 32×24 tiles.
 
 ### F.1 Pixel-sized lighting buffers (1024*768 = 786 432 bytes each)
 
+**Status 2026-05-20:** all six declarations migrated. `ls` and
+`ls_moon1..4` are now `unsigned char*` heap pointers allocated by
+`lighting_alloc()` in `src/client/viewport.cpp`, called from
+`setup_client.inc`. Sizes still come from the constant accessors in
+`viewport.h`, so storage is identical at 1024×768. Re-sizing happens
+the moment the accessors flip to runtime variables.
+
 | File                          | Line  | Declaration                                  | Phase   |
 | ----------------------------- | ----- | -------------------------------------------- | ------- |
-| `src/common/globals.inc`      | 721   | `unsigned char ls[1024*768];`                | RW-P2.1 |
-| `src/common/globals.inc`      | 722   | `unsigned char ls_moon1[1024*768];`          | RW-P2.1 |
-| `src/common/globals.inc`      | 723   | `unsigned char ls_moon2[1024*768];`          | RW-P2.1 |
-| `src/common/globals.inc`      | 724   | `unsigned char ls_moon3[1024*768];`          | RW-P2.1 |
-| `src/common/globals.inc`      | 725   | `unsigned char ls_moon4[1024*768];`          | RW-P2.1 |
-| `src/client/data_client.h`    | 269-273 | `extern unsigned char ls[1024*768];` …     | RW-P2.1 |
+| ~~`src/common/globals.inc`~~  | ~~721~~ | ~~`unsigned char ls[1024*768];`~~ → `unsigned char* ls = 0;` | DONE RW-P2.1 |
+| ~~`src/common/globals.inc`~~  | ~~722-725~~ | ~~`unsigned char ls_moonN[1024*768];`~~ → `unsigned char* ls_moonN = 0;` | DONE RW-P2.1 |
+| ~~`src/client/data_client.h`~~| ~~269-273~~ | ~~`extern unsigned char ls[1024*768];` …~~ → `extern unsigned char* ls; …` | DONE RW-P2.1 |
 
 ### F.2 Tile-sized visibility buffers (32×24, 34×26)
 

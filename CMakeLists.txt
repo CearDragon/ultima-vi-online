@@ -152,6 +152,7 @@ set(Source_Files
         "src/common/spell_code/spell_code.cpp"
         "src/common/stdafx.cpp"
         "src/common/txt.cpp"
+        "src/client/viewport.cpp"
         "src/common/u6o7.cpp"
         "src/common/use_code/use_code.cpp"
         "src/common/Xenkan.cpp"
@@ -565,6 +566,7 @@ set(Source_Files
         "src/common/txt.cpp"
         "src/common/u6o7.cpp"
         "src/common/Xenkan.cpp"
+        "src/client/viewport.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
 

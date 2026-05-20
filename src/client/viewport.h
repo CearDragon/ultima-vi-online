@@ -74,6 +74,18 @@ inline bool recreateBackbuffers(int /*newW*/, int /*newH*/) {
     return true;
 }
 
+// RW-P2.1: allocate the lighting buffers (`ls`, `ls_moon1..4`) on the heap
+// at the requested size. Called once during client startup from
+// setup_client.inc, before any code reads/writes those buffers. Idempotent:
+// calling it again with the same dimensions reuses the existing
+// allocation; calling it with different dimensions frees and re-allocates.
+// Implemented in viewport.cpp.
+bool lighting_alloc(int w, int h);
+
+// Free the lighting buffers. Safe to call before lighting_alloc().
+// Implemented in viewport.cpp.
+void lighting_free();
+
 }} // namespace u6o::client
 
 // Unqualified shims so existing C-style call sites (and inline asm
@@ -85,6 +97,8 @@ inline int lightingTotalBytes() { return u6o::client::lightingTotalBytes(); }
 inline bool recreateBackbuffers(int newW, int newH) {
     return u6o::client::recreateBackbuffers(newW, newH);
 }
+inline bool lighting_alloc(int w, int h) { return u6o::client::lighting_alloc(w, h); }
+inline void lighting_free() { u6o::client::lighting_free(); }
 
 #endif // VIEWPORT_H
 

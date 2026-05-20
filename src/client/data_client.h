@@ -266,11 +266,13 @@ extern char windy2;
 extern unsigned long ls_off,ls_off_add,ls2_off,ls2_off_add;
 extern unsigned char *ls2_p;
 extern unsigned short lval[16][65536];
-extern unsigned char ls[1024*768];
-extern unsigned char ls_moon1[1024*768];
-extern unsigned char ls_moon2[1024*768];
-extern unsigned char ls_moon3[1024*768];
-extern unsigned char ls_moon4[1024*768];
+// RW-P2.1: lighting buffers are heap-allocated (see viewport.cpp /
+// lighting_alloc). Defined in src/common/globals.inc as `unsigned char*`.
+extern unsigned char* ls;
+extern unsigned char* ls_moon1;
+extern unsigned char* ls_moon2;
+extern unsigned char* ls_moon3;
+extern unsigned char* ls_moon4;
 extern unsigned char ls3[32*3][32*3];
 extern unsigned char ls3b[32*3][32*3];
 extern unsigned char ls5[32*5][32*5];

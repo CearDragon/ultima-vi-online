@@ -276,7 +276,7 @@ void LIGHTnew(unsigned short x,unsigned short y,unsigned long light_data_offset,
   asm_copy_vc_sourceskip=x_axis_size-asm_copy_vc_bytesx;
   asm_copy_vc_destskip=lsStride-asm_copy_vc_bytesx;
   asm_copy_vc_sourceoffset=y3*x_axis_size+light_data_offset+x3;
-  asm_copy_vc_destoffset=(y2*lsStride)+(unsigned long)&ls+x2;
+  asm_copy_vc_destoffset=(y2*lsStride)+(unsigned long)ls+x2;
   asm_copy_vc_rows=y4;
   _asm{
     push esi
