@@ -108,6 +108,7 @@ set(Header_Files
         "src/common/u6o7.h"
         "src/common/use_code/use_code.h"
         "src/client/viewport.h"
+        "src/client/ui_layout.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -153,6 +154,7 @@ set(Source_Files
         "src/common/stdafx.cpp"
         "src/common/txt.cpp"
         "src/client/viewport.cpp"
+        "src/client/ui_layout.cpp"
         "src/common/u6o7.cpp"
         "src/common/use_code/use_code.cpp"
         "src/common/Xenkan.cpp"
@@ -533,6 +535,7 @@ set(Header_Files
         "src/common/u6o7.h"
         "src/common/use_code/use_code.h"
         "src/client/viewport.h"
+        "src/client/ui_layout.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -567,6 +570,7 @@ set(Source_Files
         "src/common/u6o7.cpp"
         "src/common/Xenkan.cpp"
         "src/client/viewport.cpp"
+        "src/client/ui_layout.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
 

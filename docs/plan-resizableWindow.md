@@ -238,12 +238,17 @@ instead of cycling modes.
 
 ## RW-P3 — UI anchor system (panels follow window edges)
 
-- ⬜ **RW-P3.1** Introduce `enum class UiAnchor { TopLeft, TopRight,
+- ✅ **RW-P3.1** Introduce `enum class UiAnchor { TopLeft, TopRight,
   BottomLeft, BottomRight, TopCenter, BottomCenter, LeftCenter,
   RightCenter, Center };` and `struct UiPlacement { UiAnchor anchor; int
   offsetX; int offsetY; int sizeX; int sizeY; };` in
   `src/client/ui_layout.{h,cpp}`. Provide `ResolveRect(UiPlacement, int
   clientW, int clientH)`.
+  _(2026-05-20 — done. Created `src/client/ui_layout.{h,cpp}` with
+  `u6o::client::UiAnchor`, `UiPlacement`, `UiRect`, and a pure
+  `ResolveRect(p, clientW, clientH)` function. Added to both client
+  CMake targets. Module is unused so far — P3.2 will populate the
+  `kBuiltinPanels[]` table that consumes these types.)_
 - ⬜ **RW-P3.2** Inventory every absolute panel/widget coordinate (sidebar,
   minimap, status bar, action bar, action-talk bar, party-member panels,
   spellbook overlays, message log, character/inventory screen, intro
