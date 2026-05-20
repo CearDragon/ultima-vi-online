@@ -975,12 +975,15 @@ if (dirtyClientSize) {
   // next RW-P2 commit, after manual testing of the centralized accessors.
   if (windowResize) {
     recreateBackbuffers((int)clientW, (int)clientH);
-    // RW-P3.3: re-anchor the five static UI panels to the new client
-    // size so they follow the window edges. No-op for any panel that
-    // was repositioned by the user via cltset since this writes
-    // unconditionally — that gap is documented in the plan and will be
-    // closed when drag-saving becomes anchor-aware.
-    RepositionAnchoredPanels((int)clientW, (int)clientH);
+    // RW-P3.3: re-anchor the five static UI panels. NOTE: until P2.2
+    // grows the back buffer with the window, panels must anchor against
+    // the back-buffer dimensions, not the client-window dimensions —
+    // they draw onto `ps` which is still 1024x768 regardless of how
+    // big the window has become. Anchoring to clientW/H would push
+    // panels off the back-buffer edge and they'd disappear behind the
+    // letterbox bars. Once the back buffer follows clientW/H, this can
+    // change to clientW/clientH for true edge-following.
+    RepositionAnchoredPanels(backbufferW(), backbufferH());
   }
 #ifdef _DEBUG
   {
@@ -6967,10 +6970,14 @@ viewfind_skip:
 
                 if (refreshcount&1){ for (x4=0;x4<=stolenitemwarningn;x4++){ if (stolenitemwarningx[x4]==mapx){ if (stolenitemwarningy[x4]==mapy){ if (stolenitemwarningtype[x4]==myobj->type){
                   static unsigned long *ps_realoffset;
-                  static unsigned short ps_fakebuffer[1024*32];
+                  // RW-P2.2: scratch buffer sized to kBackbufferMaxW so
+                  // getspr() — which writes at the active back-buffer
+                  // pitch — can't overflow when the user has resized
+                  // the window beyond the legacy 1024 pitch.
+                  static unsigned short ps_fakebuffer[1920*32];
                   static long siw_x,siw_y,siw_r,siw_g,siw_b;
                   for (siw_y=0;siw_y<=31;siw_y++){ for (siw_x=0;siw_x<=31;siw_x++){
-                    ps_fakebuffer[siw_y*1024+siw_x]=0;
+                    ps_fakebuffer[siw_y*lightingStride()+siw_x]=0;
                   }}
                   ps_realoffset=ps->o;
                   ps->o=(unsigned long*)&ps_fakebuffer;
@@ -6978,12 +6985,13 @@ viewfind_skip:
                   getspr(myobj);
                   ps->o=ps_realoffset;
                   for (siw_y=0;siw_y<=31;siw_y++){ for (siw_x=0;siw_x<=31;siw_x++){
-                    if (x5=ps_fakebuffer[siw_y*1024+siw_x]){
+                    if (x5=ps_fakebuffer[siw_y*lightingStride()+siw_x]){
                       x6=x5>>11;
                       x7=(x5&0x7E0)>>6; if (x7>x6) x6=x7;
                       x7=x5&0x1F; if (x7>x6) x6=x7;
                       x6=x6<<11;
-                      ps->o2[y2*1024*32+siw_y*1024+x2*32+siw_x]=x6;
+                      // RW-P2.2: route through lightingStride() == active ps row pitch in pixels.
+                      ps->o2[(y2*32+siw_y)*lightingStride()+x2*32+siw_x]=x6;
                     }//x5
                   }}
                   goto stolenitemwarningflash;
@@ -7112,10 +7120,11 @@ flash_disable2:
 
               if (refreshcount&1){ for (x4=0;x4<=stolenitemwarningn;x4++){ if (stolenitemwarningx[x4]==mapx){ if (stolenitemwarningy[x4]==mapy){ if (stolenitemwarningtype[x4]==myobj->type){
                 static unsigned long *ps_realoffset;
-                static unsigned short ps_fakebuffer[1024*32];
+                // RW-P2.2: scratch buffer sized to kBackbufferMaxW.
+                static unsigned short ps_fakebuffer[1920*32];
                 static long siw_x,siw_y,siw_r,siw_g,siw_b;
                 for (siw_y=0;siw_y<=31;siw_y++){ for (siw_x=0;siw_x<=31;siw_x++){
-                  ps_fakebuffer[siw_y*1024+siw_x]=0;
+                  ps_fakebuffer[siw_y*lightingStride()+siw_x]=0;
                 }}
                 ps_realoffset=ps->o;
                 ps->o=(unsigned long*)&ps_fakebuffer;
@@ -7123,12 +7132,13 @@ flash_disable2:
                 getspr(myobj);
                 ps->o=ps_realoffset;
                 for (siw_y=0;siw_y<=31;siw_y++){ for (siw_x=0;siw_x<=31;siw_x++){
-                  if (x5=ps_fakebuffer[siw_y*1024+siw_x]){
+                  if (x5=ps_fakebuffer[siw_y*lightingStride()+siw_x]){
                     x6=x5>>11;
                     x7=(x5&0x7E0)>>6; if (x7>x6) x6=x7;
                     x7=x5&0x1F; if (x7>x6) x6=x7;
                     x6=x6<<11;
-                    ps->o2[y2*1024*32+siw_y*1024+x2*32+siw_x]=x6;
+                    // RW-P2.2: route through lightingStride() == active ps row pitch in pixels.
+                    ps->o2[(y2*32+siw_y)*lightingStride()+x2*32+siw_x]=x6;
                   }//x5
                 }}
                 goto stolenitemwarningflash2;

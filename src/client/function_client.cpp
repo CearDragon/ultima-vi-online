@@ -307,6 +307,82 @@ void LIGHTnew(unsigned short x,unsigned short y,unsigned long light_data_offset,
 }//LIGHTnew
 
 
+// =====================================================================
+// RW-P2.2: backbuffer recreation. Called from the dirtyClientSize
+// handler in loop_client.cpp when the user resizes the window with
+// WINDOW_RESIZE enabled. Releases and re-creates the `ps`/`ps3`/`ps5`
+// DirectDraw surfaces, re-allocates the lighting buffers, patches FRAME
+// pointers (vf, fs) that referenced the old `ps`, and clears the new
+// surface to black so unrendered regions don't show stale pixels.
+// =====================================================================
+namespace u6o { namespace client {
+bool recreateBackbuffers(int newW, int newH) {
+    // Clamp to [legacy, max].
+    if (newW < kBackbufferLegacyW) newW = kBackbufferLegacyW;
+    if (newH < kBackbufferLegacyH) newH = kBackbufferLegacyH;
+    if (newW > kBackbufferMaxW)    newW = kBackbufferMaxW;
+    if (newH > kBackbufferMaxH)    newH = kBackbufferMaxH;
+
+    if (newW == backbufferW() && newH == backbufferH()) {
+        return true; // already at requested size
+    }
+
+    // Re-allocate the lighting buffers FIRST so any code path that
+    // reads ls during the surface free/recreate window sees a valid
+    // (zero-initialized) buffer of the new size. lighting_alloc is
+    // idempotent and bumps storage to match the new dims.
+    if (!lighting_alloc(newW, newH)) {
+        return false;
+    }
+
+    // Whether the 32-bpp helper surface ps3 currently exists. It's
+    // only created on non-16bpp displays in setup_client.inc, so we
+    // re-create it only if it was there to begin with.
+    bool had_ps3 = (ps3 != NULL);
+
+    // Release the old surfaces. `free(surf*)` calls ->Release() on
+    // the IDirectDrawSurface and frees the wrapper struct.
+    if (ps)       { free(ps);       ps  = NULL; }
+    if (ps3)      { free(ps3);      ps3 = NULL; }
+    if (ps5)      { free(ps5);      ps5 = NULL; }
+
+    // Re-create at the new size. Match the original setup_client.inc
+    // flag choices: ps and ps5 are 16bpp sysmem; ps3 is 32bpp sysmem
+    // (used as the format-conversion target on non-16bpp displays).
+    ps = newsurf(newW, newH, SURF_SYSMEM16);
+    if (had_ps3) {
+        ps3 = newsurf(newW, newH, SURF_SYSMEM);
+    }
+    ps5 = newsurf(newW, newH, SURF_SYSMEM16);
+
+    if (!ps || (had_ps3 && !ps3) || !ps5) {
+        return false; // allocation failure — leave dims at old values
+    }
+
+    // Patch FRAME pointers that held a reference to the old ps. vf
+    // (the main view frame) and fs (the full-screen overlay) both
+    // had `graphic = ps` set in setup_client.inc.
+    if (vf) vf->graphic = ps;
+    if (fs) fs->graphic = ps;
+
+    // Clear ps to black so the area outside the legacy 1024x768 (where
+    // the world tile renderer still draws) starts clean. The world
+    // overdraws the upper-left 1024x768 every frame; the new outer
+    // region is never written by the renderer, so without this you'd
+    // see whatever heap/DD memory happened to be there.
+    cls(ps, 0);
+    if (ps3) cls(ps3, 0);
+
+    // Publish the new dims. Done last so any concurrent reader on the
+    // same thread (we're single-threaded for graphics, but be careful
+    // anyway) sees consistent state: surfaces are valid before
+    // backbufferW()/H() return the new values.
+    set_active_backbuffer_dims(newW, newH);
+    return true;
+}
+}} // namespace u6o::client
+
+
 // s333 backup player mv info
 void backupplayermvinfon1(player* tplayer) {
 	combatinfoplayerprevinit = 1;

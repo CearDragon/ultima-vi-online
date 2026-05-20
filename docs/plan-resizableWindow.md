@@ -172,7 +172,7 @@ instead of cycling modes.
   accessors, so behavior at 1024×768 is unchanged. The seam is now ready
   for `recreateBackbuffers()` to call `lighting_alloc(newW, newH)` once
   the accessors return runtime values.)_
-- 🟡 **RW-P2.2** Wrap `newsurf(1024,768,…)` calls in `setup_client.inc` with
+- ✅ **RW-P2.2** Wrap `newsurf(1024,768,…)` calls in `setup_client.inc` with
   `newsurf(currentBackbufferW(), currentBackbufferH(), …)`. Provide
   `RecreateBackbuffers(newW, newH)` that frees and reallocates `ps`, `ps3`,
   `ps5`, `psnew1`, `psnew1b`. Call from `OnClientResized` (gated by
@@ -185,6 +185,32 @@ instead of cycling modes.
   `setup_client.inc` `newsurf(1024,768,…)` calls have **not** been
   rewritten yet; they should become `newsurf(backbufferW(), backbufferH(),
   …)` in the same commit that flips the seam to dynamic.)_
+  _(2026-05-20 follow-up — done. `viewport.h` accessors flipped from
+  `inline … return constant` to extern declarations; bodies in
+  `viewport.cpp` read `g_active_w`/`g_active_h` (defaulting to the
+  legacy 1024×768 floor). `recreateBackbuffers(newW, newH)` body lives
+  in `function_client.cpp` (where the FRAME globals are visible) and
+  does the full release/recreate dance: clamp to
+  `[kBackbufferLegacy*, kBackbufferMax*]` (1024×768 → 1920×1200);
+  re-allocate `ls`/`ls_moon1..4` via `lighting_alloc`; release `ps` /
+  `ps3` (when present) / `ps5` and re-create them via `newsurf` at the
+  new dims; patch `vf->graphic` and `fs->graphic` to the new `ps`;
+  `cls(ps, 0)` so the new outer region (outside the legacy 1024×768
+  world-render area) starts black; finally publish the new dims via
+  `set_active_backbuffer_dims`. Pitch-coupled hot-path migrations:
+  `loop_client.cpp:6989/7134` (world tile rasterizer) now use
+  `(y2*32+siw_y)*lightingStride()` instead of `*1024*32` /
+  `*1024`. Stormcloak block at `loop_client.cpp:8060ff` now uses
+  `y7*lightingStride()` and explicit per-pixel division by stride for
+  the row-boundary clamp (was `>>10`). The two `ps_fakebuffer[1024*32]`
+  scratch arrays at lines 6973/7123 grew to `[1920*32]` and now use
+  `lightingStride()` for their indexing so getspr() can't overflow
+  them when the active pitch exceeds 1024. Out of scope per user
+  direction (2026-05-20): intro/title star rendering at
+  `loop_client.cpp:1329-1337` and the scrlog status-bar
+  `memcpy(ps->o,&ps->o2[16384],1540096)` at `function_client.cpp:1822`
+  remain at hard-coded `*1024` — those only run during the startup
+  intro, before the user can resize.)_
 - 🟡 **RW-P2.3** Audit `function_client.cpp` blits and clamps for hard-coded
   `1024` / `768` / `>1024` / `>=768` checks; replace with
   `currentBackbufferW()` / `currentBackbufferH()`. Hotspots already known:

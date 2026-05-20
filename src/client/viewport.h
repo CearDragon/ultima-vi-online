@@ -5,86 +5,85 @@
 // truth for the client's back-buffer dimensions, lighting-buffer stride,
 // and related sizing constants.
 //
-// Current state (RW-P2 step 1, 2026-05-20):
-//   * The constants below are still **fixed at 1024x768**. The accessors
-//     return those constants. Behavior is bit-identical to the legacy
-//     hard-coded literals they're replacing.
-//   * The point of this header is to give the rest of the renderer a
-//     single, named call site to read back-buffer dimensions through.
-//     Once every hot path consults these accessors instead of literal
-//     `1024`/`768`, the next step (after manual testing) is to flip the
-//     accessors from constants to runtime-mutable globals fed by
-//     OnClientResized() / RecreateBackbuffers().
-//
-// Future state (RW-P2 step 2, post-testing):
-//   * The static lighting arrays (`ls`, `ls_moon1..4`) become heap
-//     allocations sized to the active back-buffer.
-//   * The DirectDraw surfaces (`ps`, `ps3`, `ps5`, `psnew1`, `psnew1b`)
-//     are released and re-created when the client area changes.
-//   * The hard-coded `mov ebp, 786432` in the lighting-compose inline
-//     asm at loop_client.cpp:8278 becomes a runtime memory operand.
-//
-// This header intentionally has no client/host #ifdef gates because the
-// sole consumer is client code. It's also intentionally header-only: no
-// state is owned here today. When the constants flip to runtime values,
-// the storage moves into globals.inc with externs in data_both.h.
+// State as of RW-P2.2 (2026-05-20):
+//   * `backbufferW()`/`backbufferH()` are now runtime-mutable: they
+//     return the active back-buffer dimensions, which start at the
+//     legacy 1024x768 floor and grow up to (kBackbufferMaxW,
+//     kBackbufferMaxH) when `recreateBackbuffers(newW, newH)` is
+//     called from the dirtyClientSize handler.
+//   * `recreateBackbuffers` releases and re-creates `ps` (and `ps3`/
+//     `ps5` when present), re-allocates `ls`/`ls_moon1..4` via
+//     `lighting_alloc`, and patches the FRAME pointers (`vf`, `fs`)
+//     whose `graphic` field referenced the old `ps`. Implementation
+//     lives in function_client.cpp where the FRAME globals are
+//     visible.
+//   * Pitch-coupled hot paths in `loop_client.cpp` (world tile
+//     rasterizer at lines 6989/7134, stormcloak lighting at 8061ff)
+//     read the row stride from `lightingStride()` so they follow the
+//     active dims. Intro/title and scrlog literals are intentionally
+//     left at hard-coded `*1024` for now (out-of-scope per user
+//     direction).
 
 namespace u6o { namespace client {
 
-// Maximum back-buffer dimensions the client will ever allocate. Currently
-// equal to the legacy 1024x768; sized to be raised when the static
-// lighting buffers become heap-allocated. Static back-buffer surfaces
-// today live at exactly this size. Declared as an enum (rather than
-// `inline constexpr`) so the header compiles cleanly under pre-C++17
-// MSVC, which is what this project targets.
+// Lower clamp on the active back-buffer size — the legacy 1024x768
+// dimensions that every renderer hot path was originally written
+// against. The active dims never go below this; if the client window
+// is smaller, blit_letterbox handles it via downscaling/letterbox.
 enum : int {
     kBackbufferLegacyW = 1024,
     kBackbufferLegacyH = 768
 };
 
-// Active back-buffer width in pixels. Game logic and renderer hot paths
-// should call this rather than referencing the literal `1024`. Today it
-// returns the legacy constant; in the next step it will read a global
-// updated by RecreateBackbuffers().
-inline int backbufferW() { return kBackbufferLegacyW; }
-inline int backbufferH() { return kBackbufferLegacyH; }
+// Upper clamp on the active back-buffer size. Sized to fit common
+// modern monitors (1920x1080, 1920x1200, 4K downscaled to 1080p).
+// Bounding the upper end keeps memory cost predictable and stops a
+// pathologically large client window from triggering allocation
+// failures mid-game. Going past these dims simply caps the active
+// viewport; the rest of the window stays as letterbox bars.
+enum : int {
+    kBackbufferMaxW = 1920,
+    kBackbufferMaxH = 1200
+};
 
-// Row stride (in bytes) of the `ls` / `ls_moon*` lighting buffers. These
-// are paletted byte buffers, so stride == width. Used by LIGHTnew() and
-// the lighting-compose pass.
-inline int lightingStride() { return backbufferW(); }
+// Active back-buffer dimensions. Bodies live in viewport.cpp; the
+// values are read every frame on hot paths so they're declared
+// extern (no inlining of a constant return).
+int backbufferW();
+int backbufferH();
 
-// Total byte count of one lighting buffer. Used for memcpy/ZeroMemory
-// over `ls` and `ls_moon*`. Replaces `1024*768` literals and the implicit
-// `mov ebp, 786432` in the lighting-compose inline asm.
-inline int lightingTotalBytes() { return backbufferW() * backbufferH(); }
+// Row stride (in pixels) of the `ls`/`ls_moon*` lighting buffers AND
+// the `ps` DirectDraw back-buffer (16-bpp pixels). Both are
+// re-allocated together by `recreateBackbuffers` so they stay in
+// lock-step; the renderer assumes pitch == width for the whole
+// back-buffer family.
+int lightingStride();
 
-// Called from OnClientResized() in the main loop when `windowResize` is
-// enabled (RW-P0.4 feature flag). Today this is a no-op stub: it logs the
-// requested dimensions in Debug builds and returns. The lighting buffers
-// and DirectDraw surfaces are still pinned at the legacy 1024x768. The
-// next step (after manual testing) wires this up to:
-//   * Release and re-create `ps`, `ps3`, `ps5`, `psnew1`, `psnew1b`.
-//   * (Once the lighting arrays are heap-allocated) re-allocate `ls`,
-//     `ls_moon1..4` to the new size.
-//   * Update the live values returned by backbufferW()/backbufferH().
-// Returns true on success; today always returns true since it's a no-op.
-inline bool recreateBackbuffers(int /*newW*/, int /*newH*/) {
-    // Intentional no-op stub. See header comment.
-    return true;
-}
+// Total byte count of one lighting buffer == active_W * active_H.
+// Used for memcpy/ZeroMemory over `ls`/`ls_moon*` and as the loop
+// count in the lighting-compose and 16->32 pixel-format inline-asm
+// loops.
+int lightingTotalBytes();
 
-// RW-P2.1: allocate the lighting buffers (`ls`, `ls_moon1..4`) on the heap
-// at the requested size. Called once during client startup from
-// setup_client.inc, before any code reads/writes those buffers. Idempotent:
-// calling it again with the same dimensions reuses the existing
-// allocation; calling it with different dimensions frees and re-allocates.
-// Implemented in viewport.cpp.
+// Resize the back-buffer family to (newW, newH) clamped to
+// [kBackbufferLegacy*, kBackbufferMax*]. Releases and re-creates the
+// `ps`/`ps3`/`ps5` DirectDraw surfaces, re-allocates the lighting
+// buffers, patches FRAME pointers (vf, fs) that referenced the old
+// `ps`, and clears the new surface to black so unrendered regions
+// don't show stale pixels. Idempotent: returns immediately if the
+// active dims already match.
+bool recreateBackbuffers(int newW, int newH);
+
+// Allocate / free the heap-resident lighting buffers (RW-P2.1).
+// `lighting_alloc` is idempotent: same dims → reuse, different dims
+// → free and re-malloc. Both implemented in viewport.cpp.
 bool lighting_alloc(int w, int h);
-
-// Free the lighting buffers. Safe to call before lighting_alloc().
-// Implemented in viewport.cpp.
 void lighting_free();
+
+// Internal: update the active back-buffer dims globals after a
+// successful surface recreation. Called only from
+// `recreateBackbuffers`'s implementation in function_client.cpp.
+void set_active_backbuffer_dims(int w, int h);
 
 }} // namespace u6o::client
 

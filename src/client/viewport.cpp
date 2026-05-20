@@ -32,9 +32,32 @@ namespace {
     int g_lighting_w = 0;
     int g_lighting_h = 0;
 
+    // RW-P2.2: active back-buffer dimensions. Initialized to the legacy
+    // 1024x768 floor so every site that calls backbufferW()/H() before
+    // the first recreateBackbuffers() (i.e. at startup, before
+    // setup_client.inc creates `ps`) still gets sane values that match
+    // the just-created surface. recreateBackbuffers() updates these
+    // atomically with the surface re-allocation.
+    int g_active_w = kBackbufferLegacyW;
+    int g_active_h = kBackbufferLegacyH;
+
     void free_one(unsigned char*& p) {
         if (p) { free(p); p = nullptr; }
     }
+}
+
+int backbufferW()        { return g_active_w; }
+int backbufferH()        { return g_active_h; }
+int lightingStride()     { return g_active_w; }
+int lightingTotalBytes() { return g_active_w * g_active_h; }
+
+// Setter is internal — only function_client.cpp's recreateBackbuffers()
+// implementation calls it, after the surfaces have been re-allocated
+// successfully. Exposed via a non-namespaced extern "C++" friend
+// function so we don't have to plumb a full namespaced header.
+void set_active_backbuffer_dims(int w, int h) {
+    g_active_w = w;
+    g_active_h = h;
 }
 
 void lighting_free() {
