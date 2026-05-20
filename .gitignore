@@ -17,4 +17,13 @@ bin/client/release/*
 bin/host/debug/*
 !bin/host/debug/README.md
 bin/host/release/*
-!bin/host/release/README.md
+!bin/host/release/README.md# CMake & build artifacts
+cmake-build-*/
+.cmake/
+build/
+bin/
+CMakeCache.txt
+CMakeFiles/
+*.dir/
+*.tlog/
+*.log
