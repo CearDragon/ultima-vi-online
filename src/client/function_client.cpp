@@ -351,19 +351,29 @@ bool recreateBackbuffers(int newW, int newH) {
         return false; // allocation failure — leave dims at old values
     }
 
-    // Pitch correctness: DirectDraw may pad the row stride beyond
-    // newW*2 (16-byte alignment etc.). Adopt the actual pitch reported
-    // by DD as our canonical width — every subsequent renderer hot
-    // path that reads `lightingStride()` / `backbufferW()` for memory
-    // arithmetic will then match the surface's true row stride. The
-    // visible image width (`ps->d.dwWidth`) is unchanged, so
-    // blit_letterbox still shows exactly the requested area in the
-    // window; padding pixels at the right edge are inside the surface
-    // but outside dwWidth and are simply not rendered.
-    int pitchPx = (int)(ps->d.lPitch / sizeof(unsigned short));
-    if (pitchPx > newW) newW = pitchPx;
+    // Pitch sanity check: in debug builds, log if DD's reported row
+    // stride doesn't match `newW * 2` bytes. The original distortion
+    // bug was caused by the lighting buffer (`malloc`'d at exactly
+    // `newW * newH` bytes) and the surface's row stride disagreeing.
+    // Adopting DD's lPitch as the canonical width broke worse on the
+    // user's setup (produced duplicated/striped output), so we now
+    // just trust newW and rely on DD not padding 16bpp sysmem
+    // surfaces. Most widths divisible by 16 should be safe; logging
+    // helps diagnose if/when this assumption fails.
+#ifdef _DEBUG
+    {
+        long expectedPitch = (long)newW * 2;
+        if ((long)ps->d.lPitch != expectedPitch) {
+            char dbg[160];
+            wsprintfA(dbg,
+                "[u6o] recreateBackbuffers: dwWidth=%lu lPitch=%ld (expected %ld)\n",
+                (unsigned long)ps->d.dwWidth, (long)ps->d.lPitch, expectedPitch);
+            OutputDebugStringA(dbg);
+        }
+    }
+#endif
 
-    // Re-allocate the lighting buffers at the actual stride so the
+    // Re-allocate the lighting buffers at the requested stride so the
     // linear-walk inline asm in the lighting compose pass at
     // loop_client.cpp:8294ff stays in lockstep with `ps->o`.
     if (!lighting_alloc(newW, newH)) {
