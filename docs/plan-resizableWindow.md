@@ -191,31 +191,17 @@ instead of cycling modes.
   stormcloak block, `ps_fakebuffer` sizing, all using
   `lightingStride()`.)_
 
-  _(2026-05-21 — **BUG FIX: horizontal backbuffer growth blocked until
-  ASM is refactored.** Root cause of "game/UI rendered twice,
-  horizontally garbled when maximised": the inline-ASM sprite renderer
-  `sf32` / `sf32z` / `im32z` (in `function_client.h`) computes the
-  destination row address as `d->o + x*2 + y*2048` — hardcoding 2048
-  bytes = 1024 pixels × 2 bytes/pixel. The included ASM bodies
-  (`fast3/4/5.asm`) also use `+2048` as the row-advance immediate.
-  When `ps->d.lPitch > 2048` (i.e. ps wider than 1024 px), every
-  sprite row lands at the wrong memory address, producing each
-  source row at the wrong horizontal position in the destination —
-  visually: game world and UI each appear twice side-by-side, and the
-  world view is horizontally garbled.
-  **Fix applied**: both `newW` and `newH` in `recreateBackbuffers` are
-  now clamped to `kBackbufferLegacyW/H` (1024×768). Vertical growth is
-  theoretically safe (lPitch stays 2048) but nothing renders past row
-  768 anyway so height is also capped for simplicity. The
-  `blit_letterbox` helper already centres the 1024×768 image in a
-  larger window with black bars, giving a clean visual result.
-  The per-frame `cls(ps,0)` guard (lines 6598-6612 in loop_client.cpp)
-  was also removed — it was only needed when the backbuffer exceeded
-  1024×768.
-  **TODO (RW-P2.3-asm)**: refactor `sf32` / `sf32z` / `im32z` +
-  `fast3/4/5.asm` to accept (`d->d.lPitch`) as a runtime parameter, then
-  remove the `newW > kBackbufferLegacyW` clamp and re-enable horizontal
-  growth.)_
+   _(2026-05-21 — **BUG FIX resolved: RW-P2.3-asm DONE.** The inline-ASM
+   sprite renderers `sf32`/`sf32z`/`im32z`/`g32`/`g32z` in
+   `function_client.h` have been rewritten as C++ loops that read
+   `d->d.lPitch` at runtime, replacing the unrolled fast3/4/5/fastHI/
+   fast2hi ASM bodies that hard-coded `+2048` row advances.  The
+   `newW > kBackbufferLegacyW` clamp in `recreateBackbuffers` is removed;
+   horizontal growth is now limited only by `kBackbufferMaxW` (1920 px).
+   Height growth was already safe and is now capped at `kBackbufferMaxH`
+   (1200 px) instead of the legacy 768 floor. Source sprite-sheet layouts
+   (sfx8 stride 4096, bt8 stride 512, spr8/spr84 stride 64) are unchanged;
+   only the destination pitch is now runtime-dynamic. 2026-05-21.)_
 - 🟡 **RW-P2.3** Audit `function_client.cpp` blits and clamps for hard-coded
   `1024` / `768` / `>1024` / `>=768` checks; replace with
   `currentBackbufferW()` / `currentBackbufferH()`. Hotspots already known:
@@ -244,10 +230,14 @@ instead of cycling modes.
   changes are behavior-identical at 1024×768 since the accessors still
   return the legacy constants. Sections A1–A4 of
   `resizable-window-hotspots.md` can now be marked DONE.)_
-- ⬜ **RW-P2.4** Update `refresh()` so `srcW/srcH` passed to
+- ✅ **RW-P2.4** Update `refresh()` so `srcW/srcH` passed to
   `blit_letterbox` come from the actual surface dims (already does via
   `s->d.dwWidth/dwHeight` — verify and add an assert that they equal the
   current backbuffer size).
+  _(2026-05-21 — verified: `refresh()` in `myddraw.cpp` line 346 passes
+  `s->d.dwWidth`/`dwHeight` directly. A `_DEBUG` divergence log (lines
+  59-67) was already present from a prior commit alongside the `viewport.h`
+  include. No code change needed; marking done.)_
 - ⬜ **RW-P2.5** Stress test: continuously toggle window between 800×600,
   1024×768, 1600×1200, and maximized while a player walks. Watch for surface
   recreation leaks (Application Verifier handle leak rule).

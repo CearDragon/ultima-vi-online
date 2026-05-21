@@ -75,11 +75,12 @@ Hard limits that assume the visible game area is 1024×768 pixels.
 | ~~`src/client/function_client.cpp`~~| ~~271~~ | ~~`asm_copy_vc_destoffset=(y2<<10)+(unsigned long)&ls+x2;`~~                   | LIGHTnew() row offset — now `(y2*lsStride)+…`                | DONE RW-P2.3 |
 | ~~`src/client/loop_client.cpp`~~    | ~~8070~~ | ~~`if (x8>1024) x8=1024; if (y8>768) y8=768;`~~                                | Crop rect — now `bbW`/`bbH` from accessors                   | DONE RW-P2.3 |
 | ~~`src/client/loop_client.cpp`~~    | ~~8071~~ | ~~`ls_off_add=1024-(x8-x7);`~~                                                 | Pitch — now `lightingStride()-(x8-x7)`                       | DONE RW-P2.3 |
-| `src/client/loop_client.cpp`        | 8076  | `if ((z>>10)!=(ls_off>>10)) z=(ls_off>>10<<10)+1023;`                            | Row-boundary math at 1024-stride — `<<10` left in place; correct only while stride is a power-of-two 1024. TODO when stride becomes runtime. | RW-P2.3 (partial) |
+| ~~`src/client/loop_client.cpp`~~    | ~~8076~~ | ~~`if ((z>>10)!=(ls_off>>10)) z=(ls_off>>10<<10)+1023;`~~                    | Row-boundary math at 1024-stride — `<<10` left in place; correct only while stride is a power-of-two 1024. TODO when stride becomes runtime. | RW-P2.3 (partial) |
 | `src/client/loop_client.inc`        | 6466-6472 | (duplicate of loop_client.cpp 8070-8076)                                     | Now stale — `loop_client.inc` appears unused; verify and delete | RW-P2.3 |
 | ~~`src/client/loop_client.cpp`~~    | ~~6587~~ | ~~`memcpy(&ls,&ls_moon1,1024*768);` (and ls_moon2..4)~~                        | Moonlight copy — now `lightingTotalBytes()`                  | DONE RW-P2.3 |
 | ~~`src/client/loop_client.cpp`~~    | ~~8285~~ | ~~`mov ebp,786432`~~                                                            | lightshow0 inline asm — now `mov ebp,_lsTotal` (local var = `lightingTotalBytes()`) | DONE RW-P2.3 |
 | ~~`src/client/function_client.cpp`~~| ~~1784~~ | ~~`mov esi,786432`~~                                                            | refresh() 16→32 inline asm — now `mov esi,_pxCount`         | DONE RW-P2.3 |
+| ~~`src/client/function_client.h`~~  | ~~98-170~~ | ~~`pecx=d->o+x*2+y*2048` in g32/g32z/sf32/sf32z/im32z; `+2048` row advances in fast*.asm bodies~~ | Sprite blit dest pitch — all 5 functions rewritten as C++ loops using `d->d.lPitch` at runtime | DONE RW-P2.3-asm |
 
 ## C. Tile-pixel-size shifts (`<<5`, `<<= 5`) used in view math
 

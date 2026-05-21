@@ -315,40 +315,26 @@ void LIGHTnew(unsigned short x,unsigned short y,unsigned long light_data_offset,
 // pointers (vf, fs) that referenced the old `ps`, and clears the new
 // surface to black so unrendered regions don't show stale pixels.
 //
-// *** HORIZONTAL GROWTH TEMPORARILY BLOCKED ***
-// The sprite-renderer functions sf32, sf32z, and im32z (in
-// function_client.h) compute the destination-row base address as
-//   pecx = d->o + x*2 + y*2048          (2048 = 1024 pixels × 2 bytes)
-// and the hand-rolled inline ASM they call (fast3/4/5.asm) hard-codes
-// row-to-row advances of +2048 bytes throughout. Both assumptions are
-// only valid when ps->d.lPitch == 2048, i.e. the back-buffer is exactly
-// 1024 pixels wide. Growing ps beyond 1024 pixels wide makes lPitch >
-// 2048, which causes every sprite row to be written at the wrong memory
-// address — resulting in the game world rendered "twice" side-by-side
-// (left half = even rows, right half = odd rows) and horizontally
-// garbled as seen in the bug screenshot.
+// RW-P2.3-asm (2026-05-21) — HORIZONTAL GROWTH UNBLOCKED
+// sf32, sf32z, im32z (and g32, g32z) have been rewritten in function_client.h
+// as C++ loops that read d->d.lPitch at runtime, replacing the hard-rolled
+// inline-ASM bodies (fast3/4/5.asm etc.) that hard-coded +2048 between dest
+// rows. The newW > kBackbufferLegacyW clamp is now removed; the back-buffer
+// can grow horizontally up to kBackbufferMaxW.
 //
-// Until sf32/sf32z/im32z are refactored to use d->d.lPitch dynamically,
-// we clamp newW to kBackbufferLegacyW so this function is a no-op for
-// any window wider than 1024 px. Vertical growth is safe (lPitch stays
-// at 2048 bytes for a 1024-pixel-wide surface) and tile/sprite rendering
-// only writes into the top 768 rows regardless of surface height. The
-// blit_letterbox helper already centres the 1024×768 image in a larger
-// window with black bars, so the visual result is clean.
-//
-// TODO (RW-P2.3): refactor sf32/sf32z/im32z + fast*.asm to accept a
-// pitch parameter, then remove the newW clamp below.
+// Height growth is also re-enabled. The world-tile renderer only writes into
+// the upper kBackbufferLegacyH rows; the new outer region starts as black
+// (cleared by cls() below) and remains black until RW-P4 expands the world
+// view. The lighting/stormcloak passes use lightingTotalBytes() / lightingStride()
+// so they follow any height change already.
 // =====================================================================
 namespace u6o { namespace client {
 bool recreateBackbuffers(int newW, int newH) {
-    // Clamp width to the legacy 1024 floor/ceiling until the inline-ASM
-    // sprite renderer supports a dynamic pitch (see block comment above).
-    // Height can grow safely; in practice nothing draws beyond row 768 so
-    // it is also clamped for now to keep memory use predictable.
+    // Clamp to [kBackbufferLegacy*, kBackbufferMax*].
     if (newW < kBackbufferLegacyW) newW = kBackbufferLegacyW;
     if (newH < kBackbufferLegacyH) newH = kBackbufferLegacyH;
-    if (newW > kBackbufferLegacyW) newW = kBackbufferLegacyW;  // ASM stride not yet dynamic
-    if (newH > kBackbufferLegacyH) newH = kBackbufferLegacyH;  // nothing renders past row 768
+    if (newW > kBackbufferMaxW) newW = kBackbufferMaxW;
+    if (newH > kBackbufferMaxH) newH = kBackbufferMaxH;
 
     if (newW == backbufferW() && newH == backbufferH()) {
         return true; // already at requested size

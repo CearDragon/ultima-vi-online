@@ -93,79 +93,119 @@ void GETINPUT_setup(txt* input_pointer,void* enterpressed_pointer,unsigned long 
 txt* GETINPUT_current();
 void GETINPUT_stop();
 
-/* luteijn: FIXME Oh JOY inline asm code that looks as portable as a uhm as a very heavy object, like a neutron star */
+// RW-P2.3-asm: All five sprite-blit inline functions have been rewritten
+// as C++ loops that read the destination row stride from d->d.lPitch at
+// runtime.  The old implementations used `y*2048` and the included
+// fast*.asm bodies hard-coded `+2048` between destination rows, which
+// assumed ps->d.lPitch == 2048 (i.e. a 1024-pixel-wide back-buffer).
+// The new C++ versions work for any back-buffer width.
+//
+// Source sprite layouts (unchanged from the original asm bodies):
+//   g32 / g32z : bt8 sprite sheet, HIRES mode, source pitch = s->d.lPitch
+//                (512 bytes = 256 px wide), 32 source rows → 32 dest rows 1:1.
+//   sf32 / sf32z: sfx8 sprite sheet, source pitch = s->d.lPitch
+//                (4096 bytes = 2048 px wide), 16 source rows → 32 dest rows
+//                (2× vertical pixel-doubling).
+//   im32z      : spr8/spr84 sequential sprites, source stride = 64 bytes
+//                (32 px wide at 2 bpp), 32 source rows → 32 dest rows 1:1.
 
-/* probably best to make these 'inline' ? */
-//g32
-//req: d=1024x?xSYSMEM16 s=32x?xSYSMEM16
-//used for basetiles
-inline void g32(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i){
-  static unsigned long pebx,pecx;
-  pebx=(unsigned long)s->o+((i/8)*2048*8)+((i&7)*64);
-  pecx=(unsigned long)d->o+x*2+y*2048;
-  //ebx=source pointer ecx=destination pointer
-  _asm{
-    mov ebx,pebx
-    mov ecx,pecx
-#ifdef OPTION_HIRES
-#include "inline_asm/fastHI.asm"
-#else /* so ! OPTION_HIRES */
-#include "inline_asm/fast.asm"
-#endif /* OPTION_HIRES */
-  } 
+// g32 — opaque basetile blit (OPTION_HIRES: source stride = s->d.lPitch,
+//        32 source rows → 32 dest rows, 1:1, no transparency).
+inline void g32(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
+    const unsigned long srcPitch = (unsigned long)s->d.lPitch;
+    const unsigned long dstPitch = (unsigned long)d->d.lPitch;
+    const unsigned char* src = (const unsigned char*)s->o
+        + ((i / 8) * srcPitch * 32) + ((i & 7) * 64);
+    unsigned char* dst = (unsigned char*)d->o + x * 2 + y * dstPitch;
+    for (int row = 0; row < 32; row++) {
+        const unsigned long* sw = (const unsigned long*)src;
+              unsigned long* dw = (unsigned long*)dst;
+        for (int dw_i = 0; dw_i < 16; dw_i++) dw[dw_i] = sw[dw_i];
+        src += srcPitch;
+        dst += dstPitch;
+    }
 }
 
-
-//used for overlaying dirt on basetiles
-inline void g32z(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i){
-  static unsigned long pebx,pecx;
-  pebx=(unsigned long)s->o+((i/8)*2048*8)+((i&7)*64);
-  pecx=(unsigned long)d->o+x*2+y*2048;
-  //ebx=source pointer ecx=destination pointer
-  _asm{
-    mov ebx,pebx
-      mov ecx,pecx
-#include "inline_asm/fast2hi.asm"
-  }
+// g32z — transparent dirt-overlay blit (same source layout as g32,
+//         skips pixels where colour == 0).
+inline void g32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
+    const unsigned long srcPitch = (unsigned long)s->d.lPitch;
+    const unsigned long dstPitch = (unsigned long)d->d.lPitch;
+    const unsigned char* src = (const unsigned char*)s->o
+        + ((i / 8) * srcPitch * 32) + ((i & 7) * 64);
+    unsigned char* dst = (unsigned char*)d->o + x * 2 + y * dstPitch;
+    for (int row = 0; row < 32; row++) {
+        const unsigned short* sw = (const unsigned short*)src;
+              unsigned short* dw = (unsigned short*)dst;
+        for (int px = 0; px < 32; px++) {
+            unsigned short v = sw[px];
+            if (v) dw[px] = v;
+        }
+        src += srcPitch;
+        dst += dstPitch;
+    }
 }
 
-inline void sf32(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i){
-  static unsigned long pebx,pecx;
-  pebx=(unsigned long)s->o+((i/32)*2048*32)+((i&31)*64);
-  pecx=(unsigned long)d->o+x*2+y*2048;
-  //ebx=source pointer ecx=destination pointer
-  _asm{
-    mov ebx,pebx
-      mov ecx,pecx
-#include "inline_asm/fast3.asm"
-  }
+// sf32 — opaque sprite blit from sfx8 with 2× vertical pixel-doubling.
+//         Source: 16 rows at srcPitch intervals → 32 dest rows (each source
+//         row written to two consecutive dest rows).
+inline void sf32(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
+    const unsigned long srcPitch = (unsigned long)s->d.lPitch;
+    const unsigned long dstPitch = (unsigned long)d->d.lPitch;
+    const unsigned char* src = (const unsigned char*)s->o
+        + ((i / 32) * srcPitch * 16) + ((i & 31) * 64);
+    unsigned char* dst = (unsigned char*)d->o + x * 2 + y * dstPitch;
+    for (int row = 0; row < 16; row++) {
+        const unsigned long* sw  = (const unsigned long*)src;
+              unsigned long* dw0 = (unsigned long*)dst;
+              unsigned long* dw1 = (unsigned long*)(dst + dstPitch);
+        for (int dw_i = 0; dw_i < 16; dw_i++) {
+            unsigned long v = sw[dw_i];
+            dw0[dw_i] = v;
+            dw1[dw_i] = v;
+        }
+        src += srcPitch;
+        dst += 2 * dstPitch;
+    }
 }
 
-inline void sf32z(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i){
-  static unsigned long pebx,pecx;
-  pebx=(unsigned long)s->o+((i/32)*2048*32)+((i&31)*64);
-  pecx=(unsigned long)d->o+x*2+y*2048;
-  //ebx=source pointer ecx=destination pointer
-  _asm{
-    mov ebx,pebx
-      mov ecx,pecx
-#include "inline_asm/fast5.asm"
-  }
+// sf32z — transparent sprite blit from sfx8 with 2× vertical pixel-doubling.
+//          Same layout as sf32; skips pixels where colour == 0.
+inline void sf32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
+    const unsigned long srcPitch = (unsigned long)s->d.lPitch;
+    const unsigned long dstPitch = (unsigned long)d->d.lPitch;
+    const unsigned char* src = (const unsigned char*)s->o
+        + ((i / 32) * srcPitch * 16) + ((i & 31) * 64);
+    unsigned char* dst = (unsigned char*)d->o + x * 2 + y * dstPitch;
+    for (int row = 0; row < 16; row++) {
+        const unsigned short* sw  = (const unsigned short*)src;
+              unsigned short* dw0 = (unsigned short*)dst;
+              unsigned short* dw1 = (unsigned short*)(dst + dstPitch);
+        for (int px = 0; px < 32; px++) {
+            unsigned short v = sw[px];
+            if (v) { dw0[px] = v; dw1[px] = v; }
+        }
+        src += srcPitch;
+        dst += 2 * dstPitch;
+    }
 }
 
-inline void im32z(surf *d,unsigned long x,unsigned long y,surf *s,unsigned long i){
-  static unsigned long pebx,pecx;
-  pebx=(unsigned long)s->o+i*64*32;
-  pecx=(unsigned long)d->o+x*2+y*2048;
-  //ebx=source pointer ecx=destination pointer
-    _asm{
-      mov ebx,pebx
-	mov ecx,pecx
-#ifdef OPTION_HIRES
-#include "inline_asm/fast4HI.asm"
-#else /* so ! OPTION_HIRES */
-#include "inline_asm/fast4.asm"
-#endif /* OPTION_HIRES */
+// im32z — transparent sprite blit from spr8/spr84 sequential storage.
+//          Source: sprite i at byte offset i*2048, stride 64 bytes (32 px × 2 bpp),
+//          32 source rows → 32 dest rows 1:1.  Skips pixels where colour == 0.
+inline void im32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
+    const unsigned long dstPitch = (unsigned long)d->d.lPitch;
+    const unsigned char* src = (const unsigned char*)s->o + i * 64 * 32;
+    unsigned char* dst = (unsigned char*)d->o + x * 2 + y * dstPitch;
+    for (int row = 0; row < 32; row++) {
+        const unsigned short* sw = (const unsigned short*)src;
+              unsigned short* dw = (unsigned short*)dst;
+        for (int px = 0; px < 32; px++) {
+            unsigned short v = sw[px];
+            if (v) dw[px] = v;
+        }
+        src += 64;       // 32 px × 2 bpp = 64 bytes per source row
+        dst += dstPitch;
     }
 }
 
