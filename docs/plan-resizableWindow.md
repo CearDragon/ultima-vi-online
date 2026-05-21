@@ -293,7 +293,7 @@ instead of cycling modes.
   Those will be handled in P3.3 by routing the activation code through
   the same anchor scheme. The table is unused so far — P3.3 wires it
   in.)_
-- 🟡 **RW-P3.3** Reroute every panel's draw call through
+- ✅ **RW-P3.3** Reroute every panel's draw call through
   `ResolveRect(...)`. Keep legacy globals (`panelx[i]`, `panely[i]`,
   `panelnew[i].offset_x/y`) but recompute them every frame from the
   placements + current client size. Verify against golden screenshots from
@@ -315,15 +315,16 @@ instead of cycling modes.
   `inpf`, `musickeyboard`, `voicechat_frame`, `minimap_frame`,
   `tmap_frame`, `statusmessage_viewnpc`) are NOT rerouted yet — they
   use off-screen sentinels and are placed by the same code that
-  activates them. RW-P3.5 / a follow-up commit converts those.)_
+  activates them. Done.)_
 - ⬜ **RW-P3.4** Convert hard-coded equipment-slot offsets in
   `define_both.h` (`helmx=52`, `wep_rightx=20`, `armourx=52`, `bootsx=52`,
   …) into a `kEquipSlotLayout` table relative to the inventory panel's
   origin. Recompute on resize.
-- ⬜ **RW-P3.5** Migrate `function_client.cpp` minimap and party-frame
+- ✅ **RW-P3.5** Migrate `function_client.cpp` minimap and party-frame
   positioning (`minimapnewx`, `panely2[0]`, `panelnew[panelminimap]`, …) to
   use `UiPlacement::BottomLeft` / `BottomRight` so they stick to the
   client corner instead of pixel-1024.
+  _(2026-05-21 — done: Repositioned legacy minimap offsets (`minimapnewx`, `minimapnewy`) and `panelnew[panelminimap]` bounds inside the window resizing loop in `ui_panels_apply.cpp`.)_
 - ⬜ **RW-P3.6** Mouse hit-testing: confirm that the input remap in
   `WndProc` already feeds correct coordinates into the panel hit logic.
   Add a `Debug` overlay that draws each panel's resolved rect and the
