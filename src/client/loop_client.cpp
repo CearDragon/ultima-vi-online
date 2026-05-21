@@ -1,3 +1,85 @@
+#include "ui_layout.h"
+// Override slot-coordinate macros to use kEquipSlotLayout for RW-P3.4 implementation
+#ifdef helmx
+#undef helmx
+#endif
+#define helmx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Helm].x
+
+#ifdef helmy
+#undef helmy
+#endif
+#define helmy u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Helm].y
+
+#ifdef wep_rightx
+#undef wep_rightx
+#endif
+#define wep_rightx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::WepRight].x
+
+#ifdef wep_righty
+#undef wep_righty
+#endif
+#define wep_righty u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::WepRight].y
+
+#ifdef wep_leftx
+#undef wep_leftx
+#endif
+#define wep_leftx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::WepLeft].x
+
+#ifdef wep_lefty
+#undef wep_lefty
+#endif
+#define wep_lefty u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::WepLeft].y
+
+#ifdef armourx
+#undef armourx
+#endif
+#define armourx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Armour].x
+
+#ifdef armoury
+#undef armoury
+#endif
+#define armoury u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Armour].y
+
+#ifdef bootsx
+#undef bootsx
+#endif
+#define bootsx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Boots].x
+
+#ifdef bootsy
+#undef bootsy
+#endif
+#define bootsy u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Boots].y
+
+#ifdef ring_rightx
+#undef ring_rightx
+#endif
+#define ring_rightx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::RingRight].x
+
+#ifdef ring_righty
+#undef ring_righty
+#endif
+#define ring_righty u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::RingRight].y
+
+#ifdef ring_leftx
+#undef ring_leftx
+#endif
+#define ring_leftx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::RingLeft].x
+
+#ifdef ring_lefty
+#undef ring_lefty
+#endif
+#define ring_lefty u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::RingLeft].y
+
+#ifdef neckx
+#undef neckx
+#endif
+#define neckx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Neck].x
+
+#ifdef necky
+#undef necky
+#endif
+#define necky u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Neck].y
+
 if (wheel_move){
   if (wheel_move>0){
     wheel_move--;
@@ -3092,10 +3174,15 @@ maxminmini:
 
 
   if (u6okeyhit(U6OK_SOUND)){ //"S" sound on/off
-    if (volcontrol->offset_x>=1024){
-      volcontrol->offset_x-=2048;
-    }else{
-      volcontrol->offset_x+=2048;
+    if (windowResize) {
+      u6o::client::g_volcontrol_visible = !u6o::client::g_volcontrol_visible;
+      RepositionAnchoredPanels(backbufferW(), backbufferH());
+    } else {
+      if (volcontrol->offset_x>=1024){
+        volcontrol->offset_x-=2048;
+      }else{
+        volcontrol->offset_x+=2048;
+      }
     }
   }
 

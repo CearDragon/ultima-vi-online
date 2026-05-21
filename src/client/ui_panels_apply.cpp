@@ -28,10 +28,128 @@ namespace {
 
 void RepositionAnchoredPanels(int clientW, int clientH) {
     if (clientW <= 0 || clientH <= 0) return;
+
+    // Update global resolution trackers so they match the resized window/backbuffer
+    resxn1w = clientW;
+    resyn1w = clientH;
+    resxn1m = clientW - (uipanelsidebar >= 0 ? uipanelsizex[uipanelsidebar][0][0] : 260);
+
+    // RW-P3.4: Recompute equipment slots layout of party member portraits on resize
+    RecomputeEquipSlotLayout(uiscaling ? uiscalex : 1.0f, uiscaling ? uiscaley : 1.0f);
+
+    // RW-P3.5: Reposition the legacy minimap and its frame offsets
+    minimapnewx = 2;
+    minimapnewy = clientH - 256 - 2;
+
+
+    // Reposition the sidebar and its nested panels/widgets
+    if (uipanelsidebar >= 0 && uipanelsidebar < uipanelcount) {
+        uipanelsizey[uipanelsidebar][0][0] = clientH;
+        uipanelx[uipanelsidebar][0][0] = clientW - uipanelsizex[uipanelsidebar][0][0];
+        uipanely[uipanelsidebar][0][0] = 0;
+    }
+
+    if (uipanelpartymemberparent >= 0 && uipanelpartymemberparent < uipanelcount) {
+        uipanelx[uipanelpartymemberparent][0][0] = uipanelx[uipanelsidebar][0][0];
+    }
+
+    if (uipanelpartymember0 >= 0 && uipanelpartymember0 < uipanelcount) {
+        uipanelx[uipanelpartymember0][0][0] = uipanelx[uipanelsidebar][0][0] + 2;
+        uipanely[uipanelpartymember0][0][0] = uipanely[uipanelsidebar][0][0] + 2;
+    }
+
+    if (uipanelminimap >= 0 && uipanelminimap < uipanelcount) {
+        uipanelx[uipanelminimap][0][0] = uipanelx[uipanelsidebar][0][0] + 2;
+        uipanely[uipanelminimap][0][0] = clientH - 258;
+    }
+
+    if (uipanelactionbar1 >= 0 && uipanelactionbar1 < uipanelcount) {
+        uipanelx[uipanelactionbar1][0][0] = uipanelx[uipanelsidebar][0][0] + 2;
+        uipanely[uipanelactionbar1][0][0] = uipanely[uipanelsidebar][0][0] + 260;
+
+        for (int i = 1; i < uipanelwidgetcount[uipanelactionbar1]; i++) {
+            uipanelx[uipanelactionbar1][i][0] = uipanelx[uipanelactionbar1][0][0] + (uipanelsizex[uipanelactionbar1][i][0] * (i - 1));
+            uipanely[uipanelactionbar1][i][0] = uipanely[uipanelactionbar1][0][0];
+        }
+    }
+
+    if (uipanelactionbar2 >= 0 && uipanelactionbar2 < uipanelcount) {
+        uipanelx[uipanelactionbar2][0][0] = uipanelx[uipanelactionbar1][0][0];
+        uipanely[uipanelactionbar2][0][0] = uipanely[uipanelactionbar1][0][0] + uipanelsizey[uipanelactionbar1][0][0] + 1;
+
+        for (int i = 1; i < uipanelwidgetcount[uipanelactionbar2]; i++) {
+            uipanelx[uipanelactionbar2][i][0] = uipanelx[uipanelactionbar2][0][0] + (uipanelsizex[uipanelactionbar2][i][0] * (i - 1));
+            uipanely[uipanelactionbar2][i][0] = uipanely[uipanelactionbar2][0][0];
+        }
+    }
+
+    if (uipaneloptionbar1 >= 0 && uipaneloptionbar1 < uipanelcount) {
+        uipanelx[uipaneloptionbar1][0][0] = uipanelx[uipanelactionbar2][0][0];
+        uipanely[uipaneloptionbar1][0][0] = uipanely[uipanelactionbar2][0][0] + uipanelsizey[uipanelactionbar2][0][0] + 1;
+
+        for (int i = 1; i < uipanelwidgetcount[uipaneloptionbar1]; i++) {
+            uipanelx[uipaneloptionbar1][i][0] = uipanelx[uipaneloptionbar1][0][0] + (uipanelsizex[uipaneloptionbar1][i][0] * (i - 1));
+            uipanely[uipaneloptionbar1][i][0] = uipanely[uipaneloptionbar1][0][0];
+        }
+    }
+
+    if (uipanelactiontalkbar1 >= 0 && uipanelactiontalkbar1 < uipanelcount) {
+        uipanelx[uipanelactiontalkbar1][0][0] = uipanelx[uipanelsidebar][0][0] + 2;
+        uipanely[uipanelactiontalkbar1][0][0] = uipanely[uipanelsidebar][0][0] + 260 + 52 + 52;
+
+        int i2 = 0;
+        for (int i = 1; i < uipanelwidgetcount[uipanelactiontalkbar1]; i++) {
+            uipanelx[uipanelactiontalkbar1][i][0] = uipanelx[uipanelactiontalkbar1][0][0] + (uipanelsizex[uipanelactiontalkbar1][i][0] * i2);
+            if (i % 2 == 0) {
+                i2++;
+                uipanely[uipanelactiontalkbar1][i][0] = uipanely[uipanelactiontalkbar1][0][0] + 26;
+            } else {
+                uipanely[uipanelactiontalkbar1][i][0] = uipanely[uipanelactiontalkbar1][0][0];
+            }
+        }
+    }
+
+    if (uipanelactiontalkbar2 >= 0 && uipanelactiontalkbar2 < uipanelcount) {
+        uipanelx[uipanelactiontalkbar2][0][0] = uipanelx[uipanelactiontalkbar1][0][0];
+        uipanely[uipanelactiontalkbar2][0][0] = uipanely[uipanelactiontalkbar1][0][0] + uipanelsizey[uipanelactiontalkbar1][0][0] + 1;
+
+        int i2 = 0;
+        for (int i = 1; i < uipanelwidgetcount[uipanelactiontalkbar2]; i++) {
+            uipanelx[uipanelactiontalkbar2][i][0] = uipanelx[uipanelactiontalkbar2][0][0] + (uipanelsizex[uipanelactiontalkbar2][i][0] * i2);
+            if (i % 2 == 0) {
+                i2++;
+                uipanely[uipanelactiontalkbar2][i][0] = uipanely[uipanelactiontalkbar2][0][0] + 26;
+            } else {
+                uipanely[uipanelactiontalkbar2][i][0] = uipanely[uipanelactiontalkbar2][0][0];
+            }
+        }
+    }
+
+    if (uipanelactiontalkbar3 >= 0 && uipanelactiontalkbar3 < uipanelcount) {
+        uipanelx[uipanelactiontalkbar3][0][0] = uipanelx[uipanelactiontalkbar2][0][0];
+        uipanely[uipanelactiontalkbar3][0][0] = uipanely[uipanelactiontalkbar2][0][0] + uipanelsizey[uipanelactiontalkbar2][0][0] + 1;
+
+        int i2 = 0;
+        for (int i = 1; i < uipanelwidgetcount[uipanelactiontalkbar3]; i++) {
+            uipanelx[uipanelactiontalkbar3][i][0] = uipanelx[uipanelactiontalkbar3][0][0] + (uipanelsizex[uipanelactiontalkbar3][i][0] * i2);
+            if (i % 2 == 0) {
+                i2++;
+                uipanely[uipanelactiontalkbar3][i][0] = uipanely[uipanelactiontalkbar3][0][0] + 26;
+            } else {
+                uipanely[uipanelactiontalkbar3][i][0] = uipanely[uipanelactiontalkbar3][0][0];
+            }
+        }
+    }
+
     apply_to(con_frm,                 UiPanelId::ConvoArrows,    clientW, clientH);
     apply_to(con_frm_img,             UiPanelId::ConvoHistory,   clientW, clientH);
     apply_to(qkstf,                   UiPanelId::PartyList,      clientW, clientH);
-    apply_to(volcontrol,              UiPanelId::VolumeControl,  clientW, clientH);
+    if (g_volcontrol_visible) {
+        apply_to(volcontrol,          UiPanelId::VolumeControl,  clientW, clientH);
+    } else if (volcontrol) {
+        volcontrol->offset_x = clientW + 2048;
+        volcontrol->offset_y = clientH + 2048;
+    }
     apply_to(statusmessage_viewprev,  UiPanelId::StatusViewPrev, clientW, clientH);
 }
 

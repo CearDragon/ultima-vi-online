@@ -100,6 +100,27 @@ enum class UiPanelId : int {
     Count
 };
 
+// RW-P3.4: structured layout table for equipment slots
+struct EquipSlot {
+    int x;
+    int y;
+};
+
+enum class EquipSlotId : int {
+    Helm = 0,
+    WepRight,
+    WepLeft,
+    Armour,
+    Boots,
+    RingRight,
+    RingLeft,
+    Neck,
+    Count
+};
+
+extern EquipSlot kEquipSlotLayout[];
+void RecomputeEquipSlotLayout(float scaleX, float scaleY);
+
 // Default placement for each UiPanelId. Indexed by the integer value of
 // the enum; size == int(UiPanelId::Count). Defined in ui_layout.cpp.
 extern const UiPlacement kBuiltinPanels[];
@@ -118,6 +139,8 @@ const UiPlacement& GetBuiltinPanel(UiPanelId id);
 // function unconditionally writes the offsets when called. When the
 // flag is off, callers skip it so legacy positions stay untouched.
 void RepositionAnchoredPanels(int clientW, int clientH);
+
+extern bool g_volcontrol_visible;
 
 }} // namespace u6o::client
 

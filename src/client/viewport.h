@@ -46,6 +46,7 @@ enum : int {
     kBackbufferMaxH = 1200
 };
 
+#ifdef CLIENT
 // Active back-buffer dimensions. Bodies live in viewport.cpp; the
 // values are read every frame on hot paths so they're declared
 // extern (no inlining of a constant return).
@@ -82,8 +83,19 @@ void lighting_free();
 
 // Internal: update the active back-buffer dims globals after a
 // successful surface recreation. Called only from
-// `recreateBackbuffers`'s implementation in function_client.cpp.
+// `recreateBackbuffers`s implementation in function_client.cpp.
 void set_active_backbuffer_dims(int w, int h);
+#else
+// Host fallbacks so u6oh doesn't require viewport.cpp
+inline int backbufferW() { return 1024; }
+inline int backbufferH() { return 768; }
+inline int lightingStride() { return 1024; }
+inline int lightingTotalBytes() { return 1024 * 768; }
+inline bool recreateBackbuffers(int, int) { return true; }
+inline bool lighting_alloc(int, int) { return true; }
+inline void lighting_free() {}
+inline void set_active_backbuffer_dims(int, int) {}
+#endif
 
 }} // namespace u6o::client
 

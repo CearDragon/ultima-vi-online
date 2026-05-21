@@ -92,5 +92,39 @@ const UiPlacement& GetBuiltinPanel(UiPanelId id) {
     return kBuiltinPanels[i];
 }
 
+// RW-P3.4: equipment slots layout
+const EquipSlot kDefaultEquipSlotLayout[] = {
+    { 52, 132 }, // Helm
+    { 20, 170 }, // WepRight
+    { 84, 170 }, // WepLeft
+    { 52, 166 }, // Armour
+    { 52, 216 }, // Boots
+    { 22, 202 }, // RingRight
+    { 84, 202 }, // RingLeft
+    { 20, 138 }  // Neck
+};
+
+EquipSlot kEquipSlotLayout[] = {
+    { 52, 132 },
+    { 20, 170 },
+    { 84, 170 },
+    { 52, 166 },
+    { 52, 216 },
+    { 22, 202 },
+    { 84, 202 },
+    { 20, 138 }
+};
+
+void RecomputeEquipSlotLayout(float scaleX, float scaleY) {
+    float xFactor = (scaleX <= 0.0f) ? 1.0f : scaleX;
+    float yFactor = (scaleY <= 0.0f) ? 1.0f : scaleY;
+    for (int i = 0; i < (int)EquipSlotId::Count; i++) {
+        kEquipSlotLayout[i].x = (int)(kDefaultEquipSlotLayout[i].x * xFactor);
+        kEquipSlotLayout[i].y = (int)(kDefaultEquipSlotLayout[i].y * yFactor);
+    }
+}
+
+bool g_volcontrol_visible = true;
+
 }} // namespace u6o::client
 
