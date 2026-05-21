@@ -185,32 +185,37 @@ instead of cycling modes.
   `setup_client.inc` `newsurf(1024,768,…)` calls have **not** been
   rewritten yet; they should become `newsurf(backbufferW(), backbufferH(),
   …)` in the same commit that flips the seam to dynamic.)_
-  _(2026-05-20 follow-up — done. `viewport.h` accessors flipped from
-  `inline … return constant` to extern declarations; bodies in
-  `viewport.cpp` read `g_active_w`/`g_active_h` (defaulting to the
-  legacy 1024×768 floor). `recreateBackbuffers(newW, newH)` body lives
-  in `function_client.cpp` (where the FRAME globals are visible) and
-  does the full release/recreate dance: clamp to
-  `[kBackbufferLegacy*, kBackbufferMax*]` (1024×768 → 1920×1200);
-  re-allocate `ls`/`ls_moon1..4` via `lighting_alloc`; release `ps` /
-  `ps3` (when present) / `ps5` and re-create them via `newsurf` at the
-  new dims; patch `vf->graphic` and `fs->graphic` to the new `ps`;
-  `cls(ps, 0)` so the new outer region (outside the legacy 1024×768
-  world-render area) starts black; finally publish the new dims via
-  `set_active_backbuffer_dims`. Pitch-coupled hot-path migrations:
-  `loop_client.cpp:6989/7134` (world tile rasterizer) now use
-  `(y2*32+siw_y)*lightingStride()` instead of `*1024*32` /
-  `*1024`. Stormcloak block at `loop_client.cpp:8060ff` now uses
-  `y7*lightingStride()` and explicit per-pixel division by stride for
-  the row-boundary clamp (was `>>10`). The two `ps_fakebuffer[1024*32]`
-  scratch arrays at lines 6973/7123 grew to `[1920*32]` and now use
-  `lightingStride()` for their indexing so getspr() can't overflow
-  them when the active pitch exceeds 1024. Out of scope per user
-  direction (2026-05-20): intro/title star rendering at
-  `loop_client.cpp:1329-1337` and the scrlog status-bar
-  `memcpy(ps->o,&ps->o2[16384],1540096)` at `function_client.cpp:1822`
-  remain at hard-coded `*1024` — those only run during the startup
-  intro, before the user can resize.)_
+  _(2026-05-20 — done: `recreateBackbuffers(newW, newH)` body lives in
+  `function_client.cpp`. Full release/recreate dance implemented.
+  Pitch-coupled hot-path migrations: `loop_client.cpp:6989/7134`,
+  stormcloak block, `ps_fakebuffer` sizing, all using
+  `lightingStride()`.)_
+
+  _(2026-05-21 — **BUG FIX: horizontal backbuffer growth blocked until
+  ASM is refactored.** Root cause of "game/UI rendered twice,
+  horizontally garbled when maximised": the inline-ASM sprite renderer
+  `sf32` / `sf32z` / `im32z` (in `function_client.h`) computes the
+  destination row address as `d->o + x*2 + y*2048` — hardcoding 2048
+  bytes = 1024 pixels × 2 bytes/pixel. The included ASM bodies
+  (`fast3/4/5.asm`) also use `+2048` as the row-advance immediate.
+  When `ps->d.lPitch > 2048` (i.e. ps wider than 1024 px), every
+  sprite row lands at the wrong memory address, producing each
+  source row at the wrong horizontal position in the destination —
+  visually: game world and UI each appear twice side-by-side, and the
+  world view is horizontally garbled.
+  **Fix applied**: both `newW` and `newH` in `recreateBackbuffers` are
+  now clamped to `kBackbufferLegacyW/H` (1024×768). Vertical growth is
+  theoretically safe (lPitch stays 2048) but nothing renders past row
+  768 anyway so height is also capped for simplicity. The
+  `blit_letterbox` helper already centres the 1024×768 image in a
+  larger window with black bars, giving a clean visual result.
+  The per-frame `cls(ps,0)` guard (lines 6598-6612 in loop_client.cpp)
+  was also removed — it was only needed when the backbuffer exceeded
+  1024×768.
+  **TODO (RW-P2.3-asm)**: refactor `sf32` / `sf32z` / `im32z` +
+  `fast3/4/5.asm` to accept (`d->d.lPitch`) as a runtime parameter, then
+  remove the `newW > kBackbufferLegacyW` clamp and re-enable horizontal
+  growth.)_
 - 🟡 **RW-P2.3** Audit `function_client.cpp` blits and clamps for hard-coded
   `1024` / `768` / `>1024` / `>=768` checks; replace with
   `currentBackbufferW()` / `currentBackbufferH()`. Hotspots already known:
