@@ -147,13 +147,13 @@ inline void g32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned lo
 }
 
 // sf32 — opaque sprite blit from sfx8 with 2× vertical pixel-doubling.
-//         Source: 16 rows at srcPitch intervals → 32 dest rows (each source
+//         Source: 16 rows at 2*srcPitch intervals → 32 dest rows (each source
 //         row written to two consecutive dest rows).
 inline void sf32(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
     const unsigned long srcPitch = (unsigned long)s->d.lPitch;
     const unsigned long dstPitch = (unsigned long)d->d.lPitch;
     const unsigned char* src = (const unsigned char*)s->o
-        + ((i / 32) * srcPitch * 16) + ((i & 31) * 64);
+        + ((i / 32) * srcPitch * 32) + ((i & 31) * 64);
     unsigned char* dst = (unsigned char*)d->o + x * 2 + y * dstPitch;
     for (int row = 0; row < 16; row++) {
         const unsigned long* sw  = (const unsigned long*)src;
@@ -164,7 +164,7 @@ inline void sf32(surf *d, unsigned long x, unsigned long y, surf *s, unsigned lo
             dw0[dw_i] = v;
             dw1[dw_i] = v;
         }
-        src += srcPitch;
+        src += 2 * srcPitch;
         dst += 2 * dstPitch;
     }
 }
@@ -175,7 +175,7 @@ inline void sf32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned l
     const unsigned long srcPitch = (unsigned long)s->d.lPitch;
     const unsigned long dstPitch = (unsigned long)d->d.lPitch;
     const unsigned char* src = (const unsigned char*)s->o
-        + ((i / 32) * srcPitch * 16) + ((i & 31) * 64);
+        + ((i / 32) * srcPitch * 32) + ((i & 31) * 64);
     unsigned char* dst = (unsigned char*)d->o + x * 2 + y * dstPitch;
     for (int row = 0; row < 16; row++) {
         const unsigned short* sw  = (const unsigned short*)src;
@@ -185,7 +185,7 @@ inline void sf32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned l
             unsigned short v = sw[px];
             if (v) { dw0[px] = v; dw1[px] = v; }
         }
-        src += srcPitch;
+        src += 2 * srcPitch;
         dst += 2 * dstPitch;
     }
 }
