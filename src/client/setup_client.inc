@@ -11,8 +11,8 @@ JDISABLED=FALSE;
 // and sized to backbufferW()*backbufferH(). When the back buffer becomes
 // dynamic in P2.2, recreateBackbuffers() will call lighting_alloc() again
 // with the new dims.
-if (!lighting_alloc(backbufferW(), backbufferH())) {
-    MessageBox(NULL,"Failed to allocate lighting buffers","Ultima 6 Online",MB_OK);
+if (!lighting_alloc(backbufferW(), backbufferH()) || !visibility_alloc(backbufferW(), backbufferH())) {
+    MessageBox(NULL,"Failed to allocate lighting/visibility buffers","Ultima 6 Online",MB_OK);
     exit(0);
 }
 

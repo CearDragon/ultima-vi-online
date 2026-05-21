@@ -5169,7 +5169,9 @@ vis_scan2:
 viewfind_skip:
 
     //get vischeck
-    ZeroMemory(&vischeck,sizeof(vischeck));
+    if (vischeck.data) {
+        memset(vischeck.data, 0, viewTilesX() * viewTilesY());
+    }
     for (y=0;y<=23;y++){ for (x=0;x<=31;x++){
       if (vis[x+2][y+2]&4) vischeck[x][y]=1;
       if (vis[x+2][y+2]&8){

@@ -13,6 +13,7 @@
 #include "stdafx.h"
 #include <stdlib.h> // malloc/free
 #include <string.h> // memset
+#include "viewport.h"
 
 // Pull in the externs for ls/ls_moon* and the Windows-only OutputDebugStringA
 // pieces. We don't include data_client.h directly to avoid dragging in the
@@ -24,7 +25,16 @@ extern unsigned char* ls_moon2;
 extern unsigned char* ls_moon3;
 extern unsigned char* ls_moon4;
 
-#include "viewport.h"
+// RW-P4.2: Dynamic 2D Visibility array externs
+extern Dynamic2DArray<unsigned char> vis;
+extern Dynamic2DArray<unsigned char> vis_window;
+extern Dynamic2DArray<unsigned char> vis_chair;
+extern Dynamic2DArray<unsigned char> vischeck;
+extern Dynamic2DArray<unsigned char> vis_bed;
+extern Dynamic2DArray<unsigned char> vis_slime;
+extern Dynamic2DArray<unsigned char> nonvis;
+
+extern bool windowResize;
 
 namespace u6o { namespace client {
 
@@ -46,10 +56,37 @@ namespace {
     }
 }
 
+
 int backbufferW()        { return g_active_w; }
 int backbufferH()        { return g_active_h; }
 int lightingStride()     { return g_active_w; }
 int lightingTotalBytes() { return g_active_w * g_active_h; }
+
+int viewTilesX() {
+    if (!windowResize) return 32;
+    return g_active_w / 32;
+}
+
+int viewTilesY() {
+    if (!windowResize) return 24;
+    return g_active_h / 32;
+}
+
+int viewPixelW() {
+    return viewTilesX() * 32;
+}
+
+int viewPixelH() {
+    return viewTilesY() * 32;
+}
+
+int viewOffsetX() {
+    return 0;
+}
+
+int viewOffsetY() {
+    return 0;
+}
 
 // Setter is internal — only function_client.cpp's recreateBackbuffers()
 // implementation calls it, after the surfaces have been re-allocated
@@ -99,6 +136,81 @@ bool lighting_alloc(int w, int h) {
 
     g_lighting_w = w;
     g_lighting_h = h;
+    return true;
+}
+
+namespace {
+    int g_visibility_w = 0;
+    int g_visibility_h = 0;
+
+    void free_visibility_array(Dynamic2DArray<unsigned char>& arr) {
+        if (arr.data) {
+            free(arr.data);
+            arr.data = nullptr;
+        }
+        arr.stride = 0;
+    }
+}
+
+void visibility_free() {
+    free_visibility_array(vis);
+    free_visibility_array(vis_window);
+    free_visibility_array(vis_chair);
+    free_visibility_array(vis_bed);
+    free_visibility_array(vis_slime);
+    free_visibility_array(vischeck);
+    free_visibility_array(nonvis);
+    g_visibility_w = 0;
+    g_visibility_h = 0;
+}
+
+bool visibility_alloc(int w, int h) {
+    if (w <= 0 || h <= 0) return false;
+    if (g_visibility_w == w && g_visibility_h == h && vis && vis_window && vis_chair && vis_bed && vis_slime && vischeck && nonvis) {
+        return true;
+    }
+    visibility_free();
+
+    int tilesX = w / 32;
+    int tilesY = h / 32;
+
+    int padX = tilesX + 4;
+    int padY = tilesY + 4;
+
+    size_t padSize = (size_t)padX * padY;
+    size_t viewSize = (size_t)tilesX * tilesY;
+
+    vis.data      = (unsigned char*)malloc(padSize);
+    vis_window.data = (unsigned char*)malloc(padSize);
+    vis_chair.data  = (unsigned char*)malloc(padSize);
+    vis_bed.data    = (unsigned char*)malloc(padSize);
+    vis_slime.data  = (unsigned char*)malloc(padSize);
+    vischeck.data   = (unsigned char*)malloc(viewSize);
+    nonvis.data     = (unsigned char*)malloc(viewSize);
+
+    if (!vis.data || !vis_window.data || !vis_chair.data || !vis_bed.data || !vis_slime.data || !vischeck.data || !nonvis.data) {
+        visibility_free();
+        return false;
+    }
+
+    vis.stride      = padY;
+    vis_window.stride = padY;
+    vis_chair.stride  = padY;
+    vis_bed.stride    = padY;
+    vis_slime.stride  = padY;
+    vischeck.stride   = tilesY;
+    nonvis.stride     = tilesY;
+
+    memset(vis.data,      0, padSize);
+    memset(vis_window.data, 0, padSize);
+    memset(vis_chair.data,  0, padSize);
+    memset(vis_bed.data,    0, padSize);
+    memset(vis_slime.data,  0, padSize);
+    memset(vischeck.data,   0, viewSize);
+    memset(nonvis.data,     0, viewSize);
+
+    g_visibility_w = w;
+    g_visibility_h = h;
     return true;
 }
 

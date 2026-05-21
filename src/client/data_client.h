@@ -1,6 +1,7 @@
 #ifndef DATA_CLIENT_H
 #define DATA_CLIENT_H
 
+#include "viewport.h"
 #include "define_client.h" /* keys etc. */
 #include "mytxt.h" /* txt* etc */
 #include "data_both.h" /* schedule* etc. */
@@ -70,13 +71,13 @@ extern surf *intro_ultimavi2;
 
 
 //visibility checking arrays
-extern unsigned char vis[34+2][26+2]; //will be used for pathfind as well!
-extern unsigned char vis_window[34+2][26+2];//if =1 window exists here
-extern unsigned char vis_chair[34+2][26+2];//1=up 2=right 3=down 4=left 0=none
-extern unsigned char vischeck[32][24];//0=objects on this square are not visible, 1=they are
+extern Dynamic2DArray<unsigned char> vis; //will be used for pathfind as well!
+extern Dynamic2DArray<unsigned char> vis_window;//if =1 window exists here
+extern Dynamic2DArray<unsigned char> vis_chair;//1=up 2=right 3=down 4=left 0=none
+extern Dynamic2DArray<unsigned char> vischeck;//0=objects on this square are not visible, 1=they are
 extern unsigned char visalways[256][1024];//bit array, if =1 force visibility
-extern unsigned char vis_bed[34+2][26+2];//1=horizontal bed 2=vertical bed
-extern unsigned char vis_slime[34+2][26+2];//1=slime
+extern Dynamic2DArray<unsigned char> vis_bed;//1=horizontal bed 2=vertical bed
+extern Dynamic2DArray<unsigned char> vis_slime;//1=slime
 
 extern unsigned char x5option;
 
@@ -308,7 +309,7 @@ extern unsigned char inprec; //input receiving
 extern unsigned char inprec_global; //input receiving global
 
 
-extern unsigned char nonvis[32][24];
+extern Dynamic2DArray<unsigned char> nonvis;
 extern short osn;
 extern short osx[1024]; //y
 extern short osy[1024]; //x (centre)

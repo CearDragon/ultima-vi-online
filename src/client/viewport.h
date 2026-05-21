@@ -1,6 +1,32 @@
 ﻿#ifndef VIEWPORT_H
 #define VIEWPORT_H
 
+// RW-P4.2: Dynamic 2D Array wrapper mimicking raw 2D arrays but with dynamic striding.
+template <typename T>
+struct Dynamic2DArray {
+    T* data;
+    int stride;
+
+    struct Row {
+        T* row_data;
+        T& operator[](int col) {
+            return row_data[col];
+        }
+        const T& operator[](int col) const {
+            return row_data[col];
+        }
+    };
+
+    Row operator[](int row) {
+        return Row{ data + row * stride };
+    }
+    const Row operator[](int row) const {
+        return Row{ data + row * stride };
+    }
+
+    operator bool() const { return data != nullptr; }
+};
+
 // Resizable-window plan (docs/plan-resizableWindow.md): single source of
 // truth for the client's back-buffer dimensions, lighting-buffer stride,
 // and related sizing constants.
@@ -53,6 +79,14 @@ enum : int {
 int backbufferW();
 int backbufferH();
 
+// RW-P4.1: Dynamic view tiles and pixel calculations
+int viewTilesX();
+int viewTilesY();
+int viewPixelW();
+int viewPixelH();
+int viewOffsetX();
+int viewOffsetY();
+
 // Row stride (in pixels) of the `ls`/`ls_moon*` lighting buffers AND
 // the `ps` DirectDraw back-buffer (16-bpp pixels). Both are
 // re-allocated together by `recreateBackbuffers` so they stay in
@@ -81,6 +115,10 @@ bool recreateBackbuffers(int newW, int newH);
 bool lighting_alloc(int w, int h);
 void lighting_free();
 
+// Allocate / free the heap-resident visibility buffers (RW-P4.2).
+bool visibility_alloc(int w, int h);
+void visibility_free();
+
 // Internal: update the active back-buffer dims globals after a
 // successful surface recreation. Called only from
 // `recreateBackbuffers`s implementation in function_client.cpp.
@@ -89,11 +127,19 @@ void set_active_backbuffer_dims(int w, int h);
 // Host fallbacks so u6oh doesn't require viewport.cpp
 inline int backbufferW() { return 1024; }
 inline int backbufferH() { return 768; }
+inline int viewTilesX() { return 32; }
+inline int viewTilesY() { return 24; }
+inline int viewPixelW() { return 1024; }
+inline int viewPixelH() { return 768; }
+inline int viewOffsetX() { return 0; }
+inline int viewOffsetY() { return 0; }
 inline int lightingStride() { return 1024; }
 inline int lightingTotalBytes() { return 1024 * 768; }
 inline bool recreateBackbuffers(int, int) { return true; }
 inline bool lighting_alloc(int, int) { return true; }
 inline void lighting_free() {}
+inline bool visibility_alloc(int, int) { return true; }
+inline void visibility_free() {}
 inline void set_active_backbuffer_dims(int, int) {}
 #endif
 
@@ -103,6 +149,12 @@ inline void set_active_backbuffer_dims(int, int) {}
 // preludes) can use the names without a `u6o::client::` prefix.
 inline int backbufferW()        { return u6o::client::backbufferW(); }
 inline int backbufferH()        { return u6o::client::backbufferH(); }
+inline int viewTilesX()         { return u6o::client::viewTilesX(); }
+inline int viewTilesY()         { return u6o::client::viewTilesY(); }
+inline int viewPixelW()         { return u6o::client::viewPixelW(); }
+inline int viewPixelH()         { return u6o::client::viewPixelH(); }
+inline int viewOffsetX()        { return u6o::client::viewOffsetX(); }
+inline int viewOffsetY()        { return u6o::client::viewOffsetY(); }
 inline int lightingStride()     { return u6o::client::lightingStride(); }
 inline int lightingTotalBytes() { return u6o::client::lightingTotalBytes(); }
 inline bool recreateBackbuffers(int newW, int newH) {
@@ -110,6 +162,8 @@ inline bool recreateBackbuffers(int newW, int newH) {
 }
 inline bool lighting_alloc(int w, int h) { return u6o::client::lighting_alloc(w, h); }
 inline void lighting_free() { u6o::client::lighting_free(); }
+inline bool visibility_alloc(int w, int h) { return u6o::client::visibility_alloc(w, h); }
+inline void visibility_free() { u6o::client::visibility_free(); }
 
 #endif // VIEWPORT_H
 

@@ -389,7 +389,7 @@ bool recreateBackbuffers(int newW, int newH) {
     // Re-allocate the lighting buffers at the requested stride so the
     // linear-walk inline asm in the lighting compose pass at
     // loop_client.cpp:8294ff stays in lockstep with `ps->o`.
-    if (!lighting_alloc(newW, newH)) {
+    if (!lighting_alloc(newW, newH) || !visibility_alloc(newW, newH)) {
         return false;
     }
 

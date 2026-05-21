@@ -1,5 +1,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
+
+#include "viewport.h"
 /*
  * actual definition of the global variables, to be included in the main program
  * these are referred to as extern everywhere else
@@ -519,13 +521,13 @@ surf *intro_ultimavi2;
 
 
 //visibility checking arrays
-unsigned char vis[34+2][26+2]; //will be used for pathfind as well!
-unsigned char vis_window[34+2][26+2];//if =1 window exists here
-unsigned char vis_chair[34+2][26+2];//1=up 2=right 3=down 4=left 0=none
-unsigned char vischeck[32][24];//0=objects on this square are not visible, 1=they are
+Dynamic2DArray<unsigned char> vis = { nullptr, 0 }; //will be used for pathfind as well!
+Dynamic2DArray<unsigned char> vis_window = { nullptr, 0 };//if =1 window exists here
+Dynamic2DArray<unsigned char> vis_chair = { nullptr, 0 };//1=up 2=right 3=down 4=left 0=none
+Dynamic2DArray<unsigned char> vischeck = { nullptr, 0 };//0=objects on this square are not visible, 1=they are
 unsigned char visalways[256][1024];//bit array, if =1 force visibility
-unsigned char vis_bed[34+2][26+2];//1=horizontal bed 2=vertical bed
-unsigned char vis_slime[34+2][26+2];//1=slime
+Dynamic2DArray<unsigned char> vis_bed = { nullptr, 0 };//1=horizontal bed 2=vertical bed
+Dynamic2DArray<unsigned char> vis_slime = { nullptr, 0 };//1=slime
 
 unsigned char x5option;
 
@@ -763,7 +765,7 @@ unsigned char inprec; //input receiving
 unsigned char inprec_global; //input receiving global
 
 
-unsigned char nonvis[32][24];
+Dynamic2DArray<unsigned char> nonvis = { nullptr, 0 };
 short osn;
 short osx[1024]; //y
 short osy[1024]; //x (centre)
