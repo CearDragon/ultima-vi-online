@@ -4,6 +4,7 @@
 #ifdef CONSOLE
 #include <conio.h>
 #endif
+#include "../client/viewport.h"
 void function_both_init(void) {
 
 }
@@ -286,19 +287,24 @@ bool NET_send(void *s,unsigned long d,txt *t){
 }
 
 void getscreenoffset(long x,long y,long *mapx,long *mapy){
-  *mapx=x-15; *mapy=y-11;
+  int tx = viewTilesX();
+  int ty = viewTilesY();
+  int htx = tx / 2 - 1;
+  int hty = ty / 2 - 1;
+  *mapx = x - htx;
+  *mapy = y - hty;
   if ((x<=1023)&&(y<=1023)){//within main overworld
     if (*mapx<0) *mapx=0;
     if (*mapy<0) *mapy=0;
-    if (*mapx>992) *mapx=992;
-    if (*mapy>1000) *mapy=1000;
+    if (*mapx>(1024-tx)) *mapx=(1024-tx);
+    if (*mapy>(1024-ty)) *mapy=(1024-ty);
     return;
   }
   if ((x>=1024)&&(y>=256)&&(x<=1279)&&(y<=511)){//within gargoyle lands
     if (*mapx<1024) *mapx=1024;
     if (*mapy<256) *mapy=256;
-    if (*mapx>1248) *mapx=1248;
-    if (*mapy>488) *mapy=488;
+    if (*mapx>(1280-tx)) *mapx=(1280-tx);
+    if (*mapy>(512-ty)) *mapy=(512-ty);
     return;
   }
   if ((x>=1327)&&(y>=319)&&(x<=1358)&&(y<=343)){//within toth's house
@@ -309,8 +315,8 @@ void getscreenoffset(long x,long y,long *mapx,long *mapy){
   //undefined
   if (*mapx<0) *mapx=0;
   if (*mapy<0) *mapy=0;
-  if (*mapx>2016) *mapx=2016;
-  if (*mapy>1000) *mapy=1000;
+  if (*mapx>(2048-tx)) *mapx=(2048-tx);
+  if (*mapy>(1024-ty)) *mapy=(1024-ty);
 }
 
 /* luteijn: this looks extermely inefficient, replaced with an inline function */

@@ -344,14 +344,16 @@ instead of cycling modes.
   `viewTilesY = (currentBackbufferH() - bottomPanelH()) / 32`. Centralize
   in `Viewport.h` (`viewTilesX()`, `viewTilesY()`,
   `viewPixelW()`, `viewPixelH()`, `viewOffsetX()`, `viewOffsetY()`). _(2026-05-21 — done.)_
-- ⬜ **RW-P4.2** Convert fixed-size visibility arrays to dynamically sized
+- ✅ **RW-P4.2** Convert fixed-size visibility arrays to dynamically sized
   containers (heap-allocated, resized on viewport change):
   - `vis[34+2][26+2]`, `vis_window`, `vis_chair`, `vis_bed`, `vis_slime`
   - `vischeck[32][24]`, `nonvis[32][24]`
   - `visalways[256][1024]` (bit array — re-evaluate; may not need resizing).
-- ⬜ **RW-P4.3** Update the world-render inner loops to iterate
+  _(2026-05-21 — done. Dynamic2DArray conversions integrated and verified.)_
+- ✅ **RW-P4.3** Update the world-render inner loops to iterate
   `0..viewTilesX-1`, `0..viewTilesY-1` instead of `0..31`, `0..23`. Update
   centering math (`x - x_axis_size/2`, etc.) accordingly.
+  _(2026-05-21 — done. Adapted getscreenoffset, all 20 viewport boundary checks, and all 10 visibility + object forward/backward rendering loops to use dynamic viewport dimensions, compiling perfectly.)_
 - ⬜ **RW-P4.4** Update lighting/fog/storm-cloak passes to operate over the
   dynamic view extents. Verify `ls3..ls13` blur kernels still operate at
   the original tile granularity (these are 32-px blocks; should be safe to

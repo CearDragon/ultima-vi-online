@@ -1,4 +1,4 @@
-#include "ui_layout.h"
+﻿#include "ui_layout.h"
 // Override slot-coordinate macros to use kEquipSlotLayout for RW-P3.4 implementation
 #ifdef helmx
 #undef helmx
@@ -6723,19 +6723,26 @@ CLIENT_donemess:
 
 
     //init vis arrays
-    for (y=0;y<=27;y++){ for (x=0;x<=35;x++){
-      vis[x][y]=1;
-      vis_window[x][y]=0;
-      vis_chair[x][y]=0;
-      vis_bed[x][y]=0;
-      vis_slime[x][y]=0;
-    }}
+    {
+      int padX = viewTilesX() + 4;
+      int padY = viewTilesY() + 4;
+      for (y=0;y<padY;y++){ for (x=0;x<padX;x++){
+        vis[x][y]=1;
+        vis_window[x][y]=0;
+        vis_chair[x][y]=0;
+        vis_bed[x][y]=0;
+        vis_slime[x][y]=0;
+      }}
+    }
     //get vis
     static long mapx,mapy,bufx,bufy;
     static unsigned short *tp2;
     myobj=fakeobj;
-    for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
-      x2=tpx+x-1; y2=tpy+y-1; if ((x2>=0)&&(y2>=0)&&(x2<=2047)&&(y2<=1023)){
+    {
+      int limitY = viewTilesY() + 1;
+      int limitX = viewTilesX() + 1;
+      for (y=0;y<=limitY;y++){ for (x=0;x<=limitX;x++){
+        x2=tpx+x-1; y2=tpy+y-1; if ((x2>=0)&&(y2>=0)&&(x2<=2047)&&(y2<=1023)){
         mapx=tpx+x-1; mapy=tpy+y-1; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
         //get basetile-vis
         i=bt[y2][x2]&1023;
@@ -6828,17 +6835,20 @@ CLIENT_donemess:
         //get x,y vis complete
       }else vis[x+1][y+1]=1;
     }}
+    }
 
     if (xray){
-      for (y=1;y<=26;y++){ for (x=1;x<=34;x++){
+      int xrayY = viewTilesY() + 2;
+      int xrayX = viewTilesX() + 2;
+      for (y=1;y<=xrayY;y++){ for (x=1;x<=xrayX;x++){
         vis[x][y]=4;
       }}
       goto viewfind_skip;
     }
 
     //pathfind
-    static unsigned char vis_index_x[4096];
-    static unsigned char vis_index_y[4096];
+    static unsigned char vis_index_x[16384];
+    static unsigned char vis_index_y[16384];
     i=-1; //last index set
     i2=0; //last index checked
     mapx=tpx-2; mapy=tpy-2; x=tplayer->x-mapx; y=tplayer->y-mapy;
@@ -6860,64 +6870,76 @@ vis_scan2:
     //2=window
     //4=visible
     //8=edge visible
-    for (y=1;y<=26;y++){ for (x=1;x<=34;x++){ //find visible edges
-      i=vis[x][y];
-      if (i==4){
-        if (vis[x+1][y]!=4) vis[x+1][y]=8;
-        if (vis[x-1][y]!=4) vis[x-1][y]=8;
-        if (vis[x][y+1]!=4) vis[x][y+1]=8;
-        if (vis[x][y-1]!=4) vis[x][y-1]=8;
-        if (vis[x-1][y-1]!=4) vis[x-1][y-1]=8;
-        if (vis[x+1][y-1]!=4) vis[x+1][y-1]=8;
-        if (vis[x+1][y+1]!=4) vis[x+1][y+1]=8;
-        if (vis[x-1][y+1]!=4) vis[x-1][y+1]=8;
-      }
-    }}
+    {
+      int edgesY = viewTilesY() + 2;
+      int edgesX = viewTilesX() + 2;
+      for (y=1;y<=edgesY;y++){ for (x=1;x<=edgesX;x++){ //find visible edges
+        i=vis[x][y];
+        if (i==4){
+          if (vis[x+1][y]!=4) vis[x+1][y]=8;
+          if (vis[x-1][y]!=4) vis[x-1][y]=8;
+          if (vis[x][y+1]!=4) vis[x][y+1]=8;
+          if (vis[x][y-1]!=4) vis[x][y-1]=8;
+          if (vis[x-1][y-1]!=4) vis[x-1][y-1]=8;
+          if (vis[x+1][y-1]!=4) vis[x+1][y-1]=8;
+          if (vis[x+1][y+1]!=4) vis[x+1][y+1]=8;
+          if (vis[x-1][y+1]!=4) vis[x-1][y+1]=8;
+        }
+      }}
+    }
 viewfind_skip:
 
     //get vischeck
     if (vischeck.data) {
         memset(vischeck.data, 0, viewTilesX() * viewTilesY());
     }
-    for (y=0;y<=23;y++){ for (x=0;x<=31;x++){
-      if (vis[x+2][y+2]&4) vischeck[x][y]=1;
-      if (vis[x+2][y+2]&8){
-        if (vis[x+3][y+2]&4) vischeck[x][y]=1;
-        if (vis[x+3][y+3]&4) vischeck[x][y]=1;
-        if (vis[x+2][y+3]&4) vischeck[x][y]=1;
-      }//&8
-    }}//x,y
+    {
+      int tilesX = viewTilesX();
+      int tilesY = viewTilesY();
+      for (y=0;y<tilesY;y++){ for (x=0;x<tilesX;x++){
+        if (vis[x+2][y+2]&4) vischeck[x][y]=1;
+        if (vis[x+2][y+2]&8){
+          if (vis[x+3][y+2]&4) vischeck[x][y]=1;
+          if (vis[x+3][y+3]&4) vischeck[x][y]=1;
+          if (vis[x+2][y+3]&4) vischeck[x][y]=1;
+        }//&8
+      }}//x,y
+    }
 
     //base tiles
-    for (y=0;y<=23;y++){ for (x=0;x<=31;x++){
-      i=bt[y+tpy][x+tpx]&1023;
-      z=0;
-      if ((i>=221)&&(i<224)) z=3; //lava
-      if ((i>=2)&&(i<6)) z=3; //swamp
-      if (z==3) LIGHTnew(x,y,(unsigned long)&ls3b,3);
-      if ((i>=8)&&(i<48)){ //ocean and coast
-        if (i<=15) oceantiles++; else rivertiles++;
-        x2=i&7;
-        y2=i/8;
-        i2=i-8;
-        x4=0; if (i2>=8) {i2=wateri[i2-8]; x4=1; }
-        i2=i2*8+keyframe;
-        x3=i2&31;
-        y3=i2/32;
-        y3+=4;
-        sf32(ps,x*32,y*32,sfx8,i2+128);
-        if (x4==1) g32z(ps,x*32,y*32,bt8[0],i);
-      }else{//not ocean
-        i2=0;
-        if (i==252){i2=keyframe; i=14;}
-        if (i==253){i2=keyframe; i=15;}
-        if (i==254){i2=keyframe; i=0;}
-        if ((i>=221)&&(i<=223)){i2=keyframe; i=i-210;}
-        if ((i>=217)&&(i<=219)){i2=keyframe; i=i-209;}
-        if (i<=7){i2=keyframe;} //changed
-        g32(ps,x*32,y*32,bt8[i2],i);
-      }
-    }}
+    {
+      int tilesX = viewTilesX();
+      int tilesY = viewTilesY();
+      for (y=0;y<tilesY;y++){ for (x=0;x<tilesX;x++){
+        i=bt[y+tpy][x+tpx]&1023;
+        z=0;
+        if ((i>=221)&&(i<224)) z=3; //lava
+        if ((i>=2)&&(i<6)) z=3; //swamp
+        if (z==3) LIGHTnew(x,y,(unsigned long)&ls3b,3);
+        if ((i>=8)&&(i<48)){ //ocean and coast
+          if (i<=15) oceantiles++; else rivertiles++;
+          x2=i&7;
+          y2=i/8;
+          i2=i-8;
+          x4=0; if (i2>=8) {i2=wateri[i2-8]; x4=1; }
+          i2=i2*8+keyframe;
+          x3=i2&31;
+          y3=i2/32;
+          y3+=4;
+          sf32(ps,x*32,y*32,sfx8,i2+128);
+          if (x4==1) g32z(ps,x*32,y*32,bt8[0],i);
+        }else{//not ocean
+          i2=0;
+          if (i==252){i2=keyframe; i=14;}
+          if (i==253){i2=keyframe; i=15;}
+          if (i==254){i2=keyframe; i=0;}
+          if ((i>=221)&&(i<=223)){i2=keyframe; i=i-210;}
+          if ((i>=217)&&(i<=219)){i2=keyframe; i=i-209;}
+          if (i<=7){i2=keyframe;} //changed
+          g32(ps,x*32,y*32,bt8[i2],i);
+        }
+      }}
+    }
 
     if (oceantiles||rivertiles){
       if (oceantiles>=576){
@@ -6964,7 +6986,7 @@ viewfind_skip:
 
     //objfixed (non floating)
     myobj=fakeobj;
-    for (y=25;y>=0;y--){ for (x=33;x>=0;x--){
+    for (y=viewTilesY()+1;y>=0;y--){ for (x=viewTilesX()+1;x>=0;x--){
       x2=x-1; y2=y-1;
       mapx=tpx+x-1; mapy=tpy+y-1; if ((mapx!=2048)&&(mapy!=1024)){
 
@@ -6979,7 +7001,7 @@ viewfind_skip:
 
 
 
-            if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+            if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
               if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                 GSs=1; GSx=x2*32; GSy=y2*32;
                 getspr(myobj);
@@ -6996,7 +7018,7 @@ viewfind_skip:
             if ((x3&1023)!=x3){ //possibly buildable!
               if (tclass_build[x3-1024]&1){//square
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7004,7 +7026,7 @@ viewfind_skip:
                   }
                 }}}}
                 x2++; y2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-2048;
                   if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7012,7 +7034,7 @@ viewfind_skip:
                   }
                 }}}}
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-3072;
                   if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7023,7 +7045,7 @@ viewfind_skip:
               }
               if (tclass_build[x3-1024]&2){//horizontal
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7034,7 +7056,7 @@ viewfind_skip:
               }
               if (tclass_build[x3-1024]&4){//vertical
                 y2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7054,7 +7076,7 @@ viewfind_skip:
 
     //tobjfixed
     myobj=fakeobj;
-    for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
+    for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
       x2=x-1; y2=y-1;
       mapx=tpx+x-1; mapy=tpy+y-1; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
       if ((mapx!=2048)&&(mapy!=1024)){
@@ -7068,7 +7090,7 @@ viewfind_skip:
               x3=tobjfixed_type[i3];
               myobj->type=x3;
 
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
 
 
 
@@ -7142,19 +7164,19 @@ lens_hide:
                 if (tclass_build[x3-1024]&1){//square
 
                   x2--;
-                  if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                  if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                     myobj->type=x3-1024;
                     GSs=1; GSx=x2*32; GSy=y2*32;
                     getspr(myobj);
                   }}}}
                   x2++; y2--;
-                  if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                  if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                     myobj->type=x3-2048;
                     GSs=1; GSx=x2*32; GSy=y2*32;
                     getspr(myobj);
                   }}}}
                   x2--;
-                  if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                  if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                     myobj->type=x3-3072;
                     GSs=1; GSx=x2*32; GSy=y2*32;
                     getspr(myobj);
@@ -7163,7 +7185,7 @@ lens_hide:
                 }
                 if (tclass_build[x3-1024]&2){//horizontal
                   x2--;
-                  if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                  if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                     myobj->type=x3-1024;
                     GSs=1; GSx=x2*32; GSy=y2*32;
                     getspr(myobj);
@@ -7173,7 +7195,7 @@ lens_hide:
                 }
                 if (tclass_build[x3-1024]&4){//vertical
                   y2--;
-                  if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                  if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                     myobj->type=x3-1024;
                     GSs=1; GSx=x2*32; GSy=y2*32;
                     getspr(myobj);
@@ -7196,7 +7218,7 @@ lens_hide:
 
     //objbuffer
     myobj=fakeobj;
-    for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
+    for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
       mapx=tpx+x-1; mapy=tpy+y-1; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
       x2=x-1; y2=y-1;
       if (i=tplayer->sobj_bufsize[bufx][bufy]){
@@ -7214,7 +7236,7 @@ lens_hide:
           }
 flash_disable2:
 
-          if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+          if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
             if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
 
 
@@ -7266,7 +7288,7 @@ stolenitemwarningflash2:;
           if ((x3&1023)!=x3){ //possibly buildable
             if (tclass_build[x3-1024]&1){//square
               x2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-1024;
                 if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                   if (x5){getspr(myobj);if (x5option&2) img75t0(ps,x2*32,y2*32,bt32);if ((x5option==0)||(x5option==1)) imgt0(ps,x2*32,y2*32,bt32);if ((x5option==4)||(x5option==5)) img0(ps,x2*32,y2*32,bt32);}else{ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj); }
@@ -7275,7 +7297,7 @@ stolenitemwarningflash2:;
                 }
               }}}}
               x2++; y2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-2048;
                 if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                   if (x5){getspr(myobj);if (x5option&2) img75t0(ps,x2*32,y2*32,bt32);if ((x5option==0)||(x5option==1)) imgt0(ps,x2*32,y2*32,bt32);if ((x5option==4)||(x5option==5)) img0(ps,x2*32,y2*32,bt32);}else{ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj); }
@@ -7283,7 +7305,7 @@ stolenitemwarningflash2:;
                 }
               }}}}
               x2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-3072;
                 if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                   if (x5){getspr(myobj);if (x5option&2) img75t0(ps,x2*32,y2*32,bt32);if ((x5option==0)||(x5option==1)) imgt0(ps,x2*32,y2*32,bt32);if ((x5option==4)||(x5option==5)) img0(ps,x2*32,y2*32,bt32);}else{ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj); }
@@ -7294,7 +7316,7 @@ stolenitemwarningflash2:;
             }
             if (tclass_build[x3-1024]&2){//horizontal
               x2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-1024;
                 if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
 
@@ -7313,7 +7335,7 @@ generatinggate0:;
             }
             if (tclass_build[x3-1024]&4){//vertical
               y2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-1024;
                 if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                   if (x5){getspr(myobj);if (x5option&2) img75t0(ps,x2*32,y2*32,bt32);if ((x5option==0)||(x5option==1)) imgt0(ps,x2*32,y2*32,bt32);if ((x5option==4)||(x5option==5)) img0(ps,x2*32,y2*32,bt32);}else{ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj); }
@@ -7344,7 +7366,7 @@ generatinggate0:;
     //PASS 2: float
     static unsigned char flash_skip;
     for (z=0;z<=2;z++){//pass
-      for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
+      for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
         mapx=tpx+x-1; mapy=tpy+y-1;
         for (i=0;i<tplayer->mv_i;i++){
           if (tplayer->mv_x[i]==mapx){ if (tplayer->mv_y[i]==mapy){
@@ -7399,7 +7421,7 @@ moverinbed:
             //first pass only changes
             if (z==0){
               if ((x3&1023)==375) vis_slime[x+1][y+1]=1;//slime vis check
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 if (vischeck[x2][y2]){
                   if (tplayer->mv_flags[i]&MV_LIGHTBRIGHT) LIGHTnew(x2,y2,(unsigned long)&ls13,13);
                   if (tplayer->mv_flags[i]&MV_LIGHTGLOW) LIGHTnew(x2,y2,(unsigned long)&ls5b,5);
@@ -7511,7 +7533,7 @@ passok:
 
 
 
-            if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+            if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
               if (((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)&&(z==2))||((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]==0)&&(z==1))||(z==0)){//floating check
 
                 if (vis_chair[x2+2][y2+2]){
@@ -7558,7 +7580,7 @@ mover_square:
 
 
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if (((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)&&(z==2))||((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]==0)&&(z==1))){//floating check
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7566,7 +7588,7 @@ mover_square:
                   }
                 }}}}
                 x2++; y2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-2048;
                   if (((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)&&(z==2))||((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]==0)&&(z==1))){//floating check
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7574,7 +7596,7 @@ mover_square:
                   }
                 }}}}
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-3072;
                   if (((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)&&(z==2))||((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]==0)&&(z==1))){//floating check
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7590,7 +7612,7 @@ mover_square:
               if (x4==1) x2--;
               if (x4==2) y2--;
               if (x4==3) x2++;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3+1024*8;
 
                 x8=0;//double headed animal?
@@ -7626,32 +7648,32 @@ mover_square:
               if (z==2){//float
                 x4=(x3>>11)&3; x5=x2; y5=y2;
                 if (x4==0){
-                  myobj->type=x3-1*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-8*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-9*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+8*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+7*1024; x2=x5-1; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-1*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-8*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-9*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+7*1024; x2=x5-1; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 if (x4==2){
-                  myobj->type=x3-1*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-8*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-9*1024; x2=x5-1; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+8*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+7*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-1*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-8*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-9*1024; x2=x5-1; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+7*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 if (x4==1){
-                  myobj->type=x3-1*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-8*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-9*1024; x2=x5+1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+8*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+7*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-1*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-8*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-9*1024; x2=x5+1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+7*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 if (x4==3){
-                  myobj->type=x3-1*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-8*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-9*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+8*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+7*1024; x2=x5+1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-1*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-8*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-9*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+7*1024; x2=x5+1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 x2=x5; y2=y5;
               }//float
@@ -7667,28 +7689,28 @@ mover_square:
                 x6=ett/1.4f+(float)x2+(float)y2; x6&=1;
 
                 if (x4==0){
-                  myobj->type=x3+8*1024+x6*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+16*1024+y6*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+24*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+32*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024+x6*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+16*1024+y6*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+24*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+32*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 if (x4==1){
-                  myobj->type=x3+8*1024+x6*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+16*1024+y6*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+24*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+32*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024+x6*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+16*1024+y6*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+24*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+32*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 if (x4==2){
-                  myobj->type=x3+8*1024+x6*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+16*1024+y6*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+24*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+32*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024+x6*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+16*1024+y6*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+24*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+32*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 if (x4==3){
-                  myobj->type=x3+8*1024+x6*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+16*1024+y6*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+24*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+32*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024+x6*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+16*1024+y6*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+24*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+32*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 x2=x5; y2=y5;
               }//float
@@ -7697,14 +7719,14 @@ mover_square:
             if ((x3&1023)==374){//hydra
               if (z==2){//float
                 x5=x2; y5=y2;
-                myobj->type=425+0*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+4*1024; x2=x5+1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+8*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+12*1024; x2=x5+1; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+16*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+20*1024; x2=x5-1; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+24*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+28*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+0*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+4*1024; x2=x5+1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+8*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+12*1024; x2=x5+1; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+16*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+20*1024; x2=x5-1; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+24*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+28*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 x2=x5; y2=y5;
               }//float
             }//hydra
@@ -7715,7 +7737,7 @@ passskip:;
 
             //after pass 1 effects
             if (z==1){
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 if (vischeck[x2][y2]){
                   if (tplayer->mv_flags[i]&MV_PROTECT) sf32z(ps,x2*32,y2*32,sfx8,3*32+19+(keyframe>>1));
                 }
@@ -7851,7 +7873,7 @@ onhorse_specialoffsetused:
 
     //objbuffer (floating)
     myobj=fakeobj;
-    for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
+    for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
       mapx=tpx+x-1; mapy=tpy+y-1; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
       x2=x-1; y2=y-1;
       if (i=tplayer->sobj_bufsize[bufx][bufy]){
@@ -7866,7 +7888,7 @@ onhorse_specialoffsetused:
             if (refreshcount&1) goto flash_skip;
           }
 flash_disable:
-          if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+          if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
             if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
               GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);
               getsound(myobj->type,x2,y2);
@@ -7876,7 +7898,7 @@ flash_disable:
           if ((x3&1023)!=x3){//might be buildable
             if (tclass_build[x3-1024]&1){//square
               x2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-1024;
                 if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                   GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7884,7 +7906,7 @@ flash_disable:
                 }
               }}}}
               x2++; y2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-2048;
                 if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                   GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7892,7 +7914,7 @@ flash_disable:
                 }
               }}}}
               x2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-3072;
                 if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                   GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7903,7 +7925,7 @@ flash_disable:
             }
             if (tclass_build[x3-1024]&2){//horizontal
               x2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-1024;
                 if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                   GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7914,7 +7936,7 @@ flash_disable:
             }
             if (tclass_build[x3-1024]&4){//vertical
               y2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-1024;
                 if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                   GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7935,7 +7957,7 @@ flash_skip:;
 
     //objfixed (floating)
     myobj=fakeobj;
-    for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
+    for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
       x2=x-1; y2=y-1;
       mapx=tpx+x-1; mapy=tpy+y-1; if ((mapx!=2048)&&(mapy!=1024)){
 
@@ -7944,7 +7966,7 @@ flash_skip:;
           for (i3=i+1;i3<=(i+i2);i3++){
             x3=objfixed_type[i3];
             myobj->type=x3;
-            if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+            if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
               if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                 GSs=1; GSx=x2*32; GSy=y2*32;
                 getspr(myobj);
@@ -7960,7 +7982,7 @@ flash_skip:;
 
               if (tclass_build[x3-1024]&1){//square
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7968,7 +7990,7 @@ flash_skip:;
                   }
                 }}}}
                 x2++; y2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-2048;
                   if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7976,7 +7998,7 @@ flash_skip:;
                   }
                 }}}}
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-3072;
                   if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7987,7 +8009,7 @@ flash_skip:;
               }
               if (tclass_build[x3-1024]&2){//horizontal
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7998,7 +8020,7 @@ flash_skip:;
               }
               if (tclass_build[x3-1024]&4){//vertical
                 y2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -8020,7 +8042,7 @@ flash_skip:;
 
 
 
-    for (y=2;y<=25;y++){ for (x=2;x<=33;x++){ //overwrite objects on reverse side of wall
+    for (y=2;y<=viewTilesY()+1;y++){ for (x=2;x<=viewTilesX()+1;x++){ //overwrite objects on reverse side of wall
       if (vis[x][y]==8){
         mapx=tpx+x-2; mapy=tpy+y-2;
         i=bt[mapy][mapx]&1023;
@@ -8031,7 +8053,7 @@ flash_skip:;
         }//i
       }//8
     }}
-    for (y=2;y<=25;y++){ for (x=2;x<=33;x++){//edit edge basetiles
+    for (y=2;y<=viewTilesY()+1;y++){ for (x=2;x<=viewTilesX()+1;x++){//edit edge basetiles
       if (vis[x][y]==8){
         mapx=tpx+x-2; mapy=tpy+y-2;
         i=bt[mapy][mapx]&1023;
@@ -8073,7 +8095,7 @@ flash_skip:;
         }
       }//8
     }}
-    for (y=2;y<=25;y++){ for (x=2;x<=33;x++){ //black corners
+    for (y=2;y<=viewTilesY()+1;y++){ for (x=2;x<=viewTilesX()+1;x++){ //black corners
       if (vis[x][y]==8){
         mapx=tpx+x-2; mapy=tpy+y-2;
         i=bt[mapy][mapx]&1023;
@@ -8090,7 +8112,7 @@ flash_skip:;
     //set black squares
     myobj=fakeobj;
     myobj->type=331+22*1024;
-    for (y=0;y<=23;y++){ for (x=0;x<=31;x++){
+    for (y=0;y<viewTilesY();y++){ for (x=0;x<viewTilesX();x++){
       if (vis[x+2][y+2]<4){
         GSs=1; GSx=x*32; GSy=y*32;
         getspr(myobj);
