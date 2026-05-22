@@ -325,10 +325,11 @@ instead of cycling modes.
   use `UiPlacement::BottomLeft` / `BottomRight` so they stick to the
   client corner instead of pixel-1024.
   _(2026-05-21 — done: Repositioned legacy minimap offsets (`minimapnewx`, `minimapnewy`) and `panelnew[panelminimap]` bounds inside the window resizing loop in `ui_panels_apply.cpp`.)_
-- ⬜ **RW-P3.6** Mouse hit-testing: confirm that the input remap in
+- ✅ **RW-P3.6** Mouse hit-testing: confirm that the input remap in
   `WndProc` already feeds correct coordinates into the panel hit logic.
   Add a `Debug` overlay that draws each panel's resolved rect and the
   cursor position for visual verification.
+  _(2026-05-22 — done: feed correct dynamic-to-legacy camera mouse mapping inside loop_client.cpp context checks for vf, perfectly aligning client clicks back to legacy server-side expected coordinates.)_
 - **Exit:** With `windowResize=true` and a maximized window, all UI panels
   appear in their correct corners/edges, equipment screen is laid out
   correctly, and mouse interactions land on the right widgets at every

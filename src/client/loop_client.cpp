@@ -1178,11 +1178,18 @@ checkobj:
       FRM_type=(FRM_TYPE*)FRM_type->next; goto checkobj;
     }
 
-	// r222 this is where mouse click is checked! no changes are made here
+    // r222 this is where mouse click is checked! no changes are made here
 
     pn->mouse_over=TRUE;
-    pn->mouse_x=mx-pn->offset_x;
-    pn->mouse_y=my-pn->offset_y;
+    if (pn == vf && windowResize && tplay && tplay->x) {
+      long tpx_legacy, tpy_legacy;
+      getscreenoffset_legacy(tplay->x, tplay->y, &tpx_legacy, &tpy_legacy);
+      pn->mouse_x = (short)((tpx - tpx_legacy) * 32 + (mx - pn->offset_x));
+      pn->mouse_y = (short)((tpy - tpy_legacy) * 32 + (my - pn->offset_y));
+    } else {
+      pn->mouse_x=mx-pn->offset_x;
+      pn->mouse_y=my-pn->offset_y;
+    }
 
 
     if (mbclick&1) pn->mouse_click|=1;
