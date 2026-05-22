@@ -73,8 +73,14 @@ void RepositionAnchoredPanels(int clientW, int clientH) {
     if (g_volcontrol_visible) {
         apply_to(volcontrol,          UiPanelId::VolumeControl,  clientW, clientH);
     } else if (volcontrol) {
-        volcontrol->offset_x = clientW + 2048;
-        volcontrol->offset_y = clientH + 2048;
+        // RW-P4.9: park volcontrol in the hide-sentinel range so the
+        // FRAME display loop's offscreen culling skips it AND the
+        // legacy `offset_x >= kPanelHideThresholdX` toggle checks read
+        // it as "hidden". A bare `clientW + 2048` could land back
+        // inside the visible range at the largest supported window
+        // sizes; the sentinel-relative offset stays safely beyond.
+        volcontrol->offset_x = kPanelHideDeltaX + clientW;
+        volcontrol->offset_y = kPanelHideDeltaY + clientH;
     }
     apply_to(statusmessage_viewprev,  UiPanelId::StatusViewPrev, clientW, clientH);
 
@@ -111,8 +117,8 @@ void ValidateUiMetrics() {
             assert(volcontrol->offset_x >= 0 && volcontrol->offset_x <= w);
             assert(volcontrol->offset_y >= 0 && volcontrol->offset_y <= h);
         } else {
-            assert(volcontrol->offset_x >= w + 2048);
-            assert(volcontrol->offset_y >= h + 2048);
+            assert(volcontrol->offset_x >= w + kPanelHideDeltaX);
+            assert(volcontrol->offset_y >= h + kPanelHideDeltaY);
         }
     }
 

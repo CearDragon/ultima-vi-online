@@ -1,4 +1,4 @@
-﻿#include "ui_layout.h"
+#include "ui_layout.h"
 // Override slot-coordinate macros to use kEquipSlotLayout for RW-P3.4 implementation
 #ifdef helmx
 #undef helmx
@@ -1059,7 +1059,7 @@ if (dirtyClientSize) {
     recreateBackbuffers((int)clientW, (int)clientH);
     // RW-P3.3: re-anchor the five static UI panels. NOTE: until P2.2
     // grows the back buffer with the window, panels must anchor against
-    // the back-buffer dimensions, not the client-window dimensions —
+    // the back-buffer dimensions, not the client-window dimensions ?
     // they draw onto `ps` which is still 1024x768 regardless of how
     // big the window has become. Anchoring to clientW/H would push
     // panels off the back-buffer edge and they'd disappear behind the
@@ -3163,7 +3163,7 @@ intro_done:
     // Programmatic minimize from host startup (or anywhere else that sets
     // the host_minimize flag). The actual `nodisplay` toggle is now driven
     // by WM_SIZE in WndProc, so all this needs to do is ask Windows to
-    // minimize the window — restore via the taskbar will resume the game.
+    // minimize the window ? restore via the taskbar will resume the game.
     host_minimize=FALSE;
     ShowWindow(hWnd2,SW_MINIMIZE);
     for (i=0;i<=65535;i++) keyon[i]=FALSE;
@@ -3174,7 +3174,7 @@ intro_done:
   // "minimize on M" version had a bug where pressing M to minimize froze
   // the game because nothing reset `nodisplay` on restore. Standard
   // window chrome (minimize button, taskbar) is the supported way to
-  // minimize/restore — that path is wired through WM_SIZE in WndProc.
+  // minimize/restore ? that path is wired through WM_SIZE in WndProc.
   // The U6OK_MAXMIN keybinding in setup_client.inc is left in place but
   // is no longer consulted anywhere in the main loop.
 maxminmini:
@@ -3185,10 +3185,10 @@ maxminmini:
       u6o::client::g_volcontrol_visible = !u6o::client::g_volcontrol_visible;
       RepositionAnchoredPanels(backbufferW(), backbufferH());
     } else {
-      if (volcontrol->offset_x>=1024){
-        volcontrol->offset_x-=2048;
+      if (volcontrol->offset_x>=kPanelHideThresholdX){
+        volcontrol->offset_x-=kPanelHideDeltaX;
       }else{
-        volcontrol->offset_x+=2048;
+        volcontrol->offset_x+=kPanelHideDeltaX;
       }
     }
   }
@@ -3352,7 +3352,7 @@ userkey_cancel:
     txtNEWLEN(inpf2->input,0);
     inpf2->enterpressed=NULL;
     GETINPUT_txt=NULL;
-    if (inpf->offset_x<1024) inpf->offset_x+=2048;
+    if (inpf->offset_x<kPanelHideThresholdX) inpf->offset_x+=kPanelHideDeltaX;
     if (inprec){
       txtset(t,"?"); t->d2[0]=20; NET_send(NETplayer,NULL,t); //typing... cancel
     }
@@ -3464,7 +3464,7 @@ inpf_scroll_failed:
         inpmess_selected=-1;
         txtNEWLEN(inpf2->input,0);
         inpf2->enterpressed=NULL;
-        if (inpf->offset_x<1024) inpf->offset_x+=2048;
+        if (inpf->offset_x<kPanelHideThresholdX) inpf->offset_x+=kPanelHideDeltaX;
         inprec=0;
         GETINPUT_txt=NULL;
         txtset(t2,"?"); t2->d2[0]=7; //message type 7
@@ -3632,7 +3632,7 @@ inpf_scroll_failed:
       //begin recording
       voicechat_recording=1;
       voicechat_recordtime=0.0f;
-      if (voicechat_frame->offset_x>=1024) voicechat_frame->offset_x-=2048;
+      if (voicechat_frame->offset_x>=kPanelHideThresholdX) voicechat_frame->offset_x-=kPanelHideDeltaX;
       img(voicechat_frame->graphic,0,0,voicechat_voicebar);
 
       voicechat_listeningplayers=FALSE;//must be validated by returned message
@@ -3693,7 +3693,7 @@ inpf_scroll_failed:
   if (voicechat_recording){
     if (u6okeyon(U6OK_VOICECHAT)==FALSE){
       voicechat_recording=0;
-      if (voicechat_frame->offset_x<1024) voicechat_frame->offset_x+=2048;
+      if (voicechat_frame->offset_x<kPanelHideThresholdX) voicechat_frame->offset_x+=kPanelHideDeltaX;
       if (voicechat_recordtime>3.0f){//recording has exceeded maximum allowable time!
         if(mciSendCommand(wDeviceID,MCI_CLOSE,MCI_WAIT,NULL)) exit(6);
 
@@ -3819,7 +3819,7 @@ dglobal:
 		}
 
         GETINPUT_setup(inpf2->input,&inpf2->enterpressed,inpf2->length_limit);
-        if (inpf->offset_x>=1024) inpf->offset_x-=2048;
+        if (inpf->offset_x>=kPanelHideThresholdX) inpf->offset_x-=kPanelHideDeltaX;
 
         if (tplay->party[0]){
           tnpc=(npc*)tplay->party[0]->more;
@@ -3966,7 +3966,7 @@ inpmess_skip: txtset(t,"?"); t->d2[0]=20; NET_send(NETplayer,NULL,t); //typing..
       }
       txtNEWLEN(inpf2->input,0);
       inpf2->enterpressed=NULL;
-      if (inpf->offset_x<1024) inpf->offset_x+=2048;
+      if (inpf->offset_x<kPanelHideThresholdX) inpf->offset_x+=kPanelHideDeltaX;
       inprec=0;
     }
     if (deadglobalmessage) {deadglobalmessage=0; goto deadglobalmessage_return;}
@@ -5140,9 +5140,9 @@ dbg1:
 
 
 
-            if (party_spellbook_frame[i2]->offset_x>1024) party_spellbook_frame[i2]->offset_x-=2048;
+            if (party_spellbook_frame[i2]->offset_x>kPanelHideThresholdX) party_spellbook_frame[i2]->offset_x-=kPanelHideDeltaX;
           }else{
-            if (party_spellbook_frame[i2]->offset_x<1024) party_spellbook_frame[i2]->offset_x+=2048;
+            if (party_spellbook_frame[i2]->offset_x<kPanelHideThresholdX) party_spellbook_frame[i2]->offset_x+=kPanelHideDeltaX;
           }
 
           //check spellbookpage! (if invalid select first spellbook page only!)
@@ -5542,7 +5542,7 @@ isplayingwait3: if (u6omidi->IsPlaying()==S_OK) goto isplayingwait3;
         if (clientinstrument==3) STATUSMESSadd("You begin playing the panpipes. (Press ESC when finished)");
         if (clientinstrument==4) STATUSMESSadd("You begin playing the xylophone. (Press ESC when finished)");
 
-        if (musickeyboard->offset_x>=1024) musickeyboard->offset_x-=2048;
+        if (musickeyboard->offset_x>=kPanelHideThresholdX) musickeyboard->offset_x-=kPanelHideDeltaX;
         goto CLIENT_donemess;
       }//24
 
@@ -5570,7 +5570,7 @@ isplayingwait3: if (u6omidi->IsPlaying()==S_OK) goto isplayingwait3;
           if (clientinstrument==4) STATUSMESSadd("You finish playing the xylophone.");
 
           playinstrument=0;
-          if (musickeyboard->offset_x<1024) musickeyboard->offset_x+=2048;
+          if (musickeyboard->offset_x<kPanelHideThresholdX) musickeyboard->offset_x+=kPanelHideDeltaX;
         }
         goto CLIENT_donemess;
       }//29
@@ -5996,7 +5996,7 @@ mover_add_next: if (BITSget(t,&bitsi,1)){
                         y=BITSget(t,&bitsi,10); x=y%34; y/=34;
                         // RW-P4.5 / desync fix (2026-05-22): server encodes the
                         // mover x,y offset relative to its own getscreenoffset()
-                        // (which is fixed at the legacy 32x24 viewport — host
+                        // (which is fixed at the legacy 32x24 viewport ? host
                         // never asks the client what view size it uses). Decoding
                         // with the dynamic tpx/tpy would shift every NPC by
                         // (tpx - tpx_legacy) tiles when the client view is wider
@@ -6118,8 +6118,8 @@ mover_add_getstate_next: if (BITSget(t,&bitsi,1)){
       if (t->d2[0]==252){ //remove NPC from temp party
         x=t->d2[1];
         tplay->party[x]=NULL;
-        if (party_spellbook_frame[x]->offset_x<1024) party_spellbook_frame[x]->offset_x+=2048;
-        if (party_frame[x]->offset_x<1024) party_frame[x]->offset_x+=2048;
+        if (party_spellbook_frame[x]->offset_x<kPanelHideThresholdX) party_spellbook_frame[x]->offset_x+=kPanelHideDeltaX;
+        if (party_frame[x]->offset_x<kPanelHideThresholdX) party_frame[x]->offset_x+=kPanelHideDeltaX;
         qkstf_update=TRUE;
         goto CLIENT_donemess;
       }
@@ -6357,7 +6357,7 @@ lluc_nextpixel:
       if (t->d2[0]==44){//receive portrait look message
         txtright(t,t->l-1);
         portraitlook_wait=8.0f;
-        if (statusmessage_viewnpc->offset_x>=1024) statusmessage_viewnpc->offset_x-=2048;
+        if (statusmessage_viewnpc->offset_x>=kPanelHideThresholdX) statusmessage_viewnpc->offset_x-=kPanelHideDeltaX;
         portraitlook_portrait=t->ds[0]; txtright(t,t->l-2);
         if (portraitlook_name==NULL) portraitlook_name=txtnew();
         txtNEWLEN(portraitlook_name,-t->d2[0]); txtright(t,t->l-1);
@@ -6703,7 +6703,7 @@ CLIENT_donemess:
     // The world tile renderer overdraws the upper-left 1024x768 area
     // every frame, but anything outside that rect (extended right/
     // bottom strips when the window has been enlarged) is never
-    // overwritten by the world pass — so stale pixels (UI panels'
+    // overwritten by the world pass ? so stale pixels (UI panels'
     // previous positions, drifted clouds) accumulated as visible
     // trails. A single DD COLORFILL is hardware-fast.
     //
@@ -7116,8 +7116,8 @@ viewfind_skip:
                 if (refreshcount&1){ for (x4=0;x4<=stolenitemwarningn;x4++){ if (stolenitemwarningx[x4]==mapx){ if (stolenitemwarningy[x4]==mapy){ if (stolenitemwarningtype[x4]==myobj->type){
                   static unsigned long *ps_realoffset;
                   // RW-P2.2: scratch buffer sized to kBackbufferMaxW so
-                  // getspr() — which writes at the active back-buffer
-                  // pitch — can't overflow when the user has resized
+                  // getspr() ? which writes at the active back-buffer
+                  // pitch ? can't overflow when the user has resized
                   // the window beyond the legacy 1024 pitch.
                   static unsigned short ps_fakebuffer[1920*32];
                   static long siw_x,siw_y,siw_r,siw_g,siw_b;
@@ -8201,16 +8201,16 @@ flash_skip:;
       GSs=1; GSx=(tplayer->x-tpx)*32; GSy=(tplayer->y-tpy)*32; getspr(myobj);
     }
 
-    if ((minimap_frame->offset_x>=1024)&&peer){
-      minimap_frame->offset_x-=2048;
-    }else if((minimap_frame->offset_x<=1024)&&!peer){
-      minimap_frame->offset_x+=2048;
+    if ((minimap_frame->offset_x>=kPanelHideThresholdX)&&peer){
+      minimap_frame->offset_x-=kPanelHideDeltaX;
+    }else if((minimap_frame->offset_x<=kPanelHideThresholdX)&&!peer){
+      minimap_frame->offset_x+=kPanelHideDeltaX;
     }
 
-    if ((tmap_frame->offset_x>=1024)&&tmap){
-      tmap_frame->offset_x-=2048;
-    }else if((tmap_frame->offset_x<=1024)&&!tmap){
-      tmap_frame->offset_x+=2048;
+    if ((tmap_frame->offset_x>=kPanelHideThresholdX)&&tmap){
+      tmap_frame->offset_x-=kPanelHideDeltaX;
+    }else if((tmap_frame->offset_x<=kPanelHideThresholdX)&&!tmap){
+      tmap_frame->offset_x+=kPanelHideDeltaX;
     }
 
     for (i=0;i<=stormcloak_last2;i++){
@@ -10224,8 +10224,8 @@ skiprefresh2:
       }
 
 	  // r222 if we want to be able to move the party member frame offscreen, we may need to do something here. no changes are made here.
-		if (pmf->offset_x >= 1024) {
-			pmf->offset_x -= 2048;
+		if (pmf->offset_x>=kPanelHideThresholdX) {
+			pmf->offset_x-=kPanelHideDeltaX;
 		}
 
       tnpc=(npc*)CLIENTplayer->party[i]->more; //shortcut
@@ -11361,10 +11361,10 @@ diskip:
         if ((x>=(56+4))&&(x<(56+4+32))){ //hide/unhide spellbook!
           if ((y>=(16))&&(y<(16+32))){
 
-            if (party_spellbook_frame[i]->offset_y<768){
-              party_spellbook_frame[i]->offset_y+=1536;
+            if (party_spellbook_frame[i]->offset_y<kPanelHideThresholdY){
+              party_spellbook_frame[i]->offset_y+=kPanelHideDeltaY;
             }else{
-              if (party_spellbook_frame[i]->offset_y>=768) party_spellbook_frame[i]->offset_y-=1536;
+              if (party_spellbook_frame[i]->offset_y>=kPanelHideThresholdY) party_spellbook_frame[i]->offset_y-=kPanelHideDeltaY;
             }
 
 
@@ -11372,10 +11372,10 @@ diskip:
 
 
         if (x<(56+4)){ //hide/unhide!
-          if (party_frame[i]->offset_y<768){
-            party_frame[i]->offset_y+=1536;
+          if (party_frame[i]->offset_y<kPanelHideThresholdY){
+            party_frame[i]->offset_y+=kPanelHideDeltaY;
           }else{
-            if (party_frame[i]->offset_y>=768) party_frame[i]->offset_y-=1536;
+            if (party_frame[i]->offset_y>=kPanelHideThresholdY) party_frame[i]->offset_y-=kPanelHideDeltaY;
           }
         }//hide/unhide
 
@@ -11700,11 +11700,11 @@ gotkey: //x2 is value of key
     //update default frame settings
     if ((i>=0)&&(i<=7)){
       cltset.party_frame_offset_x[i]=pmf->offset_x; cltset.party_frame_offset_y[i]=pmf->offset_y;
-      if (cltset.party_frame_offset_x[i]>1024) cltset.party_frame_offset_x[i]-=2048;
+      if (cltset.party_frame_offset_x[i]>kPanelHideThresholdX) cltset.party_frame_offset_x[i]-=kPanelHideDeltaX;
     }
     if ((i>=8)&&(i<=15)){
       cltset.party_spellbook_frame_offset_x[i-8]=pmf->offset_x; cltset.party_spellbook_frame_offset_y[i-8]=pmf->offset_y;
-      if (cltset.party_spellbook_frame_offset_x[i-8]>1024) cltset.party_spellbook_frame_offset_x[i-8]-=2048;
+      if (cltset.party_spellbook_frame_offset_x[i-8]>kPanelHideThresholdX) cltset.party_spellbook_frame_offset_x[i-8]-=kPanelHideDeltaX;
     }
     if (i==18){cltset.con_frm_offset_x=pmf->offset_x; cltset.con_frm_offset_y=pmf->offset_y;}
     if (i==20){cltset.qkstf_offset_x=pmf->offset_x; cltset.qkstf_offset_y=pmf->offset_y;}
@@ -12455,7 +12455,7 @@ if (portraitlook_wait){
   portraitlook_wait-=et;
   if (portraitlook_wait<0.0f){
     portraitlook_wait=0.0f;
-    if (statusmessage_viewnpc->offset_x<1024) statusmessage_viewnpc->offset_x+=2048;
+    if (statusmessage_viewnpc->offset_x<kPanelHideThresholdX) statusmessage_viewnpc->offset_x+=kPanelHideDeltaX;
   }
 }
 keyon[0xD8]=FALSE; keyon[0xD9]=FALSE; //release mousewheel "buttons"

@@ -72,6 +72,42 @@ enum : int {
     kBackbufferMaxH = 1200
 };
 
+// Draggable-UI hide sentinel constants (RW-P4.9, 2026-05-22).
+//
+// The legacy code hides a UI panel by adding 2048 to `offset_x` (or
+// 1536 to `offset_y`) and detects "hidden" via `offset_x >= 1024` /
+// `offset_y >= 768`. Those thresholds also acted as the per-frame
+// snap-back guard for the always-on inventory panels (see
+// loop_client.cpp:10227), which made it impossible to drag a panel
+// past x=1024 / y=768 — every frame the guard would interpret the
+// dragged position as the hide-sentinel and subtract 2048.
+//
+// With `windowResize=true` the back buffer can grow up to
+// kBackbufferMaxW x kBackbufferMaxH, so the legacy thresholds sit
+// inside the user-visible drag area. These constants move the
+// thresholds (and the matching deltas) safely past the max
+// back-buffer dimensions, so any drag inside the window stays in the
+// "visible" range and only an explicit hide call moves the panel
+// into the "hidden" range.
+//
+// Invariants:
+//   kPanelHideThresholdX > kBackbufferMaxW
+//   kPanelHideDeltaX     >= kPanelHideThresholdX   (so adding the
+//       delta to ANY visible offset lands in hidden range)
+//   Same on the Y axis.
+//
+// At the legacy 1024x768 client size the in-game behavior is
+// unchanged — `offset_x += kPanelHideDeltaX` still pushes a panel
+// well off the back-buffer's right edge, and the per-frame guard
+// only fires for panels that were actually hidden via the sentinel
+// rather than dragged by the user.
+enum : int {
+    kPanelHideThresholdX = 4096,
+    kPanelHideDeltaX     = 4096,
+    kPanelHideThresholdY = 2048,
+    kPanelHideDeltaY     = 2048
+};
+
 #ifdef CLIENT
 // Active back-buffer dimensions. Bodies live in viewport.cpp; the
 // values are read every frame on hot paths so they're declared
@@ -164,6 +200,15 @@ inline bool lighting_alloc(int w, int h) { return u6o::client::lighting_alloc(w,
 inline void lighting_free() { u6o::client::lighting_free(); }
 inline bool visibility_alloc(int w, int h) { return u6o::client::visibility_alloc(w, h); }
 inline void visibility_free() { u6o::client::visibility_free(); }
+
+// Unqualified aliases for the panel-hide constants (RW-P4.9). Call
+// sites in loop_client.cpp use these without a namespace prefix.
+enum : int {
+    kPanelHideThresholdX = u6o::client::kPanelHideThresholdX,
+    kPanelHideDeltaX     = u6o::client::kPanelHideDeltaX,
+    kPanelHideThresholdY = u6o::client::kPanelHideThresholdY,
+    kPanelHideDeltaY     = u6o::client::kPanelHideDeltaY
+};
 
 #endif // VIEWPORT_H
 

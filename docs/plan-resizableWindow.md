@@ -405,6 +405,33 @@ instead of cycling modes.
   (`con_frm`, `con_frm_img`, `qkstf`, `volcontrol`,
   `statusmessage_viewprev`) still anchor to window edges via
   `apply_to` — they're overlays, not part of the sidebar.)_
+- ✅ **RW-P4.9** Let users drag UI panels (party list, volume,
+  spellbook, inventory, music keyboard, minimap, tmap,
+  voicechat, status overlays, text input prompt) anywhere inside
+  the resized window — previously they snapped back at x=1024 /
+  y=768.
+  _(2026-05-22 — done. Root cause: the codebase uses a
+  hide-by-position scheme — panels are hidden by adding `2048` to
+  `offset_x` (or `1536` to `offset_y`) and detected as hidden via
+  `offset_x >= 1024` / `offset_y >= 768`. The per-frame guard at
+  `loop_client.cpp:10227` (`if (pmf->offset_x >= 1024) pmf->offset_x
+  -= 2048;`) snaps the inventory panel back every frame once a drag
+  crosses x=1024, and the matching toggle/save sites do the same
+  for the spellbook/volume/music/minimap/tmap/voicechat panels.
+  With `windowResize=true` the back buffer can grow up to 1920×1200
+  so those thresholds sit inside the user-visible drag area. Fix:
+  centralized `kPanelHideThresholdX/Y` (4096 / 2048) and
+  `kPanelHideDeltaX/Y` (4096 / 2048) constants in `viewport.h`
+  (chosen safely above `kBackbufferMaxW/H`), then bulk-replaced 33
+  magic-number sites in `loop_client.cpp` and the volcontrol
+  hide-position in `ui_panels_apply.cpp` to use them. At the legacy
+  1024×768 size the in-game behavior is unchanged — hidden panels
+  still land past the back-buffer's right edge — but at any larger
+  back-buffer size the entire visible region falls below the new
+  threshold so drags are no longer snapped back. The dead-code
+  `loop_client.inc` mirror (legacy `smallwindow+windowsizecyclenum`
+  rendering path, unreachable since the Option-A single-window
+  cleanup) was intentionally left untouched.)_
 - **Exit:** Maximizing the window reveals more game tiles around the
   player; UI hugs the edges; world state (NPCs, objects, lighting)
   remains correct at every visible tile; the legacy 1024×768 size is
