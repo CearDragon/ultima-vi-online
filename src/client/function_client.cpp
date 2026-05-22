@@ -345,6 +345,17 @@ bool recreateBackbuffers(int newW, int newH) {
     // re-create it only if it was there to begin with.
     bool had_ps3 = (ps3 != NULL);
 
+    // Capture the OLD ps pointer so we can patch only FRAMEs that
+    // actually referenced it. fs (the full-screen intro/menu overlay)
+    // toggles its graphic between ps (during intros/menus) and NULL
+    // (gameplay). Re-attaching ps unconditionally during gameplay
+    // re-shows fs with offset_x=1024, and since fs->graphic == ps,
+    // the FRAME display loop copies ps onto itself shifted right by
+    // 1024 pixels — duplicating the rendered world side-by-side. See
+    // loop_client.cpp:2005,2203,2348 + loop_client.inc:938,1136,1281
+    // for the gameplay-time `fs->graphic = NULL` assignments.
+    surf* old_ps = ps;
+
     // Release the old surfaces. `free(surf*)` calls ->Release() on
     // the IDirectDrawSurface and frees the wrapper struct.
     if (ps)       { free(ps);       ps  = NULL; }
@@ -393,11 +404,16 @@ bool recreateBackbuffers(int newW, int newH) {
         return false;
     }
 
-    // Patch FRAME pointers that held a reference to the old ps. vf
-    // (the main view frame) and fs (the full-screen overlay) both
-    // had `graphic = ps` set in setup_client.inc.
-    if (vf) vf->graphic = ps;
-    if (fs) fs->graphic = ps;
+    // Patch FRAME pointers that held a reference to the OLD ps.
+    // Critical: only patch if the FRAME was actually pointing at the
+    // old ps. fs->graphic is NULL during gameplay (the intro/menu
+    // logic clears it when the overlay is dismissed); patching it
+    // back to ps would revive a hidden overlay positioned at
+    // offset_x=1024 and produce the "world rendered twice
+    // side-by-side" duplication described in the resizable-window
+    // bug.png.
+    if (vf && vf->graphic == old_ps) vf->graphic = ps;
+    if (fs && fs->graphic == old_ps) fs->graphic = ps;
 
     // Clear ps to black so the area outside the legacy 1024x768 (where
     // the world tile renderer still draws) starts clean. The world

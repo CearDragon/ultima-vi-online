@@ -368,6 +368,22 @@ instead of cycling modes.
   _(2026-05-21 — done. Confirmed 96x72 is sufficient since max viewport is 60x34. Introduced getscreenoffset_legacy to ensure replication shifts, block-copy indexing, and offscreen mobile removal (32x24) remain 100% in lockstep with server expectations. Placed dynamic view limits into the drawing/render thread exclusively, fully resolving desynchronization, character disappearances, and teleportation bugs.)_
 - ⬜ **RW-P4.6** Verify minimap centering still works when the world view
   is wider/taller than legacy.
+- ✅ **RW-P4.7** Fix "world rendered twice side-by-side" duplication seen
+  in bug.png when maximizing with `windowResize=true`.
+  _(2026-05-22 — done. Root cause: `recreateBackbuffers()` in
+  `function_client.cpp` unconditionally re-attached the new `ps` to
+  `fs->graphic`. During gameplay `fs->graphic` is `NULL` (the
+  intro/menu code at `loop_client.cpp:2005,2203,2348` and
+  `loop_client.inc:938,1136,1281` clears it when the overlay
+  closes, leaving `fs->offset_x=1024`). Re-attaching ps revived the
+  hidden overlay so the FRAME display loop ran
+  `img(ps, 1024, 0, ps)`, copying the left half of the back buffer
+  onto itself shifted right by 1024 px — producing two
+  side-by-side worlds where the right side was a stale memcpy that
+  no panel hit-test covered, and any panel dragged past x=1024 got
+  overwritten by the duplication. Fix: capture `old_ps` before
+  freeing the surfaces and only patch `vf`/`fs` if their `graphic`
+  field actually pointed at the old `ps`.)_
 - **Exit:** Maximizing the window reveals more game tiles around the
   player; UI hugs the edges; world state (NPCs, objects, lighting)
   remains correct at every visible tile; the legacy 1024×768 size is
