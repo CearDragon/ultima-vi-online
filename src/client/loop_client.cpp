@@ -5994,7 +5994,16 @@ mover_statechange_next2:
 mover_add_next: if (BITSget(t,&bitsi,1)){
                         i=tplayer->mv_i;
                         y=BITSget(t,&bitsi,10); x=y%34; y/=34;
-                        x=x+tpx-1; y=y+tpy-1;
+                        // RW-P4.5 / desync fix (2026-05-22): server encodes the
+                        // mover x,y offset relative to its own getscreenoffset()
+                        // (which is fixed at the legacy 32x24 viewport — host
+                        // never asks the client what view size it uses). Decoding
+                        // with the dynamic tpx/tpy would shift every NPC by
+                        // (tpx - tpx_legacy) tiles when the client view is wider
+                        // than 32 tiles, causing the "teleport then disappear"
+                        // symptom because mover_removeoffscreen below also uses
+                        // tpx_legacy + the hard-coded 32x24 window.
+                        x=x+tpx_legacy-1; y=y+tpy_legacy-1;
                         tplayer->mv_x[i]=x; tplayer->mv_y[i]=y;
                         z=BITSget(t,&bitsi,10);
                         //special cases exist
