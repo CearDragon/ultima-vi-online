@@ -7,8 +7,11 @@
 // UiRect.
 
 #include "stdafx.h"
+#include <cassert>
 #include "data_client.h" // qkstf, volcontrol, con_frm, con_frm_img, statusmessage_viewprev
 #include "ui_layout.h"
+#include "viewport.h"
+
 
 namespace u6o { namespace client {
 
@@ -40,6 +43,7 @@ void RepositionAnchoredPanels(int clientW, int clientH) {
     // RW-P3.5: Reposition the legacy minimap and its frame offsets
     minimapnewx = 2;
     minimapnewy = clientH - 256 - 2;
+
 
 
     // Reposition the sidebar and its nested panels/widgets
@@ -151,6 +155,60 @@ void RepositionAnchoredPanels(int clientW, int clientH) {
         volcontrol->offset_y = clientH + 2048;
     }
     apply_to(statusmessage_viewprev,  UiPanelId::StatusViewPrev, clientW, clientH);
+
+    ValidateUiMetrics();
+}
+
+void ValidateUiMetrics() {
+    int w = backbufferW();
+    int h = backbufferH();
+
+    // 1. Backbuffer bounds validation
+    assert(w >= kBackbufferLegacyW && w <= kBackbufferMaxW);
+    assert(h >= kBackbufferLegacyH && h <= kBackbufferMaxH);
+
+    // 2. Builtin panels bounds validation (No Out-Of-Bounds Drift)
+    if (con_frm) {
+        assert(con_frm->offset_x >= 0 && con_frm->offset_x <= w);
+        assert(con_frm->offset_y >= 0 && con_frm->offset_y <= h);
+    }
+
+    if (con_frm_img) {
+        assert(con_frm_img->offset_x >= 0 && con_frm_img->offset_x <= w);
+        // ConvoHistory image is offset at -256 to hide it initially, which is a known valid off-screen state
+        assert(con_frm_img->offset_y >= -256 && con_frm_img->offset_y <= h);
+    }
+
+    if (qkstf) {
+        assert(qkstf->offset_x >= 0 && qkstf->offset_x <= w);
+        assert(qkstf->offset_y >= 0 && qkstf->offset_y <= h);
+    }
+
+    if (volcontrol) {
+        if (g_volcontrol_visible) {
+            assert(volcontrol->offset_x >= 0 && volcontrol->offset_x <= w);
+            assert(volcontrol->offset_y >= 0 && volcontrol->offset_y <= h);
+        } else {
+            assert(volcontrol->offset_x >= w + 2048);
+            assert(volcontrol->offset_y >= h + 2048);
+        }
+    }
+
+    if (statusmessage_viewprev) {
+        assert(statusmessage_viewprev->offset_x >= 0 && statusmessage_viewprev->offset_x <= w);
+        assert(statusmessage_viewprev->offset_y >= -100 && statusmessage_viewprev->offset_y <= h);
+    }
+
+    // 3. Minimap Synchronization
+    assert(minimapnewx == 2);
+    assert(minimapnewy == h - 256 - 2);
+
+
+    if (uipanelminimap >= 0 && uipanelminimap < uipanelcount) {
+        int expected_sidebar_x = w - (uipanelsidebar >= 0 ? uipanelsizex[uipanelsidebar][0][0] : 260);
+        assert(uipanelx[uipanelminimap][0][0] == expected_sidebar_x + 2);
+        assert(uipanely[uipanelminimap][0][0] == h - 258);
+    }
 }
 
 }} // namespace u6o::client

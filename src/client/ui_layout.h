@@ -139,6 +139,7 @@ const UiPlacement& GetBuiltinPanel(UiPanelId id);
 // function unconditionally writes the offsets when called. When the
 // flag is off, callers skip it so legacy positions stay untouched.
 void RepositionAnchoredPanels(int clientW, int clientH);
+void ValidateUiMetrics();
 
 extern bool g_volcontrol_visible;
 
@@ -148,6 +149,9 @@ extern bool g_volcontrol_visible;
 // loop_client.cpp can use the name without the `u6o::client::` prefix.
 inline void RepositionAnchoredPanels(int clientW, int clientH) {
     u6o::client::RepositionAnchoredPanels(clientW, clientH);
+}
+inline void ValidateUiMetrics() {
+    u6o::client::ValidateUiMetrics();
 }
 
 #endif // UI_LAYOUT_H

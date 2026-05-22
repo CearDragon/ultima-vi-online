@@ -338,11 +338,12 @@ instead of cycling modes.
 
 ## RW-P4 — Expand the world view (more tiles around the player)
 
-- ⬜ **RW-P4.1** Replace fixed view dimensions (`32`, `24`, `34+2`, `26+2`)
+- ✅ **RW-P4.0** Add dynamic state validation metrics: `ValidateUiMetrics()` in `ui_panels_apply.cpp`. Asserts no out-of-bounds drift of on-screen panels (`con_frm`, `qkstf`, etc.), off-screen positioning of closed panels (`volcontrol`), and exact synchronization of dynamic minimap and sidebar container offsets. _(2026-05-21 — done.)_
+- ✅ **RW-P4.1** Replace fixed view dimensions (`32`, `24`, `34+2`, `26+2`)
   with `viewTilesX = (currentBackbufferW() - sidePanelW()) / 32`,
   `viewTilesY = (currentBackbufferH() - bottomPanelH()) / 32`. Centralize
   in `Viewport.h` (`viewTilesX()`, `viewTilesY()`,
-  `viewPixelW()`, `viewPixelH()`, `viewOffsetX()`, `viewOffsetY()`).
+  `viewPixelW()`, `viewPixelH()`, `viewOffsetX()`, `viewOffsetY()`). _(2026-05-21 — done.)_
 - ⬜ **RW-P4.2** Convert fixed-size visibility arrays to dynamically sized
   containers (heap-allocated, resized on viewport change):
   - `vis[34+2][26+2]`, `vis_window`, `vis_chair`, `vis_bed`, `vis_slime`

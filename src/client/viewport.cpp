@@ -34,6 +34,9 @@ extern Dynamic2DArray<unsigned char> vis_bed;
 extern Dynamic2DArray<unsigned char> vis_slime;
 extern Dynamic2DArray<unsigned char> nonvis;
 
+extern int uipanelsidebar;
+extern int uipanelsizex[20][11][6]; // UI_PANEL_MAX x UI_PANELWIDGET_MAX x UI_WIDGETSTATE_MAX
+
 extern bool windowResize;
 
 namespace u6o { namespace client {
@@ -54,6 +57,14 @@ namespace {
     void free_one(unsigned char*& p) {
         if (p) { free(p); p = nullptr; }
     }
+
+    inline int sidePanelW() {
+        return (uipanelsidebar >= 0) ? uipanelsizex[uipanelsidebar][0][0] : 260;
+    }
+
+    inline int bottomPanelH() {
+        return 0;
+    }
 }
 
 
@@ -64,12 +75,12 @@ int lightingTotalBytes() { return g_active_w * g_active_h; }
 
 int viewTilesX() {
     if (!windowResize) return 32;
-    return g_active_w / 32;
+    return (g_active_w - sidePanelW()) / 32;
 }
 
 int viewTilesY() {
     if (!windowResize) return 24;
-    return g_active_h / 32;
+    return (g_active_h - bottomPanelH()) / 32;
 }
 
 int viewPixelW() {
