@@ -61,15 +61,27 @@ enum : int {
     kBackbufferLegacyH = 768
 };
 
-// Upper clamp on the active back-buffer size. Sized to fit common
-// modern monitors (1920x1080, 1920x1200, 4K downscaled to 1080p).
-// Bounding the upper end keeps memory cost predictable and stops a
-// pathologically large client window from triggering allocation
-// failures mid-game. Going past these dims simply caps the active
-// viewport; the rest of the window stays as letterbox bars.
+// Upper clamp on the active back-buffer size. Sized to fit native 4K
+// monitors (3840x2160) plus a little headroom for ultrawide / vertical
+// stacks. Bounding the upper end keeps memory cost predictable and
+// stops a pathologically large client window from triggering
+// allocation failures mid-game. Going past these dims simply caps the
+// active viewport; the rest of the window stays as letterbox bars.
+//
+// RW-P4.10 (2026-05-22): raised from 1920x1200 to 3840x2400 so that on
+// 1440p / 4K monitors the back buffer fills the entire client area
+// instead of leaving black letterbox bars on the sides. The dragged-
+// panel clamp in loop_client.cpp keys off backbufferW/H, so growing
+// the back buffer is sufficient to let users park UI panels in what
+// used to be the letterbox bars (outside the legacy 1024x768 game
+// view). Memory cost at the new cap: ~16 MB per 16bpp surface
+// (ps, ps5), ~33 MB for the 32bpp helper (ps3, only on non-16bpp
+// displays), and ~46 MB across the five lighting buffers. Total ~110
+// MB worst case, which is a non-issue on any machine that can drive
+// a 4K display.
 enum : int {
-    kBackbufferMaxW = 1920,
-    kBackbufferMaxH = 1200
+    kBackbufferMaxW = 3840,
+    kBackbufferMaxH = 2400
 };
 
 // Draggable-UI hide sentinel constants (RW-P4.9, 2026-05-22).
@@ -104,8 +116,8 @@ enum : int {
 enum : int {
     kPanelHideThresholdX = 4096,
     kPanelHideDeltaX     = 4096,
-    kPanelHideThresholdY = 2048,
-    kPanelHideDeltaY     = 2048
+    kPanelHideThresholdY = 4096,
+    kPanelHideDeltaY     = 4096
 };
 
 #ifdef CLIENT

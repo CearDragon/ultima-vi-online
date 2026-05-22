@@ -7115,11 +7115,12 @@ viewfind_skip:
 
                 if (refreshcount&1){ for (x4=0;x4<=stolenitemwarningn;x4++){ if (stolenitemwarningx[x4]==mapx){ if (stolenitemwarningy[x4]==mapy){ if (stolenitemwarningtype[x4]==myobj->type){
                   static unsigned long *ps_realoffset;
-                  // RW-P2.2: scratch buffer sized to kBackbufferMaxW so
-                  // getspr() ? which writes at the active back-buffer
-                  // pitch ? can't overflow when the user has resized
-                  // the window beyond the legacy 1024 pitch.
-                  static unsigned short ps_fakebuffer[1920*32];
+                  // RW-P2.2 / RW-P4.10: scratch buffer sized to
+                  // kBackbufferMaxW so getspr() ? which writes at the
+                  // active back-buffer pitch ? can't overflow when the
+                  // user has resized the window beyond the legacy 1024
+                  // pitch. Must track kBackbufferMaxW in viewport.h.
+                  static unsigned short ps_fakebuffer[kBackbufferMaxW*32];
                   static long siw_x,siw_y,siw_r,siw_g,siw_b;
                   for (siw_y=0;siw_y<=31;siw_y++){ for (siw_x=0;siw_x<=31;siw_x++){
                     ps_fakebuffer[siw_y*lightingStride()+siw_x]=0;
@@ -7265,8 +7266,10 @@ flash_disable2:
 
               if (refreshcount&1){ for (x4=0;x4<=stolenitemwarningn;x4++){ if (stolenitemwarningx[x4]==mapx){ if (stolenitemwarningy[x4]==mapy){ if (stolenitemwarningtype[x4]==myobj->type){
                 static unsigned long *ps_realoffset;
-                // RW-P2.2: scratch buffer sized to kBackbufferMaxW.
-                static unsigned short ps_fakebuffer[1920*32];
+                // RW-P2.2 / RW-P4.10: scratch buffer sized to
+                // kBackbufferMaxW. See note at the first occurrence
+                // (~line 7118).
+                static unsigned short ps_fakebuffer[kBackbufferMaxW*32];
                 static long siw_x,siw_y,siw_r,siw_g,siw_b;
                 for (siw_y=0;siw_y<=31;siw_y++){ for (siw_x=0;siw_x<=31;siw_x++){
                   ps_fakebuffer[siw_y*lightingStride()+siw_x]=0;
