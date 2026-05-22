@@ -11692,7 +11692,12 @@ gotkey: //x2 is value of key
     }else{
       x2=pmf->size_x; y2=pmf->size_y;
     }
-    if ((x<=(2048-x2))&&(y<=(1536-y2))){ //onscreen (or supposed to be onscreen!)
+    // RW-P4.10: "onscreen" here means "not parked at the hide sentinel"
+    // (i.e. the panel is actually visible to the user, vs. hidden by
+    // adding kPanelHideDeltaX/Y to its offset). Old values 2048/1536
+    // matched the legacy hide thresholds; now they track the
+    // kPanelHideThresholdX/Y constants in viewport.h.
+    if ((x<=(kPanelHideThresholdX-x2))&&(y<=(kPanelHideThresholdY-y2))){ //onscreen (or supposed to be onscreen!)
       // RW: clamp dragged panels to the *live* back-buffer extents instead of the
       // legacy 1024x768 floor, otherwise maximized windows visually trap every
       // widget at x~=1016 / y~=760 even though the cursor moves further.

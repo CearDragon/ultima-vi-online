@@ -443,7 +443,7 @@ vf=FRMnew(); vf->graphic=ps; vf->graphic_use0pixel=TRUE; vf->move=FALSE;
 
 inpf=FRMnew();
 inpf->graphic=getportrait(198);
-inpf->offset_x=256+2048;
+inpf->offset_x=256+kPanelHideDeltaX;
 inpf->offset_y=576;
 inpf->no_focus=TRUE;
 inpftxt=txtnew();
@@ -528,14 +528,14 @@ if (i2=getsetting("VOLUMECONTROL_TRANSPARENCYLEVEL")) volcontrol->mouse_over_tra
 
 musickeyboard=FRMnew();
 musickeyboard->graphic=loadimage(".\\dr\\keyb.bmp",SURF_SYSMEM16);
-musickeyboard->offset_x=176+2048; musickeyboard->offset_y=677;
-musickeyboard->graphic_use0pixel=TRUE; 
+musickeyboard->offset_x=176+kPanelHideDeltaX; musickeyboard->offset_y=677;
+musickeyboard->graphic_use0pixel=TRUE;
 musickeyboard->mouse_over_transparent=TRUE;
 if (i2=getsetting("PLAYINSTRUMENTPIANOKEYS_TRANSPARENCYLEVEL")) musickeyboard->mouse_over_transparent=i2-1;
 
 voicechat_frame=FRMnew();
 voicechat_frame->graphic=newsurf(395,18,SURF_SYSMEM16);
-voicechat_frame->offset_x=314+2048;
+voicechat_frame->offset_x=314+kPanelHideDeltaX;
 voicechat_frame->offset_y=711;
 img(voicechat_frame->graphic,0,0,voicechat_voicebar);
 
@@ -550,7 +550,7 @@ if (i2=getsetting("STATUSMESSAGE_VIEWPREVIOUSBOX_TRANSPARENCYLEVEL")) statusmess
 
 statusmessage_viewnpc=FRMnew();
 statusmessage_viewnpc->graphic=viewnpc_temp;
-statusmessage_viewnpc->offset_x=424+2048;
+statusmessage_viewnpc->offset_x=424+kPanelHideDeltaX;
 statusmessage_viewnpc->offset_y=112;
 statusmessage_viewnpc->graphic_use0pixel=TRUE;
 
@@ -782,8 +782,8 @@ u6omidivolume=cltset2.u6omidivolume;
 u6ovoicevolume=cltset2.u6ovoicevolume;
 memcpy(&spellrecall_partymember,&cltset2.spellrecall_partymember,8);
 memcpy(&spellrecall_i,&cltset2.spellrecall_i,8);
-if (cltset2.musickeyboard_offset_x!=32767){musickeyboard->offset_x=cltset2.musickeyboard_offset_x+2048; musickeyboard->offset_y=cltset2.musickeyboard_offset_y;}
-if (cltset2.inpf_offset_x!=32767){inpf->offset_x=cltset2.inpf_offset_x+2048; inpf->offset_y=cltset2.inpf_offset_y;}
+if (cltset2.musickeyboard_offset_x!=32767){musickeyboard->offset_x=cltset2.musickeyboard_offset_x+kPanelHideDeltaX; musickeyboard->offset_y=cltset2.musickeyboard_offset_y;}
+if (cltset2.inpf_offset_x!=32767){inpf->offset_x=cltset2.inpf_offset_x+kPanelHideDeltaX; inpf->offset_y=cltset2.inpf_offset_y;}
 if (cltset2.con_frm_offset_x!=32767){con_frm->offset_x=cltset2.con_frm_offset_x; con_frm->offset_y=cltset2.con_frm_offset_y;}
 if (cltset2.volcontrol_offset_x!=32767){volcontrol->offset_x=cltset2.volcontrol_offset_x; volcontrol->offset_y=cltset2.volcontrol_offset_y;}
 if (cltset2.qkstf_offset_x!=32767){qkstf->offset_x=cltset2.qkstf_offset_x; qkstf->offset_y=cltset2.qkstf_offset_y;}
