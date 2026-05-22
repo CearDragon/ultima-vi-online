@@ -359,11 +359,12 @@ instead of cycling modes.
   the original tile granularity (these are 32-px blocks; should be safe to
   reuse unchanged at the per-tile level).
   _(2026-05-21 — done. Adapted storm-cloak rendering row-wrapping checks and starting offsets to rely on lightingStride() division/multiplication instead of static bitwise shifts.)_
-- ⬜ **RW-P4.5** Sprite/object scene buffer (`sobj[96][72]` in `player`
+- ✅ **RW-P4.5** Sprite/object scene buffer (`sobj[96][72]` in `player`
   struct, host-side): determine if 96×72 is a sufficient cap for any
   client view we want to support (maximized 1920×1080 = 60×34 tiles
   visible — fits). If not, extend the protocol in RW-P5; otherwise
   document the cap as an explicit `kMaxClientViewTilesX/Y` constant.
+  _(2026-05-21 — done. Confirmed 96x72 is sufficient since max viewport is 60x34. Corrected legacy hardcoded 32x24 offscreen mobile removal checks and screen-shift checks to use dynamic viewTilesX() and viewTilesY() bounds, resolving player disappearing & character teleportation bugs.)_
 - ⬜ **RW-P4.6** Verify minimap centering still works when the world view
   is wider/taller than legacy.
 - **Exit:** Maximizing the window reveals more game tiles around the

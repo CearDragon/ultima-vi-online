@@ -5612,7 +5612,7 @@ scene_update_message:
         ctpx=tpx; ctpy=tpy;
 
         //screen+1 shift
-        x3=tpx-1; y3=tpy-1; x4=tpx+32; y4=tpy+24;
+        x3=tpx-1; y3=tpy-1; x4=tpx+viewTilesX(); y4=tpy+viewTilesY();
         x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
         //i. if the screen+1 buffer fits within buffer don't relocate
         if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -5682,7 +5682,7 @@ screen1shiftokc:;
 
         if (BITSget(t,&bitsi,1)){//obj buffer has changed
           //screen+8 shift
-          x3=tpx-8; y3=tpy-8; x4=tpx+32+8-1; y4=tpy+24+8-1;
+          x3=tpx-8; y3=tpy-8; x4=tpx+viewTilesX()+8-1; y4=tpy+viewTilesY()+8-1;
           x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
           //i. if the screen+8 buffer fits within buffer don't relocate
           if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -5824,7 +5824,7 @@ oum_getnextobj: if (BITSget(t,&bitsi,1)){//if =1 a/another object exists on this
 mover_removeoffscreen_restartc:
         for (i=0;i<tplayer->mv_i;i++){
           x=tplayer->mv_x[i]-tpx; y=tplayer->mv_y[i]-tpy;
-          if ((x<-1)||(x>32)||(y<-1)||(y>24)){
+          if ((x<-1)||(x>viewTilesX())||(y<-1)||(y>viewTilesY())){
 
             //reshuffle array
             for (i3=i+1;i3<tplayer->mv_i;i3++){
