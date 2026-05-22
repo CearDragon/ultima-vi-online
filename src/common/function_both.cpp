@@ -319,6 +319,38 @@ void getscreenoffset(long x,long y,long *mapx,long *mapy){
   if (*mapy>(1024-ty)) *mapy=(1024-ty);
 }
 
+void getscreenoffset_legacy(long x,long y,long *mapx,long *mapy) {
+  int tx = 32;
+  int ty = 24;
+  int htx = tx / 2 - 1;
+  int hty = ty / 2 - 1;
+  *mapx = x - htx;
+  *mapy = y - hty;
+  if ((x<=1023)&&(y<=1023)){
+    if (*mapx<0) *mapx=0;
+    if (*mapy<0) *mapy=0;
+    if (*mapx>(1024-tx)) *mapx=(1024-tx);
+    if (*mapy>(1024-ty)) *mapy=(1024-ty);
+    return;
+  }
+  if ((x>=1024)&&(y>=256)&&(x<=1279)&&(y<=511)){
+    if (*mapx<1024) *mapx=1024;
+    if (*mapy<256) *mapy=256;
+    if (*mapx>(1280-tx)) *mapx=(1280-tx);
+    if (*mapy>(512-ty)) *mapy=(512-ty);
+    return;
+  }
+  if ((x>=1327)&&(y>=319)&&(x<=1358)&&(y<=343)){
+    *mapx=1327;
+    *mapy=319;
+    return;
+  }
+  if (*mapx<0) *mapx=0;
+  if (*mapy<0) *mapy=0;
+  if (*mapx>(2048-tx)) *mapx=(2048-tx);
+  if (*mapy>(1024-ty)) *mapy=(1024-ty);
+}
+
 /* luteijn: this looks extermely inefficient, replaced with an inline function */
 /*
 //getnbits returns the number of bits required to store n combinations

@@ -364,7 +364,7 @@ instead of cycling modes.
   client view we want to support (maximized 1920×1080 = 60×34 tiles
   visible — fits). If not, extend the protocol in RW-P5; otherwise
   document the cap as an explicit `kMaxClientViewTilesX/Y` constant.
-  _(2026-05-21 — done. Confirmed 96x72 is sufficient since max viewport is 60x34. Corrected legacy hardcoded 32x24 offscreen mobile removal checks and screen-shift checks to use dynamic viewTilesX() and viewTilesY() bounds, resolving player disappearing & character teleportation bugs.)_
+  _(2026-05-21 — done. Confirmed 96x72 is sufficient since max viewport is 60x34. Introduced getscreenoffset_legacy to ensure replication shifts, block-copy indexing, and offscreen mobile removal (32x24) remain 100% in lockstep with server expectations. Placed dynamic view limits into the drawing/render thread exclusively, fully resolving desynchronization, character disappearances, and teleportation bugs.)_
 - ⬜ **RW-P4.6** Verify minimap centering still works when the world view
   is wider/taller than legacy.
 - **Exit:** Maximizing the window reveals more game tiles around the

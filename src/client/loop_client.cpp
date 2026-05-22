@@ -5605,6 +5605,8 @@ scene_update_message:
 
         x=tplayer->x; y=tplayer->y;
 
+        static long tpx_legacy, tpy_legacy;
+        getscreenoffset_legacy(x,y,&tpx_legacy,&tpy_legacy);
         getscreenoffset(x,y,&tpx,&tpy);
 
 
@@ -5612,7 +5614,7 @@ scene_update_message:
         ctpx=tpx; ctpy=tpy;
 
         //screen+1 shift
-        x3=tpx-1; y3=tpy-1; x4=tpx+viewTilesX(); y4=tpy+viewTilesY();
+        x3=tpx_legacy-1; y3=tpy_legacy-1; x4=tpx_legacy+32; y4=tpy_legacy+24;
         x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
         //i. if the screen+1 buffer fits within buffer don't relocate
         if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -5626,7 +5628,7 @@ scene_update_message:
         if (y3>y6) i=1;
         if (i){
           ZeroMemory(&tplayer->sobj_bufsize,96*72*2); ZeroMemory(&tplayer->sobj_tempfixed,96*72*4);
-          tplayer->sobj_bufoffx=tpx-32; tplayer->sobj_bufoffy=tpy-24;
+          tplayer->sobj_bufoffx=tpx_legacy-32; tplayer->sobj_bufoffy=tpy_legacy-24;
           goto screen1shiftokc;
         }
         //iii. relocate screen+1 buffer
@@ -5682,7 +5684,7 @@ screen1shiftokc:;
 
         if (BITSget(t,&bitsi,1)){//obj buffer has changed
           //screen+8 shift
-          x3=tpx-8; y3=tpy-8; x4=tpx+viewTilesX()+8-1; y4=tpy+viewTilesY()+8-1;
+          x3=tpx_legacy-8; y3=tpy_legacy-8; x4=tpx_legacy+32+8-1; y4=tpy_legacy+24+8-1;
           x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
           //i. if the screen+8 buffer fits within buffer don't relocate
           if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -5696,7 +5698,7 @@ screen1shiftokc:;
           if (y3>y6) i=1;
           if (i){
             ZeroMemory(&tplayer->sobj_bufsize,96*72*2); ZeroMemory(&tplayer->sobj_tempfixed,96*72*4);
-            tplayer->sobj_bufoffx=tpx-32; tplayer->sobj_bufoffy=tpy-24;
+            tplayer->sobj_bufoffx=tpx_legacy-32; tplayer->sobj_bufoffy=tpy_legacy-24;
             goto screen8shiftokc;
           }
           //iii. relocate buffer
@@ -5753,12 +5755,12 @@ screen8shiftokc:;
 
 changestate: if (BITSget(t,&bitsi,1)){
           y=BITSget(t,&bitsi,11); x=y%48; y/=48;
-          i3=tobjfixed_index[tpy-8+y][tpx-8+x];
+          i3=tobjfixed_index[tpy_legacy-8+y][tpx_legacy-8+x];
           i4=tobjfixed_type[i3];
           z=BITSget(t,&bitsi,getnbits(i4));
           i5=1<<z;
 
-          x2=tpx+x-8; y2=tpy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
+          x2=tpx_legacy+x-8; y2=tpy_legacy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
           if (tplayer->sobj_tempfixed[x3][y3]&i5) tplayer->sobj_tempfixed[x3][y3]-=i5; else tplayer->sobj_tempfixed[x3][y3]|=i5;
           goto changestate;
              }
@@ -5766,7 +5768,7 @@ changestate: if (BITSget(t,&bitsi,1)){
              static unsigned short vbuf[1024];
 oum_getnextsquare: if (BITSget(t,&bitsi,1)){//if =1 set object of a/another square on the map
              y=BITSget(t,&bitsi,11); x=y%48; y/=48;
-             x2=tpx+x-8; y2=tpy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
+             x2=tpx_legacy+x-8; y2=tpy_legacy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
              i=0;//vbuf index
 oum_getnextobj: if (BITSget(t,&bitsi,1)){//if =1 a/another object exists on this square
              vbuf[i]=BITSget(t,&bitsi,16);
@@ -5823,8 +5825,8 @@ oum_getnextobj: if (BITSget(t,&bitsi,1)){//if =1 a/another object exists on this
         //remove all offscreen objects in client's array
 mover_removeoffscreen_restartc:
         for (i=0;i<tplayer->mv_i;i++){
-          x=tplayer->mv_x[i]-tpx; y=tplayer->mv_y[i]-tpy;
-          if ((x<-1)||(x>viewTilesX())||(y<-1)||(y>viewTilesY())){
+          x=tplayer->mv_x[i]-tpx_legacy; y=tplayer->mv_y[i]-tpy_legacy;
+          if ((x<-1)||(x>32)||(y<-1)||(y>24)){
 
             //reshuffle array
             for (i3=i+1;i3<tplayer->mv_i;i3++){

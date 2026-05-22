@@ -28,6 +28,7 @@ DWORD WINAPI sockets_disconnect(LPVOID i);
 
 bool NET_send(void *s,unsigned long d,txt *t);
 void getscreenoffset(long x,long y,long *mapx,long *mapy);
+void getscreenoffset_legacy(long x,long y,long *mapx,long *mapy);
 
 //getnbits returns the number of bits required to store n combinations
 //if combinations is 1, getnbits returns 0 (only 1 combination requires 0 bits represent)
