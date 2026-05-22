@@ -384,6 +384,27 @@ instead of cycling modes.
   overwritten by the duplication. Fix: capture `old_ps` before
   freeing the surfaces and only patch `vf`/`fs` if their `graphic`
   field actually pointed at the old `ps`.)_
+- ✅ **RW-P4.8** Remove right-edge sidebar anchoring; let the world view
+  fill the full window width.
+  _(2026-05-22 — done. Per user request, the sidebar (and every panel
+  positioned relative to it: partymember parent/0, in-sidebar minimap,
+  actionbar1/2, optionbar1, actiontalkbar1/2/3) no longer tracks the
+  resized window's right edge. They stay at their legacy
+  1024-relative coordinates from `setup_client.inc`. `viewTilesX()`
+  now returns `backbufferW()/32` instead of
+  `(backbufferW() − sidePanelW())/32`, so the world view extends
+  across the entire client area. The legacy sidebar still draws on
+  top of the world via the FRAME display loop, so it occludes the
+  same world region it always did at 1024×768 — but extra game
+  tiles are now visible to the right of the sidebar and beyond. The
+  `RepositionAnchoredPanels`/`ValidateUiMetrics` blocks that asserted
+  sidebar/partymember/minimap right-edge positions were removed
+  accordingly. `resxn1m` (the X just left of the sidebar) is pinned
+  to `kBackbufferLegacyW − sidebarW` so inventory hit-testing
+  continues to use the legacy coordinate. The five floating panels
+  (`con_frm`, `con_frm_img`, `qkstf`, `volcontrol`,
+  `statusmessage_viewprev`) still anchor to window edges via
+  `apply_to` — they're overlays, not part of the sidebar.)_
 - **Exit:** Maximizing the window reveals more game tiles around the
   player; UI hugs the edges; world state (NPCs, objects, lighting)
   remains correct at every visible tile; the legacy 1024×768 size is

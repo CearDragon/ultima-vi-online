@@ -75,7 +75,13 @@ int lightingTotalBytes() { return g_active_w * g_active_h; }
 
 int viewTilesX() {
     if (!windowResize) return 32;
-    return (g_active_w - sidePanelW()) / 32;
+    // RW-P4.8 (2026-05-22): sidebar is no longer anchored to the right
+    // edge of the window (see ui_panels_apply.cpp). The world view now
+    // fills the full back-buffer width; the legacy sidebar (still at
+    // its 1024-relative x) draws on top of the world via the FRAME
+    // display loop. Previously we subtracted sidePanelW() to leave the
+    // sidebar an exclusive strip on the right edge.
+    return g_active_w / 32;
 }
 
 int viewTilesY() {
