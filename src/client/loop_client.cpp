@@ -8204,12 +8204,13 @@ flash_skip:;
       // RW-P2.3: route crop bounds and ls stride through viewport.h accessors.
       { const long bbW=backbufferW(), bbH=backbufferH();
         if (x7<0) x7=0; if (y7<0) y7=0; if (x8>bbW) x8=bbW; if (y8>bbH) y8=bbH; }
-      ls_off=(y7<<10)+x7; ls_off_add=lightingStride()-(x8-x7); //starting offset/add
+      const int stride = lightingStride();
+      ls_off=y7*stride+x7; ls_off_add=stride-(x8-x7); //starting offset/add
       ls2_off=(y7+y9)*((z2*2+1)*32)+x7+x9; ls2_off_add=((z2*2+1)*32)-(x8-x7);
       for (y6=y7;y6<y8;y6++){ for (x6=x7;x6<x8;x6++){
         if (z=ls2_p[ls2_off]){
           z+=ls_off;
-          if ((z>>10)!=(ls_off>>10)) z=(ls_off>>10<<10)+1023;
+          if ((z/stride)!=(ls_off/stride)) z=(ls_off/stride*stride)+(stride-1);
           ps->o2[ls_off]=ps->o2[z];
         }//z
         ls_off++; ls2_off++;

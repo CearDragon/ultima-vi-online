@@ -354,10 +354,11 @@ instead of cycling modes.
   `0..viewTilesX-1`, `0..viewTilesY-1` instead of `0..31`, `0..23`. Update
   centering math (`x - x_axis_size/2`, etc.) accordingly.
   _(2026-05-21 — done. Adapted getscreenoffset, all 20 viewport boundary checks, and all 10 visibility + object forward/backward rendering loops to use dynamic viewport dimensions, compiling perfectly.)_
-- ⬜ **RW-P4.4** Update lighting/fog/storm-cloak passes to operate over the
+- ✅ **RW-P4.4** Update lighting/fog/storm-cloak passes to operate over the
   dynamic view extents. Verify `ls3..ls13` blur kernels still operate at
   the original tile granularity (these are 32-px blocks; should be safe to
   reuse unchanged at the per-tile level).
+  _(2026-05-21 — done. Adapted storm-cloak rendering row-wrapping checks and starting offsets to rely on lightingStride() division/multiplication instead of static bitwise shifts.)_
 - ⬜ **RW-P4.5** Sprite/object scene buffer (`sobj[96][72]` in `player`
   struct, host-side): determine if 96×72 is a sufficient cap for any
   client view we want to support (maximized 1920×1080 = 60×34 tiles

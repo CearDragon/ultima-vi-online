@@ -240,7 +240,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 if (MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE
             $<$<CONFIG:Debug>:
-            /Gm;
             /Od;
             /RTC1;
             /W1;
@@ -445,7 +444,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 if (MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE
             $<$<CONFIG:Debug>:
-            /Gm;
             /Od;
             /RTC1;
             /W1;
@@ -639,7 +637,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 if (MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE
             $<$<CONFIG:Debug>:
-            /Gm;
             /Od;
             /RTC1;
             /W1;
