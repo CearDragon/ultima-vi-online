@@ -213,9 +213,14 @@ inline void lighting_free() { u6o::client::lighting_free(); }
 inline bool visibility_alloc(int w, int h) { return u6o::client::visibility_alloc(w, h); }
 inline void visibility_free() { u6o::client::visibility_free(); }
 
-// Unqualified aliases for the panel-hide constants (RW-P4.9). Call
-// sites in loop_client.cpp use these without a namespace prefix.
+// Unqualified aliases for the panel-hide constants (RW-P4.9) and the
+// back-buffer dim caps (RW-P4.10). Call sites in loop_client.cpp use
+// these without a namespace prefix.
 enum : int {
+    kBackbufferLegacyW   = u6o::client::kBackbufferLegacyW,
+    kBackbufferLegacyH   = u6o::client::kBackbufferLegacyH,
+    kBackbufferMaxW      = u6o::client::kBackbufferMaxW,
+    kBackbufferMaxH      = u6o::client::kBackbufferMaxH,
     kPanelHideThresholdX = u6o::client::kPanelHideThresholdX,
     kPanelHideDeltaX     = u6o::client::kPanelHideDeltaX,
     kPanelHideThresholdY = u6o::client::kPanelHideThresholdY,

@@ -7120,7 +7120,7 @@ viewfind_skip:
                   // active back-buffer pitch ? can't overflow when the
                   // user has resized the window beyond the legacy 1024
                   // pitch. Must track kBackbufferMaxW in viewport.h.
-                  static unsigned short ps_fakebuffer[kBackbufferMaxW*32];
+                  static unsigned short ps_fakebuffer[u6o::client::kBackbufferMaxW*32];
                   static long siw_x,siw_y,siw_r,siw_g,siw_b;
                   for (siw_y=0;siw_y<=31;siw_y++){ for (siw_x=0;siw_x<=31;siw_x++){
                     ps_fakebuffer[siw_y*lightingStride()+siw_x]=0;
@@ -7269,7 +7269,7 @@ flash_disable2:
                 // RW-P2.2 / RW-P4.10: scratch buffer sized to
                 // kBackbufferMaxW. See note at the first occurrence
                 // (~line 7118).
-                static unsigned short ps_fakebuffer[kBackbufferMaxW*32];
+                static unsigned short ps_fakebuffer[u6o::client::kBackbufferMaxW*32];
                 static long siw_x,siw_y,siw_r,siw_g,siw_b;
                 for (siw_y=0;siw_y<=31;siw_y++){ for (siw_x=0;siw_x<=31;siw_x++){
                   ps_fakebuffer[siw_y*lightingStride()+siw_x]=0;
