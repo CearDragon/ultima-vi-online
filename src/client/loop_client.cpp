@@ -11690,10 +11690,15 @@ gotkey: //x2 is value of key
       x2=pmf->size_x; y2=pmf->size_y;
     }
     if ((x<=(2048-x2))&&(y<=(1536-y2))){ //onscreen (or supposed to be onscreen!)
+      // RW: clamp dragged panels to the *live* back-buffer extents instead of the
+      // legacy 1024x768 floor, otherwise maximized windows visually trap every
+      // widget at x~=1016 / y~=760 even though the cursor moves further.
+      const long bb_w = windowResize ? (long)backbufferW() : 1024L;
+      const long bb_h = windowResize ? (long)backbufferH() : 768L;
       x3=8-x2; if (x<x3) pmf->offset_x=x3;
       y3=8-y2; if (y<y3) pmf->offset_y=y3;
-      x3=1024-8; if (x>x3) pmf->offset_x=x3;
-      y3=768-8; if (y>y3) pmf->offset_y=y3;
+      x3=bb_w-8; if (x>x3) pmf->offset_x=x3;
+      y3=bb_h-8; if (y>y3) pmf->offset_y=y3;
       if (i==16){cltset.musickeyboard_offset_x=pmf->offset_x; cltset.musickeyboard_offset_y=pmf->offset_y;}
       if (i==17){cltset.inpf_offset_x=pmf->offset_x; cltset.inpf_offset_y=pmf->offset_y;}
     }//onscreen
