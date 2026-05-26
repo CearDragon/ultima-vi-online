@@ -6793,6 +6793,19 @@ CLIENT_donemess:
             if (myobj->type==163+(6*1024)) vis_bed[x+1][y+1]=2;//bed (vertical)
           }//i3
         }//i
+        // DOB-P0.2 / RW-P4.11 follow-up (crash at loop_client.cpp:6825,
+        // 2026-05-26): tplayer->sobj_bufoffx/y are streamed by the host
+        // and can briefly lag the client's tpx/tpy while walking, which
+        // pushes bufx/bufy outside the fixed-size sobj_bufsize[96][72]
+        // (and sobj[][] / sobj_tempfixed[][]) arrays. Reading off the
+        // end produced an unmapped-memory dereference (EXCEPTION_
+        // ACCESS_VIOLATION, see crash.dmp). Mirror the bounds guard
+        // already present in function_client.cpp:529 here so out-of-
+        // buffer tiles fall through to the default vis state instead of
+        // walking off the struct. Remove once DOB-P2+ replaces the
+        // fixed 96x72 storage with a per-player Dynamic2DArray sized
+        // from viewTilesX/Y.
+        if ((bufx>=0)&&(bufx<96)&&(bufy>=0)&&(bufy<72)){
         //get tfixedobj-vis
         if (i=tobjfixed_index[tpy+y-1][tpx+x-1]){
           i2=tobjfixed_type[i];
@@ -6844,6 +6857,7 @@ CLIENT_donemess:
             }//build
           }//i2
         }//i
+        }//bufx/bufy in-range
 
         //get visalways
         x3=x2>>3; x4=x2&7;
