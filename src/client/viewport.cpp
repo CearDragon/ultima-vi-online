@@ -81,12 +81,23 @@ int viewTilesX() {
     // its 1024-relative x) draws on top of the world via the FRAME
     // display loop. Previously we subtracted sidePanelW() to leave the
     // sidebar an exclusive strip on the right edge.
-    return g_active_w / 32;
+    //
+    // RW-P4.11 (2026-05-26): clamp to kViewportTilesXMax so the world
+    // render loops can't walk past the end of the fixed-size
+    // `sobj_bufsize[96][72]` per-player buffer. See the constant's
+    // definition in viewport.h for the derivation.
+    int tiles = g_active_w / 32;
+    if (tiles > kViewportTilesXMax) tiles = kViewportTilesXMax;
+    return tiles;
 }
 
 int viewTilesY() {
     if (!windowResize) return 24;
-    return (g_active_h - bottomPanelH()) / 32;
+    // RW-P4.11 (2026-05-26): clamp to kViewportTilesYMax. See note
+    // above and the constant's definition in viewport.h.
+    int tiles = (g_active_h - bottomPanelH()) / 32;
+    if (tiles > kViewportTilesYMax) tiles = kViewportTilesYMax;
+    return tiles;
 }
 
 int viewPixelW() {

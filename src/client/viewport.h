@@ -120,6 +120,34 @@ enum : int {
     kPanelHideDeltaY     = 4096
 };
 
+// RW-P4.11 (2026-05-26): hard cap on the world-view tile dimensions.
+//
+// The server-side per-player object buffer `sobj_bufsize[96][72]` (see
+// data_both.h) is fixed at 96x72 tiles, positioned with the player
+// near (32, 24) inside the buffer (see loop_client.inc:3950 — the
+// buffer is reset to `tpx-32, tpy-24` whenever the player drifts past
+// its extents). The world-render loops in loop_client.cpp iterate
+// `x in [0..viewTilesX()+1]` and read `tplayer->sobj_bufsize[bufx][bufy]`
+// where `bufx = tpx + x - 1 - sobj_bufoffx`. With sobj_bufoffx == tpx-32
+// the safe range is `bufx in [31..bufx+viewTilesX()]`, so we need
+// `viewTilesX() + 31 < 96`, i.e. `viewTilesX() <= 63`. Same arithmetic
+// on Y with sobj_bufoffy == tpy-24 gives `viewTilesY() <= 47`.
+//
+// Before this cap, raising kBackbufferMaxW/H past ~96*32 / 72*32 let
+// the user resize the window large enough that viewTilesX/Y exceeded
+// these bounds. The per-frame visibility loop then walked past the
+// end of `sobj_bufsize` and eventually hit unmapped memory, producing
+// an intermittent C0000005 read crash while walking around the map
+// (loop_client.cpp:6825).
+//
+// The world view stops growing past these caps; back-buffer columns/
+// rows past `viewTilesX()*32 / viewTilesY()*32` are cleared to black
+// each frame (see clear-vis loop in loop_client.cpp).
+enum : int {
+    kViewportTilesXMax = 63,
+    kViewportTilesYMax = 47
+};
+
 #ifdef CLIENT
 // Active back-buffer dimensions. Bodies live in viewport.cpp; the
 // values are read every frame on hot paths so they're declared
