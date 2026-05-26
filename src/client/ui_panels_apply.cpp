@@ -43,8 +43,15 @@ void RepositionAnchoredPanels(int clientW, int clientH) {
     // before the anchoring system existed).
     resxn1m = kBackbufferLegacyW - (uipanelsidebar >= 0 ? uipanelsizex[uipanelsidebar][0][0] : 260);
 
-    // RW-P3.4: Recompute equipment slots layout of party member portraits on resize
-    RecomputeEquipSlotLayout(uiscaling ? uiscalex : 1.0f, uiscaling ? uiscaley : 1.0f);
+    // RW-P3.4 / 2026-05-26: equipment-slot positions are pinned to the
+    // paperdoll silhouette that is baked into the fixed-size status8.bmp
+    // (256x256). Scaling the slot coordinates by uiscalex/uiscaley
+    // shifted the equipped item sprites off the silhouette (they
+    // floated above the paperdoll head when uiscaling was on, which
+    // matches the maximized-window bug report). Until status8 itself
+    // becomes resizable, the slot layout must stay at its native 1.0
+    // scale to keep the items aligned with the painted silhouette.
+    RecomputeEquipSlotLayout(1.0f, 1.0f);
 
     // RW-P3.5: Reposition the legacy minimap and its frame offsets
     minimapnewx = 2;
