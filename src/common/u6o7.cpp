@@ -463,15 +463,26 @@ ATOM MyRegisterClass( HINSTANCE hInstance )
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= hInstance;
-	//wcex.hIcon		= LoadIcon(hInstance, (LPCTSTR)IDI_ULTIMATE);
-	wcex.hIcon		= LoadIcon(hInstance, (LPCTSTR)IDI_SMALL);
-
-
-	wcex.hCursor		= NULL; //LoadCursor(NULL, IDC_ARROW); //we use custom cursor
-	wcex.hbrBackground	= NULL; //(HBRUSH)(COLOR_WINDOW+1); //we use a custom refresh
-	wcex.lpszMenuName	= NULL;
-	wcex.lpszClassName	= szWindowClass;
-	wcex.hIconSm		= LoadIcon(hInstance, (LPCTSTR)IDI_SMALL);
+	// Icons come from the resource compiler (u6o7.rc.in -> generated
+	// u6o7.rc, see CMakeLists.txt icon pipeline). LoadImage with the
+	// system-metric size lets Windows pick the right sub-image from the
+	// multi-resolution ICO (16/20/24/32/40/48/64/96/128/256 px frames),
+	// so the title bar and the taskbar each get a crisp render at the
+	// active DPI without us hand-tuning anything.
+	wcex.hIcon   = (HICON)LoadImage(hInstance, MAKEINTRESOURCE(IDI_U6O7),
+	                                IMAGE_ICON,
+	                                GetSystemMetrics(SM_CXICON),
+	                                GetSystemMetrics(SM_CYICON),
+	                                LR_DEFAULTCOLOR | LR_SHARED);
+	wcex.hIconSm = (HICON)LoadImage(hInstance, MAKEINTRESOURCE(IDI_SMALL),
+	                                IMAGE_ICON,
+	                                GetSystemMetrics(SM_CXSMICON),
+	                                GetSystemMetrics(SM_CYSMICON),
+	                                LR_DEFAULTCOLOR | LR_SHARED);
+	wcex.hCursor       = NULL; // we use a custom cursor
+	wcex.hbrBackground = NULL; // we use a custom refresh
+	wcex.lpszMenuName  = NULL;
+	wcex.lpszClassName = szWindowClass;
 	return RegisterClassEx( &wcex );
 }
 
@@ -500,6 +511,7 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 	// hWnd4 set NULL in function_client.cpp newmodeinit.
 
 	hWnd=hWnd2;
+
 	ShowWindow(hWnd,nCmdShow);
 
 	UpdateWindow(hWnd);

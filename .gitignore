@@ -28,3 +28,9 @@ CMakeFiles/
 *.tlog/
 *.log
 test/*
+
+# Generated icon pipeline outputs (rebuilt from assets/images/icon.png
+# by tools/build_icon.ps1 via CMake). The .ico files used to live under
+# src/ but are now build-time artifacts only.
+*.ico
+src/common/u6o7.rc
