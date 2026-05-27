@@ -258,9 +258,12 @@ extern int  g_volcontrol_user_x, g_volcontrol_user_y;
 ```
 
 `RepositionAnchoredPanels()` then restores from the cache (clamped to
-the live client area) instead of snapping back to the anchored
-default. The cache survives the volcontrol show/hide cycle, so
-toggling **S** off and back on returns the panel to the user's chosen
+the live client area for display only — the cache itself is never
+mutated by a clamp) instead of snapping back to the anchored default.
+The cache survives the volcontrol show/hide cycle AND survives
+sessions that open the window smaller than it was when the position
+was saved (e.g. a maximized save followed by a default-size restart).
+Toggling **S** off and back on returns the panel to the user's chosen
 spot. See "Persistence" in §5.
 
 ---
@@ -335,10 +338,22 @@ Lifecycle:
 2. **Per-frame mirror** — `loop_client.cpp:11700–11750` walks every
    tracked panel and writes its live `offset_x/y` into the matching
    `cltset.*` field. For `qkstf` / `volcontrol` the mirror reads from
-   the `g_*_user_*` cache instead of `pmf->offset_x` so the hidden-
-   volcontrol's parked off-screen offset can't overwrite a saved
-   user position; if the flag is unset it writes `32767` instead.
-3. **Shutdown save** — `src/common/u6o7.cpp:316` writes `cltset`
+   the `g_*_user_*` cache instead of `pmf->offset_x`. This is critical:
+   the live offset is auto-clamped each frame to `backbufferW()`, so
+   if the window is smaller than the saved position (a far-right
+   coord saved while maximized, reopened at the default size) the
+   live offset gets shrunk. Reading from the cache keeps the saved
+   value intact through the small-window session, so the next
+   maximize restores the panel to its original spot. If the flag is
+   unset the mirror writes `32767` instead.
+3. **Cache mutation rule** — the `g_*_user_x/y` cache is updated
+   **only** by an actual user drag (`loop_client.cpp:~1376`). Neither
+   `RepositionAnchoredPanels()` nor the per-frame clamp ever writes
+   to it. Auto-clamps adjust the **live** `offset_x/y` for the
+   current frame; the cache (and therefore `cltset` and
+   `settings.bin`) remembers the user's intended position regardless
+   of the current window size.
+4. **Shutdown save** — `src/common/u6o7.cpp:316` writes `cltset`
    back to `settings.bin` (only if `clientsettingsvalid` is `TRUE`).
 
 > **Window placement** (size + maximized state) is persisted

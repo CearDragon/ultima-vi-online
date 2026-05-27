@@ -77,17 +77,20 @@ void RepositionAnchoredPanels(int clientW, int clientH) {
     apply_to(con_frm,                 UiPanelId::ConvoArrows,    clientW, clientH);
     apply_to(con_frm_img,             UiPanelId::ConvoHistory,   clientW, clientH);
     // RW: if the user dragged qkstf to a custom spot (this session or a
-    // restored prior session), keep it there instead of snapping back to
-    // the anchored top-right default. Clamp to the live client area so a
-    // shrunken window can't strand the panel off-screen.
+    // restored prior session), keep it there instead of snapping back
+    // to the anchored top-right default. Clamp the *live* offset to
+    // the current client area so a shrunken window doesn't strand the
+    // panel off-screen, but do NOT write the clamp back into the
+    // cache — a maximized window may have saved a coordinate that's
+    // perfectly valid for the larger size and would be permanently
+    // lost if the user briefly opened at the default size. The cache
+    // is only ever mutated by an actual user drag (loop_client.cpp).
     if (qkstf) {
         if (g_qkstf_user_positioned) {
             int x = g_qkstf_user_x;
             int y = g_qkstf_user_y;
             if (x < 0) x = 0; if (x > clientW) x = clientW;
             if (y < 0) y = 0; if (y > clientH) y = clientH;
-            g_qkstf_user_x = x;
-            g_qkstf_user_y = y;
             qkstf->offset_x = x;
             qkstf->offset_y = y;
         } else {
@@ -96,13 +99,12 @@ void RepositionAnchoredPanels(int clientW, int clientH) {
     }
     if (g_volcontrol_visible) {
         // Same override behavior for volcontrol when it's on screen.
+        // Same rationale on the no-write-back-to-cache rule.
         if (volcontrol && g_volcontrol_user_positioned) {
             int x = g_volcontrol_user_x;
             int y = g_volcontrol_user_y;
             if (x < 0) x = 0; if (x > clientW) x = clientW;
             if (y < 0) y = 0; if (y > clientH) y = clientH;
-            g_volcontrol_user_x = x;
-            g_volcontrol_user_y = y;
             volcontrol->offset_x = x;
             volcontrol->offset_y = y;
         } else {

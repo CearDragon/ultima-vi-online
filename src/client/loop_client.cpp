@@ -11740,22 +11740,13 @@ gotkey: //x2 is value of key
       y3=bb_h-8; if (y>y3) pmf->offset_y=y3;
       if (i==16){cltset.musickeyboard_offset_x=pmf->offset_x; cltset.musickeyboard_offset_y=pmf->offset_y;}
       if (i==17){cltset.inpf_offset_x=pmf->offset_x; cltset.inpf_offset_y=pmf->offset_y;}
-      // RW: keep the user-positioned caches in sync with the live
-      // (already-clamped) frame offset so RepositionAnchoredPanels
-      // restores to the right spot on resize / show toggle, and the
-      // shutdown writer persists the latest position. Only refresh
-      // when the user has actually positioned the panel; otherwise
-      // the panel is still tracking the anchored default and the
-      // cache must stay at its "unset" state so the cltset mirror
-      // below writes the 32767 sentinel.
-      if ((i==19) && u6o::client::g_volcontrol_user_positioned) {
-        u6o::client::g_volcontrol_user_x = pmf->offset_x;
-        u6o::client::g_volcontrol_user_y = pmf->offset_y;
-      }
-      if ((i==20) && u6o::client::g_qkstf_user_positioned) {
-        u6o::client::g_qkstf_user_x = pmf->offset_x;
-        u6o::client::g_qkstf_user_y = pmf->offset_y;
-      }
+      // RW: deliberately do NOT refresh the qkstf/volcontrol
+      // user-positioned cache from `pmf->offset_x` here. The live
+      // offset has just been auto-clamped to `backbufferW()`, which
+      // for a smaller-than-saved window would shrink the cache and
+      // permanently lose the user's far-right position from a
+      // previous maximized session. The cache is updated exclusively
+      // by a real user drag (see the drag handler near line 1376).
     }//onscreen
     //update default frame settings
     if ((i>=0)&&(i<=7)){
