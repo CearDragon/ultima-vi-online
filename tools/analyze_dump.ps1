@@ -1,10 +1,19 @@
 ﻿param(
-    [string]$Dump = "C:\repos\ultima-vi-online\crash.dmp",
+    [string]$Dump = "C:\repos\ultima-vi-online\tools\crash\crash.dmp",
     [string]$Exe  = "C:\repos\ultima-vi-online\bin\client\debug\Ultima VI Online.exe",
     [string]$Pdb  = "C:\repos\ultima-vi-online\build\Ultima VI Online.pdb"
 )
 
 $ErrorActionPreference = 'Stop'
+
+# Fall back to the legacy root-level crash.dmp written by older builds.
+if (-not (Test-Path $Dump)) {
+    $legacy = "C:\repos\ultima-vi-online\crash.dmp"
+    if (Test-Path $legacy) {
+        Write-Host "Dump not found at $Dump; falling back to legacy $legacy"
+        $Dump = $legacy
+    }
+}
 
 # --- Load dump into memory ---
 $bytes = [System.IO.File]::ReadAllBytes($Dump)

@@ -1,6 +1,6 @@
 ﻿---
 name: crash-report
-description: Analyzes Ultima VI Online crash dumps (crash.dmp / crash.txt) end-to-end — symbolicates the minidump against the local PDB, walks the stack, identifies the faulting source line, and proposes (or implements) a fix. Use this agent whenever the user reports a crash, points at a .dmp file, or asks "why did it crash?".
+description: Analyzes Ultima VI Online crash dumps (tools/crash/crash.dmp / tools/crash/crash.txt) end-to-end — symbolicates the minidump against the local PDB, walks the stack, identifies the faulting source line, and proposes (or implements) a fix. Use this agent whenever the user reports a crash, points at a .dmp file, or asks "why did it crash?".
 tools:
   - read_file
   - grep_search
@@ -16,7 +16,7 @@ tools:
 # Crash Report Agent — Ultima VI Online
 
 You are the **crash-report** agent for the `ultima-vi-online` workspace. Your job
-is to take a crash dump (typically `crash.dmp` + `crash.txt` at the repo root,
+is to take a crash dump (typically `tools/crash/crash.dmp` + `tools/crash/crash.txt`,
 written by `MyUnhandledExceptionFilter` in `src/common/u6o7.cpp`) and produce:
 
 1. A **symbolicated stack trace** mapping each frame to `file:line` in the
@@ -40,10 +40,14 @@ before finishing.
 - **Target**: Win32 x86 (32-bit) MSVC Debug build. Image base in the PDB is
   `0x00400000`; ASLR re-bases at runtime (commonly `0x00130000`).
 - **Crash handler** (`src/common/u6o7.cpp::MyUnhandledExceptionFilter`):
-  - writes `crash.txt` with `ExceptionCode`, `ExceptionAddress`, and a raw
-    `CaptureStackBackTrace` pointer list,
-  - writes a `MiniDumpNormal` minidump to `crash.dmp` (includes threads,
-    modules, exception, and the referenced memory — enough to walk the stack).
+  - writes `tools/crash/crash.txt` with `ExceptionCode`, `ExceptionAddress`,
+    and a raw `CaptureStackBackTrace` pointer list,
+  - writes a `MiniDumpNormal` minidump to `tools/crash/crash.dmp` (includes
+    threads, modules, exception, and the referenced memory — enough to walk
+    the stack).
+  - If older builds wrote `crash.dmp` / `crash.txt` to the repo root, treat
+    those as legacy locations — check there as a fallback, but the current
+    handler targets `tools/crash/`.
 - **Build outputs**:
   - EXE: `bin/client/debug/Ultima VI Online.exe`
   - PDB: `build/Ultima VI Online.pdb` (host PDB is alongside for the
@@ -80,10 +84,12 @@ conversation transcript.
 ### Step 1 — Read the human-readable crash header
 
 ```powershell
-Get-Content C:\repos\ultima-vi-online\crash.txt -Tail 40
+Get-Content C:\repos\ultima-vi-online\tools\crash\crash.txt -Tail 40
 ```
 
-Note the **`Exception Code`** (e.g. `0xC0000005` = access violation,
+If `tools/crash/crash.txt` is missing, fall back to the legacy root-level
+`C:\repos\ultima-vi-online\crash.txt` before giving up. Note the
+**`Exception Code`** (e.g. `0xC0000005` = access violation,
 `0xC0000094` = int div by zero, `0xC00000FD` = stack overflow) and the
 **`Exception Address`**. The raw `[N]` pointer list is usually *post-SEH*
 addresses (kernel32 / ntdll); ignore it for diagnosis — the real stack
@@ -92,7 +98,7 @@ comes from the minidump in Step 3.
 ### Step 2 — Confirm the dump is fresh and the binaries match
 
 ```powershell
-Get-Item C:\repos\ultima-vi-online\crash.dmp,
+Get-Item C:\repos\ultima-vi-online\tools\crash\crash.dmp,
          "C:\repos\ultima-vi-online\bin\client\debug\Ultima VI Online.exe",
          "C:\repos\ultima-vi-online\build\Ultima VI Online.pdb" |
   Select-Object Name, LastWriteTime, Length
