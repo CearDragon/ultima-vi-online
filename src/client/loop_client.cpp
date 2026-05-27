@@ -1384,10 +1384,20 @@ if (drg!=NULL){ //drag panel
       // "user-positioned" mode so RepositionAnchoredPanels stops
       // snapping them back to the anchored default on resize / show
       // toggle, and the per-frame cltset mirror starts persisting the
-      // chosen offset to settings.bin. The cache is refreshed from the
-      // clamped offset below in the i==19 / i==20 block.
-      if (drg == qkstf)     u6o::client::g_qkstf_user_positioned = true;
-      if (drg == volcontrol) u6o::client::g_volcontrol_user_positioned = true;
+      // chosen offset to settings.bin. The cache is updated here
+      // (from the post-drag, pre-clamp value) — NEVER from the
+      // per-frame auto-clamp — so a far-right position saved while
+      // maximized survives a session that opens at the default size.
+      if (drg == qkstf) {
+        u6o::client::g_qkstf_user_positioned = true;
+        u6o::client::g_qkstf_user_x = drg->offset_x;
+        u6o::client::g_qkstf_user_y = drg->offset_y;
+      }
+      if (drg == volcontrol) {
+        u6o::client::g_volcontrol_user_positioned = true;
+        u6o::client::g_volcontrol_user_x = drg->offset_x;
+        u6o::client::g_volcontrol_user_y = drg->offset_y;
+      }
     }
   }
 }
