@@ -7254,6 +7254,15 @@ lens_hide:
     for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
       mapx=tpx+x-1; mapy=tpy+y-1; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
       x2=x-1; y2=y-1;
+      // DOB-P0.2 follow-up (crash at loop_client.cpp:7257, 2026-05-27):
+      // sibling of the guarded block at line 6808. Same root cause —
+      // host-streamed sobj_bufoffx/y briefly lags the client's tpx/tpy
+      // while walking and pushes bufx/bufy outside the fixed
+      // sobj_bufsize[96][72] / sobj[][] arrays. Mirror the same guard
+      // already present at loop_client.cpp:6808 and function_client.cpp:529.
+      // Remove once DOB-P2+ replaces fixed 96x72 storage with a per-player
+      // Dynamic2DArray sized from viewTilesX/Y.
+      if ((bufx>=0)&&(bufx<96)&&(bufy>=0)&&(bufy<72)){
       if (i=tplayer->sobj_bufsize[bufx][bufy]){
         tp2=tplayer->sobj[bufx][bufy];
         for (i2=0;i2<i;i2++){
@@ -7383,6 +7392,7 @@ generatinggate0:;
           //flash_skip2:;
         }//i2
       }//i
+      }//bufx/bufy in-range
     }}//objbuffer end
 
 
@@ -7911,6 +7921,12 @@ onhorse_specialoffsetused:
     for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
       mapx=tpx+x-1; mapy=tpy+y-1; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
       x2=x-1; y2=y-1;
+      // DOB-P0.2 follow-up (crash at loop_client.cpp:7257, 2026-05-27):
+      // same sobj_bufoffx/y lag pattern, applied prophylactically to the
+      // floating-objbuffer pass which would have crashed identically on
+      // the next viewport size. See loop_client.cpp:6808 / 7257 /
+      // function_client.cpp:529 for the same guard.
+      if ((bufx>=0)&&(bufx<96)&&(bufy>=0)&&(bufy<72)){
       if (i=tplayer->sobj_bufsize[bufx][bufy]){
         tp2=tplayer->sobj[bufx][bufy];
         for (i2=0;i2<i;i2++){
@@ -7984,6 +8000,7 @@ flash_disable:
 flash_skip:;
         }//i2
       }//i
+      }//bufx/bufy in-range
     }}//objbuffer (floating) end
 
 

@@ -28,6 +28,9 @@ written by `MyUnhandledExceptionFilter` in `src/common/u6o7.cpp`) and produce:
 4. A note in any relevant planning doc under `docs/plan-*.md` if the crash
    matches a documented design issue (e.g. `docs/plan-dynamicObjectBuffer.md`
    already enumerates `loop_client.cpp:6825` as a known C0000005).
+5. A **post-fix crash report** in `tools/crash/crash-reports/` (see Step 0
+   and Step 10) so future runs of this agent can recognize and dedupe a
+   repeat of the same crash instead of "fixing" it a second time.
 
 Keep the user's compile/edit cycle fast: prefer in-place edits over long
 explanations, build only the targets you changed, and clean up scratch files
@@ -80,6 +83,45 @@ before finishing.
 
 Execute the steps in order. Skip a step only if its output is already in the
 conversation transcript.
+
+### Step 0 — Check the crash-reports archive for a known match
+
+Before doing any analysis, scan `tools/crash/crash-reports/` for prior fixes
+that already cover this crash. The goal is to avoid re-diagnosing (and
+re-"fixing") a bug that has a known root cause.
+
+```powershell
+# Quick header (exception code + address) from the new crash
+$header = Get-Content C:\repos\ultima-vi-online\tools\crash\crash.txt -ErrorAction SilentlyContinue
+$code   = ($header | Select-String 'Exception Code:').Line
+$addr   = ($header | Select-String 'Exception Address:').Line
+"$code`n$addr"
+
+# Search prior reports for the same exception code AND/OR address
+Get-ChildItem C:\repos\ultima-vi-online\tools\crash\crash-reports -Filter *.md -ErrorAction SilentlyContinue |
+  Select-String -Pattern '0xC0000005','loop_client.cpp:','<symbol-of-interest>' |
+  Format-Table Path, LineNumber, Line -AutoSize
+```
+
+Match criteria (in priority order):
+
+1. **Same `Exception Code` + same symbolicated `file:line`** → almost
+   certainly the same bug. If the prior report says `Status: Fixed` and the
+   shipped EXE is newer than the fix's commit/date, the user has likely
+   *regressed* the fix or is running a stale binary — surface that
+   immediately and stop. Don't re-implement the fix.
+2. **Same `Exception Code` + nearby file/line (±50 lines, same function)** →
+   probable variant. Cite the prior report, finish symbolicating to confirm,
+   and either extend the existing report ("Recurrence on YYYY-MM-DD") or
+   open a sibling report if the underlying cause is genuinely different.
+3. **Same `Exception Address` AND the EXE/PDB `LastWriteTime` from the prior
+   report is unchanged** → exact same build hit the exact same instruction.
+   Treat as a known issue and reference the prior report verbatim.
+4. **No match** → proceed with the normal workflow.
+
+If you find a match, jump straight to Step 9 and report what was found,
+what's already been done, and what the user should do next (rebuild,
+verify, escalate). Do **not** edit code or rebuild.
 
 ### Step 1 — Read the human-readable crash header
 
@@ -226,7 +268,89 @@ is newer than the crash. Pre-existing warnings (e.g. `C4731` on
 
 For host-side crashes, target `u6oh` instead.
 
-### Step 9 — Final report to the user
+### Step 9 — Write the post-fix crash report
+
+After the fix is in source and the binary rebuilt, record what happened in
+`tools/crash/crash-reports/` so the next invocation of this agent (Step 0)
+can dedupe a repeat submission.
+
+**File naming**: `YYYY-MM-DD_<exception-code>_<short-symbol>.md`, e.g.
+`2026-05-26_C0000005_loop_client-sobj_bufsize.md`. Use lowercase for the
+symbol, replace `::` with `-`, drop the `0x` from the exception code.
+If a report for the same `<exception-code>_<short-symbol>` already exists,
+append a "Recurrence" section to it instead of creating a new file.
+
+**Required template** (fill every section; leave `N/A` only when truly not
+applicable):
+
+```markdown
+# Crash Report — <one-line summary>
+
+- **Date analyzed**: YYYY-MM-DD
+- **Exception Code**: 0xXXXXXXXX (<human name, e.g. ACCESS_VIOLATION>)
+- **Exception Address (runtime)**: 0xXXXXXXXX
+- **EXE-relative RVA**: 0xXXXXXX
+- **Faulting symbol**: `Function + 0xNN` at `path/to/file.cpp:LINE`
+- **Build under test**:
+  - EXE: `bin/client/debug/Ultima VI Online.exe` (LastWriteTime: ...)
+  - PDB: `build/Ultima VI Online.pdb` (LastWriteTime: ...)
+- **Dump source**: `tools/crash/crash.dmp` (LastWriteTime: ...)
+- **Status**: Fixed | Mitigated | Open | Duplicate-of(<link>)
+
+## Stack (top frames, EXE only)
+
+| # | RVA | Symbol | file:line |
+|---|-----|--------|-----------|
+| 0 | 0x...| ... | ... |
+| 1 | 0x...| ... | ... |
+
+## Register evidence
+
+EIP, ESP, EBP plus the 1–2 registers that prove the diagnosis (e.g.
+`ECX=0, EAX=0` proving NULL-base 2D-array read). One short paragraph
+explaining how those values map to the faulting instruction.
+
+## Root cause
+
+One or two paragraphs. Name the invariant that was violated and the
+upstream reason it was violated.
+
+## Fix
+
+- File(s) changed: `src/.../foo.cpp` (lines AAA–BBB)
+- Change type: bounds guard | null check | init | refactor | other
+- Sibling pattern reused (if any): `src/.../bar.cpp:NNN`
+- Plan bridge (if any): `docs/plan-<name>.md` phase `XYZ-P0.2`
+
+## Verification
+
+- Rebuilt target: `u6oclient2` (or `u6oh`)
+- New EXE timestamp: ...
+- Smoke test: ... (or "user to verify by reproducing original walk path")
+
+## Recurrence log
+
+- YYYY-MM-DD — first occurrence (this report).
+```
+
+Save the file with `create_file` (or append to an existing one with
+`replace_string_in_file`). Then move the consumed `tools/crash/crash.dmp`
+and `tools/crash/crash.txt` aside so they don't get re-analyzed next
+session:
+
+```powershell
+$stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+New-Item -ItemType Directory -Force -Path C:\repos\ultima-vi-online\tools\crash\crash-reports\archive | Out-Null
+Move-Item C:\repos\ultima-vi-online\tools\crash\crash.dmp `
+          "C:\repos\ultima-vi-online\tools\crash\crash-reports\archive\crash_$stamp.dmp" -ErrorAction SilentlyContinue
+Move-Item C:\repos\ultima-vi-online\tools\crash\crash.txt `
+          "C:\repos\ultima-vi-online\tools\crash\crash-reports\archive\crash_$stamp.txt" -ErrorAction SilentlyContinue
+```
+
+Reference the archived dump's filename from the report's "Dump source"
+line so a future investigator can re-open the original artifact.
+
+### Step 10 — Final report to the user
 
 Always present:
 
@@ -241,6 +365,20 @@ Always present:
 - **Follow-ups** (e.g. "the long-term fix is `DOB-P2` — replacing the
   fixed `[96][72]` storage with per-player `Dynamic2DArray` sized from
   `viewTilesX/Y`").
+- **Crash report path** — the new (or updated) file under
+  `tools/crash/crash-reports/`, so the user can review and version-control
+  the diagnosis alongside the source fix.
+
+When Step 0 short-circuited the workflow (known crash), the final report
+must instead state:
+
+- Which prior crash-report file matched and why.
+- Whether the fix from that report is present in the currently-shipped
+  EXE (compare PDB timestamp + relevant source line content).
+- The single next action for the user: rebuild from the current source,
+  pull the latest source, or — if the fix really is in place and the
+  crash still happened — flag a regression and re-open the prior report
+  with a new "Recurrence" entry.
 
 ---
 
@@ -286,6 +424,11 @@ Always present:
   output format**; other tooling may scrape it.
 - `tools/symbolize.cpp` — DbgHelp symbolizer. Build with:
   `cl /nologo /EHsc /Fe:symbolize.exe symbolize.cpp dbghelp.lib`
+- `tools/crash/crash-reports/*.md` — one report per distinct root cause.
+  Always check (Step 0) before analysis and always write/append (Step 9)
+  after a fix. The folder is the project's deduplication memory.
+- `tools/crash/crash-reports/archive/` — consumed `crash.dmp` / `crash.txt`
+  pairs, timestamped, so reports stay linkable to original artifacts.
 - `docs/plan-*.md` — when a crash matches a documented plan, update
   that plan's "Session handoff" section with the new evidence
   (date, dump file, line) so the next plan-execution session has
