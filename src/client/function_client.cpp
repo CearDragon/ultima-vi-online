@@ -1,4 +1,5 @@
 #include "function_client.h"
+#include "viewport.h" // RW-P2: backbufferW/H, lightingStride, lightingTotalBytes
 //#include <windows.h>
 #pragma warning(disable: 4018 4244)
 void function_client_init(void){
@@ -246,9 +247,16 @@ void midiup(unsigned char instrument,unsigned char key){
 
 void LIGHTnew(unsigned short x,unsigned short y,unsigned long light_data_offset, unsigned short x_axis_size){
   if (timelval==0) return;
+  // RW-P2.3: read back-buffer dims through the viewport.h accessors so this
+  // function tracks the active back-buffer size when it eventually becomes
+  // dynamic. Today the accessors return the legacy 1024/768 constants and
+  // behavior is identical to the previous hard-coded literals.
   static long asm_copy_vc_bytesx,asm_copy_vc_sourceoffset,asm_copy_vc_destoffset,asm_copy_vc_sourceskip,asm_copy_vc_destskip,asm_copy_vc_rows;
   static long x2,y2,x3,y3,x4,y4;
   static long xoff,yoff;
+  const long bbW = backbufferW();
+  const long bbH = backbufferH();
+  const long lsStride = lightingStride();
   xoff=x-x_axis_size/2;
   xoff<<=5;
   yoff=y-x_axis_size/2;
@@ -258,17 +266,17 @@ void LIGHTnew(unsigned short x,unsigned short y,unsigned long light_data_offset,
   x3=0;//start source x offset
   x4=x_axis_size; //displayed "pixels" of x axis
   if (xoff<0){x4+=xoff; x2=0; x3=-xoff;}
-  if ((xoff+x_axis_size)>1024) x4-=xoff+x_axis_size-1024;
+  if ((xoff+x_axis_size)>bbW) x4-=xoff+x_axis_size-bbW;
   y2=yoff;//starting dest y offset
   y3=0;//starting source y offset
   y4=x_axis_size; //rows on screen
   if (yoff<0){y4+=yoff; y2=0; y3=-yoff;}
-  if ((yoff+x_axis_size)>768) y4-=yoff+x_axis_size-768;
+  if ((yoff+x_axis_size)>bbH) y4-=yoff+x_axis_size-bbH;
   asm_copy_vc_bytesx=x4;
   asm_copy_vc_sourceskip=x_axis_size-asm_copy_vc_bytesx;
-  asm_copy_vc_destskip=1024-asm_copy_vc_bytesx;
+  asm_copy_vc_destskip=lsStride-asm_copy_vc_bytesx;
   asm_copy_vc_sourceoffset=y3*x_axis_size+light_data_offset+x3;
-  asm_copy_vc_destoffset=(y2<<10)+(unsigned long)&ls+x2;
+  asm_copy_vc_destoffset=(y2*lsStride)+(unsigned long)ls+x2;
   asm_copy_vc_rows=y4;
   _asm{
     push esi
@@ -297,6 +305,144 @@ void LIGHTnew(unsigned short x,unsigned short y,unsigned long light_data_offset,
       pop esi
   }//_asm
 }//LIGHTnew
+
+
+// =====================================================================
+// RW-P2.2: backbuffer recreation. Called from the dirtyClientSize
+// handler in loop_client.cpp when the user resizes the window. Releases
+// and re-creates the `ps`/`ps3`/`ps5`
+// DirectDraw surfaces, re-allocates the lighting buffers, patches FRAME
+// pointers (vf, fs) that referenced the old `ps`, and clears the new
+// surface to black so unrendered regions don't show stale pixels.
+//
+// RW-P2.3-asm (2026-05-21) — HORIZONTAL GROWTH UNBLOCKED
+// sf32, sf32z, im32z (and g32, g32z) have been rewritten in function_client.h
+// as C++ loops that read d->d.lPitch at runtime, replacing the hard-rolled
+// inline-ASM bodies (fast3/4/5.asm etc.) that hard-coded +2048 between dest
+// rows. The newW > kBackbufferLegacyW clamp is now removed; the back-buffer
+// can grow horizontally up to kBackbufferMaxW.
+//
+// Height growth is also re-enabled. The world-tile renderer only writes into
+// the upper kBackbufferLegacyH rows; the new outer region starts as black
+// (cleared by cls() below) and remains black until RW-P4 expands the world
+// view. The lighting/stormcloak passes use lightingTotalBytes() / lightingStride()
+// so they follow any height change already.
+// =====================================================================
+namespace u6o { namespace client {
+bool recreateBackbuffers(int newW, int newH) {
+    // Clamp to [kBackbufferLegacy*, kBackbufferMax*].
+    if (newW < kBackbufferLegacyW) newW = kBackbufferLegacyW;
+    if (newH < kBackbufferLegacyH) newH = kBackbufferLegacyH;
+    if (newW > kBackbufferMaxW) newW = kBackbufferMaxW;
+    if (newH > kBackbufferMaxH) newH = kBackbufferMaxH;
+
+    if (newW == backbufferW() && newH == backbufferH()) {
+        return true; // already at requested size
+    }
+
+    // Whether the 32-bpp helper surface ps3 currently exists. It's
+    // only created on non-16bpp displays in setup_client.inc, so we
+    // re-create it only if it was there to begin with.
+    bool had_ps3 = (ps3 != NULL);
+
+    // Capture the OLD ps pointer so we can patch only FRAMEs that
+    // actually referenced it. fs (the full-screen intro/menu overlay)
+    // toggles its graphic between ps (during intros/menus) and NULL
+    // (gameplay). Re-attaching ps unconditionally during gameplay
+    // re-shows fs with offset_x=1024, and since fs->graphic == ps,
+    // the FRAME display loop copies ps onto itself shifted right by
+    // 1024 pixels — duplicating the rendered world side-by-side. See
+    // loop_client.cpp:2005,2203,2348 + loop_client.inc:938,1136,1281
+    // for the gameplay-time `fs->graphic = NULL` assignments.
+    surf* old_ps = ps;
+
+    // Release the old surfaces. `free(surf*)` calls ->Release() on
+    // the IDirectDrawSurface and frees the wrapper struct.
+    // NOTE: ps5 is intentionally NOT resized. It is used solely as a
+    // 768x768 scratch surface (24 tiles * 32px) for the minimap / gem
+    // peer view. The downstream call `img(ps6, ps5)` (and the analogous
+    // `img(minimaptilesurf, ps5)`) resamples the ENTIRE ps5 surface into
+    // a fixed-size destination cell, and the 60-px-per-cell layout in
+    // minimap_surf_new / minimap_frame->graphic only lines up when ps5
+    // has the original 1024x768 dimensions:
+    //     ps6   80x60: 768/1024 * 80 = 60, 768/768 * 60 = 60
+    //     mtile 80x60 (or 160x120 for minimaptype==1): same ratio
+    // Growing ps5 with the backbuffer shrinks the 24x24-tile content to
+    // only a fraction of each destination cell, producing the black gaps
+    // visible when a player uses a Gem on a resized window. Keeping ps5
+    // at its original size restores the legacy behavior on all window
+    // sizes (ps5 is never sampled by the main world view).
+    if (ps)       { free(ps);       ps  = NULL; }
+    if (ps3)      { free(ps3);      ps3 = NULL; }
+
+    // Re-create at the new size. Match the original setup_client.inc
+    // flag choices: ps is 16bpp sysmem; ps3 is 32bpp sysmem
+    // (used as the format-conversion target on non-16bpp displays).
+    ps = newsurf(newW, newH, SURF_SYSMEM16);
+    if (had_ps3) {
+        ps3 = newsurf(newW, newH, SURF_SYSMEM);
+    }
+
+    if (!ps || (had_ps3 && !ps3)) {
+        return false; // allocation failure — leave dims at old values
+    }
+
+    // Pitch sanity check: in debug builds, log if DD's reported row
+    // stride doesn't match `newW * 2` bytes. The original distortion
+    // bug was caused by the lighting buffer (`malloc`'d at exactly
+    // `newW * newH` bytes) and the surface's row stride disagreeing.
+    // Adopting DD's lPitch as the canonical width broke worse on the
+    // user's setup (produced duplicated/striped output), so we now
+    // just trust newW and rely on DD not padding 16bpp sysmem
+    // surfaces. Most widths divisible by 16 should be safe; logging
+    // helps diagnose if/when this assumption fails.
+#ifdef _DEBUG
+    {
+        long expectedPitch = (long)newW * 2;
+        if ((long)ps->d.lPitch != expectedPitch) {
+            char dbg[160];
+            wsprintfA(dbg,
+                "[u6o] recreateBackbuffers: dwWidth=%lu lPitch=%ld (expected %ld)\n",
+                (unsigned long)ps->d.dwWidth, (long)ps->d.lPitch, expectedPitch);
+            OutputDebugStringA(dbg);
+        }
+    }
+#endif
+
+    // Re-allocate the lighting buffers at the requested stride so the
+    // linear-walk inline asm in the lighting compose pass at
+    // loop_client.cpp:8294ff stays in lockstep with `ps->o`.
+    if (!lighting_alloc(newW, newH) || !visibility_alloc(newW, newH)) {
+        return false;
+    }
+
+    // Patch FRAME pointers that held a reference to the OLD ps.
+    // Critical: only patch if the FRAME was actually pointing at the
+    // old ps. fs->graphic is NULL during gameplay (the intro/menu
+    // logic clears it when the overlay is dismissed); patching it
+    // back to ps would revive a hidden overlay positioned at
+    // offset_x=1024 and produce the "world rendered twice
+    // side-by-side" duplication described in the resizable-window
+    // bug.png.
+    if (vf && vf->graphic == old_ps) vf->graphic = ps;
+    if (fs && fs->graphic == old_ps) fs->graphic = ps;
+
+    // Clear ps to black so the area outside the legacy 1024x768 (where
+    // the world tile renderer still draws) starts clean. The world
+    // overdraws the upper-left 1024x768 every frame; the new outer
+    // region is never written by the renderer, so without this you'd
+    // see whatever heap/DD memory happened to be there.
+    cls(ps, 0);
+    if (ps3) cls(ps3, 0);
+
+    // Publish the new dims. Done last so any concurrent reader on the
+    // same thread (we're single-threaded for graphics, but be careful
+    // anyway) sees consistent state: surfaces are valid before
+    // backbufferW()/H() return the new values.
+    set_active_backbuffer_dims(newW, newH);
+    return true;
+}
+}} // namespace u6o::client
 
 
 // s333 backup player mv info
@@ -1577,6 +1723,89 @@ getsetting_choice_nextchoice:
   return FALSE;
 }
 
+// Rewrites settings.txt in place, replacing (or appending) a single
+// `{NAME, [VALUE]}` integer entry. Preserves every other line.
+//
+// Read back with:
+//     txtset(GETSETTING_RAW, "");      // clear so absence is detectable
+//     getsetting(name);                // return value is ignored
+//     if (GETSETTING_RAW->l > 0) {
+//         long v = (long)txtnum(GETSETTING_RAW);
+//     }
+// getsetting() only populates GETSETTING_RAW when the named entry
+// exists in the file, so the explicit reset above is what distinguishes
+// "missing" from "present and zero".
+//
+// Failure modes are silent on purpose:
+//   - settings.txt missing: a fresh file is created with just the new line.
+//   - write failure: the previous file is left intact (the entire
+//     replacement content is buffered before the truncate-open).
+// Failing to persist UI state must never break the game session.
+void setsetting_int(const char* name, long value) {
+  static file *tfh;
+  static txt  *line=txtnew();
+  static txt  *out=txtnew();
+  static txt  *needle=txtnew();
+  static txt  *lowerline=txtnew();
+  static txt  *numbuf=txtnew();
+  static long i,sz;
+
+  txtNEWLEN(out,0);
+
+  // Build the prefix we recognize, e.g. "{window_maximized,". Comparison
+  // is case-insensitive — we lower a copy of each line and compare its
+  // leading bytes against `needle`.
+  txtset(needle,"{");
+  txtadd(needle,name);
+  txtadd(needle,",");
+  txtlcase(needle);
+
+  // -- Phase 1: read every line, drop any matching the key --
+  tfh=open2("settings.txt",OF_READ|OF_SHARE_COMPAT);
+  if (tfh->h!=HFILE_ERROR){
+    for (;;){
+      i=seek(tfh);
+      sz=lof(tfh);
+      if (i>=sz) break;
+      txtfilein(line,tfh);
+      if (line->l==0) continue;
+
+      txtset(lowerline,line);
+      txtlcase(lowerline);
+      bool match = false;
+      if (lowerline->l >= needle->l){
+        match = true;
+        for (long j=0;j<needle->l;j++){
+          if (lowerline->d[j] != needle->d[j]) { match = false; break; }
+        }
+      }
+      if (match) continue;  // drop existing entry; we'll re-append it
+
+      if (out->l) txtadd(out,"\r\n");
+      txtadd(out,line);
+    }
+    close(tfh);
+  }
+
+  // -- Phase 2: append the new entry --
+  if (out->l) txtadd(out,"\r\n");
+  txtadd(out,"{");
+  txtadd(out,name);
+  txtadd(out,", [");
+  txtnumint(numbuf,value);
+  txtadd(out,numbuf);
+  txtadd(out,"]}\r\n");
+
+  // -- Phase 3: truncate-write. OF_CREATE truncates on open per the
+  //    OpenFile() contract used throughout the project (see
+  //    e.g. loop_client.cpp:1986 userinfo.txt rewrite). --
+  tfh=open2("settings.txt",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
+  if (tfh->h!=HFILE_ERROR){
+    put(tfh,out->d,out->l);
+  }
+  close(tfh);
+}
+
 // rrr added new mode handling
 void refresh(){
 //  if (smallwindow){
@@ -1770,10 +1999,12 @@ void refresh(){
 	static unsigned long pebx,pecx;
 	pebx=(unsigned long)ps->o;
 	pecx=(unsigned long)ps3->o;
+	// RW-P2.3: route pixel count through viewport.h accessor.
+	unsigned long _pxCount = (unsigned long)lightingTotalBytes();
 	_asm{
 	  mov ebx,pebx
 	    mov ecx,pecx
-	    mov esi,786432
+	    mov esi,_pxCount
 	    p16to32:
 	    mov ax,[ebx]
 	    mov dx,ax
@@ -1934,20 +2165,20 @@ void newmodeinit() {
 	respn1m = resxn1m * resyn1m;
 
 	// s888 load startup mode
-	windowsizecyclenum = getsetting("WINDOW_MODE");
-	if (windowsizecyclenum == 1) {
-		smallwindow = FALSE;
-		windowsizecyclenum = 0;
-	} else if (windowsizecyclenum == 2) {
-		smallwindow = TRUE;
-		windowsizecyclenum = 0;
-	} else if (windowsizecyclenum == 3) {
-		smallwindow = TRUE;
-		windowsizecyclenum = 1;
-	} else {
-		smallwindow = FALSE;
-		windowsizecyclenum = 0;
-	}
+	// Option A (single-window-mode cleanup, 2026-05-20): the client now
+	// supports only Mode 1 (the main classic 1024x768 window, hWnd2). The
+	// legacy 512x384 small-classic mode (hWnd3) and the "N1 enhanced"
+	// alternate mode (hWnd4) have been removed from the runtime path. The
+	// WINDOW_MODE setting in settings.txt is therefore ignored. The flags
+	// below are still defined so existing references compile, but they are
+	// pinned to "main classic" and never change at runtime.
+	(void)getsetting("WINDOW_MODE"); // tolerate legacy setting without using it
+	smallwindow = FALSE;
+	windowsizecyclenum = 0;
+
+	// (Removed 2026-05-27: WINDOW_RESIZE setting + `windowResize` flag.
+	// The client is now always resizable / always-maximizable; the
+	// legacy fixed-1024x768 rendering path the flag gated is gone.)
 
 	/*
 		if (resysettingoption == 2) {
@@ -2028,12 +2259,13 @@ void newmodeinit() {
 	//pspartytemp=newsurf(256,256,SURF_SYSMEM16);
 	//pspartynew=newsurf(resxn1m,256,SURF_SYSMEM16);
 
-	static RECT clrect;
-	clrect.top = 0; clrect.left = 0; clrect.bottom = resyn1w; clrect.right = resxn1w;
-	AdjustWindowRect(&clrect, WS_OVERLAPPED | WS_CAPTION | WS_BORDER, FALSE);
-
-	hWnd4 = CreateWindow(szWindowClass, window_name, WS_OVERLAPPED | WS_CAPTION | WS_BORDER,
-		0, 0, clrect.right - clrect.left, clrect.bottom - clrect.top, NULL, NULL, hInst, NULL);
+	// Option A (2026-05-20): hWnd4 (the "N1 enhanced" alternate window) is
+	// no longer created — only Mode 1 / hWnd2 is used. Left as NULL so any
+	// stale reference fails fast in Debug rather than blitting to a bogus
+	// window. The N1 panel surfaces are still allocated below for now;
+	// they're harmless when the window that would display them no longer
+	// exists. A future cleanup sweep can remove them.
+	hWnd4 = NULL;
 
 	// s555
 	if (!enhanceclientn1) {

@@ -18,6 +18,11 @@
 #include "frame.h"
 #include "windows.h"
 
+#ifdef CLIENT
+// Pre-game splash screen helper (CLIENT only). See splash.h / splash.cpp.
+#include "../client/splash.h"
+#endif
+
 #ifdef CONSOLE
 #include <conio.h>
 #endif
@@ -155,6 +160,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					   int       nCmdShow)
 {
     SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
+
+#ifdef CLIENT
+    // Pre-game splash screen (CLIENT only — the dedicated host runs without
+    // any window). Displays an image from one of the default search paths
+    // (see splash.cpp::kDefaultSearchPaths) for kDefaultDurationMs (3s)
+    // before any heavy setup runs. All failure modes (missing image,
+    // GDI+ init failure, CreateWindow failure) still honor the duration
+    // contract so the game-start timing is predictable.
+    //
+    // The splash is suppressed for the dedicated host build path below
+    // (which is selected later via the "host" command line parameter or
+    // the CONSOLE define). If a future user wants to skip the splash for
+    // automated testing, gate this on a new command-line flag.
+    u6o::client::splash::Run(hInstance,
+                             u6o::client::splash::DefaultSearchPaths(),
+                             u6o::client::splash::kDefaultDurationMs);
+#endif
 
 	//temporary use variables
 	static long i=0,i2=0,i3=0,i4=0,i5=0,i6=0,i7=0,i8=0,i9=0;
@@ -295,6 +317,11 @@ delay_overprocess://check for messages again
 				put(tfh,&cltset,sizeof(client_settings));
 				close(tfh);
 			}
+			// WINDOW_MAXIMIZED / WINDOW_W / WINDOW_H / WINDOW_X / WINDOW_Y
+			// are written from inside the WM_DESTROY handler — see WndProc.
+			// They can't be written here because by the time GetMessage
+			// returns 0 (WM_QUIT) Windows has already destroyed hWnd, so
+			// GetWindowPlacement would fail.
 #endif
 
 #ifdef HOST
@@ -463,15 +490,26 @@ ATOM MyRegisterClass( HINSTANCE hInstance )
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= hInstance;
-	//wcex.hIcon		= LoadIcon(hInstance, (LPCTSTR)IDI_ULTIMATE);
-	wcex.hIcon		= LoadIcon(hInstance, (LPCTSTR)IDI_SMALL);
-
-
-	wcex.hCursor		= NULL; //LoadCursor(NULL, IDC_ARROW); //we use custom cursor
-	wcex.hbrBackground	= NULL; //(HBRUSH)(COLOR_WINDOW+1); //we use a custom refresh
-	wcex.lpszMenuName	= NULL;
-	wcex.lpszClassName	= szWindowClass;
-	wcex.hIconSm		= LoadIcon(hInstance, (LPCTSTR)IDI_SMALL);
+	// Icons come from the resource compiler (u6o7.rc.in -> generated
+	// u6o7.rc, see CMakeLists.txt icon pipeline). LoadImage with the
+	// system-metric size lets Windows pick the right sub-image from the
+	// multi-resolution ICO (16/20/24/32/40/48/64/96/128/256 px frames),
+	// so the title bar and the taskbar each get a crisp render at the
+	// active DPI without us hand-tuning anything.
+	wcex.hIcon   = (HICON)LoadImage(hInstance, MAKEINTRESOURCE(IDI_U6O7),
+	                                IMAGE_ICON,
+	                                GetSystemMetrics(SM_CXICON),
+	                                GetSystemMetrics(SM_CYICON),
+	                                LR_DEFAULTCOLOR | LR_SHARED);
+	wcex.hIconSm = (HICON)LoadImage(hInstance, MAKEINTRESOURCE(IDI_SMALL),
+	                                IMAGE_ICON,
+	                                GetSystemMetrics(SM_CXSMICON),
+	                                GetSystemMetrics(SM_CYSMICON),
+	                                LR_DEFAULTCOLOR | LR_SHARED);
+	wcex.hCursor       = NULL; // we use a custom cursor
+	wcex.hbrBackground = NULL; // we use a custom refresh
+	wcex.lpszMenuName  = NULL;
+	wcex.lpszClassName = szWindowClass;
 	return RegisterClassEx( &wcex );
 }
 
@@ -481,39 +519,88 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 	static RECT clrect;
 	hInst = hInstance;
 
-	if ((desktop_rect.right>1024)&&(desktop_rect.bottom>768)){
-		//create 1024x768 window with title bar
-		// rrr can't change this; it will be broken
-//		clrect.top=0; clrect.left=0; clrect.bottom=768; clrect.right=1024;
-		clrect.top = 0; clrect.left = 0; clrect.bottom = resyo; clrect.right = resxo;
-		AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,FALSE);
-		hWnd2 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,
-			0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
-	}else{
-
-		//create a 1024x768 window (not movable, full screen window)
-		hWnd2 = CreateWindow(szWindowClass,window_name,WS_POPUP,
-			0, 0, 1024, 768, NULL, NULL, hInstance, NULL);
-	}
-
-	clrect.top=0; clrect.left=0; clrect.bottom= resys; clrect.right= resxs;
-	AdjustWindowRect(&clrect,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,FALSE);
-
-	hWnd3 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPED|WS_CAPTION|WS_BORDER,
+	// Option A (single-window-mode cleanup, 2026-05-20):
+	//   - Mode 1 (main classic 1024x768, hWnd2) is the only window mode now.
+	//   - The desktop<=1024x768 WS_POPUP fullscreen fallback is gone; on a
+	//     too-small desktop the window will simply be partially off-screen
+	//     and the user can drag/resize it (we now have WS_THICKFRAME).
+	//   - hWnd3 (small classic 512x384) is no longer created.
+	//   - hWnd4 (N1 enhanced) is created (or rather, NOT created) over in
+	//     function_client.cpp's newmodeinit; it's pinned to NULL.
+	clrect.top = 0; clrect.left = 0; clrect.bottom = resyo; clrect.right = resxo;
+	// WS_OVERLAPPEDWINDOW = caption + sysmenu + thickframe + min/max boxes,
+	// giving the player full drag-resize, maximize, and minimize.
+	AdjustWindowRect(&clrect,WS_OVERLAPPEDWINDOW,FALSE);
+	hWnd2 = CreateWindow(szWindowClass,window_name,WS_OVERLAPPEDWINDOW,
 		0, 0, clrect.right-clrect.left,clrect.bottom-clrect.top, NULL, NULL, hInstance, NULL);
 
-	// rrr moved to newmodeinit
-	/*
-	static RECT clrect;
-	clrect.top = 0; clrect.left = 0; clrect.bottom = resyn1w; clrect.right = resxn1w;
-	AdjustWindowRect(&clrect, WS_OVERLAPPED | WS_CAPTION | WS_BORDER, FALSE);
-
-	hWnd4 = CreateWindow(szWindowClass, window_name, WS_OVERLAPPED | WS_CAPTION | WS_BORDER,
-		0, 0, clrect.right - clrect.left, clrect.bottom - clrect.top, NULL, NULL, hInstance, NULL);
-	*/
+	hWnd3 = NULL;
+	// hWnd4 set NULL in function_client.cpp newmodeinit.
 
 	hWnd=hWnd2;
-	ShowWindow(hWnd,nCmdShow);
+
+	// Restore the last session's window layout from settings.txt. We
+	// persist five integers in WM_DESTROY (see WndProc):
+	//   WINDOW_MAXIMIZED  - 1 if last session ended in maximized state.
+	//   WINDOW_X/Y/W/H    - the *restored* (non-maximized) rect.
+	// Reading order matters: position+size FIRST so a maximized window
+	// has a sensible un-maximize target, THEN ShowWindow with
+	// SW_SHOWMAXIMIZED if applicable.
+	//
+	// getsetting() only populates GETSETTING_RAW when the named key is
+	// found in the file, so we reset it before each call to
+	// distinguish "missing" from "present and zero" (first-run case).
+	//
+	// We also pre-check the file's existence: getsetting() opens via
+	// the legacy open() helper which pops up a MessageBox per call on
+	// missing-file, and we don't want first-run to fire five popups.
+	if (GetFileAttributesA("settings.txt") != INVALID_FILE_ATTRIBUTES) {
+		long savedX=0, savedY=0, savedW=0, savedH=0;
+		bool haveX=false, haveY=false, haveW=false, haveH=false;
+		txtset(GETSETTING_RAW, ""); getsetting("WINDOW_X");
+		if (GETSETTING_RAW->l > 0) { savedX = (long)txtnum(GETSETTING_RAW); haveX = true; }
+		txtset(GETSETTING_RAW, ""); getsetting("WINDOW_Y");
+		if (GETSETTING_RAW->l > 0) { savedY = (long)txtnum(GETSETTING_RAW); haveY = true; }
+		txtset(GETSETTING_RAW, ""); getsetting("WINDOW_W");
+		if (GETSETTING_RAW->l > 0) { savedW = (long)txtnum(GETSETTING_RAW); haveW = true; }
+		txtset(GETSETTING_RAW, ""); getsetting("WINDOW_H");
+		if (GETSETTING_RAW->l > 0) { savedH = (long)txtnum(GETSETTING_RAW); haveH = true; }
+
+		// Need all four to commit the move. Validate against the
+		// virtual screen so a window saved on a now-disconnected
+		// monitor doesn't open completely off-screen. We require the
+		// title bar to overlap the work area by at least 100 px in
+		// each dimension — otherwise fall back to the default rect.
+		if (haveX && haveY && haveW && haveH && savedW > 200 && savedH > 150) {
+			int vsLeft   = GetSystemMetrics(SM_XVIRTUALSCREEN);
+			int vsTop    = GetSystemMetrics(SM_YVIRTUALSCREEN);
+			int vsRight  = vsLeft + GetSystemMetrics(SM_CXVIRTUALSCREEN);
+			int vsBottom = vsTop  + GetSystemMetrics(SM_CYVIRTUALSCREEN);
+			bool onScreen =
+				(savedX + savedW) > (vsLeft + 100) &&
+				 savedX           < (vsRight - 100) &&
+				(savedY + savedH) > (vsTop + 100)  &&
+				 savedY           < (vsBottom - 100);
+			if (onScreen) {
+				SetWindowPos(hWnd, NULL,
+				             (int)savedX, (int)savedY,
+				             (int)savedW, (int)savedH,
+				             SWP_NOZORDER | SWP_NOACTIVATE);
+			}
+		}
+
+		int showCmd = nCmdShow;
+		txtset(GETSETTING_RAW, "");
+		getsetting("WINDOW_MAXIMIZED");
+		if (GETSETTING_RAW->l > 0 && (long)txtnum(GETSETTING_RAW) != 0) {
+			showCmd = SW_SHOWMAXIMIZED;
+		}
+		ShowWindow(hWnd, showCmd);
+	} else {
+		// First run (or settings.txt deleted): use the launcher-provided
+		// default; WM_DESTROY will create the file on this session's exit.
+		ShowWindow(hWnd, nCmdShow);
+	}
 
 	UpdateWindow(hWnd);
 
@@ -531,6 +618,50 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_KILLFOCUS:
 		break;
 	case WM_SETFOCUS:
+		break;
+
+	// RW-P1.2: enforce a sensible minimum client size when the window is
+	// resizable, so the renderer never has to cope with degenerate dims.
+	case WM_GETMINMAXINFO:
+		{
+			MINMAXINFO* mmi = (MINMAXINFO*)lParam;
+			// Approximate non-client overhead (frame + caption); good enough
+			// for a floor — Windows will refuse smaller drag-resizes.
+			const long minClientW = 800;
+			const long minClientH = 600;
+			const long ncxOverhead = GetSystemMetrics(SM_CXSIZEFRAME) * 2;
+			const long ncyOverhead = GetSystemMetrics(SM_CYSIZEFRAME) * 2 +
+			                         GetSystemMetrics(SM_CYCAPTION);
+			mmi->ptMinTrackSize.x = minClientW + ncxOverhead;
+			mmi->ptMinTrackSize.y = minClientH + ncyOverhead;
+		}
+		return 0;
+
+	// RW-P1.3: capture new client dimensions and signal the main loop to
+	// run its OnClientResized handling. Surfaces are NOT touched from in
+	// here — that work is deferred to the next tick of the main loop.
+	//
+	// Also drives the `nodisplay` flag from the actual window state so the
+	// game pauses while minimized and resumes on restore — without this,
+	// minimizing left the client frozen because the previous M-key handler
+	// was the only thing that ever cleared `nodisplay`.
+	case WM_SIZE:
+#ifdef CLIENT
+		if (wParam == SIZE_MINIMIZED) {
+			nodisplay = TRUE;
+		} else {
+			nodisplay = FALSE;
+		}
+#endif
+		if (wParam != SIZE_MINIMIZED) {
+			long newW = (long)LOWORD(lParam);
+			long newH = (long)HIWORD(lParam);
+			if (newW != clientW || newH != clientH) {
+				clientW = newW;
+				clientH = newH;
+				dirtyClientSize = true;
+			}
+		}
 		break;
 
 	case WM_KEYDOWN:
@@ -589,8 +720,20 @@ syskeyup:
 		break;
 
 	case WM_MOUSEMOVE:
-		mx=LOWORD(lParam);
-		my=HIWORD(lParam);
+		{
+			// Raw client-area pixel coordinates from Windows.
+			long raw_mx = (long)(short)LOWORD(lParam);
+			long raw_my = (long)(short)HIWORD(lParam);
+			// Translate from window-client space into source-surface space
+			// based on the current letterbox blit transform (set by refresh()).
+			if (blit_scale > 0.0) {
+				mx = (long)((raw_mx - blit_offx) / blit_scale);
+				my = (long)((raw_my - blit_offy) / blit_scale);
+			} else {
+				mx = raw_mx;
+				my = raw_my;
+			}
+		}
 		break;
 
 	case WM_CHAR:
@@ -681,6 +824,30 @@ syskeyup:
 		*/
 
 	case WM_DESTROY:
+#ifdef CLIENT
+		// Persist window placement to settings.txt while hWnd is still
+		// valid (the post-WM_QUIT shutdown block in _tWinMain runs AFTER
+		// Windows has destroyed the handle, so GetWindowPlacement would
+		// fail there). We capture the *restored* rect even when the
+		// window is currently maximized or minimized, so unmaximizing
+		// next session lands in the same spot the user last sized it.
+		{
+			WINDOWPLACEMENT wp; wp.length = sizeof(WINDOWPLACEMENT);
+			if (GetWindowPlacement(hWnd, &wp)) {
+				bool maximized =
+					(wp.showCmd == SW_SHOWMAXIMIZED) ||
+					((wp.showCmd == SW_SHOWMINIMIZED) &&
+					 ((wp.flags & WPF_RESTORETOMAXIMIZED) != 0));
+				setsetting_int("WINDOW_MAXIMIZED", maximized ? 1 : 0);
+				setsetting_int("WINDOW_X", (long)wp.rcNormalPosition.left);
+				setsetting_int("WINDOW_Y", (long)wp.rcNormalPosition.top);
+				setsetting_int("WINDOW_W",
+					(long)(wp.rcNormalPosition.right - wp.rcNormalPosition.left));
+				setsetting_int("WINDOW_H",
+					(long)(wp.rcNormalPosition.bottom - wp.rcNormalPosition.top));
+			}
+		}
+#endif
 		endprogram=TRUE;
 		PostQuitMessage(0);
 		break;

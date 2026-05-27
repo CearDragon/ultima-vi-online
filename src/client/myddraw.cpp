@@ -7,6 +7,7 @@
 #include "commdlg.h"
 // r999
 #include "define_both.h"
+#include "viewport.h" // RW-P2.4: backbufferW()/H() for blit_letterbox sanity check
 
 
 //darklight.cpp extern
@@ -30,6 +31,103 @@ extern double scalexm;
 extern double scaleym;
 extern unsigned int resxo;
 extern unsigned int resyo;
+
+// Letterbox blit transform globals (defined in globals.inc, declared in
+// data_both.h). refresh() updates these every frame so WndProc can translate
+// raw client-pixel mouse coordinates back into source-surface coordinates.
+extern long   blit_offx;
+extern long   blit_offy;
+extern double blit_scale;
+extern long   clientW;
+extern long   clientH;
+extern bool   dirtyClientSize;
+// (windowResize removed 2026-05-27 — always-on now.)
+
+// Blit the source-surface DC `srcdc` (size srcW x srcH) into window `hWndDst`
+// while preserving the source aspect ratio. Letterbox bars are filled black.
+// Also publishes the resulting transform via blit_offx/blit_offy/blit_scale
+// so mouse input maps back to source coordinates correctly.
+static void blit_letterbox(HWND hWndDst, HDC srcdc, long srcW, long srcH)
+{
+	// RW-P2.4: defensive check — the only surfaces we currently letterbox are
+	// back-buffer-sized (ps/psnew1/psnew1b), so srcW/srcH should equal the
+	// current viewport.h-published back-buffer size. If they ever diverge
+	// (e.g. someone passes a half-res or minimap surface), we want a loud
+	// warning in debug builds rather than silently producing the wrong
+	// blit_scale. In release builds this is a no-op so there's zero cost on
+	// the hot path.
+#ifdef _DEBUG
+	if (srcW != backbufferW() || srcH != backbufferH()) {
+		char dbgbuf[160];
+		wsprintfA(dbgbuf,
+			"[u6o] blit_letterbox: srcW/H=%ldx%ld != backbuffer=%dx%d\n",
+			srcW, srcH, backbufferW(), backbufferH());
+		OutputDebugStringA(dbgbuf);
+	}
+#endif
+	RECT cr;
+	GetClientRect(hWndDst, &cr);
+	long cW = cr.right  - cr.left;
+	long cH = cr.bottom - cr.top;
+	// Publish the live client dimensions for OnClientResized / debug logging
+	// (RW-P1.3). Use the raw GetClientRect values; clamping below is purely
+	// for the StretchBlt math that follows.
+	clientW = cW;
+	clientH = cH;
+	if (cW < 1) cW = 1;
+	if (cH < 1) cH = 1;
+
+	double sx = (double)cW / (double)srcW;
+	double sy = (double)cH / (double)srcH;
+	double s  = (sx < sy) ? sx : sy;
+	// Never upscale beyond native pixels. When the client area is larger than
+	// the source surface (e.g. the window was maximized), keep the game image
+	// at 1:1 zoom and let the extra space become black border. This preserves
+	// the original art scale instead of stretching it.
+	if (s > 1.0) s = 1.0;
+	if (s <= 0.0) s = 1.0;
+
+	long dstW = (long)(srcW * s + 0.5);
+	long dstH = (long)(srcH * s + 0.5);
+	long dstX = (cW - dstW) / 2;
+	long dstY = (cH - dstH) / 2;
+
+	HDC winhdc = GetDC(hWndDst);
+
+	// Letterbox bars (black). Only fill the bars that exist.
+	HBRUSH black = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	if (dstY > 0) {
+		RECT r = { 0, 0, cW, dstY };
+		FillRect(winhdc, &r, black);
+	}
+	if (dstY + dstH < cH) {
+		RECT r = { 0, dstY + dstH, cW, cH };
+		FillRect(winhdc, &r, black);
+	}
+	if (dstX > 0) {
+		RECT r = { 0, dstY, dstX, dstY + dstH };
+		FillRect(winhdc, &r, black);
+	}
+	if (dstX + dstW < cW) {
+		RECT r = { dstX + dstW, dstY, cW, dstY + dstH };
+		FillRect(winhdc, &r, black);
+	}
+
+	if (dstW == srcW && dstH == srcH) {
+		BitBlt(winhdc, dstX, dstY, srcW, srcH, srcdc, 0, 0, SRCCOPY);
+	} else {
+		SetStretchBltMode(winhdc, HALFTONE);
+		SetBrushOrgEx(winhdc, 0, 0, NULL);
+		StretchBlt(winhdc, dstX, dstY, dstW, dstH, srcdc, 0, 0, srcW, srcH, SRCCOPY);
+	}
+
+	ReleaseDC(hWndDst, winhdc);
+
+	// Publish transform for input mapping.
+	blit_offx  = dstX;
+	blit_offy  = dstY;
+	blit_scale = s;
+}
 
 
 
@@ -232,229 +330,24 @@ return;
 }
 
 // rrr refresh(surf* s)
+//
+// Option A (single-window-mode cleanup, 2026-05-20): the client now has only
+// one window (hWnd2 / hWnd) so refresh() collapses to a single
+// blit_letterbox call. The previous multi-branch implementation switched
+// between hWnd2 / hWnd3 / hWnd4 based on smallwindow + windowsizecyclenum
+// and recomputed scalexm/scaleym for mouse mapping. None of that is needed
+// any more — blit_letterbox already publishes blit_offx/offy/scale every
+// frame, and the WndProc mouse handler maps client coords back through
+// those globals.
 void refresh(surf* s)
 {
-static HDC winhdc,ddhdc;
-static RECT clrect,wrect; //,drect;
-static long x,x2,y;
-static HWND ohWnd;
-if (smallwindow){
-//switch to 512x384 window if not currently displayed
-/*
-if (hWnd != hWnd3) {
-ShowWindow(hWnd3, SW_SHOW);
-UpdateWindow(hWnd3);
-ShowWindow(hWnd2, SW_HIDE); //hide current window
-hWnd = hWnd3;
-}
-*/
-	
-	if (windowsizecyclenum == 0) {
-		if (hWnd != hWnd3) {
-			ShowWindow(hWnd3, SW_SHOW);
-			UpdateWindow(hWnd3);
-			//ShowWindow(hWnd2, SW_HIDE); //hide current window
-			ShowWindow(hWnd, SW_HIDE); //hide current window
-			hWnd = hWnd3;
-
-			resxz = resxs;
-			resyz = resys;
-			scalexm = (double)resxo / resxz;
-			scaleym = (double)resyo / resyz;
-		}
-	}
-	else if (windowsizecyclenum == 1) {
-		if (hWnd != hWnd4) {
-			ShowWindow(hWnd4, SW_SHOW);
-			UpdateWindow(hWnd4);
-			ShowWindow(hWnd, SW_HIDE); //hide current window
-			hWnd = hWnd4;
-
-			resxz = resxn1m;
-			resyz = resyn1m;
-			scalexm = (double)resxo / resxz;
-			scaleym = (double)resyo / resyz;
-		}
-	}
-
-
-// title bar window refresh
-GetWindowRect(hWnd,&wrect);
-GetClientRect(hWnd,&clrect);
-//resxz = clrect.right;
-//resyz = clrect.bottom;
-x=wrect.right-wrect.left; //full window width
-x2=(x-clrect.right)/2; //width of single border
-x=x2;
-y=(wrect.bottom-wrect.top)-clrect.bottom-x2;
-winhdc=GetWindowDC(hWnd);
-s->s->GetDC(&ddhdc);
-
-/*
-typedef struct BITMAPINFO656 {
-BITMAPINFOHEADER bmiHeader;
-DWORD red;
-DWORD green;
-DWORD blue;
-};
-
-static BITMAPINFO656 bmi;
-ZeroMemory(&bmi,sizeof(BITMAPINFO656));
-bmi.bmiHeader.biSize=sizeof(BITMAPINFO656);
-bmi.bmiHeader.biWidth=512;
-bmi.bmiHeader.biHeight=384;
-bmi.bmiHeader.biPlanes=1;
-bmi.bmiHeader.biBitCount=16;
-bmi.bmiHeader.biCompression=BI_BITFIELDS;
-bmi.bmiHeader.biSizeImage=0;
-bmi.bmiHeader.biXPelsPerMeter=0;
-bmi.bmiHeader.biYPelsPerMeter=0;
-bmi.bmiHeader.biClrUsed=0;
-bmi.bmiHeader.biClrImportant=0;
-bmi.red=0xF800;
-bmi.green=0x7E0;
-bmi.blue=0x1F;
-
-////
-SetDIBitsToDevice(
-  winhdc,                 // handle to DC
-  x,               // x-coord of destination upper-left corner
-  y,               // y-coord of destination upper-left corner 
-  512,           // source rectangle width
-  384,          // source rectangle height
-  0,                // x-coord of source lower-left corner
-  0,                // y-coord of source lower-left corner
-  0,         // first scan line in array
-  384,         // number of scan lines
-  s->o,     // array of DIB bits
-  (BITMAPINFO*)&bmi, // bitmap information
-  DIB_RGB_COLORS          // RGB or palette indexes
-);
-*/
-
-BitBlt(winhdc,x,y,s->d.dwWidth,s->d.dwHeight,ddhdc,0,0,SRCCOPY);
-
-s->s->ReleaseDC(ddhdc);
-ReleaseDC(hWnd,winhdc);
-return;
-
-
-}
-
-
-//switch to 1024x768 window if not currently displayed
-if (hWnd!=hWnd2){
-ShowWindow(hWnd2,SW_SHOW);
-UpdateWindow(hWnd2);
-//ShowWindow(hWnd3,SW_HIDE); //hide current window
-ShowWindow(hWnd, SW_HIDE); //hide current window
-hWnd=hWnd2;
-}
-//1024x768 title bar window refresh
-if ((desktop_rect.right>1024)&&(desktop_rect.bottom>768)){
-GetWindowRect(hWnd,&wrect);
-GetClientRect(hWnd,&clrect);
-x=wrect.right-wrect.left; //full window width
-x2=(x-clrect.right)/2; //width of single border
-x=x2;
-y=(wrect.bottom-wrect.top)-clrect.bottom-x2;
-winhdc=GetWindowDC(hWnd);
-s->s->GetDC(&ddhdc);
-BitBlt(winhdc,x,y,s->d.dwWidth,s->d.dwHeight,ddhdc,0,0,SRCCOPY);
-s->s->ReleaseDC(ddhdc);
-ReleaseDC(hWnd,winhdc);
-return;
-}
-//1024x768 full screen refresh
-
-/*
-static unsigned long screen_offset,buffer_offset;
-screen_offset=(unsigned long)vs->o;
-buffer_offset=(unsigned long)s->o;
-_asm{
-push esi
-push edi
-push ebx
-mov esi,buffer_offset
-mov edi,screen_offset
-sub edi,8
-mov ebx,buffer_offset
-add ebx,4
-sub ebx,8
-mov edx,screen_offset
-add edx,4
-sub edx,8
-push ebp
-mov ebp,196608
-refresh0:
-add ebx,8
-mov eax,[esi]
-add edi,8
-mov ecx,[ebx]
-add edx,8
-mov [edi],eax
-add esi,8
-mov [edx],ecx
-dec ebp
-jnz refresh0
-pop ebp
-pop ebx
-pop edi
-pop esi
-};
-*/
-
-/*
-typedef struct BITMAPINFO656 {
-BITMAPINFOHEADER bmiHeader;
-DWORD red;
-DWORD green;
-DWORD blue;
-};
-
-static BITMAPINFO656 bmi;
-ZeroMemory(&bmi,sizeof(BITMAPINFO656));
-bmi.bmiHeader.biSize=sizeof(BITMAPINFO656);
-bmi.bmiHeader.biWidth=1024;
-bmi.bmiHeader.biHeight=768;
-bmi.bmiHeader.biPlanes=1;
-bmi.bmiHeader.biBitCount=16;
-bmi.bmiHeader.biCompression=BI_BITFIELDS;
-bmi.bmiHeader.biSizeImage=0;
-bmi.bmiHeader.biXPelsPerMeter=0;
-bmi.bmiHeader.biYPelsPerMeter=0;
-bmi.bmiHeader.biClrUsed=0;
-bmi.bmiHeader.biClrImportant=0;
-bmi.red=0xF800;
-bmi.green=0x7E0;
-bmi.blue=0x1F;
-
-////BitBlt(winhdc,x,y,s->d.dwWidth,s->d.dwHeight,ddhdc,0,0,SRCCOPY);
-SetDIBitsToDevice(
-  winhdc,                 // handle to DC
-  0,               // x-coord of destination upper-left corner
-  0,               // y-coord of destination upper-left corner 
-  1024,           // source rectangle width
-  768,          // source rectangle height
-  0,                // x-coord of source lower-left corner
-  0,                // y-coord of source lower-left corner
-  0,         // first scan line in array
-  768,         // number of scan lines
-  s->o,     // array of DIB bits
-  (BITMAPINFO*)&bmi, // bitmap information
-  DIB_RGB_COLORS          // RGB or palette indexes
-);
-*/
-
-
-winhdc=GetWindowDC(hWnd);
-s->s->GetDC(&ddhdc);
-BitBlt(winhdc,0,0,s->d.dwWidth,s->d.dwHeight,ddhdc,0,0,SRCCOPY);
-s->s->ReleaseDC(ddhdc);
-ReleaseDC(hWnd,winhdc);
-
+	HDC ddhdc;
+	s->s->GetDC(&ddhdc);
+	blit_letterbox(hWnd, ddhdc, (long)s->d.dwWidth, (long)s->d.dwHeight);
+	s->s->ReleaseDC(ddhdc);
 
 }//refresh end
+
 
 
 //ebx/edi/esi are NOT backed up!!

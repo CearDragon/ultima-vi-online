@@ -5,6 +5,17 @@
 SCRLOG_FILEONLY=FALSE;
 JDISABLED=FALSE;
 
+// RW-P2.1: heap-allocate ls/ls_moon1..4 before any code touches them. The
+// moon-light populating loop further down (~line 623) and the
+// lighting-compose pass in loop_client.cpp both assume these are non-null
+// and sized to backbufferW()*backbufferH(). When the back buffer becomes
+// dynamic in P2.2, recreateBackbuffers() will call lighting_alloc() again
+// with the new dims.
+if (!lighting_alloc(backbufferW(), backbufferH()) || !visibility_alloc(backbufferW(), backbufferH())) {
+    MessageBox(NULL,"Failed to allocate lighting/visibility buffers","Ultima 6 Online",MB_OK);
+    exit(0);
+}
+
 
 GetWindowRect(GetDesktopWindow(),&desktop_rect);
 if (!NEThost){
@@ -45,7 +56,17 @@ ps4=newsurf(resxo/2,resyo/2,SURF_SYSMEM16); //to temporarily convert to 16bit?
 }else{
 ps2=newsurf(resxo/2,resyo/2,SURF_SYSMEM16);
 }
-ps5=newsurf(resxo,resyo,SURF_SYSMEM16); //unconverted mimimap
+// ps5 MUST stay at 1024x768 regardless of the (possibly resized) backbuffer
+// size. It is a scratch surface for the minimap / Gem peer view: the world
+// draw fills its top-left 768x768 (24 tiles * 32px) and then img()
+// resamples the WHOLE surface into a fixed-size destination cell. The
+// 60-px-per-cell layout only lines up when the source is 1024x768
+// (768/1024*80 = 60 wide, 768/768*60 = 60 tall, matching the cell stride).
+// Allocating ps5 at resxo x resyo would shrink the rendered content to a
+// fraction of each cell on resized windows, producing black gaps in the
+// gem birds-eye view. recreateBackbuffers() also intentionally leaves ps5
+// alone for the same reason.
+ps5=newsurf(1024,768,SURF_SYSMEM16); //unconverted mimimap (fixed size; see comment above)
 ps6=newsurf(80,60,SURF_SYSMEM16); //convert to minimap size
 ps7=newsurf(120,120,SURF_SYSMEM16); //unconverted treasuremap
 ps8=newsurf(240,240,SURF_SYSMEM16); //convert to treasuremap size
@@ -432,7 +453,7 @@ vf=FRMnew(); vf->graphic=ps; vf->graphic_use0pixel=TRUE; vf->move=FALSE;
 
 inpf=FRMnew();
 inpf->graphic=getportrait(198);
-inpf->offset_x=256+2048;
+inpf->offset_x=256+kPanelHideDeltaX;
 inpf->offset_y=576;
 inpf->no_focus=TRUE;
 inpftxt=txtnew();
@@ -517,14 +538,14 @@ if (i2=getsetting("VOLUMECONTROL_TRANSPARENCYLEVEL")) volcontrol->mouse_over_tra
 
 musickeyboard=FRMnew();
 musickeyboard->graphic=loadimage(".\\dr\\keyb.bmp",SURF_SYSMEM16);
-musickeyboard->offset_x=176+2048; musickeyboard->offset_y=677;
-musickeyboard->graphic_use0pixel=TRUE; 
+musickeyboard->offset_x=176+kPanelHideDeltaX; musickeyboard->offset_y=677;
+musickeyboard->graphic_use0pixel=TRUE;
 musickeyboard->mouse_over_transparent=TRUE;
 if (i2=getsetting("PLAYINSTRUMENTPIANOKEYS_TRANSPARENCYLEVEL")) musickeyboard->mouse_over_transparent=i2-1;
 
 voicechat_frame=FRMnew();
 voicechat_frame->graphic=newsurf(395,18,SURF_SYSMEM16);
-voicechat_frame->offset_x=314+2048;
+voicechat_frame->offset_x=314+kPanelHideDeltaX;
 voicechat_frame->offset_y=711;
 img(voicechat_frame->graphic,0,0,voicechat_voicebar);
 
@@ -539,7 +560,7 @@ if (i2=getsetting("STATUSMESSAGE_VIEWPREVIOUSBOX_TRANSPARENCYLEVEL")) statusmess
 
 statusmessage_viewnpc=FRMnew();
 statusmessage_viewnpc->graphic=viewnpc_temp;
-statusmessage_viewnpc->offset_x=424+2048;
+statusmessage_viewnpc->offset_x=424+kPanelHideDeltaX;
 statusmessage_viewnpc->offset_y=112;
 statusmessage_viewnpc->graphic_use0pixel=TRUE;
 
@@ -771,11 +792,19 @@ u6omidivolume=cltset2.u6omidivolume;
 u6ovoicevolume=cltset2.u6ovoicevolume;
 memcpy(&spellrecall_partymember,&cltset2.spellrecall_partymember,8);
 memcpy(&spellrecall_i,&cltset2.spellrecall_i,8);
-if (cltset2.musickeyboard_offset_x!=32767){musickeyboard->offset_x=cltset2.musickeyboard_offset_x+2048; musickeyboard->offset_y=cltset2.musickeyboard_offset_y;}
-if (cltset2.inpf_offset_x!=32767){inpf->offset_x=cltset2.inpf_offset_x+2048; inpf->offset_y=cltset2.inpf_offset_y;}
+if (cltset2.musickeyboard_offset_x!=32767){musickeyboard->offset_x=cltset2.musickeyboard_offset_x+kPanelHideDeltaX; musickeyboard->offset_y=cltset2.musickeyboard_offset_y;}
+if (cltset2.inpf_offset_x!=32767){inpf->offset_x=cltset2.inpf_offset_x+kPanelHideDeltaX; inpf->offset_y=cltset2.inpf_offset_y;}
 if (cltset2.con_frm_offset_x!=32767){con_frm->offset_x=cltset2.con_frm_offset_x; con_frm->offset_y=cltset2.con_frm_offset_y;}
-if (cltset2.volcontrol_offset_x!=32767){volcontrol->offset_x=cltset2.volcontrol_offset_x; volcontrol->offset_y=cltset2.volcontrol_offset_y;}
-if (cltset2.qkstf_offset_x!=32767){qkstf->offset_x=cltset2.qkstf_offset_x; qkstf->offset_y=cltset2.qkstf_offset_y;}
+if (cltset2.volcontrol_offset_x!=32767){volcontrol->offset_x=cltset2.volcontrol_offset_x; volcontrol->offset_y=cltset2.volcontrol_offset_y;
+  u6o::client::g_volcontrol_user_positioned = true;
+  u6o::client::g_volcontrol_user_x = cltset2.volcontrol_offset_x;
+  u6o::client::g_volcontrol_user_y = cltset2.volcontrol_offset_y;
+}
+if (cltset2.qkstf_offset_x!=32767){qkstf->offset_x=cltset2.qkstf_offset_x; qkstf->offset_y=cltset2.qkstf_offset_y;
+  u6o::client::g_qkstf_user_positioned = true;
+  u6o::client::g_qkstf_user_x = cltset2.qkstf_offset_x;
+  u6o::client::g_qkstf_user_y = cltset2.qkstf_offset_y;
+}
 memcpy(&cltset,&cltset2,sizeof(client_settings));
 }else{
 //set default/unknown(32767) values
@@ -842,6 +871,16 @@ U6O_WALKTHRU_REC=TRUE;
 }
 
 scrlog("Beginning main loop!");
+
+// RW-P3.3: snap the five anchored panels (con_frm, con_frm_img, qkstf,
+// volcontrol, statusmessage_viewprev) to their UiPlacement-resolved
+// positions. We anchor against the back-buffer size, NOT the
+// client-window size: panels draw onto `ps` which is currently pinned
+// at 1024x768 regardless of window size. Anchoring to clientW/H here
+// would push panels off the back-buffer edge into the letterbox bars
+// where they can't render. (windowResize gate removed 2026-05-27 —
+// always run.)
+RepositionAnchoredPanels(backbufferW(), backbufferH());
 
 tfh=open(".\\dr\\objfixed.bin"); get(tfh,&objfixed_index,2048*1024*2); get(tfh,&objfixed_type,65536*2); close(tfh);
 //scrlog(">Fixed map objects loaded [objfixed.bin]");

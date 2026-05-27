@@ -1,3 +1,85 @@
+#include "ui_layout.h"
+// Override slot-coordinate macros to use kEquipSlotLayout for RW-P3.4 implementation
+#ifdef helmx
+#undef helmx
+#endif
+#define helmx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Helm].x
+
+#ifdef helmy
+#undef helmy
+#endif
+#define helmy u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Helm].y
+
+#ifdef wep_rightx
+#undef wep_rightx
+#endif
+#define wep_rightx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::WepRight].x
+
+#ifdef wep_righty
+#undef wep_righty
+#endif
+#define wep_righty u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::WepRight].y
+
+#ifdef wep_leftx
+#undef wep_leftx
+#endif
+#define wep_leftx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::WepLeft].x
+
+#ifdef wep_lefty
+#undef wep_lefty
+#endif
+#define wep_lefty u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::WepLeft].y
+
+#ifdef armourx
+#undef armourx
+#endif
+#define armourx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Armour].x
+
+#ifdef armoury
+#undef armoury
+#endif
+#define armoury u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Armour].y
+
+#ifdef bootsx
+#undef bootsx
+#endif
+#define bootsx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Boots].x
+
+#ifdef bootsy
+#undef bootsy
+#endif
+#define bootsy u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Boots].y
+
+#ifdef ring_rightx
+#undef ring_rightx
+#endif
+#define ring_rightx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::RingRight].x
+
+#ifdef ring_righty
+#undef ring_righty
+#endif
+#define ring_righty u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::RingRight].y
+
+#ifdef ring_leftx
+#undef ring_leftx
+#endif
+#define ring_leftx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::RingLeft].x
+
+#ifdef ring_lefty
+#undef ring_lefty
+#endif
+#define ring_lefty u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::RingLeft].y
+
+#ifdef neckx
+#undef neckx
+#endif
+#define neckx u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Neck].x
+
+#ifdef necky
+#undef necky
+#endif
+#define necky u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Neck].y
+
 if (wheel_move){
   if (wheel_move>0){
     wheel_move--;
@@ -937,8 +1019,61 @@ if (!NEThost) {
   if (lastsecond==-1) lastsecond=ett; x=ett; //detect frame rate
   if (x!=lastsecond){
     lastsecond=x; framerate=framecount; framecount=0;
+#ifdef _DEBUG
+    // RW-P0.2: per-second client-metrics log to make it easy to verify
+    // window-resize plumbing during development. Cheap (one OutputDebugString
+    // per second) and Debug-only so it never ships to release builds.
+    {
+      char dbgbuf[256];
+      _snprintf(dbgbuf, sizeof(dbgbuf),
+        "[u6o] client=%ldx%ld src=%ux%u blit_off=%ld,%ld blit_scale=%.3f "
+        "wsc=%u smallwin=%d hWnd=%p\n",
+        clientW, clientH, resxo, resyo,
+        blit_offx, blit_offy, blit_scale,
+        windowsizecyclenum, (int)smallwindow,
+        (void*)hWnd);
+      dbgbuf[sizeof(dbgbuf)-1] = '\0';
+      OutputDebugStringA(dbgbuf);
+    }
+#endif
   }
   framecount++;
+}
+
+// RW-P1.4: react to WM_SIZE-driven client-area changes outside of WndProc.
+// At this point the renderer is unchanged (back buffer is still 1024x768),
+// so the only useful work this hook does today is give the rest of the
+// codebase one well-defined seam through which all future surface/UI
+// re-layout work in RW-P2..RW-P4 will be plumbed.
+if (dirtyClientSize) {
+  dirtyClientSize = false;
+  // refresh()/blit_letterbox already recomputes blit_offx/offy/scale every
+  // frame from GetClientRect, so input mapping stays correct without any
+  // extra work here. Reserved for future surface recreation (RW-P2.2) and
+  // UI anchor recomputation (RW-P3.3).
+  // RW-P2.2: ask the viewport seam to re-create back buffers at the new
+  // client size, then reposition anchored UI panels. (windowResize gate
+  // removed 2026-05-27 — always-on.)
+  recreateBackbuffers((int)clientW, (int)clientH);
+  // RW-P3.3: re-anchor the five static UI panels. NOTE: until P2.2
+  // grows the back buffer with the window, panels must anchor against
+  // the back-buffer dimensions, not the client-window dimensions ?
+  // they draw onto `ps` which is still 1024x768 regardless of how
+  // big the window has become. Anchoring to clientW/H would push
+  // panels off the back-buffer edge and they'd disappear behind the
+  // letterbox bars. Once the back buffer follows clientW/H, this can
+  // change to clientW/clientH for true edge-following.
+  RepositionAnchoredPanels(backbufferW(), backbufferH());
+#ifdef _DEBUG
+  {
+    char dbgbuf[160];
+    _snprintf(dbgbuf, sizeof(dbgbuf),
+      "[u6o] OnClientResized: %ldx%ld\n",
+      clientW, clientH);
+    dbgbuf[sizeof(dbgbuf)-1] = '\0';
+    OutputDebugStringA(dbgbuf);
+  }
+#endif
 }
 
 // rrr moved fix mouse logic to (near) top of source file
@@ -1040,11 +1175,18 @@ checkobj:
       FRM_type=(FRM_TYPE*)FRM_type->next; goto checkobj;
     }
 
-	// r222 this is where mouse click is checked! no changes are made here
+    // r222 this is where mouse click is checked! no changes are made here
 
     pn->mouse_over=TRUE;
-    pn->mouse_x=mx-pn->offset_x;
-    pn->mouse_y=my-pn->offset_y;
+    if (pn == vf && tplay && tplay->x) {
+      long tpx_legacy, tpy_legacy;
+      getscreenoffset_legacy(tplay->x, tplay->y, &tpx_legacy, &tpy_legacy);
+      pn->mouse_x = (short)((tpx - tpx_legacy) * 32 + (mx - pn->offset_x));
+      pn->mouse_y = (short)((tpy - tpy_legacy) * 32 + (my - pn->offset_y));
+    } else {
+      pn->mouse_x=mx-pn->offset_x;
+      pn->mouse_y=my-pn->offset_y;
+    }
 
 
     if (mbclick&1) pn->mouse_click|=1;
@@ -1238,6 +1380,24 @@ if (drg!=NULL){ //drag panel
       FRAME_drg_begin=TRUE;
       drg->offset_x+=x;
       drg->offset_y+=y;
+      // RW: a real user drag of qkstf/volcontrol flips them into
+      // "user-positioned" mode so RepositionAnchoredPanels stops
+      // snapping them back to the anchored default on resize / show
+      // toggle, and the per-frame cltset mirror starts persisting the
+      // chosen offset to settings.bin. The cache is updated here
+      // (from the post-drag, pre-clamp value) — NEVER from the
+      // per-frame auto-clamp — so a far-right position saved while
+      // maximized survives a session that opens at the default size.
+      if (drg == qkstf) {
+        u6o::client::g_qkstf_user_positioned = true;
+        u6o::client::g_qkstf_user_x = drg->offset_x;
+        u6o::client::g_qkstf_user_y = drg->offset_y;
+      }
+      if (drg == volcontrol) {
+        u6o::client::g_volcontrol_user_positioned = true;
+        u6o::client::g_volcontrol_user_x = drg->offset_x;
+        u6o::client::g_volcontrol_user_y = drg->offset_y;
+      }
     }
   }
 }
@@ -3014,55 +3174,32 @@ intro_done:
     exitrequest=TRUE;
   }
 
-  if ((NEThost)&&(host_minimize)){host_minimize=FALSE; goto host_minimize_goto;}
-  if (u6okeyhit(U6OK_MAXMIN)){ //"M" maximize/minimize/mini_window
-    if ((smallwindow==FALSE)&&(nodisplay==FALSE)&&NEThost){
-host_minimize_goto:
-      nodisplay=TRUE;
-      ShowWindow(hWnd2,SW_MINIMIZE);
-      for (i=0;i<=65535;i++) keyon[i]=FALSE;
-      goto maxminmini;
-    }
-
-	// rrr cycle through resolution modes; added the new resolution mode into the cycle
-	if (enhanceclientn1) { // s555
-		if ((smallwindow == TRUE) && (nodisplay == FALSE)) {
-			windowsizecyclenum++;
-			if (windowsizecyclenum > windowsizecyclemax) {
-				windowsizecyclenum = 0;
-			}
-			else {
-				for (i = 0; i <= 65535; i++) keyon[i] = FALSE;
-				goto maxminmini;
-			}
-		}
-	}
-
-    if ((smallwindow==FALSE)&&(nodisplay==FALSE)){
-      smallwindow=TRUE;
-      for (i=0;i<=65535;i++) keyon[i]=FALSE;
-      goto maxminmini;
-    }
-    if (nodisplay==TRUE){
-      //nodisplay_maximize:
-      nodisplay=FALSE;
-      ShowWindow(hWnd3,SW_SHOW);
-      smallwindow=TRUE;
-      for (i=0;i<=65535;i++) keyon[i]=FALSE;
-      goto maxminmini;
-    }
-    smallwindow=FALSE;
+  if ((NEThost)&&(host_minimize)){
+    // Programmatic minimize from host startup (or anywhere else that sets
+    // the host_minimize flag). The actual `nodisplay` toggle is now driven
+    // by WM_SIZE in WndProc, so all this needs to do is ask Windows to
+    // minimize the window ? restore via the taskbar will resume the game.
+    host_minimize=FALSE;
+    ShowWindow(hWnd2,SW_MINIMIZE);
     for (i=0;i<=65535;i++) keyon[i]=FALSE;
   }
+  // Option A follow-up (2026-05-20): the "M" / U6OK_MAXMIN hotkey is
+  // removed entirely. Its previous behavior (cycle through window modes)
+  // is meaningless now that only one mode exists, and the simplified
+  // "minimize on M" version had a bug where pressing M to minimize froze
+  // the game because nothing reset `nodisplay` on restore. Standard
+  // window chrome (minimize button, taskbar) is the supported way to
+  // minimize/restore ? that path is wired through WM_SIZE in WndProc.
+  // The U6OK_MAXMIN keybinding in setup_client.inc is left in place but
+  // is no longer consulted anywhere in the main loop.
 maxminmini:
 
 
   if (u6okeyhit(U6OK_SOUND)){ //"S" sound on/off
-    if (volcontrol->offset_x>=1024){
-      volcontrol->offset_x-=2048;
-    }else{
-      volcontrol->offset_x+=2048;
-    }
+    // (windowResize gate removed 2026-05-27 — always toggle the volume
+    // panel visibility; the legacy slide-off-screen path is gone.)
+    u6o::client::g_volcontrol_visible = !u6o::client::g_volcontrol_visible;
+    RepositionAnchoredPanels(backbufferW(), backbufferH());
   }
 
   if (volcontrol->mouse_over){
@@ -3224,7 +3361,7 @@ userkey_cancel:
     txtNEWLEN(inpf2->input,0);
     inpf2->enterpressed=NULL;
     GETINPUT_txt=NULL;
-    if (inpf->offset_x<1024) inpf->offset_x+=2048;
+    if (inpf->offset_x<kPanelHideThresholdX) inpf->offset_x+=kPanelHideDeltaX;
     if (inprec){
       txtset(t,"?"); t->d2[0]=20; NET_send(NETplayer,NULL,t); //typing... cancel
     }
@@ -3336,7 +3473,7 @@ inpf_scroll_failed:
         inpmess_selected=-1;
         txtNEWLEN(inpf2->input,0);
         inpf2->enterpressed=NULL;
-        if (inpf->offset_x<1024) inpf->offset_x+=2048;
+        if (inpf->offset_x<kPanelHideThresholdX) inpf->offset_x+=kPanelHideDeltaX;
         inprec=0;
         GETINPUT_txt=NULL;
         txtset(t2,"?"); t2->d2[0]=7; //message type 7
@@ -3504,7 +3641,7 @@ inpf_scroll_failed:
       //begin recording
       voicechat_recording=1;
       voicechat_recordtime=0.0f;
-      if (voicechat_frame->offset_x>=1024) voicechat_frame->offset_x-=2048;
+      if (voicechat_frame->offset_x>=kPanelHideThresholdX) voicechat_frame->offset_x-=kPanelHideDeltaX;
       img(voicechat_frame->graphic,0,0,voicechat_voicebar);
 
       voicechat_listeningplayers=FALSE;//must be validated by returned message
@@ -3565,7 +3702,7 @@ inpf_scroll_failed:
   if (voicechat_recording){
     if (u6okeyon(U6OK_VOICECHAT)==FALSE){
       voicechat_recording=0;
-      if (voicechat_frame->offset_x<1024) voicechat_frame->offset_x+=2048;
+      if (voicechat_frame->offset_x<kPanelHideThresholdX) voicechat_frame->offset_x+=kPanelHideDeltaX;
       if (voicechat_recordtime>3.0f){//recording has exceeded maximum allowable time!
         if(mciSendCommand(wDeviceID,MCI_CLOSE,MCI_WAIT,NULL)) exit(6);
 
@@ -3691,7 +3828,7 @@ dglobal:
 		}
 
         GETINPUT_setup(inpf2->input,&inpf2->enterpressed,inpf2->length_limit);
-        if (inpf->offset_x>=1024) inpf->offset_x-=2048;
+        if (inpf->offset_x>=kPanelHideThresholdX) inpf->offset_x-=kPanelHideDeltaX;
 
         if (tplay->party[0]){
           tnpc=(npc*)tplay->party[0]->more;
@@ -3838,7 +3975,7 @@ inpmess_skip: txtset(t,"?"); t->d2[0]=20; NET_send(NETplayer,NULL,t); //typing..
       }
       txtNEWLEN(inpf2->input,0);
       inpf2->enterpressed=NULL;
-      if (inpf->offset_x<1024) inpf->offset_x+=2048;
+      if (inpf->offset_x<kPanelHideThresholdX) inpf->offset_x+=kPanelHideDeltaX;
       inprec=0;
     }
     if (deadglobalmessage) {deadglobalmessage=0; goto deadglobalmessage_return;}
@@ -5012,9 +5149,9 @@ dbg1:
 
 
 
-            if (party_spellbook_frame[i2]->offset_x>1024) party_spellbook_frame[i2]->offset_x-=2048;
+            if (party_spellbook_frame[i2]->offset_x>kPanelHideThresholdX) party_spellbook_frame[i2]->offset_x-=kPanelHideDeltaX;
           }else{
-            if (party_spellbook_frame[i2]->offset_x<1024) party_spellbook_frame[i2]->offset_x+=2048;
+            if (party_spellbook_frame[i2]->offset_x<kPanelHideThresholdX) party_spellbook_frame[i2]->offset_x+=kPanelHideDeltaX;
           }
 
           //check spellbookpage! (if invalid select first spellbook page only!)
@@ -5414,7 +5551,7 @@ isplayingwait3: if (u6omidi->IsPlaying()==S_OK) goto isplayingwait3;
         if (clientinstrument==3) STATUSMESSadd("You begin playing the panpipes. (Press ESC when finished)");
         if (clientinstrument==4) STATUSMESSadd("You begin playing the xylophone. (Press ESC when finished)");
 
-        if (musickeyboard->offset_x>=1024) musickeyboard->offset_x-=2048;
+        if (musickeyboard->offset_x>=kPanelHideThresholdX) musickeyboard->offset_x-=kPanelHideDeltaX;
         goto CLIENT_donemess;
       }//24
 
@@ -5442,7 +5579,7 @@ isplayingwait3: if (u6omidi->IsPlaying()==S_OK) goto isplayingwait3;
           if (clientinstrument==4) STATUSMESSadd("You finish playing the xylophone.");
 
           playinstrument=0;
-          if (musickeyboard->offset_x<1024) musickeyboard->offset_x+=2048;
+          if (musickeyboard->offset_x<kPanelHideThresholdX) musickeyboard->offset_x+=kPanelHideDeltaX;
         }
         goto CLIENT_donemess;
       }//29
@@ -5484,6 +5621,8 @@ scene_update_message:
 
         x=tplayer->x; y=tplayer->y;
 
+        static long tpx_legacy, tpy_legacy;
+        getscreenoffset_legacy(x,y,&tpx_legacy,&tpy_legacy);
         getscreenoffset(x,y,&tpx,&tpy);
 
 
@@ -5491,7 +5630,7 @@ scene_update_message:
         ctpx=tpx; ctpy=tpy;
 
         //screen+1 shift
-        x3=tpx-1; y3=tpy-1; x4=tpx+32; y4=tpy+24;
+        x3=tpx_legacy-1; y3=tpy_legacy-1; x4=tpx_legacy+32; y4=tpy_legacy+24;
         x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
         //i. if the screen+1 buffer fits within buffer don't relocate
         if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -5505,7 +5644,7 @@ scene_update_message:
         if (y3>y6) i=1;
         if (i){
           ZeroMemory(&tplayer->sobj_bufsize,96*72*2); ZeroMemory(&tplayer->sobj_tempfixed,96*72*4);
-          tplayer->sobj_bufoffx=tpx-32; tplayer->sobj_bufoffy=tpy-24;
+          tplayer->sobj_bufoffx=tpx_legacy-32; tplayer->sobj_bufoffy=tpy_legacy-24;
           goto screen1shiftokc;
         }
         //iii. relocate screen+1 buffer
@@ -5561,7 +5700,7 @@ screen1shiftokc:;
 
         if (BITSget(t,&bitsi,1)){//obj buffer has changed
           //screen+8 shift
-          x3=tpx-8; y3=tpy-8; x4=tpx+32+8-1; y4=tpy+24+8-1;
+          x3=tpx_legacy-8; y3=tpy_legacy-8; x4=tpx_legacy+32+8-1; y4=tpy_legacy+24+8-1;
           x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
           //i. if the screen+8 buffer fits within buffer don't relocate
           if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -5575,7 +5714,7 @@ screen1shiftokc:;
           if (y3>y6) i=1;
           if (i){
             ZeroMemory(&tplayer->sobj_bufsize,96*72*2); ZeroMemory(&tplayer->sobj_tempfixed,96*72*4);
-            tplayer->sobj_bufoffx=tpx-32; tplayer->sobj_bufoffy=tpy-24;
+            tplayer->sobj_bufoffx=tpx_legacy-32; tplayer->sobj_bufoffy=tpy_legacy-24;
             goto screen8shiftokc;
           }
           //iii. relocate buffer
@@ -5632,12 +5771,12 @@ screen8shiftokc:;
 
 changestate: if (BITSget(t,&bitsi,1)){
           y=BITSget(t,&bitsi,11); x=y%48; y/=48;
-          i3=tobjfixed_index[tpy-8+y][tpx-8+x];
+          i3=tobjfixed_index[tpy_legacy-8+y][tpx_legacy-8+x];
           i4=tobjfixed_type[i3];
           z=BITSget(t,&bitsi,getnbits(i4));
           i5=1<<z;
 
-          x2=tpx+x-8; y2=tpy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
+          x2=tpx_legacy+x-8; y2=tpy_legacy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
           if (tplayer->sobj_tempfixed[x3][y3]&i5) tplayer->sobj_tempfixed[x3][y3]-=i5; else tplayer->sobj_tempfixed[x3][y3]|=i5;
           goto changestate;
              }
@@ -5645,7 +5784,7 @@ changestate: if (BITSget(t,&bitsi,1)){
              static unsigned short vbuf[1024];
 oum_getnextsquare: if (BITSget(t,&bitsi,1)){//if =1 set object of a/another square on the map
              y=BITSget(t,&bitsi,11); x=y%48; y/=48;
-             x2=tpx+x-8; y2=tpy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
+             x2=tpx_legacy+x-8; y2=tpy_legacy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
              i=0;//vbuf index
 oum_getnextobj: if (BITSget(t,&bitsi,1)){//if =1 a/another object exists on this square
              vbuf[i]=BITSget(t,&bitsi,16);
@@ -5702,7 +5841,7 @@ oum_getnextobj: if (BITSget(t,&bitsi,1)){//if =1 a/another object exists on this
         //remove all offscreen objects in client's array
 mover_removeoffscreen_restartc:
         for (i=0;i<tplayer->mv_i;i++){
-          x=tplayer->mv_x[i]-tpx; y=tplayer->mv_y[i]-tpy;
+          x=tplayer->mv_x[i]-tpx_legacy; y=tplayer->mv_y[i]-tpy_legacy;
           if ((x<-1)||(x>32)||(y<-1)||(y>24)){
 
             //reshuffle array
@@ -5864,7 +6003,16 @@ mover_statechange_next2:
 mover_add_next: if (BITSget(t,&bitsi,1)){
                         i=tplayer->mv_i;
                         y=BITSget(t,&bitsi,10); x=y%34; y/=34;
-                        x=x+tpx-1; y=y+tpy-1;
+                        // RW-P4.5 / desync fix (2026-05-22): server encodes the
+                        // mover x,y offset relative to its own getscreenoffset()
+                        // (which is fixed at the legacy 32x24 viewport ? host
+                        // never asks the client what view size it uses). Decoding
+                        // with the dynamic tpx/tpy would shift every NPC by
+                        // (tpx - tpx_legacy) tiles when the client view is wider
+                        // than 32 tiles, causing the "teleport then disappear"
+                        // symptom because mover_removeoffscreen below also uses
+                        // tpx_legacy + the hard-coded 32x24 window.
+                        x=x+tpx_legacy-1; y=y+tpy_legacy-1;
                         tplayer->mv_x[i]=x; tplayer->mv_y[i]=y;
                         z=BITSget(t,&bitsi,10);
                         //special cases exist
@@ -5979,8 +6127,8 @@ mover_add_getstate_next: if (BITSget(t,&bitsi,1)){
       if (t->d2[0]==252){ //remove NPC from temp party
         x=t->d2[1];
         tplay->party[x]=NULL;
-        if (party_spellbook_frame[x]->offset_x<1024) party_spellbook_frame[x]->offset_x+=2048;
-        if (party_frame[x]->offset_x<1024) party_frame[x]->offset_x+=2048;
+        if (party_spellbook_frame[x]->offset_x<kPanelHideThresholdX) party_spellbook_frame[x]->offset_x+=kPanelHideDeltaX;
+        if (party_frame[x]->offset_x<kPanelHideThresholdX) party_frame[x]->offset_x+=kPanelHideDeltaX;
         qkstf_update=TRUE;
         goto CLIENT_donemess;
       }
@@ -6218,7 +6366,7 @@ lluc_nextpixel:
       if (t->d2[0]==44){//receive portrait look message
         txtright(t,t->l-1);
         portraitlook_wait=8.0f;
-        if (statusmessage_viewnpc->offset_x>=1024) statusmessage_viewnpc->offset_x-=2048;
+        if (statusmessage_viewnpc->offset_x>=kPanelHideThresholdX) statusmessage_viewnpc->offset_x-=kPanelHideDeltaX;
         portraitlook_portrait=t->ds[0]; txtright(t,t->l-2);
         if (portraitlook_name==NULL) portraitlook_name=txtnew();
         txtNEWLEN(portraitlook_name,-t->d2[0]); txtright(t,t->l-1);
@@ -6558,11 +6706,33 @@ CLIENT_donemess:
     if (nodisplay) goto skiprefresh2;
 
 
-    if (moonlight==0) ZeroMemory(&ls,sizeof(ls)); //clear array
-    if (moonlight==1) memcpy(&ls,&ls_moon1,1024*768);
-    if (moonlight==2) memcpy(&ls,&ls_moon2,1024*768);
-    if (moonlight==3) memcpy(&ls,&ls_moon3,1024*768);
-    if (moonlight==4) memcpy(&ls,&ls_moon4,1024*768);
+    // RW-P2.2 / RW-P3.3 trails fix: when the active back-buffer is
+    // larger than the legacy 1024x768 world view, clear the whole
+    // back-buffer to black at the start of each frame. The world tile
+    // renderer overdraws the upper-left 1024x768 area every frame, but
+    // anything outside that rect (extended right/bottom strips when the
+    // window has been enlarged) is never overwritten by the world pass
+    // ? so stale pixels (UI panels' previous positions, drifted clouds)
+    // accumulated as visible trails. A single DD COLORFILL is
+    // hardware-fast.
+    //
+    // (windowResize gate removed 2026-05-27 — the back buffer can grow
+    // beyond 1024x768 whenever the window is enlarged.)
+    if (backbufferW() > 1024 || backbufferH() > 768) {
+        cls(ps, 0);
+    }
+
+    // RW-P2.3: route lighting buffer copy size through viewport.h accessor.
+    // RW-P2.1: ls/ls_moonN are now heap pointers (lighting_alloc), so we
+    // pass the pointers directly instead of `&ls`/`&ls_moonN`.
+    {
+      const unsigned long lsBytes = (unsigned long)lightingTotalBytes();
+      if (moonlight==0) ZeroMemory(ls,lsBytes); //clear array
+      if (moonlight==1) memcpy(ls,ls_moon1,lsBytes);
+      if (moonlight==2) memcpy(ls,ls_moon2,lsBytes);
+      if (moonlight==3) memcpy(ls,ls_moon3,lsBytes);
+      if (moonlight==4) memcpy(ls,ls_moon4,lsBytes);
+    }
 
     //calculate tpx,tpy from current x,y
     getscreenoffset(tplayer->x,tplayer->y,&tpx,&tpy);
@@ -6580,19 +6750,26 @@ CLIENT_donemess:
 
 
     //init vis arrays
-    for (y=0;y<=27;y++){ for (x=0;x<=35;x++){
-      vis[x][y]=1;
-      vis_window[x][y]=0;
-      vis_chair[x][y]=0;
-      vis_bed[x][y]=0;
-      vis_slime[x][y]=0;
-    }}
+    {
+      int padX = viewTilesX() + 4;
+      int padY = viewTilesY() + 4;
+      for (y=0;y<padY;y++){ for (x=0;x<padX;x++){
+        vis[x][y]=1;
+        vis_window[x][y]=0;
+        vis_chair[x][y]=0;
+        vis_bed[x][y]=0;
+        vis_slime[x][y]=0;
+      }}
+    }
     //get vis
     static long mapx,mapy,bufx,bufy;
     static unsigned short *tp2;
     myobj=fakeobj;
-    for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
-      x2=tpx+x-1; y2=tpy+y-1; if ((x2>=0)&&(y2>=0)&&(x2<=2047)&&(y2<=1023)){
+    {
+      int limitY = viewTilesY() + 1;
+      int limitX = viewTilesX() + 1;
+      for (y=0;y<=limitY;y++){ for (x=0;x<=limitX;x++){
+        x2=tpx+x-1; y2=tpy+y-1; if ((x2>=0)&&(y2>=0)&&(x2<=2047)&&(y2<=1023)){
         mapx=tpx+x-1; mapy=tpy+y-1; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
         //get basetile-vis
         i=bt[y2][x2]&1023;
@@ -6625,6 +6802,19 @@ CLIENT_donemess:
             if (myobj->type==163+(6*1024)) vis_bed[x+1][y+1]=2;//bed (vertical)
           }//i3
         }//i
+        // DOB-P0.2 / RW-P4.11 follow-up (crash at loop_client.cpp:6825,
+        // 2026-05-26): tplayer->sobj_bufoffx/y are streamed by the host
+        // and can briefly lag the client's tpx/tpy while walking, which
+        // pushes bufx/bufy outside the fixed-size sobj_bufsize[96][72]
+        // (and sobj[][] / sobj_tempfixed[][]) arrays. Reading off the
+        // end produced an unmapped-memory dereference (EXCEPTION_
+        // ACCESS_VIOLATION, see crash.dmp). Mirror the bounds guard
+        // already present in function_client.cpp:529 here so out-of-
+        // buffer tiles fall through to the default vis state instead of
+        // walking off the struct. Remove once DOB-P2+ replaces the
+        // fixed 96x72 storage with a per-player Dynamic2DArray sized
+        // from viewTilesX/Y.
+        if ((bufx>=0)&&(bufx<96)&&(bufy>=0)&&(bufy<72)){
         //get tfixedobj-vis
         if (i=tobjfixed_index[tpy+y-1][tpx+x-1]){
           i2=tobjfixed_type[i];
@@ -6676,6 +6866,7 @@ CLIENT_donemess:
             }//build
           }//i2
         }//i
+        }//bufx/bufy in-range
 
         //get visalways
         x3=x2>>3; x4=x2&7;
@@ -6685,17 +6876,20 @@ CLIENT_donemess:
         //get x,y vis complete
       }else vis[x+1][y+1]=1;
     }}
+    }
 
     if (xray){
-      for (y=1;y<=26;y++){ for (x=1;x<=34;x++){
+      int xrayY = viewTilesY() + 2;
+      int xrayX = viewTilesX() + 2;
+      for (y=1;y<=xrayY;y++){ for (x=1;x<=xrayX;x++){
         vis[x][y]=4;
       }}
       goto viewfind_skip;
     }
 
     //pathfind
-    static unsigned char vis_index_x[4096];
-    static unsigned char vis_index_y[4096];
+    static unsigned char vis_index_x[16384];
+    static unsigned char vis_index_y[16384];
     i=-1; //last index set
     i2=0; //last index checked
     mapx=tpx-2; mapy=tpy-2; x=tplayer->x-mapx; y=tplayer->y-mapy;
@@ -6717,62 +6911,76 @@ vis_scan2:
     //2=window
     //4=visible
     //8=edge visible
-    for (y=1;y<=26;y++){ for (x=1;x<=34;x++){ //find visible edges
-      i=vis[x][y];
-      if (i==4){
-        if (vis[x+1][y]!=4) vis[x+1][y]=8;
-        if (vis[x-1][y]!=4) vis[x-1][y]=8;
-        if (vis[x][y+1]!=4) vis[x][y+1]=8;
-        if (vis[x][y-1]!=4) vis[x][y-1]=8;
-        if (vis[x-1][y-1]!=4) vis[x-1][y-1]=8;
-        if (vis[x+1][y-1]!=4) vis[x+1][y-1]=8;
-        if (vis[x+1][y+1]!=4) vis[x+1][y+1]=8;
-        if (vis[x-1][y+1]!=4) vis[x-1][y+1]=8;
-      }
-    }}
+    {
+      int edgesY = viewTilesY() + 2;
+      int edgesX = viewTilesX() + 2;
+      for (y=1;y<=edgesY;y++){ for (x=1;x<=edgesX;x++){ //find visible edges
+        i=vis[x][y];
+        if (i==4){
+          if (vis[x+1][y]!=4) vis[x+1][y]=8;
+          if (vis[x-1][y]!=4) vis[x-1][y]=8;
+          if (vis[x][y+1]!=4) vis[x][y+1]=8;
+          if (vis[x][y-1]!=4) vis[x][y-1]=8;
+          if (vis[x-1][y-1]!=4) vis[x-1][y-1]=8;
+          if (vis[x+1][y-1]!=4) vis[x+1][y-1]=8;
+          if (vis[x+1][y+1]!=4) vis[x+1][y+1]=8;
+          if (vis[x-1][y+1]!=4) vis[x-1][y+1]=8;
+        }
+      }}
+    }
 viewfind_skip:
 
     //get vischeck
-    ZeroMemory(&vischeck,sizeof(vischeck));
-    for (y=0;y<=23;y++){ for (x=0;x<=31;x++){
-      if (vis[x+2][y+2]&4) vischeck[x][y]=1;
-      if (vis[x+2][y+2]&8){
-        if (vis[x+3][y+2]&4) vischeck[x][y]=1;
-        if (vis[x+3][y+3]&4) vischeck[x][y]=1;
-        if (vis[x+2][y+3]&4) vischeck[x][y]=1;
-      }//&8
-    }}//x,y
+    if (vischeck.data) {
+        memset(vischeck.data, 0, viewTilesX() * viewTilesY());
+    }
+    {
+      int tilesX = viewTilesX();
+      int tilesY = viewTilesY();
+      for (y=0;y<tilesY;y++){ for (x=0;x<tilesX;x++){
+        if (vis[x+2][y+2]&4) vischeck[x][y]=1;
+        if (vis[x+2][y+2]&8){
+          if (vis[x+3][y+2]&4) vischeck[x][y]=1;
+          if (vis[x+3][y+3]&4) vischeck[x][y]=1;
+          if (vis[x+2][y+3]&4) vischeck[x][y]=1;
+        }//&8
+      }}//x,y
+    }
 
     //base tiles
-    for (y=0;y<=23;y++){ for (x=0;x<=31;x++){
-      i=bt[y+tpy][x+tpx]&1023;
-      z=0;
-      if ((i>=221)&&(i<224)) z=3; //lava
-      if ((i>=2)&&(i<6)) z=3; //swamp
-      if (z==3) LIGHTnew(x,y,(unsigned long)&ls3b,3);
-      if ((i>=8)&&(i<48)){ //ocean and coast
-        if (i<=15) oceantiles++; else rivertiles++;
-        x2=i&7;
-        y2=i/8;
-        i2=i-8;
-        x4=0; if (i2>=8) {i2=wateri[i2-8]; x4=1; }
-        i2=i2*8+keyframe;
-        x3=i2&31;
-        y3=i2/32;
-        y3+=4;
-        sf32(ps,x*32,y*32,sfx8,i2+128);
-        if (x4==1) g32z(ps,x*32,y*32,bt8[0],i);
-      }else{//not ocean
-        i2=0;
-        if (i==252){i2=keyframe; i=14;}
-        if (i==253){i2=keyframe; i=15;}
-        if (i==254){i2=keyframe; i=0;}
-        if ((i>=221)&&(i<=223)){i2=keyframe; i=i-210;}
-        if ((i>=217)&&(i<=219)){i2=keyframe; i=i-209;}
-        if (i<=7){i2=keyframe;} //changed
-        g32(ps,x*32,y*32,bt8[i2],i);
-      }
-    }}
+    {
+      int tilesX = viewTilesX();
+      int tilesY = viewTilesY();
+      for (y=0;y<tilesY;y++){ for (x=0;x<tilesX;x++){
+        i=bt[y+tpy][x+tpx]&1023;
+        z=0;
+        if ((i>=221)&&(i<224)) z=3; //lava
+        if ((i>=2)&&(i<6)) z=3; //swamp
+        if (z==3) LIGHTnew(x,y,(unsigned long)&ls3b,3);
+        if ((i>=8)&&(i<48)){ //ocean and coast
+          if (i<=15) oceantiles++; else rivertiles++;
+          x2=i&7;
+          y2=i/8;
+          i2=i-8;
+          x4=0; if (i2>=8) {i2=wateri[i2-8]; x4=1; }
+          i2=i2*8+keyframe;
+          x3=i2&31;
+          y3=i2/32;
+          y3+=4;
+          sf32(ps,x*32,y*32,sfx8,i2+128);
+          if (x4==1) g32z(ps,x*32,y*32,bt8[0],i);
+        }else{//not ocean
+          i2=0;
+          if (i==252){i2=keyframe; i=14;}
+          if (i==253){i2=keyframe; i=15;}
+          if (i==254){i2=keyframe; i=0;}
+          if ((i>=221)&&(i<=223)){i2=keyframe; i=i-210;}
+          if ((i>=217)&&(i<=219)){i2=keyframe; i=i-209;}
+          if (i<=7){i2=keyframe;} //changed
+          g32(ps,x*32,y*32,bt8[i2],i);
+        }
+      }}
+    }
 
     if (oceantiles||rivertiles){
       if (oceantiles>=576){
@@ -6819,7 +7027,7 @@ viewfind_skip:
 
     //objfixed (non floating)
     myobj=fakeobj;
-    for (y=25;y>=0;y--){ for (x=33;x>=0;x--){
+    for (y=viewTilesY()+1;y>=0;y--){ for (x=viewTilesX()+1;x>=0;x--){
       x2=x-1; y2=y-1;
       mapx=tpx+x-1; mapy=tpy+y-1; if ((mapx!=2048)&&(mapy!=1024)){
 
@@ -6834,7 +7042,7 @@ viewfind_skip:
 
 
 
-            if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+            if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
               if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                 GSs=1; GSx=x2*32; GSy=y2*32;
                 getspr(myobj);
@@ -6851,7 +7059,7 @@ viewfind_skip:
             if ((x3&1023)!=x3){ //possibly buildable!
               if (tclass_build[x3-1024]&1){//square
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -6859,7 +7067,7 @@ viewfind_skip:
                   }
                 }}}}
                 x2++; y2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-2048;
                   if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -6867,7 +7075,7 @@ viewfind_skip:
                   }
                 }}}}
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-3072;
                   if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -6878,7 +7086,7 @@ viewfind_skip:
               }
               if (tclass_build[x3-1024]&2){//horizontal
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -6889,7 +7097,7 @@ viewfind_skip:
               }
               if (tclass_build[x3-1024]&4){//vertical
                 y2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -6909,7 +7117,7 @@ viewfind_skip:
 
     //tobjfixed
     myobj=fakeobj;
-    for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
+    for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
       x2=x-1; y2=y-1;
       mapx=tpx+x-1; mapy=tpy+y-1; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
       if ((mapx!=2048)&&(mapy!=1024)){
@@ -6923,17 +7131,22 @@ viewfind_skip:
               x3=tobjfixed_type[i3];
               myobj->type=x3;
 
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
 
 
 
 
                 if (refreshcount&1){ for (x4=0;x4<=stolenitemwarningn;x4++){ if (stolenitemwarningx[x4]==mapx){ if (stolenitemwarningy[x4]==mapy){ if (stolenitemwarningtype[x4]==myobj->type){
                   static unsigned long *ps_realoffset;
-                  static unsigned short ps_fakebuffer[1024*32];
+                  // RW-P2.2 / RW-P4.10: scratch buffer sized to
+                  // kBackbufferMaxW so getspr() ? which writes at the
+                  // active back-buffer pitch ? can't overflow when the
+                  // user has resized the window beyond the legacy 1024
+                  // pitch. Must track kBackbufferMaxW in viewport.h.
+                  static unsigned short ps_fakebuffer[u6o::client::kBackbufferMaxW*32];
                   static long siw_x,siw_y,siw_r,siw_g,siw_b;
                   for (siw_y=0;siw_y<=31;siw_y++){ for (siw_x=0;siw_x<=31;siw_x++){
-                    ps_fakebuffer[siw_y*1024+siw_x]=0;
+                    ps_fakebuffer[siw_y*lightingStride()+siw_x]=0;
                   }}
                   ps_realoffset=ps->o;
                   ps->o=(unsigned long*)&ps_fakebuffer;
@@ -6941,12 +7154,13 @@ viewfind_skip:
                   getspr(myobj);
                   ps->o=ps_realoffset;
                   for (siw_y=0;siw_y<=31;siw_y++){ for (siw_x=0;siw_x<=31;siw_x++){
-                    if (x5=ps_fakebuffer[siw_y*1024+siw_x]){
+                    if (x5=ps_fakebuffer[siw_y*lightingStride()+siw_x]){
                       x6=x5>>11;
                       x7=(x5&0x7E0)>>6; if (x7>x6) x6=x7;
                       x7=x5&0x1F; if (x7>x6) x6=x7;
                       x6=x6<<11;
-                      ps->o2[y2*1024*32+siw_y*1024+x2*32+siw_x]=x6;
+                      // RW-P2.2: route through lightingStride() == active ps row pitch in pixels.
+                      ps->o2[(y2*32+siw_y)*lightingStride()+x2*32+siw_x]=x6;
                     }//x5
                   }}
                   goto stolenitemwarningflash;
@@ -6992,19 +7206,19 @@ lens_hide:
                 if (tclass_build[x3-1024]&1){//square
 
                   x2--;
-                  if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                  if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                     myobj->type=x3-1024;
                     GSs=1; GSx=x2*32; GSy=y2*32;
                     getspr(myobj);
                   }}}}
                   x2++; y2--;
-                  if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                  if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                     myobj->type=x3-2048;
                     GSs=1; GSx=x2*32; GSy=y2*32;
                     getspr(myobj);
                   }}}}
                   x2--;
-                  if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                  if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                     myobj->type=x3-3072;
                     GSs=1; GSx=x2*32; GSy=y2*32;
                     getspr(myobj);
@@ -7013,7 +7227,7 @@ lens_hide:
                 }
                 if (tclass_build[x3-1024]&2){//horizontal
                   x2--;
-                  if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                  if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                     myobj->type=x3-1024;
                     GSs=1; GSx=x2*32; GSy=y2*32;
                     getspr(myobj);
@@ -7023,7 +7237,7 @@ lens_hide:
                 }
                 if (tclass_build[x3-1024]&4){//vertical
                   y2--;
-                  if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                  if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                     myobj->type=x3-1024;
                     GSs=1; GSx=x2*32; GSy=y2*32;
                     getspr(myobj);
@@ -7046,9 +7260,18 @@ lens_hide:
 
     //objbuffer
     myobj=fakeobj;
-    for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
+    for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
       mapx=tpx+x-1; mapy=tpy+y-1; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
       x2=x-1; y2=y-1;
+      // DOB-P0.2 follow-up (crash at loop_client.cpp:7257, 2026-05-27):
+      // sibling of the guarded block at line 6808. Same root cause —
+      // host-streamed sobj_bufoffx/y briefly lags the client's tpx/tpy
+      // while walking and pushes bufx/bufy outside the fixed
+      // sobj_bufsize[96][72] / sobj[][] arrays. Mirror the same guard
+      // already present at loop_client.cpp:6808 and function_client.cpp:529.
+      // Remove once DOB-P2+ replaces fixed 96x72 storage with a per-player
+      // Dynamic2DArray sized from viewTilesX/Y.
+      if ((bufx>=0)&&(bufx<96)&&(bufy>=0)&&(bufy<72)){
       if (i=tplayer->sobj_bufsize[bufx][bufy]){
         tp2=tplayer->sobj[bufx][bufy];
         for (i2=0;i2<i;i2++){
@@ -7064,7 +7287,7 @@ lens_hide:
           }
 flash_disable2:
 
-          if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+          if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
             if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
 
 
@@ -7075,10 +7298,13 @@ flash_disable2:
 
               if (refreshcount&1){ for (x4=0;x4<=stolenitemwarningn;x4++){ if (stolenitemwarningx[x4]==mapx){ if (stolenitemwarningy[x4]==mapy){ if (stolenitemwarningtype[x4]==myobj->type){
                 static unsigned long *ps_realoffset;
-                static unsigned short ps_fakebuffer[1024*32];
+                // RW-P2.2 / RW-P4.10: scratch buffer sized to
+                // kBackbufferMaxW. See note at the first occurrence
+                // (~line 7118).
+                static unsigned short ps_fakebuffer[u6o::client::kBackbufferMaxW*32];
                 static long siw_x,siw_y,siw_r,siw_g,siw_b;
                 for (siw_y=0;siw_y<=31;siw_y++){ for (siw_x=0;siw_x<=31;siw_x++){
-                  ps_fakebuffer[siw_y*1024+siw_x]=0;
+                  ps_fakebuffer[siw_y*lightingStride()+siw_x]=0;
                 }}
                 ps_realoffset=ps->o;
                 ps->o=(unsigned long*)&ps_fakebuffer;
@@ -7086,12 +7312,13 @@ flash_disable2:
                 getspr(myobj);
                 ps->o=ps_realoffset;
                 for (siw_y=0;siw_y<=31;siw_y++){ for (siw_x=0;siw_x<=31;siw_x++){
-                  if (x5=ps_fakebuffer[siw_y*1024+siw_x]){
+                  if (x5=ps_fakebuffer[siw_y*lightingStride()+siw_x]){
                     x6=x5>>11;
                     x7=(x5&0x7E0)>>6; if (x7>x6) x6=x7;
                     x7=x5&0x1F; if (x7>x6) x6=x7;
                     x6=x6<<11;
-                    ps->o2[y2*1024*32+siw_y*1024+x2*32+siw_x]=x6;
+                    // RW-P2.2: route through lightingStride() == active ps row pitch in pixels.
+                    ps->o2[(y2*32+siw_y)*lightingStride()+x2*32+siw_x]=x6;
                   }//x5
                 }}
                 goto stolenitemwarningflash2;
@@ -7114,7 +7341,7 @@ stolenitemwarningflash2:;
           if ((x3&1023)!=x3){ //possibly buildable
             if (tclass_build[x3-1024]&1){//square
               x2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-1024;
                 if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                   if (x5){getspr(myobj);if (x5option&2) img75t0(ps,x2*32,y2*32,bt32);if ((x5option==0)||(x5option==1)) imgt0(ps,x2*32,y2*32,bt32);if ((x5option==4)||(x5option==5)) img0(ps,x2*32,y2*32,bt32);}else{ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj); }
@@ -7123,7 +7350,7 @@ stolenitemwarningflash2:;
                 }
               }}}}
               x2++; y2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-2048;
                 if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                   if (x5){getspr(myobj);if (x5option&2) img75t0(ps,x2*32,y2*32,bt32);if ((x5option==0)||(x5option==1)) imgt0(ps,x2*32,y2*32,bt32);if ((x5option==4)||(x5option==5)) img0(ps,x2*32,y2*32,bt32);}else{ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj); }
@@ -7131,7 +7358,7 @@ stolenitemwarningflash2:;
                 }
               }}}}
               x2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-3072;
                 if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                   if (x5){getspr(myobj);if (x5option&2) img75t0(ps,x2*32,y2*32,bt32);if ((x5option==0)||(x5option==1)) imgt0(ps,x2*32,y2*32,bt32);if ((x5option==4)||(x5option==5)) img0(ps,x2*32,y2*32,bt32);}else{ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj); }
@@ -7142,7 +7369,7 @@ stolenitemwarningflash2:;
             }
             if (tclass_build[x3-1024]&2){//horizontal
               x2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-1024;
                 if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
 
@@ -7161,7 +7388,7 @@ generatinggate0:;
             }
             if (tclass_build[x3-1024]&4){//vertical
               y2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-1024;
                 if ((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)==0){//not floating
                   if (x5){getspr(myobj);if (x5option&2) img75t0(ps,x2*32,y2*32,bt32);if ((x5option==0)||(x5option==1)) imgt0(ps,x2*32,y2*32,bt32);if ((x5option==4)||(x5option==5)) img0(ps,x2*32,y2*32,bt32);}else{ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj); }
@@ -7174,6 +7401,7 @@ generatinggate0:;
           //flash_skip2:;
         }//i2
       }//i
+      }//bufx/bufy in-range
     }}//objbuffer end
 
 
@@ -7192,7 +7420,7 @@ generatinggate0:;
     //PASS 2: float
     static unsigned char flash_skip;
     for (z=0;z<=2;z++){//pass
-      for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
+      for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
         mapx=tpx+x-1; mapy=tpy+y-1;
         for (i=0;i<tplayer->mv_i;i++){
           if (tplayer->mv_x[i]==mapx){ if (tplayer->mv_y[i]==mapy){
@@ -7247,7 +7475,7 @@ moverinbed:
             //first pass only changes
             if (z==0){
               if ((x3&1023)==375) vis_slime[x+1][y+1]=1;//slime vis check
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 if (vischeck[x2][y2]){
                   if (tplayer->mv_flags[i]&MV_LIGHTBRIGHT) LIGHTnew(x2,y2,(unsigned long)&ls13,13);
                   if (tplayer->mv_flags[i]&MV_LIGHTGLOW) LIGHTnew(x2,y2,(unsigned long)&ls5b,5);
@@ -7359,7 +7587,7 @@ passok:
 
 
 
-            if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+            if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
               if (((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)&&(z==2))||((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]==0)&&(z==1))||(z==0)){//floating check
 
                 if (vis_chair[x2+2][y2+2]){
@@ -7406,7 +7634,7 @@ mover_square:
 
 
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if (((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)&&(z==2))||((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]==0)&&(z==1))){//floating check
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7414,7 +7642,7 @@ mover_square:
                   }
                 }}}}
                 x2++; y2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-2048;
                   if (((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)&&(z==2))||((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]==0)&&(z==1))){//floating check
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7422,7 +7650,7 @@ mover_square:
                   }
                 }}}}
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-3072;
                   if (((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1)&&(z==2))||((objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]==0)&&(z==1))){//floating check
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7438,7 +7666,7 @@ mover_square:
               if (x4==1) x2--;
               if (x4==2) y2--;
               if (x4==3) x2++;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3+1024*8;
 
                 x8=0;//double headed animal?
@@ -7474,32 +7702,32 @@ mover_square:
               if (z==2){//float
                 x4=(x3>>11)&3; x5=x2; y5=y2;
                 if (x4==0){
-                  myobj->type=x3-1*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-8*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-9*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+8*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+7*1024; x2=x5-1; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-1*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-8*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-9*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+7*1024; x2=x5-1; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 if (x4==2){
-                  myobj->type=x3-1*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-8*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-9*1024; x2=x5-1; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+8*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+7*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-1*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-8*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-9*1024; x2=x5-1; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+7*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 if (x4==1){
-                  myobj->type=x3-1*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-8*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-9*1024; x2=x5+1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+8*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+7*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-1*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-8*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-9*1024; x2=x5+1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+7*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 if (x4==3){
-                  myobj->type=x3-1*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-8*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3-9*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+8*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+7*1024; x2=x5+1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-1*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-8*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3-9*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+7*1024; x2=x5+1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 x2=x5; y2=y5;
               }//float
@@ -7515,28 +7743,28 @@ mover_square:
                 x6=ett/1.4f+(float)x2+(float)y2; x6&=1;
 
                 if (x4==0){
-                  myobj->type=x3+8*1024+x6*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+16*1024+y6*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+24*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+32*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024+x6*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+16*1024+y6*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+24*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+32*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 if (x4==1){
-                  myobj->type=x3+8*1024+x6*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+16*1024+y6*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+24*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+32*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024+x6*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+16*1024+y6*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+24*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+32*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 if (x4==2){
-                  myobj->type=x3+8*1024+x6*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+16*1024+y6*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+24*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+32*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024+x6*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+16*1024+y6*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+24*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+32*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 if (x4==3){
-                  myobj->type=x3+8*1024+x6*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+16*1024+y6*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+24*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                  myobj->type=x3+32*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+8*1024+x6*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+16*1024+y6*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+24*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                  myobj->type=x3+32*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 }
                 x2=x5; y2=y5;
               }//float
@@ -7545,14 +7773,14 @@ mover_square:
             if ((x3&1023)==374){//hydra
               if (z==2){//float
                 x5=x2; y5=y2;
-                myobj->type=425+0*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+4*1024; x2=x5+1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+8*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+12*1024; x2=x5+1; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+16*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+20*1024; x2=x5-1; y2=y5+1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+24*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
-                myobj->type=425+28*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+0*1024; x2=x5; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+4*1024; x2=x5+1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+8*1024; x2=x5+1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+12*1024; x2=x5+1; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+16*1024; x2=x5; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+20*1024; x2=x5-1; y2=y5+1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+24*1024; x2=x5-1; y2=y5; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
+                myobj->type=425+28*1024; x2=x5-1; y2=y5-1; if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){ GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);}}}}
                 x2=x5; y2=y5;
               }//float
             }//hydra
@@ -7563,7 +7791,7 @@ passskip:;
 
             //after pass 1 effects
             if (z==1){
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 if (vischeck[x2][y2]){
                   if (tplayer->mv_flags[i]&MV_PROTECT) sf32z(ps,x2*32,y2*32,sfx8,3*32+19+(keyframe>>1));
                 }
@@ -7699,9 +7927,15 @@ onhorse_specialoffsetused:
 
     //objbuffer (floating)
     myobj=fakeobj;
-    for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
+    for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
       mapx=tpx+x-1; mapy=tpy+y-1; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
       x2=x-1; y2=y-1;
+      // DOB-P0.2 follow-up (crash at loop_client.cpp:7257, 2026-05-27):
+      // same sobj_bufoffx/y lag pattern, applied prophylactically to the
+      // floating-objbuffer pass which would have crashed identically on
+      // the next viewport size. See loop_client.cpp:6808 / 7257 /
+      // function_client.cpp:529 for the same guard.
+      if ((bufx>=0)&&(bufx<96)&&(bufy>=0)&&(bufy<72)){
       if (i=tplayer->sobj_bufsize[bufx][bufy]){
         tp2=tplayer->sobj[bufx][bufy];
         for (i2=0;i2<i;i2++){
@@ -7714,7 +7948,7 @@ onhorse_specialoffsetused:
             if (refreshcount&1) goto flash_skip;
           }
 flash_disable:
-          if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+          if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
             if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
               GSs=1; GSx=x2*32; GSy=y2*32; getspr(myobj);
               getsound(myobj->type,x2,y2);
@@ -7724,7 +7958,7 @@ flash_disable:
           if ((x3&1023)!=x3){//might be buildable
             if (tclass_build[x3-1024]&1){//square
               x2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-1024;
                 if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                   GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7732,7 +7966,7 @@ flash_disable:
                 }
               }}}}
               x2++; y2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-2048;
                 if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                   GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7740,7 +7974,7 @@ flash_disable:
                 }
               }}}}
               x2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-3072;
                 if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                   GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7751,7 +7985,7 @@ flash_disable:
             }
             if (tclass_build[x3-1024]&2){//horizontal
               x2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-1024;
                 if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                   GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7762,7 +7996,7 @@ flash_disable:
             }
             if (tclass_build[x3-1024]&4){//vertical
               y2--;
-              if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+              if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                 myobj->type=x3-1024;
                 if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                   GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7775,6 +8009,7 @@ flash_disable:
 flash_skip:;
         }//i2
       }//i
+      }//bufx/bufy in-range
     }}//objbuffer (floating) end
 
 
@@ -7783,7 +8018,7 @@ flash_skip:;
 
     //objfixed (floating)
     myobj=fakeobj;
-    for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
+    for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
       x2=x-1; y2=y-1;
       mapx=tpx+x-1; mapy=tpy+y-1; if ((mapx!=2048)&&(mapy!=1024)){
 
@@ -7792,7 +8027,7 @@ flash_skip:;
           for (i3=i+1;i3<=(i+i2);i3++){
             x3=objfixed_type[i3];
             myobj->type=x3;
-            if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+            if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
               if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                 GSs=1; GSx=x2*32; GSy=y2*32;
                 getspr(myobj);
@@ -7808,7 +8043,7 @@ flash_skip:;
 
               if (tclass_build[x3-1024]&1){//square
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7816,7 +8051,7 @@ flash_skip:;
                   }
                 }}}}
                 x2++; y2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-2048;
                   if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7824,7 +8059,7 @@ flash_skip:;
                   }
                 }}}}
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-3072;
                   if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7835,7 +8070,7 @@ flash_skip:;
               }
               if (tclass_build[x3-1024]&2){//horizontal
                 x2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7846,7 +8081,7 @@ flash_skip:;
               }
               if (tclass_build[x3-1024]&4){//vertical
                 y2--;
-                if (x2>=0){ if (x2<=31){ if (y2>=0){ if (y2<=23){
+                if (x2>=0){ if (x2<viewTilesX()){ if (y2>=0){ if (y2<viewTilesY()){
                   myobj->type=x3-1024;
                   if (objfloatflags[(myobj->type>>10)+sprlnk[myobj->type&1023]]&1){//floating
                     GSs=1; GSx=x2*32; GSy=y2*32;
@@ -7868,7 +8103,7 @@ flash_skip:;
 
 
 
-    for (y=2;y<=25;y++){ for (x=2;x<=33;x++){ //overwrite objects on reverse side of wall
+    for (y=2;y<=viewTilesY()+1;y++){ for (x=2;x<=viewTilesX()+1;x++){ //overwrite objects on reverse side of wall
       if (vis[x][y]==8){
         mapx=tpx+x-2; mapy=tpy+y-2;
         i=bt[mapy][mapx]&1023;
@@ -7879,7 +8114,7 @@ flash_skip:;
         }//i
       }//8
     }}
-    for (y=2;y<=25;y++){ for (x=2;x<=33;x++){//edit edge basetiles
+    for (y=2;y<=viewTilesY()+1;y++){ for (x=2;x<=viewTilesX()+1;x++){//edit edge basetiles
       if (vis[x][y]==8){
         mapx=tpx+x-2; mapy=tpy+y-2;
         i=bt[mapy][mapx]&1023;
@@ -7921,7 +8156,7 @@ flash_skip:;
         }
       }//8
     }}
-    for (y=2;y<=25;y++){ for (x=2;x<=33;x++){ //black corners
+    for (y=2;y<=viewTilesY()+1;y++){ for (x=2;x<=viewTilesX()+1;x++){ //black corners
       if (vis[x][y]==8){
         mapx=tpx+x-2; mapy=tpy+y-2;
         i=bt[mapy][mapx]&1023;
@@ -7938,7 +8173,7 @@ flash_skip:;
     //set black squares
     myobj=fakeobj;
     myobj->type=331+22*1024;
-    for (y=0;y<=23;y++){ for (x=0;x<=31;x++){
+    for (y=0;y<viewTilesY();y++){ for (x=0;x<viewTilesX();x++){
       if (vis[x+2][y+2]<4){
         GSs=1; GSx=x*32; GSy=y*32;
         getspr(myobj);
@@ -8009,16 +8244,16 @@ flash_skip:;
       GSs=1; GSx=(tplayer->x-tpx)*32; GSy=(tplayer->y-tpy)*32; getspr(myobj);
     }
 
-    if ((minimap_frame->offset_x>=1024)&&peer){
-      minimap_frame->offset_x-=2048;
-    }else if((minimap_frame->offset_x<=1024)&&!peer){
-      minimap_frame->offset_x+=2048;
+    if ((minimap_frame->offset_x>=kPanelHideThresholdX)&&peer){
+      minimap_frame->offset_x-=kPanelHideDeltaX;
+    }else if((minimap_frame->offset_x<=kPanelHideThresholdX)&&!peer){
+      minimap_frame->offset_x+=kPanelHideDeltaX;
     }
 
-    if ((tmap_frame->offset_x>=1024)&&tmap){
-      tmap_frame->offset_x-=2048;
-    }else if((tmap_frame->offset_x<=1024)&&!tmap){
-      tmap_frame->offset_x+=2048;
+    if ((tmap_frame->offset_x>=kPanelHideThresholdX)&&tmap){
+      tmap_frame->offset_x-=kPanelHideDeltaX;
+    }else if((tmap_frame->offset_x<=kPanelHideThresholdX)&&!tmap){
+      tmap_frame->offset_x+=kPanelHideDeltaX;
     }
 
     for (i=0;i<=stormcloak_last2;i++){
@@ -8027,13 +8262,16 @@ flash_skip:;
       ls2_p=(unsigned char*)&stormcloak[z][0]; z2=7;
       x7=(x-z2)*32; y7=(y-z2)*32; x8=(x+z2+1)*32; y8=(y+z2+1)*32; //screen rect
       x9=-x7; y9=-y7; //offset inside lsX array
-      if (x7<0) x7=0; if (y7<0) y7=0; if (x8>1024) x8=1024; if (y8>768) y8=768; //crop rect
-      ls_off=(y7<<10)+x7; ls_off_add=1024-(x8-x7); //starting offset/add
-      ls2_off=(y7+y9)*((z2*2+1)*32)+x7+x9; ls2_off_add=((z2*2+1)*32)-(x8-x7); 
+      // RW-P2.3: route crop bounds and ls stride through viewport.h accessors.
+      { const long bbW=backbufferW(), bbH=backbufferH();
+        if (x7<0) x7=0; if (y7<0) y7=0; if (x8>bbW) x8=bbW; if (y8>bbH) y8=bbH; }
+      const int stride = lightingStride();
+      ls_off=y7*stride+x7; ls_off_add=stride-(x8-x7); //starting offset/add
+      ls2_off=(y7+y9)*((z2*2+1)*32)+x7+x9; ls2_off_add=((z2*2+1)*32)-(x8-x7);
       for (y6=y7;y6<y8;y6++){ for (x6=x7;x6<x8;x6++){
         if (z=ls2_p[ls2_off]){
           z+=ls_off;
-          if ((z>>10)!=(ls_off>>10)) z=(ls_off>>10<<10)+1023;
+          if ((z/stride)!=(ls_off/stride)) z=(ls_off/stride*stride)+(stride-1);
           ps->o2[ls_off]=ps->o2[z];
         }//z
         ls_off++; ls2_off++;
@@ -8243,9 +8481,12 @@ cloudadded:
     }
 
     if (x5=timelval){
-      i=(unsigned long)&ls;
+      i=(unsigned long)ls; // RW-P2.1: ls is now a heap pointer.
       i2=(unsigned long)ps->o;
       i3=(unsigned long)lval;
+      // RW-P2.3: load total pixel count from viewport.h accessor instead of
+      // hard-coding 786432 (=1024*768) into the inline asm immediate.
+      unsigned long _lsTotal = (unsigned long)lightingTotalBytes();
       _asm{
         ;preserve registers
           push ebx
@@ -8257,7 +8498,7 @@ cloudadded:
           mov edx,i3
           mov ecx,x5
           push ebp
-          mov ebp,786432
+          mov ebp,_lsTotal
           ;main loop
 asm_lightshow0:
         mov al,[esi]
@@ -8344,7 +8585,7 @@ asm_lightshow2:
           if (z2==10) z2=0;
           x=osx[z];
           y=osy[z]-8;
-          if ((timelval-ls[x+(y+8+16)*1024])==15) goto osdisplay_ktar_skip;
+          if ((timelval-ls[x+(y+8+16)*lightingStride()])==15) goto osdisplay_ktar_skip;
           txtnumint(t,z2);
           txtfnt=fnt2;
           goto osdisplay_ktar;
@@ -10026,8 +10267,8 @@ skiprefresh2:
       }
 
 	  // r222 if we want to be able to move the party member frame offscreen, we may need to do something here. no changes are made here.
-		if (pmf->offset_x >= 1024) {
-			pmf->offset_x -= 2048;
+		if (pmf->offset_x>=kPanelHideThresholdX) {
+			pmf->offset_x-=kPanelHideDeltaX;
 		}
 
       tnpc=(npc*)CLIENTplayer->party[i]->more; //shortcut
@@ -11163,10 +11404,10 @@ diskip:
         if ((x>=(56+4))&&(x<(56+4+32))){ //hide/unhide spellbook!
           if ((y>=(16))&&(y<(16+32))){
 
-            if (party_spellbook_frame[i]->offset_y<768){
-              party_spellbook_frame[i]->offset_y+=1536;
+            if (party_spellbook_frame[i]->offset_y<kPanelHideThresholdY){
+              party_spellbook_frame[i]->offset_y+=kPanelHideDeltaY;
             }else{
-              if (party_spellbook_frame[i]->offset_y>=768) party_spellbook_frame[i]->offset_y-=1536;
+              if (party_spellbook_frame[i]->offset_y>=kPanelHideThresholdY) party_spellbook_frame[i]->offset_y-=kPanelHideDeltaY;
             }
 
 
@@ -11174,10 +11415,10 @@ diskip:
 
 
         if (x<(56+4)){ //hide/unhide!
-          if (party_frame[i]->offset_y<768){
-            party_frame[i]->offset_y+=1536;
+          if (party_frame[i]->offset_y<kPanelHideThresholdY){
+            party_frame[i]->offset_y+=kPanelHideDeltaY;
           }else{
-            if (party_frame[i]->offset_y>=768) party_frame[i]->offset_y-=1536;
+            if (party_frame[i]->offset_y>=kPanelHideThresholdY) party_frame[i]->offset_y-=kPanelHideDeltaY;
           }
         }//hide/unhide
 
@@ -11491,26 +11732,64 @@ gotkey: //x2 is value of key
     }else{
       x2=pmf->size_x; y2=pmf->size_y;
     }
-    if ((x<=(2048-x2))&&(y<=(1536-y2))){ //onscreen (or supposed to be onscreen!)
+    // RW-P4.10: "onscreen" here means "not parked at the hide sentinel"
+    // (i.e. the panel is actually visible to the user, vs. hidden by
+    // adding kPanelHideDeltaX/Y to its offset). Old values 2048/1536
+    // matched the legacy hide thresholds; now they track the
+    // kPanelHideThresholdX/Y constants in viewport.h.
+    if ((x<=(kPanelHideThresholdX-x2))&&(y<=(kPanelHideThresholdY-y2))){ //onscreen (or supposed to be onscreen!)
+      // RW: clamp dragged panels to the *live* back-buffer extents instead of the
+      // legacy 1024x768 floor, otherwise maximized windows visually trap every
+      // widget at x~=1016 / y~=760 even though the cursor moves further.
+      // (windowResize ternary removed 2026-05-27 — always use the live size.)
+      const long bb_w = (long)backbufferW();
+      const long bb_h = (long)backbufferH();
       x3=8-x2; if (x<x3) pmf->offset_x=x3;
       y3=8-y2; if (y<y3) pmf->offset_y=y3;
-      x3=1024-8; if (x>x3) pmf->offset_x=x3;
-      y3=768-8; if (y>y3) pmf->offset_y=y3;
+      x3=bb_w-8; if (x>x3) pmf->offset_x=x3;
+      y3=bb_h-8; if (y>y3) pmf->offset_y=y3;
       if (i==16){cltset.musickeyboard_offset_x=pmf->offset_x; cltset.musickeyboard_offset_y=pmf->offset_y;}
       if (i==17){cltset.inpf_offset_x=pmf->offset_x; cltset.inpf_offset_y=pmf->offset_y;}
+      // RW: deliberately do NOT refresh the qkstf/volcontrol
+      // user-positioned cache from `pmf->offset_x` here. The live
+      // offset has just been auto-clamped to `backbufferW()`, which
+      // for a smaller-than-saved window would shrink the cache and
+      // permanently lose the user's far-right position from a
+      // previous maximized session. The cache is updated exclusively
+      // by a real user drag (see the drag handler near line 1376).
     }//onscreen
     //update default frame settings
     if ((i>=0)&&(i<=7)){
       cltset.party_frame_offset_x[i]=pmf->offset_x; cltset.party_frame_offset_y[i]=pmf->offset_y;
-      if (cltset.party_frame_offset_x[i]>1024) cltset.party_frame_offset_x[i]-=2048;
+      if (cltset.party_frame_offset_x[i]>kPanelHideThresholdX) cltset.party_frame_offset_x[i]-=kPanelHideDeltaX;
     }
     if ((i>=8)&&(i<=15)){
       cltset.party_spellbook_frame_offset_x[i-8]=pmf->offset_x; cltset.party_spellbook_frame_offset_y[i-8]=pmf->offset_y;
-      if (cltset.party_spellbook_frame_offset_x[i-8]>1024) cltset.party_spellbook_frame_offset_x[i-8]-=2048;
+      if (cltset.party_spellbook_frame_offset_x[i-8]>kPanelHideThresholdX) cltset.party_spellbook_frame_offset_x[i-8]-=kPanelHideDeltaX;
     }
     if (i==18){cltset.con_frm_offset_x=pmf->offset_x; cltset.con_frm_offset_y=pmf->offset_y;}
-    if (i==20){cltset.qkstf_offset_x=pmf->offset_x; cltset.qkstf_offset_y=pmf->offset_y;}
-    if (i==19){cltset.volcontrol_offset_x=pmf->offset_x; cltset.volcontrol_offset_y=pmf->offset_y;}
+    // RW: mirror qkstf/volcontrol to cltset from the user-positioned
+    // cache, NOT from pmf->offset_x — when volcontrol is hidden the
+    // live offset is parked in the off-screen sentinel range and would
+    // overwrite a previously-saved user position. Writing 32767 when
+    // the panel is at its anchored default keeps the load path's
+    // "default vs. user" distinction working across restarts.
+    if (i==20){
+      if (u6o::client::g_qkstf_user_positioned){
+        cltset.qkstf_offset_x=u6o::client::g_qkstf_user_x;
+        cltset.qkstf_offset_y=u6o::client::g_qkstf_user_y;
+      } else {
+        cltset.qkstf_offset_x=32767;
+      }
+    }
+    if (i==19){
+      if (u6o::client::g_volcontrol_user_positioned){
+        cltset.volcontrol_offset_x=u6o::client::g_volcontrol_user_x;
+        cltset.volcontrol_offset_y=u6o::client::g_volcontrol_user_y;
+      } else {
+        cltset.volcontrol_offset_x=32767;
+      }
+    }
     if (i==21){cltset.minimap_offset_x=pmf->offset_x; cltset.minimap_offset_y=pmf->offset_y;}
     if (i==22){cltset.tmap_offset_x=pmf->offset_x; cltset.tmap_offset_y=pmf->offset_y;}
   }//i (frame)
@@ -12257,7 +12536,7 @@ if (portraitlook_wait){
   portraitlook_wait-=et;
   if (portraitlook_wait<0.0f){
     portraitlook_wait=0.0f;
-    if (statusmessage_viewnpc->offset_x<1024) statusmessage_viewnpc->offset_x+=2048;
+    if (statusmessage_viewnpc->offset_x<kPanelHideThresholdX) statusmessage_viewnpc->offset_x+=kPanelHideDeltaX;
   }
 }
 keyon[0xD8]=FALSE; keyon[0xD9]=FALSE; //release mousewheel "buttons"

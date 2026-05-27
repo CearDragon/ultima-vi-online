@@ -1,5 +1,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
+
+#include "viewport.h"
 /*
  * actual definition of the global variables, to be included in the main program
  * these are referred to as extern everywhere else
@@ -61,6 +63,26 @@ long omy3;
 
 double scalexm = 1.0f;
 double scaleym = 1.0f;
+
+// Letterbox blit transform: how the source surface is mapped onto the window
+// client area in refresh(). Used to translate client-pixel mouse coordinates
+// back into source-surface coordinates so input stays aligned when the window
+// is resized/maximized.
+long   blit_offx  = 0;
+long   blit_offy  = 0;
+double blit_scale = 1.0;
+
+// (Removed 2026-05-27: the WINDOW_RESIZE setting and its `windowResize`
+// flag. The client is now always resizable — the legacy "fixed 1024x768"
+// rendering path it gated has no remaining use case. If you're hunting
+// for old branches, look for `windowResize` in git history.)
+
+// Most recently observed window-client dimensions (RW-P1.3) and a flag set
+// by WM_SIZE that the main loop uses to trigger OnClientResized() outside of
+// WndProc. clientW/clientH start at 0 and are populated on first refresh.
+long clientW = 0;
+long clientH = 0;
+bool dirtyClientSize = false;
 
 // r999 new
 surf* uipanelsurf[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
@@ -497,13 +519,13 @@ surf *intro_ultimavi2;
 
 
 //visibility checking arrays
-unsigned char vis[34+2][26+2]; //will be used for pathfind as well!
-unsigned char vis_window[34+2][26+2];//if =1 window exists here
-unsigned char vis_chair[34+2][26+2];//1=up 2=right 3=down 4=left 0=none
-unsigned char vischeck[32][24];//0=objects on this square are not visible, 1=they are
+Dynamic2DArray<unsigned char> vis = { nullptr, 0 }; //will be used for pathfind as well!
+Dynamic2DArray<unsigned char> vis_window = { nullptr, 0 };//if =1 window exists here
+Dynamic2DArray<unsigned char> vis_chair = { nullptr, 0 };//1=up 2=right 3=down 4=left 0=none
+Dynamic2DArray<unsigned char> vischeck = { nullptr, 0 };//0=objects on this square are not visible, 1=they are
 unsigned char visalways[256][1024];//bit array, if =1 force visibility
-unsigned char vis_bed[34+2][26+2];//1=horizontal bed 2=vertical bed
-unsigned char vis_slime[34+2][26+2];//1=slime
+Dynamic2DArray<unsigned char> vis_bed = { nullptr, 0 };//1=horizontal bed 2=vertical bed
+Dynamic2DArray<unsigned char> vis_slime = { nullptr, 0 };//1=slime
 
 unsigned char x5option;
 
@@ -696,11 +718,15 @@ char windy2;
 unsigned long ls_off,ls_off_add,ls2_off,ls2_off_add;
 unsigned char *ls2_p;
 unsigned short lval[16][65536];
-unsigned char ls[1024*768];
-unsigned char ls_moon1[1024*768];
-unsigned char ls_moon2[1024*768];
-unsigned char ls_moon3[1024*768];
-unsigned char ls_moon4[1024*768];
+// RW-P2.1: lighting buffers are now heap-allocated by lighting_alloc()
+// (viewport.cpp), called from setup_client.inc at startup. Sizing is
+// driven by viewport.h::backbufferW()/H() so these can grow with the
+// window in the next step.
+unsigned char* ls       = 0;
+unsigned char* ls_moon1 = 0;
+unsigned char* ls_moon2 = 0;
+unsigned char* ls_moon3 = 0;
+unsigned char* ls_moon4 = 0;
 unsigned char ls3[32*3][32*3];
 unsigned char ls3b[32*3][32*3];
 unsigned char ls5[32*5][32*5];
@@ -737,7 +763,7 @@ unsigned char inprec; //input receiving
 unsigned char inprec_global; //input receiving global
 
 
-unsigned char nonvis[32][24];
+Dynamic2DArray<unsigned char> nonvis = { nullptr, 0 };
 short osn;
 short osx[1024]; //y
 short osy[1024]; //x (centre)
