@@ -18,6 +18,11 @@
 #include "frame.h"
 #include "windows.h"
 
+#ifdef CLIENT
+// Pre-game splash screen helper (CLIENT only). See splash.h / splash.cpp.
+#include "../client/splash.h"
+#endif
+
 #ifdef CONSOLE
 #include <conio.h>
 #endif
@@ -155,6 +160,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					   int       nCmdShow)
 {
     SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
+
+#ifdef CLIENT
+    // Pre-game splash screen (CLIENT only — the dedicated host runs without
+    // any window). Displays an image from one of the default search paths
+    // (see splash.cpp::kDefaultSearchPaths) for kDefaultDurationMs (3s)
+    // before any heavy setup runs. All failure modes (missing image,
+    // GDI+ init failure, CreateWindow failure) still honor the duration
+    // contract so the game-start timing is predictable.
+    //
+    // The splash is suppressed for the dedicated host build path below
+    // (which is selected later via the "host" command line parameter or
+    // the CONSOLE define). If a future user wants to skip the splash for
+    // automated testing, gate this on a new command-line flag.
+    u6o::client::splash::Run(hInstance,
+                             u6o::client::splash::DefaultSearchPaths(),
+                             u6o::client::splash::kDefaultDurationMs);
+#endif
 
 	//temporary use variables
 	static long i=0,i2=0,i3=0,i4=0,i5=0,i6=0,i7=0,i8=0,i9=0;

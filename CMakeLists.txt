@@ -180,6 +180,7 @@ set(Header_Files
         "src/common/use_code/use_code.h"
         "src/client/viewport.h"
         "src/client/ui_layout.h"
+        "src/client/splash.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -226,6 +227,7 @@ set(Source_Files
         "src/client/viewport.cpp"
         "src/client/ui_layout.cpp"
         "src/client/ui_panels_apply.cpp"
+        "src/client/splash.cpp"
         "src/common/u6o7.cpp"
         "src/common/use_code/use_code.cpp"
         "src/common/Xenkan.cpp"
@@ -366,7 +368,8 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "vfw32;"
         "dplayx;"
         "ddraw;"
-        "dsound"
+        "dsound;"
+        "gdiplus"
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
 
@@ -573,7 +576,8 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "vfw32;"
         "dplayx;"
         "ddraw;"
-        "dsound"
+        "dsound;"
+        "gdiplus"
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
 
@@ -606,6 +610,7 @@ set(Header_Files
         "src/common/use_code/use_code.h"
         "src/client/viewport.h"
         "src/client/ui_layout.h"
+        "src/client/splash.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -641,6 +646,7 @@ set(Source_Files
         "src/client/viewport.cpp"
         "src/client/ui_layout.cpp"
         "src/client/ui_panels_apply.cpp"
+        "src/client/splash.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
 
