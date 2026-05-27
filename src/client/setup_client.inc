@@ -56,7 +56,17 @@ ps4=newsurf(resxo/2,resyo/2,SURF_SYSMEM16); //to temporarily convert to 16bit?
 }else{
 ps2=newsurf(resxo/2,resyo/2,SURF_SYSMEM16);
 }
-ps5=newsurf(resxo,resyo,SURF_SYSMEM16); //unconverted mimimap
+// ps5 MUST stay at 1024x768 regardless of the (possibly resized) backbuffer
+// size. It is a scratch surface for the minimap / Gem peer view: the world
+// draw fills its top-left 768x768 (24 tiles * 32px) and then img()
+// resamples the WHOLE surface into a fixed-size destination cell. The
+// 60-px-per-cell layout only lines up when the source is 1024x768
+// (768/1024*80 = 60 wide, 768/768*60 = 60 tall, matching the cell stride).
+// Allocating ps5 at resxo x resyo would shrink the rendered content to a
+// fraction of each cell on resized windows, producing black gaps in the
+// gem birds-eye view. recreateBackbuffers() also intentionally leaves ps5
+// alone for the same reason.
+ps5=newsurf(1024,768,SURF_SYSMEM16); //unconverted mimimap (fixed size; see comment above)
 ps6=newsurf(80,60,SURF_SYSMEM16); //convert to minimap size
 ps7=newsurf(120,120,SURF_SYSMEM16); //unconverted treasuremap
 ps8=newsurf(240,240,SURF_SYSMEM16); //convert to treasuremap size

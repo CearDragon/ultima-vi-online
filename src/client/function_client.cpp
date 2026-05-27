@@ -358,20 +358,32 @@ bool recreateBackbuffers(int newW, int newH) {
 
     // Release the old surfaces. `free(surf*)` calls ->Release() on
     // the IDirectDrawSurface and frees the wrapper struct.
+    // NOTE: ps5 is intentionally NOT resized. It is used solely as a
+    // 768x768 scratch surface (24 tiles * 32px) for the minimap / gem
+    // peer view. The downstream call `img(ps6, ps5)` (and the analogous
+    // `img(minimaptilesurf, ps5)`) resamples the ENTIRE ps5 surface into
+    // a fixed-size destination cell, and the 60-px-per-cell layout in
+    // minimap_surf_new / minimap_frame->graphic only lines up when ps5
+    // has the original 1024x768 dimensions:
+    //     ps6   80x60: 768/1024 * 80 = 60, 768/768 * 60 = 60
+    //     mtile 80x60 (or 160x120 for minimaptype==1): same ratio
+    // Growing ps5 with the backbuffer shrinks the 24x24-tile content to
+    // only a fraction of each destination cell, producing the black gaps
+    // visible when a player uses a Gem on a resized window. Keeping ps5
+    // at its original size restores the legacy behavior on all window
+    // sizes (ps5 is never sampled by the main world view).
     if (ps)       { free(ps);       ps  = NULL; }
     if (ps3)      { free(ps3);      ps3 = NULL; }
-    if (ps5)      { free(ps5);      ps5 = NULL; }
 
     // Re-create at the new size. Match the original setup_client.inc
-    // flag choices: ps and ps5 are 16bpp sysmem; ps3 is 32bpp sysmem
+    // flag choices: ps is 16bpp sysmem; ps3 is 32bpp sysmem
     // (used as the format-conversion target on non-16bpp displays).
     ps = newsurf(newW, newH, SURF_SYSMEM16);
     if (had_ps3) {
         ps3 = newsurf(newW, newH, SURF_SYSMEM);
     }
-    ps5 = newsurf(newW, newH, SURF_SYSMEM16);
 
-    if (!ps || (had_ps3 && !ps3) || !ps5) {
+    if (!ps || (had_ps3 && !ps3)) {
         return false; // allocation failure — leave dims at old values
     }
 
