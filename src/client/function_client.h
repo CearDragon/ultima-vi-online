@@ -255,11 +255,13 @@ void STATUSMESSadd(const char *t, int skippable, int num);
 
 long getsetting(const char*d);
 
-// Rewrite settings.txt in place, replacing/appending one boolean entry of
-// the form `{NAME, CHOICE, [V], [1], [0]}`. See implementation in
-// function_client.cpp for the failure model. Used to persist
-// session-state UI flags such as WINDOW_MAXIMIZED.
-void setsetting_choice2(const char* name, long value);
+// Rewrite settings.txt in place, replacing/appending one
+// `{NAME, [VALUE]}` integer entry. See implementation in
+// function_client.cpp for the failure model and the recommended
+// read-back idiom (clear GETSETTING_RAW first, then call getsetting,
+// then test GETSETTING_RAW->l). Used to persist session UI state such
+// as WINDOW_MAXIMIZED / WINDOW_W / WINDOW_H / WINDOW_X / WINDOW_Y.
+void setsetting_int(const char* name, long value);
 
 void refresh();  // FIXME Inline assembly alert!
 

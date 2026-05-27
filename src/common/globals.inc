@@ -72,12 +72,10 @@ long   blit_offx  = 0;
 long   blit_offy  = 0;
 double blit_scale = 1.0;
 
-// Resizable-window plan (see docs/plan-resizableWindow.md).
-// Master feature flag for everything in that plan. When false, the client
-// behaves exactly as it did before the resizable-window work began. Set via
-// the WINDOW_RESIZE setting in settings.txt and parsed during client init.
-// Phase: RW-P0.4.
-bool windowResize = false;
+// (Removed 2026-05-27: the WINDOW_RESIZE setting and its `windowResize`
+// flag. The client is now always resizable — the legacy "fixed 1024x768"
+// rendering path it gated has no remaining use case. If you're hunting
+// for old branches, look for `windowResize` in git history.)
 
 // Most recently observed window-client dimensions (RW-P1.3) and a flag set
 // by WM_SIZE that the main loop uses to trigger OnClientResized() outside of

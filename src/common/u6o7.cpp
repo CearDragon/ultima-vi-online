@@ -317,22 +317,11 @@ delay_overprocess://check for messages again
 				put(tfh,&cltset,sizeof(client_settings));
 				close(tfh);
 			}
-
-			// Persist the current maximized state to settings.txt so the
-			// next session restores the same window layout. We use
-			// GetWindowPlacement (rather than IsZoomed) so a window that
-			// is currently minimized still records its underlying
-			// "restore-to-maximized" intent — otherwise minimizing then
-			// quitting would silently reset the flag.
-			if (hWnd){
-				WINDOWPLACEMENT wp; wp.length = sizeof(WINDOWPLACEMENT);
-				if (GetWindowPlacement(hWnd, &wp)){
-					bool maximized = (wp.showCmd == SW_SHOWMAXIMIZED) ||
-					                 ((wp.showCmd == SW_SHOWMINIMIZED) &&
-					                  ((wp.flags & WPF_RESTORETOMAXIMIZED) != 0));
-					setsetting_choice2("WINDOW_MAXIMIZED", maximized ? 1 : 0);
-				}
-			}
+			// WINDOW_MAXIMIZED / WINDOW_W / WINDOW_H / WINDOW_X / WINDOW_Y
+			// are written from inside the WM_DESTROY handler — see WndProc.
+			// They can't be written here because by the time GetMessage
+			// returns 0 (WM_QUIT) Windows has already destroyed hWnd, so
+			// GetWindowPlacement would fail.
 #endif
 
 #ifdef HOST
@@ -550,17 +539,68 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 
 	hWnd=hWnd2;
 
-	// Restore the last session's maximized state. WINDOW_MAXIMIZED is
-	// stored in settings.txt as a CHOICE so getsetting() returns 1 when
-	// the user last exited maximized (matches the same convention as
-	// WINDOW_RESIZE — see function_client.cpp). When the setting is
-	// absent or any other value, fall through to the launcher-provided
-	// nCmdShow so first-run behavior is unchanged.
-	int showCmd = nCmdShow;
-	if (getsetting("WINDOW_MAXIMIZED") == 1) {
-		showCmd = SW_SHOWMAXIMIZED;
+	// Restore the last session's window layout from settings.txt. We
+	// persist five integers in WM_DESTROY (see WndProc):
+	//   WINDOW_MAXIMIZED  - 1 if last session ended in maximized state.
+	//   WINDOW_X/Y/W/H    - the *restored* (non-maximized) rect.
+	// Reading order matters: position+size FIRST so a maximized window
+	// has a sensible un-maximize target, THEN ShowWindow with
+	// SW_SHOWMAXIMIZED if applicable.
+	//
+	// getsetting() only populates GETSETTING_RAW when the named key is
+	// found in the file, so we reset it before each call to
+	// distinguish "missing" from "present and zero" (first-run case).
+	//
+	// We also pre-check the file's existence: getsetting() opens via
+	// the legacy open() helper which pops up a MessageBox per call on
+	// missing-file, and we don't want first-run to fire five popups.
+	if (GetFileAttributesA("settings.txt") != INVALID_FILE_ATTRIBUTES) {
+		long savedX=0, savedY=0, savedW=0, savedH=0;
+		bool haveX=false, haveY=false, haveW=false, haveH=false;
+		txtset(GETSETTING_RAW, ""); getsetting("WINDOW_X");
+		if (GETSETTING_RAW->l > 0) { savedX = (long)txtnum(GETSETTING_RAW); haveX = true; }
+		txtset(GETSETTING_RAW, ""); getsetting("WINDOW_Y");
+		if (GETSETTING_RAW->l > 0) { savedY = (long)txtnum(GETSETTING_RAW); haveY = true; }
+		txtset(GETSETTING_RAW, ""); getsetting("WINDOW_W");
+		if (GETSETTING_RAW->l > 0) { savedW = (long)txtnum(GETSETTING_RAW); haveW = true; }
+		txtset(GETSETTING_RAW, ""); getsetting("WINDOW_H");
+		if (GETSETTING_RAW->l > 0) { savedH = (long)txtnum(GETSETTING_RAW); haveH = true; }
+
+		// Need all four to commit the move. Validate against the
+		// virtual screen so a window saved on a now-disconnected
+		// monitor doesn't open completely off-screen. We require the
+		// title bar to overlap the work area by at least 100 px in
+		// each dimension — otherwise fall back to the default rect.
+		if (haveX && haveY && haveW && haveH && savedW > 200 && savedH > 150) {
+			int vsLeft   = GetSystemMetrics(SM_XVIRTUALSCREEN);
+			int vsTop    = GetSystemMetrics(SM_YVIRTUALSCREEN);
+			int vsRight  = vsLeft + GetSystemMetrics(SM_CXVIRTUALSCREEN);
+			int vsBottom = vsTop  + GetSystemMetrics(SM_CYVIRTUALSCREEN);
+			bool onScreen =
+				(savedX + savedW) > (vsLeft + 100) &&
+				 savedX           < (vsRight - 100) &&
+				(savedY + savedH) > (vsTop + 100)  &&
+				 savedY           < (vsBottom - 100);
+			if (onScreen) {
+				SetWindowPos(hWnd, NULL,
+				             (int)savedX, (int)savedY,
+				             (int)savedW, (int)savedH,
+				             SWP_NOZORDER | SWP_NOACTIVATE);
+			}
+		}
+
+		int showCmd = nCmdShow;
+		txtset(GETSETTING_RAW, "");
+		getsetting("WINDOW_MAXIMIZED");
+		if (GETSETTING_RAW->l > 0 && (long)txtnum(GETSETTING_RAW) != 0) {
+			showCmd = SW_SHOWMAXIMIZED;
+		}
+		ShowWindow(hWnd, showCmd);
+	} else {
+		// First run (or settings.txt deleted): use the launcher-provided
+		// default; WM_DESTROY will create the file on this session's exit.
+		ShowWindow(hWnd, nCmdShow);
 	}
-	ShowWindow(hWnd,showCmd);
 
 	UpdateWindow(hWnd);
 
@@ -784,6 +824,30 @@ syskeyup:
 		*/
 
 	case WM_DESTROY:
+#ifdef CLIENT
+		// Persist window placement to settings.txt while hWnd is still
+		// valid (the post-WM_QUIT shutdown block in _tWinMain runs AFTER
+		// Windows has destroyed the handle, so GetWindowPlacement would
+		// fail there). We capture the *restored* rect even when the
+		// window is currently maximized or minimized, so unmaximizing
+		// next session lands in the same spot the user last sized it.
+		{
+			WINDOWPLACEMENT wp; wp.length = sizeof(WINDOWPLACEMENT);
+			if (GetWindowPlacement(hWnd, &wp)) {
+				bool maximized =
+					(wp.showCmd == SW_SHOWMAXIMIZED) ||
+					((wp.showCmd == SW_SHOWMINIMIZED) &&
+					 ((wp.flags & WPF_RESTORETOMAXIMIZED) != 0));
+				setsetting_int("WINDOW_MAXIMIZED", maximized ? 1 : 0);
+				setsetting_int("WINDOW_X", (long)wp.rcNormalPosition.left);
+				setsetting_int("WINDOW_Y", (long)wp.rcNormalPosition.top);
+				setsetting_int("WINDOW_W",
+					(long)(wp.rcNormalPosition.right - wp.rcNormalPosition.left));
+				setsetting_int("WINDOW_H",
+					(long)(wp.rcNormalPosition.bottom - wp.rcNormalPosition.top));
+			}
+		}
+#endif
 		endprogram=TRUE;
 		PostQuitMessage(0);
 		break;

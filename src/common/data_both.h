@@ -427,7 +427,7 @@ extern long   blit_offy;
 extern double blit_scale;
 
 // Resizable-window plan (docs/plan-resizableWindow.md).
-extern bool windowResize;
+// (`windowResize` removed 2026-05-27 — the client is now always resizable.)
 extern long clientW;
 extern long clientH;
 extern bool dirtyClientSize;

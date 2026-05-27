@@ -309,8 +309,8 @@ void LIGHTnew(unsigned short x,unsigned short y,unsigned long light_data_offset,
 
 // =====================================================================
 // RW-P2.2: backbuffer recreation. Called from the dirtyClientSize
-// handler in loop_client.cpp when the user resizes the window with
-// WINDOW_RESIZE enabled. Releases and re-creates the `ps`/`ps3`/`ps5`
+// handler in loop_client.cpp when the user resizes the window. Releases
+// and re-creates the `ps`/`ps3`/`ps5`
 // DirectDraw surfaces, re-allocates the lighting buffers, patches FRAME
 // pointers (vf, fs) that referenced the old `ps`, and clears the new
 // surface to black so unrendered regions don't show stale pixels.
@@ -1712,38 +1712,43 @@ getsetting_choice_nextchoice:
 }
 
 // Rewrites settings.txt in place, replacing (or appending) a single
-// `{NAME, CHOICE, [V], [1], [0]}` entry. Preserves every other line.
+// `{NAME, [VALUE]}` integer entry. Preserves every other line.
 //
-// Designed for boolean session-state flags like WINDOW_MAXIMIZED. The
-// CHOICE form is used so getsetting() returns 1 when V == 1 and 2
-// otherwise — matching the convention used by existing settings such as
-// WINDOW_RESIZE (`getsetting("WINDOW_RESIZE") == 1` meaning enabled).
+// Read back with:
+//     txtset(GETSETTING_RAW, "");      // clear so absence is detectable
+//     getsetting(name);                // return value is ignored
+//     if (GETSETTING_RAW->l > 0) {
+//         long v = (long)txtnum(GETSETTING_RAW);
+//     }
+// getsetting() only populates GETSETTING_RAW when the named entry
+// exists in the file, so the explicit reset above is what distinguishes
+// "missing" from "present and zero".
 //
-// Failure modes are silent:
+// Failure modes are silent on purpose:
 //   - settings.txt missing: a fresh file is created with just the new line.
-//   - write failure: the previous file is left intact (no partial overwrite
-//     because we accumulate everything in memory before truncating).
-// This is deliberate — failing to persist UI state must never break the
-// game session.
-void setsetting_choice2(const char* name, long value) {
+//   - write failure: the previous file is left intact (the entire
+//     replacement content is buffered before the truncate-open).
+// Failing to persist UI state must never break the game session.
+void setsetting_int(const char* name, long value) {
   static file *tfh;
   static txt  *line=txtnew();
   static txt  *out=txtnew();
   static txt  *needle=txtnew();
   static txt  *lowerline=txtnew();
+  static txt  *numbuf=txtnew();
   static long i,sz;
 
   txtNEWLEN(out,0);
 
-  // Build the prefix we use to recognize the existing entry, e.g.
-  // "{window_maximized,". We compare case-insensitively by lowering both
-  // sides (getsetting itself relies on txtsamewithoutcase for the same).
+  // Build the prefix we recognize, e.g. "{window_maximized,". Comparison
+  // is case-insensitive — we lower a copy of each line and compare its
+  // leading bytes against `needle`.
   txtset(needle,"{");
   txtadd(needle,name);
   txtadd(needle,",");
   txtlcase(needle);
 
-  // -- Phase 1: read every line except the one we're about to replace --
+  // -- Phase 1: read every line, drop any matching the key --
   tfh=open2("settings.txt",OF_READ|OF_SHARE_COMPAT);
   if (tfh->h!=HFILE_ERROR){
     for (;;){
@@ -1753,8 +1758,6 @@ void setsetting_choice2(const char* name, long value) {
       txtfilein(line,tfh);
       if (line->l==0) continue;
 
-      // Case-insensitive prefix match: lower a copy of the line and
-      // compare its leading bytes against `needle`.
       txtset(lowerline,line);
       txtlcase(lowerline);
       bool match = false;
@@ -1776,12 +1779,13 @@ void setsetting_choice2(const char* name, long value) {
   if (out->l) txtadd(out,"\r\n");
   txtadd(out,"{");
   txtadd(out,name);
-  txtadd(out,", CHOICE, [");
-  txtadd(out,(value!=0) ? "1" : "0");
-  txtadd(out,"], [1], [0]}\r\n");
+  txtadd(out,", [");
+  txtnumint(numbuf,value);
+  txtadd(out,numbuf);
+  txtadd(out,"]}\r\n");
 
-  // -- Phase 3: truncate-write the new content. OF_CREATE truncates on
-  //    open per the OpenFile() contract used throughout the project (see
+  // -- Phase 3: truncate-write. OF_CREATE truncates on open per the
+  //    OpenFile() contract used throughout the project (see
   //    e.g. loop_client.cpp:1986 userinfo.txt rewrite). --
   tfh=open2("settings.txt",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
   if (tfh->h!=HFILE_ERROR){
@@ -2160,11 +2164,9 @@ void newmodeinit() {
 	smallwindow = FALSE;
 	windowsizecyclenum = 0;
 
-	// RW-P0.4: master feature flag for the resizable-window plan
-	// (docs/plan-resizableWindow.md). Defaults to FALSE so the client
-	// remains bit-identical to legacy behavior unless the user opts in
-	// via "WINDOW_RESIZE [1]" in settings.txt.
-	windowResize = (getsetting("WINDOW_RESIZE") == 1);
+	// (Removed 2026-05-27: WINDOW_RESIZE setting + `windowResize` flag.
+	// The client is now always resizable / always-maximizable; the
+	// legacy fixed-1024x768 rendering path the flag gated is gone.)
 
 	/*
 		if (resysettingoption == 2) {

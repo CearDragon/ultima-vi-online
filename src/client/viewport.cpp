@@ -37,7 +37,7 @@ extern Dynamic2DArray<unsigned char> nonvis;
 extern int uipanelsidebar;
 extern int uipanelsizex[20][11][6]; // UI_PANEL_MAX x UI_PANELWIDGET_MAX x UI_WIDGETSTATE_MAX
 
-extern bool windowResize;
+// (windowResize extern removed 2026-05-27 — always-on now.)
 
 namespace u6o { namespace client {
 
@@ -74,7 +74,10 @@ int lightingStride()     { return g_active_w; }
 int lightingTotalBytes() { return g_active_w * g_active_h; }
 
 int viewTilesX() {
-    if (!windowResize) return 32;
+    // (windowResize early-return removed 2026-05-27. The legacy 32-tile
+    // floor is now expressed through the same g_active_w / 32 path; the
+    // active back buffer starts at kBackbufferLegacyW so the legacy
+    // 32-tile width is the natural minimum.)
     // RW-P4.8 (2026-05-22): sidebar is no longer anchored to the right
     // edge of the window (see ui_panels_apply.cpp). The world view now
     // fills the full back-buffer width; the legacy sidebar (still at
@@ -92,7 +95,7 @@ int viewTilesX() {
 }
 
 int viewTilesY() {
-    if (!windowResize) return 24;
+    // (windowResize early-return removed 2026-05-27 — see viewTilesX.)
     // RW-P4.11 (2026-05-26): clamp to kViewportTilesYMax. See note
     // above and the constant's definition in viewport.h.
     int tiles = (g_active_h - bottomPanelH()) / 32;

@@ -22,7 +22,7 @@ namespace u6o { namespace client { namespace splash {
 
 // Three seconds, as requested by product. Adjust here if the duration ever
 // becomes configurable.
-constexpr DWORD kDefaultDurationMs = 3000;
+constexpr DWORD kDefaultDurationMs = 4000;
 
 // Null-terminated list of UTF-16 paths the splash will probe in order for
 // the splash image. The first one that opens wins. Keep this array

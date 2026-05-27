@@ -94,7 +94,7 @@ enum : int {
 // past x=1024 / y=768 — every frame the guard would interpret the
 // dragged position as the hide-sentinel and subtract 2048.
 //
-// With `windowResize=true` the back buffer can grow up to
+// With the always-resizable client the back buffer can grow up to
 // kBackbufferMaxW x kBackbufferMaxH, so the legacy thresholds sit
 // inside the user-visible drag area. These constants move the
 // thresholds (and the matching deltas) safely past the max

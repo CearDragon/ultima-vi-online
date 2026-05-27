@@ -41,7 +41,7 @@ extern double blit_scale;
 extern long   clientW;
 extern long   clientH;
 extern bool   dirtyClientSize;
-extern bool   windowResize;
+// (windowResize removed 2026-05-27 — always-on now.)
 
 // Blit the source-surface DC `srcdc` (size srcW x srcH) into window `hWndDst`
 // while preserving the source aspect ratio. Letterbox bars are filled black.

@@ -1027,10 +1027,10 @@ if (!NEThost) {
       char dbgbuf[256];
       _snprintf(dbgbuf, sizeof(dbgbuf),
         "[u6o] client=%ldx%ld src=%ux%u blit_off=%ld,%ld blit_scale=%.3f "
-        "wsc=%u smallwin=%d resize=%d hWnd=%p\n",
+        "wsc=%u smallwin=%d hWnd=%p\n",
         clientW, clientH, resxo, resyo,
         blit_offx, blit_offy, blit_scale,
-        windowsizecyclenum, (int)smallwindow, (int)windowResize,
+        windowsizecyclenum, (int)smallwindow,
         (void*)hWnd);
       dbgbuf[sizeof(dbgbuf)-1] = '\0';
       OutputDebugStringA(dbgbuf);
@@ -1051,28 +1051,25 @@ if (dirtyClientSize) {
   // frame from GetClientRect, so input mapping stays correct without any
   // extra work here. Reserved for future surface recreation (RW-P2.2) and
   // UI anchor recomputation (RW-P3.3).
-  // RW-P2.2: when windowResize is on, ask the viewport seam to (eventually)
-  // re-create back buffers at the new client size. Today this is a no-op
-  // stub in viewport.h; the actual surface free/realloc work lands in the
-  // next RW-P2 commit, after manual testing of the centralized accessors.
-  if (windowResize) {
-    recreateBackbuffers((int)clientW, (int)clientH);
-    // RW-P3.3: re-anchor the five static UI panels. NOTE: until P2.2
-    // grows the back buffer with the window, panels must anchor against
-    // the back-buffer dimensions, not the client-window dimensions ?
-    // they draw onto `ps` which is still 1024x768 regardless of how
-    // big the window has become. Anchoring to clientW/H would push
-    // panels off the back-buffer edge and they'd disappear behind the
-    // letterbox bars. Once the back buffer follows clientW/H, this can
-    // change to clientW/clientH for true edge-following.
-    RepositionAnchoredPanels(backbufferW(), backbufferH());
-  }
+  // RW-P2.2: ask the viewport seam to re-create back buffers at the new
+  // client size, then reposition anchored UI panels. (windowResize gate
+  // removed 2026-05-27 — always-on.)
+  recreateBackbuffers((int)clientW, (int)clientH);
+  // RW-P3.3: re-anchor the five static UI panels. NOTE: until P2.2
+  // grows the back buffer with the window, panels must anchor against
+  // the back-buffer dimensions, not the client-window dimensions ?
+  // they draw onto `ps` which is still 1024x768 regardless of how
+  // big the window has become. Anchoring to clientW/H would push
+  // panels off the back-buffer edge and they'd disappear behind the
+  // letterbox bars. Once the back buffer follows clientW/H, this can
+  // change to clientW/clientH for true edge-following.
+  RepositionAnchoredPanels(backbufferW(), backbufferH());
 #ifdef _DEBUG
   {
     char dbgbuf[160];
     _snprintf(dbgbuf, sizeof(dbgbuf),
-      "[u6o] OnClientResized: %ldx%ld (windowResize=%d)\n",
-      clientW, clientH, (int)windowResize);
+      "[u6o] OnClientResized: %ldx%ld\n",
+      clientW, clientH);
     dbgbuf[sizeof(dbgbuf)-1] = '\0';
     OutputDebugStringA(dbgbuf);
   }
@@ -1181,7 +1178,7 @@ checkobj:
     // r222 this is where mouse click is checked! no changes are made here
 
     pn->mouse_over=TRUE;
-    if (pn == vf && windowResize && tplay && tplay->x) {
+    if (pn == vf && tplay && tplay->x) {
       long tpx_legacy, tpy_legacy;
       getscreenoffset_legacy(tplay->x, tplay->y, &tpx_legacy, &tpy_legacy);
       pn->mouse_x = (short)((tpx - tpx_legacy) * 32 + (mx - pn->offset_x));
@@ -3181,16 +3178,10 @@ maxminmini:
 
 
   if (u6okeyhit(U6OK_SOUND)){ //"S" sound on/off
-    if (windowResize) {
-      u6o::client::g_volcontrol_visible = !u6o::client::g_volcontrol_visible;
-      RepositionAnchoredPanels(backbufferW(), backbufferH());
-    } else {
-      if (volcontrol->offset_x>=kPanelHideThresholdX){
-        volcontrol->offset_x-=kPanelHideDeltaX;
-      }else{
-        volcontrol->offset_x+=kPanelHideDeltaX;
-      }
-    }
+    // (windowResize gate removed 2026-05-27 — always toggle the volume
+    // panel visibility; the legacy slide-off-screen path is gone.)
+    u6o::client::g_volcontrol_visible = !u6o::client::g_volcontrol_visible;
+    RepositionAnchoredPanels(backbufferW(), backbufferH());
   }
 
   if (volcontrol->mouse_over){
@@ -6697,19 +6688,19 @@ CLIENT_donemess:
     if (nodisplay) goto skiprefresh2;
 
 
-    // RW-P2.2 / RW-P3.3 trails fix: when WINDOW_RESIZE is on and the
-    // active back-buffer is larger than the legacy 1024x768 world view,
-    // clear the whole back-buffer to black at the start of each frame.
-    // The world tile renderer overdraws the upper-left 1024x768 area
-    // every frame, but anything outside that rect (extended right/
-    // bottom strips when the window has been enlarged) is never
-    // overwritten by the world pass ? so stale pixels (UI panels'
-    // previous positions, drifted clouds) accumulated as visible
-    // trails. A single DD COLORFILL is hardware-fast.
+    // RW-P2.2 / RW-P3.3 trails fix: when the active back-buffer is
+    // larger than the legacy 1024x768 world view, clear the whole
+    // back-buffer to black at the start of each frame. The world tile
+    // renderer overdraws the upper-left 1024x768 area every frame, but
+    // anything outside that rect (extended right/bottom strips when the
+    // window has been enlarged) is never overwritten by the world pass
+    // ? so stale pixels (UI panels' previous positions, drifted clouds)
+    // accumulated as visible trails. A single DD COLORFILL is
+    // hardware-fast.
     //
-    // Gated on windowResize so legacy 1024x768 users see no behavior
-    // change and don't pay the (small) per-frame cls cost.
-    if (windowResize && (backbufferW() > 1024 || backbufferH() > 768)) {
+    // (windowResize gate removed 2026-05-27 — the back buffer can grow
+    // beyond 1024x768 whenever the window is enlarged.)
+    if (backbufferW() > 1024 || backbufferH() > 768) {
         cls(ps, 0);
     }
 
@@ -11732,8 +11723,9 @@ gotkey: //x2 is value of key
       // RW: clamp dragged panels to the *live* back-buffer extents instead of the
       // legacy 1024x768 floor, otherwise maximized windows visually trap every
       // widget at x~=1016 / y~=760 even though the cursor moves further.
-      const long bb_w = windowResize ? (long)backbufferW() : 1024L;
-      const long bb_h = windowResize ? (long)backbufferH() : 768L;
+      // (windowResize ternary removed 2026-05-27 — always use the live size.)
+      const long bb_w = (long)backbufferW();
+      const long bb_h = (long)backbufferH();
       x3=8-x2; if (x<x3) pmf->offset_x=x3;
       y3=8-y2; if (y<y3) pmf->offset_y=y3;
       x3=bb_w-8; if (x>x3) pmf->offset_x=x3;

@@ -135,9 +135,9 @@ const UiPlacement& GetBuiltinPanel(UiPanelId id);
 // when the window is resized. Implemented in ui_panels_apply.cpp where
 // the panel globals are visible (via data_client.h).
 //
-// Caller is responsible for the `windowResize` feature gate — this
-// function unconditionally writes the offsets when called. When the
-// flag is off, callers skip it so legacy positions stay untouched.
+// Caller used to be responsible for a `windowResize` feature gate; that
+// gate was removed 2026-05-27 (always-on now) so callers may invoke
+// this unconditionally.
 void RepositionAnchoredPanels(int clientW, int clientH);
 void ValidateUiMetrics();
 

@@ -854,21 +854,15 @@ U6O_WALKTHRU_REC=TRUE;
 
 scrlog("Beginning main loop!");
 
-// RW-P3.3: when WINDOW_RESIZE is enabled, snap the five anchored
-// panels (con_frm, con_frm_img, qkstf, volcontrol,
-// statusmessage_viewprev) to their UiPlacement-resolved positions.
-// We anchor against the back-buffer size, NOT the client-window size:
-// panels draw onto `ps` which is currently pinned at 1024x768
-// regardless of window size. Anchoring to clientW/H here would push
-// panels off the back-buffer edge into the letterbox bars where they
-// can't render. At the legacy back-buffer size this is a no-op (the
-// placements were authored to reproduce the legacy literals exactly),
-// so behavior is bit-identical until P2.2 grows the back buffer.
-// The call is skipped when windowResize is off — existing positions
-// (including any cltset-saved overrides) stay untouched.
-if (windowResize) {
-    RepositionAnchoredPanels(backbufferW(), backbufferH());
-}
+// RW-P3.3: snap the five anchored panels (con_frm, con_frm_img, qkstf,
+// volcontrol, statusmessage_viewprev) to their UiPlacement-resolved
+// positions. We anchor against the back-buffer size, NOT the
+// client-window size: panels draw onto `ps` which is currently pinned
+// at 1024x768 regardless of window size. Anchoring to clientW/H here
+// would push panels off the back-buffer edge into the letterbox bars
+// where they can't render. (windowResize gate removed 2026-05-27 —
+// always run.)
+RepositionAnchoredPanels(backbufferW(), backbufferH());
 
 tfh=open(".\\dr\\objfixed.bin"); get(tfh,&objfixed_index,2048*1024*2); get(tfh,&objfixed_type,65536*2); close(tfh);
 //scrlog(">Fixed map objects loaded [objfixed.bin]");
