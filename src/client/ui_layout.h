@@ -143,6 +143,27 @@ void ValidateUiMetrics();
 
 extern bool g_volcontrol_visible;
 
+// RW: per-panel persistence overrides.
+//
+// When the user drags `qkstf` or `volcontrol` to a custom location (or
+// such a custom location was restored from settings.bin at startup),
+// the corresponding `*_user_positioned` flag flips to true and the
+// `*_user_x/y` fields cache the chosen offset. RepositionAnchoredPanels
+// then restores from the cache on every reposition event (initial
+// snap, window resize, volcontrol show/hide toggle) instead of
+// snapping the panel back to the anchored default from kBuiltinPanels.
+// The per-frame mirror in loop_client.cpp uses the cache to populate
+// cltset.qkstf_offset_x/y and cltset.volcontrol_offset_x/y so that the
+// shutdown writer (u6o7.cpp) persists the user's choice; when the flag
+// is false the mirror writes the 32767 "no override" sentinel.
+extern bool g_qkstf_user_positioned;
+extern int  g_qkstf_user_x;
+extern int  g_qkstf_user_y;
+
+extern bool g_volcontrol_user_positioned;
+extern int  g_volcontrol_user_x;
+extern int  g_volcontrol_user_y;
+
 }} // namespace u6o::client
 
 // Unqualified shim so existing C-style call sites in setup_client.inc /

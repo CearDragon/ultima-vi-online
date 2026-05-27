@@ -785,8 +785,16 @@ memcpy(&spellrecall_i,&cltset2.spellrecall_i,8);
 if (cltset2.musickeyboard_offset_x!=32767){musickeyboard->offset_x=cltset2.musickeyboard_offset_x+kPanelHideDeltaX; musickeyboard->offset_y=cltset2.musickeyboard_offset_y;}
 if (cltset2.inpf_offset_x!=32767){inpf->offset_x=cltset2.inpf_offset_x+kPanelHideDeltaX; inpf->offset_y=cltset2.inpf_offset_y;}
 if (cltset2.con_frm_offset_x!=32767){con_frm->offset_x=cltset2.con_frm_offset_x; con_frm->offset_y=cltset2.con_frm_offset_y;}
-if (cltset2.volcontrol_offset_x!=32767){volcontrol->offset_x=cltset2.volcontrol_offset_x; volcontrol->offset_y=cltset2.volcontrol_offset_y;}
-if (cltset2.qkstf_offset_x!=32767){qkstf->offset_x=cltset2.qkstf_offset_x; qkstf->offset_y=cltset2.qkstf_offset_y;}
+if (cltset2.volcontrol_offset_x!=32767){volcontrol->offset_x=cltset2.volcontrol_offset_x; volcontrol->offset_y=cltset2.volcontrol_offset_y;
+  u6o::client::g_volcontrol_user_positioned = true;
+  u6o::client::g_volcontrol_user_x = cltset2.volcontrol_offset_x;
+  u6o::client::g_volcontrol_user_y = cltset2.volcontrol_offset_y;
+}
+if (cltset2.qkstf_offset_x!=32767){qkstf->offset_x=cltset2.qkstf_offset_x; qkstf->offset_y=cltset2.qkstf_offset_y;
+  u6o::client::g_qkstf_user_positioned = true;
+  u6o::client::g_qkstf_user_x = cltset2.qkstf_offset_x;
+  u6o::client::g_qkstf_user_y = cltset2.qkstf_offset_y;
+}
 memcpy(&cltset,&cltset2,sizeof(client_settings));
 }else{
 //set default/unknown(32767) values

@@ -76,9 +76,38 @@ void RepositionAnchoredPanels(int clientW, int clientH) {
 
     apply_to(con_frm,                 UiPanelId::ConvoArrows,    clientW, clientH);
     apply_to(con_frm_img,             UiPanelId::ConvoHistory,   clientW, clientH);
-    apply_to(qkstf,                   UiPanelId::PartyList,      clientW, clientH);
+    // RW: if the user dragged qkstf to a custom spot (this session or a
+    // restored prior session), keep it there instead of snapping back to
+    // the anchored top-right default. Clamp to the live client area so a
+    // shrunken window can't strand the panel off-screen.
+    if (qkstf) {
+        if (g_qkstf_user_positioned) {
+            int x = g_qkstf_user_x;
+            int y = g_qkstf_user_y;
+            if (x < 0) x = 0; if (x > clientW) x = clientW;
+            if (y < 0) y = 0; if (y > clientH) y = clientH;
+            g_qkstf_user_x = x;
+            g_qkstf_user_y = y;
+            qkstf->offset_x = x;
+            qkstf->offset_y = y;
+        } else {
+            apply_to(qkstf, UiPanelId::PartyList, clientW, clientH);
+        }
+    }
     if (g_volcontrol_visible) {
-        apply_to(volcontrol,          UiPanelId::VolumeControl,  clientW, clientH);
+        // Same override behavior for volcontrol when it's on screen.
+        if (volcontrol && g_volcontrol_user_positioned) {
+            int x = g_volcontrol_user_x;
+            int y = g_volcontrol_user_y;
+            if (x < 0) x = 0; if (x > clientW) x = clientW;
+            if (y < 0) y = 0; if (y > clientH) y = clientH;
+            g_volcontrol_user_x = x;
+            g_volcontrol_user_y = y;
+            volcontrol->offset_x = x;
+            volcontrol->offset_y = y;
+        } else {
+            apply_to(volcontrol,      UiPanelId::VolumeControl,  clientW, clientH);
+        }
     } else if (volcontrol) {
         // RW-P4.9: park volcontrol in the hide-sentinel range so the
         // FRAME display loop's offscreen culling skips it AND the

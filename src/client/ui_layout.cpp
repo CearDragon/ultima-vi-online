@@ -126,5 +126,13 @@ void RecomputeEquipSlotLayout(float scaleX, float scaleY) {
 
 bool g_volcontrol_visible = true;
 
-}} // namespace u6o::client
+// See ui_layout.h for the design rationale of these per-panel overrides.
+bool g_qkstf_user_positioned = false;
+int  g_qkstf_user_x = 0;
+int  g_qkstf_user_y = 0;
 
+bool g_volcontrol_user_positioned = false;
+int  g_volcontrol_user_x = 0;
+int  g_volcontrol_user_y = 0;
+
+}} // namespace u6o::client

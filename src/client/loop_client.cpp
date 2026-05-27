@@ -1380,6 +1380,14 @@ if (drg!=NULL){ //drag panel
       FRAME_drg_begin=TRUE;
       drg->offset_x+=x;
       drg->offset_y+=y;
+      // RW: a real user drag of qkstf/volcontrol flips them into
+      // "user-positioned" mode so RepositionAnchoredPanels stops
+      // snapping them back to the anchored default on resize / show
+      // toggle, and the per-frame cltset mirror starts persisting the
+      // chosen offset to settings.bin. The cache is refreshed from the
+      // clamped offset below in the i==19 / i==20 block.
+      if (drg == qkstf)     u6o::client::g_qkstf_user_positioned = true;
+      if (drg == volcontrol) u6o::client::g_volcontrol_user_positioned = true;
     }
   }
 }
@@ -11732,6 +11740,22 @@ gotkey: //x2 is value of key
       y3=bb_h-8; if (y>y3) pmf->offset_y=y3;
       if (i==16){cltset.musickeyboard_offset_x=pmf->offset_x; cltset.musickeyboard_offset_y=pmf->offset_y;}
       if (i==17){cltset.inpf_offset_x=pmf->offset_x; cltset.inpf_offset_y=pmf->offset_y;}
+      // RW: keep the user-positioned caches in sync with the live
+      // (already-clamped) frame offset so RepositionAnchoredPanels
+      // restores to the right spot on resize / show toggle, and the
+      // shutdown writer persists the latest position. Only refresh
+      // when the user has actually positioned the panel; otherwise
+      // the panel is still tracking the anchored default and the
+      // cache must stay at its "unset" state so the cltset mirror
+      // below writes the 32767 sentinel.
+      if ((i==19) && u6o::client::g_volcontrol_user_positioned) {
+        u6o::client::g_volcontrol_user_x = pmf->offset_x;
+        u6o::client::g_volcontrol_user_y = pmf->offset_y;
+      }
+      if ((i==20) && u6o::client::g_qkstf_user_positioned) {
+        u6o::client::g_qkstf_user_x = pmf->offset_x;
+        u6o::client::g_qkstf_user_y = pmf->offset_y;
+      }
     }//onscreen
     //update default frame settings
     if ((i>=0)&&(i<=7)){
@@ -11743,8 +11767,28 @@ gotkey: //x2 is value of key
       if (cltset.party_spellbook_frame_offset_x[i-8]>kPanelHideThresholdX) cltset.party_spellbook_frame_offset_x[i-8]-=kPanelHideDeltaX;
     }
     if (i==18){cltset.con_frm_offset_x=pmf->offset_x; cltset.con_frm_offset_y=pmf->offset_y;}
-    if (i==20){cltset.qkstf_offset_x=pmf->offset_x; cltset.qkstf_offset_y=pmf->offset_y;}
-    if (i==19){cltset.volcontrol_offset_x=pmf->offset_x; cltset.volcontrol_offset_y=pmf->offset_y;}
+    // RW: mirror qkstf/volcontrol to cltset from the user-positioned
+    // cache, NOT from pmf->offset_x — when volcontrol is hidden the
+    // live offset is parked in the off-screen sentinel range and would
+    // overwrite a previously-saved user position. Writing 32767 when
+    // the panel is at its anchored default keeps the load path's
+    // "default vs. user" distinction working across restarts.
+    if (i==20){
+      if (u6o::client::g_qkstf_user_positioned){
+        cltset.qkstf_offset_x=u6o::client::g_qkstf_user_x;
+        cltset.qkstf_offset_y=u6o::client::g_qkstf_user_y;
+      } else {
+        cltset.qkstf_offset_x=32767;
+      }
+    }
+    if (i==19){
+      if (u6o::client::g_volcontrol_user_positioned){
+        cltset.volcontrol_offset_x=u6o::client::g_volcontrol_user_x;
+        cltset.volcontrol_offset_y=u6o::client::g_volcontrol_user_y;
+      } else {
+        cltset.volcontrol_offset_x=32767;
+      }
+    }
     if (i==21){cltset.minimap_offset_x=pmf->offset_x; cltset.minimap_offset_y=pmf->offset_y;}
     if (i==22){cltset.tmap_offset_x=pmf->offset_x; cltset.tmap_offset_y=pmf->offset_y;}
   }//i (frame)
