@@ -255,6 +255,12 @@ void STATUSMESSadd(const char *t, int skippable, int num);
 
 long getsetting(const char*d);
 
+// Rewrite settings.txt in place, replacing/appending one boolean entry of
+// the form `{NAME, CHOICE, [V], [1], [0]}`. See implementation in
+// function_client.cpp for the failure model. Used to persist
+// session-state UI flags such as WINDOW_MAXIMIZED.
+void setsetting_choice2(const char* name, long value);
+
 void refresh();  // FIXME Inline assembly alert!
 
 void scrlog(const char*d); //screen log

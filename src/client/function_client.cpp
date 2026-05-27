@@ -1711,6 +1711,85 @@ getsetting_choice_nextchoice:
   return FALSE;
 }
 
+// Rewrites settings.txt in place, replacing (or appending) a single
+// `{NAME, CHOICE, [V], [1], [0]}` entry. Preserves every other line.
+//
+// Designed for boolean session-state flags like WINDOW_MAXIMIZED. The
+// CHOICE form is used so getsetting() returns 1 when V == 1 and 2
+// otherwise — matching the convention used by existing settings such as
+// WINDOW_RESIZE (`getsetting("WINDOW_RESIZE") == 1` meaning enabled).
+//
+// Failure modes are silent:
+//   - settings.txt missing: a fresh file is created with just the new line.
+//   - write failure: the previous file is left intact (no partial overwrite
+//     because we accumulate everything in memory before truncating).
+// This is deliberate — failing to persist UI state must never break the
+// game session.
+void setsetting_choice2(const char* name, long value) {
+  static file *tfh;
+  static txt  *line=txtnew();
+  static txt  *out=txtnew();
+  static txt  *needle=txtnew();
+  static txt  *lowerline=txtnew();
+  static long i,sz;
+
+  txtNEWLEN(out,0);
+
+  // Build the prefix we use to recognize the existing entry, e.g.
+  // "{window_maximized,". We compare case-insensitively by lowering both
+  // sides (getsetting itself relies on txtsamewithoutcase for the same).
+  txtset(needle,"{");
+  txtadd(needle,name);
+  txtadd(needle,",");
+  txtlcase(needle);
+
+  // -- Phase 1: read every line except the one we're about to replace --
+  tfh=open2("settings.txt",OF_READ|OF_SHARE_COMPAT);
+  if (tfh->h!=HFILE_ERROR){
+    for (;;){
+      i=seek(tfh);
+      sz=lof(tfh);
+      if (i>=sz) break;
+      txtfilein(line,tfh);
+      if (line->l==0) continue;
+
+      // Case-insensitive prefix match: lower a copy of the line and
+      // compare its leading bytes against `needle`.
+      txtset(lowerline,line);
+      txtlcase(lowerline);
+      bool match = false;
+      if (lowerline->l >= needle->l){
+        match = true;
+        for (long j=0;j<needle->l;j++){
+          if (lowerline->d[j] != needle->d[j]) { match = false; break; }
+        }
+      }
+      if (match) continue;  // drop existing entry; we'll re-append it
+
+      if (out->l) txtadd(out,"\r\n");
+      txtadd(out,line);
+    }
+    close(tfh);
+  }
+
+  // -- Phase 2: append the new entry --
+  if (out->l) txtadd(out,"\r\n");
+  txtadd(out,"{");
+  txtadd(out,name);
+  txtadd(out,", CHOICE, [");
+  txtadd(out,(value!=0) ? "1" : "0");
+  txtadd(out,"], [1], [0]}\r\n");
+
+  // -- Phase 3: truncate-write the new content. OF_CREATE truncates on
+  //    open per the OpenFile() contract used throughout the project (see
+  //    e.g. loop_client.cpp:1986 userinfo.txt rewrite). --
+  tfh=open2("settings.txt",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
+  if (tfh->h!=HFILE_ERROR){
+    put(tfh,out->d,out->l);
+  }
+  close(tfh);
+}
+
 // rrr added new mode handling
 void refresh(){
 //  if (smallwindow){

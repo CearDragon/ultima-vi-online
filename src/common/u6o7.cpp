@@ -317,6 +317,22 @@ delay_overprocess://check for messages again
 				put(tfh,&cltset,sizeof(client_settings));
 				close(tfh);
 			}
+
+			// Persist the current maximized state to settings.txt so the
+			// next session restores the same window layout. We use
+			// GetWindowPlacement (rather than IsZoomed) so a window that
+			// is currently minimized still records its underlying
+			// "restore-to-maximized" intent — otherwise minimizing then
+			// quitting would silently reset the flag.
+			if (hWnd){
+				WINDOWPLACEMENT wp; wp.length = sizeof(WINDOWPLACEMENT);
+				if (GetWindowPlacement(hWnd, &wp)){
+					bool maximized = (wp.showCmd == SW_SHOWMAXIMIZED) ||
+					                 ((wp.showCmd == SW_SHOWMINIMIZED) &&
+					                  ((wp.flags & WPF_RESTORETOMAXIMIZED) != 0));
+					setsetting_choice2("WINDOW_MAXIMIZED", maximized ? 1 : 0);
+				}
+			}
 #endif
 
 #ifdef HOST
@@ -534,7 +550,17 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 
 	hWnd=hWnd2;
 
-	ShowWindow(hWnd,nCmdShow);
+	// Restore the last session's maximized state. WINDOW_MAXIMIZED is
+	// stored in settings.txt as a CHOICE so getsetting() returns 1 when
+	// the user last exited maximized (matches the same convention as
+	// WINDOW_RESIZE — see function_client.cpp). When the setting is
+	// absent or any other value, fall through to the launcher-provided
+	// nCmdShow so first-run behavior is unchanged.
+	int showCmd = nCmdShow;
+	if (getsetting("WINDOW_MAXIMIZED") == 1) {
+		showCmd = SW_SHOWMAXIMIZED;
+	}
+	ShowWindow(hWnd,showCmd);
 
 	UpdateWindow(hWnd);
 
