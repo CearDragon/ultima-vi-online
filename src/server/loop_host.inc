@@ -2279,6 +2279,13 @@ moverbuffer_outofrange:;
 
 
           //******this code happens whether or not an update is sent******
+          // RW dynamic-objects fix follow-up (mirror of loop_host.cpp; not
+          // compiled): the silent-prune path MUST force sceneupdaterequired
+          // so the client's mirror-prune runs in lock-step. Without it,
+          // host's mv_i shrinks while client's stays, every later
+          // remove/move/add index is off-by-N on the client, the wrong
+          // mover slots get clobbered (often index 0 = the avatar), NPCs
+          // duplicate, and the player visually drifts off-camera.
           //remove all offscreen objects in client's array
           i=0;
 mover_removeoffscreen_next: if (i<tplayer->mv_i){
@@ -2301,6 +2308,7 @@ mover_removeoffscreen_next: if (i<tplayer->mv_i){
               tplayer->mv_more[i3-1]=tplayer->mv_more[i3];
             }//i3
             tplayer->mv_i--;
+            sceneupdaterequired=1;//force send so client's mirror-prune runs
             goto mover_removeoffscreen_next;
           }//x,y boundary check
           i++; goto mover_removeoffscreen_next;

@@ -2345,6 +2345,19 @@ moverbuffer_outofrange:;
 
 
           //******this code happens whether or not an update is sent******
+          // RW dynamic-objects fix follow-up (2026-05-28): this prune MUST
+          // force a scene-update send whenever it removes a mover. Otherwise
+          // the host shrinks tplayer->mv_i locally and never tells the
+          // client, so the client keeps the stale entry; every subsequent
+          // remove/move/add index is then off-by-N on the client and the
+          // wrong mover slots get overwritten -- producing duplicated NPCs,
+          // a ghost-avatar that lags the camera, and "walking just moves
+          // the camera" because the player's own mover slot (typically
+          // index 0) gets reassigned to a different mover on the client.
+          // Was latent at the legacy 32x24 prune because that bound
+          // almost always coincided with a player-MOVE message setting
+          // sceneupdaterequired anyway; the widened MV_TX bounds made the
+          // silent-prune case more likely and exposed the bug.
           //remove all offscreen objects in client's array
           i=0;
 mover_removeoffscreen_next: if (i<tplayer->mv_i){
@@ -2368,6 +2381,7 @@ mover_removeoffscreen_next: if (i<tplayer->mv_i){
               tplayer->mv_more[i3-1]=tplayer->mv_more[i3];
             }//i3
             tplayer->mv_i--;
+            sceneupdaterequired=1;//force send so client's mirror-prune runs
             goto mover_removeoffscreen_next;
           }//x,y boundary check
           i++; goto mover_removeoffscreen_next;
