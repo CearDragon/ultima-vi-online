@@ -2142,8 +2142,12 @@ objbufnoupdate0:;
 
           //create new mover list
           i=-1;
-          for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
-            mapx=tpx+x-1; mapy=tpy+y-1;
+          // RW dynamic-objects fix (mirror of loop_host.cpp): iterate an
+          // MV_TX_W x MV_TX_H rectangle centered on the avatar via
+          // MV_TX_OFFX/Y so NPCs/monsters/animals/players fill the entire
+          // rendered view, not only the legacy 32x24 box. See define_both.h.
+          for (y=0;y<MV_TX_H;y++){ for (x=0;x<MV_TX_W;x++){
+            mapx=tpx+x-MV_TX_OFFX; mapy=tpy+y-MV_TX_OFFY;
 
             if (mapx<0) goto moverbuffer_outofrange; if (mapx>2047) goto moverbuffer_outofrange; if (mapy<0) goto moverbuffer_outofrange; if (mapy>1023) goto moverbuffer_outofrange;
             myobj=od[mapy][mapx];
@@ -2277,7 +2281,9 @@ moverbuffer_outofrange:;
           i=0;
 mover_removeoffscreen_next: if (i<tplayer->mv_i){
           x=tplayer->mv_x[i]-tpx; y=tplayer->mv_y[i]-tpy;
-          if ((x<-1)||(x>32)||(y<-1)||(y>24)){
+          // RW dynamic-objects fix (mirror of loop_host.cpp): bounds match the
+          // centered MV_TX_W x MV_TX_H fill window.
+          if ((x<-MV_TX_OFFX)||(x>(MV_TX_W-1-MV_TX_OFFX))||(y<-MV_TX_OFFY)||(y>(MV_TX_H-1-MV_TX_OFFY))){
             //reshuffle array
             for (i3=i+1;i3<tplayer->mv_i;i3++){
               tplayer->mv_x[i3-1]=tplayer->mv_x[i3];
@@ -2507,9 +2513,12 @@ MV_LIGHTGLOW_assumed:
 
                             sceneupdaterequired=1;
                             z=1; BITSadd(t,&bitsi,z,1);//add a/another mover
-                            x=mv_x[i2]-tpx+1;//0-33
-                            y=mv_y[i2]-tpy+1;//0-25
-                            z=y*34+x; BITSadd(t,&bitsi,z,10);//x,y offset
+                            // RW dynamic-objects fix (mirror of loop_host.cpp):
+                            // encode x,y across the MV_TX_W x MV_TX_H window in
+                            // MV_TX_BITS bits, centered via MV_TX_OFFX/Y.
+                            x=mv_x[i2]-tpx+MV_TX_OFFX;//0..MV_TX_W-1
+                            y=mv_y[i2]-tpy+MV_TX_OFFY;//0..MV_TX_H-1
+                            z=y*MV_TX_W+x; BITSadd(t,&bitsi,z,MV_TX_BITS);//x,y offset
                             z=mv_type[i2]; BITSadd(t,&bitsi,z,10);//type YET TO BE OPTOMIZED
 
                             if (z==413){//silver serp

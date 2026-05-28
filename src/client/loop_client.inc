@@ -4305,8 +4305,17 @@ mover_statechange_next2:
                         //3. ADD
 mover_add_next: if (BITSget(t,&bitsi,1)){
                         i=tplayer->mv_i;
-                        y=BITSget(t,&bitsi,10); x=y%34; y/=34;
-                        x=x+tpx-1; y=y+tpy-1;
+                        // RW dynamic-objects fix (mirror of loop_client.cpp):
+                        // host now encodes mover positions across the full
+                        // MV_TX_W x MV_TX_H window (centered via MV_TX_OFFX/Y)
+                        // in MV_TX_BITS bits. Was 10 bits + y*34+x tied to the
+                        // legacy 32x24 view. NOTE: this .inc copy is not
+                        // compiled (see CMakeLists.txt); the compiled decoder
+                        // is in loop_client.cpp and references tpx_legacy
+                        // instead of tpx to match the host's legacy-anchored
+                        // tpx. See define_both.h.
+                        y=BITSget(t,&bitsi,MV_TX_BITS); x=y%MV_TX_W; y/=MV_TX_W;
+                        x=x+tpx-MV_TX_OFFX; y=y+tpy-MV_TX_OFFY;
                         tplayer->mv_x[i]=x; tplayer->mv_y[i]=y;
                         z=BITSget(t,&bitsi,10);
                         //special cases exist

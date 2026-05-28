@@ -28,7 +28,7 @@
 #ifndef DEFINE_BOTH_H
 #define DEFINE_BOTH_H
 
-#define U6O_VERSION 9
+#define U6O_VERSION 10
 #define U6O_DEBUG FALSE/* should probably put this on the compiler command line instead of here!! */
 #include "random/random.h"
 
@@ -62,6 +62,41 @@
 #define INVALID_NET 0xFFFFFFFF//used by net_send(),...
 //mover flags
 #define MVLISTLAST 2047
+
+// Dynamic-mover transmit window (NPCs, monsters, animals, other players).
+// Host fills movers within an MV_TX_W x MV_TX_H rectangle centered on the
+// player's world position; the per-mover "add" message encodes the in-window
+// (x, y) as y*MV_TX_W + x using MV_TX_BITS bits. Sized to cover the entire
+// resizable client viewport at its maximum (kViewportTilesXMax=63 /
+// kViewportTilesYMax=47 in src/client/viewport.h) plus a 1-tile fence on
+// each side so dynamic objects render everywhere the world is drawn, not
+// only inside the legacy 32x24 area.
+//
+// The host's tpx/tpy is anchored to the legacy 32x24 view origin (the host
+// build of viewTilesX()/Y() returns 32/24, so getscreenoffset() puts the
+// avatar at column 15 / row 11 inside its returned (tpx, tpy)). MV_TX_OFFX /
+// MV_TX_OFFY recenter the transmit window on the avatar so the rectangle
+// extends an equal distance left/right and up/down of the player, regardless
+// of how large the client viewport actually is. Concretely:
+//
+//   mapx = tpx + x_loop - MV_TX_OFFX   for x_loop in [0 .. MV_TX_W-1]
+//   mapy = tpy + y_loop - MV_TX_OFFY   for y_loop in [0 .. MV_TX_H-1]
+//
+// covers mapx in [playerX - 31, playerX + 33] when the host is unclamped,
+// which is the largest possible resizable viewport (63 wide) plus +/-1 fence.
+//
+// Math: max encoded z = (MV_TX_H-1)*MV_TX_W + (MV_TX_W-1) = 48*65 + 64 = 3184.
+// ceil(log2(3185)) = 12 bits.
+//
+// This is wire-protocol coupled: host and client must agree on MV_TX_W,
+// MV_TX_H, MV_TX_BITS, MV_TX_OFFX, and MV_TX_OFFY. Bump U6O_VERSION whenever
+// any of them change so mixed-version clients/hosts refuse to connect instead
+// of misdecoding mover positions.
+#define MV_TX_W 65
+#define MV_TX_H 49
+#define MV_TX_BITS 12
+#define MV_TX_OFFX 16   // = max htx_real (30) + 1 fence - legacy htx (15)
+#define MV_TX_OFFY 12   // = max hty_real (22) + 1 fence - legacy hty (11)
 #define MV_LIGHTBRIGHT 1
 #define MV_LIGHTGLOW 2
 #define MV_INVISIBLE 4
