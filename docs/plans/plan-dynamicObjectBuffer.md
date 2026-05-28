@@ -101,7 +101,7 @@ this plan must touch lives in `docs/resizable-window-hotspots.md`
   the regression baseline P4 must match.
 
 **Exit criteria**: hotspot table committed; every fixed-buffer access in
-both `u6oclient2` and `u6oh` builds goes through `DOB_BUF_AT`; baseline
+both `client` and `host` builds goes through `DOB_BUF_AT`; baseline
 recorded; full client+host build clean.
 
 ---
@@ -318,7 +318,7 @@ crash; legacy size produces baseline-identical output.
 | R2 | Save games embed `sobj_*` arrays directly. | DOB-P2.3 confirms via grep; if so, write a converter that drops the arrays (they're caches). |
 | R3 | Off-by-one in the recenter math hides objects near the buffer edge. | DOB-P3.3 fence-post audit + DOB_BUF_AT asserts catch this in Debug; DOB-P4.4 regression sweep at three window sizes catches visual regressions. |
 | R4 | Per-player ~400 KB at full cap × 100 concurrent players = 40 MB extra on host. | Acceptable on any modern server box; document in P4.4 results. If tight, gate per-player max at smaller dim until needed. |
-| R5 | `Dynamic2DArray` was designed for client-only use; host build (`u6oh`) may not include `viewport.cpp`. | Move the template into `src/common/dynamic2darray.h` if it isn't already common. Verify in P2.1. |
+| R5 | `Dynamic2DArray` was designed for client-only use; host build (`host`) may not include `viewport.cpp`. | Move the template into `src/common/dynamic2darray.h` if it isn't already common. Verify in P2.1. |
 | R6 | Two long-lived branches (this work + ongoing RW-P5+ work) drift the literal-`96/72` audit. | DOB-P0.1 re-runs as a pre-merge gate; PRs touching the four arrays must reference a DOB-P phase ID. |
 
 ---
