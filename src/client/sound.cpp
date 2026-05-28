@@ -186,3 +186,27 @@ free((void*)s);
 }
 return;
 }
+
+// RW shutdown-fix (2026-05-28): fast best-effort teardown of every live
+// DirectSound voice + the global dsnd device. Called from the client
+// shutdown path in u6o7.cpp so dsound.dll releases its hold on client.exe
+// (and any in-flight WAV stops audibly) before ExitProcess runs. Safe when
+// sound setup never completed -- guards on per-entry and global pointers.
+void soundshutdown(){
+	if (soundsetupf==FALSE) return;
+	for (long i=0;i<256;i++){
+		if (tempsound[i]!=NULL){
+			if (tempsound[i]->s){
+				tempsound[i]->s->Stop();
+				tempsound[i]->s->Release();
+			}
+			free((void*)tempsound[i]);
+			tempsound[i]=NULL;
+		}
+	}
+	if (dsnd){
+		dsnd->Release();
+		dsnd=NULL;
+	}
+	soundsetupf=FALSE;
+}
