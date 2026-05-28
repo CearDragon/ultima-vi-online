@@ -334,7 +334,36 @@ delay_overprocess://check for messages again
 #endif
 
 #ifdef CLIENT
-			shutdown(socketclient[0],SD_RECEIVE|SD_SEND); SleepEx(2048,NULL); closesocket(socketclient[0]);
+			// Fast / clean shutdown (2026-05-28): the previous shutdown path
+			// blocked on SleepEx(2048) AFTER asking the socket to shut down,
+			// AND never told DirectMusic to stop or release. Net effect: the
+			// background MIDI kept playing for several seconds on its own
+			// COM apartment thread while the OS kept client.exe locked as
+			// "in use" until the sleep returned and ExitProcess ran.
+			//
+			// Order matters:
+			//   1. Stop + release DirectMusic FIRST so the music thread is
+			//      gone before the process exits (silences audio
+			//      immediately; releases the EXE lock the DirectMusic
+			//      synth holds).
+			//   2. Best-effort stop on any DirectSound voices, then release
+			//      the device so dsound.dll lets go of client.exe too.
+			//   3. Then close the socket. The legacy 2048ms SleepEx was a
+			//      "give the peer time to ACK the FIN" buffer that's
+			//      overkill on the client (one socket; the OS-level
+			//      linger handles it). 50ms is plenty.
+			if (u6omidisetup && u6omidi){
+				u6omidi->Stop();
+				delete u6omidi;
+				u6omidi=NULL;
+				u6omidisetup=0;
+			}
+			// Stop+release all live DirectSound voices and the dsnd device.
+			// Implementation lives in src/client/sound.cpp where the static
+			// tempsound[] array is visible.
+			soundshutdown();
+
+			shutdown(socketclient[0],SD_RECEIVE|SD_SEND); SleepEx(50,NULL); closesocket(socketclient[0]);
 			WSACleanup();
 			if (midiout_setup) midiOutClose(midiout_handle);
 #endif
