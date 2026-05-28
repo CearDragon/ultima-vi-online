@@ -4150,10 +4150,14 @@ oum_getnextobj: if (BITSget(t,&bitsi,1)){//if =1 a/another object exists on this
 
 
         //remove all offscreen objects in client's array
+        // RW dynamic-objects fix follow-up (mirror of loop_client.cpp; not
+        // compiled). Bounds match the host's MV_TX_W x MV_TX_H transmit
+        // window so the client doesn't preemptively prune what the host
+        // just sent.
 mover_removeoffscreen_restartc:
         for (i=0;i<tplayer->mv_i;i++){
           x=tplayer->mv_x[i]-tpx; y=tplayer->mv_y[i]-tpy;
-          if ((x<-1)||(x>32)||(y<-1)||(y>24)){
+          if ((x<-MV_TX_OFFX)||(x>(MV_TX_W-1-MV_TX_OFFX))||(y<-MV_TX_OFFY)||(y>(MV_TX_H-1-MV_TX_OFFY))){
 
             //reshuffle array
             for (i3=i+1;i3<tplayer->mv_i;i3++){
