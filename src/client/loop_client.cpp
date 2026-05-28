@@ -5630,7 +5630,12 @@ scene_update_message:
         ctpx=tpx; ctpy=tpy;
 
         //screen+1 shift
-        x3=tpx_legacy-1; y3=tpy_legacy-1; x4=tpx_legacy+32; y4=tpy_legacy+24;
+        // RW sobj-fix: screen+1 grew from legacy 32x24 + 1 fence to
+        // max-viewport (63x47) + 1 fence. tpx_legacy/tpy_legacy is the host's
+        // emit reference frame; the 96x72 sobj buffer still has slack to
+        // hold the larger window. See define_both.h.
+        x3=tpx_legacy-SOBJ_S1_LEFT; y3=tpy_legacy-SOBJ_S1_TOP;
+        x4=tpx_legacy+SOBJ_S1_RIGHT; y4=tpy_legacy+SOBJ_S1_BOTTOM;
         x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
         //i. if the screen+1 buffer fits within buffer don't relocate
         if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -5700,7 +5705,11 @@ screen1shiftokc:;
 
         if (BITSget(t,&bitsi,1)){//obj buffer has changed
           //screen+8 shift
-          x3=tpx_legacy-8; y3=tpy_legacy-8; x4=tpx_legacy+32+8-1; y4=tpy_legacy+24+8-1;
+          // RW sobj-fix: screen+8 grew from legacy 32x24 + 8 fence to
+          // max-viewport (63x47) + 8 fence. SOBJ_TX_OFFX/Y are the screen+8
+          // fence distances by construction. See define_both.h.
+          x3=tpx_legacy-SOBJ_TX_OFFX; y3=tpy_legacy-SOBJ_TX_OFFY;
+          x4=tpx_legacy+SOBJ_TX_W-1-SOBJ_TX_OFFX; y4=tpy_legacy+SOBJ_TX_H-1-SOBJ_TX_OFFY;
           x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
           //i. if the screen+8 buffer fits within buffer don't relocate
           if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -5770,21 +5779,25 @@ sobj_copiedpos0c:;
 screen8shiftokc:;
 
 changestate: if (BITSget(t,&bitsi,1)){
-          y=BITSget(t,&bitsi,11); x=y%48; y/=48;
-          i3=tobjfixed_index[tpy_legacy-8+y][tpx_legacy-8+x];
+          // RW sobj-fix: was BITSget 11 + y%48 + tpx_legacy-8 offset; now
+          // SOBJ_TX_BITS + y%SOBJ_TX_W + tpx_legacy-SOBJ_TX_OFFX. Must match
+          // host encoder in loop_host.cpp. See define_both.h.
+          y=BITSget(t,&bitsi,SOBJ_TX_BITS); x=y%SOBJ_TX_W; y/=SOBJ_TX_W;
+          i3=tobjfixed_index[tpy_legacy-SOBJ_TX_OFFY+y][tpx_legacy-SOBJ_TX_OFFX+x];
           i4=tobjfixed_type[i3];
           z=BITSget(t,&bitsi,getnbits(i4));
           i5=1<<z;
 
-          x2=tpx_legacy+x-8; y2=tpy_legacy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
+          x2=tpx_legacy+x-SOBJ_TX_OFFX; y2=tpy_legacy+y-SOBJ_TX_OFFY; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
           if (tplayer->sobj_tempfixed[x3][y3]&i5) tplayer->sobj_tempfixed[x3][y3]-=i5; else tplayer->sobj_tempfixed[x3][y3]|=i5;
           goto changestate;
              }
 
              static unsigned short vbuf[1024];
 oum_getnextsquare: if (BITSget(t,&bitsi,1)){//if =1 set object of a/another square on the map
-             y=BITSget(t,&bitsi,11); x=y%48; y/=48;
-             x2=tpx_legacy+x-8; y2=tpy_legacy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
+             // RW sobj-fix: matches host encoder bit-width / multiplier / offset.
+             y=BITSget(t,&bitsi,SOBJ_TX_BITS); x=y%SOBJ_TX_W; y/=SOBJ_TX_W;
+             x2=tpx_legacy+x-SOBJ_TX_OFFX; y2=tpy_legacy+y-SOBJ_TX_OFFY; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
              i=0;//vbuf index
 oum_getnextobj: if (BITSget(t,&bitsi,1)){//if =1 a/another object exists on this square
              vbuf[i]=BITSget(t,&bitsi,16);

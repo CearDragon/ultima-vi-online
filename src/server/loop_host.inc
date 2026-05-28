@@ -1696,7 +1696,8 @@ nextobj2: if (myobj!=NULL){
           getscreenoffset(x,y,&tpx,&tpy);
 
           //does screen+1 fit inside current buffer?
-          x3=tpx-1; y3=tpy-1; x4=tpx+32; y4=tpy+24;//screen+1
+          x3=tpx-SOBJ_S1_LEFT; y3=tpy-SOBJ_S1_TOP;
+          x4=tpx+SOBJ_S1_RIGHT; y4=tpy+SOBJ_S1_BOTTOM;//screen+1 (RW sobj-fix mirror)
           x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
           //i. if the screen+1 buffer fits within buffer don't relocate
           if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -1774,7 +1775,8 @@ screenplus1check_return:
           z=1; BITSadd(t,&bitsi,z,1);//screen+8 update required
 
 
-          x3=tpx-8; y3=tpy-8; x4=tpx+32+8-1; y4=tpy+24+8-1;
+          x3=tpx-SOBJ_TX_OFFX; y3=tpy-SOBJ_TX_OFFY;
+          x4=tpx+SOBJ_TX_W-1-SOBJ_TX_OFFX; y4=tpy+SOBJ_TX_H-1-SOBJ_TX_OFFY;//screen+8 (RW sobj-fix mirror)
           x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
           //i. if the screen+8 buffer fits within buffer don't relocate
           if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -1872,8 +1874,8 @@ screenplus1check_entry:
           //buffer must be updated while message is created!
           static long mapx,mapy,bufx,bufy;
           static unsigned short vbuf[1024];
-          for (y=0;y<=39;y++){ for (x=0;x<=47;x++){
-            mapx=tpx+x-8; mapy=tpy+y-8; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
+          for (y=0;y<SOBJ_TX_H;y++){ for (x=0;x<SOBJ_TX_W;x++){
+            mapx=tpx+x-SOBJ_TX_OFFX; mapy=tpy+y-SOBJ_TX_OFFY; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
 
             /*
             x4=0; z4=2;
@@ -1899,7 +1901,7 @@ screenplus1check_entry:
 
 
             if (screenplus1check){
-              if (x<7) goto objbufnoupdate0; if (y<7) goto objbufnoupdate0; if (x>40) goto objbufnoupdate0; if (y>32) goto objbufnoupdate0;
+              if (x<SOBJ_S1_INSET) goto objbufnoupdate0; if (y<SOBJ_S1_INSET) goto objbufnoupdate0; if (x>(SOBJ_TX_W-1-SOBJ_S1_INSET)) goto objbufnoupdate0; if (y>(SOBJ_TX_H-1-SOBJ_S1_INSET)) goto objbufnoupdate0;
             }
 
             i=0;
@@ -1953,7 +1955,7 @@ noflash0:
                     if (screenplus1check) goto screenplus1check_return; //********SCREENPLUS1CHECK********
                     tplayer->sobj_tempfixed[bufx][bufy]-=i5;
                     z=1; BITSadd(t,&bitsi,z,1);//edit another tempfixed object
-                    z=y*48+x; BITSadd(t,&bitsi,z,11);//x,y offset
+                    z=y*SOBJ_TX_W+x; BITSadd(t,&bitsi,z,SOBJ_TX_BITS);//x,y offset (RW sobj-fix mirror)
                     if (z3){z=i2-i3-1; BITSadd(t,&bitsi,z,z3);}//which tempfixed obj
 
                     //MessageBox(NULL,"tempfixed change","Ultima 6 Online",MB_OK);
@@ -1965,7 +1967,7 @@ noflash0:
                     if (screenplus1check) goto screenplus1check_return; //********SCREENPLUS1CHECK********
                     tplayer->sobj_tempfixed[bufx][bufy]|=i5;
                     z=1; BITSadd(t,&bitsi,z,1);//edit another tempfixed object
-                    z=y*48+x; BITSadd(t,&bitsi,z,11);//x,y offset
+                    z=y*SOBJ_TX_W+x; BITSadd(t,&bitsi,z,SOBJ_TX_BITS);//x,y offset (RW sobj-fix mirror)
                     if (z3){z=i2-i3-1; BITSadd(t,&bitsi,z,z3);}//which tempfixed obj
 
                     //MessageBox(NULL,"tempfixed change","Ultima 6 Online",MB_OK);
@@ -1979,7 +1981,7 @@ noflash0:
                   if (screenplus1check) goto screenplus1check_return; //********SCREENPLUS1CHECK********
                   tplayer->sobj_tempfixed[bufx][bufy]|=i5;
                   z=1; BITSadd(t,&bitsi,z,1);//edit another tempfixed object
-                  z=y*48+x; BITSadd(t,&bitsi,z,11);//x,y offset
+                  z=y*SOBJ_TX_W+x; BITSadd(t,&bitsi,z,SOBJ_TX_BITS);//x,y offset (RW sobj-fix mirror)
                   if (z3){z=i2-i3-1; BITSadd(t,&bitsi,z,z3);}//which tempfixed obj
 
                   //MessageBox(NULL,"tempfixed change","Ultima 6 Online",MB_OK);
@@ -2068,7 +2070,7 @@ objbufupdate0:
 
 
              z=1; BITSadd(t2,&bitsi2,z,1);//1 edit objects of another square
-             z=y*48+x; BITSadd(t2,&bitsi2,z,11);//11 screen offset of square
+             z=y*SOBJ_TX_W+x; BITSadd(t2,&bitsi2,z,SOBJ_TX_BITS);//screen offset of square (RW sobj-fix mirror)
 
              //update buffer info
              tp2=tplayer->sobj[bufx][bufy];

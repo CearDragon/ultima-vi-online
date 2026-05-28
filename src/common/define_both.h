@@ -28,7 +28,7 @@
 #ifndef DEFINE_BOTH_H
 #define DEFINE_BOTH_H
 
-#define U6O_VERSION 10
+#define U6O_VERSION 11
 #define U6O_DEBUG FALSE/* should probably put this on the compiler command line instead of here!! */
 #include "random/random.h"
 
@@ -97,6 +97,72 @@
 #define MV_TX_BITS 12
 #define MV_TX_OFFX 16   // = max htx_real (30) + 1 fence - legacy htx (15)
 #define MV_TX_OFFY 12   // = max hty_real (22) + 1 fence - legacy hty (11)
+
+// Per-tile scene-object transmit window (ground items, fields, signs, doors,
+// containers -- everything stored in the host's per-player sobj_*[96][72]
+// buffers). The host fills + encodes a SOBJ_TX_W x SOBJ_TX_H rectangle every
+// scene update; the encoded (x,y) inside the window is packed as
+// y*SOBJ_TX_W + x in SOBJ_TX_BITS bits. Sized to cover the entire resizable
+// client viewport at its maximum (kViewportTilesXMax=63 /
+// kViewportTilesYMax=47 in src/client/viewport.h) plus an 8-tile fence on
+// each side (the legacy "screen+8" margin that lets streaming pre-load
+// objects just past the visible edge). Was 48x40 / 11 bits / mapx=tpx+x-8
+// pre-2026-05-28 -- tied to the legacy 32x24 view, which left ground items
+// missing from the outer half of any resized world view.
+//
+// Geometry (legacy reference frame -- host's tpx/tpy is anchored at the
+// legacy 32x24 view origin because host viewTilesX/Y returns 32/24):
+//
+//   transmit window x range: [tpx - SOBJ_TX_OFFX, tpx + SOBJ_TX_W-1-SOBJ_TX_OFFX]
+//                          = [tpx - 23,            tpx + 55]                (79 wide)
+//   transmit window y range: [tpy - SOBJ_TX_OFFY, tpy + SOBJ_TX_H-1-SOBJ_TX_OFFY]
+//                          = [tpy - 19,            tpy + 43]                (63 tall)
+//
+//   fill loop:        for y in [0..SOBJ_TX_H-1] for x in [0..SOBJ_TX_W-1]
+//                     mapx = tpx + x - SOBJ_TX_OFFX
+//                     mapy = tpy + y - SOBJ_TX_OFFY
+//   encode:           z = y*SOBJ_TX_W + x; max = 62*79 + 78 = 4976
+//                     ceil(log2(4977)) = 13 = SOBJ_TX_BITS
+//   decode (client):  y = BITSget(t, &bitsi, SOBJ_TX_BITS); x = y%SOBJ_TX_W; y /= SOBJ_TX_W;
+//                     mapx = tpx_legacy + x - SOBJ_TX_OFFX  (use tpx_legacy NOT tpx -- host
+//                                                            emits in legacy reference frame)
+//
+// Buffer capacity check: with sobj_bufoffx = tpx - 32 (player anchored at
+// buffer slot 32), the buffer covers map x in [tpx-32, tpx+63]. The new
+// fill x range [tpx-23, tpx+55] is fully inside that, with 9 tiles of slack
+// on the left and 8 on the right. Same on Y: buffer covers [tpy-24, tpy+47],
+// fill range [tpy-19, tpy+43] (5 tiles slack above, 4 below). The static
+// 96x72 sobj_*[][] arrays therefore do NOT need to grow -- this fix only
+// expands the *transmit window*, not the storage. The deeper plan in
+// docs/plans/plan-dynamicObjectBuffer.md (DOB-P0..P5) is still needed to
+// lift the 96x72 cap entirely, but is not required to render ground items
+// across the current kViewportTilesX/YMax-sized world view.
+//
+// Screen+1 / screen+8 buffer-fit checks: the host and client run a "screen+1"
+// optimization pass that skips buffer relocation when the immediate
+// (view + 1 fence) area still fits in the current buffer, and falls back to
+// a "screen+8" relocation when it doesn't. These rectangles must also grow
+// to match the new view size. SOBJ_S1_LEFT/TOP/RIGHT/BOTTOM give the
+// per-side distance from tpx/tpy to the screen+1 rectangle edges in the
+// legacy reference frame. SOBJ_TX_OFFX/SOBJ_TX_OFFY double as the
+// screen+8 fence (transmit window edge == screen+8 edge, by construction).
+//
+// SOBJ_S1_INSET is the per-side inset (in loop coordinates) used by the
+// host fill loop's "process only inner screen+1 region" optimization gate;
+// equals the fence delta SOBJ_TX_OFFX - SOBJ_S1_LEFT = 8 - 1 = 7.
+//
+// Wire-protocol coupled: host and client must agree on every constant
+// below. Bump U6O_VERSION whenever any of them change.
+#define SOBJ_TX_W      79
+#define SOBJ_TX_H      63
+#define SOBJ_TX_BITS   13
+#define SOBJ_TX_OFFX   23   // = legacy_htx (15) + 8-tile fence
+#define SOBJ_TX_OFFY   19   // = legacy_hty (11) + 8-tile fence
+#define SOBJ_S1_LEFT   16   // screen+1 left   distance from tpx
+#define SOBJ_S1_RIGHT  48   // screen+1 right  distance from tpx (max view right edge + 1)
+#define SOBJ_S1_TOP    12   // screen+1 top    distance from tpy
+#define SOBJ_S1_BOTTOM 36   // screen+1 bottom distance from tpy (max view bottom edge + 1)
+#define SOBJ_S1_INSET  (SOBJ_TX_OFFX - SOBJ_S1_LEFT)  // = 7 (fence delta 8-1)
 #define MV_LIGHTBRIGHT 1
 #define MV_LIGHTGLOW 2
 #define MV_INVISIBLE 4

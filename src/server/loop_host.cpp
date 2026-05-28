@@ -1730,7 +1730,12 @@ nextobj2: if (myobj!=NULL){
           getscreenoffset(x,y,&tpx,&tpy);
 
           //does screen+1 fit inside current buffer?
-          x3=tpx-1; y3=tpy-1; x4=tpx+32; y4=tpy+24;//screen+1
+          // RW sobj-fix: screen+1 in legacy frame grew from [tpx-1, tpx+32]
+          // (legacy 32x24 + 1 fence) to [tpx-SOBJ_S1_LEFT, tpx+SOBJ_S1_RIGHT]
+          // (max viewport 63x47 + 1 fence). Same on Y. The 96x72 sobj buffer
+          // still has room. See define_both.h.
+          x3=tpx-SOBJ_S1_LEFT; y3=tpy-SOBJ_S1_TOP;
+          x4=tpx+SOBJ_S1_RIGHT; y4=tpy+SOBJ_S1_BOTTOM;//screen+1
           x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
           //i. if the screen+1 buffer fits within buffer don't relocate
           if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -1808,7 +1813,11 @@ screenplus1check_return:
           z=1; BITSadd(t,&bitsi,z,1);//screen+8 update required
 
 
-          x3=tpx-8; y3=tpy-8; x4=tpx+32+8-1; y4=tpy+24+8-1;
+          // RW sobj-fix: screen+8 in legacy frame grew from [tpx-8, tpx+39]
+          // to [tpx-SOBJ_TX_OFFX, tpx+SOBJ_TX_W-1-SOBJ_TX_OFFX]. SOBJ_TX_OFFX/Y
+          // double as the screen+8 fence by construction. See define_both.h.
+          x3=tpx-SOBJ_TX_OFFX; y3=tpy-SOBJ_TX_OFFY;
+          x4=tpx+SOBJ_TX_W-1-SOBJ_TX_OFFX; y4=tpy+SOBJ_TX_H-1-SOBJ_TX_OFFY;
           x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
           //i. if the screen+8 buffer fits within buffer don't relocate
           if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -1906,8 +1915,20 @@ screenplus1check_entry:
           //buffer must be updated while message is created!
           static long mapx,mapy,bufx,bufy;
           static unsigned short vbuf[1024];
-          for (y=0;y<=39;y++){ for (x=0;x<=47;x++){
-            mapx=tpx+x-8; mapy=tpy+y-8; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
+          // RW sobj-fix: iterate SOBJ_TX_W x SOBJ_TX_H (was 48x40). Window is
+          // sized to cover the max resizable viewport (63x47) + an 8-tile
+          // fence on each side ("screen+8" in legacy lingo). mapx,mapy still
+          // use the legacy tpx/tpy reference frame -- the offset is now
+          // SOBJ_TX_OFFX/Y (was a literal 8). bufx,bufy then index the per-
+          // player 96x72 sobj_*[][] buffers, which already have enough slack
+          // to hold the larger window (see define_both.h capacity check).
+          // All five sites -- this fill loop, the screenplus1check inner
+          // gate just below, the three tempfixed encodes, and the per-square
+          // object encode in the t2 stream -- must use the same constants;
+          // the client decoder in loop_client.cpp must mirror them or sobj
+          // positions misdecode.
+          for (y=0;y<SOBJ_TX_H;y++){ for (x=0;x<SOBJ_TX_W;x++){
+            mapx=tpx+x-SOBJ_TX_OFFX; mapy=tpy+y-SOBJ_TX_OFFY; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
 
             /*
             x4=0; z4=2;
@@ -1933,7 +1954,14 @@ screenplus1check_entry:
 
 
             if (screenplus1check){
-              if (x<7) goto objbufnoupdate0; if (y<7) goto objbufnoupdate0; if (x>40) goto objbufnoupdate0; if (y>32) goto objbufnoupdate0;
+              // RW sobj-fix: inner gate skips tiles outside the screen+1
+              // inset. Inset = SOBJ_TX_OFFX - SOBJ_S1_LEFT = 7 (legacy fence
+              // delta 8-1). Was hardcoded 7/40/7/32 for the legacy 48x40
+              // window. See define_both.h SOBJ_S1_INSET.
+              if (x<SOBJ_S1_INSET) goto objbufnoupdate0;
+              if (y<SOBJ_S1_INSET) goto objbufnoupdate0;
+              if (x>(SOBJ_TX_W-1-SOBJ_S1_INSET)) goto objbufnoupdate0;
+              if (y>(SOBJ_TX_H-1-SOBJ_S1_INSET)) goto objbufnoupdate0;
             }
 
             i=0;
@@ -1987,7 +2015,9 @@ noflash0:
                     if (screenplus1check) goto screenplus1check_return; //********SCREENPLUS1CHECK********
                     tplayer->sobj_tempfixed[bufx][bufy]-=i5;
                     z=1; BITSadd(t,&bitsi,z,1);//edit another tempfixed object
-                    z=y*48+x; BITSadd(t,&bitsi,z,11);//x,y offset
+                    // RW sobj-fix: was y*48+x in 11 bits; now y*SOBJ_TX_W+x
+                    // in SOBJ_TX_BITS. Client decoder mirrors this.
+                    z=y*SOBJ_TX_W+x; BITSadd(t,&bitsi,z,SOBJ_TX_BITS);//x,y offset
                     if (z3){z=i2-i3-1; BITSadd(t,&bitsi,z,z3);}//which tempfixed obj
 
                     //MessageBox(NULL,"tempfixed change","Ultima 6 Online",MB_OK);
@@ -1999,7 +2029,7 @@ noflash0:
                     if (screenplus1check) goto screenplus1check_return; //********SCREENPLUS1CHECK********
                     tplayer->sobj_tempfixed[bufx][bufy]|=i5;
                     z=1; BITSadd(t,&bitsi,z,1);//edit another tempfixed object
-                    z=y*48+x; BITSadd(t,&bitsi,z,11);//x,y offset
+                    z=y*SOBJ_TX_W+x; BITSadd(t,&bitsi,z,SOBJ_TX_BITS);//x,y offset (RW sobj-fix)
                     if (z3){z=i2-i3-1; BITSadd(t,&bitsi,z,z3);}//which tempfixed obj
 
                     //MessageBox(NULL,"tempfixed change","Ultima 6 Online",MB_OK);
@@ -2013,7 +2043,7 @@ noflash0:
                   if (screenplus1check) goto screenplus1check_return; //********SCREENPLUS1CHECK********
                   tplayer->sobj_tempfixed[bufx][bufy]|=i5;
                   z=1; BITSadd(t,&bitsi,z,1);//edit another tempfixed object
-                  z=y*48+x; BITSadd(t,&bitsi,z,11);//x,y offset
+                  z=y*SOBJ_TX_W+x; BITSadd(t,&bitsi,z,SOBJ_TX_BITS);//x,y offset (RW sobj-fix)
                   if (z3){z=i2-i3-1; BITSadd(t,&bitsi,z,z3);}//which tempfixed obj
 
                   //MessageBox(NULL,"tempfixed change","Ultima 6 Online",MB_OK);
@@ -2102,7 +2132,7 @@ objbufupdate0:
 
 
              z=1; BITSadd(t2,&bitsi2,z,1);//1 edit objects of another square
-             z=y*48+x; BITSadd(t2,&bitsi2,z,11);//11 screen offset of square
+             z=y*SOBJ_TX_W+x; BITSadd(t2,&bitsi2,z,SOBJ_TX_BITS);//screen offset of square (RW sobj-fix)
 
              //update buffer info
              tp2=tplayer->sobj[bufx][bufy];
