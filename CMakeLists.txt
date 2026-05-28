@@ -154,7 +154,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 ################################################################################
 
 
-set(PROJECT_NAME u6o7)
+set(PROJECT_NAME both)
 
 ################################################################################
 # Source groups
@@ -378,7 +378,7 @@ target_link_directories(${PROJECT_NAME} PRIVATE
 )
 
 
-set(PROJECT_NAME u6oh)
+set(PROJECT_NAME host)
 
 ################################################################################
 # Source groups
@@ -586,7 +586,7 @@ target_link_directories(${PROJECT_NAME} PRIVATE
 )
 
 
-set(PROJECT_NAME u6oclient2)
+set(PROJECT_NAME client)
 
 ################################################################################
 # Source groups
