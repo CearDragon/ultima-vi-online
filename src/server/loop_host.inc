@@ -2184,7 +2184,10 @@ mvobjskip: if (myobj){
             //add it to the list
             i++;
             mv_object[i]=myobj;
-            mv_x[i]=tpx+x-1; mv_y[i]=tpy+y-1;
+            // RW dynamic-objects bug fix (2026-05-28): see loop_host.cpp
+            // for the full rationale. mv_x/mv_y must be mapx/mapy, not the
+            // legacy `tpx+x-1` offset, now that the fill window is MV_TX_*.
+            mv_x[i]=mapx; mv_y[i]=mapy;
             mv_type[i]=myobj->type&1023;
             mv_dir[i]=objgetdir(myobj->type);
             mv_frame[i]=OBJGETDIR_FRAME;

@@ -2250,7 +2250,19 @@ mvobjskip: if (myobj){
             //add it to the list
             i++;
             mv_object[i]=myobj;
-            mv_x[i]=tpx+x-1; mv_y[i]=tpy+y-1;
+            // RW dynamic-objects bug fix (2026-05-28): store the mover's actual
+            // world coords (mapx/mapy), not the legacy `tpx+x-1` offset. The
+            // fill loop above now iterates an MV_TX_W x MV_TX_H window with
+            // mapx = tpx+x-MV_TX_OFFX, but this assignment was left at the
+            // pre-fix `-1` offset, so every mover was stored 15 tiles east /
+            // 11 tiles south of the NPC's true position. Symptoms: NPCs and
+            // boats rendered scattered across the world on unwalkable tiles,
+            // duplicates appearing as movers walked (the host re-added them
+            // at fresh wrong coords each frame), avatar offset to bottom-
+            // right, and "walking just moves the camera" because the player's
+            // own mover sprite drifted away from the real player position.
+            // Not a wire change -- mv_x/mv_y are host-side state only.
+            mv_x[i]=mapx; mv_y[i]=mapy;
             mv_type[i]=myobj->type&1023;
             mv_dir[i]=objgetdir(myobj->type);
             mv_frame[i]=OBJGETDIR_FRAME;
