@@ -8344,7 +8344,15 @@ kshipattack2:;
         tnpc=(npc*)myobj->more;
         txtright(t,t->l-1);
         x2=t->ds[0]; y2=t->ds[1];
-        WPF_OBJECT=myobj; wpf_pathfind(tnpc->path,myobj->x,myobj->y,x2,y2,16,0,0);
+        // RW: extend pathfind range so a right-click anywhere in the
+        // resizable client's rendered view actually finds a path. The
+        // legacy cap of 16 tiles is exactly half the original 32x24
+        // view, so it silently rejected clicks near the edges once the
+        // client viewport grew (kViewportTilesXMax=63, YMax=47 in
+        // src/client/viewport.h => avatar can be ~32 tiles from a
+        // clicked tile in the worst case). 48 covers the full max view
+        // with margin; wpf_weight[512][512] easily holds z=2*48+2=98.
+        WPF_OBJECT=myobj; wpf_pathfind(tnpc->path,myobj->x,myobj->y,x2,y2,48,0,0);
         if (WPF_RETURN==WPF_PATHFOUND){
           if (WPF_PATHLENGTH){
             tnpc->path_max=WPF_PATHLENGTH; tnpc->pathn=WPF_PATHLENGTH;

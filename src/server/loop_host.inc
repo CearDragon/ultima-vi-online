@@ -7847,7 +7847,11 @@ kshipattack2:;
         tnpc=(npc*)myobj->more;
         txtright(t,t->l-1);
         x2=t->ds[0]; y2=t->ds[1];
-        WPF_OBJECT=myobj; wpf_pathfind(tnpc->path,myobj->x,myobj->y,x2,y2,16,0,0);
+        // RW: extend pathfind range so a right-click anywhere in the
+        // resizable client's rendered view actually finds a path. See
+        // loop_host.cpp for full rationale (was 16; bumped to 48 to
+        // cover kViewportTilesXMax=63 / YMax=47 worst case).
+        WPF_OBJECT=myobj; wpf_pathfind(tnpc->path,myobj->x,myobj->y,x2,y2,48,0,0);
         if (WPF_RETURN==WPF_PATHFOUND){
           if (WPF_PATHLENGTH){
             tnpc->path_max=WPF_PATHLENGTH; tnpc->pathn=WPF_PATHLENGTH;
