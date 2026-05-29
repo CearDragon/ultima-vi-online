@@ -18,22 +18,23 @@
 
 #include <windows.h>
 
-namespace u6o { namespace client { namespace splash {
+namespace u6o {
+    namespace client {
+        namespace splash {
+            // Three seconds, as requested by product. Adjust here if the duration ever
+            // becomes configurable.
+            constexpr DWORD kDefaultDurationMs = 4000;
 
-// Three seconds, as requested by product. Adjust here if the duration ever
-// becomes configurable.
-constexpr DWORD kDefaultDurationMs = 4000;
+            // Null-terminated list of UTF-16 paths the splash will probe in order for
+            // the splash image. The first one that opens wins. Keep this array
+            // statically allocated; the splash only reads from it.
+            const wchar_t *const*DefaultSearchPaths();
 
-// Null-terminated list of UTF-16 paths the splash will probe in order for
-// the splash image. The first one that opens wins. Keep this array
-// statically allocated; the splash only reads from it.
-const wchar_t* const* DefaultSearchPaths();
-
-// Show the splash, then return no earlier than `minDurationMs` after the
-// call. Always returns; failures are swallowed (the game starts regardless).
-void Run(HINSTANCE hInstance,
-         const wchar_t* const* searchPaths,
-         DWORD minDurationMs);
-
-}}}  // namespace u6o::client::splash
-
+            // Show the splash, then return no earlier than `minDurationMs` after the
+            // call. Always returns; failures are swallowed (the game starts regardless).
+            void Run(HINSTANCE hInstance,
+                     const wchar_t *const*searchPaths,
+                     DWORD minDurationMs);
+        }
+    }
+} // namespace u6o::client::splash

@@ -3933,7 +3933,11 @@ scene_update_message:
         ctpx=tpx; ctpy=tpy;
 
         //screen+1 shift
-        x3=tpx-1; y3=tpy-1; x4=tpx+32; y4=tpy+24;
+        // RW sobj-fix mirror: not compiled; see loop_client.cpp for the live
+        // version (which uses tpx_legacy/tpy_legacy because the host emits in
+        // the legacy 32x24 reference frame). This .inc copy keeps the original
+        // tpx/tpy naming.
+        x3=tpx-SOBJ_S1_LEFT; y3=tpy-SOBJ_S1_TOP; x4=tpx+SOBJ_S1_RIGHT; y4=tpy+SOBJ_S1_BOTTOM;
         x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
         //i. if the screen+1 buffer fits within buffer don't relocate
         if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -4003,7 +4007,9 @@ screen1shiftokc:;
 
         if (BITSget(t,&bitsi,1)){//obj buffer has changed
           //screen+8 shift
-          x3=tpx-8; y3=tpy-8; x4=tpx+32+8-1; y4=tpy+24+8-1;
+          // RW sobj-fix mirror.
+          x3=tpx-SOBJ_TX_OFFX; y3=tpy-SOBJ_TX_OFFY;
+          x4=tpx+SOBJ_TX_W-1-SOBJ_TX_OFFX; y4=tpy+SOBJ_TX_H-1-SOBJ_TX_OFFY;
           x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
           //i. if the screen+8 buffer fits within buffer don't relocate
           if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -4073,21 +4079,23 @@ sobj_copiedpos0c:;
 screen8shiftokc:;
 
 changestate: if (BITSget(t,&bitsi,1)){
-          y=BITSget(t,&bitsi,11); x=y%48; y/=48;
-          i3=tobjfixed_index[tpy-8+y][tpx-8+x];
+          // RW sobj-fix mirror.
+          y=BITSget(t,&bitsi,SOBJ_TX_BITS); x=y%SOBJ_TX_W; y/=SOBJ_TX_W;
+          i3=tobjfixed_index[tpy-SOBJ_TX_OFFY+y][tpx-SOBJ_TX_OFFX+x];
           i4=tobjfixed_type[i3];
           z=BITSget(t,&bitsi,getnbits(i4));
           i5=1<<z;
 
-          x2=tpx+x-8; y2=tpy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
+          x2=tpx+x-SOBJ_TX_OFFX; y2=tpy+y-SOBJ_TX_OFFY; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
           if (tplayer->sobj_tempfixed[x3][y3]&i5) tplayer->sobj_tempfixed[x3][y3]-=i5; else tplayer->sobj_tempfixed[x3][y3]|=i5;
           goto changestate;
              }
 
              static unsigned short vbuf[1024];
 oum_getnextsquare: if (BITSget(t,&bitsi,1)){//if =1 set object of a/another square on the map
-             y=BITSget(t,&bitsi,11); x=y%48; y/=48;
-             x2=tpx+x-8; y2=tpy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
+             // RW sobj-fix mirror.
+             y=BITSget(t,&bitsi,SOBJ_TX_BITS); x=y%SOBJ_TX_W; y/=SOBJ_TX_W;
+             x2=tpx+x-SOBJ_TX_OFFX; y2=tpy+y-SOBJ_TX_OFFY; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
              i=0;//vbuf index
 oum_getnextobj: if (BITSget(t,&bitsi,1)){//if =1 a/another object exists on this square
              vbuf[i]=BITSget(t,&bitsi,16);
@@ -4142,10 +4150,14 @@ oum_getnextobj: if (BITSget(t,&bitsi,1)){//if =1 a/another object exists on this
 
 
         //remove all offscreen objects in client's array
+        // RW dynamic-objects fix follow-up (mirror of loop_client.cpp; not
+        // compiled). Bounds match the host's MV_TX_W x MV_TX_H transmit
+        // window so the client doesn't preemptively prune what the host
+        // just sent.
 mover_removeoffscreen_restartc:
         for (i=0;i<tplayer->mv_i;i++){
           x=tplayer->mv_x[i]-tpx; y=tplayer->mv_y[i]-tpy;
-          if ((x<-1)||(x>32)||(y<-1)||(y>24)){
+          if ((x<-MV_TX_OFFX)||(x>(MV_TX_W-1-MV_TX_OFFX))||(y<-MV_TX_OFFY)||(y>(MV_TX_H-1-MV_TX_OFFY))){
 
             //reshuffle array
             for (i3=i+1;i3<tplayer->mv_i;i3++){
@@ -4305,8 +4317,17 @@ mover_statechange_next2:
                         //3. ADD
 mover_add_next: if (BITSget(t,&bitsi,1)){
                         i=tplayer->mv_i;
-                        y=BITSget(t,&bitsi,10); x=y%34; y/=34;
-                        x=x+tpx-1; y=y+tpy-1;
+                        // RW dynamic-objects fix (mirror of loop_client.cpp):
+                        // host now encodes mover positions across the full
+                        // MV_TX_W x MV_TX_H window (centered via MV_TX_OFFX/Y)
+                        // in MV_TX_BITS bits. Was 10 bits + y*34+x tied to the
+                        // legacy 32x24 view. NOTE: this .inc copy is not
+                        // compiled (see CMakeLists.txt); the compiled decoder
+                        // is in loop_client.cpp and references tpx_legacy
+                        // instead of tpx to match the host's legacy-anchored
+                        // tpx. See define_both.h.
+                        y=BITSget(t,&bitsi,MV_TX_BITS); x=y%MV_TX_W; y/=MV_TX_W;
+                        x=x+tpx-MV_TX_OFFX; y=y+tpy-MV_TX_OFFY;
                         tplayer->mv_x[i]=x; tplayer->mv_y[i]=y;
                         z=BITSget(t,&bitsi,10);
                         //special cases exist

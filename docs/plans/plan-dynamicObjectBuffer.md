@@ -101,7 +101,7 @@ this plan must touch lives in `docs/resizable-window-hotspots.md`
   the regression baseline P4 must match.
 
 **Exit criteria**: hotspot table committed; every fixed-buffer access in
-both `u6oclient2` and `u6oh` builds goes through `DOB_BUF_AT`; baseline
+both `client` and `host` builds goes through `DOB_BUF_AT`; baseline
 recorded; full client+host build clean.
 
 ---
@@ -318,7 +318,7 @@ crash; legacy size produces baseline-identical output.
 | R2 | Save games embed `sobj_*` arrays directly. | DOB-P2.3 confirms via grep; if so, write a converter that drops the arrays (they're caches). |
 | R3 | Off-by-one in the recenter math hides objects near the buffer edge. | DOB-P3.3 fence-post audit + DOB_BUF_AT asserts catch this in Debug; DOB-P4.4 regression sweep at three window sizes catches visual regressions. |
 | R4 | Per-player ~400 KB at full cap × 100 concurrent players = 40 MB extra on host. | Acceptable on any modern server box; document in P4.4 results. If tight, gate per-player max at smaller dim until needed. |
-| R5 | `Dynamic2DArray` was designed for client-only use; host build (`u6oh`) may not include `viewport.cpp`. | Move the template into `src/common/dynamic2darray.h` if it isn't already common. Verify in P2.1. |
+| R5 | `Dynamic2DArray` was designed for client-only use; host build (`host`) may not include `viewport.cpp`. | Move the template into `src/common/dynamic2darray.h` if it isn't already common. Verify in P2.1. |
 | R6 | Two long-lived branches (this work + ongoing RW-P5+ work) drift the literal-`96/72` audit. | DOB-P0.1 re-runs as a pre-merge gate; PRs touching the four arrays must reference a DOB-P phase ID. |
 
 ---
@@ -352,6 +352,28 @@ State of the plan (update at the end of every session, with date & who):
   Phase 1 = the cap added in RW-P4.11 (`kViewportTilesXMax = 63`,
   `kViewportTilesYMax = 47`) is in place and protects the crash; this
   plan is the path to remove that cap properly. Start at **DOB-P0.1**.
+- **2026-05-28 (sobj transmit-window pre-fix)** — Out-of-band patch: the
+  host's per-frame sobj fill loop, the screen+1 / screen+8 buffer-fit
+  checks, and the per-tile encode/decode were all stretched to cover the
+  full `kViewportTilesXMax x kViewportTilesYMax + 8 fence` rectangle so
+  ground items render across the entire resizable viewport. Added
+  constants live in `src/common/define_both.h` (`SOBJ_TX_W=79`,
+  `SOBJ_TX_H=63`, `SOBJ_TX_BITS=13`, `SOBJ_TX_OFFX/OFFY`,
+  `SOBJ_S1_LEFT/TOP/RIGHT/BOTTOM`, `SOBJ_S1_INSET`). `U6O_VERSION`
+  bumped 10 → 11. **The static `[96][72]` per-player sobj buffers were
+  NOT enlarged** (the new transmit window fits inside the existing
+  capacity with 4-9 tiles of slack on each axis when the buffer is
+  re-centered on the player). This means:
+    * DOB-P0..P3 are still required to lift the 96×72 cap if we ever
+      want `kViewportTilesXMax/YMax` to exceed (96 - 32 - 1) / (72 - 24
+      - 1) = 63 / 47 — i.e. the cap can't be raised beyond its current
+      value without doing the dynamic-buffer work.
+    * The sobj transmit window already saturates the current
+      kViewportTiles*Max ceiling, so further capacity gains require the
+      full plan.
+  Resume DOB work at **DOB-P0.1** as before; the new `SOBJ_TX_*`
+  constants give P1's "named-constants instead of literal 48/40/11"
+  refactor a head start on the wire-format side.
 
 To pick up cleanly:
 

@@ -6,29 +6,38 @@
  */
 #include <winsock2.h>
 #include "data_both.h"
-#include "math.h" 
+#include "math.h"
 
 /* external global variables section */
-extern unsigned long BITSleftmask[33];//mask of index-many bits to keep 
+extern unsigned long BITSleftmask[33]; //mask of index-many bits to keep
 extern unsigned char OBJGETDIR_FRAME;
 
 /* function headers */
-ATOM MyRegisterClass( HINSTANCE hInstance );
-BOOL InitInstance( HINSTANCE, int );
-LRESULT CALLBACK WndProc( HWND, UINT, WPARAM, LPARAM );
+ATOM MyRegisterClass(HINSTANCE hInstance);
+
+BOOL InitInstance(HINSTANCE, int);
+
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 void function_both_init(void);
-void BITSadd(txt *t,unsigned long *start,unsigned long value,unsigned long nbits);
-unsigned long BITSget(txt *t,unsigned long *start,unsigned long nbits);
-void LOGadd(txt* t);
+
+void BITSadd(txt *t, unsigned long *start, unsigned long value, unsigned long nbits);
+
+unsigned long BITSget(txt *t, unsigned long *start, unsigned long nbits);
+
+void LOGadd(txt * t);
 
 DWORD WINAPI sockets_send(LPVOID i);
+
 DWORD WINAPI sockets_receive(LPVOID i);
+
 DWORD WINAPI sockets_disconnect(LPVOID i);
 
-bool NET_send(void *s,unsigned long d,txt *t);
-void getscreenoffset(long x,long y,long *mapx,long *mapy);
-void getscreenoffset_legacy(long x,long y,long *mapx,long *mapy);
+bool NET_send(void *s, unsigned long d, txt *t);
+
+void getscreenoffset(long x, long y, long *mapx, long *mapy);
+
+void getscreenoffset_legacy(long x, long y, long *mapx, long *mapy);
 
 //getnbits returns the number of bits required to store n combinations
 //if combinations is 1, getnbits returns 0 (only 1 combination requires 0 bits represent)
@@ -40,20 +49,22 @@ void getscreenoffset_legacy(long x,long y,long *mapx,long *mapy);
 // since that messes up exact answers and we lose combatibility with the real
 // client...  since we already link the maths lib anyway, we might as well just
 // put in a macro here, since this is used extensively when decoding the update
-// messages.  
+// messages.
 #define getnbits(x) ((unsigned char) ceil(x?((logf((float)x)/logf(2.0))):0))
-// the way this is used, this makes sense. FIXME still ugly.  
+// the way this is used, this makes sense. FIXME still ugly.
 
 unsigned char objgetdir(unsigned short type);
-void txtaddcolouredname(txt *t,txt *name,player *p);
+
+void txtaddcolouredname(txt * t, txt * name, player * p);
 
 
-void SHA2(txt* t,txt* t2);
+void SHA2(txt * t, txt * t2);
 
 
 // c111
 unsigned long new1_getexprequired(unsigned short level);
-unsigned long new1_getexprequired(npc* npc);
+
+unsigned long new1_getexprequired(npc * npc);
 
 
 #endif /* FUNCTION_BOTH_H */

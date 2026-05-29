@@ -80,125 +80,151 @@
 #endif
 #define necky u6o::client::kEquipSlotLayout[(int)u6o::client::EquipSlotId::Neck].y
 
-if (wheel_move){
-  if (wheel_move>0){
-    wheel_move--;
-    i=0xD8;
-    keyon[i]=TRUE;
-    key[i]=TRUE;
-    key_gotrelease[i]=FALSE;
-  }else{
-    wheel_move++;
-    i=0xD9;
-    keyon[i]=TRUE;
-    key[i]=TRUE;
-    key_gotrelease[i]=FALSE;
-  }
-}
-if (playinstrument){
-
-  txtset(t,"?"); t->d2[0]=25; //play MIDI keys
-  txtset(t2,"?");
-  //multiple keys can point to a single sound
-  for (i=0;i<=255;i++){
-    if (keyhit(i)){
-      if (t->l<9){
-        if (midikeyboard2[i]!=255){
-          if (midikeyboard2_keyon[i]){ //if release not received for key, release now
-            txtset(t3,"??"); t3->d2[0]=26; //stop MIDI keys
-            t3->d2[1]=midikeyboard2[i];
-            NET_send(NETplayer,NULL,t3);
-          }
-          t2->d2[0]=midikeyboard2[i]; txtadd(t,t2);
-          midikeyboard2_keyon[i]=1;
-        }//!=255
-      }
-    }//keyhit
-  }//i
-  if (t->l>1){
-    NET_send(NETplayer,NULL,t);
-  }
-
-  txtset(t,"?"); t->d2[0]=26; //stop MIDI keys
-  txtset(t2,"?");
-  for (i=0;i<=255;i++){
-    if (keyon[i]==NULL){
-      if (midikeyboard2_keyon[i]){
-        t2->d2[0]=midikeyboard2[i]; txtadd(t,t2);
-        midikeyboard2_keyon[i]=0;
-      }}}
-  if (t->l>1){
-    NET_send(NETplayer,NULL,t);
-  }
-
-}//playinstrument
-
-if (setupfail) {
-    DestroyWindow( hWnd );
-}
-
-if (exitrequest){
-  exitrequest=FALSE;
-
-  // r777 fix quit sometimes not working bug
-	i = U6OK[U6OK_QUIT][0];
-	keyon[i] = FALSE;
-	key[i] = FALSE;
-	key_gotrelease[i] = TRUE;
-
-  if (exitrequest_noconfirm){
-    DestroyWindow( hWnd );
-  }else{
-    static txt *exitrequest_t=txtnew();
-    static long i;
-    for (i=1;i<=7;i++){
-      if (tplay->party[i]){
-        txtset (exitrequest_t,"Dupre");
-        if (txtsame(((npc*)tplay->party[i]->more)->name,exitrequest_t)) MessageBox(NULL,"Dupre cannot stay in your party, if you leave his items will be lost!","Ultima 6 Online",MB_OK);
-        txtset (exitrequest_t,"Shamino");
-        if (txtsame(((npc*)tplay->party[i]->more)->name,exitrequest_t)) MessageBox(NULL,"Shamino cannot stay in your party, if you leave his items will be lost!","Ultima 6 Online",MB_OK);
-        txtset (exitrequest_t,"Iolo");
-        if (txtsame(((npc*)tplay->party[i]->more)->name,exitrequest_t)) MessageBox(NULL,"Iolo cannot stay in your party, if you leave his items will be lost!","Ultima 6 Online",MB_OK);
-        txtset (exitrequest_t,"Beh Lem");
-        if (txtsame(((npc*)tplay->party[i]->more)->name,exitrequest_t)) MessageBox(NULL,"Beh Lem cannot stay in your party, if you leave his items will be lost!","Ultima 6 Online",MB_OK);
-        txtset (exitrequest_t,"Sentri");
-        if (txtsame(((npc*)tplay->party[i]->more)->name,exitrequest_t)) MessageBox(NULL,"Sentri cannot stay in your party, if you leave his items will be lost!","Ultima 6 Online",MB_OK);
-        txtset (exitrequest_t,"Sherry");
-        if (txtsame(((npc*)tplay->party[i]->more)->name,exitrequest_t)) MessageBox(NULL,"Sherry cannot stay in your party, if you leave her items will be lost!","Ultima 6 Online",MB_OK);
-        txtset (exitrequest_t,"Seggallion");
-        if (txtsame(((npc*)tplay->party[i]->more)->name,exitrequest_t)) MessageBox(NULL,"Seggallion cannot stay in your party, if you leave his items will be lost!","Ultima 6 Online",MB_OK);
-
-      }
+if
+(wheel_move) {
+    if (wheel_move > 0) {
+        wheel_move--;
+        i = 0xD8;
+        keyon[i] = TRUE;
+        key[i] = TRUE;
+        key_gotrelease[i] = FALSE;
+    } else {
+        wheel_move++;
+        i = 0xD9;
+        keyon[i] = TRUE;
+        key[i] = TRUE;
+        key_gotrelease[i] = FALSE;
     }
-    if (IDYES==MessageBox(NULL,"Leave Britannia?","Ultima 6 Online",MB_YESNO)){
-      //send "leaving Britannia message"
-      //note: Sent directly skipping NET_send(...) routine to be sure it is sent before exit.
-      txtsetshort(exitrequest_t,1);
-      txtaddchar(exitrequest_t,244); 
-      send(socketclient[0],(const char*)&exitrequest_t->d2[0],exitrequest_t->l,0);
-      DestroyWindow( hWnd );
-    }
-  }
 }
+
+if
+(playinstrument) {
+    txtset(t, "?");
+    t->d2[0] = 25; //play MIDI keys
+    txtset(t2, "?");
+    //multiple keys can point to a single sound
+    for (i = 0; i <= 255; i++) {
+        if (keyhit(i)) {
+            if (t->l < 9) {
+                if (midikeyboard2[i] != 255) {
+                    if (midikeyboard2_keyon[i]) {
+                        //if release not received for key, release now
+                        txtset(t3, "??");
+                        t3->d2[0] = 26; //stop MIDI keys
+                        t3->d2[1] = midikeyboard2[i];
+                        NET_send(NETplayer, NULL, t3);
+                    }
+                    t2->d2[0] = midikeyboard2[i];
+                    txtadd(t, t2);
+                    midikeyboard2_keyon[i] = 1;
+                } //!=255
+            }
+        } //keyhit
+    } //i
+    if (t->l > 1) {
+        NET_send(NETplayer, NULL, t);
+    }
+
+    txtset(t, "?");
+    t->d2[0] = 26; //stop MIDI keys
+    txtset(t2, "?");
+    for (i = 0; i <= 255; i++) {
+        if (keyon[i] == NULL) {
+            if (midikeyboard2_keyon[i]) {
+                t2->d2[0] = midikeyboard2[i];
+                txtadd(t, t2);
+                midikeyboard2_keyon[i] = 0;
+            }
+        }
+    }
+    if (t->l > 1) {
+        NET_send(NETplayer, NULL, t);
+    }
+} //playinstrument
+
+if
+(setupfail) {
+    DestroyWindow(hWnd);
+}
+
+if
+(exitrequest) {
+    exitrequest = FALSE;
+
+    // r777 fix quit sometimes not working bug
+    i = U6OK[U6OK_QUIT][0];
+    keyon[i] = FALSE;
+    key[i] = FALSE;
+    key_gotrelease[i] = TRUE;
+
+    if (exitrequest_noconfirm) {
+        DestroyWindow(hWnd);
+    } else {
+        static txt *exitrequest_t = txtnew();
+        static long i;
+        for (i = 1; i <= 7; i++) {
+            if (tplay->party[i]) {
+                txtset(exitrequest_t, "Dupre");
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
+                    NULL, "Dupre cannot stay in your party, if you leave his items will be lost!", "Ultima 6 Online",
+                    MB_OK);
+                txtset(exitrequest_t, "Shamino");
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
+                    NULL, "Shamino cannot stay in your party, if you leave his items will be lost!", "Ultima 6 Online",
+                    MB_OK);
+                txtset(exitrequest_t, "Iolo");
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
+                    NULL, "Iolo cannot stay in your party, if you leave his items will be lost!", "Ultima 6 Online",
+                    MB_OK);
+                txtset(exitrequest_t, "Beh Lem");
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
+                    NULL, "Beh Lem cannot stay in your party, if you leave his items will be lost!", "Ultima 6 Online",
+                    MB_OK);
+                txtset(exitrequest_t, "Sentri");
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
+                    NULL, "Sentri cannot stay in your party, if you leave his items will be lost!", "Ultima 6 Online",
+                    MB_OK);
+                txtset(exitrequest_t, "Sherry");
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
+                    NULL, "Sherry cannot stay in your party, if you leave her items will be lost!", "Ultima 6 Online",
+                    MB_OK);
+                txtset(exitrequest_t, "Seggallion");
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
+                    NULL, "Seggallion cannot stay in your party, if you leave his items will be lost!",
+                    "Ultima 6 Online", MB_OK);
+            }
+        }
+        if (IDYES == MessageBox(NULL, "Leave Britannia?", "Ultima 6 Online", MB_YESNO)) {
+            //send "leaving Britannia message"
+            //note: Sent directly skipping NET_send(...) routine to be sure it is sent before exit.
+            txtsetshort(exitrequest_t, 1);
+            txtaddchar(exitrequest_t, 244);
+            send(socketclient[0], (const char *) &exitrequest_t->d2[0], exitrequest_t->l, 0);
+            DestroyWindow(hWnd);
+        }
+    }
+}
+
 //end exit request
 
 // rrr map/scale mouse location to 1024 resolution (because all logic and graphic is tied to that mode!!!)
-if (smallwindow) {
-	if ((mx != omx2) || (my != omy2)) {
-		//double multiplierx;
-		//double multipliery;
-		omx3 = mx;
-		omy3 = my;
+if
+(smallwindow) {
+    if ((mx != omx2) || (my != omy2)) {
+        //double multiplierx;
+        //double multipliery;
+        omx3 = mx;
+        omy3 = my;
 
-		// r999 new
-		hituipaneli = -1;
-		//selectedpartymembern1 = tplay->selected_partymember;
+        // r999 new
+        hituipaneli = -1;
+        //selectedpartymembern1 = tplay->selected_partymember;
 
-		// r999
-		//panelmx[0] = (omx3 - panelx[0]) * panelscalex[0];
-		//panelmy[0] = (omy3 - panely[0]) * panelscaley[0];
+        // r999
+        //panelmx[0] = (omx3 - panelx[0]) * panelscalex[0];
+        //panelmy[0] = (omy3 - panely[0]) * panelscaley[0];
 
-		/*
+        /*
 		if (windowsizecyclenum == 0) {
 			multiplierx = (double) resxo / resxs;
 			multipliery = (double) resyo / resys;
@@ -210,143 +236,144 @@ if (smallwindow) {
 		}
 		*/
 
-		// the scale is only (re)calculated when the resolution changes; in "void refresh(surf* s)" in myddraw.cpp
+        // the scale is only (re)calculated when the resolution changes; in "void refresh(surf* s)" in myddraw.cpp
 
-//		mx *= multiplierx; my *= multipliery;
-		mx *= scalexm; my *= scaleym;
-		omx2 = mx; omy2 = my;
+        //		mx *= multiplierx; my *= multipliery;
+        mx *= scalexm;
+        my *= scaleym;
+        omx2 = mx;
+        omy2 = my;
+    }
 
-	}
+    // r666 actionbar functionality
+    if (windowsizecyclenum == 1) {
+        if (actionpending > 0) {
+            actionlast = actionpending;
 
-	// r666 actionbar functionality
-	if (windowsizecyclenum == 1) {
-		if (actionpending > 0) {
-			actionlast = actionpending;
+            if (actionpending == 1) {
+                //U6OK[U6OK_CANCEL][0];
+                i = U6OK[U6OK_ATTACK][0];
+                //keyon[i]=TRUE;
+                key[i] = TRUE;
+                //key_gotrelease[i]=TRUE;
 
-			if (actionpending == 1) {
-				//U6OK[U6OK_CANCEL][0];
-				i=U6OK[U6OK_ATTACK][0];
-				//keyon[i]=TRUE;
-				key[i]=TRUE;
-				//key_gotrelease[i]=TRUE;
+                //MessageBox(NULL,"attack!","Ultima 6 Online",MB_OK);
+                //txtset(t, "attack!");
+                //LOGadd(t);
+            } else if (actionpending == 2) {
+                i = U6OK[U6OK_TALK][0];
+                keyon[i] = TRUE;
+                key[i] = TRUE;
+                key_gotrelease[i] = TRUE;
+            } else if (actionpending == 3) {
+                i = U6OK[U6OK_LOOK][0];
+                keyon[i] = TRUE;
+                key[i] = TRUE;
+                key_gotrelease[i] = TRUE;
+            } else if (actionpending == 4) {
+                i = U6OK[U6OK_USE][0];
+                keyon[i] = TRUE;
+                key[i] = TRUE;
+                key_gotrelease[i] = TRUE;
+            } else if (actionpending == 5) {
+                minimaptype++;
+                if (minimaptype > minimaptypemax)
+                    minimaptype = 0;
 
-				//MessageBox(NULL,"attack!","Ultima 6 Online",MB_OK);
-				//txtset(t, "attack!");
-				//LOGadd(t);
-			} else if (actionpending == 2) {
-				i=U6OK[U6OK_TALK][0];
-				keyon[i]=TRUE;
-				key[i]=TRUE;
-				key_gotrelease[i]=TRUE;
-			} else if (actionpending == 3) {
-				i=U6OK[U6OK_LOOK][0];
-				keyon[i]=TRUE;
-				key[i]=TRUE;
-				key_gotrelease[i]=TRUE;
-			} else if (actionpending == 4) {
-				i=U6OK[U6OK_USE][0];
-				keyon[i]=TRUE;
-				key[i]=TRUE;
-				key_gotrelease[i]=TRUE;
-			} else if (actionpending == 5) {
-				minimaptype++;
-				if (minimaptype > minimaptypemax)
-					minimaptype = 0;
+                if (minimaptype == 1) {
+                    minimaptilexstart = 1;
+                    minimaptilexend = 3;
+                    minimaptileystart = 1;
+                    minimaptileyend = 3;
+                    minimaptilesurf = minimaptilesurf1;
+                    //minimapplayerx = minimapnewx+128-13;
+                    //minimapplayery = minimapnewy+128-24;
+                    minimapplayerx = 128 - 13;
+                    minimapplayery = 128 - 24;
+                    minimapstepsize = 4.9f;
+                } else if (minimaptype == 2) {
+                    minimaptilexstart = 0;
+                    minimaptilexend = 4;
+                    minimaptileystart = 0;
+                    minimaptileyend = 4;
+                    minimaptilesurf = minimaptilesurf2;
+                    //minimapplayerx = minimapnewx+128-9;
+                    //minimapplayery = minimapnewy+128-21;
+                    minimapplayerx = 128 - 9;
+                    minimapplayery = 128 - 21;
+                    minimapstepsize = 2.45f;
+                }
+            } else if (actionpending == 6) {
+                i = U6OK[U6OK_TALK][0];
+                keyon[i] = TRUE;
+                key[i] = TRUE;
+                key_gotrelease[i] = TRUE;
+                actiontalkfilltext = 1;
+            } else if (actionpending == 7) {
+                i = U6OK[U6OK_QUIT][0];
+                keyon[i] = TRUE;
+                key[i] = TRUE;
+                key_gotrelease[i] = TRUE;
+            } else if (actionpending == 100) {
+                // r777 use item on self: step 1
+                i = U6OK[U6OK_USE][0];
+                keyon[i] = TRUE;
+                key[i] = TRUE;
+                key_gotrelease[i] = TRUE;
+                actionpending = 501;
+                //MessageBox(NULL,"a 100","Ultima 6 Online",MB_OK);
+            } else if (actionpending == 501) {
+                // r777 click on self
+                actionpending = 502;
+                //MessageBox(NULL,"a 501","Ultima 6 Online",MB_OK);
+            } else if (actionpending == 503) {
+                // r777 send item to inventory
+                actionpending = 0;
+                actionreset = 1;
+                itemtoinv = 1;
+                //MessageBox(NULL,"a 503","Ultima 6 Online",MB_OK);
+            } else if (actionpending == 599) {
+                // r777 reset action
+                actionpending = 0;
+                actionreset = 1;
+            }
 
-				if (minimaptype == 1) {
-					minimaptilexstart = 1;
-					minimaptilexend = 3;
-					minimaptileystart = 1;
-					minimaptileyend = 3;
-					minimaptilesurf = minimaptilesurf1;
-					//minimapplayerx = minimapnewx+128-13;
-					//minimapplayery = minimapnewy+128-24;
-					minimapplayerx = 128-13;
-					minimapplayery = 128-24;
-					minimapstepsize = 4.9f;
-				} else if (minimaptype == 2) {
-					minimaptilexstart = 0;
-					minimaptilexend = 4;
-					minimaptileystart = 0;
-					minimaptileyend = 4;
-					minimaptilesurf = minimaptilesurf2;
-					//minimapplayerx = minimapnewx+128-9;
-					//minimapplayery = minimapnewy+128-21;
-					minimapplayerx = 128-9;
-					minimapplayery = 128-21;
-					minimapstepsize = 2.45f;
-				}
-			} else if (actionpending == 6) {
-				i = U6OK[U6OK_TALK][0];
-				keyon[i] = TRUE;
-				key[i] = TRUE;
-				key_gotrelease[i] = TRUE;
-				actiontalkfilltext = 1;
-			} else if (actionpending == 7) {
-				i = U6OK[U6OK_QUIT][0];
-				keyon[i] = TRUE;
-				key[i] = TRUE;
-				key_gotrelease[i] = TRUE;
-			} else if (actionpending == 100) {
-				// r777 use item on self: step 1
-				i=U6OK[U6OK_USE][0];
-				keyon[i]=TRUE;
-				key[i]=TRUE;
-				key_gotrelease[i]=TRUE;
-				actionpending = 501;
-				//MessageBox(NULL,"a 100","Ultima 6 Online",MB_OK);
-			} else if (actionpending == 501) {
-				// r777 click on self
-				actionpending = 502;
-				//MessageBox(NULL,"a 501","Ultima 6 Online",MB_OK);
-			} else if (actionpending == 503) {
-				// r777 send item to inventory
-				actionpending = 0;
-				actionreset = 1;
-				itemtoinv = 1;
-				//MessageBox(NULL,"a 503","Ultima 6 Online",MB_OK);
-			} else if (actionpending == 599) {
-				// r777 reset action
-				actionpending = 0;
-				actionreset = 1;
-			}
+            if (actionpending < 500)
+                actionpending = 0;
+        } else if (actionreset != 0) {
+            actionreset = 0;
+            actionlast = 0;
+            //} else if (mbclick & 1) {
+        } else {
+            hituipaneli = -5;
+            hituiwidgeti = -5;
 
-			if (actionpending < 500)
-				actionpending = 0;
-		} else if (actionreset != 0) {
-			actionreset = 0;
-			actionlast = 0;
-		//} else if (mbclick & 1) {
-		} else {
-			hituipaneli = -5;
-			hituiwidgeti = -5;
+            // s444 process mouse clicks on worldmap and worldmapbar
+            if (mbclick) {
+                if (showworldmapn1 > 0) {
+                    hituipaneli = gethituipaneli(omx3, omy3);
+                    //hituiwidgeti = -1;
 
-			// s444 process mouse clicks on worldmap and worldmapbar
-			if (mbclick) {
-				if (showworldmapn1 > 0) {
-					hituipaneli = gethituipaneli(omx3, omy3);
-					//hituiwidgeti = -1;
+                    // s444 cancel all mouse clicks on world map
+                    if (hituipaneli == uipanelworldmap) {
+                        hituipaneli = -2;
+                        mbclick = 0;
+                        mbheld = 0;
+                    } else if (hituipaneli == uipanelworldmapbar) {
+                        if (mbclick & 1)
+                            hituiwidgeti = gethituipanelwidgeti(omx3, omy3, uipanelworldmapbar);
+                        else {
+                            // s444 cancel non-left mouse clicks on world map bar
+                            hituipaneli = -5;
+                            mbclick = 0;
+                            mbheld = 0;
+                        }
+                    } else if (!(mbclick & 1)) {
+                        hituipaneli = -5;
+                    }
 
-					// s444 cancel all mouse clicks on world map
-					if (hituipaneli == uipanelworldmap) {
-						hituipaneli = -2;
-						mbclick = 0;
-						mbheld = 0;
-					} else if (hituipaneli == uipanelworldmapbar) {
-						if (mbclick & 1)
-							hituiwidgeti = gethituipanelwidgeti(omx3, omy3, uipanelworldmapbar);
-						else {
-							// s444 cancel non-left mouse clicks on world map bar
-							hituipaneli = -5;
-							mbclick = 0;
-							mbheld = 0;
-						}
-					} else if (!(mbclick & 1)) {
-						hituipaneli = -5;
-					}
-
-					// s444 cancel right mouse clicks on world map bar
-					/*
+                    // s444 cancel right mouse clicks on world map bar
+                    /*
 					if (hituiwidgeti > 0) {
 						if (!(mbclick & 1)) {
 							hituipaneli = -2;
@@ -357,607 +384,603 @@ if (smallwindow) {
 					}
 					*/
 
-					// s444 worldmapbar
-					if (hituiwidgeti > 0) {
-						mbclick = 0;
+                    // s444 worldmapbar
+                    if (hituiwidgeti > 0) {
+                        mbclick = 0;
 
-						if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6CLOTH) {
-							if (worldmapindexn1 != 1)
-								updateworldmapn1 = 1;
+                        if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6CLOTH) {
+                            if (worldmapindexn1 != 1)
+                                updateworldmapn1 = 1;
 
-							worldmapindexn1 = 1;
+                            worldmapindexn1 = 1;
 
-							if (soundn1 >= 2)
-								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-						}
-						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6P) {
-							if (worldmapindexn1 != 2)
-								updateworldmapn1 = 1;
+                            if (soundn1 >= 2)
+                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+                        } else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6P) {
+                            if (worldmapindexn1 != 2)
+                                updateworldmapn1 = 1;
 
-							worldmapindexn1 = 2;
+                            worldmapindexn1 = 2;
 
-							if (soundn1 >= 2)
-								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-						}
-						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6G) {
-							if (worldmapindexn1 != 3)
-								updateworldmapn1 = 1;
+                            if (soundn1 >= 2)
+                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+                        } else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6G) {
+                            if (worldmapindexn1 != 3)
+                                updateworldmapn1 = 1;
 
-							worldmapindexn1 = 3;
+                            worldmapindexn1 = 3;
 
-							if (soundn1 >= 2)
-								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-						}
-						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6RUNE) {
-							if (worldmapindexn1 != 4)
-								updateworldmapn1 = 1;
+                            if (soundn1 >= 2)
+                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+                        } else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6RUNE) {
+                            if (worldmapindexn1 != 4)
+                                updateworldmapn1 = 1;
 
-							worldmapindexn1 = 4;
+                            worldmapindexn1 = 4;
 
-							if (soundn1 >= 2)
-								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-						}
-						else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_CLOSE) {
-							showworldmapn1 = 0;
-							uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
+                            if (soundn1 >= 2)
+                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+                        } else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_CLOSE) {
+                            showworldmapn1 = 0;
+                            uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
 
-							if (soundn1 >= 2)
-								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-						}
-					}
-				}
-			} // mbclick
+                            if (soundn1 >= 2)
+                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+                        }
+                    }
+                }
+            } // mbclick
 
-			// r999 new
-			//hituipaneli = gethituipaneli(omx3, omy3);
-			//hituiwidgeti = -1;
+            // r999 new
+            //hituipaneli = gethituipaneli(omx3, omy3);
+            //hituiwidgeti = -1;
 
-			// r999 new only process left mouse clicks if it was not previously canceled
-			if ((mbclick & 1) && (hituipaneli < -4)) {
-				hituipaneli = gethituipaneli(omx3, omy3);
-				//hituiwidgeti = -1;
+            // r999 new only process left mouse clicks if it was not previously canceled
+            if ((mbclick & 1) && (hituipaneli < -4)) {
+                hituipaneli = gethituipaneli(omx3, omy3);
+                //hituiwidgeti = -1;
 
-				if (hituipaneli < 0)
-					actionreset = 1;
-			}
+                if (hituipaneli < 0)
+                    actionreset = 1;
+            }
 
-			// s444 cancel mouse clicks on world map
-			/*
+            // s444 cancel mouse clicks on world map
+            /*
 			if (hituipaneli == uipanelworldmap) {
 				hituipaneli = -1;
 				mbclick = 0;
 			}
 			*/
 
-			// process left mouse clicks on new ui
-			if (hituipaneli > 0) {
-				hituiwidgeti = -1;
+            // process left mouse clicks on new ui
+            if (hituipaneli > 0) {
+                hituiwidgeti = -1;
 
-				// r999 new actionbar1
-				if (hituipaneli == uipanelactionbar1) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+                // r999 new actionbar1
+                if (hituipaneli == uipanelactionbar1) {
+                    hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
 
-					if (hituiwidgeti > 0) {
-						if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_ATTACK) {
-							// attack
-							actionreset = 0;
-							if (actionlast != 1) {
-								i=U6OK[U6OK_CANCEL][0];
-								keyon[i]=TRUE;
-								key[i]=TRUE;
-								key_gotrelease[i]=TRUE;
-							} else
-								actionreset = 1;
+                    if (hituiwidgeti > 0) {
+                        if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_ATTACK) {
+                            // attack
+                            actionreset = 0;
+                            if (actionlast != 1) {
+                                i = U6OK[U6OK_CANCEL][0];
+                                keyon[i] = TRUE;
+                                key[i] = TRUE;
+                                key_gotrelease[i] = TRUE;
+                            } else
+                                actionreset = 1;
 
-							actionpending = 1;
+                            actionpending = 1;
 
-							//MessageBox(NULL,"attack!","Ultima 6 Online",MB_OK);
-							//txtset(t, "attack!");
-							//LOGadd(t);
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_TALK) {
-							// talk
-							actionreset = 0;
-							i=U6OK[U6OK_CANCEL][0];
-							keyon[i]=TRUE;
-							key[i]=TRUE;
-							key_gotrelease[i]=TRUE;
+                            //MessageBox(NULL,"attack!","Ultima 6 Online",MB_OK);
+                            //txtset(t, "attack!");
+                            //LOGadd(t);
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_TALK) {
+                            // talk
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
 
-							if (actionlast != 2)
-								actionpending = 2;
-							else
-								actionreset = 1;
+                            if (actionlast != 2)
+                                actionpending = 2;
+                            else
+                                actionreset = 1;
 
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_LOOK) {
-							// look
-							actionreset = 0;
-							i=U6OK[U6OK_CANCEL][0];
-							keyon[i]=TRUE;
-							key[i]=TRUE;
-							key_gotrelease[i]=TRUE;
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_LOOK) {
+                            // look
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
 
-							if (actionlast != 3)
-								actionpending = 3;
-							else
-								actionreset = 1;
+                            if (actionlast != 3)
+                                actionpending = 3;
+                            else
+                                actionreset = 1;
 
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_USE) {
-							// use
-							actionreset = 0;
-							i=U6OK[U6OK_CANCEL][0];
-							keyon[i]=TRUE;
-							key[i]=TRUE;
-							key_gotrelease[i]=TRUE;
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_USE) {
+                            // use
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
 
-							if (actionlast != 4) {
-								if ( (keyon[VK_SHIFT]) && CLIENTplayer->mobj) {
-									// r777 set use item on self action
-									actionpending = 100;
-								} else
-									actionpending = 4;
-							}
-							else
-								actionreset = 1;
+                            if (actionlast != 4) {
+                                if ((keyon[VK_SHIFT]) && CLIENTplayer->mobj) {
+                                    // r777 set use item on self action
+                                    actionpending = 100;
+                                } else
+                                    actionpending = 4;
+                            } else
+                                actionreset = 1;
 
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_DROP) {
-							// drop item
-							actionreset = 0;
-							i=U6OK[U6OK_CANCEL][0];
-							keyon[i]=TRUE;
-							key[i]=TRUE;
-							key_gotrelease[i]=TRUE;
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_DROP) {
+                            // drop item
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
 
-							if (CLIENTplayer->mobj)
-								actionpending = 510;
-							else {
-								if (setdroplocation)
-									setdroplocation = 0;
-								else
-									setdroplocation = 1;
+                            if (CLIENTplayer->mobj)
+                                actionpending = 510;
+                            else {
+                                if (setdroplocation)
+                                    setdroplocation = 0;
+                                else
+                                    setdroplocation = 1;
 
-								if (soundn1 >= 2)
-									soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-							}
+                                if (soundn1 >= 2)
+                                    soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+                            }
 
-							mbclick = 0;
-						}
-					}
-				} // actionbar1
-				// actionbar2
-				else if (hituipaneli == uipanelactionbar2) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+                            mbclick = 0;
+                        }
+                    }
+                } // actionbar1
+                // actionbar2
+                else if (hituipaneli == uipanelactionbar2) {
+                    hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
 
-					if (hituiwidgeti > 0) {
-						if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_FOOD) {
-							// food (use)
-							actionreset = 0;
-							i=U6OK[U6OK_CANCEL][0];
-							keyon[i]=TRUE;
-							key[i]=TRUE;
-							key_gotrelease[i]=TRUE;
+                    if (hituiwidgeti > 0) {
+                        if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_FOOD) {
+                            // food (use)
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
 
-							if (CLIENTplayer->mobj) {
-								// r777 set use item on self action
-								actionpending = 100;
-							} else
-								actionreset = 1;
+                            if (CLIENTplayer->mobj) {
+                                // r777 set use item on self action
+                                actionpending = 100;
+                            } else
+                                actionreset = 1;
 
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_WORLDMAP) {
-							// worldmap
-							showworldmapn1++;
-							if (showworldmapn1 > 1) {
-								showworldmapn1 = 0;
-								uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
-							} else {
-								uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 1;
-							}
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_WORLDMAP) {
+                            // worldmap
+                            showworldmapn1++;
+                            if (showworldmapn1 > 1) {
+                                showworldmapn1 = 0;
+                                uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
+                            } else {
+                                uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 1;
+                            }
 
-							if (soundn1 >= 2)
-								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_COMBATLOG) {
-							// combatlog
-							combatinfo++;
-							txtsetchar(t3, 255);
+                            if (soundn1 >= 2)
+                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_COMBATLOG) {
+                            // combatlog
+                            combatinfo++;
+                            txtsetchar(t3, 255);
 
-							if (combatinfo > 1) {
-								combatinfo = 0;
-								STATUSMESSadd("Combat log disabled.", 1);
-							} else {
-								STATUSMESSadd("Combat log enabled. (experimental)  Warning: may cause game to crash.", 1);
-							}
+                            if (combatinfo > 1) {
+                                combatinfo = 0;
+                                STATUSMESSadd("Combat log disabled.", 1);
+                            } else {
+                                STATUSMESSadd("Combat log enabled. (experimental)  Warning: may cause game to crash.",
+                                              1);
+                            }
 
-							if (soundn1)
-								soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
-						}
-					}
-				} // actionbar2
-				// optionbar1
-				else if (hituipaneli == uipaneloptionbar1) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+                            if (soundn1)
+                                soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
+                        }
+                    }
+                } // actionbar2
+                // optionbar1
+                else if (hituipaneli == uipaneloptionbar1) {
+                    hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
 
-					if (hituiwidgeti > 0) {
-						if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_ENHANCE) {
-							// game enhancement
-							enhancen1++;
-							if (enhancen1 > 2) {
-								enhancen1 = 0;
-								STATUSMESSadd("Game option: set to default", 1);
-							} else
-								STATUSMESSadd("Game option: set to alternate ", 1, enhancen1);
+                    if (hituiwidgeti > 0) {
+                        if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_ENHANCE) {
+                            // game enhancement
+                            enhancen1++;
+                            if (enhancen1 > 2) {
+                                enhancen1 = 0;
+                                STATUSMESSadd("Game option: set to default", 1);
+                            } else
+                                STATUSMESSadd("Game option: set to alternate ", 1, enhancen1);
 
-							if (soundn1)
-								soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
-							//updateoptioninfo();
-							updatepartyframen1 = 1;
-						} else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_SOUND) {
-							// game sound enhancement
-							soundn1++;
-							if (soundn1 > 2) {
-								soundn1 = 0;
-								STATUSMESSadd("Sound option: set to default", 1);
-							} else
-								STATUSMESSadd("Sound option: set to alternate ", 1, soundn1);
+                            if (soundn1)
+                                soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
+                            //updateoptioninfo();
+                            updatepartyframen1 = 1;
+                        } else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_SOUND) {
+                            // game sound enhancement
+                            soundn1++;
+                            if (soundn1 > 2) {
+                                soundn1 = 0;
+                                STATUSMESSadd("Sound option: set to default", 1);
+                            } else
+                                STATUSMESSadd("Sound option: set to alternate ", 1, soundn1);
 
-							if (soundn1)
-								soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
-							//updateoptioninfo();
-						} else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_COMBATSOUND) {
-							// combat sound enhancement
-							combatsoundn1++;
-							if (combatsoundn1 > 2) {
-								combatsoundn1 = 0;
-								STATUSMESSadd("Combat sound option: set to default", 1);
-							} else
-								STATUSMESSadd("Combat sound option: set to alternate ", 1, combatsoundn1);
+                            if (soundn1)
+                                soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
+                            //updateoptioninfo();
+                        } else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_COMBATSOUND) {
+                            // combat sound enhancement
+                            combatsoundn1++;
+                            if (combatsoundn1 > 2) {
+                                combatsoundn1 = 0;
+                                STATUSMESSadd("Combat sound option: set to default", 1);
+                            } else
+                                STATUSMESSadd("Combat sound option: set to alternate ", 1, combatsoundn1);
 
-							if (soundn1)
-								soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
-							//updateoptioninfo();
-						} else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_MINIMAP) {
-							// minimap toggle
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 5;
-							mbclick = 0;
+                            if (soundn1)
+                                soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
+                            //updateoptioninfo();
+                        } else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_MINIMAP) {
+                            // minimap toggle
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 5;
+                            mbclick = 0;
 
-							if (soundn1 >= 2)
-								soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
-						} else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_QUIT) {
-							// quit
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 7;
-							mbclick = 0;
-							//MessageBox(NULL,"quit","Ultima 6 Online",MB_OK);
-						}
-					}
-				} // optionbar1
-				// actiontalkbar1
-				else if (hituipaneli == uipanelactiontalkbar1) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+                            if (soundn1 >= 2)
+                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
+                        } else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_QUIT) {
+                            // quit
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 7;
+                            mbclick = 0;
+                            //MessageBox(NULL,"quit","Ultima 6 Online",MB_OK);
+                        }
+                    }
+                } // optionbar1
+                // actiontalkbar1
+                else if (hituipaneli == uipanelactiontalkbar1) {
+                    hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
 
-					if (hituiwidgeti > 0) {
-						if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_NAME) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "name");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_JOB) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "job");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_HEAL) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "heal");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_CURE) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "cure");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_RESURRECT) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "resurrect");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_INSURANCE) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "insurance");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_SPELL) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "spell");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_REAGENT) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "reagent");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_POTION) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "potion");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_STAFF) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "staff");
-							mbclick = 0;
-						}
-					}
-				} // actiontalkbar1
-				// actiontalkbar2
-				else if (hituipaneli == uipanelactiontalkbar2) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+                    if (hituiwidgeti > 0) {
+                        if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_NAME) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "name");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_JOB) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "job");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_HEAL) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "heal");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_CURE) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "cure");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_RESURRECT) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "resurrect");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_INSURANCE) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "insurance");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_SPELL) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "spell");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_REAGENT) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "reagent");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_POTION) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "potion");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_STAFF) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "staff");
+                            mbclick = 0;
+                        }
+                    }
+                } // actiontalkbar1
+                // actiontalkbar2
+                else if (hituipaneli == uipanelactiontalkbar2) {
+                    hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
 
-					if (hituiwidgeti > 0) {
-						if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_YES) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "yes");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_NO) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "no");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_SELL) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "sell");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BULK) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "bulk");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BUY) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "buy");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_ARMOR) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "armor");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_ARMS) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "arms");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_WEAPON) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "weapon");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_ARROWS) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "arrows");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BOLTS) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "bolts");
-							mbclick = 0;
-						}
-					}
-				} // actiontalkbar2
-				// actiontalkbar3
-				else if (hituipaneli == uipanelactiontalkbar3) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+                    if (hituiwidgeti > 0) {
+                        if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_YES) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "yes");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_NO) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "no");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_SELL) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "sell");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BULK) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "bulk");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BUY) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "buy");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_ARMOR) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "armor");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_ARMS) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "arms");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_WEAPON) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "weapon");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_ARROWS) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "arrows");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BOLTS) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "bolts");
+                            mbclick = 0;
+                        }
+                    }
+                } // actiontalkbar2
+                // actiontalkbar3
+                else if (hituipaneli == uipanelactiontalkbar3) {
+                    hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
 
-					if (hituiwidgeti > 0) {
-						if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_DEPOSIT) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "deposit");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_WITHDRAW) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "withdraw");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BALANCE) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "balance");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_EXCHANGE) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "exchange");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_HOUSE) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "house");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_PAYMENT) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "payment");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_JOIN) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "join");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_LEAVE) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "leave");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BAGS) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "bags");
-							mbclick = 0;
-						} else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_HELP) {
-							actionreset = 0;
-							i = U6OK[U6OK_CANCEL][0];
-							keyon[i] = TRUE;
-							key[i] = TRUE;
-							key_gotrelease[i] = TRUE;
-							actionpending = 6;
-							txtset(newt1, "kal lor <-- replace with all uppercase (i.e. \"KAL LOR\") and press Enter. WARNING: you will LOSE some (i.e. 1/16) of ... your (TOTAL) experience!  This help request will teleport you to the starting location.");
-							mbclick = 0;
-						}
-					}
-				} // actiontalkbar3
-				// partymemberbar1
-				else if (hituipaneli == uipanelpartymemberbar1) {
-					hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
+                    if (hituiwidgeti > 0) {
+                        if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_DEPOSIT) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "deposit");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_WITHDRAW) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "withdraw");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BALANCE) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "balance");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_EXCHANGE) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "exchange");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_HOUSE) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "house");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_PAYMENT) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "payment");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_JOIN) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "join");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_LEAVE) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "leave");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_BAGS) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1, "bags");
+                            mbclick = 0;
+                        } else if (hituiwidgeti == UI_WIDGET_ACTIONTALKBUTTON_HELP) {
+                            actionreset = 0;
+                            i = U6OK[U6OK_CANCEL][0];
+                            keyon[i] = TRUE;
+                            key[i] = TRUE;
+                            key_gotrelease[i] = TRUE;
+                            actionpending = 6;
+                            txtset(newt1,
+                                   "kal lor <-- replace with all uppercase (i.e. \"KAL LOR\") and press Enter. WARNING: you will LOSE some (i.e. 1/16) of ... your (TOTAL) experience!  This help request will teleport you to the starting location.");
+                            mbclick = 0;
+                        }
+                    }
+                } // actiontalkbar3
+                // partymemberbar1
+                else if (hituipaneli == uipanelpartymemberbar1) {
+                    hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
 
-					if (hituiwidgeti > 0) {
-						selectedpartymemberframen1 = hituiwidgeti - 1;
-					}
-				} // partymemberbar1
-				// party member inventory frame
-				else if (hituipaneli == uipanelpartymember0) {
-					// partymemberlock
-					if (testhituipanel(omx3, omy3, uipanelpartymemberlock)) {
-						selectedpartymemberframelock++;
+                    if (hituiwidgeti > 0) {
+                        selectedpartymemberframen1 = hituiwidgeti - 1;
+                    }
+                } // partymemberbar1
+                // party member inventory frame
+                else if (hituipaneli == uipanelpartymember0) {
+                    // partymemberlock
+                    if (testhituipanel(omx3, omy3, uipanelpartymemberlock)) {
+                        selectedpartymemberframelock++;
 
-						if (selectedpartymemberframelock > 1)
-							selectedpartymemberframelock = 0;
-					} // partymemberlock
-				} // party member inventory frame
+                        if (selectedpartymemberframelock > 1)
+                            selectedpartymemberframelock = 0;
+                    } // partymemberlock
+                } // party member inventory frame
+            }
 
-			}
-
-			/*
+            /*
 			txtset(t4, "hittest uipi=");
 			txtnumint(t5, hituipaneli);
 			txtadd(t4, t5);
@@ -967,17 +990,25 @@ if (smallwindow) {
 			txtadd(t4, t5);
 			LOGadd(t4);
 			*/
-
-		}
-    //if (mb&1){
-	}
-
+        }
+        //if (mb&1){
+    }
 }
 
 
 //check for midi keys that need to be cleared
-i3=0;
-for (i2=0;i2<=15;i2++){
+i3=
+0;
+for
+(i2=
+0;
+i2
+<=
+15;
+i2
+++
+)
+{
   for (i=0;i<=255;i++){
 
     if (midikeystack[i2][i]){
@@ -989,7 +1020,15 @@ for (i2=0;i2<=15;i2++){
       }}}
 }
 
-if ((i3==0)&&midipause){
+if
+((i3
+==
+0
+)
+&&
+midipause
+)
+{
   if (playinstrument==0){
     midipause=0;
 
@@ -1001,21 +1040,62 @@ if ((i3==0)&&midipause){
 }
 
 
-clientframe=!clientframe;
+clientframe=
+!
+clientframe;
 //if (!NEThost) clientframe=1;
-clientframe=1;
+clientframe=
+1;
 
-f=1.0f; if (int((ett/f))!=int((ett/f)-(et/f))){
+f=
+1.0f;
+if
+(
+int ((ett
+/
+f
+)
+)
+!=
+int ((ett
+/
+f
+)
+-
+(et
+/
+f
+)
+)
+)
+{
   if (xray) xray--;
   if (peer) peer--;
   if (tmap) tmap--;
 }
-ktar_display-=et; if (ktar_display<0.0f) ktar_display=0.0f;
-wizardeyetimeleft-=et; if (wizardeyetimeleft<0.0f) wizardeyetimeleft=0.0f;
+ktar_display
+-=
+et;
+if
+(ktar_display<0.0f)
+ktar_display=
+0.0f;
+wizardeyetimeleft
+-=
+et;
+if
+(wizardeyetimeleft<0.0f)
+wizardeyetimeleft=
+0.0f;
 
 isit=TRUE;
 
-if (!NEThost) {
+if
+(
+!
+NEThost
+)
+ {
   if (lastsecond==-1) lastsecond=ett; x=ett; //detect frame rate
   if (x!=lastsecond){
     lastsecond=x; framerate=framecount; framecount=0;
@@ -1045,34 +1125,35 @@ if (!NEThost) {
 // so the only useful work this hook does today is give the rest of the
 // codebase one well-defined seam through which all future surface/UI
 // re-layout work in RW-P2..RW-P4 will be plumbed.
-if (dirtyClientSize) {
-  dirtyClientSize = false;
-  // refresh()/blit_letterbox already recomputes blit_offx/offy/scale every
-  // frame from GetClientRect, so input mapping stays correct without any
-  // extra work here. Reserved for future surface recreation (RW-P2.2) and
-  // UI anchor recomputation (RW-P3.3).
-  // RW-P2.2: ask the viewport seam to re-create back buffers at the new
-  // client size, then reposition anchored UI panels. (windowResize gate
-  // removed 2026-05-27 — always-on.)
-  recreateBackbuffers((int)clientW, (int)clientH);
-  // RW-P3.3: re-anchor the five static UI panels. NOTE: until P2.2
-  // grows the back buffer with the window, panels must anchor against
-  // the back-buffer dimensions, not the client-window dimensions ?
-  // they draw onto `ps` which is still 1024x768 regardless of how
-  // big the window has become. Anchoring to clientW/H would push
-  // panels off the back-buffer edge and they'd disappear behind the
-  // letterbox bars. Once the back buffer follows clientW/H, this can
-  // change to clientW/clientH for true edge-following.
-  RepositionAnchoredPanels(backbufferW(), backbufferH());
+if
+(dirtyClientSize) {
+    dirtyClientSize = false;
+    // refresh()/blit_letterbox already recomputes blit_offx/offy/scale every
+    // frame from GetClientRect, so input mapping stays correct without any
+    // extra work here. Reserved for future surface recreation (RW-P2.2) and
+    // UI anchor recomputation (RW-P3.3).
+    // RW-P2.2: ask the viewport seam to re-create back buffers at the new
+    // client size, then reposition anchored UI panels. (windowResize gate
+    // removed 2026-05-27 — always-on.)
+    recreateBackbuffers((int) clientW, (int) clientH);
+    // RW-P3.3: re-anchor the five static UI panels. NOTE: until P2.2
+    // grows the back buffer with the window, panels must anchor against
+    // the back-buffer dimensions, not the client-window dimensions ?
+    // they draw onto `ps` which is still 1024x768 regardless of how
+    // big the window has become. Anchoring to clientW/H would push
+    // panels off the back-buffer edge and they'd disappear behind the
+    // letterbox bars. Once the back buffer follows clientW/H, this can
+    // change to clientW/clientH for true edge-following.
+    RepositionAnchoredPanels(backbufferW(), backbufferH());
 #ifdef _DEBUG
-  {
-    char dbgbuf[160];
-    _snprintf(dbgbuf, sizeof(dbgbuf),
-      "[u6o] OnClientResized: %ldx%ld\n",
-      clientW, clientH);
-    dbgbuf[sizeof(dbgbuf)-1] = '\0';
-    OutputDebugStringA(dbgbuf);
-  }
+    {
+        char dbgbuf[160];
+        _snprintf(dbgbuf, sizeof(dbgbuf),
+                  "[u6o] OnClientResized: %ldx%ld\n",
+                  clientW, clientH);
+        dbgbuf[sizeof(dbgbuf) - 1] = '\0';
+        OutputDebugStringA(dbgbuf);
+    }
 #endif
 }
 
@@ -1090,17 +1171,46 @@ if (smallwindow){
 
 omb=FRAME_mb; //find old button value using FRAME_mb (which now contains old value)
 FRAME_mb=mb; //backup physical mouse value
-if ((mb&1)==0) FRAME_mbl[0]=FALSE; //disabled mouse locks
-if ((mb&2)==0) FRAME_mbl[1]=FALSE;
-if (FRAME_mbl[0]==TRUE){ //mask physical values if locked
+if
+((mb&
+1
+)
+==
+0
+)
+FRAME_mbl [0]=FALSE; //disabled mouse locks
+if
+((mb&
+2
+)
+==
+0
+)
+FRAME_mbl [1]=FALSE;
+if
+(FRAME_mbl[0]
+==
+TRUE
+)
+{ //mask physical values if locked
   if (mb&1) mb=mb-1;
 }
-if (FRAME_mbl[1]==TRUE){
+if
+(FRAME_mbl[1]
+==
+TRUE
+)
+{
   if (mb&2) mb=mb-2;
 }
 pn=firstpanel;
-checkpanel:
-if (pn!=NULL){ //frame available
+checkpanel : 
+if
+(pn
+!=
+NULL
+)
+{ //frame available
   if ((pn->graphic!=NULL)&&(pn->size_x==0)&&(pn->size_y==0)){
     x3=pn->offset_x; y3=pn->offset_y;
     x4=x3+pn->graphic->d.dwWidth; y4=y3+pn->graphic->d.dwHeight;
@@ -1238,14 +1348,19 @@ maskcheckfailed:;
   }}}}
   pn=(FRAME*)pn->next; goto checkpanel; //next frame pointer
 }
-checkdone:
+checkdone : 
 
 // r222 handle mouse click for party[0] (the player avatar) for new resolution mode top-right inventory window
 // r222 we are just simulating the clicking/variables as if it is being performed on the actual inventory in the 1024 res.  the rest is handle by the original 1024 res code/logic.
-if (smallwindow && windowsizecyclenum == 1) {
+if
+(smallwindow &&windowsizecyclenum
+==
+1
+)
+ {
 	//double multiplierx = (double)resxz / resxo;
 	//double multipliery = (double)resyz / resyo;
-	
+
 
 	//if (newmodestatus >= 5) {
 	if (itemtoinv) {
@@ -1280,7 +1395,7 @@ if (smallwindow && windowsizecyclenum == 1) {
 			party_frame_new[i]->mouse_over = FALSE;
 			//pmf = party_frame[i];
 			pmf = party_frame[selectedpartymemberframen1];
-			
+
 			//		if ((omx3 >= resxn1m + 3) && (omy3 <= 256))
 
 			// not true anymore --> omx3 and omy3 does not need to be scaled because the (new) top-right inventory window is not scaled at all (it is always the 1024 res scaled-size; i.e. not scaled)
@@ -1349,7 +1464,8 @@ if (smallwindow && windowsizecyclenum == 1) {
 		*/
 		}//i
 	}
-} else {
+} else
+ {
 	if (enhancen1 >= 2) {
 		if (actionpending == 510) {
 			// Drop item action: remove "focus" from party member frames to allow item to drop on ground
@@ -1363,14 +1479,39 @@ if (smallwindow && windowsizecyclenum == 1) {
 
 
 //external functions, results of button presses
-if ((ONOFF_hold!=NULL)&&((FRAME_mb&1)==0)){
+if
+((ONOFF_hold
+!=
+NULL
+)
+&&
+((FRAME_mb&
+1
+)
+==
+0
+)
+)
+{
   soundplay(ONOFF_hold->sound_off);
   ONOFF_hold->value=0;
   ONOFF_hold=NULL;
 }
-if ((FRAME_mb&2)==0) drg=NULL;
+if
+((FRAME_mb&
+2
+)
+==
+0
+)
+drg=NULL;
 
-if (drg!=NULL){ //drag panel
+if
+(drg
+!=
+NULL
+)
+{ //drag panel
 
 
   if (drg->move==TRUE){
@@ -1401,1743 +1542,2543 @@ if (drg!=NULL){ //drag panel
     }
   }
 }
-if ((FRAME_mbl[0]==FALSE)&&((mb&1)==1)){
+if
+((FRAME_mbl[0]
+==
+FALSE
+)
+&&
+((mb&
+1
+)
+==
+1
+)
+)
+{
   FRAME_mbl[0]=TRUE; //lock mouse button for user
   FRAME_mblf[0]=NULL;
 }
-if ((FRAME_mbl[1]==FALSE)&&((mb&2)==2)){
+if
+((FRAME_mbl[1]
+==
+FALSE
+)
+&&
+((mb&
+2
+)
+==
+2
+)
+)
+{
   FRAME_mbl[1]=TRUE; //lock mouse button2  for user
   FRAME_mblf[1]=NULL;
 }
-if ((FRAME_mbl[0]==TRUE)&&(FRAME_mblf[0]==NULL)) mb=mb|1;
-if ((FRAME_mbl[1]==TRUE)&&(FRAME_mblf[1]==NULL)) mb=mb|2;
+if
+((FRAME_mbl[0]
+==
+TRUE
+)
+&&
+(FRAME_mblf[0]
+==
+NULL
+)
+)
+mb=mb
+|
+1;
+if
+((FRAME_mbl[1]
+==
+TRUE
+)
+&&
+(FRAME_mblf[1]
+==
+NULL
+)
+)
+mb=mb
+|
+2;
 
 //CLIENT2HOST KEEPALIVE MESSAGE
-f=4.0f; if (int((ett/f))!=int((ett/f)-(et/f))){
+f=
+4.0f;
+if
+(
+int ((ett
+/
+f
+)
+)
+!=
+int ((ett
+/
+f
+)
+-
+(et
+/
+f
+)
+)
+)
+{
   txtset(t,"?"); t->d2[0]=251; NET_send(NETplayer,NULL,t);
 }
 
 
-if (intro){
-  f=intro_timer;
+if
+(intro) {
+    f = intro_timer;
 
 
-  //refresh backdrop
-  if (intro!=100){
-
-    cls(ps,(2<<11)+(27<<5)+18); 
-    x2=(4<<11)+(54<<5)+31;
-    x3=(3<<11)+(46<<5)+27;
-    x4=(2<<11)+(34<<5)+21;
-    for (x=0;x<=255;x++){
-      ps->o2[intro_stary[x]*1024+intro_starx[x]]=x2;
-      ps->o2[intro_stary[x]*1024+intro_starx[x]+1]=x3;
-      ps->o2[intro_stary[x]*1024+intro_starx[x]-1]=x3;
-      ps->o2[intro_stary[x]*1024+intro_starx[x]+1024]=x3;
-      ps->o2[intro_stary[x]*1024+intro_starx[x]-1024]=x3;
-      ps->o2[intro_stary[x]*1024+intro_starx[x]-1025]=x4;
-      ps->o2[intro_stary[x]*1024+intro_starx[x]-1023]=x4;
-      ps->o2[intro_stary[x]*1024+intro_starx[x]+1023]=x4;
-      ps->o2[intro_stary[x]*1024+intro_starx[x]+1025]=x4;
-    }
-    img0(ps,1024-656,768-369,intro_startup);
-  }else{
-    cls(ps,0);
-  }
-
-
-  static unsigned char intro_setup=0;
-
-  //exit request?
-  if (fs->mouse_click){
-    if ((mx>(1024-21-4))&&(my<(21+4))){
-      exitrequest=TRUE;
-      fs->mouse_click=NULL;
-    }
-  }
-
-
-  //GYPSY
-  static unsigned char vquan[8];
-  static unsigned short vcol[8];
-  static unsigned short vx[8];//original x offset
-  static char vaction=-1;
-  static unsigned char vaction_done=0;
-  static unsigned char vques[28];
-  static char vtext;
-
-
-  if (intro==100){
-    if (intro_setup==0){ intro_setup=1;
-    f=0;
-    for (x=0;x<=7;x++) vquan[x]=7;
-    ZeroMemory(&vques,28);
-    vcol[0]=(0>>3<<11)+(0>>16<<5)+(252>>3);
-    vcol[1]=(252>>3<<11)+(252>>2<<5)+(84>>3);
-    vcol[2]=(252>>3<<11)+(0>>2<<5)+(0>>3);
-    vcol[3]=(0>>3<<11)+(252>>2<<5)+(0>>3);
-    vcol[4]=(252>>3<<11)+(96>>2<<5)+(0>>3);
-    vcol[5]=(168>>3<<11)+(0>>2<<5)+(168>>3);
-    vcol[6]=(252>>3<<11)+(252>>2<<5)+(252>>3);
-    vcol[7]=(72>>3<<11)+(72>>2<<5)+(72>>3);
-    vx[0]=51;
-    vx[1]=72;
-    vx[2]=93;
-    vx[3]=114;
-    vx[4]=187;
-    vx[5]=208;
-    vx[6]=229;
-    vx[7]=250;
-
-    img0_0key(intro_vial,21);
-    img0_0key(intro_hpl0,21);
-    img0_0key(intro_hpl2,21);
-    img0_0key(intro_hpl3,21);
-    img0_0key(intro_hpr0,21);
-    img0_0key(intro_hpr2,21);
-    img0_0key(intro_hpr3,21);
-
-
-    vtext=-2;
-    }//intro_setup==0
-
-
-    f+=et/1.0f; //action timer
-
-    cls(ps320200,0);
-    img(ps320200,0,0,intro_gypsy); //backdrop!
-
-    y5=1;
-    if (vaction!=-1){
-
-
-      f2=f;
-      if (f2>1.0f){
-        if (vaction_done==0) {vaction_done=1; vquan[vaction]--;}
-        f2=2.0f-f;
-      }
-
-
-      y2=66-f2*34.0f;
-
-
-      if (vaction<=3){
-        x2=(132-vx[vaction])*f2+vx[vaction];
-        img0(ps320200,x2-12,y2+12,intro_arml);
-        y5=0; img(ps320200,0,97,intro_gypsy2); //backdrop!
-        cls(intro_hps0,vcol[vaction]); img0(intro_hps0,0,0,intro_hpl0); img0_0key(intro_hps0,32);
-        cls(intro_hps2,vcol[vaction]); img0(intro_hps2,0,0,intro_hpl2); img0_0key(intro_hps2,32);
-        cls(intro_hps3,vcol[vaction]); img0(intro_hps3,0,0,intro_hpl3); img0_0key(intro_hps3,32);
-
-
-        if (f2<=0.5f) img0(ps320200,x2-2,y2,intro_hps0);
-        if ((f2>0.5)&&(f2<=0.9)) img0(ps320200,x2-16,y2,intro_hps2);
-        if (f2>0.9f) img0(ps320200,x2-16,y2,intro_hps3);
-      }else{
-        x2=(132+32+8-vx[vaction])*f2+vx[vaction];
-        img0(ps320200,x2-8,y2+12,intro_armr);
-        y5=0; img(ps320200,0,97,intro_gypsy2); //backdrop!
-        cls(intro_hps0,vcol[vaction]); img0(intro_hps0,0,0,intro_hpr0); img0_0key(intro_hps0,32);
-        cls(intro_hps2,vcol[vaction]); img0(intro_hps2,0,0,intro_hpr2); img0_0key(intro_hps2,32);
-        cls(intro_hps3,vcol[vaction]); img0(intro_hps3,0,0,intro_hpr3); img0_0key(intro_hps3,32);
-        if (f2<=0.5f) img0(ps320200,x2-2,y2,intro_hps0);
-        if ((f2>0.5)&&(f2<=0.9)) img0(ps320200,x2-8,y2,intro_hps2);
-        if (f2>0.9f) img0(ps320200,x2-10,y2,intro_hps3);
-      }
-
-
-
-
-
-
-
-
-
-      if (f>2) {f=0;  vaction=-1; }
+    //refresh backdrop
+    if (intro != 100) {
+        cls(ps, (2 << 11) + (27 << 5) + 18);
+        x2 = (4 << 11) + (54 << 5) + 31;
+        x3 = (3 << 11) + (46 << 5) + 27;
+        x4 = (2 << 11) + (34 << 5) + 21;
+        for (x = 0; x <= 255; x++) {
+            ps->o2[intro_stary[x] * 1024 + intro_starx[x]] = x2;
+            ps->o2[intro_stary[x] * 1024 + intro_starx[x] + 1] = x3;
+            ps->o2[intro_stary[x] * 1024 + intro_starx[x] - 1] = x3;
+            ps->o2[intro_stary[x] * 1024 + intro_starx[x] + 1024] = x3;
+            ps->o2[intro_stary[x] * 1024 + intro_starx[x] - 1024] = x3;
+            ps->o2[intro_stary[x] * 1024 + intro_starx[x] - 1025] = x4;
+            ps->o2[intro_stary[x] * 1024 + intro_starx[x] - 1023] = x4;
+            ps->o2[intro_stary[x] * 1024 + intro_starx[x] + 1023] = x4;
+            ps->o2[intro_stary[x] * 1024 + intro_starx[x] + 1025] = x4;
+        }
+        img0(ps, 1024 - 656, 768 - 369, intro_startup);
+    } else {
+        cls(ps, 0);
     }
 
 
-    if (y5) img(ps320200,0,97,intro_gypsy2); //backdrop!
+    static unsigned char intro_setup = 0;
 
-
-
-    for (x=0;x<=7;x++){
-      if (vaction!=x){
-        cls(intro_s64,vcol[x]);
-        cls(intro_s128,0);
-        img(intro_s128,0,41-(float)vquan[x]*4.3f,intro_s64);
-        img0(intro_s128,0,0,intro_vial);
-        img(intro_svial,0,0,intro_s128);
-        img0_0key(intro_svial,32*4);
-        img0_0key(intro_svial,32);
-        img0(ps320200,vx[x],66,intro_svial);
-      }
+    //exit request?
+    if (fs->mouse_click) {
+        if ((mx > (1024 - 21 - 4)) && (my < (21 + 4))) {
+            exitrequest = TRUE;
+            fs->mouse_click = NULL;
+        }
     }
 
 
-    //draw liquid in vial
-
-    x2=0; //height
-    for (x=0;x<=7;x++){
-      x2+=(7-vquan[x]);
-    }
-    x2=x2+(x2>>1); //*1.5
-
-
-    for (y=103;y>(103-x2);y--){
-      for (x=148;x<=171;x++){
-vialmix:
-        x3=rnd*8;
-        x4=rnd*7;
-        if (vquan[x3]>x4) goto vialmix;
-        ps320200->o2[y*320+x]=vcol[x3];
-      }}
+    //GYPSY
+    static unsigned char vquan[8];
+    static unsigned short vcol[8];
+    static unsigned short vx[8]; //original x offset
+    static char vaction = -1;
+    static unsigned char vaction_done = 0;
+    static unsigned char vques[28];
+    static char vtext;
 
 
-    img0(ps320200,142,56,intro_bigvial);
+    if (intro == 100) {
+        if (intro_setup == 0) {
+            intro_setup = 1;
+            f = 0;
+            for (x = 0; x <= 7; x++) vquan[x] = 7;
+            ZeroMemory(&vques, 28);
+            vcol[0] = (0 >> 3 << 11) + (0 >> 16 << 5) + (252 >> 3);
+            vcol[1] = (252 >> 3 << 11) + (252 >> 2 << 5) + (84 >> 3);
+            vcol[2] = (252 >> 3 << 11) + (0 >> 2 << 5) + (0 >> 3);
+            vcol[3] = (0 >> 3 << 11) + (252 >> 2 << 5) + (0 >> 3);
+            vcol[4] = (252 >> 3 << 11) + (96 >> 2 << 5) + (0 >> 3);
+            vcol[5] = (168 >> 3 << 11) + (0 >> 2 << 5) + (168 >> 3);
+            vcol[6] = (252 >> 3 << 11) + (252 >> 2 << 5) + (252 >> 3);
+            vcol[7] = (72 >> 3 << 11) + (72 >> 2 << 5) + (72 >> 3);
+            vx[0] = 51;
+            vx[1] = 72;
+            vx[2] = 93;
+            vx[3] = 114;
+            vx[4] = 187;
+            vx[5] = 208;
+            vx[6] = 229;
+            vx[7] = 250;
+
+            img0_0key(intro_vial, 21);
+            img0_0key(intro_hpl0, 21);
+            img0_0key(intro_hpl2, 21);
+            img0_0key(intro_hpl3, 21);
+            img0_0key(intro_hpr0, 21);
+            img0_0key(intro_hpr2, 21);
+            img0_0key(intro_hpr3, 21);
 
 
-    if (vtext>=0){
-      img(ps320200,279,174,intro_ab);
-
-      x2=vtext; x=-1; x4=0; x3=0; //if (vques[vtext]==1) x3=1;
-
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_COMPASSION} //i3,d3
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_VALOR} //i3,s3
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_JUSTICE} //i3,X
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_SACRIFICE} //i3,X
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_HONOR} //i3,X
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_SPIRITUALITY} //i3,a1
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_HUMILITY} //i3,X
-      x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_VALOR} //d3,s3
-      x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_JUSTICE} //d3,X
-      x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_SACRIFICE} //d3,X
-      x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_HONOR} //d3,X
-      x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_SPIRITUALITY} //d3,a1
-      x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_HUMILITY} //d3,X
-      x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_JUSTICE} //s3,X
-      x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_SACRIFICE} //s3,X
-      x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_HONOR} //s3,X
-      x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_SPIRITUALITY} //s3,a1
-      x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_HUMILITY} //s3,X
-      x++; if (x==x2) if (x3) {U6O2_JUSTICE} else {U6O2_SACRIFICE} //i,d
-      x++; if (x==x2) if (x3) {U6O2_JUSTICE} else {U6O2_HONOR} //s,d
-      x++; if (x==x2) if (x3) {U6O2_JUSTICE} else {U6O2_SPIRITUALITY} //X,a1
-      x++; if (x==x2) if (x3) {U6O2_JUSTICE} else {U6O2_HUMILITY} //OK,X
-      x++; if (x==x2) if (x3) {U6O2_SACRIFICE} else {U6O2_HONOR} //s,i
-      x++; if (x==x2) if (x3) {U6O2_SACRIFICE} else {U6O2_SPIRITUALITY} //X,OK
-      x++; if (x==x2) if (x3) {U6O2_SACRIFICE} else {U6O2_HUMILITY} //a1,X
-      x++; if (x==x2) if (x3) {U6O2_HONOR} else {U6O2_SPIRITUALITY} //X,a1
-      x++; if (x==x2) if (x3) {U6O2_HONOR} else {U6O2_HUMILITY} //OK,X
-      x++; if (x==x2) if (x3) {U6O2_SPIRITUALITY} else {U6O2_HUMILITY} //a1,X
-      x5=x4;
-      x2=vtext; x=-1; x4=0; x3=1;
-
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_COMPASSION} //i3,d3
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_VALOR} //i3,s3
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_JUSTICE} //i3,X
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_SACRIFICE} //i3,X
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_HONOR} //i3,X
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_SPIRITUALITY} //i3,a1
-      x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_HUMILITY} //i3,X
-      x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_VALOR} //d3,s3
-      x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_JUSTICE} //d3,X
-      x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_SACRIFICE} //d3,X
-      x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_HONOR} //d3,X
-      x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_SPIRITUALITY} //d3,a1
-      x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_HUMILITY} //d3,X
-      x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_JUSTICE} //s3,X
-      x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_SACRIFICE} //s3,X
-      x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_HONOR} //s3,X
-      x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_SPIRITUALITY} //s3,a1
-      x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_HUMILITY} //s3,X
-      x++; if (x==x2) if (x3) {U6O2_JUSTICE} else {U6O2_SACRIFICE} //i,d
-      x++; if (x==x2) if (x3) {U6O2_JUSTICE} else {U6O2_HONOR} //s,d
-      x++; if (x==x2) if (x3) {U6O2_JUSTICE} else {U6O2_SPIRITUALITY} //X,a1
-      x++; if (x==x2) if (x3) {U6O2_JUSTICE} else {U6O2_HUMILITY} //OK,X
-      x++; if (x==x2) if (x3) {U6O2_SACRIFICE} else {U6O2_HONOR} //s,i
-      x++; if (x==x2) if (x3) {U6O2_SACRIFICE} else {U6O2_SPIRITUALITY} //X,OK
-      x++; if (x==x2) if (x3) {U6O2_SACRIFICE} else {U6O2_HUMILITY} //a1,X
-      x++; if (x==x2) if (x3) {U6O2_HONOR} else {U6O2_SPIRITUALITY} //X,a1
-      x++; if (x==x2) if (x3) {U6O2_HONOR} else {U6O2_HUMILITY} //OK,X
-      x++; if (x==x2) if (x3) {U6O2_SPIRITUALITY} else {U6O2_HUMILITY} //a1,X
-      if ((x4<=2)||(x4==6)) {x4=2; goto gotx4;}
-      if (x4!=7) {x4=1; goto gotx4;}
-      x4=0;
-gotx4:
-      if ((x5<=2)||(x5==6)) {x5=2; goto gotx5;}
-      if (x5!=7) {x5=1; goto gotx5;}
-      x5=0;
-gotx5:
-      x=ett*2.0f; x&=1;
-      if (x){
-        if (x4>=x5) img(ps320200,279,174,intro_aba);
-      }else{
-        if (x5>=x4) img(ps320200,279,174,intro_abb);
-      }
-    }
-
-    img(ps640400,ps320200); img(ps,192,184,ps640400);
+            vtext = -2;
+        } //intro_setup==0
 
 
-    txtset(t4,"");
-    switch(vtext) 
-    {
-    case 0:
-      txtset(t,"Entrusted to deliver an uncounted purse of gold, thou dost meet a poor");
-      txtset(t2,"beggar. Dost thou:");
-      txtset(t3,"A) Deliver the gold knowing the Trust in thee was well-placed; or");
-      txtset(t4,"B) Show Compassion, giving the Beggar a coin, knowing it won't be missed?");
-      break; case 1:
-      txtset(t,"Thou hast been prohibited by thy absent Lord from joining thy friends in a");
-      txtset(t2,"close pitched battle. Dost thou:");
-      txtset(t3,"A) Refrain, so thou may Honestly claim obedience; or");
-      txtset(t4,"B) Show Valor, and aid thy comrades, knowing thou may deny it later?");
-      break; case 2:
-      txtset(t,"A merchant owes thy friend money, now long past due. Thou dost see the same");
-      txtset(t2,"merchant drop a purse of gold. Dost thou:");
-      txtset(t3,"A) Honestly return the purse intact; or");
-      txtset(t4,"B) Justly give thy friend a portion of the gold first?");
-      break; case 3:
-      txtset(t,"Thee and thy friend are valiant but penniless warriors. Thou both go out to");
-      txtset(t2,"slay a mighty dragon. Thy friend thinks he slew it, thee did. When asked, dost thou:");
-      txtset(t3,"A) Truthfully claim the gold; or");
-      txtset(t4,"B) Allow thy friend the large reward?");
-      break; case 4:
-      txtset(t,"Thou art sworn to protect thy Lord at any cost, yet thou knowest he hast");
-      txtset(t2,"committed a crime. Authorities ask the of the affair, dost thou:");
-      txtset(t3,"A) Break thine oath by Honestly speaking; or");
-      txtset(t4,"B) Uphold Honor by silently keeping thine oath?");
-      break; case 5:
-      txtset(t,"Thy friend seeks admittance to thy Spiritual order. Thou art asked to vouch");
-      txtset(t2,"for his purity of Spirit, of which thou art unsure. Dost thou:");
-      txtset(t3,"A) Honestly express thy doubt; or");
-      txtset(t4,"B) Vouch for him, hoping for his Spiritual improvement?");
-      break; case 6:
-      txtset(t,"Thy Lord mistakenly believes he slew a dragon. Thou hast proof that thy lance");
-      txtset(t2,"felled the beast. When asked, dost thou:");
-      txtset(t3,"A) Honestly claim the kill and the prize; or");
-      txtset(t4,"B) Humbly permit thy Lord his belief?");
-      break; case 7:
-      txtset(t,"Thou dost manage to disarm thy mortal enemy in a duel. He is at thy mercy.");
-      txtset(t2,"Dost thou:");
-      txtset(t3,"A) Show Compassion by permitting him to yield; or");
-      txtset(t4,"B) Slay him as expected of a Valiant duelist?");
-      break; case 8:
-      txtset(t,"After 20 years thou hast found the slayer of thy best friends. The villain");
-      txtset(t2,"proves to be a man who provides the sole support for a young girl. Dost thou:");
-      txtset(t3,"A) Spare him in Compassion for the girl; or");
-      txtset(t4,"B) Slay him in the name of Justice?");
-      break; case 9:
-      txtset(t,"Thee and thy friends have been routed and ordered to retreat. In defiance of");
-      txtset(t2,"thy orders, dost thou:");
-      txtset(t3,"A) Stop in Compassion to aid a wounded companion; or");
-      txtset(t4,"B) Sacrifice thyself to slow the pursuing enemy, so others can escape?");
-      break; case 10:
-      txtset(t,"Thou art sworn to uphold a Lord who participates in the forbidden torture of");
-      txtset(t2,"prisoners. Each night their cries of pain reach thee. Dost thou:");
-      txtset(t3,"A) Show Compassion by reporting the deeds; or");
-      txtset(t4,"B) Honor thy oath and ignore the deeds?");
-      break; case 11:
-      txtset(t,"Thou hast been taught to preserve all life as sacred. A man lies fatally"); 
-      txtset(t2,"stung by a venomous serpent. He pleads for a merciful death. Dost thou:");
-      txtset(t3,"A) Show Compassion and end his pain; or");
-      txtset(t4,"B) Heed thy Spiritual beliefs and refuse?");
-      break; case 12:
-      txtset(t,"As one of the King's Guard, thy Captain has asked that one amongst you visit");
-      txtset(t2,"a hospital to cheer the children with tales of thy valiant deeds. Dost thou:");
-      txtset(t3,"A) Show thy Compassion and play the braggart; or");
-      txtset(t4,"B) Humbly let another go?");
-      break; case 13:
-      txtset(t,"Thou hast been sent to secure a needed treaty with a distant Lord. Thy host");
-      txtset(t2,"is agreeable to the proposal but insults thy country at dinner. Dost thou:");
-      txtset(t3,"A) Valiantly bear the slurs; or");
-      txtset(t4,"B) Justly rise and demand an apology?");
-      break; case 14:
-      txtset(t,"A mighty knight accosts thee and demands thy food. Dost thou:");
-      txtset(t2,"A) Valiantly refuse and engage the knight; or");
-      txtset(t3,"B) Sacrifice thy food unto the hungry knight?");
-      break; case 15:
-      txtset(t,"During battle thou art ordered to guard thy commmander's empty tent. The");
-      txtset(t2,"battle goes poorly and thou dost yearn to aid thy fellows. Dost thou:");
-      txtset(t3,"A) Valiantly enter the battle to aid thy companions; or");
-      txtset(t4,"B) Honor thy post as guard?");
-      break; case 16:
-      txtset(t,"A local bully pushes for a fight. Dost thou:");
-      txtset(t2,"A) Valiantly trounce the rogue; or");
-      txtset(t3,"B) Decline, knowing in thy Spirit that no lasting good will come of it?");
-      break; case 17:
-      txtset(t,"Although a teacher of music, thou art a skillful wrestler. Thou hast been");
-      txtset(t2,"asked to fight in a local championship. Dost thou:");
-      txtset(t3,"A) Accept the invitation and Valiantly fight to win; or");
-      txtset(t4,"B) Humbly decline knowing thou art sure to win?");
-      break; case 18:
-      txtset(t,"During a pitched battle, thou dost see a fellow desert his post, endangering");
-      txtset(t2,"many. As he flees, he is set upon by several enemies. Dost thou:");
-      txtset(t3,"A) Justly let him fight alone; or");
-      txtset(t4,"B) Risk Sacrificing thine own life to aid him?");
-      break; case 19:
-      txtset(t,"Thou hast sworn to do thy Lord's bidding in all. He covets a piece of land");
-      txtset(t2,"and orders the owner removed. Dost thou:");
-      txtset(t3,"A) Serve Justice, refusing to act, thus being disgraced; or");
-      txtset(t4,"B) Honor thine oath and unfairly evict the landowner?");
-      break; case 20:
-      txtset(t,"Thou dost believe that virtue resides in all people. Thou dost see a rogue");
-      txtset(t2,"steal from thy Lord. Dost thou:");
-      txtset(t3,"A) Call him to Justice; or");
-      txtset(t4,"B) Personally try to sway him back to the Spiritual path of good?");
-      break; case 21:
-      txtset(t,"Unwitnessed, thou hast slain a great dragon in self defense. A poor warrior");
-      txtset(t2,"claims the offered reward. Dost thou:");
-      txtset(t3,"A) Justly step forward to claim the reward; or");
-      txtset(t4,"B) Humbly go about life, secure in thy self-esteem?");
-      break; case 22:
-      txtset(t,"Thou art a bounty hunter sworn to return an alleged murderer. After his");
-      txtset(t2,"capture, thou believest him to be innocent. Dost thou:");
-      txtset(t3,"A) Sacrifice thy sizeable bounty for thy belief; or");
-      txtset(t4,"B) Honor thy oath to return him as thou hast promised?");
-      break; case 23:
-      txtset(t,"Thou hast spent thy life in charitable and righteous work. Thine uncle the");
-      txtset(t2,"innkeeper lies ill and asks you to take over his tavern. Dost thou:");
-      txtset(t3,"A) Sacrifice thy life of purity to aid thy kin; or");
-      txtset(t4,"B) Decline & follow thy Spirit's call?");
-      break; case 24:
-      txtset(t,"Thou art an elderly, wealthy eccentric. Thy end is near. Dost thou:");
-      txtset(t2,"A) Donate all thy wealth to feed hundreds of starving children, and receive public adulation; or");
-      txtset(t3,"B) Humbly live out thy life, willing thy fortune to thy heirs?");
-      break; case 25:
-      txtset(t,"In thy youth thou pledged to marry thy sweetheart. Now thou art on a sacred");
-      txtset(t2,"quest in distant lands. Thy sweetheart asks thee to keep thy vow. Dost thou:");
-      txtset(t3,"A) Honor thy pledge to wed; or");
-      txtset(t4,"B) Follow thy Spiritual crusade?");
-      break; case 26:
-      txtset(t,"Thou art at a crossroads in thy life. Dost thou:");
-      txtset(t2,"A) Choose the Honorable life of a Paladin, striving for Truth and Courage; or");
-      txtset(t3,"B) Choose the Humble life of a Shepherd, and a world of simplicity and peace?");
-      break; case 27:
-      txtset(t,"Thy parents wish thee to become an apprentice. Two positions are available.");
-      txtset(t2,"Dost thou:");
-      txtset(t3,"A) Become an acolyte in the Spiritual order; or");
-      txtset(t4,"B) Become an assistant to a humble village cobbler?");
-      break; case -2:
-      txtset(t,"\"At last thou hast come to fulfill thy destiny,\" the gypsy says.");
-      txtset(t2,"She smiles, as if in great relief.");
-      txtset(t3,"\"Sit before me now, and I shall pour the light of Virtue into the");
-      txtset(t4,"shadows of thy future.\"");
-      break; case -1:
-      txtset(t,"On a wooden table eight bottles stand, a rainbow of bubbling liquids.");
-      txtset(t2,"\"Behold the virtues of the Avatar\", the woman says.");
-      txtset(t3,"\"Let us begin the casting!\"");
-      txtset(t4,"(Recommended buttons for answers are blinking.)");
-      break; case -3:
-      txtset(t,"\"The path of the Avatar lies beneath thy feet, worthy ");
-      txtadd(t,u6o_name); txtadd(t,",\"");
-      txtset(t2,"the gypsy intones. With a mysterious smile, she passes you the flask");
-      txtset(t3,"of shimmering liquids. \"Drink of these waters and go forth among our");
-      txtset(t4,"people, who shall receive thee in Joy!\"");
-    }
+        f += et / 1.0f; //action timer
 
+        cls(ps320200, 0);
+        img(ps320200, 0, 0, intro_gypsy); //backdrop!
 
-
-
-
-
-
-
-
-
-
-
-
-    x=192+32-16;
-    y=184+132*2-8-4;
-    txtcol=rgb(255,255,255); txtout(ps,x+1,y+1,t);
-    y+=20;
-    txtcol=rgb(255,255,255); txtout(ps,x+1,y+1,t2);
-    y+=20;
-    txtcol=rgb(255,255,255); txtout(ps,x+1,y+1,t3);
-    y+=20;
-    txtcol=rgb(255,255,255); txtout(ps,x+1,y+1,t4);
-
-
-    if (keyhit(65)){//"A" key
-      mx=(279*2)+192; my=(174*2)+184; goto abkey;
-    }
-    if (keyhit(66)){//"B" key
-      mx=((279+17)*2)+192; my=(174*2)+184; goto abkey;
-    }
-
-    //for compatibility, simulate a mouse click in the top left corner
-    if (keyhit(VK_RETURN)){
-      mx=0; my=0; goto abkey;
-    }
-
-    if (fs->mouse_click){
-      fs->mouse_click=NULL;
-abkey:
-
-
-      if (vtext<0){
-        if (vtext==-3) {intro=101; intro_setup=0; goto intro_done;}
-        vtext++; vaction_done=1; 
-        if (vtext==0) vtext=rnd*28;
-      }else{
-        if (vaction_done){
-
-
-
-
-          x=(mx-192)/2; y=(my-184)/2;
-          static unsigned char stats_warning=1;
-
-          if ((x>=279)&&(x<(279+16))&&(y>=174)&&(y<(174+16))){
-            vques[vtext]=1;
-            if (x5>x4){
-              if (stats_warning){
-                stats_warning=0;
-                if (IDNO==MessageBox(NULL,"If you select a non-blinking answer the total of your strength, dexterity and intelligence will be lower. Are you sure?","Ultima 6 Online",MB_YESNO)) vques[vtext]=0;
-              }
+        y5 = 1;
+        if (vaction != -1) {
+            f2 = f;
+            if (f2 > 1.0f) {
+                if (vaction_done == 0) {
+                    vaction_done = 1;
+                    vquan[vaction]--;
+                }
+                f2 = 2.0f - f;
             }
-          }
 
-          if ((x>=(279+17))&&(x<(279+17+16))&&(y>=174)&&(y<(174+16))){
-            vques[vtext]=2;
-            if (x4>x5){
-              if (stats_warning){
-                stats_warning=0;
-                if (IDNO==MessageBox(NULL,"If you select a non-blinking answer the total of your strength, dexterity and intelligence will be lower. Are you sure?","Ultima 6 Online",MB_YESNO)) vques[vtext]=0;
-              }
+
+            y2 = 66 - f2 * 34.0f;
+
+
+            if (vaction <= 3) {
+                x2 = (132 - vx[vaction]) * f2 + vx[vaction];
+                img0(ps320200, x2 - 12, y2 + 12, intro_arml);
+                y5 = 0;
+                img(ps320200, 0, 97, intro_gypsy2); //backdrop!
+                cls(intro_hps0, vcol[vaction]);
+                img0(intro_hps0, 0, 0, intro_hpl0);
+                img0_0key(intro_hps0, 32);
+                cls(intro_hps2, vcol[vaction]);
+                img0(intro_hps2, 0, 0, intro_hpl2);
+                img0_0key(intro_hps2, 32);
+                cls(intro_hps3, vcol[vaction]);
+                img0(intro_hps3, 0, 0, intro_hpl3);
+                img0_0key(intro_hps3, 32);
+
+
+                if (f2 <= 0.5f) img0(ps320200, x2 - 2, y2, intro_hps0);
+                if ((f2 > 0.5) && (f2 <= 0.9)) img0(ps320200, x2 - 16, y2, intro_hps2);
+                if (f2 > 0.9f) img0(ps320200, x2 - 16, y2, intro_hps3);
+            } else {
+                x2 = (132 + 32 + 8 - vx[vaction]) * f2 + vx[vaction];
+                img0(ps320200, x2 - 8, y2 + 12, intro_armr);
+                y5 = 0;
+                img(ps320200, 0, 97, intro_gypsy2); //backdrop!
+                cls(intro_hps0, vcol[vaction]);
+                img0(intro_hps0, 0, 0, intro_hpr0);
+                img0_0key(intro_hps0, 32);
+                cls(intro_hps2, vcol[vaction]);
+                img0(intro_hps2, 0, 0, intro_hpr2);
+                img0_0key(intro_hps2, 32);
+                cls(intro_hps3, vcol[vaction]);
+                img0(intro_hps3, 0, 0, intro_hpr3);
+                img0_0key(intro_hps3, 32);
+                if (f2 <= 0.5f) img0(ps320200, x2 - 2, y2, intro_hps0);
+                if ((f2 > 0.5) && (f2 <= 0.9)) img0(ps320200, x2 - 8, y2, intro_hps2);
+                if (f2 > 0.9f) img0(ps320200, x2 - 10, y2, intro_hps3);
             }
-          }
 
-          if (vques[vtext]==0) goto ab_noselection;
 
-
-
-
-
-          x2=vtext; x=-1; x4=0; x3=0; if (vques[vtext]==1) x3=1;
-          u6o_vq[vtext]=vques[vtext]-1;
-          x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_COMPASSION} //i3,d3
-          x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_VALOR} //i3,s3
-          x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_JUSTICE} //i3,X
-          x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_SACRIFICE} //i3,X
-          x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_HONOR} //i3,X
-          x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_SPIRITUALITY} //i3,a1
-          x++; if (x==x2) if (x3) {U6O2_HONESTY} else {U6O2_HUMILITY} //i3,X
-          x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_VALOR} //d3,s3
-          x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_JUSTICE} //d3,X
-          x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_SACRIFICE} //d3,X
-          x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_HONOR} //d3,X
-          x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_SPIRITUALITY} //d3,a1
-          x++; if (x==x2) if (x3) {U6O2_COMPASSION} else {U6O2_HUMILITY} //d3,X
-          x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_JUSTICE} //s3,X
-          x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_SACRIFICE} //s3,X
-          x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_HONOR} //s3,X
-          x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_SPIRITUALITY} //s3,a1
-          x++; if (x==x2) if (x3) {U6O2_VALOR} else {U6O2_HUMILITY} //s3,X
-          x++; if (x==x2) if (x3) {U6O2_JUSTICE} else {U6O2_SACRIFICE} //i,d
-          x++; if (x==x2) if (x3) {U6O2_JUSTICE} else {U6O2_HONOR} //s,d
-          x++; if (x==x2) if (x3) {U6O2_JUSTICE} else {U6O2_SPIRITUALITY} //X,a1
-          x++; if (x==x2) if (x3) {U6O2_JUSTICE} else {U6O2_HUMILITY} //OK,X
-          x++; if (x==x2) if (x3) {U6O2_SACRIFICE} else {U6O2_HONOR} //s,i
-          x++; if (x==x2) if (x3) {U6O2_SACRIFICE} else {U6O2_SPIRITUALITY} //X,OK
-          x++; if (x==x2) if (x3) {U6O2_SACRIFICE} else {U6O2_HUMILITY} //a1,X
-          x++; if (x==x2) if (x3) {U6O2_HONOR} else {U6O2_SPIRITUALITY} //X,a1
-          x++; if (x==x2) if (x3) {U6O2_HONOR} else {U6O2_HUMILITY} //OK,X
-          x++; if (x==x2) if (x3) {U6O2_SPIRITUALITY} else {U6O2_HUMILITY} //a1,X
-
-          //show vial action (needs to relate to question!)
-          vaction=x4; f=0; vaction_done=0;
-
-          for (x=0; x<=27; x++) if (vques[x]==0) goto vquesnew;
-vquesnew:
-          if (x==28) {
-            vtext=-3;
-          }else{
-nextvques: x=rnd*28; if (vques[x]) goto nextvques;
-            vtext=x;
-          }//28
-ab_noselection:;
-        }//vaction_done
-      }
-
-
-
-
-
-
-
-    }
-  }//intro==100
-
-
-  if (intro==101){
-    if (intro_setup==0){ intro_setup=1;
-    f=0;
-    }
-    img(ps320200,0,0,intro_flask);
-    f+=et;
-    for (y=34;y<=128;y++){
-      for (x=116;x<=203;x++){
-vialmix2:
-        x3=rnd*8;
-        x4=rnd*7;
-        if (vquan[x3]>x4) goto vialmix2;
-        if (ps320200->o2[y*320+x]==0) ps320200->o2[y*320+x]=vcol[x3];
-      }}
-
-    img(ps640400,ps320200); img(ps,192,184,ps640400);
-
-    x=144;
-    y=640;
-    txtset(t,"As you drink from the flask, vertigo overwhelms you. A soothing mist obscures the gypsy's face,");
-    txtcol=rgb(255,255,255); txtouts(ps,x+1,y+1,t);
-    txtset(t,"and you sink without fear into an untroubled sleep.");
-    txtcol=rgb(255,255,255); txtouts(ps,x+1,y+1+20,t);
-
-    if (fs->mouse_click||keyhit(VK_RETURN)){
-      //final backup of userinfo
-      tfh=open2("userinfo.txt",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
-      txtfileout(u6o_user_name,tfh);
-      txtfileout(u6o_user_password,tfh);
-      close(tfh);
-
-      //save walkthru pos
-      txtset(t,".\\dr\\walkthru.pos");
-      tfh=open2(t,OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
-      put(tfh,&walkthru_pos,4); //lines to skip of the walkthru
-      close(tfh);
-      walkthru_pos_skip=0;
-
-      tfh=open(".\\dr\\controls.bin");
-      get(tfh,&U6OK,512); get(tfh,&U6OK_FLAGS,128);
-      close(tfh);
-
-      u6o_createcharacter=1; //ALLOW CREATION OF NEW PLAYER
-
-      fs->mouse_click=NULL; intro=0; intro_setup=0;
-      fs->offset_x=1024; fs->graphic=NULL;
-    }
-  }//intro==101
-
-  if (intro==102){
-    if (intro_setup==0){ intro_setup=1;
-    f=0;
-    }
-    x=f*16.0f; if (x>191) x=191;
-    img(ps320200,-x,0,intro_caravan);
-
-    f+=et;
-    img(ps640400,ps320200); img(ps,192,184,ps640400);
-
-    x=192+32-16;
-    y=616-16;
-    txtset(t,"\"Welcome, O Seeker!\""); txtcol=rgb(255,255,255); txtouts(ps,x,y,t);
-    y+=32;
-    txtset(t,"A lonely stroll along an unfamiliar forest path brings you upon a curious gypsy"); txtcol=rgb(255,255,255); txtouts(ps,x,y,t);
-    y+=32;
-    txtset(t,"wagon, its exotic colors dappled in the summer shade."); txtcol=rgb(255,255,255); txtouts(ps,x,y,t);
-    y+=32;
-    txtset(t,"A woman's voice rings out with friendship, beckoning you into across the"); txtcol=rgb(255,255,255); txtouts(ps,x,y,t);
-    y+=32;
-    txtset(t,"wagon's threshold and, as it happens, into another life...."); txtcol=rgb(255,255,255); txtouts(ps,x,y,t);
-
-
-    //txtset(t,"and you sink without fear into an untroubled sleep.");
-    //txtcol=rgb(255,255,255); txtout(ps,x+1,y+1+20,t);
-
-
-    if (fs->mouse_click||keyhit(VK_RETURN)){
-      fs->mouse_click=NULL; intro=100; intro_setup=0;
-    }
-  }//intro==102
-
-  if (intro==200){
-    if (intro_setup==0){ intro_setup=1;
-
-    tfh=open2("userinfo.txt",OF_READWRITE|OF_SHARE_COMPAT);
-    if (tfh->h!=HFILE_ERROR){
-      txtfilein(u6o_user_name,tfh);
-      txtfilein(u6o_user_password,tfh);
-      close(tfh);
-    }else{
-      txtset(u6o_user_name,"UNKNOWN");
-      txtset(u6o_user_password,"UNKNOWN");
-    }
-
-    f=0;
-    }
-
-
-    if (NEThost){
-      goto login; //very stupid way of doing this, just a quick fix
-    }
-
-
-    img0(ps,18,25,intro_ultimavi);
-
-    txtset(t,"Create a Character"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-    x5=160-tagxy.cx/2; y5=64*2+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-    txtcol=rgb(255,160,0); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-
-    txtset(t,"Journey Onward"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-    x5=160-tagxy.cx/2; y5=64*3+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-    txtcol=rgb(255,160,0); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-
-    txtset(t,"Transfer a Character"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-    x5=160-tagxy.cx/2; y5=64*4+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-    txtcol=rgb(255,160,0); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-
-    txtset(t,"Custom Controls"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-    x5=160-tagxy.cx/2; y5=64*5+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-    txtcol=rgb(255,160,0); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-
-    txtset(t,"Custom Portrait"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-    x5=160-tagxy.cx/2; y5=64*6+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-    txtcol=rgb(255,160,0); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-
-    txtset(t,"Name Display Colour"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-    x5=160-tagxy.cx/2; y5=64*7+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-    txtcol=rgb(255,160,0); 
-    if (u6o_namecolour) txtcol=u6o_namecolour;
-    txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-
-
-
-
-
-
-
-    f+=et;
-
-
-    x=mx; y=my;
-
-
-
-    if ((x>=0)&&(x<320)&&(y>=128)&&(y<192)){
-      txtset(t,"Create a Character"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-      x5=160-tagxy.cx/2; y5=64*2+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-      txtcol=rgb(255,255,96); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-    }
-
-    if ((x>=0)&&(x<320)&&(y>=192)&&(y<256)){
-      txtset(t,"Journey Onward"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-      x5=160-tagxy.cx/2; y5=64*3+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-      txtcol=rgb(255,255,96); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-      txtset(t,"USER NAME: ");
-      txtadd(t,u6o_user_name);
-      txtadd(t,"        USER PASSWORD: ");
-      txtadd(t,u6o_user_password);
-      txtcol=rgb(255,255,255); txtouts(ps,256+64,736+4,t);
-    }
-
-    if ((x>=0)&&(x<320)&&(y>=256)&&(y<320)){
-      txtset(t,"Transfer a Character"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-      x5=160-tagxy.cx/2; y5=64*4+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-      txtcol=rgb(255,255,96); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-      txtset(t,"CHANGE USER NAME AND USER PASSWORD");
-      txtcol=rgb(255,255,255); txtouts(ps,256+64,736+4,t);
-    }
-
-    if ((x>=0)&&(x<320)&&(y>=(256+64))&&(y<(320+64))){
-      txtset(t,"Custom Controls"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-      x5=160-tagxy.cx/2; y5=64*5+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-      txtcol=rgb(255,255,96); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-      txtset(t,"CHANGE DEFAULT KEYBOARD KEYS");
-      txtcol=rgb(255,255,255); txtouts(ps,256+64+64,736+4,t);
-    }
-
-    if ((x>=0)&&(x<320)&&(y>=(256+64+64))&&(y<(320+64+64))){
-      txtset(t,"Custom Portrait"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-      x5=160-tagxy.cx/2; y5=64*6+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-      txtcol=rgb(255,255,96); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-      txtset(t,"UPLOAD A CUSTOM PORTRAIT FOR AN EXISTING CHARACTER");
-      txtcol=rgb(255,255,255); txtouts(ps,256+64,736+4,t);
-    }
-
-
-    if ((x>=0)&&(x<320)&&(y>=(256+64+64+64))&&(y<(320+64+64+64))){
-      txtset(t,"Name Display Colour"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-      x5=160-tagxy.cx/2; y5=64*7+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-      txtcol=rgb(255,255,96);
-      if (u6o_namecolour){
-        x6=u6o_namecolour&255;//blue
-        x7=(u6o_namecolour>>8)&255;//green
-        x8=(u6o_namecolour>>16)&255;//red
-        x6+=64; if (x6>255) x6=255;
-        x7+=64; if (x7>255) x7=255;
-        x8+=64; if (x8>255) x8=255;
-        txtcol=rgb(x8,x7,x6);
-      }
-      txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-      txtset(t,"SET THE COLOUR TO DISPLAY YOUR CHARACTER'S NAME WITH WHEN SENDING MESSAGES");
-      txtcol=rgb(255,255,255); txtouts(ps,256-64-32,736+4,t);
-    }
-
-
-
-
-    if (fs->mouse_click){
-      fs->mouse_click=NULL;
-
-      if ((x>=0)&&(x<320)&&(y>=128)&&(y<192)){intro=201; intro_setup=0; goto intro_done;}
-      if ((x>=0)&&(x<320)&&(y>=256)&&(y<320)){intro=202; intro_setup=0; goto intro_done;}
-      if ((x>=0)&&(x<320)&&(y>=(256+64))&&(y<(320+64))){intro=206; intro_setup=0; goto intro_done;}
-      if ((x>=0)&&(x<320)&&(y>=(256+64+64))&&(y<(320+64+64))){intro=204; intro_setup=0; goto intro_done;}
-
-      if ((x>=0)&&(x<320)&&(y>=(256+64+64+64))&&(y<(320+64+64+64))){
-
-        x5=getcol(u6o_namecolour);
-        //assume a 24bit colour returned
-
-        x6=x5&255;//blue
-        x7=(x5>>8)&255;//green
-        x8=(x5>>16)&255;//red
-        if ((x6+x7+x8)<255){
-          MessageBox(NULL,"That colour cannot be used because it's too dark! (The sum of the red, green and blue channels must be at least 255)","Ultima 6 Online",MB_OK);
-        }else{
-          u6o_namecolour=x5;//initially sent as 24bit
+            if (f > 2) {
+                f = 0;
+                vaction = -1;
+            }
         }
 
-        goto intro_done;
-      }
 
-      //journey onward
-      if ((x>=0)&&(x<320)&&(y>=192)&&(y<256)){
-login:
-        txtset(t,"UNKNOWN");
-        if (!txtsame(t,u6o_user_name)){
-          if (!txtsame(t,u6o_user_password)){
+        if (y5) img(ps320200, 0, 97, intro_gypsy2); //backdrop!
 
-            tfh=open(".\\dr\\controls.bin");
-            get(tfh,&U6OK,512); get(tfh,&U6OK_FLAGS,128);
+
+        for (x = 0; x <= 7; x++) {
+            if (vaction != x) {
+                cls(intro_s64, vcol[x]);
+                cls(intro_s128, 0);
+                img(intro_s128, 0, 41 - (float) vquan[x] * 4.3f, intro_s64);
+                img0(intro_s128, 0, 0, intro_vial);
+                img(intro_svial, 0, 0, intro_s128);
+                img0_0key(intro_svial, 32 * 4);
+                img0_0key(intro_svial, 32);
+                img0(ps320200, vx[x], 66, intro_svial);
+            }
+        }
+
+
+        //draw liquid in vial
+
+        x2 = 0; //height
+        for (x = 0; x <= 7; x++) {
+            x2 += (7 - vquan[x]);
+        }
+        x2 = x2 + (x2 >> 1); //*1.5
+
+
+        for (y = 103; y > (103 - x2); y--) {
+            for (x = 148; x <= 171; x++) {
+            vialmix:
+                x3 = rnd * 8;
+                x4 = rnd * 7;
+                if (vquan[x3] > x4) goto vialmix;
+                ps320200->o2[y * 320 + x] = vcol[x3];
+            }
+        }
+
+
+        img0(ps320200, 142, 56, intro_bigvial);
+
+
+        if (vtext >= 0) {
+            img(ps320200, 279, 174, intro_ab);
+
+            x2 = vtext;
+            x = -1;
+            x4 = 0;
+            x3 = 0; //if (vques[vtext]==1) x3=1;
+
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_COMPASSION } //i3,d3
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_VALOR } //i3,s3
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_JUSTICE } //i3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_SACRIFICE } //i3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_HONOR } //i3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_SPIRITUALITY } //i3,a1
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_HUMILITY } //i3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_VALOR } //d3,s3
+            x++;
+            if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_JUSTICE } //d3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_SACRIFICE } //d3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_HONOR } //d3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_SPIRITUALITY } //d3,a1
+            x++;
+            if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_HUMILITY } //d3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_JUSTICE } //s3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_SACRIFICE } //s3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_HONOR } //s3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_SPIRITUALITY } //s3,a1
+            x++;
+            if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_HUMILITY } //s3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_JUSTICE } else { U6O2_SACRIFICE } //i,d
+            x++;
+            if (x == x2) if (x3) { U6O2_JUSTICE } else { U6O2_HONOR } //s,d
+            x++;
+            if (x == x2) if (x3) { U6O2_JUSTICE } else { U6O2_SPIRITUALITY } //X,a1
+            x++;
+            if (x == x2) if (x3) { U6O2_JUSTICE } else { U6O2_HUMILITY } //OK,X
+            x++;
+            if (x == x2) if (x3) { U6O2_SACRIFICE } else { U6O2_HONOR } //s,i
+            x++;
+            if (x == x2) if (x3) { U6O2_SACRIFICE } else { U6O2_SPIRITUALITY } //X,OK
+            x++;
+            if (x == x2) if (x3) { U6O2_SACRIFICE } else { U6O2_HUMILITY } //a1,X
+            x++;
+            if (x == x2) if (x3) { U6O2_HONOR } else { U6O2_SPIRITUALITY } //X,a1
+            x++;
+            if (x == x2) if (x3) { U6O2_HONOR } else { U6O2_HUMILITY } //OK,X
+            x++;
+            if (x == x2) if (x3) { U6O2_SPIRITUALITY } else { U6O2_HUMILITY } //a1,X
+            x5 = x4;
+            x2 = vtext;
+            x = -1;
+            x4 = 0;
+            x3 = 1;
+
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_COMPASSION } //i3,d3
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_VALOR } //i3,s3
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_JUSTICE } //i3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_SACRIFICE } //i3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_HONOR } //i3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_SPIRITUALITY } //i3,a1
+            x++;
+            if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_HUMILITY } //i3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_VALOR } //d3,s3
+            x++;
+            if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_JUSTICE } //d3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_SACRIFICE } //d3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_HONOR } //d3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_SPIRITUALITY } //d3,a1
+            x++;
+            if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_HUMILITY } //d3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_JUSTICE } //s3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_SACRIFICE } //s3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_HONOR } //s3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_SPIRITUALITY } //s3,a1
+            x++;
+            if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_HUMILITY } //s3,X
+            x++;
+            if (x == x2) if (x3) { U6O2_JUSTICE } else { U6O2_SACRIFICE } //i,d
+            x++;
+            if (x == x2) if (x3) { U6O2_JUSTICE } else { U6O2_HONOR } //s,d
+            x++;
+            if (x == x2) if (x3) { U6O2_JUSTICE } else { U6O2_SPIRITUALITY } //X,a1
+            x++;
+            if (x == x2) if (x3) { U6O2_JUSTICE } else { U6O2_HUMILITY } //OK,X
+            x++;
+            if (x == x2) if (x3) { U6O2_SACRIFICE } else { U6O2_HONOR } //s,i
+            x++;
+            if (x == x2) if (x3) { U6O2_SACRIFICE } else { U6O2_SPIRITUALITY } //X,OK
+            x++;
+            if (x == x2) if (x3) { U6O2_SACRIFICE } else { U6O2_HUMILITY } //a1,X
+            x++;
+            if (x == x2) if (x3) { U6O2_HONOR } else { U6O2_SPIRITUALITY } //X,a1
+            x++;
+            if (x == x2) if (x3) { U6O2_HONOR } else { U6O2_HUMILITY } //OK,X
+            x++;
+            if (x == x2) if (x3) { U6O2_SPIRITUALITY } else { U6O2_HUMILITY } //a1,X
+            if ((x4 <= 2) || (x4 == 6)) {
+                x4 = 2;
+                goto gotx4;
+            }
+            if (x4 != 7) {
+                x4 = 1;
+                goto gotx4;
+            }
+            x4 = 0;
+        gotx4:
+            if ((x5 <= 2) || (x5 == 6)) {
+                x5 = 2;
+                goto gotx5;
+            }
+            if (x5 != 7) {
+                x5 = 1;
+                goto gotx5;
+            }
+            x5 = 0;
+        gotx5:
+            x = ett * 2.0f;
+            x &= 1;
+            if (x) {
+                if (x4 >= x5) img(ps320200, 279, 174, intro_aba);
+            } else {
+                if (x5 >= x4) img(ps320200, 279, 174, intro_abb);
+            }
+        }
+
+        img(ps640400, ps320200);
+        img(ps, 192, 184, ps640400);
+
+
+        txtset(t4, "");
+        switch (vtext) {
+            case 0:
+                txtset(t, "Entrusted to deliver an uncounted purse of gold, thou dost meet a poor");
+                txtset(t2, "beggar. Dost thou:");
+                txtset(t3, "A) Deliver the gold knowing the Trust in thee was well-placed; or");
+                txtset(t4, "B) Show Compassion, giving the Beggar a coin, knowing it won't be missed?");
+                break;
+            case 1:
+                txtset(t, "Thou hast been prohibited by thy absent Lord from joining thy friends in a");
+                txtset(t2, "close pitched battle. Dost thou:");
+                txtset(t3, "A) Refrain, so thou may Honestly claim obedience; or");
+                txtset(t4, "B) Show Valor, and aid thy comrades, knowing thou may deny it later?");
+                break;
+            case 2:
+                txtset(t, "A merchant owes thy friend money, now long past due. Thou dost see the same");
+                txtset(t2, "merchant drop a purse of gold. Dost thou:");
+                txtset(t3, "A) Honestly return the purse intact; or");
+                txtset(t4, "B) Justly give thy friend a portion of the gold first?");
+                break;
+            case 3:
+                txtset(t, "Thee and thy friend are valiant but penniless warriors. Thou both go out to");
+                txtset(t2, "slay a mighty dragon. Thy friend thinks he slew it, thee did. When asked, dost thou:");
+                txtset(t3, "A) Truthfully claim the gold; or");
+                txtset(t4, "B) Allow thy friend the large reward?");
+                break;
+            case 4:
+                txtset(t, "Thou art sworn to protect thy Lord at any cost, yet thou knowest he hast");
+                txtset(t2, "committed a crime. Authorities ask the of the affair, dost thou:");
+                txtset(t3, "A) Break thine oath by Honestly speaking; or");
+                txtset(t4, "B) Uphold Honor by silently keeping thine oath?");
+                break;
+            case 5:
+                txtset(t, "Thy friend seeks admittance to thy Spiritual order. Thou art asked to vouch");
+                txtset(t2, "for his purity of Spirit, of which thou art unsure. Dost thou:");
+                txtset(t3, "A) Honestly express thy doubt; or");
+                txtset(t4, "B) Vouch for him, hoping for his Spiritual improvement?");
+                break;
+            case 6:
+                txtset(t, "Thy Lord mistakenly believes he slew a dragon. Thou hast proof that thy lance");
+                txtset(t2, "felled the beast. When asked, dost thou:");
+                txtset(t3, "A) Honestly claim the kill and the prize; or");
+                txtset(t4, "B) Humbly permit thy Lord his belief?");
+                break;
+            case 7:
+                txtset(t, "Thou dost manage to disarm thy mortal enemy in a duel. He is at thy mercy.");
+                txtset(t2, "Dost thou:");
+                txtset(t3, "A) Show Compassion by permitting him to yield; or");
+                txtset(t4, "B) Slay him as expected of a Valiant duelist?");
+                break;
+            case 8:
+                txtset(t, "After 20 years thou hast found the slayer of thy best friends. The villain");
+                txtset(t2, "proves to be a man who provides the sole support for a young girl. Dost thou:");
+                txtset(t3, "A) Spare him in Compassion for the girl; or");
+                txtset(t4, "B) Slay him in the name of Justice?");
+                break;
+            case 9:
+                txtset(t, "Thee and thy friends have been routed and ordered to retreat. In defiance of");
+                txtset(t2, "thy orders, dost thou:");
+                txtset(t3, "A) Stop in Compassion to aid a wounded companion; or");
+                txtset(t4, "B) Sacrifice thyself to slow the pursuing enemy, so others can escape?");
+                break;
+            case 10:
+                txtset(t, "Thou art sworn to uphold a Lord who participates in the forbidden torture of");
+                txtset(t2, "prisoners. Each night their cries of pain reach thee. Dost thou:");
+                txtset(t3, "A) Show Compassion by reporting the deeds; or");
+                txtset(t4, "B) Honor thy oath and ignore the deeds?");
+                break;
+            case 11:
+                txtset(t, "Thou hast been taught to preserve all life as sacred. A man lies fatally");
+                txtset(t2, "stung by a venomous serpent. He pleads for a merciful death. Dost thou:");
+                txtset(t3, "A) Show Compassion and end his pain; or");
+                txtset(t4, "B) Heed thy Spiritual beliefs and refuse?");
+                break;
+            case 12:
+                txtset(t, "As one of the King's Guard, thy Captain has asked that one amongst you visit");
+                txtset(t2, "a hospital to cheer the children with tales of thy valiant deeds. Dost thou:");
+                txtset(t3, "A) Show thy Compassion and play the braggart; or");
+                txtset(t4, "B) Humbly let another go?");
+                break;
+            case 13:
+                txtset(t, "Thou hast been sent to secure a needed treaty with a distant Lord. Thy host");
+                txtset(t2, "is agreeable to the proposal but insults thy country at dinner. Dost thou:");
+                txtset(t3, "A) Valiantly bear the slurs; or");
+                txtset(t4, "B) Justly rise and demand an apology?");
+                break;
+            case 14:
+                txtset(t, "A mighty knight accosts thee and demands thy food. Dost thou:");
+                txtset(t2, "A) Valiantly refuse and engage the knight; or");
+                txtset(t3, "B) Sacrifice thy food unto the hungry knight?");
+                break;
+            case 15:
+                txtset(t, "During battle thou art ordered to guard thy commmander's empty tent. The");
+                txtset(t2, "battle goes poorly and thou dost yearn to aid thy fellows. Dost thou:");
+                txtset(t3, "A) Valiantly enter the battle to aid thy companions; or");
+                txtset(t4, "B) Honor thy post as guard?");
+                break;
+            case 16:
+                txtset(t, "A local bully pushes for a fight. Dost thou:");
+                txtset(t2, "A) Valiantly trounce the rogue; or");
+                txtset(t3, "B) Decline, knowing in thy Spirit that no lasting good will come of it?");
+                break;
+            case 17:
+                txtset(t, "Although a teacher of music, thou art a skillful wrestler. Thou hast been");
+                txtset(t2, "asked to fight in a local championship. Dost thou:");
+                txtset(t3, "A) Accept the invitation and Valiantly fight to win; or");
+                txtset(t4, "B) Humbly decline knowing thou art sure to win?");
+                break;
+            case 18:
+                txtset(t, "During a pitched battle, thou dost see a fellow desert his post, endangering");
+                txtset(t2, "many. As he flees, he is set upon by several enemies. Dost thou:");
+                txtset(t3, "A) Justly let him fight alone; or");
+                txtset(t4, "B) Risk Sacrificing thine own life to aid him?");
+                break;
+            case 19:
+                txtset(t, "Thou hast sworn to do thy Lord's bidding in all. He covets a piece of land");
+                txtset(t2, "and orders the owner removed. Dost thou:");
+                txtset(t3, "A) Serve Justice, refusing to act, thus being disgraced; or");
+                txtset(t4, "B) Honor thine oath and unfairly evict the landowner?");
+                break;
+            case 20:
+                txtset(t, "Thou dost believe that virtue resides in all people. Thou dost see a rogue");
+                txtset(t2, "steal from thy Lord. Dost thou:");
+                txtset(t3, "A) Call him to Justice; or");
+                txtset(t4, "B) Personally try to sway him back to the Spiritual path of good?");
+                break;
+            case 21:
+                txtset(t, "Unwitnessed, thou hast slain a great dragon in self defense. A poor warrior");
+                txtset(t2, "claims the offered reward. Dost thou:");
+                txtset(t3, "A) Justly step forward to claim the reward; or");
+                txtset(t4, "B) Humbly go about life, secure in thy self-esteem?");
+                break;
+            case 22:
+                txtset(t, "Thou art a bounty hunter sworn to return an alleged murderer. After his");
+                txtset(t2, "capture, thou believest him to be innocent. Dost thou:");
+                txtset(t3, "A) Sacrifice thy sizeable bounty for thy belief; or");
+                txtset(t4, "B) Honor thy oath to return him as thou hast promised?");
+                break;
+            case 23:
+                txtset(t, "Thou hast spent thy life in charitable and righteous work. Thine uncle the");
+                txtset(t2, "innkeeper lies ill and asks you to take over his tavern. Dost thou:");
+                txtset(t3, "A) Sacrifice thy life of purity to aid thy kin; or");
+                txtset(t4, "B) Decline & follow thy Spirit's call?");
+                break;
+            case 24:
+                txtset(t, "Thou art an elderly, wealthy eccentric. Thy end is near. Dost thou:");
+                txtset(
+                    t2,
+                    "A) Donate all thy wealth to feed hundreds of starving children, and receive public adulation; or");
+                txtset(t3, "B) Humbly live out thy life, willing thy fortune to thy heirs?");
+                break;
+            case 25:
+                txtset(t, "In thy youth thou pledged to marry thy sweetheart. Now thou art on a sacred");
+                txtset(t2, "quest in distant lands. Thy sweetheart asks thee to keep thy vow. Dost thou:");
+                txtset(t3, "A) Honor thy pledge to wed; or");
+                txtset(t4, "B) Follow thy Spiritual crusade?");
+                break;
+            case 26:
+                txtset(t, "Thou art at a crossroads in thy life. Dost thou:");
+                txtset(t2, "A) Choose the Honorable life of a Paladin, striving for Truth and Courage; or");
+                txtset(t3, "B) Choose the Humble life of a Shepherd, and a world of simplicity and peace?");
+                break;
+            case 27:
+                txtset(t, "Thy parents wish thee to become an apprentice. Two positions are available.");
+                txtset(t2, "Dost thou:");
+                txtset(t3, "A) Become an acolyte in the Spiritual order; or");
+                txtset(t4, "B) Become an assistant to a humble village cobbler?");
+                break;
+            case -2:
+                txtset(t, "\"At last thou hast come to fulfill thy destiny,\" the gypsy says.");
+                txtset(t2, "She smiles, as if in great relief.");
+                txtset(t3, "\"Sit before me now, and I shall pour the light of Virtue into the");
+                txtset(t4, "shadows of thy future.\"");
+                break;
+            case -1:
+                txtset(t, "On a wooden table eight bottles stand, a rainbow of bubbling liquids.");
+                txtset(t2, "\"Behold the virtues of the Avatar\", the woman says.");
+                txtset(t3, "\"Let us begin the casting!\"");
+                txtset(t4, "(Recommended buttons for answers are blinking.)");
+                break;
+            case -3:
+                txtset(t, "\"The path of the Avatar lies beneath thy feet, worthy ");
+                txtadd(t, u6o_name);
+                txtadd(t, ",\"");
+                txtset(t2, "the gypsy intones. With a mysterious smile, she passes you the flask");
+                txtset(t3, "of shimmering liquids. \"Drink of these waters and go forth among our");
+                txtset(t4, "people, who shall receive thee in Joy!\"");
+        }
+
+
+        x = 192 + 32 - 16;
+        y = 184 + 132 * 2 - 8 - 4;
+        txtcol = rgb(255, 255, 255);
+        txtout(ps, x + 1, y + 1, t);
+        y += 20;
+        txtcol = rgb(255, 255, 255);
+        txtout(ps, x + 1, y + 1, t2);
+        y += 20;
+        txtcol = rgb(255, 255, 255);
+        txtout(ps, x + 1, y + 1, t3);
+        y += 20;
+        txtcol = rgb(255, 255, 255);
+        txtout(ps, x + 1, y + 1, t4);
+
+
+        if (keyhit(65)) {
+            //"A" key
+            mx = (279 * 2) + 192;
+            my = (174 * 2) + 184;
+            goto abkey;
+        }
+        if (keyhit(66)) {
+            //"B" key
+            mx = ((279 + 17) * 2) + 192;
+            my = (174 * 2) + 184;
+            goto abkey;
+        }
+
+        //for compatibility, simulate a mouse click in the top left corner
+        if (keyhit(VK_RETURN)) {
+            mx = 0;
+            my = 0;
+            goto abkey;
+        }
+
+        if (fs->mouse_click) {
+            fs->mouse_click = NULL;
+        abkey:
+
+
+            if (vtext < 0) {
+                if (vtext == -3) {
+                    intro = 101;
+                    intro_setup = 0;
+                    goto intro_done;
+                }
+                vtext++;
+                vaction_done = 1;
+                if (vtext == 0) vtext = rnd * 28;
+            } else {
+                if (vaction_done) {
+                    x = (mx - 192) / 2;
+                    y = (my - 184) / 2;
+                    static unsigned char stats_warning = 1;
+
+                    if ((x >= 279) && (x < (279 + 16)) && (y >= 174) && (y < (174 + 16))) {
+                        vques[vtext] = 1;
+                        if (x5 > x4) {
+                            if (stats_warning) {
+                                stats_warning = 0;
+                                if (IDNO == MessageBox(
+                                        NULL,
+                                        "If you select a non-blinking answer the total of your strength, dexterity and intelligence will be lower. Are you sure?",
+                                        "Ultima 6 Online", MB_YESNO)) vques[vtext] = 0;
+                            }
+                        }
+                    }
+
+                    if ((x >= (279 + 17)) && (x < (279 + 17 + 16)) && (y >= 174) && (y < (174 + 16))) {
+                        vques[vtext] = 2;
+                        if (x4 > x5) {
+                            if (stats_warning) {
+                                stats_warning = 0;
+                                if (IDNO == MessageBox(
+                                        NULL,
+                                        "If you select a non-blinking answer the total of your strength, dexterity and intelligence will be lower. Are you sure?",
+                                        "Ultima 6 Online", MB_YESNO)) vques[vtext] = 0;
+                            }
+                        }
+                    }
+
+                    if (vques[vtext] == 0) goto ab_noselection;
+
+
+                    x2 = vtext;
+                    x = -1;
+                    x4 = 0;
+                    x3 = 0;
+                    if (vques[vtext] == 1) x3 = 1;
+                    u6o_vq[vtext] = vques[vtext] - 1;
+                    x++;
+                    if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_COMPASSION } //i3,d3
+                    x++;
+                    if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_VALOR } //i3,s3
+                    x++;
+                    if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_JUSTICE } //i3,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_SACRIFICE } //i3,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_HONOR } //i3,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_SPIRITUALITY } //i3,a1
+                    x++;
+                    if (x == x2) if (x3) { U6O2_HONESTY } else { U6O2_HUMILITY } //i3,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_VALOR } //d3,s3
+                    x++;
+                    if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_JUSTICE } //d3,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_SACRIFICE } //d3,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_HONOR } //d3,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_SPIRITUALITY } //d3,a1
+                    x++;
+                    if (x == x2) if (x3) { U6O2_COMPASSION } else { U6O2_HUMILITY } //d3,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_JUSTICE } //s3,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_SACRIFICE } //s3,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_HONOR } //s3,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_SPIRITUALITY } //s3,a1
+                    x++;
+                    if (x == x2) if (x3) { U6O2_VALOR } else { U6O2_HUMILITY } //s3,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_JUSTICE } else { U6O2_SACRIFICE } //i,d
+                    x++;
+                    if (x == x2) if (x3) { U6O2_JUSTICE } else { U6O2_HONOR } //s,d
+                    x++;
+                    if (x == x2) if (x3) { U6O2_JUSTICE } else { U6O2_SPIRITUALITY } //X,a1
+                    x++;
+                    if (x == x2) if (x3) { U6O2_JUSTICE } else { U6O2_HUMILITY } //OK,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_SACRIFICE } else { U6O2_HONOR } //s,i
+                    x++;
+                    if (x == x2) if (x3) { U6O2_SACRIFICE } else { U6O2_SPIRITUALITY } //X,OK
+                    x++;
+                    if (x == x2) if (x3) { U6O2_SACRIFICE } else { U6O2_HUMILITY } //a1,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_HONOR } else { U6O2_SPIRITUALITY } //X,a1
+                    x++;
+                    if (x == x2) if (x3) { U6O2_HONOR } else { U6O2_HUMILITY } //OK,X
+                    x++;
+                    if (x == x2) if (x3) { U6O2_SPIRITUALITY } else { U6O2_HUMILITY } //a1,X
+
+                    //show vial action (needs to relate to question!)
+                    vaction = x4;
+                    f = 0;
+                    vaction_done = 0;
+
+                    for (x = 0; x <= 27; x++) if (vques[x] == 0) goto vquesnew;
+                vquesnew:
+                    if (x == 28) {
+                        vtext = -3;
+                    } else {
+                    nextvques:
+                        x = rnd * 28;
+                        if (vques[x]) goto nextvques;
+                        vtext = x;
+                    } //28
+                ab_noselection:;
+                } //vaction_done
+            }
+        }
+    } //intro==100
+
+
+    if (intro == 101) {
+        if (intro_setup == 0) {
+            intro_setup = 1;
+            f = 0;
+        }
+        img(ps320200, 0, 0, intro_flask);
+        f += et;
+        for (y = 34; y <= 128; y++) {
+            for (x = 116; x <= 203; x++) {
+            vialmix2:
+                x3 = rnd * 8;
+                x4 = rnd * 7;
+                if (vquan[x3] > x4) goto vialmix2;
+                if (ps320200->o2[y * 320 + x] == 0) ps320200->o2[y * 320 + x] = vcol[x3];
+            }
+        }
+
+        img(ps640400, ps320200);
+        img(ps, 192, 184, ps640400);
+
+        x = 144;
+        y = 640;
+        txtset(t, "As you drink from the flask, vertigo overwhelms you. A soothing mist obscures the gypsy's face,");
+        txtcol = rgb(255, 255, 255);
+        txtouts(ps, x + 1, y + 1, t);
+        txtset(t, "and you sink without fear into an untroubled sleep.");
+        txtcol = rgb(255, 255, 255);
+        txtouts(ps, x + 1, y + 1 + 20, t);
+
+        if (fs->mouse_click || keyhit(VK_RETURN)) {
+            //final backup of userinfo
+            tfh = open2("userinfo.txt", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+            txtfileout(u6o_user_name, tfh);
+            txtfileout(u6o_user_password, tfh);
             close(tfh);
 
-            fs->offset_x=1024; fs->graphic=NULL;
-            intro=0; intro_setup=0; goto intro_done;
-          }}
-        MessageBox(NULL,"Select CREATE A CHARACTER if you are a new player.","Ultima 6 Online",MB_OK);
+            //save walkthru pos
+            txtset(t, ".\\dr\\walkthru.pos");
+            tfh = open2(t, OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+            put(tfh, &walkthru_pos, 4); //lines to skip of the walkthru
+            close(tfh);
+            walkthru_pos_skip = 0;
 
-      }
+            tfh = open(".\\dr\\controls.bin");
+            get(tfh, &U6OK, 512);
+            get(tfh, &U6OK_FLAGS, 128);
+            close(tfh);
 
-    }
-  }//intro==200
+            u6o_createcharacter = 1; //ALLOW CREATION OF NEW PLAYER
 
-
-  //transfer a character
-
-
-
-  if (intro==202){
-    static txt *tusername2=txtnew();
-    static txt *tuserpassword2=txtnew();
-    static txt *tnewuserpassword2=txtnew();
-    static unsigned char intro_ep=1;
-    static unsigned char intro_ti=0;
-    if (intro_setup==0){ intro_setup=1;
-    txtset(tusername2,"");
-    txtset(tuserpassword2,"");
-    txtset(tnewuserpassword2,"");
-    f=0;
-    //select username text field
-    intro_ep=0; intro_ti=2; GETINPUT_setup(tusername2,&intro_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-    }
-    f+=et;
-
-    img0(ps,1024-25-22-2,2,intro_back);
-    img0(ps,18,25,intro_ultimavi);
-    txtset(t,"Transfer a Character"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-    x5=160-tagxy.cx/2; y5=64*4+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-    txtcol=rgb(255,255,96); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-
-
-    img0(ps,0,256+64+8,intro_tacinfo);
-
-    txtcol=rgb(252,200,20);
-    txtset(t,tusername2); if (((long)(f*4)&1)&&(intro_ti==2)&&(intro_ep==0)) txtadd(t,"|");
-    img(ps,120+4,320+4+4,intro_ifield);
-    txtout(ps,120+4+4,320+4-1,t);
-    txtset(t,tuserpassword2); if (((long)(f*4)&1)&&(intro_ti==3)&&(intro_ep==0)) txtadd(t,"|");
-    img(ps,120+4,320+32+4+4,intro_ifield);
-    txtout(ps,120+4+4,320+32+4-1,t);
-    txtset(t,tnewuserpassword2); if (((long)(f*4)&1)&&(intro_ti==4)&&(intro_ep==0)) txtadd(t,"|");
-    img(ps,120+4,320+32+4+4+96,intro_ifield);
-    txtout(ps,120+4+4,320+32+4-1+96,t);
-
-    x=mx; y=my;
-
-    if ((x>=0)&&(x<320)&&(y>=(352+96))&&(y<(384+96))){
-      txtset(t,"ONLY SET IF CHANGING YOUR EXISTING PASSWORD");
-      txtcol=rgb(255,255,255); txtouts(ps,256+64,736+4,t);
-    }
-
-
-    //switch to next field if tab pressed!
-    if (GETINPUT_tab_pressed==GETINPUT_TAB_PRESSED){
-      GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_STOP;
-      if (intro_ti==4){
-        intro_ep=0; intro_ti=2;
-        GETINPUT_setup(tusername2,&intro_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-        goto transferachar_newfieldselected;
-      }
-      if (intro_ti==2){
-        intro_ep=0; intro_ti=3;
-        GETINPUT_setup(tuserpassword2,&intro_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-        goto transferachar_newfieldselected;
-      }
-      if (intro_ti==3){
-        intro_ep=0; intro_ti=4;
-        GETINPUT_setup(tnewuserpassword2,&intro_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-        goto transferachar_newfieldselected;
-      }
-    }//GETINPUT_TAB_PRESSED
-transferachar_newfieldselected:
-
-    if (keyhit(VK_RETURN)) goto transferachar_enterkey;
-
-
-    if (fs->mouse_click){
-      fs->mouse_click=NULL;
-
-      if ((x>(1024-21-4-26))&&(y<(21+4))){
-        if (intro_ep==0){
-          GETINPUT_stop();
+            fs->mouse_click = NULL;
+            intro = 0;
+            intro_setup = 0;
+            fs->offset_x = 1024;
+            fs->graphic = NULL;
         }
-        intro=200; intro_setup=0; goto intro_done;
-      }
+    } //intro==101
 
-
-
-      if ((x>=0)&&(x<320)&&(y>=320)&&(y<352)){
-        intro_ep=0; intro_ti=2;
-        GETINPUT_setup(tusername2,&intro_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-      }
-      if ((x>=0)&&(x<320)&&(y>=352)&&(y<384)){
-        intro_ep=0; intro_ti=3;
-        GETINPUT_setup(tuserpassword2,&intro_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-      }
-      if ((x>=0)&&(x<320)&&(y>=(352+96))&&(y<(384+96))){
-        intro_ep=0; intro_ti=4;
-        GETINPUT_setup(tnewuserpassword2,&intro_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-      }
-
-      if ((x>=0)&&(x<320)&&(y>=384)&&(y<416)){
-transferachar_enterkey:
-
-        if (tusername2->l==0){
-          MessageBox(NULL,"Please select a USER NAME","Ultima 6 Online",MB_OK);
-          goto intro_done;
+    if (intro == 102) {
+        if (intro_setup == 0) {
+            intro_setup = 1;
+            f = 0;
         }
-        if (tuserpassword2->l==0){
-          MessageBox(NULL,"Please select a USER PASSWORD","Ultima 6 Online",MB_OK);
-          goto intro_done;
+        x = f * 16.0f;
+        if (x > 191) x = 191;
+        img(ps320200, -x, 0, intro_caravan);
+
+        f += et;
+        img(ps640400, ps320200);
+        img(ps, 192, 184, ps640400);
+
+        x = 192 + 32 - 16;
+        y = 616 - 16;
+        txtset(t, "\"Welcome, O Seeker!\"");
+        txtcol = rgb(255, 255, 255);
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "A lonely stroll along an unfamiliar forest path brings you upon a curious gypsy");
+        txtcol = rgb(255, 255, 255);
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "wagon, its exotic colors dappled in the summer shade.");
+        txtcol = rgb(255, 255, 255);
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "A woman's voice rings out with friendship, beckoning you into across the");
+        txtcol = rgb(255, 255, 255);
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "wagon's threshold and, as it happens, into another life....");
+        txtcol = rgb(255, 255, 255);
+        txtouts(ps, x, y, t);
+
+
+        //txtset(t,"and you sink without fear into an untroubled sleep.");
+        //txtcol=rgb(255,255,255); txtout(ps,x+1,y+1+20,t);
+
+
+        if (fs->mouse_click || keyhit(VK_RETURN)) {
+            fs->mouse_click = NULL;
+            intro = 100;
+            intro_setup = 0;
+        }
+    } //intro==102
+
+    if (intro == 200) {
+        if (intro_setup == 0) {
+            intro_setup = 1;
+
+            tfh = open2("userinfo.txt", OF_READWRITE | OF_SHARE_COMPAT);
+            if (tfh->h != HFILE_ERROR) {
+                txtfilein(u6o_user_name, tfh);
+                txtfilein(u6o_user_password, tfh);
+                close(tfh);
+            } else {
+                txtset(u6o_user_name, "UNKNOWN");
+                txtset(u6o_user_password, "UNKNOWN");
+            }
+
+            f = 0;
         }
 
-        if (intro_ep==0){
-          GETINPUT_stop();
-        }
-        txtset(u6o_user_name,tusername2);
-        txtset(u6o_user_password,tuserpassword2);
-        if (tnewuserpassword2->l){
-          txtset(u6o_new_user_password,tnewuserpassword2);
+
+        if (NEThost) {
+            goto login; //very stupid way of doing this, just a quick fix
         }
 
-        tfh=open2("userinfo.txt",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
-        txtfileout(u6o_user_name,tfh);
-        if (tnewuserpassword2->l) txtfileout(u6o_new_user_password,tfh); else txtfileout(u6o_user_password,tfh);
-        close(tfh);
 
-        //save walkthru pos
-        txtset(t,".\\dr\\walkthru.pos");
-        tfh=open2(t,OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
-        put(tfh,&walkthru_pos,4); //lines to skip of the walkthru
-        close(tfh);
-        walkthru_pos_skip=0;
-
-        tfh=open(".\\dr\\controls.bin");
-        get(tfh,&U6OK,512); get(tfh,&U6OK_FLAGS,128);
-        close(tfh);
-
-        fs->offset_x=1024; fs->graphic=NULL;
-        intro=0; intro_setup=0; goto intro_done;
-      }
-    }//->mouse_click
-  }//intro==202
-
-
-
-  if (intro==206){//custom keys: main menu
-    if (intro_setup==0){
-      f=0;
-      intro_setup=1;
-    }
-    img0(ps,1024-25-22-2,2,intro_back);
-    img0(ps,18,25,intro_ultimavi);
-    txtset(t,"Custom Controls"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-    x5=160-tagxy.cx/2; y5=64*5+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-    txtcol=rgb(255,255,96); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-
-
-    txtcol=rgb(255,255,255);
-
-    x=320; y=256;
-    x+=32; txtset(t,"RESTORE DEFAULT CONTROLS"); txtouts(ps,x,y,t); x-=32;
-    img0(ps,x,y,intro_next);
-    y+=64;
-    x+=32; txtset(t,"CHANGE CURRENT CUSTOM CONTROLS"); txtouts(ps,x,y,t); x-=32;
-    img0(ps,x,y,intro_next);
-
-
-
-
-    if (fs->mouse_click){
-      fs->mouse_click=NULL;
-
-      if ((mx>=x)&&(mx<(x+22))&&(my>=(y-64))&&(my<(y+22-64))){
-        memcpy(&U6OK_TEMP,&U6OK_DEFAULT,512);
-        memcpy(&U6OK_TEMP_FLAGS,&U6OK_DEFAULT_FLAGS,128);
-        tfh=open2(".\\dr\\controls.bin",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
-        put(tfh,&U6OK_TEMP,512);
-        put(tfh,&U6OK_TEMP_FLAGS,128);
-        close(tfh);
-        intro=200; intro_setup=0; goto intro_done;
-      }
-
-      if ((mx>=x)&&(mx<(x+22))&&(my>=y)&&(my<(y+22))){
-        intro=203; intro_setup=0; goto intro_done;
-      }
-
-      if ((mx>(1024-21-4-26))&&(my<(21+4))){//back
-        intro=200; intro_setup=0; goto intro_done;
-      }
-    }//->mouse_click
-  }//intro==206
-
-
-
-
-
-
-
-
-  if (intro==203){ //custom keys
-    static unsigned char nextkey;
-    static unsigned short key1,key2;
-
-    if (intro_setup==0){
-      tfh=open(".\\dr\\controls.bin");
-      get(tfh,&U6OK_TEMP,512);
-      get(tfh,&U6OK_TEMP_FLAGS,128);
-      close(tfh);
-      key1=0;
-      key2=0;
-      nextkey=0;
-      intro_setup=1;
-      f=0;
-    }
-
-    img0(ps,1024-25-22-2,2,intro_back);
-    img0(ps,18,25,intro_ultimavi);
-    txtset(t,"Custom Controls"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-    x5=160-tagxy.cx/2; y5=64*5+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-    txtcol=rgb(255,255,96); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-
-    img0(ps,536,420,intro_ccsave1);
-    img0(ps,536,484,intro_ccsave3);
-
-    if (nextkey!=0) img0(ps,466,416,intro_back);
-    if (nextkey!=72){
-      if ((U6OK_TEMP[nextkey][0]!=U6OK_DEFAULT[nextkey][0])||(U6OK_TEMP[nextkey][1]!=U6OK_DEFAULT[nextkey][1])||(U6OK_TEMP_FLAGS[nextkey]!=U6OK_DEFAULT_FLAGS[nextkey])){
-        img0(ps,536,420,intro_ccsave2);
-      }
-      img0(ps,665,416,intro_next);
-      if (U6OK_TEMP_FLAGS[nextkey]&2){
-        if (U6OK_TEMP_FLAGS[nextkey]&1) img(ps,720,411,instantclickok); else img(ps,720,411,instantclickx);
-      }
-    }
-
-
-
-    x=320; y=128;
-    txtcol=rgb(18*2,108*2,255); //(3<<11)+(46<<5)+27;
-
-    txtset(t,"Use the green arrows to select which controls to change");
-    txtouts(ps,x,y,t); y+=32;
-    txtset(t,"Only change the controls you need to, then select SAVE ALL");
-    txtouts(ps,x,y,t); y+=32;
-    txtset(t,"To use a combination (eg. SHIFT+T), hold the 1st key then press the 2nd key");
-    txtouts(ps,x,y,t); y+=32;
-    txtset(t,"You may also use SHIFT, CTRL or ALT independently as non-combination keys");
-    txtouts(ps,x,y,t); y+=32;
-
-    txtcol=rgb(255,64,64);
-    txtset(t,"CAUTION");
-    txtouts(ps,x,y,t); y+=32;
-    txtcol=rgb(18*2,108*2,255);
-    txtset(t,"All keys can used, but some controls may conflict with each other!");
-    txtouts(ps,x,y,t); y+=32;
-
-    txtset(t,"Press SAVE ALL button to save custom controls");
-    i=-1;
-    i++; if (nextkey==i) txtset(t,"Press WALK RIGHT (WALK EAST) key now [ default key: RIGHT ARROW ]");
-    i++; if (nextkey==i) txtset(t,"Press WALK LEFT (WALK WEST) key now [ LEFT ARROW ]");
-    i++; if (nextkey==i) txtset(t,"Press WALK UP (WALK NORTH) key now [ UP ARROW ]");
-    i++; if (nextkey==i) txtset(t,"Press WALK DOWN (WALK SOUTH) key now [ DOWN ARROW ]");
-    i++; if (nextkey==i) txtset(t,"Press TALK key now [ T ]");
-    i++; if (nextkey==i) txtset(t,"Press GLOBAL TALK key now [ SHIFT+T ]");
-    i++; if (nextkey==i) txtset(t,"Press MESSAGE SEND key now [ ENTER ]");
-    i++; if (nextkey==i) txtset(t,"Press ATTACK key now [ A ]");
-    i++; if (nextkey==i) txtset(t,"Press LOOK key now [ L ]");
-    i++; if (nextkey==i) txtset(t,"Press USE key now [ U ]");
-    i++; if (nextkey==i) txtset(t,"Press MAXIMIZE/MINIMIZE key now [ M ]");
-    i++; if (nextkey==i) txtset(t,"Press QUIT key now [ Q ]");
-    i++; if (nextkey==i) txtset(t,"Press SOUND key now [ S ]");
-    i++; if (nextkey==i) txtset(t,"Press CANCEL key now [ ESC ]");
-    i++; if (nextkey==i) txtset(t,"Press RETYPE/MESSAGE RECALL key now [ F3 ]");
-    i++; if (nextkey==i) txtset(t,"Press RESPAWN key now [ F1 ]");
-
-    i++; if (nextkey==i) txtset(t,"Press SELECT 1ST PARTY MEMBER key now [ 1 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 2ND PARTY MEMBER key now [ 2 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 3RD PARTY MEMBER key now [ 3 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 4TH PARTY MEMBER key now [ 4 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 5TH PARTY MEMBER key now [ 5 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 6TH PARTY MEMBER key now [ 6 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 7TH PARTY MEMBER key now [ 7 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 8TH PARTY MEMBER key now [ 8 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 9TH PARTY MEMBER key now [ 9 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 10TH PARTY MEMBER key now [ 0 ]");
-
-    i++; if (nextkey==i) txtset(t,"Press SELECT 1ST NUMBERED TARGET key now [ 1 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 2ND NUMBERED TARGET key now [ 2 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 3RD NUMBERED TARGET key now [ 3 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 4TH NUMBERED TARGET key now [ 4 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 5TH NUMBERED TARGET key now [ 5 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 6TH NUMBERED TARGET key now [ 6 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 7TH NUMBERED TARGET key now [ 7 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 8TH NUMBERED TARGET key now [ 8 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 9TH NUMBERED TARGET key now [ 9 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 10TH NUMBERED TARGET key now [ 0 ]");
-
-    i++; if (nextkey==i) txtset(t,"Press SELECT 1ST RECALL SPELL key now [ F5 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 2ND RECALL SPELL key now [ F6 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 3RD RECALL SPELL key now [ F7 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 4TH RECALL SPELL key now [ F8 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 5TH RECALL SPELL key now [ F9 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 6TH RECALL SPELL key now [ F10 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 7TH RECALL SPELL key now [ F11 ]");
-    i++; if (nextkey==i) txtset(t,"Press SELECT 8TH RECALL SPELL key now [ F12 ]");
-
-    i++; if (nextkey==i) txtset(t,"Press SET 1ST RECALL SPELL key now [ SHIFT+F5 ]");
-    i++; if (nextkey==i) txtset(t,"Press SET 2ND RECALL SPELL key now [ SHIFT+F6 ]");
-    i++; if (nextkey==i) txtset(t,"Press SET 3RD RECALL SPELL key now [ SHIFT+F7 ]");
-    i++; if (nextkey==i) txtset(t,"Press SET 4TH RECALL SPELL key now [ SHIFT+F8 ]");
-    i++; if (nextkey==i) txtset(t,"Press SET 5TH RECALL SPELL key now [ SHIFT+F9 ]");
-    i++; if (nextkey==i) txtset(t,"Press SET 6TH RECALL SPELL key now [ SHIFT+F10 ]");
-    i++; if (nextkey==i) txtset(t,"Press SET 7TH RECALL SPELL key now [ SHIFT+F11 ]");
-    i++; if (nextkey==i) txtset(t,"Press SET 8TH RECALL SPELL key now [ SHIFT+F12 ]");
-
-    i++; if (nextkey==i) txtset(t,"Press ENTER PARTIAL AMOUNT/QUANTITY key now [ SHIFT ]");
-    i++; if (nextkey==i) txtset(t,"Press NUMBER 1 FOR PARTIAL AMOUNT/QUANTITY key now [ 1 ]");
-    i++; if (nextkey==i) txtset(t,"Press NUMBER 2 FOR PARTIAL AMOUNT/QUANTITY key now [ 2 ]");
-    i++; if (nextkey==i) txtset(t,"Press NUMBER 3 FOR PARTIAL AMOUNT/QUANTITY key now [ 3 ]");
-    i++; if (nextkey==i) txtset(t,"Press NUMBER 4 FOR PARTIAL AMOUNT/QUANTITY key now [ 4 ]");
-    i++; if (nextkey==i) txtset(t,"Press NUMBER 5 FOR PARTIAL AMOUNT/QUANTITY key now [ 5 ]");
-    i++; if (nextkey==i) txtset(t,"Press NUMBER 6 FOR PARTIAL AMOUNT/QUANTITY key now [ 6 ]");
-    i++; if (nextkey==i) txtset(t,"Press NUMBER 7 FOR PARTIAL AMOUNT/QUANTITY key now [ 7 ]");
-    i++; if (nextkey==i) txtset(t,"Press NUMBER 8 FOR PARTIAL AMOUNT/QUANTITY key now [ 8 ]");
-    i++; if (nextkey==i) txtset(t,"Press NUMBER 9 FOR PARTIAL AMOUNT/QUANTITY key now [ 9 ]");
-    i++; if (nextkey==i) txtset(t,"Press NUMBER 0 FOR PARTIAL AMOUNT/QUANTITY key now [ 0 ]");
-
-    i++; if (nextkey==i) txtset(t,"Press SCROLL UP key now [ MOUSE WHEEL UP ]");
-    i++; if (nextkey==i) txtset(t,"Press SCROLL DOWN key now [ MOUSE WHEEL DOWN ]");
-
-    i++; if (nextkey==i) txtset(t,"Press ALTERNATIVE ATTACK key now [ NOT USED ]");
-    i++; if (nextkey==i) txtset(t,"Press ALTERNATIVE LOOK key now [ NOT USED ]");
-    i++; if (nextkey==i) txtset(t,"Press ALTERNATIVE USE key now [ NOT USED ]");
-
-    i++; if (nextkey==i) txtset(t,"Press CHAT (CONTINUE CONVERSATION) key now [ CONTROL+T ]");
-
-    i++; if (nextkey==i) txtset(t,"Press VOICE CHAT key now [ V ]");
-
-    i++; if (nextkey==i) txtset(t,"Press MARK/UNMARK AS DO-NOT-SELL key now [ X ]");
-
-    i++; if (nextkey==i) txtset(t,"Press RESPAWN FOLLOWERS key now [ SHIFT+F1 ]");
-
-
-    tagxy.cx=0; tagxy.cy=0;
-    ps->s->GetDC(&taghdc);
-    SelectObject(taghdc,txtfnt);
-    GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy);
-    ps->s->ReleaseDC(taghdc);
-    x2=tagxy.cx/2;
-    txtcol=rgb(255,255,255); txtouts(ps,512+64-x2,128+64+64+64+22,t);
-
-    if (nextkey!=72){
-
-      txtset(t,"Waiting.");
-      x=ett*2.0f; x&=3;
-      for (x2=0;x2<=x;x2++){
-        txtadd(t,".");
-      }
-      tagxy.cx=0; tagxy.cy=0;
-      ps->s->GetDC(&taghdc);
-      SelectObject(taghdc,txtfnt);
-      GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy);
-      ps->s->ReleaseDC(taghdc);
-      x2=tagxy.cx/2;
-      txtcol=rgb(255,255,255); txtouts(ps,512+64-x2,128+64+64+64+22+32,t);
-
-      for (i=0;i<=65535;i++){
-        if (keyhit(i)){
-          if (!key1) key1=i; else key2=i;
-        }
-      }
-      if (key1){
-        if (keyon[key1]==0){
-          U6OK_TEMP[nextkey][0]=key1; U6OK_TEMP[nextkey][1]=key2;
-          key1=0; key2=0; nextkey++;
-        }
-      }
-    }
-
-
-
-
-
-
-    if (fs->mouse_click){
-      fs->mouse_click=NULL;
-
-      if (nextkey!=72){
-        if (U6OK_TEMP_FLAGS[nextkey]&2){
-          if ((mx>=720)&&(mx<(720+84))&&(my>=411)&&(my<(411+32))){
-            if (U6OK_TEMP_FLAGS[nextkey]&1) U6OK_TEMP_FLAGS[nextkey]--; else U6OK_TEMP_FLAGS[nextkey]|=1;
-          }
-        }
-      }
-
-      if (nextkey!=72){
-        if ((mx>=536)&&(mx<(536+81))&&(my>=420)&&(my<(420+16))){
-          if ((U6OK_TEMP[nextkey][0]!=U6OK_DEFAULT[nextkey][0])||(U6OK_TEMP[nextkey][1]!=U6OK_DEFAULT[nextkey][1])||(U6OK_TEMP_FLAGS[nextkey]!=U6OK_DEFAULT_FLAGS[nextkey])){
-            U6OK_TEMP[nextkey][0]=U6OK_DEFAULT[nextkey][0];
-            U6OK_TEMP[nextkey][1]=U6OK_DEFAULT[nextkey][1];
-            U6OK_TEMP_FLAGS[nextkey]=U6OK_DEFAULT_FLAGS[nextkey];
-            nextkey++; key1=0; key2=0; goto intro_done;
-          }
-        }
-      }
-
-      if ((mx>=536)&&(mx<(536+60))&&(my>=484)&&(my<(484+16))){ //save all
-        tfh=open2(".\\dr\\controls.bin",OF_READWRITE|OF_SHARE_COMPAT|OF_CREATE);
-        put(tfh,&U6OK_TEMP,512);
-        put(tfh,&U6OK_TEMP_FLAGS,128);
-        close(tfh);
-        intro=200; intro_setup=0; goto intro_done;
-      }
-
-      if ((mx>=466)&&(mx<(466+22))&&(my>=416)&&(my<(416+22))){
-        if (nextkey) {nextkey--; key1=0; key2=0; goto intro_done;}
-      }
-
-      if ((mx>=665)&&(mx<(665+22))&&(my>=416)&&(my<(416+22))){
-        if (nextkey!=72) {nextkey++; key1=0; key2=0; goto intro_done;}
-      }
-
-      if ((mx>(1024-21-4-26))&&(my<(21+4))){
-        intro=200; intro_setup=0; goto intro_done;
-      }
-
-    }//->mouse_click
-
-  }//intro==203
-
-
-
-
-
-  static surf *customport;
-
-
-  if (intro==204){//custom portrait
-    if (intro_setup==0){
-      intro_setup=1;
-      f=0;
-    }
-
-    img0(ps,1024-25-22-2,2,intro_back);
-    img0(ps,18,25,intro_ultimavi);
-    txtset(t,"Custom Portrait"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-    x5=160-tagxy.cx/2; y5=64*6+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-    txtcol=rgb(255,255,96); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-
-    x=320; y=128;
-    txtcol=rgb(18*2,108*2,255); //(3<<11)+(46<<5)+27;
-
-    txtset(t,"CUSTOM PORTRAIT UPLOAD RULES");
-    txtouts(ps,x,y,t); y+=32;
-    txtset(t,"1. The portrait must portray the Avatar as being human.");
-    txtouts(ps,x,y,t); y+=32;
-    txtset(t,"2. The portrait must consist mostly of the Avatar's face.");
-    txtouts(ps,x,y,t); y+=32;
-    txtset(t,"3. The gender of the portrait must match that of the Avatar.");
-    txtouts(ps,x,y,t); y+=32;
-    txtset(t,"4. The portrait must not be mistakable for any other original or custom portrait.");
-    txtouts(ps,x,y,t); y+=32;
-    txtset(t,"5. The portrait must not contain nudity or adult content.");
-    txtouts(ps,x,y,t); y+=32;
-    txtset(t,"6. The portrait must be in keeping with the spirit and timeframe of Ultima 6.");
-    txtouts(ps,x,y,t); y+=32;
-    y+=32;
-    txtcol=rgb(255,64,64);
-    txtset(t,"WARNING!");
-    if ((long)(ett*2)&1) txtouts(ps,x,y,t);
-    x+=96;
-    txtset(t,"UPLOADING AN INAPPROPRIATE PORTRAIT WILL PERMANENTLY");
-    txtouts(ps,x,y,t);
-    y+=32;
-    txtset(t,"DISABLE THIS FEATURE FOR USE WITH YOUR CHARACTER");
-
-    txtouts(ps,x,y,t); y+=32; x-=96;
-
-    txtcol=rgb(18*2,108*2,255);
-    y+=32; 
-    txtset(t,"LEVEL RESTRICTION: ONLY CHARACTERS WHO ARE LEVEL 3 OR ABOVE"); txtouts(ps,x,y,t); y+=32;
-    txtset(t,"XP COST: 1000 EXPERIENCE POINTS ARE TAKEN PER UPLOAD"); txtouts(ps,x,y,t); y+=32;
-    txtset(t,"FORMAT: ANY .BMP TYPE (DIMENTIONS 56x64)"); txtouts(ps,x,y,t); y+=32;
-    txtset(t,"TRANSPARENT COLOUR: BLACK (RGB[0,0,0] AFTER CONVERSION TO 16BIT COLOUR)"); txtouts(ps,x,y,t); y+=32;
-    y+=32; 
-    txtcol=rgb(255,255,255);
-    x+=128; x+=64;
-    txtset(t,"SELECT PORTRAIT FILE TO UPLOAD"); txtouts(ps,x,y,t);
-    x-=32;
-    img0(ps,x,y,intro_next);
-
-
-    if (fs->mouse_click){
-      fs->mouse_click=NULL;
-
-      if ((mx>=x)&&(mx<(x+22))&&(my>=y)&&(my<(y+22))){
-        txtgetfilename(t);
-        if (t->l==0){
-          goto intro_done;
-        }
-        customport=loadimage(t->d,SURF_SYSMEM16);
-        if (customport==NULL){
-          txtadd(t," is not a .BMP file"); MessageBox(NULL,t->d,"Ultima 6 Online",MB_OK);
-          goto intro_done;
-        }
-        if (customport->d.dwWidth!=56){
-          MessageBox(NULL,"BMP must be 56 pixels wide","Ultima 6 Online",MB_OK);
-          goto intro_done;
-        }
-        if (customport->d.dwHeight!=64){
-          MessageBox(NULL,"BMP must be 64 pixels high","Ultima 6 Online",MB_OK);
-          goto intro_done;
-        }
-        intro=205; intro_setup=0; goto intro_done;
-      }
-
-      if ((mx>(1024-21-4-26))&&(my<(21+4))){
-        intro=200; intro_setup=0; goto intro_done;
-      }
-
-    }//->mouse_click
-
-  }//intro==204
-
-
-  if (intro==205){//confirm custom portrait
-    if (intro_setup==0){
-
-      intro_setup=1;
-      f=0;
-    }
-    img0(ps,1024-25-22-2,2,intro_back);
-    img0(ps,18,25,intro_ultimavi);
-    txtset(t,"Custom Portrait"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-    x5=160-tagxy.cx/2; y5=64*6+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-    txtcol=rgb(255,255,96); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-
-    x=ett/3.0f; x&=15;
-    if (x>7) {y=1; x-=8;} else y=0;
-    img(bt32,-x*32,-y*32,bt8[0]);
-    y2=ett*16; y2&=31;
-    for (y=0;y<=24;y++){
-      img(ps,320,y*32-y2,bt32);
-      img(ps,320+32,y*32-y2,bt32);
-    }
-    img0(ps,320+4,128,customport);
-
-    x=320+64+32; y=128+24;
-    txtcol=rgb(18*2,108*2,255); //(3<<11)+(46<<5)+27;
-
-    txtset(t,"Check that the portrait appears correctly on the backgrounds."); txtouts(ps,x,y,t);
-    y+=32;
-    txtset(t,"Pay attention to areas of the portrait that should or should not be transparent."); txtouts(ps,x,y,t);
-
-    y+=128-32;
-    txtcol=rgb(255,255,255);
-    x+=32;
-    txtset(t,"UPLOAD THIS PORTRAIT WHEN I ENTER BRITANNIA"); txtouts(ps,x,y,t);
-    x-=32;
-    img0(ps,x,y,intro_next);
-
-    if (fs->mouse_click){
-      fs->mouse_click=NULL;
-
-      if ((mx>=x)&&(mx<(x+22))&&(my>=y)&&(my<(y+22))){
-        //copy all data to client port buffer
-        for(x2=0;x2<3584;x2++){
-          customportrait[x2]=customport->o2[x2];
-        }
-        customportrait_upload=1;
-        intro=200; intro_setup=0; goto intro_done;
-      }
-
-      if ((mx>(1024-21-4-26))&&(my<(21+4))){
-        intro=200; intro_setup=0; goto intro_done;
-      }
-
-    }//->mouse_click
-
-  }//intro==205
-
-
-
-
-
-  //create a char
-  if (intro==201){
-    static unsigned char sex=0;
-    static unsigned char portn=0;
-    static unsigned char typen=0;
-    static txt *tname2=txtnew();
-    static txt *tusername2=txtnew();
-    static txt *tuserpassword2=txtnew();
-    static unsigned char intro201_ep=1;
-    static unsigned char intro201_ti=0;
-    static object* typen_obj=OBJnew_local();
-
-    if (intro_setup==0){ intro_setup=1;
-    txtset(tname2,"");
-    txtset(tusername2,"");
-    txtset(tuserpassword2,"");
-    sex=0;
-    portn=0;
-    typen=0;
-    intro201_ep=1;
-    intro201_ti=0;
-
-    //select username text field
-    intro201_ep=0; intro201_ti=2; GETINPUT_setup(tusername2,&intro201_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-
-    f=0;
-    }
-    f+=et;
-
-    //show port
-    x3=portn;
-    if (sex){
-      if (x3==0) x4=194;
-      if (x3==1) x4=195;
-      if (x3==2) x4=197;
-      if (x3==3) x4=198;
-      if (x3==4) x4=202;
-      if (x3==5) x4=203;
-      if (x3==6) x4=207;
-    }else{
-      if (x3==0) x4=196;
-      if (x3==1) x4=199;
-      if (x3==2) x4=200;
-      if (x3==3) x4=201;
-      if (x3==4) x4=204;
-      if (x3==5) x4=205;
-      if (x3==6) x4=206;
-    }
-
-    img0(ps,99+8,168+320,getportrait(x4));
-
-    img0(ps,1024-25-22-2,2,intro_back);
-    img0(ps,18,25,intro_ultimavi);
-    txtset(t,"Create a Character"); txtfnt=fnt7; tagxy.cx=0; tagxy.cy=0; ps->s->GetDC(&taghdc); SelectObject(taghdc,txtfnt); GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy); ps->s->ReleaseDC(taghdc);
-    x5=160-tagxy.cx/2; y5=64*2+22; txtcol=rgb(0,0,0); txtout(ps,x5,y5,t); txtout(ps,x5+1,y5,t); txtout(ps,x5+2,y5,t); txtout(ps,x5+2,y5+1,t); txtout(ps,x5+2,y5+2,t); txtout(ps,x5+1,y5+2,t); txtout(ps,x5,y5+2,t); txtout(ps,x5,y5+1,t);
-    txtcol=rgb(255,255,96); txtout(ps,x5+1,y5+1,t); txtfnt=fnt1;
-
-    if (intro201_ep||fs->mouse_click){ //show auto-formatting
-      //name
-      txtset(t5,tname2);
-autoformat_name_cull3:
-      for (i3=0;i3<t5->l;i3++){
-        x=t5->d2[i3];
-        x2=0; //cull?
-        if (x<48) x2=1;
-        if ((x>57)&&(x<65)) x2=1;
-        if ((x>90)&&(x<97)) x2=1;
-        if (x>122) x2=1;
-        if ((x==45)&&(t5->d2[i3+1]!=45)) x2=0; //-
-        if ((x==39)&&(t5->d2[i3+1]!=39)) x2=0; //'
-        if ((x==46)&&(t5->d2[i3+1]!=46)) x2=0; //.
-        if (x==95){t5->d2[i3]=32; x=32; x2=0; goto autoformat_name_cull3;} //_ to space
-        if ((x==32)&&(t5->d2[i3+1]!=32)){
-          if (i3&&(i3!=(t5->l-1))) x2=0;
-        }
-        if (x2){
-          txtset(t6,t5); txtright(t6,t5->l-i3-1);
-          txtleft(t5,i3); txtadd(t5,t6);
-          goto autoformat_name_cull3;
-        }
-      }
-      if (t5->l>16) txtleft(t5,16);
-      txtset(tname2,t5);
-      //username
-      txtset(t5,tusername2);
-      txtucase(t5);
-autoformat_username_cull3:
-      for (i3=0;i3<t5->l;i3++){
-        x=t5->d2[i3];
-        x2=0; //cull?
-        if (x<48) x2=1;
-        if (x>90) x2=1;
-        if ((x>57)&&(x<65)) x2=1;
-        if (x2){
-          txtset(t6,t5); txtright(t6,t5->l-i3-1);
-          txtleft(t5,i3); txtadd(t5,t6);
-          goto autoformat_username_cull3;
-        }
-      }
-      if (t5->l>16) txtleft(t5,16);
-      txtset(tusername2,t5);
-      //password
-      txtset(t5,tuserpassword2);
-      txtucase(t5);
-autoformat_password_cull3:
-      for (i3=0;i3<t5->l;i3++){
-        x=t5->d2[i3];
-        x2=0; //cull?
-        if (x<48) x2=1;
-        if (x>90) x2=1;
-        if ((x>57)&&(x<65)) x2=1;
-        if (x2){
-          txtset(t6,t5); txtright(t6,t5->l-i3-1);
-          txtleft(t5,i3); txtadd(t5,t6);
-          goto autoformat_password_cull3;
-        }
-      }
-      if (t5->l>16) txtleft(t5,16);
-      txtset(tuserpassword2,t5);
-    }//intro201_ep||fs->mouse_click
-
-
-    txtcol=rgb(252,200,20);
-    txtset(t,tusername2); if (((long)(f*4)&1)&&(intro201_ti==2)&&(intro201_ep==0)) txtadd(t,"|");
-    img(ps,99+4,320+4+4,intro_ifield);
-    txtout(ps,99+4+4,320+4-1,t);
-    txtset(t,tuserpassword2); if (((long)(f*4)&1)&&(intro201_ti==3)&&(intro201_ep==0)) txtadd(t,"|");
-    img(ps,99+4,320+32+4+4,intro_ifield);
-    txtout(ps,99+4+4,320+32+4-1,t);
-    txtset(t,tname2); if (((long)(f*4)&1)&&(intro201_ti==1)&&(intro201_ep==0)) txtadd(t,"|");
-    img(ps,99+4,320+32*2+4+4,intro_ifield);
-    txtout(ps,99+4+4,320+32*2+4-1,t);
-
-    x3=410; if (typen!=0) x3=375+typen;
-    x4=(long)(f*2.0f)%16;
-    typen_obj->type=x3+x4*1024;
-    getspr(typen_obj);
-    img0(ps,99+8+12,136+320-8,bt32);
-
-
-
-    img0(ps,0,320,intro_newchar2);
-
-
-
-
-
-    //switch to next field if tab pressed!
-    if (GETINPUT_tab_pressed==GETINPUT_TAB_PRESSED){
-      GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_STOP;
-      if (intro201_ti==1){
-        intro201_ep=0; intro201_ti=2;
-        GETINPUT_setup(tusername2,&intro201_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-        goto createachar_newfieldselected;
-      }
-      if (intro201_ti==2){
-        intro201_ep=0; intro201_ti=3;
-        GETINPUT_setup(tuserpassword2,&intro201_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-        goto createachar_newfieldselected;
-      }
-      if (intro201_ti==3){
-        intro201_ep=0; intro201_ti=1;
-        GETINPUT_setup(tname2,&intro201_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-        goto createachar_newfieldselected;
-      }
-    }//GETINPUT_TAB_PRESSED
-createachar_newfieldselected:
-
-    if (keyhit(VK_RETURN)) goto createachar_enterkey;
-
-
-
-
-
-
-
-
-
-
-
-    x=mx; y=my;
-    if (fs->mouse_click){
-      fs->mouse_click=NULL;
-
-      if ((x>(1024-21-4-26))&&(y<(21+4))){
-        if (intro201_ep==0){
-          GETINPUT_stop();
-        }
-        intro=200; intro_setup=0; goto intro_done;
-      }
-
-      if ((x>=0)&&(x<320)&&(y>=416)&&(y<448)){
-        sex++; if (sex>1) sex=0;
-      }
-
-      if ((x>=0)&&(x<320)&&(y>=448)&&(y<480)){
-        typen++; if (typen>12) typen=0;
-      }
-
-      if ((x>=0)&&(x<320)&&(y>=480)&&(y<512)){
-        portn++; if (portn>6) portn=0;
-      }
-
-
-
-      if ((x>=0)&&(x<320)&&(y>=320)&&(y<352)){
-        intro201_ep=0; intro201_ti=2;
-        GETINPUT_setup(tusername2,&intro201_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-      }
-      if ((x>=0)&&(x<320)&&(y>=352)&&(y<384)){
-        intro201_ep=0; intro201_ti=3;
-        GETINPUT_setup(tuserpassword2,&intro201_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-      }
-      if ((x>=0)&&(x<320)&&(y>=384)&&(y<416)){
-        intro201_ep=0; intro201_ti=1;
-        GETINPUT_setup(tname2,&intro201_ep,16); GETINPUT_tab_pressed=GETINPUT_TAB_PRESSED_INIT;
-      }
-
-      if ((x>=0)&&(x<320)&&(y>=576)&&(y<608)){ //continue
-createachar_enterkey:
-
-        //error checking MUST OCCUR HERE!
-        if (tusername2->l==0){
-          MessageBox(NULL,"Please select a USER NAME","Ultima 6 Online",MB_OK);
-          goto intro_done;
-        }
-        if (tuserpassword2->l==0){
-          MessageBox(NULL,"Please select a USER PASSWORD","Ultima 6 Online",MB_OK);
-          goto intro_done;
-        }
-        if (tname2->l==0){
-          MessageBox(NULL,"Please select a NAME","Ultima 6 Online",MB_OK);
-          goto intro_done;
+        img0(ps, 18, 25, intro_ultimavi);
+
+        txtset(t, "Create a Character");
+        txtfnt = fnt7;
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x5 = 160 - tagxy.cx / 2;
+        y5 = 64 * 2 + 22;
+        txtcol = rgb(0, 0, 0);
+        txtout(ps, x5, y5, t);
+        txtout(ps, x5 + 1, y5, t);
+        txtout(ps, x5 + 2, y5, t);
+        txtout(ps, x5 + 2, y5 + 1, t);
+        txtout(ps, x5 + 2, y5 + 2, t);
+        txtout(ps, x5 + 1, y5 + 2, t);
+        txtout(ps, x5, y5 + 2, t);
+        txtout(ps, x5, y5 + 1, t);
+        txtcol = rgb(255, 160, 0);
+        txtout(ps, x5 + 1, y5 + 1, t);
+        txtfnt = fnt1;
+
+        txtset(t, "Journey Onward");
+        txtfnt = fnt7;
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x5 = 160 - tagxy.cx / 2;
+        y5 = 64 * 3 + 22;
+        txtcol = rgb(0, 0, 0);
+        txtout(ps, x5, y5, t);
+        txtout(ps, x5 + 1, y5, t);
+        txtout(ps, x5 + 2, y5, t);
+        txtout(ps, x5 + 2, y5 + 1, t);
+        txtout(ps, x5 + 2, y5 + 2, t);
+        txtout(ps, x5 + 1, y5 + 2, t);
+        txtout(ps, x5, y5 + 2, t);
+        txtout(ps, x5, y5 + 1, t);
+        txtcol = rgb(255, 160, 0);
+        txtout(ps, x5 + 1, y5 + 1, t);
+        txtfnt = fnt1;
+
+        txtset(t, "Transfer a Character");
+        txtfnt = fnt7;
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x5 = 160 - tagxy.cx / 2;
+        y5 = 64 * 4 + 22;
+        txtcol = rgb(0, 0, 0);
+        txtout(ps, x5, y5, t);
+        txtout(ps, x5 + 1, y5, t);
+        txtout(ps, x5 + 2, y5, t);
+        txtout(ps, x5 + 2, y5 + 1, t);
+        txtout(ps, x5 + 2, y5 + 2, t);
+        txtout(ps, x5 + 1, y5 + 2, t);
+        txtout(ps, x5, y5 + 2, t);
+        txtout(ps, x5, y5 + 1, t);
+        txtcol = rgb(255, 160, 0);
+        txtout(ps, x5 + 1, y5 + 1, t);
+        txtfnt = fnt1;
+
+        txtset(t, "Custom Controls");
+        txtfnt = fnt7;
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x5 = 160 - tagxy.cx / 2;
+        y5 = 64 * 5 + 22;
+        txtcol = rgb(0, 0, 0);
+        txtout(ps, x5, y5, t);
+        txtout(ps, x5 + 1, y5, t);
+        txtout(ps, x5 + 2, y5, t);
+        txtout(ps, x5 + 2, y5 + 1, t);
+        txtout(ps, x5 + 2, y5 + 2, t);
+        txtout(ps, x5 + 1, y5 + 2, t);
+        txtout(ps, x5, y5 + 2, t);
+        txtout(ps, x5, y5 + 1, t);
+        txtcol = rgb(255, 160, 0);
+        txtout(ps, x5 + 1, y5 + 1, t);
+        txtfnt = fnt1;
+
+        txtset(t, "Custom Portrait");
+        txtfnt = fnt7;
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x5 = 160 - tagxy.cx / 2;
+        y5 = 64 * 6 + 22;
+        txtcol = rgb(0, 0, 0);
+        txtout(ps, x5, y5, t);
+        txtout(ps, x5 + 1, y5, t);
+        txtout(ps, x5 + 2, y5, t);
+        txtout(ps, x5 + 2, y5 + 1, t);
+        txtout(ps, x5 + 2, y5 + 2, t);
+        txtout(ps, x5 + 1, y5 + 2, t);
+        txtout(ps, x5, y5 + 2, t);
+        txtout(ps, x5, y5 + 1, t);
+        txtcol = rgb(255, 160, 0);
+        txtout(ps, x5 + 1, y5 + 1, t);
+        txtfnt = fnt1;
+
+        txtset(t, "Name Display Colour");
+        txtfnt = fnt7;
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x5 = 160 - tagxy.cx / 2;
+        y5 = 64 * 7 + 22;
+        txtcol = rgb(0, 0, 0);
+        txtout(ps, x5, y5, t);
+        txtout(ps, x5 + 1, y5, t);
+        txtout(ps, x5 + 2, y5, t);
+        txtout(ps, x5 + 2, y5 + 1, t);
+        txtout(ps, x5 + 2, y5 + 2, t);
+        txtout(ps, x5 + 1, y5 + 2, t);
+        txtout(ps, x5, y5 + 2, t);
+        txtout(ps, x5, y5 + 1, t);
+        txtcol = rgb(255, 160, 0);
+        if (u6o_namecolour) txtcol = u6o_namecolour;
+        txtout(ps, x5 + 1, y5 + 1, t);
+        txtfnt = fnt1;
+
+
+        f += et;
+
+
+        x = mx;
+        y = my;
+
+
+        if ((x >= 0) && (x < 320) && (y >= 128) && (y < 192)) {
+            txtset(t, "Create a Character");
+            txtfnt = fnt7;
+            tagxy.cx = 0;
+            tagxy.cy = 0;
+            ps->s->GetDC(&taghdc);
+            SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            ps->s->ReleaseDC(taghdc);
+            x5 = 160 - tagxy.cx / 2;
+            y5 = 64 * 2 + 22;
+            txtcol = rgb(0, 0, 0);
+            txtout(ps, x5, y5, t);
+            txtout(ps, x5 + 1, y5, t);
+            txtout(ps, x5 + 2, y5, t);
+            txtout(ps, x5 + 2, y5 + 1, t);
+            txtout(ps, x5 + 2, y5 + 2, t);
+            txtout(ps, x5 + 1, y5 + 2, t);
+            txtout(ps, x5, y5 + 2, t);
+            txtout(ps, x5, y5 + 1, t);
+            txtcol = rgb(255, 255, 96);
+            txtout(ps, x5 + 1, y5 + 1, t);
+            txtfnt = fnt1;
         }
 
-        if (NEThost==NULL){
-
-
-          //check if username or charname is taken
-          txtsetchar(t,246);
-          txtaddchar(t,tusername2->l);
-          txtadd(t,tusername2);
-          txtaddchar(t,tname2->l);
-          txtadd(t,tname2);
-          NET_send(NETplayer,NULL,t);
-
-          //wait for a reply
-          static unsigned long cac_time;
-          cac_time=timeGetTime();
-cac_waitforhost:
-          x3=0;
-          i=0;
-          if (socketclient_ri[i]->d[socketclient_ri[i]->next]->l){ //buffered data available
-            txtset(t,socketclient_ri[i]->d[socketclient_ri[i]->next]);
-            txtNEWLEN(socketclient_ri[i]->d[socketclient_ri[i]->next],0);
-            socketclient_ri[i]->next++;
-            x3=1;
-          }//->l
-          if (timeGetTime()>(cac_time+8000)) goto intro_done;
-          if (!x3) goto cac_waitforhost;
-          if (t->d2[0]!=245) goto cac_waitforhost;//incorrect message!
-
-          //0 neither username or charname is taken
-          //1 username is taken
-          //2 charname is taken
-          if (t->d2[1]==1){
-            MessageBox(NULL,"USER NAME taken. Please choose a different USER NAME","Ultima 6 Online",MB_OK);
-            goto intro_done;
-          }
-          if (t->d2[1]==2){
-            MessageBox(NULL,"Character name taken. Please choose a different NAME","Ultima 6 Online",MB_OK);
-            goto intro_done;
-          }
-
-
-        }//NEThost==NULL
-
-
-        if (intro201_ep==0){
-          GETINPUT_stop();
+        if ((x >= 0) && (x < 320) && (y >= 192) && (y < 256)) {
+            txtset(t, "Journey Onward");
+            txtfnt = fnt7;
+            tagxy.cx = 0;
+            tagxy.cy = 0;
+            ps->s->GetDC(&taghdc);
+            SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            ps->s->ReleaseDC(taghdc);
+            x5 = 160 - tagxy.cx / 2;
+            y5 = 64 * 3 + 22;
+            txtcol = rgb(0, 0, 0);
+            txtout(ps, x5, y5, t);
+            txtout(ps, x5 + 1, y5, t);
+            txtout(ps, x5 + 2, y5, t);
+            txtout(ps, x5 + 2, y5 + 1, t);
+            txtout(ps, x5 + 2, y5 + 2, t);
+            txtout(ps, x5 + 1, y5 + 2, t);
+            txtout(ps, x5, y5 + 2, t);
+            txtout(ps, x5, y5 + 1, t);
+            txtcol = rgb(255, 255, 96);
+            txtout(ps, x5 + 1, y5 + 1, t);
+            txtfnt = fnt1;
+            txtset(t, "USER NAME: ");
+            txtadd(t, u6o_user_name);
+            txtadd(t, "        USER PASSWORD: ");
+            txtadd(t, u6o_user_password);
+            txtcol = rgb(255, 255, 255);
+            txtouts(ps, 256 + 64, 736 + 4, t);
         }
 
-        //allocate info
-        txtset(u6o_user_name,tusername2);
-        txtset(u6o_user_password,tuserpassword2);
-        txtset(u6o_name,tname2);
-        u6o_malefemale=sex;
-        u6o_type=typen;
-        x3=portn;
-        if (sex){
-          if (x3==0) x4=194;
-          if (x3==1) x4=195;
-          if (x3==2) x4=197;
-          if (x3==3) x4=198;
-          if (x3==4) x4=202;
-          if (x3==5) x4=203;
-          if (x3==6) x4=207;
-        }else{
-          if (x3==0) x4=196;
-          if (x3==1) x4=199;
-          if (x3==2) x4=200;
-          if (x3==3) x4=201;
-          if (x3==4) x4=204;
-          if (x3==5) x4=205;
-          if (x3==6) x4=206;
+        if ((x >= 0) && (x < 320) && (y >= 256) && (y < 320)) {
+            txtset(t, "Transfer a Character");
+            txtfnt = fnt7;
+            tagxy.cx = 0;
+            tagxy.cy = 0;
+            ps->s->GetDC(&taghdc);
+            SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            ps->s->ReleaseDC(taghdc);
+            x5 = 160 - tagxy.cx / 2;
+            y5 = 64 * 4 + 22;
+            txtcol = rgb(0, 0, 0);
+            txtout(ps, x5, y5, t);
+            txtout(ps, x5 + 1, y5, t);
+            txtout(ps, x5 + 2, y5, t);
+            txtout(ps, x5 + 2, y5 + 1, t);
+            txtout(ps, x5 + 2, y5 + 2, t);
+            txtout(ps, x5 + 1, y5 + 2, t);
+            txtout(ps, x5, y5 + 2, t);
+            txtout(ps, x5, y5 + 1, t);
+            txtcol = rgb(255, 255, 96);
+            txtout(ps, x5 + 1, y5 + 1, t);
+            txtfnt = fnt1;
+            txtset(t, "CHANGE USER NAME AND USER PASSWORD");
+            txtcol = rgb(255, 255, 255);
+            txtouts(ps, 256 + 64, 736 + 4, t);
         }
-        u6o_portrait=x4-194;
-        intro=102; intro_setup=0; goto intro_done; //->gypsy intro
-      }
 
-    }
-  }//intro==201
+        if ((x >= 0) && (x < 320) && (y >= (256 + 64)) && (y < (320 + 64))) {
+            txtset(t, "Custom Controls");
+            txtfnt = fnt7;
+            tagxy.cx = 0;
+            tagxy.cy = 0;
+            ps->s->GetDC(&taghdc);
+            SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            ps->s->ReleaseDC(taghdc);
+            x5 = 160 - tagxy.cx / 2;
+            y5 = 64 * 5 + 22;
+            txtcol = rgb(0, 0, 0);
+            txtout(ps, x5, y5, t);
+            txtout(ps, x5 + 1, y5, t);
+            txtout(ps, x5 + 2, y5, t);
+            txtout(ps, x5 + 2, y5 + 1, t);
+            txtout(ps, x5 + 2, y5 + 2, t);
+            txtout(ps, x5 + 1, y5 + 2, t);
+            txtout(ps, x5, y5 + 2, t);
+            txtout(ps, x5, y5 + 1, t);
+            txtcol = rgb(255, 255, 96);
+            txtout(ps, x5 + 1, y5 + 1, t);
+            txtfnt = fnt1;
+            txtset(t, "CHANGE DEFAULT KEYBOARD KEYS");
+            txtcol = rgb(255, 255, 255);
+            txtouts(ps, 256 + 64 + 64, 736 + 4, t);
+        }
 
+        if ((x >= 0) && (x < 320) && (y >= (256 + 64 + 64)) && (y < (320 + 64 + 64))) {
+            txtset(t, "Custom Portrait");
+            txtfnt = fnt7;
+            tagxy.cx = 0;
+            tagxy.cy = 0;
+            ps->s->GetDC(&taghdc);
+            SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            ps->s->ReleaseDC(taghdc);
+            x5 = 160 - tagxy.cx / 2;
+            y5 = 64 * 6 + 22;
+            txtcol = rgb(0, 0, 0);
+            txtout(ps, x5, y5, t);
+            txtout(ps, x5 + 1, y5, t);
+            txtout(ps, x5 + 2, y5, t);
+            txtout(ps, x5 + 2, y5 + 1, t);
+            txtout(ps, x5 + 2, y5 + 2, t);
+            txtout(ps, x5 + 1, y5 + 2, t);
+            txtout(ps, x5, y5 + 2, t);
+            txtout(ps, x5, y5 + 1, t);
+            txtcol = rgb(255, 255, 96);
+            txtout(ps, x5 + 1, y5 + 1, t);
+            txtfnt = fnt1;
+            txtset(t, "UPLOAD A CUSTOM PORTRAIT FOR AN EXISTING CHARACTER");
+            txtcol = rgb(255, 255, 255);
+            txtouts(ps, 256 + 64, 736 + 4, t);
+        }
+
+
+        if ((x >= 0) && (x < 320) && (y >= (256 + 64 + 64 + 64)) && (y < (320 + 64 + 64 + 64))) {
+            txtset(t, "Name Display Colour");
+            txtfnt = fnt7;
+            tagxy.cx = 0;
+            tagxy.cy = 0;
+            ps->s->GetDC(&taghdc);
+            SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            ps->s->ReleaseDC(taghdc);
+            x5 = 160 - tagxy.cx / 2;
+            y5 = 64 * 7 + 22;
+            txtcol = rgb(0, 0, 0);
+            txtout(ps, x5, y5, t);
+            txtout(ps, x5 + 1, y5, t);
+            txtout(ps, x5 + 2, y5, t);
+            txtout(ps, x5 + 2, y5 + 1, t);
+            txtout(ps, x5 + 2, y5 + 2, t);
+            txtout(ps, x5 + 1, y5 + 2, t);
+            txtout(ps, x5, y5 + 2, t);
+            txtout(ps, x5, y5 + 1, t);
+            txtcol = rgb(255, 255, 96);
+            if (u6o_namecolour) {
+                x6 = u6o_namecolour & 255; //blue
+                x7 = (u6o_namecolour >> 8) & 255; //green
+                x8 = (u6o_namecolour >> 16) & 255; //red
+                x6 += 64;
+                if (x6 > 255) x6 = 255;
+                x7 += 64;
+                if (x7 > 255) x7 = 255;
+                x8 += 64;
+                if (x8 > 255) x8 = 255;
+                txtcol = rgb(x8, x7, x6);
+            }
+            txtout(ps, x5 + 1, y5 + 1, t);
+            txtfnt = fnt1;
+            txtset(t, "SET THE COLOUR TO DISPLAY YOUR CHARACTER'S NAME WITH WHEN SENDING MESSAGES");
+            txtcol = rgb(255, 255, 255);
+            txtouts(ps, 256 - 64 - 32, 736 + 4, t);
+        }
+
+
+        if (fs->mouse_click) {
+            fs->mouse_click = NULL;
+
+            if ((x >= 0) && (x < 320) && (y >= 128) && (y < 192)) {
+                intro = 201;
+                intro_setup = 0;
+                goto intro_done;
+            }
+            if ((x >= 0) && (x < 320) && (y >= 256) && (y < 320)) {
+                intro = 202;
+                intro_setup = 0;
+                goto intro_done;
+            }
+            if ((x >= 0) && (x < 320) && (y >= (256 + 64)) && (y < (320 + 64))) {
+                intro = 206;
+                intro_setup = 0;
+                goto intro_done;
+            }
+            if ((x >= 0) && (x < 320) && (y >= (256 + 64 + 64)) && (y < (320 + 64 + 64))) {
+                intro = 204;
+                intro_setup = 0;
+                goto intro_done;
+            }
+
+            if ((x >= 0) && (x < 320) && (y >= (256 + 64 + 64 + 64)) && (y < (320 + 64 + 64 + 64))) {
+                x5 = getcol(u6o_namecolour);
+                //assume a 24bit colour returned
+
+                x6 = x5 & 255; //blue
+                x7 = (x5 >> 8) & 255; //green
+                x8 = (x5 >> 16) & 255; //red
+                if ((x6 + x7 + x8) < 255) {
+                    MessageBox(
+                        NULL,
+                        "That colour cannot be used because it's too dark! (The sum of the red, green and blue channels must be at least 255)",
+                        "Ultima 6 Online", MB_OK);
+                } else {
+                    u6o_namecolour = x5; //initially sent as 24bit
+                }
+
+                goto intro_done;
+            }
+
+            //journey onward
+            if ((x >= 0) && (x < 320) && (y >= 192) && (y < 256)) {
+            login:
+                txtset(t, "UNKNOWN");
+                if (!txtsame(t, u6o_user_name)) {
+                    if (!txtsame(t, u6o_user_password)) {
+                        tfh = open(".\\dr\\controls.bin");
+                        get(tfh, &U6OK, 512);
+                        get(tfh, &U6OK_FLAGS, 128);
+                        close(tfh);
+
+                        fs->offset_x = 1024;
+                        fs->graphic = NULL;
+                        intro = 0;
+                        intro_setup = 0;
+                        goto intro_done;
+                    }
+                }
+                MessageBox(NULL, "Select CREATE A CHARACTER if you are a new player.", "Ultima 6 Online", MB_OK);
+            }
+        }
+    } //intro==200
+
+
+    //transfer a character
+
+
+    if (intro == 202) {
+        static txt *tusername2 = txtnew();
+        static txt *tuserpassword2 = txtnew();
+        static txt *tnewuserpassword2 = txtnew();
+        static unsigned char intro_ep = 1;
+        static unsigned char intro_ti = 0;
+        if (intro_setup == 0) {
+            intro_setup = 1;
+            txtset(tusername2, "");
+            txtset(tuserpassword2, "");
+            txtset(tnewuserpassword2, "");
+            f = 0;
+            //select username text field
+            intro_ep = 0;
+            intro_ti = 2;
+            GETINPUT_setup(tusername2, &intro_ep, 16);
+            GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+        }
+        f += et;
+
+        img0(ps, 1024 - 25 - 22 - 2, 2, intro_back);
+        img0(ps, 18, 25, intro_ultimavi);
+        txtset(t, "Transfer a Character");
+        txtfnt = fnt7;
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x5 = 160 - tagxy.cx / 2;
+        y5 = 64 * 4 + 22;
+        txtcol = rgb(0, 0, 0);
+        txtout(ps, x5, y5, t);
+        txtout(ps, x5 + 1, y5, t);
+        txtout(ps, x5 + 2, y5, t);
+        txtout(ps, x5 + 2, y5 + 1, t);
+        txtout(ps, x5 + 2, y5 + 2, t);
+        txtout(ps, x5 + 1, y5 + 2, t);
+        txtout(ps, x5, y5 + 2, t);
+        txtout(ps, x5, y5 + 1, t);
+        txtcol = rgb(255, 255, 96);
+        txtout(ps, x5 + 1, y5 + 1, t);
+        txtfnt = fnt1;
+
+
+        img0(ps, 0, 256 + 64 + 8, intro_tacinfo);
+
+        txtcol = rgb(252, 200, 20);
+        txtset(t, tusername2);
+        if (((long) (f * 4) & 1) && (intro_ti == 2) && (intro_ep == 0)) txtadd(t, "|");
+        img(ps, 120 + 4, 320 + 4 + 4, intro_ifield);
+        txtout(ps, 120 + 4 + 4, 320 + 4 - 1, t);
+        txtset(t, tuserpassword2);
+        if (((long) (f * 4) & 1) && (intro_ti == 3) && (intro_ep == 0)) txtadd(t, "|");
+        img(ps, 120 + 4, 320 + 32 + 4 + 4, intro_ifield);
+        txtout(ps, 120 + 4 + 4, 320 + 32 + 4 - 1, t);
+        txtset(t, tnewuserpassword2);
+        if (((long) (f * 4) & 1) && (intro_ti == 4) && (intro_ep == 0)) txtadd(t, "|");
+        img(ps, 120 + 4, 320 + 32 + 4 + 4 + 96, intro_ifield);
+        txtout(ps, 120 + 4 + 4, 320 + 32 + 4 - 1 + 96, t);
+
+        x = mx;
+        y = my;
+
+        if ((x >= 0) && (x < 320) && (y >= (352 + 96)) && (y < (384 + 96))) {
+            txtset(t, "ONLY SET IF CHANGING YOUR EXISTING PASSWORD");
+            txtcol = rgb(255, 255, 255);
+            txtouts(ps, 256 + 64, 736 + 4, t);
+        }
+
+
+        //switch to next field if tab pressed!
+        if (GETINPUT_tab_pressed == GETINPUT_TAB_PRESSED) {
+            GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_STOP;
+            if (intro_ti == 4) {
+                intro_ep = 0;
+                intro_ti = 2;
+                GETINPUT_setup(tusername2, &intro_ep, 16);
+                GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+                goto transferachar_newfieldselected;
+            }
+            if (intro_ti == 2) {
+                intro_ep = 0;
+                intro_ti = 3;
+                GETINPUT_setup(tuserpassword2, &intro_ep, 16);
+                GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+                goto transferachar_newfieldselected;
+            }
+            if (intro_ti == 3) {
+                intro_ep = 0;
+                intro_ti = 4;
+                GETINPUT_setup(tnewuserpassword2, &intro_ep, 16);
+                GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+                goto transferachar_newfieldselected;
+            }
+        } //GETINPUT_TAB_PRESSED
+    transferachar_newfieldselected:
+
+        if (keyhit(VK_RETURN)) goto transferachar_enterkey;
+
+
+        if (fs->mouse_click) {
+            fs->mouse_click = NULL;
+
+            if ((x > (1024 - 21 - 4 - 26)) && (y < (21 + 4))) {
+                if (intro_ep == 0) {
+                    GETINPUT_stop();
+                }
+                intro = 200;
+                intro_setup = 0;
+                goto intro_done;
+            }
+
+
+            if ((x >= 0) && (x < 320) && (y >= 320) && (y < 352)) {
+                intro_ep = 0;
+                intro_ti = 2;
+                GETINPUT_setup(tusername2, &intro_ep, 16);
+                GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+            }
+            if ((x >= 0) && (x < 320) && (y >= 352) && (y < 384)) {
+                intro_ep = 0;
+                intro_ti = 3;
+                GETINPUT_setup(tuserpassword2, &intro_ep, 16);
+                GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+            }
+            if ((x >= 0) && (x < 320) && (y >= (352 + 96)) && (y < (384 + 96))) {
+                intro_ep = 0;
+                intro_ti = 4;
+                GETINPUT_setup(tnewuserpassword2, &intro_ep, 16);
+                GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+            }
+
+            if ((x >= 0) && (x < 320) && (y >= 384) && (y < 416)) {
+            transferachar_enterkey:
+
+                if (tusername2->l == 0) {
+                    MessageBox(NULL, "Please select a USER NAME", "Ultima 6 Online", MB_OK);
+                    goto intro_done;
+                }
+                if (tuserpassword2->l == 0) {
+                    MessageBox(NULL, "Please select a USER PASSWORD", "Ultima 6 Online", MB_OK);
+                    goto intro_done;
+                }
+
+                if (intro_ep == 0) {
+                    GETINPUT_stop();
+                }
+                txtset(u6o_user_name, tusername2);
+                txtset(u6o_user_password, tuserpassword2);
+                if (tnewuserpassword2->l) {
+                    txtset(u6o_new_user_password, tnewuserpassword2);
+                }
+
+                tfh = open2("userinfo.txt", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+                txtfileout(u6o_user_name, tfh);
+                if (tnewuserpassword2->l) txtfileout(u6o_new_user_password, tfh);
+                else txtfileout(u6o_user_password, tfh);
+                close(tfh);
+
+                //save walkthru pos
+                txtset(t, ".\\dr\\walkthru.pos");
+                tfh = open2(t, OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+                put(tfh, &walkthru_pos, 4); //lines to skip of the walkthru
+                close(tfh);
+                walkthru_pos_skip = 0;
+
+                tfh = open(".\\dr\\controls.bin");
+                get(tfh, &U6OK, 512);
+                get(tfh, &U6OK_FLAGS, 128);
+                close(tfh);
+
+                fs->offset_x = 1024;
+                fs->graphic = NULL;
+                intro = 0;
+                intro_setup = 0;
+                goto intro_done;
+            }
+        } //->mouse_click
+    } //intro==202
+
+
+    if (intro == 206) {
+        //custom keys: main menu
+        if (intro_setup == 0) {
+            f = 0;
+            intro_setup = 1;
+        }
+        img0(ps, 1024 - 25 - 22 - 2, 2, intro_back);
+        img0(ps, 18, 25, intro_ultimavi);
+        txtset(t, "Custom Controls");
+        txtfnt = fnt7;
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x5 = 160 - tagxy.cx / 2;
+        y5 = 64 * 5 + 22;
+        txtcol = rgb(0, 0, 0);
+        txtout(ps, x5, y5, t);
+        txtout(ps, x5 + 1, y5, t);
+        txtout(ps, x5 + 2, y5, t);
+        txtout(ps, x5 + 2, y5 + 1, t);
+        txtout(ps, x5 + 2, y5 + 2, t);
+        txtout(ps, x5 + 1, y5 + 2, t);
+        txtout(ps, x5, y5 + 2, t);
+        txtout(ps, x5, y5 + 1, t);
+        txtcol = rgb(255, 255, 96);
+        txtout(ps, x5 + 1, y5 + 1, t);
+        txtfnt = fnt1;
+
+
+        txtcol = rgb(255, 255, 255);
+
+        x = 320;
+        y = 256;
+        x += 32;
+        txtset(t, "RESTORE DEFAULT CONTROLS");
+        txtouts(ps, x, y, t);
+        x -= 32;
+        img0(ps, x, y, intro_next);
+        y += 64;
+        x += 32;
+        txtset(t, "CHANGE CURRENT CUSTOM CONTROLS");
+        txtouts(ps, x, y, t);
+        x -= 32;
+        img0(ps, x, y, intro_next);
+
+
+        if (fs->mouse_click) {
+            fs->mouse_click = NULL;
+
+            if ((mx >= x) && (mx < (x + 22)) && (my >= (y - 64)) && (my < (y + 22 - 64))) {
+                memcpy(&U6OK_TEMP, &U6OK_DEFAULT, 512);
+                memcpy(&U6OK_TEMP_FLAGS, &U6OK_DEFAULT_FLAGS, 128);
+                tfh = open2(".\\dr\\controls.bin", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+                put(tfh, &U6OK_TEMP, 512);
+                put(tfh, &U6OK_TEMP_FLAGS, 128);
+                close(tfh);
+                intro = 200;
+                intro_setup = 0;
+                goto intro_done;
+            }
+
+            if ((mx >= x) && (mx < (x + 22)) && (my >= y) && (my < (y + 22))) {
+                intro = 203;
+                intro_setup = 0;
+                goto intro_done;
+            }
+
+            if ((mx > (1024 - 21 - 4 - 26)) && (my < (21 + 4))) {
+                //back
+                intro = 200;
+                intro_setup = 0;
+                goto intro_done;
+            }
+        } //->mouse_click
+    } //intro==206
+
+
+    if (intro == 203) {
+        //custom keys
+        static unsigned char nextkey;
+        static unsigned short key1, key2;
+
+        if (intro_setup == 0) {
+            tfh = open(".\\dr\\controls.bin");
+            get(tfh, &U6OK_TEMP, 512);
+            get(tfh, &U6OK_TEMP_FLAGS, 128);
+            close(tfh);
+            key1 = 0;
+            key2 = 0;
+            nextkey = 0;
+            intro_setup = 1;
+            f = 0;
+        }
+
+        img0(ps, 1024 - 25 - 22 - 2, 2, intro_back);
+        img0(ps, 18, 25, intro_ultimavi);
+        txtset(t, "Custom Controls");
+        txtfnt = fnt7;
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x5 = 160 - tagxy.cx / 2;
+        y5 = 64 * 5 + 22;
+        txtcol = rgb(0, 0, 0);
+        txtout(ps, x5, y5, t);
+        txtout(ps, x5 + 1, y5, t);
+        txtout(ps, x5 + 2, y5, t);
+        txtout(ps, x5 + 2, y5 + 1, t);
+        txtout(ps, x5 + 2, y5 + 2, t);
+        txtout(ps, x5 + 1, y5 + 2, t);
+        txtout(ps, x5, y5 + 2, t);
+        txtout(ps, x5, y5 + 1, t);
+        txtcol = rgb(255, 255, 96);
+        txtout(ps, x5 + 1, y5 + 1, t);
+        txtfnt = fnt1;
+
+        img0(ps, 536, 420, intro_ccsave1);
+        img0(ps, 536, 484, intro_ccsave3);
+
+        if (nextkey != 0) img0(ps, 466, 416, intro_back);
+        if (nextkey != 72) {
+            if ((U6OK_TEMP[nextkey][0] != U6OK_DEFAULT[nextkey][0]) || (
+                    U6OK_TEMP[nextkey][1] != U6OK_DEFAULT[nextkey][1]) || (
+                    U6OK_TEMP_FLAGS[nextkey] != U6OK_DEFAULT_FLAGS[nextkey])) {
+                img0(ps, 536, 420, intro_ccsave2);
+            }
+            img0(ps, 665, 416, intro_next);
+            if (U6OK_TEMP_FLAGS[nextkey] & 2) {
+                if (U6OK_TEMP_FLAGS[nextkey] & 1) img(ps, 720, 411, instantclickok);
+                else img(ps, 720, 411, instantclickx);
+            }
+        }
+
+
+        x = 320;
+        y = 128;
+        txtcol = rgb(18 * 2, 108 * 2, 255); //(3<<11)+(46<<5)+27;
+
+        txtset(t, "Use the green arrows to select which controls to change");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "Only change the controls you need to, then select SAVE ALL");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "To use a combination (eg. SHIFT+T), hold the 1st key then press the 2nd key");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "You may also use SHIFT, CTRL or ALT independently as non-combination keys");
+        txtouts(ps, x, y, t);
+        y += 32;
+
+        txtcol = rgb(255, 64, 64);
+        txtset(t, "CAUTION");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtcol = rgb(18 * 2, 108 * 2, 255);
+        txtset(t, "All keys can used, but some controls may conflict with each other!");
+        txtouts(ps, x, y, t);
+        y += 32;
+
+        txtset(t, "Press SAVE ALL button to save custom controls");
+        i = -1;
+        i++;
+        if (nextkey == i) txtset(t, "Press WALK RIGHT (WALK EAST) key now [ default key: RIGHT ARROW ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press WALK LEFT (WALK WEST) key now [ LEFT ARROW ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press WALK UP (WALK NORTH) key now [ UP ARROW ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press WALK DOWN (WALK SOUTH) key now [ DOWN ARROW ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press TALK key now [ T ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press GLOBAL TALK key now [ SHIFT+T ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press MESSAGE SEND key now [ ENTER ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press ATTACK key now [ A ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press LOOK key now [ L ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press USE key now [ U ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press MAXIMIZE/MINIMIZE key now [ M ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press QUIT key now [ Q ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SOUND key now [ S ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press CANCEL key now [ ESC ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press RETYPE/MESSAGE RECALL key now [ F3 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press RESPAWN key now [ F1 ]");
+
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 1ST PARTY MEMBER key now [ 1 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 2ND PARTY MEMBER key now [ 2 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 3RD PARTY MEMBER key now [ 3 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 4TH PARTY MEMBER key now [ 4 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 5TH PARTY MEMBER key now [ 5 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 6TH PARTY MEMBER key now [ 6 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 7TH PARTY MEMBER key now [ 7 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 8TH PARTY MEMBER key now [ 8 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 9TH PARTY MEMBER key now [ 9 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 10TH PARTY MEMBER key now [ 0 ]");
+
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 1ST NUMBERED TARGET key now [ 1 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 2ND NUMBERED TARGET key now [ 2 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 3RD NUMBERED TARGET key now [ 3 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 4TH NUMBERED TARGET key now [ 4 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 5TH NUMBERED TARGET key now [ 5 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 6TH NUMBERED TARGET key now [ 6 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 7TH NUMBERED TARGET key now [ 7 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 8TH NUMBERED TARGET key now [ 8 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 9TH NUMBERED TARGET key now [ 9 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 10TH NUMBERED TARGET key now [ 0 ]");
+
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 1ST RECALL SPELL key now [ F5 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 2ND RECALL SPELL key now [ F6 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 3RD RECALL SPELL key now [ F7 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 4TH RECALL SPELL key now [ F8 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 5TH RECALL SPELL key now [ F9 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 6TH RECALL SPELL key now [ F10 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 7TH RECALL SPELL key now [ F11 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SELECT 8TH RECALL SPELL key now [ F12 ]");
+
+        i++;
+        if (nextkey == i) txtset(t, "Press SET 1ST RECALL SPELL key now [ SHIFT+F5 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SET 2ND RECALL SPELL key now [ SHIFT+F6 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SET 3RD RECALL SPELL key now [ SHIFT+F7 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SET 4TH RECALL SPELL key now [ SHIFT+F8 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SET 5TH RECALL SPELL key now [ SHIFT+F9 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SET 6TH RECALL SPELL key now [ SHIFT+F10 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SET 7TH RECALL SPELL key now [ SHIFT+F11 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SET 8TH RECALL SPELL key now [ SHIFT+F12 ]");
+
+        i++;
+        if (nextkey == i) txtset(t, "Press ENTER PARTIAL AMOUNT/QUANTITY key now [ SHIFT ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press NUMBER 1 FOR PARTIAL AMOUNT/QUANTITY key now [ 1 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press NUMBER 2 FOR PARTIAL AMOUNT/QUANTITY key now [ 2 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press NUMBER 3 FOR PARTIAL AMOUNT/QUANTITY key now [ 3 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press NUMBER 4 FOR PARTIAL AMOUNT/QUANTITY key now [ 4 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press NUMBER 5 FOR PARTIAL AMOUNT/QUANTITY key now [ 5 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press NUMBER 6 FOR PARTIAL AMOUNT/QUANTITY key now [ 6 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press NUMBER 7 FOR PARTIAL AMOUNT/QUANTITY key now [ 7 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press NUMBER 8 FOR PARTIAL AMOUNT/QUANTITY key now [ 8 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press NUMBER 9 FOR PARTIAL AMOUNT/QUANTITY key now [ 9 ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press NUMBER 0 FOR PARTIAL AMOUNT/QUANTITY key now [ 0 ]");
+
+        i++;
+        if (nextkey == i) txtset(t, "Press SCROLL UP key now [ MOUSE WHEEL UP ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press SCROLL DOWN key now [ MOUSE WHEEL DOWN ]");
+
+        i++;
+        if (nextkey == i) txtset(t, "Press ALTERNATIVE ATTACK key now [ NOT USED ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press ALTERNATIVE LOOK key now [ NOT USED ]");
+        i++;
+        if (nextkey == i) txtset(t, "Press ALTERNATIVE USE key now [ NOT USED ]");
+
+        i++;
+        if (nextkey == i) txtset(t, "Press CHAT (CONTINUE CONVERSATION) key now [ CONTROL+T ]");
+
+        i++;
+        if (nextkey == i) txtset(t, "Press VOICE CHAT key now [ V ]");
+
+        i++;
+        if (nextkey == i) txtset(t, "Press MARK/UNMARK AS DO-NOT-SELL key now [ X ]");
+
+        i++;
+        if (nextkey == i) txtset(t, "Press RESPAWN FOLLOWERS key now [ SHIFT+F1 ]");
+
+
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x2 = tagxy.cx / 2;
+        txtcol = rgb(255, 255, 255);
+        txtouts(ps, 512 + 64 - x2, 128 + 64 + 64 + 64 + 22, t);
+
+        if (nextkey != 72) {
+            txtset(t, "Waiting.");
+            x = ett * 2.0f;
+            x &= 3;
+            for (x2 = 0; x2 <= x; x2++) {
+                txtadd(t, ".");
+            }
+            tagxy.cx = 0;
+            tagxy.cy = 0;
+            ps->s->GetDC(&taghdc);
+            SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            ps->s->ReleaseDC(taghdc);
+            x2 = tagxy.cx / 2;
+            txtcol = rgb(255, 255, 255);
+            txtouts(ps, 512 + 64 - x2, 128 + 64 + 64 + 64 + 22 + 32, t);
+
+            for (i = 0; i <= 65535; i++) {
+                if (keyhit(i)) {
+                    if (!key1) key1 = i;
+                    else key2 = i;
+                }
+            }
+            if (key1) {
+                if (keyon[key1] == 0) {
+                    U6OK_TEMP[nextkey][0] = key1;
+                    U6OK_TEMP[nextkey][1] = key2;
+                    key1 = 0;
+                    key2 = 0;
+                    nextkey++;
+                }
+            }
+        }
+
+
+        if (fs->mouse_click) {
+            fs->mouse_click = NULL;
+
+            if (nextkey != 72) {
+                if (U6OK_TEMP_FLAGS[nextkey] & 2) {
+                    if ((mx >= 720) && (mx < (720 + 84)) && (my >= 411) && (my < (411 + 32))) {
+                        if (U6OK_TEMP_FLAGS[nextkey] & 1) U6OK_TEMP_FLAGS[nextkey]--;
+                        else U6OK_TEMP_FLAGS[nextkey] |= 1;
+                    }
+                }
+            }
+
+            if (nextkey != 72) {
+                if ((mx >= 536) && (mx < (536 + 81)) && (my >= 420) && (my < (420 + 16))) {
+                    if ((U6OK_TEMP[nextkey][0] != U6OK_DEFAULT[nextkey][0]) || (
+                            U6OK_TEMP[nextkey][1] != U6OK_DEFAULT[nextkey][1]) || (
+                            U6OK_TEMP_FLAGS[nextkey] != U6OK_DEFAULT_FLAGS[nextkey])) {
+                        U6OK_TEMP[nextkey][0] = U6OK_DEFAULT[nextkey][0];
+                        U6OK_TEMP[nextkey][1] = U6OK_DEFAULT[nextkey][1];
+                        U6OK_TEMP_FLAGS[nextkey] = U6OK_DEFAULT_FLAGS[nextkey];
+                        nextkey++;
+                        key1 = 0;
+                        key2 = 0;
+                        goto intro_done;
+                    }
+                }
+            }
+
+            if ((mx >= 536) && (mx < (536 + 60)) && (my >= 484) && (my < (484 + 16))) {
+                //save all
+                tfh = open2(".\\dr\\controls.bin", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+                put(tfh, &U6OK_TEMP, 512);
+                put(tfh, &U6OK_TEMP_FLAGS, 128);
+                close(tfh);
+                intro = 200;
+                intro_setup = 0;
+                goto intro_done;
+            }
+
+            if ((mx >= 466) && (mx < (466 + 22)) && (my >= 416) && (my < (416 + 22))) {
+                if (nextkey) {
+                    nextkey--;
+                    key1 = 0;
+                    key2 = 0;
+                    goto intro_done;
+                }
+            }
+
+            if ((mx >= 665) && (mx < (665 + 22)) && (my >= 416) && (my < (416 + 22))) {
+                if (nextkey != 72) {
+                    nextkey++;
+                    key1 = 0;
+                    key2 = 0;
+                    goto intro_done;
+                }
+            }
+
+            if ((mx > (1024 - 21 - 4 - 26)) && (my < (21 + 4))) {
+                intro = 200;
+                intro_setup = 0;
+                goto intro_done;
+            }
+        } //->mouse_click
+    } //intro==203
+
+
+    static surf *customport;
+
+
+    if (intro == 204) {
+        //custom portrait
+        if (intro_setup == 0) {
+            intro_setup = 1;
+            f = 0;
+        }
+
+        img0(ps, 1024 - 25 - 22 - 2, 2, intro_back);
+        img0(ps, 18, 25, intro_ultimavi);
+        txtset(t, "Custom Portrait");
+        txtfnt = fnt7;
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x5 = 160 - tagxy.cx / 2;
+        y5 = 64 * 6 + 22;
+        txtcol = rgb(0, 0, 0);
+        txtout(ps, x5, y5, t);
+        txtout(ps, x5 + 1, y5, t);
+        txtout(ps, x5 + 2, y5, t);
+        txtout(ps, x5 + 2, y5 + 1, t);
+        txtout(ps, x5 + 2, y5 + 2, t);
+        txtout(ps, x5 + 1, y5 + 2, t);
+        txtout(ps, x5, y5 + 2, t);
+        txtout(ps, x5, y5 + 1, t);
+        txtcol = rgb(255, 255, 96);
+        txtout(ps, x5 + 1, y5 + 1, t);
+        txtfnt = fnt1;
+
+        x = 320;
+        y = 128;
+        txtcol = rgb(18 * 2, 108 * 2, 255); //(3<<11)+(46<<5)+27;
+
+        txtset(t, "CUSTOM PORTRAIT UPLOAD RULES");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "1. The portrait must portray the Avatar as being human.");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "2. The portrait must consist mostly of the Avatar's face.");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "3. The gender of the portrait must match that of the Avatar.");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "4. The portrait must not be mistakable for any other original or custom portrait.");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "5. The portrait must not contain nudity or adult content.");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "6. The portrait must be in keeping with the spirit and timeframe of Ultima 6.");
+        txtouts(ps, x, y, t);
+        y += 32;
+        y += 32;
+        txtcol = rgb(255, 64, 64);
+        txtset(t, "WARNING!");
+        if ((long) (ett * 2) & 1) txtouts(ps, x, y, t);
+        x += 96;
+        txtset(t, "UPLOADING AN INAPPROPRIATE PORTRAIT WILL PERMANENTLY");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "DISABLE THIS FEATURE FOR USE WITH YOUR CHARACTER");
+
+        txtouts(ps, x, y, t);
+        y += 32;
+        x -= 96;
+
+        txtcol = rgb(18 * 2, 108 * 2, 255);
+        y += 32;
+        txtset(t, "LEVEL RESTRICTION: ONLY CHARACTERS WHO ARE LEVEL 3 OR ABOVE");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "XP COST: 1000 EXPERIENCE POINTS ARE TAKEN PER UPLOAD");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "FORMAT: ANY .BMP TYPE (DIMENTIONS 56x64)");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "TRANSPARENT COLOUR: BLACK (RGB[0,0,0] AFTER CONVERSION TO 16BIT COLOUR)");
+        txtouts(ps, x, y, t);
+        y += 32;
+        y += 32;
+        txtcol = rgb(255, 255, 255);
+        x += 128;
+        x += 64;
+        txtset(t, "SELECT PORTRAIT FILE TO UPLOAD");
+        txtouts(ps, x, y, t);
+        x -= 32;
+        img0(ps, x, y, intro_next);
+
+
+        if (fs->mouse_click) {
+            fs->mouse_click = NULL;
+
+            if ((mx >= x) && (mx < (x + 22)) && (my >= y) && (my < (y + 22))) {
+                txtgetfilename(t);
+                if (t->l == 0) {
+                    goto intro_done;
+                }
+                customport = loadimage(t->d, SURF_SYSMEM16);
+                if (customport == NULL) {
+                    txtadd(t, " is not a .BMP file");
+                    MessageBox(NULL, t->d, "Ultima 6 Online", MB_OK);
+                    goto intro_done;
+                }
+                if (customport->d.dwWidth != 56) {
+                    MessageBox(NULL, "BMP must be 56 pixels wide", "Ultima 6 Online", MB_OK);
+                    goto intro_done;
+                }
+                if (customport->d.dwHeight != 64) {
+                    MessageBox(NULL, "BMP must be 64 pixels high", "Ultima 6 Online", MB_OK);
+                    goto intro_done;
+                }
+                intro = 205;
+                intro_setup = 0;
+                goto intro_done;
+            }
+
+            if ((mx > (1024 - 21 - 4 - 26)) && (my < (21 + 4))) {
+                intro = 200;
+                intro_setup = 0;
+                goto intro_done;
+            }
+        } //->mouse_click
+    } //intro==204
+
+
+    if (intro == 205) {
+        //confirm custom portrait
+        if (intro_setup == 0) {
+            intro_setup = 1;
+            f = 0;
+        }
+        img0(ps, 1024 - 25 - 22 - 2, 2, intro_back);
+        img0(ps, 18, 25, intro_ultimavi);
+        txtset(t, "Custom Portrait");
+        txtfnt = fnt7;
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x5 = 160 - tagxy.cx / 2;
+        y5 = 64 * 6 + 22;
+        txtcol = rgb(0, 0, 0);
+        txtout(ps, x5, y5, t);
+        txtout(ps, x5 + 1, y5, t);
+        txtout(ps, x5 + 2, y5, t);
+        txtout(ps, x5 + 2, y5 + 1, t);
+        txtout(ps, x5 + 2, y5 + 2, t);
+        txtout(ps, x5 + 1, y5 + 2, t);
+        txtout(ps, x5, y5 + 2, t);
+        txtout(ps, x5, y5 + 1, t);
+        txtcol = rgb(255, 255, 96);
+        txtout(ps, x5 + 1, y5 + 1, t);
+        txtfnt = fnt1;
+
+        x = ett / 3.0f;
+        x &= 15;
+        if (x > 7) {
+            y = 1;
+            x -= 8;
+        } else y = 0;
+        img(bt32, -x * 32, -y * 32, bt8[0]);
+        y2 = ett * 16;
+        y2 &= 31;
+        for (y = 0; y <= 24; y++) {
+            img(ps, 320, y * 32 - y2, bt32);
+            img(ps, 320 + 32, y * 32 - y2, bt32);
+        }
+        img0(ps, 320 + 4, 128, customport);
+
+        x = 320 + 64 + 32;
+        y = 128 + 24;
+        txtcol = rgb(18 * 2, 108 * 2, 255); //(3<<11)+(46<<5)+27;
+
+        txtset(t, "Check that the portrait appears correctly on the backgrounds.");
+        txtouts(ps, x, y, t);
+        y += 32;
+        txtset(t, "Pay attention to areas of the portrait that should or should not be transparent.");
+        txtouts(ps, x, y, t);
+
+        y += 128 - 32;
+        txtcol = rgb(255, 255, 255);
+        x += 32;
+        txtset(t, "UPLOAD THIS PORTRAIT WHEN I ENTER BRITANNIA");
+        txtouts(ps, x, y, t);
+        x -= 32;
+        img0(ps, x, y, intro_next);
+
+        if (fs->mouse_click) {
+            fs->mouse_click = NULL;
+
+            if ((mx >= x) && (mx < (x + 22)) && (my >= y) && (my < (y + 22))) {
+                //copy all data to client port buffer
+                for (x2 = 0; x2 < 3584; x2++) {
+                    customportrait[x2] = customport->o2[x2];
+                }
+                customportrait_upload = 1;
+                intro = 200;
+                intro_setup = 0;
+                goto intro_done;
+            }
+
+            if ((mx > (1024 - 21 - 4 - 26)) && (my < (21 + 4))) {
+                intro = 200;
+                intro_setup = 0;
+                goto intro_done;
+            }
+        } //->mouse_click
+    } //intro==205
+
+
+    //create a char
+    if (intro == 201) {
+        static unsigned char sex = 0;
+        static unsigned char portn = 0;
+        static unsigned char typen = 0;
+        static txt *tname2 = txtnew();
+        static txt *tusername2 = txtnew();
+        static txt *tuserpassword2 = txtnew();
+        static unsigned char intro201_ep = 1;
+        static unsigned char intro201_ti = 0;
+        static object *typen_obj = OBJnew_local();
+
+        if (intro_setup == 0) {
+            intro_setup = 1;
+            txtset(tname2, "");
+            txtset(tusername2, "");
+            txtset(tuserpassword2, "");
+            sex = 0;
+            portn = 0;
+            typen = 0;
+            intro201_ep = 1;
+            intro201_ti = 0;
+
+            //select username text field
+            intro201_ep = 0;
+            intro201_ti = 2;
+            GETINPUT_setup(tusername2, &intro201_ep, 16);
+            GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+
+            f = 0;
+        }
+        f += et;
+
+        //show port
+        x3 = portn;
+        if (sex) {
+            if (x3 == 0) x4 = 194;
+            if (x3 == 1) x4 = 195;
+            if (x3 == 2) x4 = 197;
+            if (x3 == 3) x4 = 198;
+            if (x3 == 4) x4 = 202;
+            if (x3 == 5) x4 = 203;
+            if (x3 == 6) x4 = 207;
+        } else {
+            if (x3 == 0) x4 = 196;
+            if (x3 == 1) x4 = 199;
+            if (x3 == 2) x4 = 200;
+            if (x3 == 3) x4 = 201;
+            if (x3 == 4) x4 = 204;
+            if (x3 == 5) x4 = 205;
+            if (x3 == 6) x4 = 206;
+        }
+
+        img0(ps, 99 + 8, 168 + 320, getportrait(x4));
+
+        img0(ps, 1024 - 25 - 22 - 2, 2, intro_back);
+        img0(ps, 18, 25, intro_ultimavi);
+        txtset(t, "Create a Character");
+        txtfnt = fnt7;
+        tagxy.cx = 0;
+        tagxy.cy = 0;
+        ps->s->GetDC(&taghdc);
+        SelectObject(taghdc, txtfnt);
+        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        ps->s->ReleaseDC(taghdc);
+        x5 = 160 - tagxy.cx / 2;
+        y5 = 64 * 2 + 22;
+        txtcol = rgb(0, 0, 0);
+        txtout(ps, x5, y5, t);
+        txtout(ps, x5 + 1, y5, t);
+        txtout(ps, x5 + 2, y5, t);
+        txtout(ps, x5 + 2, y5 + 1, t);
+        txtout(ps, x5 + 2, y5 + 2, t);
+        txtout(ps, x5 + 1, y5 + 2, t);
+        txtout(ps, x5, y5 + 2, t);
+        txtout(ps, x5, y5 + 1, t);
+        txtcol = rgb(255, 255, 96);
+        txtout(ps, x5 + 1, y5 + 1, t);
+        txtfnt = fnt1;
+
+        if (intro201_ep || fs->mouse_click) {
+            //show auto-formatting
+            //name
+            txtset(t5, tname2);
+        autoformat_name_cull3:
+            for (i3 = 0; i3 < t5->l; i3++) {
+                x = t5->d2[i3];
+                x2 = 0; //cull?
+                if (x < 48) x2 = 1;
+                if ((x > 57) && (x < 65)) x2 = 1;
+                if ((x > 90) && (x < 97)) x2 = 1;
+                if (x > 122) x2 = 1;
+                if ((x == 45) && (t5->d2[i3 + 1] != 45)) x2 = 0; //-
+                if ((x == 39) && (t5->d2[i3 + 1] != 39)) x2 = 0; //'
+                if ((x == 46) && (t5->d2[i3 + 1] != 46)) x2 = 0; //.
+                if (x == 95) {
+                    t5->d2[i3] = 32;
+                    x = 32;
+                    x2 = 0;
+                    goto autoformat_name_cull3;
+                } //_ to space
+                if ((x == 32) && (t5->d2[i3 + 1] != 32)) {
+                    if (i3 && (i3 != (t5->l - 1))) x2 = 0;
+                }
+                if (x2) {
+                    txtset(t6, t5);
+                    txtright(t6, t5->l - i3 - 1);
+                    txtleft(t5, i3);
+                    txtadd(t5, t6);
+                    goto autoformat_name_cull3;
+                }
+            }
+            if (t5->l > 16) txtleft(t5, 16);
+            txtset(tname2, t5);
+            //username
+            txtset(t5, tusername2);
+            txtucase(t5);
+        autoformat_username_cull3:
+            for (i3 = 0; i3 < t5->l; i3++) {
+                x = t5->d2[i3];
+                x2 = 0; //cull?
+                if (x < 48) x2 = 1;
+                if (x > 90) x2 = 1;
+                if ((x > 57) && (x < 65)) x2 = 1;
+                if (x2) {
+                    txtset(t6, t5);
+                    txtright(t6, t5->l - i3 - 1);
+                    txtleft(t5, i3);
+                    txtadd(t5, t6);
+                    goto autoformat_username_cull3;
+                }
+            }
+            if (t5->l > 16) txtleft(t5, 16);
+            txtset(tusername2, t5);
+            //password
+            txtset(t5, tuserpassword2);
+            txtucase(t5);
+        autoformat_password_cull3:
+            for (i3 = 0; i3 < t5->l; i3++) {
+                x = t5->d2[i3];
+                x2 = 0; //cull?
+                if (x < 48) x2 = 1;
+                if (x > 90) x2 = 1;
+                if ((x > 57) && (x < 65)) x2 = 1;
+                if (x2) {
+                    txtset(t6, t5);
+                    txtright(t6, t5->l - i3 - 1);
+                    txtleft(t5, i3);
+                    txtadd(t5, t6);
+                    goto autoformat_password_cull3;
+                }
+            }
+            if (t5->l > 16) txtleft(t5, 16);
+            txtset(tuserpassword2, t5);
+        } //intro201_ep||fs->mouse_click
+
+
+        txtcol = rgb(252, 200, 20);
+        txtset(t, tusername2);
+        if (((long) (f * 4) & 1) && (intro201_ti == 2) && (intro201_ep == 0)) txtadd(t, "|");
+        img(ps, 99 + 4, 320 + 4 + 4, intro_ifield);
+        txtout(ps, 99 + 4 + 4, 320 + 4 - 1, t);
+        txtset(t, tuserpassword2);
+        if (((long) (f * 4) & 1) && (intro201_ti == 3) && (intro201_ep == 0)) txtadd(t, "|");
+        img(ps, 99 + 4, 320 + 32 + 4 + 4, intro_ifield);
+        txtout(ps, 99 + 4 + 4, 320 + 32 + 4 - 1, t);
+        txtset(t, tname2);
+        if (((long) (f * 4) & 1) && (intro201_ti == 1) && (intro201_ep == 0)) txtadd(t, "|");
+        img(ps, 99 + 4, 320 + 32 * 2 + 4 + 4, intro_ifield);
+        txtout(ps, 99 + 4 + 4, 320 + 32 * 2 + 4 - 1, t);
+
+        x3 = 410;
+        if (typen != 0) x3 = 375 + typen;
+        x4 = (long) (f * 2.0f) % 16;
+        typen_obj->type = x3 + x4 * 1024;
+        getspr(typen_obj);
+        img0(ps, 99 + 8 + 12, 136 + 320 - 8, bt32);
+
+
+        img0(ps, 0, 320, intro_newchar2);
+
+
+        //switch to next field if tab pressed!
+        if (GETINPUT_tab_pressed == GETINPUT_TAB_PRESSED) {
+            GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_STOP;
+            if (intro201_ti == 1) {
+                intro201_ep = 0;
+                intro201_ti = 2;
+                GETINPUT_setup(tusername2, &intro201_ep, 16);
+                GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+                goto createachar_newfieldselected;
+            }
+            if (intro201_ti == 2) {
+                intro201_ep = 0;
+                intro201_ti = 3;
+                GETINPUT_setup(tuserpassword2, &intro201_ep, 16);
+                GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+                goto createachar_newfieldselected;
+            }
+            if (intro201_ti == 3) {
+                intro201_ep = 0;
+                intro201_ti = 1;
+                GETINPUT_setup(tname2, &intro201_ep, 16);
+                GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+                goto createachar_newfieldselected;
+            }
+        } //GETINPUT_TAB_PRESSED
+    createachar_newfieldselected:
+
+        if (keyhit(VK_RETURN)) goto createachar_enterkey;
+
+
+        x = mx;
+        y = my;
+        if (fs->mouse_click) {
+            fs->mouse_click = NULL;
+
+            if ((x > (1024 - 21 - 4 - 26)) && (y < (21 + 4))) {
+                if (intro201_ep == 0) {
+                    GETINPUT_stop();
+                }
+                intro = 200;
+                intro_setup = 0;
+                goto intro_done;
+            }
+
+            if ((x >= 0) && (x < 320) && (y >= 416) && (y < 448)) {
+                sex++;
+                if (sex > 1) sex = 0;
+            }
+
+            if ((x >= 0) && (x < 320) && (y >= 448) && (y < 480)) {
+                typen++;
+                if (typen > 12) typen = 0;
+            }
+
+            if ((x >= 0) && (x < 320) && (y >= 480) && (y < 512)) {
+                portn++;
+                if (portn > 6) portn = 0;
+            }
+
+
+            if ((x >= 0) && (x < 320) && (y >= 320) && (y < 352)) {
+                intro201_ep = 0;
+                intro201_ti = 2;
+                GETINPUT_setup(tusername2, &intro201_ep, 16);
+                GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+            }
+            if ((x >= 0) && (x < 320) && (y >= 352) && (y < 384)) {
+                intro201_ep = 0;
+                intro201_ti = 3;
+                GETINPUT_setup(tuserpassword2, &intro201_ep, 16);
+                GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+            }
+            if ((x >= 0) && (x < 320) && (y >= 384) && (y < 416)) {
+                intro201_ep = 0;
+                intro201_ti = 1;
+                GETINPUT_setup(tname2, &intro201_ep, 16);
+                GETINPUT_tab_pressed = GETINPUT_TAB_PRESSED_INIT;
+            }
+
+            if ((x >= 0) && (x < 320) && (y >= 576) && (y < 608)) {
+                //continue
+            createachar_enterkey:
+
+                //error checking MUST OCCUR HERE!
+                if (tusername2->l == 0) {
+                    MessageBox(NULL, "Please select a USER NAME", "Ultima 6 Online", MB_OK);
+                    goto intro_done;
+                }
+                if (tuserpassword2->l == 0) {
+                    MessageBox(NULL, "Please select a USER PASSWORD", "Ultima 6 Online", MB_OK);
+                    goto intro_done;
+                }
+                if (tname2->l == 0) {
+                    MessageBox(NULL, "Please select a NAME", "Ultima 6 Online", MB_OK);
+                    goto intro_done;
+                }
+
+                if (NEThost == NULL) {
+                    //check if username or charname is taken
+                    txtsetchar(t, 246);
+                    txtaddchar(t, tusername2->l);
+                    txtadd(t, tusername2);
+                    txtaddchar(t, tname2->l);
+                    txtadd(t, tname2);
+                    NET_send(NETplayer, NULL, t);
+
+                    //wait for a reply
+                    static unsigned long cac_time;
+                    cac_time = timeGetTime();
+                cac_waitforhost:
+                    x3 = 0;
+                    i = 0;
+                    if (socketclient_ri[i]->d[socketclient_ri[i]->next]->l) {
+                        //buffered data available
+                        txtset(t, socketclient_ri[i]->d[socketclient_ri[i]->next]);
+                        txtNEWLEN(socketclient_ri[i]->d[socketclient_ri[i]->next], 0);
+                        socketclient_ri[i]->next++;
+                        x3 = 1;
+                    } //->l
+                    if (timeGetTime() > (cac_time + 8000)) goto intro_done;
+                    if (!x3) goto cac_waitforhost;
+                    if (t->d2[0] != 245) goto cac_waitforhost; //incorrect message!
+
+                    //0 neither username or charname is taken
+                    //1 username is taken
+                    //2 charname is taken
+                    if (t->d2[1] == 1) {
+                        MessageBox(NULL, "USER NAME taken. Please choose a different USER NAME", "Ultima 6 Online",
+                                   MB_OK);
+                        goto intro_done;
+                    }
+                    if (t->d2[1] == 2) {
+                        MessageBox(NULL, "Character name taken. Please choose a different NAME", "Ultima 6 Online",
+                                   MB_OK);
+                        goto intro_done;
+                    }
+                } //NEThost==NULL
+
+
+                if (intro201_ep == 0) {
+                    GETINPUT_stop();
+                }
+
+                //allocate info
+                txtset(u6o_user_name, tusername2);
+                txtset(u6o_user_password, tuserpassword2);
+                txtset(u6o_name, tname2);
+                u6o_malefemale = sex;
+                u6o_type = typen;
+                x3 = portn;
+                if (sex) {
+                    if (x3 == 0) x4 = 194;
+                    if (x3 == 1) x4 = 195;
+                    if (x3 == 2) x4 = 197;
+                    if (x3 == 3) x4 = 198;
+                    if (x3 == 4) x4 = 202;
+                    if (x3 == 5) x4 = 203;
+                    if (x3 == 6) x4 = 207;
+                } else {
+                    if (x3 == 0) x4 = 196;
+                    if (x3 == 1) x4 = 199;
+                    if (x3 == 2) x4 = 200;
+                    if (x3 == 3) x4 = 201;
+                    if (x3 == 4) x4 = 204;
+                    if (x3 == 5) x4 = 205;
+                    if (x3 == 6) x4 = 206;
+                }
+                u6o_portrait = x4 - 194;
+                intro = 102;
+                intro_setup = 0;
+                goto intro_done; //->gypsy intro
+            }
+        }
+    } //intro==201
 
 
 intro_done:
 
 
+    img0(ps, 1024 - 21 - 2, 2, intro_x);
 
 
-  img0(ps,1024-21-2,2,intro_x);
-
-
-  intro_timer=f;
-  goto intro_refresh;
-
-
+    intro_timer = f;
+    goto intro_refresh;
 }
-{
 
+{
 
 
   //btime2+=et*0.00666667f; //non-rolled over btime!
@@ -3151,7 +4092,7 @@ intro_done:
   */
   //luteijn: attempt 2, speed progress of time by 4 on the host.
   //would give /37.5 vs /150.0 doesn't look nice, so changed to 32 and 128
-  
+
   if (!NEThost) {
     btime2+=et/150.0f; //non-rolled over btime!
     x=btime2/24;
@@ -3330,9 +4271,6 @@ u6omidivolume_changed:
   }
 
 
-
-
-
   //assign mouse cursor
   if ((vf_mb2_x==0xFFFF)&&(vf_mb2_y==0xFFFF)){
     if (cur_type==1) SetCursor (cur1);
@@ -3491,10 +4429,8 @@ inpf_scroll_failed:
   }
 
 
-
   //VOICE CHAT 1.0: DETECT AUDIO OUTPUT LEVEL
   f=1.0f; if (int((ett/f))!=int((ett/f)-(et/f))){
-
 
 
     //MIXER: variables
@@ -3630,14 +4566,6 @@ inpf_scroll_failed:
       }//voicechat_permissionrequested==FALSE
 
 
-
-
-
-
-
-
-
-
       //begin recording
       voicechat_recording=1;
       voicechat_recordtime=0.0f;
@@ -3649,7 +4577,6 @@ inpf_scroll_failed:
       txtset(t2,"?"); t2->d2[0]=40;//request voice volume levels of others(40)
       NET_send(NETplayer,NULL,t2);
       //returned by ID!
-
 
 
       dwMilliSeconds=3000;
@@ -3695,7 +4622,6 @@ inpf_scroll_failed:
 
     }
   }
-
 
 
   //finish recording?
@@ -4065,17 +4991,6 @@ turnspellpager:
         }
       }
     }//i
-
-
-
-
-
-
-
-
-
-
-
 
 
     tnpc=(npc*)tplay->party[0]->more;
@@ -4463,7 +5378,6 @@ mousemove_finish:
 	}
 
 
-
     //turn spell
     for (i=0;i<=7;i++){
 
@@ -4483,13 +5397,6 @@ mousemove_finish:
                 i4=0;
                 for (i2=0;i2<=15;i2++){
                   if (spell[i][(i3<<4)+i2]){ //valid
-
-
-
-
-
-
-
 
 
                     if (i4==x){
@@ -4555,8 +5462,6 @@ gotspell:;
 
       party_spellbook_frame[i]->mouse_click=0;
     }//i
-
-
 
 
     if (userkey==4){
@@ -4730,7 +5635,6 @@ ktarcast:
     }//not4sale
 
 
-
     if ((CLIENTplayer->key&KEYmbclick)&&(userkey==1)){
       userkey=0;
       CLIENTplayer->key|=KEYu;
@@ -4759,7 +5663,6 @@ ktarcast:
     if (CLIENTplayer->key!=CLIENTplayer->key2) x=1;
     //?action
     if (x==1){ //send INPUT update message to host
-
 
 
       txtNEWLEN(t,(DWORD)&CLIENTplayer->mobj-(DWORD)&CLIENTplayer->mf);
@@ -5019,7 +5922,6 @@ dbg1:
         }//x4&32
 
 
-
         if (x4&64){
           x=t->ds[0]; myobj=NULL; if (x!=0){myobj=tobj_e[i2][0];myobj->type=x;} tnpc->helm=myobj;
           x=t->ds[1]; myobj=NULL; if (x!=0){myobj=tobj_e[i2][1];myobj->type=x;} tnpc->wep_right=myobj;
@@ -5054,7 +5956,6 @@ dbg1:
           tnpc->wt2_max=t->ds[8];
           txtright(t,t->l-18);
         }//x4&1
-
 
 
         if (x4&16){//wt
@@ -5124,7 +6025,6 @@ dbg1:
         if (x4&128){//spellbook
           ZeroMemory(&spell[i2][0],512);
           x=t->d2[0]; txtright(t,t->l-1); //number of spells
-
 
 
           for (x2=0;x2<x;x2++){
@@ -5630,7 +6530,12 @@ scene_update_message:
         ctpx=tpx; ctpy=tpy;
 
         //screen+1 shift
-        x3=tpx_legacy-1; y3=tpy_legacy-1; x4=tpx_legacy+32; y4=tpy_legacy+24;
+        // RW sobj-fix: screen+1 grew from legacy 32x24 + 1 fence to
+        // max-viewport (63x47) + 1 fence. tpx_legacy/tpy_legacy is the host's
+        // emit reference frame; the 96x72 sobj buffer still has slack to
+        // hold the larger window. See define_both.h.
+        x3=tpx_legacy-SOBJ_S1_LEFT; y3=tpy_legacy-SOBJ_S1_TOP;
+        x4=tpx_legacy+SOBJ_S1_RIGHT; y4=tpy_legacy+SOBJ_S1_BOTTOM;
         x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
         //i. if the screen+1 buffer fits within buffer don't relocate
         if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -5700,7 +6605,11 @@ screen1shiftokc:;
 
         if (BITSget(t,&bitsi,1)){//obj buffer has changed
           //screen+8 shift
-          x3=tpx_legacy-8; y3=tpy_legacy-8; x4=tpx_legacy+32+8-1; y4=tpy_legacy+24+8-1;
+          // RW sobj-fix: screen+8 grew from legacy 32x24 + 8 fence to
+          // max-viewport (63x47) + 8 fence. SOBJ_TX_OFFX/Y are the screen+8
+          // fence distances by construction. See define_both.h.
+          x3=tpx_legacy-SOBJ_TX_OFFX; y3=tpy_legacy-SOBJ_TX_OFFY;
+          x4=tpx_legacy+SOBJ_TX_W-1-SOBJ_TX_OFFX; y4=tpy_legacy+SOBJ_TX_H-1-SOBJ_TX_OFFY;
           x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
           //i. if the screen+8 buffer fits within buffer don't relocate
           if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -5770,21 +6679,25 @@ sobj_copiedpos0c:;
 screen8shiftokc:;
 
 changestate: if (BITSget(t,&bitsi,1)){
-          y=BITSget(t,&bitsi,11); x=y%48; y/=48;
-          i3=tobjfixed_index[tpy_legacy-8+y][tpx_legacy-8+x];
+          // RW sobj-fix: was BITSget 11 + y%48 + tpx_legacy-8 offset; now
+          // SOBJ_TX_BITS + y%SOBJ_TX_W + tpx_legacy-SOBJ_TX_OFFX. Must match
+          // host encoder in loop_host.cpp. See define_both.h.
+          y=BITSget(t,&bitsi,SOBJ_TX_BITS); x=y%SOBJ_TX_W; y/=SOBJ_TX_W;
+          i3=tobjfixed_index[tpy_legacy-SOBJ_TX_OFFY+y][tpx_legacy-SOBJ_TX_OFFX+x];
           i4=tobjfixed_type[i3];
           z=BITSget(t,&bitsi,getnbits(i4));
           i5=1<<z;
 
-          x2=tpx_legacy+x-8; y2=tpy_legacy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
+          x2=tpx_legacy+x-SOBJ_TX_OFFX; y2=tpy_legacy+y-SOBJ_TX_OFFY; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
           if (tplayer->sobj_tempfixed[x3][y3]&i5) tplayer->sobj_tempfixed[x3][y3]-=i5; else tplayer->sobj_tempfixed[x3][y3]|=i5;
           goto changestate;
              }
 
              static unsigned short vbuf[1024];
 oum_getnextsquare: if (BITSget(t,&bitsi,1)){//if =1 set object of a/another square on the map
-             y=BITSget(t,&bitsi,11); x=y%48; y/=48;
-             x2=tpx_legacy+x-8; y2=tpy_legacy+y-8; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
+             // RW sobj-fix: matches host encoder bit-width / multiplier / offset.
+             y=BITSget(t,&bitsi,SOBJ_TX_BITS); x=y%SOBJ_TX_W; y/=SOBJ_TX_W;
+             x2=tpx_legacy+x-SOBJ_TX_OFFX; y2=tpy_legacy+y-SOBJ_TX_OFFY; x3=x2-tplayer->sobj_bufoffx; y3=y2-tplayer->sobj_bufoffy;
              i=0;//vbuf index
 oum_getnextobj: if (BITSget(t,&bitsi,1)){//if =1 a/another object exists on this square
              vbuf[i]=BITSget(t,&bitsi,16);
@@ -5808,11 +6721,7 @@ oum_getnextobj: if (BITSget(t,&bitsi,1)){//if =1 a/another object exists on this
                    }//if =1 set object of a/another square on the map
 
 
-
-
                    //update mover buffer
-
-
 
 
                    /*
@@ -5833,16 +6742,25 @@ oum_getnextobj: if (BITSget(t,&bitsi,1)){//if =1 a/another object exists on this
                    */
 
 
-
-
         }//object buffer changed
 
 
         //remove all offscreen objects in client's array
+        // RW dynamic-objects fix follow-up (2026-05-28): bounds MUST match
+        // the host's mover transmit window. The host now fills + emits movers
+        // across the full MV_TX_W x MV_TX_H rectangle centered on the avatar
+        // (see define_both.h MV_TX_OFFX / MV_TX_OFFY). When this client-side
+        // prune was still hardcoded to the legacy 32x24 box, every mover the
+        // host placed outside that box got removed locally before processing
+        // the host's remove/move/add messages -- which then targeted the
+        // wrong mv_x[] indices because both sides had reshuffled the array
+        // differently. The visible symptom was NPCs/ships/party members
+        // teleporting, ships drawn on land, and the avatar going invisible
+        // when index 0 got reassigned to a different mover.
 mover_removeoffscreen_restartc:
         for (i=0;i<tplayer->mv_i;i++){
           x=tplayer->mv_x[i]-tpx_legacy; y=tplayer->mv_y[i]-tpy_legacy;
-          if ((x<-1)||(x>32)||(y<-1)||(y>24)){
+          if ((x<-MV_TX_OFFX)||(x>(MV_TX_W-1-MV_TX_OFFX))||(y<-MV_TX_OFFY)||(y>(MV_TX_H-1-MV_TX_OFFY))){
 
             //reshuffle array
             for (i3=i+1;i3<tplayer->mv_i;i3++){
@@ -5934,7 +6852,6 @@ mover_move_next: if (BITSget(t,&bitsi,1)){
                  }
 
 
-
                  //2.2 MOVER DIRECTION/FRAME CHANGE
                  /*
                  1 change mover frame/dir
@@ -6002,17 +6919,19 @@ mover_statechange_next2:
                         //3. ADD
 mover_add_next: if (BITSget(t,&bitsi,1)){
                         i=tplayer->mv_i;
-                        y=BITSget(t,&bitsi,10); x=y%34; y/=34;
-                        // RW-P4.5 / desync fix (2026-05-22): server encodes the
-                        // mover x,y offset relative to its own getscreenoffset()
-                        // (which is fixed at the legacy 32x24 viewport ? host
-                        // never asks the client what view size it uses). Decoding
-                        // with the dynamic tpx/tpy would shift every NPC by
-                        // (tpx - tpx_legacy) tiles when the client view is wider
-                        // than 32 tiles, causing the "teleport then disappear"
-                        // symptom because mover_removeoffscreen below also uses
-                        // tpx_legacy + the hard-coded 32x24 window.
-                        x=x+tpx_legacy-1; y=y+tpy_legacy-1;
+                        // RW dynamic-objects fix: host now encodes mover
+                        // positions across the full MV_TX_W x MV_TX_H window
+                        // (centered on the avatar via MV_TX_OFFX/Y) in
+                        // MV_TX_BITS bits. Was 10 bits + y*34+x tied to the
+                        // legacy 32x24 view, which caused NPCs/monsters/other
+                        // players outside the legacy box to never reach the
+                        // client. tpx_legacy is the host's reference origin
+                        // (avatar at col 15 / row 11 of the legacy view); the
+                        // -MV_TX_OFFX/Y shift recenters the decoded position
+                        // on the avatar so it matches the host's centered
+                        // emit. See define_both.h.
+                        y=BITSget(t,&bitsi,MV_TX_BITS); x=y%MV_TX_W; y/=MV_TX_W;
+                        x=x+tpx_legacy-MV_TX_OFFX; y=y+tpy_legacy-MV_TX_OFFY;
                         tplayer->mv_x[i]=x; tplayer->mv_y[i]=y;
                         z=BITSget(t,&bitsi,10);
                         //special cases exist
@@ -6115,8 +7034,6 @@ mover_add_getstate_next: if (BITSget(t,&bitsi,1)){
         wizardeyetimeleft=t->d2[1];
         goto CLIENT_donemess;
       }//wizardeyetimeleft update
-
-
 
 
       if (t->d2[0]==254){ //incorrect version
@@ -6442,220 +7359,11 @@ lluc_nextpixel:
 CLIENT_donemess:
 
 
-
     //if (NEThost) goto U6Ohostlink1return;
 
     goto CLIENT_readnext;
   } //read local message
   //} //client (+host link)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   u6opi=3;
@@ -6745,8 +7453,6 @@ CLIENT_donemess:
 
     osn=-1;
     stormcloak_last2=-1;
-
-
 
 
     //init vis arrays
@@ -7023,8 +7729,6 @@ viewfind_skip:
     }
 
 
-
-
     //objfixed (non floating)
     myobj=fakeobj;
     for (y=viewTilesY()+1;y>=0;y--){ for (x=viewTilesX()+1;x>=0;x--){
@@ -7112,7 +7816,6 @@ viewfind_skip:
 
       }//mapx,mapy
     }}//x,y
-
 
 
     //tobjfixed
@@ -7253,7 +7956,6 @@ lens_hide:
 
       }//mapx,mapy
     }}//x,y
-
 
 
     x5option++; if (x5option>7) x5option=0;
@@ -7405,16 +8107,6 @@ generatinggate0:;
     }}//objbuffer end
 
 
-
-
-
-
-
-
-
-
-
-
     //PASS 0: tanglevine tendrils ONLY
     //PASS 1: non-float
     //PASS 2: float
@@ -7468,8 +8160,6 @@ generatinggate0:;
             }//MV_SLEEP
 moverinbed:
             //end: non-pass specific changes
-
-
 
 
             //first pass only changes
@@ -8013,9 +8703,6 @@ flash_skip:;
     }}//objbuffer (floating) end
 
 
-
-
-
     //objfixed (floating)
     myobj=fakeobj;
     for (y=0;y<=viewTilesY()+1;y++){ for (x=0;x<=viewTilesX()+1;x++){
@@ -8038,7 +8725,6 @@ flash_skip:;
 
 
             if ((x3&1023)!=x3){ //possibly buildable!
-
 
 
               if (tclass_build[x3-1024]&1){//square
@@ -8097,10 +8783,6 @@ flash_skip:;
       }//mapx,mapy
 
     }}//x,y
-
-
-
-
 
 
     for (y=2;y<=viewTilesY()+1;y++){ for (x=2;x<=viewTilesX()+1;x++){ //overwrite objects on reverse side of wall
@@ -8277,7 +8959,6 @@ flash_skip:;
         ls_off++; ls2_off++;
       } ls_off+=ls_off_add; ls2_off+=ls2_off_add; } //x6, y6
     }//i
-
 
 
     //tremor
@@ -8540,14 +9221,6 @@ asm_lightshow2:
     }
 
 
-
-
-
-
-
-
-
-
     //display onscreen text
     if (osn!=-1){
       for (z=0;z<=osn;z++){
@@ -8698,7 +9371,6 @@ osdisplay_ktar_skip:;
           }else{
             img0(ps,(sfx[i3].x-tpx)*32,(sfx[i3].y-tpy)*32,bt32);
           }
-
 
 
           //number above?
@@ -9103,7 +9775,6 @@ pw_jmp:
           if (sfx[i3].more==0xFFFF){ //setup
 
 
-
             sfx[i3].more=0; //index type *up arrow
             if (i4==9){
               //if ((unsigned long)sfx[i3].wait&32768) {soundplay2(u6osound[18],u6osound_volume[18]); sfx[i3].wait-=32768;}
@@ -9245,17 +9916,12 @@ pw_jmp:
         }//2,...
 
 
-
         if (i4==3){ //global portrait message
           txtset(t,(txt*)sfx[i3].p);
           txtset(t2,"?"); t2->d2[0]=92;
           z=txtsearch(t,t2);
 
           if (sfx[i3].wait==0){ //send message to message log and remove
-
-
-
-
 
 
             txtset(t3,t);
@@ -9281,10 +9947,6 @@ pw_jmp:
             }
 
 
-
-
-
-
             //fetch colourname if available
             txtset(t6,"");
             if (t4->d2[0]==6){
@@ -9306,8 +9968,6 @@ wraptext_recheck:
             if (t6->l&&wraptext_firstline) tagxy.cx-=64;
             if ((64+tagxy.cx)>=1024){//original string is more than 1024 chars
               txtset(t7,"");//clear t7
-
-
 
 
               //move t4 string into t7 until it fits exactly
@@ -9409,12 +10069,6 @@ seekmore:
                   z4=txtnum(t); txtright(t,t->l-x3);
                   img0(con_frm_img->graphic,0,256-32-32*x4,getportrait_halfsize(z4));
                 }
-
-
-
-
-
-
 
 
                 //rune font?
@@ -10083,10 +10737,6 @@ donesf2:;
     }//i3
 
 
-
-
-
-
     if (STATUSMESSwait){
       txtset(t,STATUSMESSdisplaying);
       x=0;
@@ -10283,7 +10933,7 @@ skiprefresh2:
 		  //party_frame[i]->graphic = pspartytemp;
 		  //updatepartyframe1(party_frame[i], i, partyresscale);
 
-		
+
         img(party_frame[i]->graphic,status8); //clear frame
 
 
@@ -10851,7 +11501,6 @@ diskip:
   } //0-7 for/next
 
 
-
 	// r222 for new mode: display party member frame at the top right of window, outside the playing area.
 	//party_frame[i]->graphic = pspartyorg;
 	//img(pspartyorg, pspartytemp);
@@ -11087,7 +11736,7 @@ diskip:
 			} else
 				uipanelhitenable[uipanelpartymemberbar1][n1i1+1][UI_STATE_DEF] = 0;
 		}
-			
+
 		// r666 for new mode: display actionbar
 		//img(psnew1b, uipanelx[uipanelactionbar1][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelactionbar1][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelactionbar1][UI_WIDGET_DEF][UI_STATE_DEF]);
 		//img(psnew1b, uipanelx[uipanelactionbar2][UI_WIDGET_DEF][UI_STATE_DEF], uipanely[uipanelactionbar2][UI_WIDGET_DEF][UI_STATE_DEF], uipanelsurf[uipanelactionbar2][UI_WIDGET_DEF][UI_STATE_DEF]);
@@ -11247,7 +11896,7 @@ diskip:
 
 		imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_MINIMAP, 1);
 
-			
+
 		//img0(psnew1b, party_frame_new[0]->offset_x+minimapdeltax, resyn1w-256-2+minimapdeltay, darrow);
 		//img0(psnew1b, minimapdeltax, minimapdeltay, darrow);
 		//img0(psnew1b, minimapplayerx, minimapplayery, darrow);
@@ -11442,12 +12091,6 @@ qkstf_mcdone:;
   if (AMBIENTLIGHT_SHOWSUN==FALSE){
     img0(tmini_1,7,4,cave); goto underground;
   }
-
-
-
-
-
-
 
 
   //use btime
@@ -11795,8 +12438,6 @@ gotkey: //x2 is value of key
   }//i (frame)
   clientsettingsvalid=TRUE;
 
-  
-
 
   // r333 no changes are made here
   //frame: display
@@ -12142,7 +12783,6 @@ endgame_donemessage:
   }//endgame
 
 
-
   if (statusmessage_viewprev->mouse_over){
     statusmessage_viewprev->mouse_over=FALSE;
     if (drg!=statusmessage_viewprev){
@@ -12225,8 +12865,6 @@ endgame_donemessage:
   }
 
 
-
-
   //DISPLAY DEBUG INFO WHEN SPACE IS HELD (ONLY IF U6O_DEBUG IS TRUE)
   // rrr
 //  if (keyon[VK_SPACE]) {
@@ -12260,107 +12898,166 @@ endgame_donemessage:
   }//END DEBUG INFO
 
 }
-intro_refresh:
+intro_refresh : refreshcount
+++;
 
 
+if
+((gotfocus
+==
+FALSE
+)
+&&
+(dxrefresh)
+)
+goto
+skiprefresh;
 
-
-refreshcount++;
-
-
-
-if ((gotfocus==FALSE)&&(dxrefresh)) goto skiprefresh;
 refresh();
-skiprefresh:
 
-mb=FRAME_mb; //restore physical mouse values
-omx=mx; omy=my; //set old mouse values
+skiprefresh : mb
+=
+FRAME_mb; //restore physical mouse values
+omx=mx;
+omy=my; //set old mouse values
 isit=FALSE;
 
 //BACKGROUND/FOREGROND MIDI
-x=0;//set volume
-if (midiinfo_loaded){
-  if (u6omidivolume){//midi cannot be processed if volume==NULL
+x=
+0; //set volume
+if
+(midiinfo_loaded) {
+    if (u6omidivolume) {
+        //midi cannot be processed if volume==NULL
 
-    if (midi_foreground!=-1){ //set midi_foreground as loaded midi
-      if (midi_foreground!=midi_loaded){
-        midi_loaded=midi_foreground;
-        u6omidi->LoadMidiFromFile(u6omidi_filename[midi_loaded]->d,TRUE);
-        if (midipause==0){
-          u6omidi->Play();
-isplayingwait0: if (u6omidi->IsPlaying()==S_FALSE) goto isplayingwait0;
-        }//midipause==0
-        x=1;
-      }//midi_foreground!=midi_loaded
-      midi_foreground=-1;
-    }//midi_foreground!=-1
+        if (midi_foreground != -1) {
+            //set midi_foreground as loaded midi
+            if (midi_foreground != midi_loaded) {
+                midi_loaded = midi_foreground;
+                u6omidi->LoadMidiFromFile(u6omidi_filename[midi_loaded]->d, TRUE);
+                if (midipause == 0) {
+                    u6omidi->Play();
+                isplayingwait0:
+                    if (u6omidi->IsPlaying() == S_FALSE) goto isplayingwait0;
+                } //midipause==0
+                x = 1;
+            } //midi_foreground!=midi_loaded
+            midi_foreground = -1;
+        } //midi_foreground!=-1
 
-    if (midi_foreground_wait){
-      midi_foreground_wait-=et; if (midi_foreground_wait<0.0f) midi_foreground_wait=0.0f;
-      if (u6omidi->IsPlaying()==S_FALSE) midi_foreground_wait=0.0f;//midi finished playing
-      if (midi_foreground_wait==0.0f){
-        u6omidi->Stop();//stop playing foreground midi
-isplayingwait2: if (u6omidi->IsPlaying()==S_OK) goto isplayingwait2;
-      }
-    }
-
-    if (midi_foreground_wait==0.0f){//no foreground midi is playing
-      if (midi_loaded!=midi_background){//load correct midi
-        if (u6omidi->IsPlaying()==S_FALSE){//midi is not playing
-          midi_loaded=midi_background;
-          u6omidi->LoadMidiFromFile(u6omidi_filename[midi_loaded]->d,TRUE);
+        if (midi_foreground_wait) {
+            midi_foreground_wait -= et;
+            if (midi_foreground_wait < 0.0f) midi_foreground_wait = 0.0f;
+            if (u6omidi->IsPlaying() == S_FALSE) midi_foreground_wait = 0.0f; //midi finished playing
+            if (midi_foreground_wait == 0.0f) {
+                u6omidi->Stop(); //stop playing foreground midi
+            isplayingwait2:
+                if (u6omidi->IsPlaying() == S_OK) goto isplayingwait2;
+            }
         }
-      }//midi_loaded!=midi_background
 
-      if (u6omidi->IsPlaying()==S_FALSE){//midi is not playing
-        if (midipause==0){
-          u6omidi->Play();
-isplayingwait1: if (u6omidi->IsPlaying()==S_FALSE) goto isplayingwait1;
-        }//midipause==0
-        x=1;
-      }//==S_FALSE
-    }//midi_foreground_wait==0.0f
+        if (midi_foreground_wait == 0.0f) {
+            //no foreground midi is playing
+            if (midi_loaded != midi_background) {
+                //load correct midi
+                if (u6omidi->IsPlaying() == S_FALSE) {
+                    //midi is not playing
+                    midi_loaded = midi_background;
+                    u6omidi->LoadMidiFromFile(u6omidi_filename[midi_loaded]->d, TRUE);
+                }
+            } //midi_loaded!=midi_background
 
-    if (x){
-      f=u6omidi_volume[midi_loaded];
-      f=f*(float)u6omidivolume/255.0f;
-      f=255-f; f=f*0.25f; f*=f;
-      //DMUS_VOLUME_MAX     2000         +20 dB
-      //DMUS_VOLUME_MIN   -20000        -200 dB
-      u6omidi->SetMasterVolume(-f);
-    }
+            if (u6omidi->IsPlaying() == S_FALSE) {
+                //midi is not playing
+                if (midipause == 0) {
+                    u6omidi->Play();
+                isplayingwait1:
+                    if (u6omidi->IsPlaying() == S_FALSE) goto isplayingwait1;
+                } //midipause==0
+                x = 1;
+            } //==S_FALSE
+        } //midi_foreground_wait==0.0f
 
-  }//u6omidivolume
-}//midiinfo_loaded
+        if (x) {
+            f = u6omidi_volume[midi_loaded];
+            f = f * (float) u6omidivolume / 255.0f;
+            f = 255 - f;
+            f = f * 0.25f;
+            f *= f;
+            //DMUS_VOLUME_MAX     2000         +20 dB
+            //DMUS_VOLUME_MIN   -20000        -200 dB
+            u6omidi->SetMasterVolume(-f);
+        }
+    } //u6omidivolume
+} //midiinfo_loaded
 
 
-for (i=0;i<=7;i++){ //mouse flag cancel
+for
+(i=
+0;
+i
+<=
+7;
+i
+++
+)
+{ //mouse flag cancel
   pmf=party_frame[i]; pmf->mouse_pressed=FALSE; pmf->mouse_over=FALSE; pmf->mouse_click=FALSE;
   pmf=party_spellbook_frame[i]; pmf->mouse_pressed=FALSE; pmf->mouse_over=FALSE; pmf->mouse_click=FALSE;
 }
-vf->mouse_click=FALSE; vf->mouse_over=FALSE; vf->mouse_pressed=FALSE;
-con_frm->mouse_over=FALSE;
-inpf->mouse_over=FALSE;
-volcontrol->mouse_over=FALSE;
-qkstf->mouse_over=FALSE;
-con_frm->mouse_over=FALSE;
-musickeyboard->mouse_over=FALSE;
-inpf->mouse_over=FALSE;
+vf
+->
+mouse_click=FALSE;
+vf
+->
+mouse_over=FALSE;
+vf
+->
+mouse_pressed=FALSE;
+con_frm
+->
+mouse_over=FALSE;
+inpf
+->
+mouse_over=FALSE;
+volcontrol
+->
+mouse_over=FALSE;
+qkstf
+->
+mouse_over=FALSE;
+con_frm
+->
+mouse_over=FALSE;
+musickeyboard
+->
+mouse_over=FALSE;
+inpf
+->
+mouse_over=FALSE;
 
 
+ZeroMemory (&key
+,
+65536
+);
 
-
-
-ZeroMemory(&key,65536);
-
-if (mb_release){
-  if ((mb_release&1)&&(mb&1)) mb-=1;
-  if ((mb_release&2)&&(mb&2)) mb-=2;
-  mb_release=0;
+if
+(mb_release) {
+    if ((mb_release & 1) && (mb & 1)) mb -= 1;
+    if ((mb_release & 2) && (mb & 2)) mb -= 2;
+    mb_release = 0;
 }
-mbclick=0;
 
-if (U6O_DISABLEMUSIC==FALSE){
+mbclick=
+0;
+
+if
+(U6O_DISABLEMUSIC
+==
+FALSE
+)
+{
   if (midiinfo_loaded==FALSE){
     //load midiinfo.txt
     midiinfo_loaded=TRUE;
@@ -12396,7 +13093,12 @@ midiinfo_next:
 }
 
 // s222 sound additions (no changes here; to add sounds, edit wavinfo.txt in wav subfolder)
-if (wavinfo_loaded==FALSE){
+if
+(wavinfo_loaded
+==
+FALSE
+)
+{
   //load wavinfo.txt
   wavinfo_loaded=TRUE;
   u6osoundtype_volume[0]=255; //UNKNOWN type 100%
@@ -12454,22 +13156,26 @@ wavinfo_next:
 }//wavinfo_loaded
 
 
+if
+(STATUSMESSwait) {
+    STATUSMESSwait -= (et * (1.0f + (float) STATUSMESSpending->l * 0.005f));
+    if (STATUSMESSwait <= 0.0f) {
+        //add to the buffer
+        for (i = 7; i >= 1; i--) {
+            txtset(STATUSMESSprev[i], STATUSMESSprev[i - 1]);
+        } //i
+        txtset(STATUSMESSprev[0], STATUSMESSdisplaying);
+        STATUSMESSwait = 0.0f;
+        txtset(STATUSMESSdisplaying, "");
+    } //STATUSMESSwait<=0.0f
+} //STATUSMESSwait
 
-
-if (STATUSMESSwait){
-  STATUSMESSwait-=(et*(1.0f+(float)STATUSMESSpending->l*0.005f));
-  if (STATUSMESSwait<=0.0f){
-    //add to the buffer
-    for (i=7;i>=1;i--){
-      txtset(STATUSMESSprev[i],STATUSMESSprev[i-1]);
-    }//i
-    txtset(STATUSMESSprev[0],STATUSMESSdisplaying);
-    STATUSMESSwait=0.0f;
-    txtset(STATUSMESSdisplaying,"");
-  }//STATUSMESSwait<=0.0f
-}//STATUSMESSwait
-
-if (STATUSMESSpending->l){
+if
+(STATUSMESSpending
+->
+l
+)
+{
 	// f333 check pending status messages if new messages were added
 	if (enhancen1) {
 		if (STATUSMESSpending->l > statusmessagependingprevlen) {
@@ -12532,31 +13238,43 @@ if (STATUSMESSpending->l){
 }
 
 
-if (portraitlook_wait){
-  portraitlook_wait-=et;
-  if (portraitlook_wait<0.0f){
-    portraitlook_wait=0.0f;
-    if (statusmessage_viewnpc->offset_x<kPanelHideThresholdX) statusmessage_viewnpc->offset_x+=kPanelHideDeltaX;
-  }
+if
+(portraitlook_wait) {
+    portraitlook_wait -= et;
+    if (portraitlook_wait < 0.0f) {
+        portraitlook_wait = 0.0f;
+        if (statusmessage_viewnpc->offset_x < kPanelHideThresholdX) statusmessage_viewnpc->offset_x += kPanelHideDeltaX;
+    }
 }
-keyon[0xD8]=FALSE; keyon[0xD9]=FALSE; //release mousewheel "buttons"
+
+keyon [0xD8]=FALSE;
+keyon [0xD9]=FALSE; //release mousewheel "buttons"
 
 //not a real fix and that is why command line parameter is needed to use this "hidden" "fix"
-if (leak) {
-  DeleteObject(fnt1);
-  DeleteObject(fnt1naa);
-  DeleteObject(fnt2);
-  DeleteObject(fnt3);
-  DeleteObject(fnt4);
-  DeleteObject(fnt5);
-  DeleteObject(fnt6);
-  DeleteObject(fnt7);
-  fnt1=CreateFont(22,NULL,0,0,0,NULL,NULL,NULL,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH|FF_DONTCARE,"Avatar");
-  fnt1naa=CreateFont(22,NULL,0,0,0,NULL,NULL,NULL,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,"Avatar");
-  fnt2=CreateFont(16,NULL,0,0,0,NULL,NULL,NULL,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,"Avatar");
-  fnt3=CreateFont(8,NULL,0,0,0,NULL,NULL,NULL,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,NONANTIALIASED_QUALITY,DEFAULT_PITCH|FF_DONTCARE,"Terminal");
-  fnt4=CreateFont(22,8,0,0,0,NULL,NULL,NULL,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH|FF_DONTCARE,"Avatar");
-  fnt5=CreateFont(22,NULL,0,0,0,NULL,NULL,NULL,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH|FF_DONTCARE,"Ultima Runes");
-  fnt6=CreateFont(22,0,0,0,0,NULL,NULL,NULL,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH|FF_DONTCARE,"Gargish");
-  fnt7=CreateFont(24,9,0,0,0,NULL,NULL,NULL,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH|FF_DONTCARE,"PerryGothic");
+if
+(leak) {
+    DeleteObject(fnt1);
+    DeleteObject(fnt1naa);
+    DeleteObject(fnt2);
+    DeleteObject(fnt3);
+    DeleteObject(fnt4);
+    DeleteObject(fnt5);
+    DeleteObject(fnt6);
+    DeleteObject(fnt7);
+    fnt1 = CreateFont(22, NULL, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                      DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Avatar");
+    fnt1naa = CreateFont(22, NULL, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                         NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Avatar");
+    fnt2 = CreateFont(16, NULL, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                      NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Avatar");
+    fnt3 = CreateFont(8, NULL, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                      NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Terminal");
+    fnt4 = CreateFont(22, 8, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                      DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Avatar");
+    fnt5 = CreateFont(22, NULL, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                      DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Ultima Runes");
+    fnt6 = CreateFont(22, 0, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                      DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Gargish");
+    fnt7 = CreateFont(24, 9, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                      DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "PerryGothic");
 }
