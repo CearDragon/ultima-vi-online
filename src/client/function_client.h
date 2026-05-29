@@ -10,11 +10,11 @@
 #include "ui_layout.h" // RW-P3: UiAnchor/UiPlacement, RepositionAnchoredPanels
 
 /* external global variables */
-	//GetInput variables 
-	//tab_pressed allows program to trap the tab key
-	//once trapped it also counts as an enterpressed, so serves a dual purpose
-	//otherwise tab key inserts an undefined amount of spaces
-	//it MUST be set after a call to getinput_setup
+//GetInput variables
+//tab_pressed allows program to trap the tab key
+//once trapped it also counts as an enterpressed, so serves a dual purpose
+//otherwise tab key inserts an undefined amount of spaces
+//it MUST be set after a call to getinput_setup
 extern unsigned char GETINPUT_tab_pressed;
 extern txt *GETINPUT_txt;
 extern unsigned char *GETINPUT_enterpressed;
@@ -40,13 +40,13 @@ extern unsigned char midipause;
 extern unsigned char getsound_MOVERSOUND;
 extern unsigned char AMBIENTLIGHT_LIGHTVALUE;
 extern unsigned char AMBIENTLIGHT_SHOWSUN;
-extern txt *STATUSMESSprev[8];//the previous 8 status messages are stored here
-extern txt *STATUSMESSdisplaying;//the message currently being displayed
+extern txt *STATUSMESSprev[8]; //the previous 8 status messages are stored here
+extern txt *STATUSMESSdisplaying; //the message currently being displayed
 extern float STATUSMESSwait;
-extern unsigned char STATUSMESSskipok;//the message will be skipped if any messages are pending
-extern txt *STATUSMESSt;//temp txt for building messages (included to aid conversion from older system)
+extern unsigned char STATUSMESSskipok; //the message will be skipped if any messages are pending
+extern txt *STATUSMESSt; //temp txt for building messages (included to aid conversion from older system)
 extern txt *STATUSMESSpending;
-extern txt *GETSETTING_RAW;//the actualt text between the square brackets [...]
+extern txt *GETSETTING_RAW; //the actualt text between the square brackets [...]
 extern txt *li2_t;
 
 
@@ -54,43 +54,53 @@ extern txt *li2_t;
 
 // r999 new
 void inituidatan1();
-void applyscaleuipanelwidget(int uipi, int uiwi, int uisi, float scalex, float scaley);
-int gethituipaneli(int x, int y);
-int gethituipanelwidgeti(int x, int y, int uipaneli);
-int gethituipanelwidgeti(int x, int y);
-int testhituipanel(int x, int y, int uipaneli);
-void updateoverlaysurfn1(surf* s);
 
+void applyscaleuipanelwidget(int uipi, int uiwi, int uisi, float scalex, float scaley);
+
+int gethituipaneli(int x, int y);
+
+int gethituipanelwidgeti(int x, int y, int uipaneli);
+
+int gethituipanelwidgeti(int x, int y);
+
+int testhituipanel(int x, int y, int uipaneli);
+
+void updateoverlaysurfn1(surf * s);
 
 
 // s333 get type of object at coordinate
-void backupplayermvinfon1(player* tplayer);
+void backupplayermvinfon1(player * tplayer);
+
 //int isobjonscreenn1(int mapxn, int mapyn, int tpxn, int tpyn);
-int getobjtypen1(player* tplayer, int mapx, int mapy);
+int getobjtypen1(player *tplayer, int mapx, int mapy);
+
 //int getobjtypen1b(player p, int mapx, int mapy);
 int getobjtypen1b(player p, int mapx, int mapy, int exactcoord);
+
 int checkdeadobjtypen1(int typeparam);
+
 int convertdeadobjtypen1(int typeparam);
+
 int checkobjtypecreaturen1(int typeparam);
 
 // s333 get description of object type (for creature)
-void getobjdescn1(txt* txtdesc, int typeparam);
+void getobjdescn1(txt *txtdesc, int typeparam);
 
 // s555
 void updateoptioninfo();
 
 
-
-
 /* function prototypes */
-void function_client_init(void); 
+void function_client_init(void);
 
 
 //for compatibility the client supports this function
 object *OBJnew_local();
 
-void GETINPUT_setup(txt* input_pointer,void* enterpressed_pointer,unsigned long maxlength);
-txt* GETINPUT_current();
+void GETINPUT_setup(txt *input_pointer, void *enterpressed_pointer, unsigned long maxlength);
+
+txt *GETINPUT_current();
+
 void GETINPUT_stop();
 
 // RW-P2.3-asm: All five sprite-blit inline functions have been rewritten
@@ -112,14 +122,14 @@ void GETINPUT_stop();
 // g32 — opaque basetile blit (OPTION_HIRES: source stride = s->d.lPitch,
 //        32 source rows → 32 dest rows, 1:1, no transparency).
 inline void g32(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
-    const unsigned long srcPitch = (unsigned long)s->d.lPitch;
-    const unsigned long dstPitch = (unsigned long)d->d.lPitch;
-    const unsigned char* src = (const unsigned char*)s->o
-        + ((i / 8) * srcPitch * 32) + ((i & 7) * 64);
-    unsigned char* dst = (unsigned char*)d->o + x * 2 + y * dstPitch;
+    const unsigned long srcPitch = (unsigned long) s->d.lPitch;
+    const unsigned long dstPitch = (unsigned long) d->d.lPitch;
+    const unsigned char *src = (const unsigned char *) s->o
+                               + ((i / 8) * srcPitch * 32) + ((i & 7) * 64);
+    unsigned char *dst = (unsigned char *) d->o + x * 2 + y * dstPitch;
     for (int row = 0; row < 32; row++) {
-        const unsigned long* sw = (const unsigned long*)src;
-              unsigned long* dw = (unsigned long*)dst;
+        const unsigned long *sw = (const unsigned long *) src;
+        unsigned long *dw = (unsigned long *) dst;
         for (int dw_i = 0; dw_i < 16; dw_i++) dw[dw_i] = sw[dw_i];
         src += srcPitch;
         dst += dstPitch;
@@ -129,14 +139,14 @@ inline void g32(surf *d, unsigned long x, unsigned long y, surf *s, unsigned lon
 // g32z — transparent dirt-overlay blit (same source layout as g32,
 //         skips pixels where colour == 0).
 inline void g32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
-    const unsigned long srcPitch = (unsigned long)s->d.lPitch;
-    const unsigned long dstPitch = (unsigned long)d->d.lPitch;
-    const unsigned char* src = (const unsigned char*)s->o
-        + ((i / 8) * srcPitch * 32) + ((i & 7) * 64);
-    unsigned char* dst = (unsigned char*)d->o + x * 2 + y * dstPitch;
+    const unsigned long srcPitch = (unsigned long) s->d.lPitch;
+    const unsigned long dstPitch = (unsigned long) d->d.lPitch;
+    const unsigned char *src = (const unsigned char *) s->o
+                               + ((i / 8) * srcPitch * 32) + ((i & 7) * 64);
+    unsigned char *dst = (unsigned char *) d->o + x * 2 + y * dstPitch;
     for (int row = 0; row < 32; row++) {
-        const unsigned short* sw = (const unsigned short*)src;
-              unsigned short* dw = (unsigned short*)dst;
+        const unsigned short *sw = (const unsigned short *) src;
+        unsigned short *dw = (unsigned short *) dst;
         for (int px = 0; px < 32; px++) {
             unsigned short v = sw[px];
             if (v) dw[px] = v;
@@ -150,15 +160,15 @@ inline void g32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned lo
 //         Source: 16 rows at 2*srcPitch intervals → 32 dest rows (each source
 //         row written to two consecutive dest rows).
 inline void sf32(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
-    const unsigned long srcPitch = (unsigned long)s->d.lPitch;
-    const unsigned long dstPitch = (unsigned long)d->d.lPitch;
-    const unsigned char* src = (const unsigned char*)s->o
-        + ((i / 32) * srcPitch * 32) + ((i & 31) * 64);
-    unsigned char* dst = (unsigned char*)d->o + x * 2 + y * dstPitch;
+    const unsigned long srcPitch = (unsigned long) s->d.lPitch;
+    const unsigned long dstPitch = (unsigned long) d->d.lPitch;
+    const unsigned char *src = (const unsigned char *) s->o
+                               + ((i / 32) * srcPitch * 32) + ((i & 31) * 64);
+    unsigned char *dst = (unsigned char *) d->o + x * 2 + y * dstPitch;
     for (int row = 0; row < 16; row++) {
-        const unsigned long* sw  = (const unsigned long*)src;
-              unsigned long* dw0 = (unsigned long*)dst;
-              unsigned long* dw1 = (unsigned long*)(dst + dstPitch);
+        const unsigned long *sw = (const unsigned long *) src;
+        unsigned long *dw0 = (unsigned long *) dst;
+        unsigned long *dw1 = (unsigned long *) (dst + dstPitch);
         for (int dw_i = 0; dw_i < 16; dw_i++) {
             unsigned long v = sw[dw_i];
             dw0[dw_i] = v;
@@ -172,18 +182,21 @@ inline void sf32(surf *d, unsigned long x, unsigned long y, surf *s, unsigned lo
 // sf32z — transparent sprite blit from sfx8 with 2× vertical pixel-doubling.
 //          Same layout as sf32; skips pixels where colour == 0.
 inline void sf32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
-    const unsigned long srcPitch = (unsigned long)s->d.lPitch;
-    const unsigned long dstPitch = (unsigned long)d->d.lPitch;
-    const unsigned char* src = (const unsigned char*)s->o
-        + ((i / 32) * srcPitch * 32) + ((i & 31) * 64);
-    unsigned char* dst = (unsigned char*)d->o + x * 2 + y * dstPitch;
+    const unsigned long srcPitch = (unsigned long) s->d.lPitch;
+    const unsigned long dstPitch = (unsigned long) d->d.lPitch;
+    const unsigned char *src = (const unsigned char *) s->o
+                               + ((i / 32) * srcPitch * 32) + ((i & 31) * 64);
+    unsigned char *dst = (unsigned char *) d->o + x * 2 + y * dstPitch;
     for (int row = 0; row < 16; row++) {
-        const unsigned short* sw  = (const unsigned short*)src;
-              unsigned short* dw0 = (unsigned short*)dst;
-              unsigned short* dw1 = (unsigned short*)(dst + dstPitch);
+        const unsigned short *sw = (const unsigned short *) src;
+        unsigned short *dw0 = (unsigned short *) dst;
+        unsigned short *dw1 = (unsigned short *) (dst + dstPitch);
         for (int px = 0; px < 32; px++) {
             unsigned short v = sw[px];
-            if (v) { dw0[px] = v; dw1[px] = v; }
+            if (v) {
+                dw0[px] = v;
+                dw1[px] = v;
+            }
         }
         src += 2 * srcPitch;
         dst += 2 * dstPitch;
@@ -194,22 +207,22 @@ inline void sf32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned l
 //          Source: sprite i at byte offset i*2048, stride 64 bytes (32 px × 2 bpp),
 //          32 source rows → 32 dest rows 1:1.  Skips pixels where colour == 0.
 inline void im32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
-    const unsigned long dstPitch = (unsigned long)d->d.lPitch;
-    const unsigned char* src = (const unsigned char*)s->o + i * 64 * 32;
-    unsigned char* dst = (unsigned char*)d->o + x * 2 + y * dstPitch;
+    const unsigned long dstPitch = (unsigned long) d->d.lPitch;
+    const unsigned char *src = (const unsigned char *) s->o + i * 64 * 32;
+    unsigned char *dst = (unsigned char *) d->o + x * 2 + y * dstPitch;
     for (int row = 0; row < 32; row++) {
-        const unsigned short* sw = (const unsigned short*)src;
-              unsigned short* dw = (unsigned short*)dst;
+        const unsigned short *sw = (const unsigned short *) src;
+        unsigned short *dw = (unsigned short *) dst;
         for (int px = 0; px < 32; px++) {
             unsigned short v = sw[px];
             if (v) dw[px] = v;
         }
-        src += 64;       // 32 px × 2 bpp = 64 bytes per source row
+        src += 64; // 32 px × 2 bpp = 64 bytes per source row
         dst += dstPitch;
     }
 }
 
-void getspr(object* obj); //loads bt32 with a spr (uses keyframe) FIXME: candidate for optimising
+void getspr(object * obj); //loads bt32 with a spr (uses keyframe) FIXME: candidate for optimising
 
 
 bool keyhit(unsigned short k);
@@ -218,42 +231,52 @@ bool u6okeyhit(unsigned char i); //returns TRUE if key has been pressed
 bool u6okeyon(unsigned char i); //returns TRUE if key has been pressed
 
 void u6okeyseton(unsigned char i);
+
 void u6okeysetoff(unsigned char i);
 
 void GETINPUT_update();
 
-void mididown(unsigned char instrument,unsigned char key);
-void midiup(unsigned char instrument,unsigned char key);
+void mididown(unsigned char instrument, unsigned char key);
 
-void LIGHTnew(unsigned short x,unsigned short y,unsigned long light_data_offset, unsigned short x_axis_size);
+void midiup(unsigned char instrument, unsigned char key);
+
+void LIGHTnew(unsigned short x, unsigned short y, unsigned long light_data_offset, unsigned short x_axis_size);
+
 //LIGHTnew has inline assembly FIXME
 
-unsigned short objgettype(unsigned short type,unsigned char dir,unsigned char frm);
+unsigned short objgettype(unsigned short type, unsigned char dir, unsigned char frm);
 
-unsigned char objgetnextframe(unsigned short type,unsigned char frm);
+unsigned char objgetnextframe(unsigned short type, unsigned char frm);
 
-void getsound(unsigned short type,long x,long y);
-void getlight(unsigned short type,long x,long y);
+void getsound(unsigned short type, long x, long y);
+
+void getlight(unsigned short type, long x, long y);
 
 //portraits 2.0 functions
-void loadportrait(unsigned short i,surf *s);
+void loadportrait(unsigned short i, surf *s);
+
 surf *getportrait(unsigned short i);
+
 surf *getportrait_doublesize(unsigned short i);
+
 surf *getportrait_halfsize(unsigned short i);
 
-unsigned char getambientlight(unsigned short x,unsigned short y);
+unsigned char getambientlight(unsigned short x, unsigned short y);
 
-void txtmakeu6ocompatible(txt* t); /* filters out nasty characters that would mess up things */
-void STATUSMESSadd(txt *t);
+void txtmakeu6ocompatible(txt * t); /* filters out nasty characters that would mess up things */
+void STATUSMESSadd(txt * t);
+
 void STATUSMESSadd(const char *t);
 
 // s555
 void STATUSMESSadd(txt *t, int skippable);
+
 void STATUSMESSadd(const char *t, int skippable);
+
 void STATUSMESSadd(const char *t, int skippable, int num);
 
 
-long getsetting(const char*d);
+long getsetting(const char *d);
 
 // Rewrite settings.txt in place, replacing/appending one
 // `{NAME, [VALUE]}` integer entry. See implementation in
@@ -261,15 +284,18 @@ long getsetting(const char*d);
 // read-back idiom (clear GETSETTING_RAW first, then call getsetting,
 // then test GETSETTING_RAW->l). Used to persist session UI state such
 // as WINDOW_MAXIMIZED / WINDOW_W / WINDOW_H / WINDOW_X / WINDOW_Y.
-void setsetting_int(const char* name, long value);
+void setsetting_int(const char *name, long value);
 
-void refresh();  // FIXME Inline assembly alert!
+void refresh(); // FIXME Inline assembly alert!
 
-void scrlog(const char*d); //screen log
+void scrlog(const char *d); //screen log
 
 surf *loadimage2(LPCSTR name);
-surf *loadimage2(txt* name);
-surf *loadimage2(LPCSTR name,long flags);
-surf *loadimage2(txt* name,long flags);
+
+surf *loadimage2(txt * name);
+
+surf *loadimage2(LPCSTR name, long flags);
+
+surf *loadimage2(txt *name, long flags);
 
 #endif /* FUNCTION_CLIENT_H */

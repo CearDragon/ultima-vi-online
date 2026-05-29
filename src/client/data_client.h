@@ -15,26 +15,27 @@
  */
 
 /* structure definitions */
-struct client_settings{
-  short party_frame_offset_x[8],party_frame_offset_y[8];
-  short party_spellbook_frame_offset_x[8],party_spellbook_frame_offset_y[8];
-  short musickeyboard_offset_x,musickeyboard_offset_y;
-  short inpf_offset_x,inpf_offset_y;
-  short con_frm_offset_x,con_frm_offset_y;
-  short volcontrol_offset_x,volcontrol_offset_y;
-  short qkstf_offset_x,qkstf_offset_y;
-  unsigned char u6ovolume;
-  unsigned char u6omidivolume;
-  //add more settings here
-  unsigned char u6ovoicevolume;
-  unsigned char spellrecall_partymember[8];
-  unsigned char spellrecall_i[8];
-  short minimap_offset_x,minimap_offset_y;
-  short tmap_offset_x,tmap_offset_y;
+struct client_settings {
+    short party_frame_offset_x[8], party_frame_offset_y[8];
+    short party_spellbook_frame_offset_x[8], party_spellbook_frame_offset_y[8];
+    short musickeyboard_offset_x, musickeyboard_offset_y;
+    short inpf_offset_x, inpf_offset_y;
+    short con_frm_offset_x, con_frm_offset_y;
+    short volcontrol_offset_x, volcontrol_offset_y;
+    short qkstf_offset_x, qkstf_offset_y;
+    unsigned char u6ovolume;
+    unsigned char u6omidivolume;
+    //add more settings here
+    unsigned char u6ovoicevolume;
+    unsigned char spellrecall_partymember[8];
+    unsigned char spellrecall_i[8];
+    short minimap_offset_x, minimap_offset_y;
+    short tmap_offset_x, tmap_offset_y;
 };
-struct inpmess_index{
-  txt *t;
-  inpmess_index *next;
+
+struct inpmess_index {
+    txt *t;
+    inpmess_index *next;
 };
 
 
@@ -72,12 +73,12 @@ extern surf *intro_ultimavi2;
 
 //visibility checking arrays
 extern Dynamic2DArray<unsigned char> vis; //will be used for pathfind as well!
-extern Dynamic2DArray<unsigned char> vis_window;//if =1 window exists here
-extern Dynamic2DArray<unsigned char> vis_chair;//1=up 2=right 3=down 4=left 0=none
-extern Dynamic2DArray<unsigned char> vischeck;//0=objects on this square are not visible, 1=they are
-extern unsigned char visalways[256][1024];//bit array, if =1 force visibility
-extern Dynamic2DArray<unsigned char> vis_bed;//1=horizontal bed 2=vertical bed
-extern Dynamic2DArray<unsigned char> vis_slime;//1=slime
+extern Dynamic2DArray<unsigned char> vis_window; //if =1 window exists here
+extern Dynamic2DArray<unsigned char> vis_chair; //1=up 2=right 3=down 4=left 0=none
+extern Dynamic2DArray<unsigned char> vischeck; //0=objects on this square are not visible, 1=they are
+extern unsigned char visalways[256][1024]; //bit array, if =1 force visibility
+extern Dynamic2DArray<unsigned char> vis_bed; //1=horizontal bed 2=vertical bed
+extern Dynamic2DArray<unsigned char> vis_slime; //1=slime
 
 extern unsigned char x5option;
 
@@ -89,7 +90,7 @@ extern MIXERCONTROL mxc;
 extern MIXERLINECONTROLS mxlc;
 extern tMIXERCONTROLDETAILS mixer;
 extern tMIXERCONTROLDETAILS_UNSIGNED mixervolume[2];
-extern MIXERCONTROLDETAILS_BOOLEAN mcb ;
+extern MIXERCONTROLDETAILS_BOOLEAN mcb;
 extern MIXERCONTROLDETAILS mcd;
 
 extern unsigned short customportrait[3584];
@@ -120,11 +121,11 @@ extern unsigned char xray;
 extern unsigned char peer;
 extern unsigned char tmap;
 extern float wizardeyetimeleft;
-extern float ktar_display;//seconds to display keyboard targetting numbers for
+extern float ktar_display; //seconds to display keyboard targetting numbers for
 extern unsigned char talkprev;
 extern unsigned char directionalmove_only;
 extern unsigned char tremor;
-extern unsigned long clientplayerid;//only valid if not 0
+extern unsigned long clientplayerid; //only valid if not 0
 extern txt *namelast;
 extern unsigned char localvoicemessage_return;
 extern float autoscroll;
@@ -150,7 +151,7 @@ extern unsigned short portraitlook_portrait;
 extern unsigned char portraitlook_equip;
 extern unsigned short portraitlook_type[8];
 extern unsigned char portraitlook_plusbonus[8];
-extern txt* portraitlook_name;
+extern txt *portraitlook_name;
 extern unsigned long portraitlook_namecolour;
 //cloud info
 extern unsigned char noclouds;
@@ -159,11 +160,11 @@ extern unsigned char cloudloaded;
 extern surf *cloudimg[16][4];
 extern unsigned char cloudactive[32];
 extern unsigned char cloudtype[32];
-extern long cloudx[32],cloudy[32];
+extern long cloudx[32], cloudy[32];
 extern long cloudheight[32];
 extern unsigned char firstclouds;
 //not4sale info
-extern unsigned short not4sale_flags[8];//one index per partymember
+extern unsigned short not4sale_flags[8]; //one index per partymember
 
 extern DWORD dwMilliSeconds;
 extern UINT wDeviceID;
@@ -172,7 +173,6 @@ extern MCI_OPEN_PARMS mciOpenParms;
 extern MCI_RECORD_PARMS mciRecordParms;
 extern MCI_SAVE_PARMS mciSaveParms;
 extern MCI_PLAY_PARMS mciPlayParms;
-
 
 
 extern surf *vs;
@@ -241,14 +241,14 @@ extern bool setupfail;
 
 /* luteijn: old stuff no longer referenced anywhere:
    txt* u6oip; //host ip address
-   HINTERNET u6o_internet; //internet session 
+   HINTERNET u6o_internet; //internet session
    bool u6o_offline=FALSE;
    */
 extern bool u6o_sound;
 extern tagSIZE tagxy;
 extern HDC taghdc;
 
-extern FRAME* musickeyboard;
+extern FRAME *musickeyboard;
 
 extern client_settings cltset;
 extern client_settings cltset2;
@@ -264,24 +264,24 @@ extern char windx2;
 extern char windy2;
 
 //light arrays
-extern unsigned long ls_off,ls_off_add,ls2_off,ls2_off_add;
+extern unsigned long ls_off, ls_off_add, ls2_off, ls2_off_add;
 extern unsigned char *ls2_p;
 extern unsigned short lval[16][65536];
 // RW-P2.1: lighting buffers are heap-allocated (see viewport.cpp /
 // lighting_alloc). Defined in src/common/globals.inc as `unsigned char*`.
-extern unsigned char* ls;
-extern unsigned char* ls_moon1;
-extern unsigned char* ls_moon2;
-extern unsigned char* ls_moon3;
-extern unsigned char* ls_moon4;
-extern unsigned char ls3[32*3][32*3];
-extern unsigned char ls3b[32*3][32*3];
-extern unsigned char ls5[32*5][32*5];
-extern unsigned char ls5b[32*5][32*5];
-extern unsigned char ls7[32*7][32*7];
-extern unsigned char ls9[32*9][32*9];
-extern unsigned char ls11[32*11][32*11];
-extern unsigned char ls13[32*13][32*13];
+extern unsigned char *ls;
+extern unsigned char *ls_moon1;
+extern unsigned char *ls_moon2;
+extern unsigned char *ls_moon3;
+extern unsigned char *ls_moon4;
+extern unsigned char ls3[32 * 3][32 * 3];
+extern unsigned char ls3b[32 * 3][32 * 3];
+extern unsigned char ls5[32 * 5][32 * 5];
+extern unsigned char ls5b[32 * 5][32 * 5];
+extern unsigned char ls7[32 * 7][32 * 7];
+extern unsigned char ls9[32 * 9][32 * 9];
+extern unsigned char ls11[32 * 11][32 * 11];
+extern unsigned char ls13[32 * 13][32 * 13];
 
 extern unsigned short intro_starx[1024];
 extern unsigned short intro_stary[1024];
@@ -292,7 +292,7 @@ extern unsigned char textdisplayupdate;
 
 extern float client_globalwait;
 
-extern txt* tshiftnum;
+extern txt *tshiftnum;
 extern unsigned char shiftnum_show;
 
 
@@ -326,7 +326,7 @@ extern unsigned long keyframe15;
 extern unsigned long keyframe31; //animation/palette index (0-7)
 extern unsigned long refreshcount; //incremented every refresh
 
-extern surf* ps;
+extern surf *ps;
 extern surf *ps2;
 extern surf *ps3;
 extern surf *ps4;
@@ -338,15 +338,15 @@ extern surf *ps640400;
 extern surf *ps320200;
 
 // rrr
-extern surf* psnew1;
-extern surf* psnew1b;
+extern surf *psnew1;
+extern surf *psnew1b;
 //extern surf* party_surf[8];
-extern FRAME* party_frame_new[];
+extern FRAME *party_frame_new[];
 extern unsigned int partyframenewmax;
 
 // r222
 extern unsigned int partyresxo;
-extern  unsigned int partyresyo;
+extern unsigned int partyresyo;
 extern unsigned int partyresxz;
 extern unsigned int partyresyz;
 extern int newmodestatus;
@@ -371,7 +371,7 @@ extern int panelsideui, panelactionbar1, panelactionbar2, panelactiontalkbar1, p
 
 // r444
 extern surf *minimaptilesurf, *minimaptilesurf1, *minimaptilesurf2;
-extern surf* minimap_surf_new;
+extern surf *minimap_surf_new;
 extern unsigned int minimaptype, minimaptypemax;
 extern int minimapnewx, minimapnewy;
 extern int minimapdeltax, minimaptilexstart, minimaptilexend;
@@ -395,7 +395,7 @@ extern int actiontalkfilltext;
 //extern surf* actionbuttonsurf[ACTIONBUTTON_MAX][10];
 
 // r999
-extern surf* uipanelsurf[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
+extern surf *uipanelsurf[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
 extern int uipanelx[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
 extern int uipanely[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
 extern int uipanelsizex[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
@@ -410,14 +410,16 @@ extern int uipaneli[UI_PANEL_MAX][UI_PANELWIDGET_MAX];
 extern int uipanelcount;
 extern int uipanelwidgetcount[UI_PANEL_MAX];
 
-extern int uipanelsidebar, uipanelminimap, uipanelworldmap, uipanelworldmapbar, uipanelpartymemberparent, uipanelactionbarparent, uipanelactiontalkbarparent;
-extern int uipanelactionbar1, uipanelactionbar2, uipaneloptionbar1, uipanelactiontalkbar1, uipanelactiontalkbar2, uipanelactiontalkbar3;
+extern int uipanelsidebar, uipanelminimap, uipanelworldmap, uipanelworldmapbar, uipanelpartymemberparent,
+        uipanelactionbarparent, uipanelactiontalkbarparent;
+extern int uipanelactionbar1, uipanelactionbar2, uipaneloptionbar1, uipanelactiontalkbar1, uipanelactiontalkbar2,
+        uipanelactiontalkbar3;
 extern int uipanelpartymember0;
 extern int uipaneloptioninfo;
 
 extern int hituipaneli, hituiwidgeti;
-extern surf* uipanelimgsurf[UI_PANEL_IMG_MAX];
-extern surf* uiwidgetimgsurf[UI_PANELWIDGET_IMG_MAX][UI_WIDGETSTATE_IMG_MAX];
+extern surf *uipanelimgsurf[UI_PANEL_IMG_MAX];
+extern surf *uiwidgetimgsurf[UI_PANELWIDGET_IMG_MAX][UI_WIDGETSTATE_IMG_MAX];
 extern float uiscalex, uiscaley;
 extern int uiscaling;
 extern int uihover;
@@ -426,7 +428,6 @@ extern surf *uihoveractionbuttonsurf, *uihoveractiontalkbuttonsurf, *uihoverpart
 // s777
 extern int uipanelpartymemberbar1;
 extern int uipanelpartymemberlock;
-
 
 
 // s222
@@ -439,7 +440,7 @@ extern int combatinfoplayerprevinit;
 extern int resultinfon1;
 
 // s444
-extern surf* worldmapsurfn1[5];
+extern surf *worldmapsurfn1[5];
 extern int worldmapindexn1;
 extern int enhancen1;
 extern int showworldmapn1;
@@ -451,14 +452,13 @@ extern HFONT txtfntoldn1;
 extern int updatepartyframen1;
 
 
-
-extern surf* bt32;
-extern surf* bt16;
-extern surf* spr84[16];
-extern surf* spr8[8];
-extern surf* sfx8;
-extern surf* bt8[8];
-extern sound* SNDhit;
+extern surf *bt32;
+extern surf *bt16;
+extern surf *spr84[16];
+extern surf *spr8[8];
+extern surf *sfx8;
+extern surf *bt8[8];
+extern sound *SNDhit;
 
 //sf compatible information
 extern sfxtype sfx[256]; //local sf
@@ -466,20 +466,20 @@ extern sfxtype sfx[256]; //local sf
 extern unsigned char update[8]; //set to 1 if party frame needs updating
 extern unsigned char action; //active action key
 
-extern unsigned char sprpi[65536];//index in pal emu spr8
+extern unsigned char sprpi[65536]; //index in pal emu spr8
 
 //portraits 2.0 info
-extern surf* portrait[65536];//regular size portraits
-extern surf* portrait_doublesize[65536];//double size
-extern surf* portrait_halfsize[65536];//half size
-extern unsigned char portrait_loaded[65536];//TRUE=PORTRAIT LOADED
-extern unsigned char portrait_requested[65536];//TRUE=portrait has been requested
+extern surf *portrait[65536]; //regular size portraits
+extern surf *portrait_doublesize[65536]; //double size
+extern surf *portrait_halfsize[65536]; //half size
+extern unsigned char portrait_loaded[65536]; //TRUE=PORTRAIT LOADED
+extern unsigned char portrait_requested[65536]; //TRUE=portrait has been requested
 extern txt *portrait_request_txt;
-extern surf* PORTRAIT_UNAVAILABLE;
+extern surf *PORTRAIT_UNAVAILABLE;
 
 extern unsigned char wateri[32]; //used for hybrid sea tiles
 
-extern object* mobj; //selected (mouse) object *local
+extern object *mobj; //selected (mouse) object *local
 extern object *moon1;
 
 extern player *CLIENTplayer;
@@ -492,10 +492,10 @@ extern unsigned short stolenitemwarningtype[256];
 
 extern unsigned char client_spellwait[8];
 
-extern txt* inpmess;
+extern txt *inpmess;
 extern inpmess_index *inpmess_mostrecent;
 extern long inpmess_selected;
-extern surf *surf_tremor,*surf_tremor2,*surf_tremorcirclemask;
+extern surf *surf_tremor, *surf_tremor2, *surf_tremorcirclemask;
 extern surf *intro_startup;
 
 extern unsigned short walkthru_x;
@@ -506,14 +506,14 @@ extern unsigned long walkthru_pos;
 extern JOYINFOEX joy;
 
 
-extern txt *u6o_user_name; 
-extern txt *u6o_user_password; 
-extern txt *u6o_name; 
-extern unsigned char u6o_malefemale;//0=male, 1=female
+extern txt *u6o_user_name;
+extern txt *u6o_user_password;
+extern txt *u6o_name;
+extern unsigned char u6o_malefemale; //0=male, 1=female
 extern unsigned short u6o_portrait;
 extern unsigned char u6o_type;
-extern unsigned char u6o_vq[28];//0=a,1=b
-extern unsigned char u6o_createcharacter;//obselete!
+extern unsigned char u6o_vq[28]; //0=a,1=b
+extern unsigned char u6o_createcharacter; //obselete!
 extern txt *u6o_new_user_password;
 
 extern surf *spellicon[256];
@@ -526,56 +526,56 @@ extern float midi_foreground_wait;
 
 extern txt *con_txt[8];
 
-extern surf* party_spellbook_surf[8];
-extern FRAME* party_spellbook_frame[8];
+extern surf *party_spellbook_surf[8];
+extern FRAME *party_spellbook_frame[8];
 extern unsigned short spell[8][256]; //number of times spell can be cast (+1)
 extern unsigned char spellbook_page[8]; //current page in spellbook
 extern unsigned char spellbook_flags[8]; //1=left dog-ear 2=right dog-ear
 
 
-extern surf* party_surf[8];
-extern FRAME* party_frame[8];
+extern surf *party_surf[8];
+extern FRAME *party_frame[8];
 
-extern surf* minimap_surf;
-extern FRAME* minimap_frame;
-extern surf* minimap_b;
-extern surf* treasuremap;
-extern surf* tmap_surf;
-extern FRAME* tmap_frame;
-extern surf* tmap_markers;
-extern surf* tmap_marker;
+extern surf *minimap_surf;
+extern FRAME *minimap_frame;
+extern surf *minimap_b;
+extern surf *treasuremap;
+extern surf *tmap_surf;
+extern FRAME *tmap_frame;
+extern surf *tmap_markers;
+extern surf *tmap_marker;
 
-extern object* tobj_i[8][16+1+4+1];
-extern object* tobj_e[8][8];
+extern object *tobj_i[8][16 + 1 + 4 + 1];
+extern object *tobj_e[8][8];
 
 extern unsigned char intro; //part of intro to process (0=ingame!)
 
 extern unsigned char cltset2_restored;
 
-extern file* messagelog;
+extern file *messagelog;
 
-extern FRAME* fs;
-extern surf* status8;
-extern surf* darrow;
-extern surf* uarrow;
-extern surf* horizon;
-extern surf* horizon2;
+extern FRAME *fs;
+extern surf *status8;
+extern surf *darrow;
+extern surf *uarrow;
+extern surf *horizon;
+extern surf *horizon2;
 
-extern surf* cave;
-extern surf* sun;
-extern surf* sun2;
-extern surf* mini_1;
-extern surf* tmini_1;
-extern surf* mini_2;
-extern surf* mini_3;
-extern surf* u6ob;
-extern surf* dhno;
-extern surf* not4sale;
-extern surf* not4salemask;
-extern surf* converse_arrows;
-extern surf* spellbook;
-extern surf* spellbookmini;
-extern surf* statusmessage_arrowup;
+extern surf *cave;
+extern surf *sun;
+extern surf *sun2;
+extern surf *mini_1;
+extern surf *tmini_1;
+extern surf *mini_2;
+extern surf *mini_3;
+extern surf *u6ob;
+extern surf *dhno;
+extern surf *not4sale;
+extern surf *not4salemask;
+extern surf *converse_arrows;
+extern surf *spellbook;
+extern surf *spellbookmini;
+extern surf *statusmessage_arrowup;
 extern surf *spellcircle[8];
 extern surf *statusbar_r255;
 extern surf *statusbar_r128;
@@ -583,7 +583,7 @@ extern surf *statusbar_b255;
 extern surf *statusbar_b128;
 extern surf *statusbar_g255;
 extern surf *statusbar_g128;
-extern surf* statusbar;
+extern surf *statusbar;
 extern surf *dogearr;
 extern surf *dogearl;
 extern surf *spellbookline;
@@ -637,32 +637,32 @@ extern surf *horsemaskdress;
 extern surf *horsemask2dress;
 extern surf *horsemaskdressb;
 extern surf *horsemask2dressb;
-extern surf* port_temp;
-extern surf* vm_volumem;
-extern surf* vm_volmmute;
-extern surf* vm_voltab2m;
-extern surf* volcontrol_background;
-extern surf* volcontrol_surf;
-extern surf* volcontrol_tab1;
-extern surf* volcontrol_tab2;
-extern surf* volcontrol_tab3;
-extern surf* viewnpc;
-extern surf* viewnpc2;
-extern surf* viewnpc_temp;
-extern surf* viewnpc2_temp;
+extern surf *port_temp;
+extern surf *vm_volumem;
+extern surf *vm_volmmute;
+extern surf *vm_voltab2m;
+extern surf *volcontrol_background;
+extern surf *volcontrol_surf;
+extern surf *volcontrol_tab1;
+extern surf *volcontrol_tab2;
+extern surf *volcontrol_tab3;
+extern surf *viewnpc;
+extern surf *viewnpc2;
+extern surf *viewnpc_temp;
+extern surf *viewnpc2_temp;
 
-extern FRAME* statusmessage_viewnpc;
-extern FRAME* statusmessage_viewprev;
-extern FRAME* voicechat_frame;
-extern FRAME* volcontrol;
-extern FRAME* qkstf;
+extern FRAME *statusmessage_viewnpc;
+extern FRAME *statusmessage_viewprev;
+extern FRAME *voicechat_frame;
+extern FRAME *volcontrol;
+extern FRAME *qkstf;
 extern FRM_IMAGE *con_frm_img;
-extern FRAME* con_frm;
-extern FRM_TXT* inpft;
+extern FRAME *con_frm;
+extern FRM_TXT *inpft;
 extern FRM_INPUT *inpf2;
 extern txt *inpftxt;
-extern FRAME* inpf;
-extern FRAME* vf;
+extern FRAME *inpf;
+extern FRAME *vf;
 
 extern HCURSOR cur1;
 extern HCURSOR cur2;

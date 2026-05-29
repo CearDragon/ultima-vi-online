@@ -1,30 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef DEFINE_BOTH_H
 #define DEFINE_BOTH_H
 
@@ -240,7 +213,7 @@
 #define SF_ARROW	(2)
 #define SF_TXT_PORTRAIT	(3)
 #define SF_SOUND_EFFECT	(4)
-#define SF_LIGHTNING	(5) 
+#define SF_LIGHTNING	(5)
 #define SF_BOLT		(6)
 #define SF_BOOMERANG	(7)
 #define SF_FIRE_BOLT	(8)
@@ -902,7 +875,6 @@
 #define UI_WIDGET_ACTIONTALKBUTTON_HELP 10
 
 
-
 // s222
 #define SOUND_LEVER 6
 #define SOUND_DOOROPEN 1
@@ -1013,7 +985,6 @@
 #define BUILD_SECTIONID_WALL 1
 #define BUILD_SECTIONID_OBJ 11
 #define BUILD_SECTIONID_STORAGE1 21
-
 
 
 #endif /* DEFINE_BOTH_H */

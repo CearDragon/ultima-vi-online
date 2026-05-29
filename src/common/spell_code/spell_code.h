@@ -17,26 +17,47 @@
 /* list generated using ../tools/function_list.sh
  */
 U6O_SPELL_FUNCTION(create_food);
+
 U6O_SPELL_FUNCTION(detect_magic);
+
 U6O_SPELL_FUNCTION(detect_trap);
+
 U6O_SPELL_FUNCTION(dispel_magic);
+
 U6O_SPELL_FUNCTION(douse);
+
 U6O_SPELL_FUNCTION(explosion);
+
 U6O_SPELL_FUNCTION(harm);
+
 U6O_SPELL_FUNCTION(heal);
+
 U6O_SPELL_FUNCTION(help);
+
 U6O_SPELL_FUNCTION(ignite);
+
 U6O_SPELL_FUNCTION(light);
+
 U6O_SPELL_FUNCTION(infravision);
+
 U6O_SPELL_FUNCTION(magic_arrow);
+
 U6O_SPELL_FUNCTION(poison);
+
 U6O_SPELL_FUNCTION(reappear);
+
 U6O_SPELL_FUNCTION(sleep);
+
 U6O_SPELL_FUNCTION(telekinesis);
+
 U6O_SPELL_FUNCTION(trap);
+
 U6O_SPELL_FUNCTION(unlock_magic);
+
 U6O_SPELL_FUNCTION(untrap);
+
 U6O_SPELL_FUNCTION(vanish);
+
 U6O_SPELL_FUNCTION(armageddon);
 
 
