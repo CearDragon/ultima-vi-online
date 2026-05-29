@@ -7,48 +7,52 @@
 
 
 /* structure definitions */
-struct housesav_info{
-  unsigned short flags;
-  //1 occupied (vacant if NULL)
-  //*EXCEPTION*: array index 0: flags set to day of month)
-  unsigned char username[32];
-  unsigned char charactername[32];
-  unsigned short gold;
-};
-//converse information
-struct npcbin_i{ //npcbin information/instruction
-  long l1;
-  long l2;
-  long l3;
-  long l4;
-};
-struct objentry
-{
-  unsigned char status;
-  unsigned char unk_h;
-  unsigned char unk_d1;
-  unsigned char unk_d2;
-  unsigned short type;
-  unsigned char qty;
-  unsigned char tag;
-};
-struct mlobj{ //multi-object index array
-  object *obj[1]; //use 1 to avoid compile warning
-};
-struct crtenum_struct{
-  char x;
-  char y;
+struct housesav_info {
+    unsigned short flags;
+    //1 occupied (vacant if NULL)
+    //*EXCEPTION*: array index 0: flags set to day of month)
+    unsigned char username[32];
+    unsigned char charactername[32];
+    unsigned short gold;
 };
 
+//converse information
+struct npcbin_i {
+    //npcbin information/instruction
+    long l1;
+    long l2;
+    long l3;
+    long l4;
+};
+
+struct objentry {
+    unsigned char status;
+    unsigned char unk_h;
+    unsigned char unk_d1;
+    unsigned char unk_d2;
+    unsigned short type;
+    unsigned char qty;
+    unsigned char tag;
+};
+
+struct mlobj {
+    //multi-object index array
+    object *obj[1]; //use 1 to avoid compile warning
+};
+
+struct crtenum_struct {
+    char x;
+    char y;
+};
 
 
 /* external variables globals.h */
-extern unsigned char save_buffer[SAVESLOTLAST+1];
-extern txt *save_username[SAVESLOTLAST+1];
-extern txt *save_password[SAVESLOTLAST+1];
-extern txt *save_name[SAVESLOTLAST+1];
-extern unsigned long save_exp[SAVESLOTLAST+1];
-extern unsigned long save_bytes[SAVESLOTLAST+1];
+extern unsigned char save_buffer[SAVESLOTLAST + 1];
+extern txt *save_username[SAVESLOTLAST + 1];
+extern txt *save_password[SAVESLOTLAST + 1];
+extern txt *save_name[SAVESLOTLAST + 1];
+extern unsigned long save_exp[SAVESLOTLAST + 1];
+extern unsigned long save_bytes[SAVESLOTLAST + 1];
 extern unsigned char save_dump;
 extern unsigned char login_dead_callback;
 
@@ -114,7 +118,7 @@ extern npcbin_i *npcbin;
 
 extern unsigned long sfi[256][256]; //pointer to first sf
 extern sfxtype sf[65536]; //clear every cycle
-extern unsigned long sf_playerid[65536];//only valid for text messages where top bit of port is set
+extern unsigned long sf_playerid[65536]; //only valid for text messages where top bit of port is set
 extern long sfn; //last sf
 extern unsigned long sfx_playerid[256];
 
@@ -137,8 +141,8 @@ extern long objb_free_last; //last free objb index
 //doorclose: automatically locks unlocked doors after 2 hours if unused and noone has passed through
 extern long doorclose_last;
 extern float doorclose_wait[1024];
-extern object *doorclose_obj[1024],*doorclose_obj2[1024];
-extern unsigned short doorclose_oldtype[1024],doorclose_oldtype2[1024];
+extern object *doorclose_obj[1024], *doorclose_obj2[1024];
+extern unsigned short doorclose_oldtype[1024], doorclose_oldtype2[1024];
 
 //leverchange
 extern long leverchange_last;
@@ -147,9 +151,8 @@ extern object *leverchange_obj[1024];
 extern unsigned short leverchange_oldtype[1024];
 
 
-
 extern unsigned char showmoongates;
-extern unsigned short moongatex[8],moongatey[8];
+extern unsigned short moongatex[8], moongatey[8];
 extern object *moongate[8][2];
 extern unsigned char moonphase;
 
@@ -163,27 +166,27 @@ extern long vlnkb_last; //last
 extern unsigned long vlnkb_free[65536]; //free vlnkb index
 extern long vlnkb_free_last; //last free vlnkb index
 
-extern object* portcullis[256][16];
-extern object* lever[256][16];
-extern object* efield[256][16]; //electric field
-extern object* eswitch[256][16]; //electric switch
+extern object *portcullis[256][16];
+extern object *lever[256][16];
+extern object *efield[256][16]; //electric field
+extern object *eswitch[256][16]; //electric switch
 
 extern crtenum_struct crtenum[1073];
-extern object* crtenum_pathok_castok[1024];
+extern object *crtenum_pathok_castok[1024];
 extern short crtenum_pathok_castok_i;
-extern object* crtenum_pathok[1024]; 
+extern object *crtenum_pathok[1024];
 extern short crtenum_pathok_i;
-extern object* crtenum_castok[1024]; 
+extern object *crtenum_castok[1024];
 extern short crtenum_castok_i;
 
 //resurrect info
 extern object *resu[65536]; //object
 extern object *resu_body[65536]; //dead body object
-extern unsigned short resu_body_type[65536];//object type of dead body (used to remake lost body and check if correct)
+extern unsigned short resu_body_type[65536]; //object type of dead body (used to remake lost body and check if correct)
 extern float resu_wait[65536]; //time until object automatically resurrected
 extern player *resu_player[65536]; //player object belongs to
 extern unsigned char resu_partymember[65536]; //party member index
-extern unsigned short resu_x[65536],resu_y[65536];
+extern unsigned short resu_x[65536], resu_y[65536];
 extern long nresu;
 
 
@@ -212,9 +215,7 @@ extern unsigned short respawn_delay[1200]; //number of seconds till creature wil
 extern long respawn_last;
 
 
-
-
-extern player* playerlist[1024]; //supports up to 1024 online players
+extern player *playerlist[1024]; //supports up to 1024 online players
 extern long playerlist_last;
 
 
@@ -226,9 +227,6 @@ extern unsigned char u60ci2[32][16][3];
 extern unsigned short u60ci[32][32];
 
 extern object *od[1024][2048]; //8M, pointers to all data, NULL pointers are common
-
-
-
 
 
 extern object *oul[65536]; //list of active objects to update (size: 1M)
@@ -260,7 +258,7 @@ or locally by being passed as flags
 local flags and OR-ed with global flags
 */
 extern unsigned long MOVERNEW_GLOBALFLAGS;
-extern unsigned char MOVERNEW_ERROR;//valid when movernew(...) returns 0
+extern unsigned char MOVERNEW_ERROR; //valid when movernew(...) returns 0
 //1=FAILED (object is not a mover)
 //2=IGNORED (object is not the primary part of a mover)
 
@@ -283,7 +281,7 @@ extern unsigned short revive_infiniteloopexit_i3;
 
 extern unsigned long mycount;
 extern long newschedule2;
-extern object* newll;
+extern object *newll;
 extern unsigned long ol_tag;
 extern unsigned long ol_tag_prev;
 

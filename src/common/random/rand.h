@@ -20,29 +20,30 @@ MODIFIED:
 #define RANDSIZ    (1<<RANDSIZL)
 
 /* context of random number generator */
-struct randctx
-{
-  ub4 randcnt;
-  ub4 randrsl[RANDSIZ];
-  ub4 randmem[RANDSIZ];
-  ub4 randa;
-  ub4 randb;
-  ub4 randc;
+struct randctx {
+    ub4 randcnt;
+    ub4 randrsl[RANDSIZ];
+    ub4 randmem[RANDSIZ];
+    ub4 randa;
+    ub4 randb;
+    ub4 randc;
 };
-typedef  struct randctx  randctx;
+
+typedef struct randctx randctx;
 
 /*
 ------------------------------------------------------------------------------
  If (flag==TRUE), then use the contents of randrsl[0..RANDSIZ-1] as the seed.
 ------------------------------------------------------------------------------
 */
-void randinit( randctx *r, word flag );
+void randinit(randctx *r, word flag);
 
 void isaac(randctx *r);
 
 void isaac_init(unsigned long seed);
 
 float isaac_rand();
+
 /*
 ------------------------------------------------------------------------------
  Call rand(/o_ randctx *r _o/) to retrieve a single 32-bit random value
@@ -54,5 +55,3 @@ float isaac_rand();
      (r)->randrsl[(r)->randcnt])
 
 #endif  /* RAND */
-
-

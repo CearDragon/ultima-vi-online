@@ -6,7 +6,7 @@
 //save version 3.0 ENCRYPTED3.0 
 //save version 4.0 UNENCRYPTED3.0 
 //save ver 5 is same as 4, but with sha2 encrypted pw and 1 extra byte to indicate what encryption is used
-#define SAVEVER 5 
+#define SAVEVER 5
 #define ADMINSMAX 8
 //shrine stat improvements
 #define U6O_HONESTY tnpc->i+=3;
@@ -28,9 +28,9 @@
 #define MOVER_FOUND 65536
 #define HOUSEMAX 256
 #define HOUSESTORAGESLOTMAX 600
-#ifdef CLIENT 
+#ifdef CLIENT
 #define FIRST_CLIENT 1
-#else 
+#else
 #define FIRST_CLIENT 0
 #endif
 #endif /* DEFINE_HOST_H */

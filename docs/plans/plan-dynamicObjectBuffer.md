@@ -352,6 +352,28 @@ State of the plan (update at the end of every session, with date & who):
   Phase 1 = the cap added in RW-P4.11 (`kViewportTilesXMax = 63`,
   `kViewportTilesYMax = 47`) is in place and protects the crash; this
   plan is the path to remove that cap properly. Start at **DOB-P0.1**.
+- **2026-05-28 (sobj transmit-window pre-fix)** — Out-of-band patch: the
+  host's per-frame sobj fill loop, the screen+1 / screen+8 buffer-fit
+  checks, and the per-tile encode/decode were all stretched to cover the
+  full `kViewportTilesXMax x kViewportTilesYMax + 8 fence` rectangle so
+  ground items render across the entire resizable viewport. Added
+  constants live in `src/common/define_both.h` (`SOBJ_TX_W=79`,
+  `SOBJ_TX_H=63`, `SOBJ_TX_BITS=13`, `SOBJ_TX_OFFX/OFFY`,
+  `SOBJ_S1_LEFT/TOP/RIGHT/BOTTOM`, `SOBJ_S1_INSET`). `U6O_VERSION`
+  bumped 10 → 11. **The static `[96][72]` per-player sobj buffers were
+  NOT enlarged** (the new transmit window fits inside the existing
+  capacity with 4-9 tiles of slack on each axis when the buffer is
+  re-centered on the player). This means:
+    * DOB-P0..P3 are still required to lift the 96×72 cap if we ever
+      want `kViewportTilesXMax/YMax` to exceed (96 - 32 - 1) / (72 - 24
+      - 1) = 63 / 47 — i.e. the cap can't be raised beyond its current
+      value without doing the dynamic-buffer work.
+    * The sobj transmit window already saturates the current
+      kViewportTiles*Max ceiling, so further capacity gains require the
+      full plan.
+  Resume DOB work at **DOB-P0.1** as before; the new `SOBJ_TX_*`
+  constants give P1's "named-constants instead of literal 48/40/11"
+  refactor a head start on the wire-format side.
 
 To pick up cleanly:
 
