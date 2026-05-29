@@ -5645,6 +5645,8 @@ ktarcast:
       userkey=0;
       CLIENTplayer->key|=KEYl;
       CLIENTplayer->action=2;
+      lookatx = mx;
+      lookaty = my;
 
     }
 
@@ -10739,8 +10741,17 @@ donesf2:;
 
     if (STATUSMESSwait){
       txtset(t,STATUSMESSdisplaying);
-      x=0;
-      y=768-32;
+
+      // Check if this is a "look" message and position it at click location
+      txtset(t3, "Thou dost see");
+      if (txtsearch(t, t3) > 0) {
+        x = lookatx;
+        y = lookaty;
+      } else {
+        x = 0;
+        y = 768-32;
+      }
+
       txtfnt=fnt1naa;
       txtcol=rgb(0,0,0);
       txtout(ps,x,y,t);
