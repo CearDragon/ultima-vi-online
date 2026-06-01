@@ -275,7 +275,7 @@ string(CONCAT "MSVC_RUNTIME_LIBRARY_STR"
         MultiThreadedDebug
         >
         $<$<CONFIG:Release>:
-        MultiThreadedDLL
+        MultiThreaded
         >
         $<$<NOT:$<OR:$<CONFIG:Debug>,$<CONFIG:Release>>>:${MSVC_RUNTIME_LIBRARY_DEFAULT}>
 )
@@ -480,7 +480,7 @@ string(CONCAT "MSVC_RUNTIME_LIBRARY_STR"
         MultiThreadedDebug
         >
         $<$<CONFIG:Release>:
-        MultiThreadedDLL
+        MultiThreaded
         >
         $<$<NOT:$<OR:$<CONFIG:Debug>,$<CONFIG:Release>>>:${MSVC_RUNTIME_LIBRARY_DEFAULT}>
 )
@@ -683,6 +683,26 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION_RELEASE "TRUE"
 )
 ################################################################################
+# MSVC runtime library
+#
+# Statically link the C/C++ runtime (/MTd debug, /MT release) so the shipped
+# client EXE has no dependency on the redistributable CRT DLLs
+# (ucrtbase.dll, vcruntime140.dll, msvcp140.dll). Users have always run the
+# game from the single EXE with no installer, so keep it self-contained.
+################################################################################
+get_property(MSVC_RUNTIME_LIBRARY_DEFAULT TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY)
+string(CONCAT "MSVC_RUNTIME_LIBRARY_STR"
+        $<$<CONFIG:Debug>:
+        MultiThreadedDebug
+        >
+        $<$<CONFIG:Release>:
+        MultiThreaded
+        >
+        $<$<NOT:$<OR:$<CONFIG:Debug>,$<CONFIG:Release>>>:${MSVC_RUNTIME_LIBRARY_DEFAULT}>
+)
+set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY ${MSVC_RUNTIME_LIBRARY_STR})
+
+################################################################################
 # Include directories
 ################################################################################
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -697,8 +717,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 ################################################################################
 target_compile_definitions(${PROJECT_NAME} PRIVATE
         "$<$<CONFIG:Debug>:"
-        "_DEBUG;"
-        "/MT"
+        "_DEBUG"
         ">"
         "$<$<CONFIG:Release>:"
         "NDEBUG"
