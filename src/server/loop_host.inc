@@ -1696,7 +1696,8 @@ nextobj2: if (myobj!=NULL){
           getscreenoffset(x,y,&tpx,&tpy);
 
           //does screen+1 fit inside current buffer?
-          x3=tpx-1; y3=tpy-1; x4=tpx+32; y4=tpy+24;//screen+1
+          x3=tpx-SOBJ_S1_LEFT; y3=tpy-SOBJ_S1_TOP;
+          x4=tpx+SOBJ_S1_RIGHT; y4=tpy+SOBJ_S1_BOTTOM;//screen+1 (RW sobj-fix mirror)
           x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
           //i. if the screen+1 buffer fits within buffer don't relocate
           if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -1774,7 +1775,8 @@ screenplus1check_return:
           z=1; BITSadd(t,&bitsi,z,1);//screen+8 update required
 
 
-          x3=tpx-8; y3=tpy-8; x4=tpx+32+8-1; y4=tpy+24+8-1;
+          x3=tpx-SOBJ_TX_OFFX; y3=tpy-SOBJ_TX_OFFY;
+          x4=tpx+SOBJ_TX_W-1-SOBJ_TX_OFFX; y4=tpy+SOBJ_TX_H-1-SOBJ_TX_OFFY;//screen+8 (RW sobj-fix mirror)
           x5=tplayer->sobj_bufoffx; y5=tplayer->sobj_bufoffy; x6=x5+96-1; y6=y5+72-1; //current buffer extents
           //i. if the screen+8 buffer fits within buffer don't relocate
           if (x3>=x5){ if (x4<=x6){ if (y3>=y5){ if (y4<=y6){
@@ -1872,8 +1874,8 @@ screenplus1check_entry:
           //buffer must be updated while message is created!
           static long mapx,mapy,bufx,bufy;
           static unsigned short vbuf[1024];
-          for (y=0;y<=39;y++){ for (x=0;x<=47;x++){
-            mapx=tpx+x-8; mapy=tpy+y-8; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
+          for (y=0;y<SOBJ_TX_H;y++){ for (x=0;x<SOBJ_TX_W;x++){
+            mapx=tpx+x-SOBJ_TX_OFFX; mapy=tpy+y-SOBJ_TX_OFFY; bufx=mapx-tplayer->sobj_bufoffx; bufy=mapy-tplayer->sobj_bufoffy;
 
             /*
             x4=0; z4=2;
@@ -1899,7 +1901,7 @@ screenplus1check_entry:
 
 
             if (screenplus1check){
-              if (x<7) goto objbufnoupdate0; if (y<7) goto objbufnoupdate0; if (x>40) goto objbufnoupdate0; if (y>32) goto objbufnoupdate0;
+              if (x<SOBJ_S1_INSET) goto objbufnoupdate0; if (y<SOBJ_S1_INSET) goto objbufnoupdate0; if (x>(SOBJ_TX_W-1-SOBJ_S1_INSET)) goto objbufnoupdate0; if (y>(SOBJ_TX_H-1-SOBJ_S1_INSET)) goto objbufnoupdate0;
             }
 
             i=0;
@@ -1953,7 +1955,7 @@ noflash0:
                     if (screenplus1check) goto screenplus1check_return; //********SCREENPLUS1CHECK********
                     tplayer->sobj_tempfixed[bufx][bufy]-=i5;
                     z=1; BITSadd(t,&bitsi,z,1);//edit another tempfixed object
-                    z=y*48+x; BITSadd(t,&bitsi,z,11);//x,y offset
+                    z=y*SOBJ_TX_W+x; BITSadd(t,&bitsi,z,SOBJ_TX_BITS);//x,y offset (RW sobj-fix mirror)
                     if (z3){z=i2-i3-1; BITSadd(t,&bitsi,z,z3);}//which tempfixed obj
 
                     //MessageBox(NULL,"tempfixed change","Ultima 6 Online",MB_OK);
@@ -1965,7 +1967,7 @@ noflash0:
                     if (screenplus1check) goto screenplus1check_return; //********SCREENPLUS1CHECK********
                     tplayer->sobj_tempfixed[bufx][bufy]|=i5;
                     z=1; BITSadd(t,&bitsi,z,1);//edit another tempfixed object
-                    z=y*48+x; BITSadd(t,&bitsi,z,11);//x,y offset
+                    z=y*SOBJ_TX_W+x; BITSadd(t,&bitsi,z,SOBJ_TX_BITS);//x,y offset (RW sobj-fix mirror)
                     if (z3){z=i2-i3-1; BITSadd(t,&bitsi,z,z3);}//which tempfixed obj
 
                     //MessageBox(NULL,"tempfixed change","Ultima 6 Online",MB_OK);
@@ -1979,7 +1981,7 @@ noflash0:
                   if (screenplus1check) goto screenplus1check_return; //********SCREENPLUS1CHECK********
                   tplayer->sobj_tempfixed[bufx][bufy]|=i5;
                   z=1; BITSadd(t,&bitsi,z,1);//edit another tempfixed object
-                  z=y*48+x; BITSadd(t,&bitsi,z,11);//x,y offset
+                  z=y*SOBJ_TX_W+x; BITSadd(t,&bitsi,z,SOBJ_TX_BITS);//x,y offset (RW sobj-fix mirror)
                   if (z3){z=i2-i3-1; BITSadd(t,&bitsi,z,z3);}//which tempfixed obj
 
                   //MessageBox(NULL,"tempfixed change","Ultima 6 Online",MB_OK);
@@ -2068,7 +2070,7 @@ objbufupdate0:
 
 
              z=1; BITSadd(t2,&bitsi2,z,1);//1 edit objects of another square
-             z=y*48+x; BITSadd(t2,&bitsi2,z,11);//11 screen offset of square
+             z=y*SOBJ_TX_W+x; BITSadd(t2,&bitsi2,z,SOBJ_TX_BITS);//screen offset of square (RW sobj-fix mirror)
 
              //update buffer info
              tp2=tplayer->sobj[bufx][bufy];
@@ -2142,8 +2144,12 @@ objbufnoupdate0:;
 
           //create new mover list
           i=-1;
-          for (y=0;y<=25;y++){ for (x=0;x<=33;x++){
-            mapx=tpx+x-1; mapy=tpy+y-1;
+          // RW dynamic-objects fix (mirror of loop_host.cpp): iterate an
+          // MV_TX_W x MV_TX_H rectangle centered on the avatar via
+          // MV_TX_OFFX/Y so NPCs/monsters/animals/players fill the entire
+          // rendered view, not only the legacy 32x24 box. See define_both.h.
+          for (y=0;y<MV_TX_H;y++){ for (x=0;x<MV_TX_W;x++){
+            mapx=tpx+x-MV_TX_OFFX; mapy=tpy+y-MV_TX_OFFY;
 
             if (mapx<0) goto moverbuffer_outofrange; if (mapx>2047) goto moverbuffer_outofrange; if (mapy<0) goto moverbuffer_outofrange; if (mapy>1023) goto moverbuffer_outofrange;
             myobj=od[mapy][mapx];
@@ -2178,7 +2184,10 @@ mvobjskip: if (myobj){
             //add it to the list
             i++;
             mv_object[i]=myobj;
-            mv_x[i]=tpx+x-1; mv_y[i]=tpy+y-1;
+            // RW dynamic-objects bug fix (2026-05-28): see loop_host.cpp
+            // for the full rationale. mv_x/mv_y must be mapx/mapy, not the
+            // legacy `tpx+x-1` offset, now that the fill window is MV_TX_*.
+            mv_x[i]=mapx; mv_y[i]=mapy;
             mv_type[i]=myobj->type&1023;
             mv_dir[i]=objgetdir(myobj->type);
             mv_frame[i]=OBJGETDIR_FRAME;
@@ -2273,11 +2282,20 @@ moverbuffer_outofrange:;
 
 
           //******this code happens whether or not an update is sent******
+          // RW dynamic-objects fix follow-up (mirror of loop_host.cpp; not
+          // compiled): the silent-prune path MUST force sceneupdaterequired
+          // so the client's mirror-prune runs in lock-step. Without it,
+          // host's mv_i shrinks while client's stays, every later
+          // remove/move/add index is off-by-N on the client, the wrong
+          // mover slots get clobbered (often index 0 = the avatar), NPCs
+          // duplicate, and the player visually drifts off-camera.
           //remove all offscreen objects in client's array
           i=0;
 mover_removeoffscreen_next: if (i<tplayer->mv_i){
           x=tplayer->mv_x[i]-tpx; y=tplayer->mv_y[i]-tpy;
-          if ((x<-1)||(x>32)||(y<-1)||(y>24)){
+          // RW dynamic-objects fix (mirror of loop_host.cpp): bounds match the
+          // centered MV_TX_W x MV_TX_H fill window.
+          if ((x<-MV_TX_OFFX)||(x>(MV_TX_W-1-MV_TX_OFFX))||(y<-MV_TX_OFFY)||(y>(MV_TX_H-1-MV_TX_OFFY))){
             //reshuffle array
             for (i3=i+1;i3<tplayer->mv_i;i3++){
               tplayer->mv_x[i3-1]=tplayer->mv_x[i3];
@@ -2293,6 +2311,7 @@ mover_removeoffscreen_next: if (i<tplayer->mv_i){
               tplayer->mv_more[i3-1]=tplayer->mv_more[i3];
             }//i3
             tplayer->mv_i--;
+            sceneupdaterequired=1;//force send so client's mirror-prune runs
             goto mover_removeoffscreen_next;
           }//x,y boundary check
           i++; goto mover_removeoffscreen_next;
@@ -2507,9 +2526,12 @@ MV_LIGHTGLOW_assumed:
 
                             sceneupdaterequired=1;
                             z=1; BITSadd(t,&bitsi,z,1);//add a/another mover
-                            x=mv_x[i2]-tpx+1;//0-33
-                            y=mv_y[i2]-tpy+1;//0-25
-                            z=y*34+x; BITSadd(t,&bitsi,z,10);//x,y offset
+                            // RW dynamic-objects fix (mirror of loop_host.cpp):
+                            // encode x,y across the MV_TX_W x MV_TX_H window in
+                            // MV_TX_BITS bits, centered via MV_TX_OFFX/Y.
+                            x=mv_x[i2]-tpx+MV_TX_OFFX;//0..MV_TX_W-1
+                            y=mv_y[i2]-tpy+MV_TX_OFFY;//0..MV_TX_H-1
+                            z=y*MV_TX_W+x; BITSadd(t,&bitsi,z,MV_TX_BITS);//x,y offset
                             z=mv_type[i2]; BITSadd(t,&bitsi,z,10);//type YET TO BE OPTOMIZED
 
                             if (z==413){//silver serp

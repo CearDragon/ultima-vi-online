@@ -29,7 +29,7 @@ engine, server, and supporting assets.
 
 ```text
 ultima-vi-online/
-├── CMakeLists.txt              # Three EXE targets: u6o7, u6oh, u6oclient2
+├── CMakeLists.txt              # Three EXE targets: both, host, client
 ├── CMake/                      # Toolchain helpers (Default*.cmake, Utils.cmake)
 ├── assets/
 │   ├── images/icon.png         # Source PNG for window/EXE icons
@@ -58,17 +58,17 @@ calling conventions.
 
 | Target        | Output EXE name                | Defines               | Subsystem | Purpose                                                                                                |
 | ------------- | ------------------------------ | --------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
-| `u6o7`        | `Ultima VI Online Full.exe`    | `HOST` + `CLIENT`     | WINDOWS   | Single-binary build that can host **and** connect as a client. Useful for local testing.               |
-| `u6oh`        | `Ultima VI Online Host.exe`    | `HOST` + `CONSOLE`    | WINDOWS   | Dedicated server / host only. No client renderer compiled in.                                          |
-| `u6oclient2`  | `Ultima VI Online.exe`         | `CLIENT`              | WINDOWS   | Pure client. Connects to a remote `u6oh`. This is the EXE shipped in `u6o.zip` for end users.          |
+| `both`        | `Ultima VI Online Full.exe`    | `HOST` + `CLIENT`     | WINDOWS   | Single-binary build that can host **and** connect as a client. Useful for local testing.               |
+| `host`        | `Ultima VI Online Host.exe`    | `HOST` + `CONSOLE`    | WINDOWS   | Dedicated server / host only. No client renderer compiled in.                                          |
+| `client`      | `Ultima VI Online.exe`         | `CLIENT`              | WINDOWS   | Pure client. Connects to a remote `host`. This is the EXE shipped in `u6o.zip` for end users.          |
 
 Output locations:
 
 ```text
-bin/client/debug   ← u6o7 + u6oclient2 debug builds
-bin/client/release ← u6o7 + u6oclient2 release builds
-bin/host/debug     ← u6oh debug build
-bin/host/release   ← u6oh release build
+bin/client/debug   ← both + client debug builds
+bin/client/release ← both + client release builds
+bin/host/debug     ← host debug build
+bin/host/release   ← host release build
 build/             ← PDBs for all configs
 ```
 
@@ -124,7 +124,7 @@ cmake --build cmake-build-debug --config Release
 
 This produces `u6o7.sln` in `cmake-build-debug/` which can also be opened
 directly in Visual Studio. Build the `ALL_BUILD` project to compile all three
-EXEs, or build individual targets (`u6o7`, `u6oh`, `u6oclient2`).
+EXEs, or build individual targets (`both`, `host`, `client`).
 
 ### Generate and build (Ninja / CLion)
 
@@ -154,7 +154,7 @@ and rebuild — no source changes needed. See [`tools/README.md`](tools/README.m
 
 ### Client
 
-The shipping client (`Ultima VI Online.exe`, from the `u6oclient2` target)
+The shipping client (`Ultima VI Online.exe`, from the `client` target)
 expects a runtime asset bundle alongside it. The reference bundle is in
 `test/client/`:
 
@@ -181,14 +181,14 @@ To run a freshly built client against a local host:
 
 ### Host
 
-Run `Ultima VI Online Host.exe` (the `u6oh` target). It listens on the port
+Run `Ultima VI Online Host.exe` (the `host` target). It listens on the port
 configured in its `dns.txt` and serves all connected clients from the same
 world state. The host also requires the `ultima6/` source assets for the
 initial world load.
 
 ### Combined host + client (testing)
 
-`Ultima VI Online Full.exe` (the `u6o7` target) hosts the world *and*
+`Ultima VI Online Full.exe` (the `both` target) hosts the world *and*
 connects to it locally — convenient for solo testing of server-side changes
 without standing up a separate host process.
 
@@ -322,7 +322,7 @@ requirements, key bindings, how to talk to NPCs, etc.) and is a useful
 reference when wiring up new gameplay features.
 
 There is no automated test framework today; verification is done by
-launching `u6o7` (combined host + client) and exercising the affected code
+launching `both` (combined host + client) and exercising the affected code
 path manually.
 
 ---

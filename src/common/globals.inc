@@ -894,6 +894,8 @@ int checkpendingstatusmessage = 0;
 int statusmessagependingprevlen = 0;
 int statusmessagechanged = 0;
 int txtcolprev = 0;
+long lookatx = 0;
+long lookaty = 0;
 int objtypen1;
 player combatinfoplayerprev;
 int combatinfoplayerprevinit = 0;
