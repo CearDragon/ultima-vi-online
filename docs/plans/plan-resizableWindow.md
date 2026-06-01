@@ -373,9 +373,8 @@ instead of cycling modes.
   _(2026-05-22 — done. Root cause: `recreateBackbuffers()` in
   `function_client.cpp` unconditionally re-attached the new `ps` to
   `fs->graphic`. During gameplay `fs->graphic` is `NULL` (the
-  intro/menu code at `loop_client.cpp:2005,2203,2348` and
-  `loop_client.inc:938,1136,1281` clears it when the overlay
-  closes, leaving `fs->offset_x=1024`). Re-attaching ps revived the
+  intro/menu code at `loop_client.cpp:2005,2203,2348` clears it when
+  the overlay closes, leaving `fs->offset_x=1024`). Re-attaching ps revived the
   hidden overlay so the FRAME display loop ran
   `img(ps, 1024, 0, ps)`, copying the left half of the back buffer
   onto itself shifted right by 1024 px — producing two
@@ -428,10 +427,11 @@ instead of cycling modes.
   1024×768 size the in-game behavior is unchanged — hidden panels
   still land past the back-buffer's right edge — but at any larger
   back-buffer size the entire visible region falls below the new
-  threshold so drags are no longer snapped back. The dead-code
-  `loop_client.inc` mirror (legacy `smallwindow+windowsizecyclenum`
+  threshold so drags are no longer snapped back. (The dead-code
+  `loop_client.inc` mirror — legacy `smallwindow+windowsizecyclenum`
   rendering path, unreachable since the Option-A single-window
-  cleanup) was intentionally left untouched.)_
+  cleanup — has since been deleted; `loop_client.cpp` is now the
+  single compiled loop source.)_
 - **Exit:** Maximizing the window reveals more game tiles around the
   player; UI hugs the edges; world state (NPCs, objects, lighting)
   remains correct at every visible tile; the legacy 1024×768 size is

@@ -59,9 +59,7 @@ void GETINPUT_stop() {
     GETINPUT_txt = NULL;
 }
 
-// luteijn: which of these? :)
 #include "new_getspr.inc"
-//#include "old_getspr.inc"
 
 bool keyhit(unsigned short k) {
     //returns TRUE if key has been pressed

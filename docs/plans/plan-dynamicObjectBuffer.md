@@ -76,7 +76,6 @@ this plan must touch lives in `docs/resizable-window-hotspots.md`
   - `src/common/data_host.h`
   - `src/common/globals.inc`
   - `src/client/loop_client.cpp`
-  - `src/client/loop_client.inc`
   - `src/client/function_client.cpp`
   - `src/client/function_client.h`
   - `src/server/loop_host.cpp`
@@ -220,7 +219,7 @@ DOB_BUF_AT asserts in a 30-min walking-around test at legacy size.
 
 Today both host and client hard-code "player lives at buffer slot
 (32, 24)" via `sobj_bufoffx = tpx - 32; sobj_bufoffy = tpy - 24;`
-(`loop_client.inc:3950`, `loop_host.cpp:1746` etc.). With variable
+(`loop_client.cpp`, `loop_host.cpp:1746` etc.). With variable
 buffer sizes the recenter must use `W/2, H/2`.
 
 - ⬜ **DOB-P3.1** Add helpers in `src/common/object_buffer_dims.h`:
@@ -237,7 +236,7 @@ buffer sizes the recenter must use `W/2, H/2`.
 
 - ⬜ **DOB-P3.2** Replace every literal `tpx - 32` / `tpy - 24` used to
   set `sobj_bufoffx/y` with these helpers. Same for the "current buffer
-  extents" check at `loop_client.inc:3937` / `loop_host.cpp:1885`:
+  extents" check at `loop_client.cpp` / `loop_host.cpp:1885`:
   ```cpp
   x6 = x5 + p->sobjbuf.W - 1;
   y6 = y5 + p->sobjbuf.H - 1;
@@ -331,7 +330,6 @@ crash; legacy size produces baseline-identical output.
 | `src/common/object_buffer_dims.h` *(new)* | P1, P3 | constants + helpers |
 | `src/common/dynamic2darray.h` *(may be new — verify)* | P2 | promote from client-only |
 | `src/client/loop_client.cpp` | P1, P2, P3, P4 | render & vis loops |
-| `src/client/loop_client.inc` | P1, P2, P3 | recenter loop, fixedobj loop |
 | `src/client/function_client.cpp` | P2, P4 | tplayer init, resize hook |
 | `src/client/viewport.h` / `.cpp` | P4 | cap removal |
 | `src/client/ui_panels_apply.cpp` | P4 | window-resize → buffer-resize |
