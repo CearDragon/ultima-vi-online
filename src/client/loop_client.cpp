@@ -394,38 +394,28 @@ if
 
                             worldmapindexn1 = 1;
 
-                            if (soundn1 >= 2)
-                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
                         } else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6P) {
                             if (worldmapindexn1 != 2)
                                 updateworldmapn1 = 1;
 
                             worldmapindexn1 = 2;
 
-                            if (soundn1 >= 2)
-                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
                         } else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6G) {
                             if (worldmapindexn1 != 3)
                                 updateworldmapn1 = 1;
 
                             worldmapindexn1 = 3;
 
-                            if (soundn1 >= 2)
-                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
                         } else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6RUNE) {
                             if (worldmapindexn1 != 4)
                                 updateworldmapn1 = 1;
 
                             worldmapindexn1 = 4;
 
-                            if (soundn1 >= 2)
-                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
                         } else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_CLOSE) {
                             showworldmapn1 = 0;
                             uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
 
-                            if (soundn1 >= 2)
-                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
                         }
                     }
                 }
@@ -540,8 +530,6 @@ if
                                 else
                                     setdroplocation = 1;
 
-                                if (soundn1 >= 2)
-                                    soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
                             }
 
                             mbclick = 0;
@@ -578,8 +566,6 @@ if
                                 uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 1;
                             }
 
-                            if (soundn1 >= 2)
-                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
                         } else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_COMBATLOG) {
                             // combatlog
                             combatinfo++;
@@ -593,8 +579,6 @@ if
                                               1);
                             }
 
-                            if (soundn1)
-                                soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
                         }
                     }
                 } // actionbar2
@@ -612,34 +596,8 @@ if
                             } else
                                 STATUSMESSadd("Game option: set to alternate ", 1, enhancen1);
 
-                            if (soundn1)
-                                soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
                             //updateoptioninfo();
                             updatepartyframen1 = 1;
-                        } else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_SOUND) {
-                            // game sound enhancement
-                            soundn1++;
-                            if (soundn1 > 2) {
-                                soundn1 = 0;
-                                STATUSMESSadd("Sound option: set to default", 1);
-                            } else
-                                STATUSMESSadd("Sound option: set to alternate ", 1, soundn1);
-
-                            if (soundn1)
-                                soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
-                            //updateoptioninfo();
-                        } else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_COMBATSOUND) {
-                            // combat sound enhancement
-                            combatsoundn1++;
-                            if (combatsoundn1 > 2) {
-                                combatsoundn1 = 0;
-                                STATUSMESSadd("Combat sound option: set to default", 1);
-                            } else
-                                STATUSMESSadd("Combat sound option: set to alternate ", 1, combatsoundn1);
-
-                            if (soundn1)
-                                soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
-                            //updateoptioninfo();
                         } else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_MINIMAP) {
                             // minimap toggle
                             actionreset = 0;
@@ -650,8 +608,6 @@ if
                             actionpending = 5;
                             mbclick = 0;
 
-                            if (soundn1 >= 2)
-                                soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
                         } else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_QUIT) {
                             // quit
                             actionreset = 0;
@@ -4700,9 +4656,6 @@ voicechat_permissionrequestfinished:
         deadglobalmessage=1; goto dglobal;
       }
 
-	  // s222 new sound for user actions
-	  if (soundn1 >= 2)
-		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
     }
     if (inpf2->enterpressed){
       deadglobalmessage=1; goto dglobal2; //process receiving input
@@ -4771,9 +4724,6 @@ dglobal:
         inprec=1;
       }
 
-	  // s222 new sound for user actions
-	  if (soundn1 >= 2)
-		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
     }
 skipglobalmessage:
     if (inpf2->enterpressed){
@@ -5037,9 +4987,6 @@ turnspellpager:
         CLIENTplayer->key|=KEYmbclick;
       }//instant click
 
-	  // s222 new sound for user actions
-	  if (soundn1 >= 2)
-		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
 
       goto skipaltuse;
     }//use
@@ -5049,9 +4996,6 @@ turnspellpager:
         CLIENTplayer->key|=KEYmbclick;
       }//instant click
 
-	  // s222 new sound for user actions
-	  if (soundn1 >= 2)
-		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
     }//use
 skipaltuse:
 
@@ -5062,9 +5006,6 @@ skipaltuse:
         CLIENTplayer->key|=KEYmbclick;
       }//instant click
 
-	  // s222 new sound for user actions
-	  if (soundn1 >= 2)
-		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
 
       goto skipaltlook;
     }
@@ -5074,9 +5015,6 @@ skipaltuse:
         CLIENTplayer->key|=KEYmbclick;
       }//instant click
 
-	  // s222 new sound for user actions
-	  if (soundn1 >= 2)
-		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
     }
 skipaltlook:
 
@@ -5099,9 +5037,6 @@ skipaltlook:
         goto userkey_cancel;
       }
 
-	  // s222 new sound for user actions
-	  if (soundn1 >= 2)
-		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
 
       goto u6okattackdone;
     }
@@ -5121,9 +5056,6 @@ skipaltlook:
         goto userkey_cancel;
       }
 
-	  // s222 new sound for user actions
-	  if (soundn1 >= 2)
-		  soundplay2(u6osound[SOUND_USERACTION], u6osound_volume[SOUND_USERACTION]);
 
       goto u6okattackdone;
     }
@@ -5290,8 +5222,6 @@ mousemove_finish:
 		if (setdroplocation) {
 			setdroplocation = 0;
 			droplocation = 4;
-			if (soundn1 >= 2)
-				soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
 		}
 	}
 	else {
@@ -5301,8 +5231,6 @@ mousemove_finish:
 			if (setdroplocation) {
 				setdroplocation = 0;
 				droplocation = 4;
-				if (soundn1 >= 2)
-					soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
 			}
 		}
 
@@ -5314,8 +5242,6 @@ mousemove_finish:
 		if (setdroplocation) {
 			setdroplocation = 0;
 			droplocation = 3;
-			if (soundn1 >= 2)
-				soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
 		}
 	}
 	else {
@@ -5325,8 +5251,6 @@ mousemove_finish:
 			if (setdroplocation) {
 				setdroplocation = 0;
 				droplocation = 3;
-				if (soundn1 >= 2)
-					soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
 			}
 		}
 	}
@@ -5337,8 +5261,6 @@ mousemove_finish:
 		if (setdroplocation) {
 			setdroplocation = 0;
 			droplocation = 1;
-			if (soundn1 >= 2)
-				soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
 		}
 	}
 	else {
@@ -5348,8 +5270,6 @@ mousemove_finish:
 			if (setdroplocation) {
 				setdroplocation = 0;
 				droplocation = 1;
-				if (soundn1 >= 2)
-					soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
 			}
 		}
 	}
@@ -5360,8 +5280,6 @@ mousemove_finish:
 		if (setdroplocation) {
 			setdroplocation = 0;
 			droplocation = 2;
-			if (soundn1 >= 2)
-				soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
 		}
 	}
 	else {
@@ -5371,8 +5289,6 @@ mousemove_finish:
 			if (setdroplocation) {
 				setdroplocation = 0;
 				droplocation = 2;
-				if (soundn1 >= 2)
-					soundplay2(u6osound[SOUND_UIACTION], u6osound_volume[SOUND_UIACTION]);
 			}
 		}
 	}
@@ -5429,8 +5345,6 @@ mousemove_finish:
 
 								}
 							}
-							else if (soundn1)
-								soundplay2(u6osound[SOUND_MAGIC_NOTREADY], u6osound_volume[SOUND_MAGIC_NOTREADY]);
 						}
 						else { // original
 						  if (spell[i][(i3<<4)+i2]!=1){ //can cast?
@@ -5555,8 +5469,6 @@ ktarcast:
 							}//ktar
 						}//valid
 					}
-					else if (soundn1)
-						soundplay2(u6osound[SOUND_MAGIC_NOTREADY], u6osound_volume[SOUND_MAGIC_NOTREADY]);
 				}
 				else { // original
 					if (spell[spellrecall_partymember[x]-1][spellrecall_i[x]]>1){ //valid
@@ -5609,14 +5521,12 @@ ktarcast:
       CLIENTplayer->key|=KEYmbclick;
 
 	  // s777 set selected party member
-	  if (enhanceclientn1) {
-		  //if (tplay->party[x - 1])
-		  if (CLIENTplayer->party[x - 1] != NULL) {
-			  selectedpartymembern1 = x - 1;
+	  //if (tplay->party[x - 1])
+	  if (CLIENTplayer->party[x - 1] != NULL) {
+		  selectedpartymembern1 = x - 1;
 
-			  if (!selectedpartymemberframelock) {
-				  selectedpartymemberframen1 = selectedpartymembern1;
-			  }
+		  if (!selectedpartymemberframelock) {
+			  selectedpartymemberframen1 = selectedpartymembern1;
 		  }
 	  }
     }
@@ -6098,9 +6008,6 @@ validpage:;
         txtright(t,t->l-1);
         STATUSMESSadd(t);
 
-		// s222 new sound for status message
-		if (enhanceclientn1) {
-			playstatusmessagesound = 1;
 
 			// r888 food status
 			checkstatusmessage = 1;
@@ -6111,7 +6018,6 @@ validpage:;
 				//      if (txtsame(t2,t3)){
 				if ((txtsearch(t, t3) > 0)) {
 					checkstatusmessage = 0;
-					playstatusmessagesound = 1;
 					//MessageBox(NULL,"hungry!","Ultima 6 Online",MB_OK);
 					foodstatus = 1;
 				}
@@ -6123,10 +6029,6 @@ validpage:;
 					checkstatusmessage = 0;
 					foodstatus = 2;
 
-					if (soundn1 >= 2)
-						playstatusmessagesound = 21;
-					else
-						playstatusmessagesound = 2;
 				}
 			}
 
@@ -6136,10 +6038,6 @@ validpage:;
 					checkstatusmessage = 0;
 					foodstatus = 2;
 
-					if (soundn1 >= 2)
-						playstatusmessagesound = 22;
-					else
-						playstatusmessagesound = 2;
 				}
 			}
 
@@ -6147,207 +6045,11 @@ validpage:;
 				txtset(t3, "full!");
 				if ((txtsearch(t, t3) > 0)) {
 					checkstatusmessage = 0;
-					playstatusmessagesound = 2;
 					foodstatus = 3;
 				}
 			}
-		}
 
-		// s222 play sound for status message
-		if (soundn1) {
-			if (checkstatusmessage) {
-				txtset(t3, "Thou dost see");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 2;
-				}
-			}
 
-			if (checkstatusmessage) {
-				txtset(t3, "paralyzed!");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 11;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "stuck in a web!");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 11;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "free!");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 12;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "in Britannia");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 23;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "Entered Britannia");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 23;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "You cannot put stolen things here!");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 4;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "You cannot stack more than 8 items here!");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 3;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "Blocked!");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 3;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "Out of range");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 3;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "Can't cast there!");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 3;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "Spell failed!");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 14;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "Not enough magic points!");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 15;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "No reagents!");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 15;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "The staff glows brightly!");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 16;
-				}
-			}
-
-			if (checkstatusmessage) {
-				txtset(t3, "Staff successfully enchanted with");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 16;
-				}
-			}
-
-			// suppress sound for below because another status message sound is already played.
-			// Sound already played: The staff glows brightly!
-			if (checkstatusmessage) {
-				txtset(t3, "To enchant this staff");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 0;
-				}
-			}
-
-			// Sound already played: Can't cast there!
-			if (checkstatusmessage) {
-				txtset(t3, "You must cast enchant upon this staff");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 0;
-				}
-			}
-
-			// Sound already played: Can't cast there!
-			if (checkstatusmessage) {
-				txtset(t3, "No more may be added at this time.");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 0;
-				}
-			}
-
-			/*
-			if (checkstatusmessage) {
-				txtset(t3, "U6O can't cast this spell yet!");
-				if ((txtsearch(t, t3) > 0)) {
-					checkstatusmessage = 0;
-					playstatusmessagesound = 15;
-				}
-			}
-			*/
-
-			if (playstatusmessagesound == 11)
-				soundplay2(u6osound[SOUND_MAGIC_FREEZE], u6osound_volume[SOUND_MAGIC_FREEZE]);
-			else if (playstatusmessagesound == 12)
-				soundplay2(u6osound[SOUND_MAGIC_UNFREEZE], u6osound_volume[SOUND_MAGIC_UNFREEZE]);
-			else if (playstatusmessagesound == 2)
-				soundplay2(u6osound[SOUND_STATUSMESSAGELOWPRIORITY], u6osound_volume[SOUND_STATUSMESSAGELOWPRIORITY]);
-			else if (playstatusmessagesound == 1)
-				soundplay2(u6osound[SOUND_STATUSMESSAGE], u6osound_volume[SOUND_STATUSMESSAGE]);
-			else if (playstatusmessagesound == 3)
-				soundplay2(u6osound[SOUND_USERACTIONDENIED], u6osound_volume[SOUND_USERACTIONDENIED]);
-			else if (playstatusmessagesound == 4)
-				soundplay2(u6osound[SOUND_STOLENITEM], u6osound_volume[SOUND_STOLENITEM]);
-			else if (playstatusmessagesound == 21)
-				soundplay2(u6osound[SOUND_EAT], u6osound_volume[SOUND_EAT]);
-			else if (playstatusmessagesound == 22)
-				soundplay2(u6osound[SOUND_DRINK], u6osound_volume[SOUND_DRINK]);
-			else if (playstatusmessagesound == 23)
-				soundplay2(u6osound[SOUND_PLAYERENTERED], u6osound_volume[SOUND_PLAYERENTERED]);
-			else if (playstatusmessagesound == 13)
-				soundplay2(u6osound[SOUND_MAGIC_FAILED1], u6osound_volume[SOUND_MAGIC_FAILED1]);
-			else if (playstatusmessagesound == 14)
-				soundplay2(u6osound[SOUND_MAGIC_FAILED2], u6osound_volume[SOUND_MAGIC_FAILED2]);
-			else if (playstatusmessagesound == 15)
-				soundplay2(u6osound[SOUND_MAGIC_FAILED3], u6osound_volume[SOUND_MAGIC_FAILED3]);
-			else if (playstatusmessagesound == 16)
-				soundplay2(u6osound[SOUND_MAGIC_SUCCESS], u6osound_volume[SOUND_MAGIC_SUCCESS]);
-		}
 
 
         goto CLIENT_donemess;
@@ -6418,9 +6120,6 @@ isplayingwait3: if (u6omidi->IsPlaying()==S_OK) goto isplayingwait3;
           tnpc=(npc*)tplay->party[t->d2[1]]->more;
           tnpc->upflags|=4;
 
-		  // s222 new sound when cast/magic is ready
-		  if (soundn1)
-			  soundplay2(u6osound[SOUND_MAGIC_READY], u6osound_volume[SOUND_MAGIC_READY]);
         }
         goto CLIENT_donemess;
       }//18
@@ -9358,7 +9057,7 @@ osdisplay_ktar_skip:;
 
         if (i4==1){ //physical attack
 		  // s222 check attack target
-		  if (combatinfo || combatsoundn1) {
+		  if (combatinfo) {
 			  hittarget = 10; // "something" is hit
 
 			  // s222 player is hit
@@ -9616,52 +9315,15 @@ osdisplay_ktar_skip:;
 				*/
 			}
 
-			// s222 new combat sound for player getting hit
-			if (combatsoundn1) {
-				if (hittarget == 1) {
-					soundplay2(u6osound[SOUND_COMBAT_PLAYERHURTN1], u6osound_volume[SOUND_COMBAT_PLAYERHURTN1]);
-
-					/*
-					if (combatinfo) {
-						int hp = tnpc->hp;
-						int newhp = t->ds[0];
-						//txtset(t2, "hp: ");
-						//txtnumint(t3, hp);
-						//txtadd(t2, t3);
-						//txtadd(t2, " // new hp: ");
-						//txtnumint(t3, newhp);
-						//txtadd(t2, t3);
-						//LOGadd(t2);
-						if (newhp < hp) {
-							txtset(t3, "You lost ");
-							txtnumint(t4, hp - newhp);
-							txtadd(t3, t4);
-							txtadd(t3, " hp");
-							STATUSMESSadd(t3);
-						}
-
-						//txtnumint(t, sfx[i3].x2); // t is set above at: if (sfx[i3].x2){
-						txtset(t3, tnpc->name);
-
-						txtadd(t3, " is hit for ");
-						txtadd(t3, t);
-						txtadd(t3, " damage");
-						STATUSMESSadd(t3);
-					}
-					*/
-				} else if (combatsoundn1 >= 2)
-		            soundplay2(u6osound[SOUND_COMBAT_HITN1],u6osound_volume[SOUND_COMBAT_HITN1]);
-				else
-		            soundplay2(u6osound[SOUND_COMBAT_HIT],u6osound_volume[SOUND_COMBAT_HIT]);
-			} else
-	            soundplay2(u6osound[SOUND_COMBAT_HIT],u6osound_volume[SOUND_COMBAT_HIT]);
+			// combat sound for player getting hit
+			soundplay2(u6osound[SOUND_COMBAT_HIT], u6osound_volume[SOUND_COMBAT_HIT]);
           }
           goto donesf;
         }//1
 
         if (i4==16){ //physical attack miss!
 		  // s222 check attack target
-		  if (combatinfo || combatsoundn1) {
+		  if (combatinfo) {
 			  hittarget = 10; // "something" is hit/miss
 
 			  // s222 player is hit
@@ -9738,14 +9400,8 @@ osdisplay_ktar_skip:;
 			}
 			*/
 
-			// s222 new combat sound for "miss"
-			if (combatsoundn1) {
-				if (hittarget > 0 && hittarget < 10)
-					soundplay2(u6osound[SOUND_COMBAT_MISS1N1], u6osound_volume[SOUND_COMBAT_MISS1N1]);
-				else
-					soundplay2(u6osound[SOUND_COMBAT_MISS2N1], u6osound_volume[SOUND_COMBAT_MISS2N1]);
-			} else
-				soundplay2(u6osound[SOUND_COMBAT_HIT],u6osound_volume[SOUND_COMBAT_HIT]);
+			// combat sound for "miss"
+			soundplay2(u6osound[SOUND_COMBAT_HIT], u6osound_volume[SOUND_COMBAT_HIT]);
           }
           goto donesf;
         }//1
@@ -9781,9 +9437,6 @@ pw_jmp:
             if (i4==9){
               //if ((unsigned long)sfx[i3].wait&32768) {soundplay2(u6osound[18],u6osound_volume[18]); sfx[i3].wait-=32768;}
               if ((unsigned long)sfx[i3].wait&32768) {soundplay2(u6osound[18],u6osound_volume[18]); sfx[i3].wait-=32768;}
-			  // s222 new sound for drop item
-			  else if (soundn1 >= 2)
-				soundplay2(u6osound[SOUND_DROP], u6osound_volume[SOUND_DROP]);
               sfx[i3].more=sfx[i3].wait; sfx[i3].wait=1;
             }
 
@@ -9818,19 +9471,13 @@ pw_jmp:
 			// s222 new sound for bow
             //if (i4==2) soundplay2(u6osound[7],u6osound_volume[7]);
 			if (i4 == 2) {
-				if (combatsoundn1)
-					soundplay2(u6osound[SOUND_COMBAT_BOWN1], u6osound_volume[SOUND_COMBAT_BOWN1]);
-				else
-					soundplay2(u6osound[SOUND_COMBAT_BOW],u6osound_volume[SOUND_COMBAT_BOW]);
+				soundplay2(u6osound[SOUND_COMBAT_BOW], u6osound_volume[SOUND_COMBAT_BOW]);
 			}
 
 			// s222 new sound for crossbow
             //if (i4==6) soundplay2(u6osound[8],u6osound_volume[8]);
 			if (i4 == 6) {
-				if (combatsoundn1)
-					soundplay2(u6osound[SOUND_COMBAT_CROSSBOWN1], u6osound_volume[SOUND_COMBAT_CROSSBOWN1]);
-				else
-					soundplay2(u6osound[SOUND_COMBAT_CROSSBOW],u6osound_volume[SOUND_COMBAT_CROSSBOW]);
+				soundplay2(u6osound[SOUND_COMBAT_CROSSBOW], u6osound_volume[SOUND_COMBAT_CROSSBOW]);
 			}
 
             if (i4==17) soundplay2(u6osound[14],u6osound_volume[14]);
@@ -9838,10 +9485,7 @@ pw_jmp:
 			// s222 new sound for fireball
             //if (i4==8) soundplay2(u6osound[20],u6osound_volume[20]);
 			if (i4 == 8) {
-				if (combatsoundn1)
-					soundplay2(u6osound[SOUND_COMBAT_FIREBALLN1], u6osound_volume[SOUND_COMBAT_FIREBALLN1]);
-				else
-					soundplay2(u6osound[SOUND_COMBAT_FIREBALL],u6osound_volume[SOUND_COMBAT_FIREBALL]);
+				soundplay2(u6osound[SOUND_COMBAT_FIREBALL], u6osound_volume[SOUND_COMBAT_FIREBALL]);
 			}
 			
 
@@ -10576,26 +10220,17 @@ txtsf_done:
           //if (sfx[i3].more==1) soundplay2(u6osound[1],u6osound_volume[1]);
           //if (sfx[i3].more==2) soundplay2(u6osound[2],u6osound_volume[2]);
           if (sfx[i3].more==1) {
-			  if (soundn1)
-				  soundplay2(u6osound[SOUND_DOOROPENN2], u6osound_volume[SOUND_DOOROPENN2]);
-			  else
-				  soundplay2(u6osound[SOUND_DOOROPEN],u6osound_volume[SOUND_DOOROPEN]);
+			  soundplay2(u6osound[SOUND_DOOROPEN], u6osound_volume[SOUND_DOOROPEN]);
 		  }
 		  if (sfx[i3].more == 2) {
-			  if (soundn1)
-				  soundplay2(u6osound[SOUND_DOORCLOSEN2], u6osound_volume[SOUND_DOORCLOSEN2]);
-			  else
-				  soundplay2(u6osound[SOUND_DOORCLOSE], u6osound_volume[SOUND_DOORCLOSE]);
+			  soundplay2(u6osound[SOUND_DOORCLOSE], u6osound_volume[SOUND_DOORCLOSE]);
 		  }
 
           if (sfx[i3].more==3) soundplay2(u6osound[4],u6osound_volume[4]);
 		  // s222 new sound for lever
           //if (sfx[i3].more==4) soundplay2(u6osound[6],u6osound_volume[6]);
 		  if (sfx[i3].more == 4) {
-			  if (soundn1)
-				  soundplay2(u6osound[SOUND_LEVERN1], u6osound_volume[SOUND_LEVERN1]);
-			  else
-				  soundplay2(u6osound[SOUND_LEVER], u6osound_volume[SOUND_LEVER]);
+			  soundplay2(u6osound[SOUND_LEVER], u6osound_volume[SOUND_LEVER]);
 		  }
 
           if (sfx[i3].more==5) soundplay2(u6osound[19],u6osound_volume[19]);
@@ -10616,9 +10251,6 @@ txtsf_done:
           stolenitemwarningy[stolenitemwarningn]=sfx[i3].y;
           stolenitemwarningtype[stolenitemwarningn]=sfx[i3].more;
 
-		  // s222 new sound for stolen item
-		  //if (soundn1)
-			//soundplay2(u6osound[SOUND_STEALINGWARNING],u6osound_volume[SOUND_STEALINGWARNING]);
 
           goto donesf;
         }//21
@@ -11815,11 +11447,7 @@ diskip:
 			imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_ENHANCE, enhancen1);
 		}
 
-		if (soundn1 > 0)
-		imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_SOUND, soundn1);
 
-		if (combatsoundn1 > 0)
-		imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_COMBATSOUND, combatsoundn1);
 
 		// r444 for new mode: display minimap
 //			if(peer) {
@@ -13165,22 +12793,6 @@ wavinfo_next:
   }
   close(tfh);
 
-  // combatsoundfix (2026-06-02): wavinfo.txt only defines sound slots 0..35,
-  // but the enhanced combat path (combatsoundn1 != 0 -- default 2 because
-  // enhanceclientn1 = 1) routes every combat sound to the "N1" alternate
-  // slots (36..53). Those slots are never loaded, so u6osound[] is NULL there
-  // and soundplay2() returns silently -- this is why players hear no combat
-  // sounds while everything else (slots 0..35) works. Until the N1 wav assets
-  // ship, alias each missing N1 combat slot to its already-loaded base combat
-  // sound (and copy its computed volume) so combat is audible again. Guarded
-  // on ==0 so real N1 wavs, if added to wavinfo.txt later, take precedence.
-  if (u6osound[SOUND_COMBAT_HITN1] == 0)       { u6osound[SOUND_COMBAT_HITN1]       = u6osound[SOUND_COMBAT_HIT];      u6osound_volume[SOUND_COMBAT_HITN1]       = u6osound_volume[SOUND_COMBAT_HIT]; }
-  if (u6osound[SOUND_COMBAT_PLAYERHURTN1] == 0){ u6osound[SOUND_COMBAT_PLAYERHURTN1] = u6osound[SOUND_COMBAT_HIT];      u6osound_volume[SOUND_COMBAT_PLAYERHURTN1] = u6osound_volume[SOUND_COMBAT_HIT]; }
-  if (u6osound[SOUND_COMBAT_MISS1N1] == 0)     { u6osound[SOUND_COMBAT_MISS1N1]     = u6osound[SOUND_COMBAT_HIT];      u6osound_volume[SOUND_COMBAT_MISS1N1]     = u6osound_volume[SOUND_COMBAT_HIT]; }
-  if (u6osound[SOUND_COMBAT_MISS2N1] == 0)     { u6osound[SOUND_COMBAT_MISS2N1]     = u6osound[SOUND_COMBAT_HIT];      u6osound_volume[SOUND_COMBAT_MISS2N1]     = u6osound_volume[SOUND_COMBAT_HIT]; }
-  if (u6osound[SOUND_COMBAT_BOWN1] == 0)       { u6osound[SOUND_COMBAT_BOWN1]       = u6osound[SOUND_COMBAT_BOW];      u6osound_volume[SOUND_COMBAT_BOWN1]       = u6osound_volume[SOUND_COMBAT_BOW]; }
-  if (u6osound[SOUND_COMBAT_CROSSBOWN1] == 0)  { u6osound[SOUND_COMBAT_CROSSBOWN1]  = u6osound[SOUND_COMBAT_CROSSBOW]; u6osound_volume[SOUND_COMBAT_CROSSBOWN1]  = u6osound_volume[SOUND_COMBAT_CROSSBOW]; }
-  if (u6osound[SOUND_COMBAT_FIREBALLN1] == 0)  { u6osound[SOUND_COMBAT_FIREBALLN1]  = u6osound[SOUND_COMBAT_FIREBALL]; u6osound_volume[SOUND_COMBAT_FIREBALLN1]  = u6osound_volume[SOUND_COMBAT_FIREBALL]; }
 }//wavinfo_loaded
 
 

@@ -1197,12 +1197,7 @@ void getsound(unsigned short type, long x, long y) {
             soundplay2(u6osound[33], u6osound_volume[33]);
             return;
         case OBJ_ELECTRIC_FIELD:
-            // s222 new sound for electric field
-            //soundplay2(u6osound[5],u6osound_volume[5]);
-            if (soundn1)
-                soundplay2(u6osound[SOUND_FIELDN1], u6osound_volume[SOUND_FIELDN1]);
-            else
-                soundplay2(u6osound[SOUND_FIELD], u6osound_volume[SOUND_FIELD]);
+            soundplay2(u6osound[SOUND_FIELD], u6osound_volume[SOUND_FIELD]);
             return;
         case OBJ_LOG_SAW:
             soundplay2(u6osound[15], u6osound_volume[15]);
@@ -2451,12 +2446,6 @@ void newmodeinit() {
     // exists. A future cleanup sweep can remove them.
     hWnd4 = NULL;
 
-    // s555
-    if (!enhanceclientn1) {
-        enhancen1 = 0;
-        soundn1 = 0;
-        combatsoundn1 = 0;
-    }
     /*
 	// r999
 	panelx[0] = resxn1m;
@@ -3952,42 +3941,12 @@ void updateoptioninfo() {
         y += 16;
     }
 
-    if (enhanceclientn1) {
-        txtset(t, "Client options: enabled");
-        //txtnumint(t2, enhanceclientn1);
-        //txtadd(t, t2);
-    } else
-        txtset(t, "Client options: disabled");
-
-    txtout(optioninfosurf, x, y, t);
-    y += 16;
-
     if (enhancen1) {
         txtset(t, "Game option: alternate ");
         txtnumint(t2, enhancen1);
         txtadd(t, t2);
     } else
         txtset(t, "Game option: default");
-
-    txtout(optioninfosurf, x, y, t);
-    y += 16;
-
-    if (soundn1) {
-        txtset(t, "Sound option: alternate ");
-        txtnumint(t2, soundn1);
-        txtadd(t, t2);
-    } else
-        txtset(t, "Sound option: default");
-
-    txtout(optioninfosurf, x, y, t);
-    y += 16;
-
-    if (combatsoundn1) {
-        txtset(t, "Combat sound option: alternate ");
-        txtnumint(t2, combatsoundn1);
-        txtadd(t, t2);
-    } else
-        txtset(t, "Combat sound option: default");
 
     txtout(optioninfosurf, x, y, t);
 

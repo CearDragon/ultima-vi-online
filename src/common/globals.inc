@@ -111,7 +111,6 @@ int uipanelpartymemberlock;
 // s555 turn on/off new changes
 int easymodehostn1 = 0;
 int enhancehostn1 = 0;
-int enhanceclientn1 = 1;
 
 
 /* function_both */
@@ -904,10 +903,6 @@ double combatinfoplayerprevett = 0.0f;
 int resultinfon1 = 0;
 int sfxonscreenn1 = 0;
 
-// s222
-int soundn1 = 2;
-int combatsoundn1 = 2;
-int playstatusmessagesound;
 
 // s444
 int enhancen1 = 2;
