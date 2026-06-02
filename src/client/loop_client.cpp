@@ -5949,12 +5949,17 @@ dbg1:
           }
           if (x){
 
-            if (party_spellbook_frame[i2]->offset_x==4096){
-              party_spellbook_frame[i2]->offset_x=i2*32; party_spellbook_frame[i2]->offset_y=128-16+i2*32+256;
+            if (party_spellbook_frame[i2]->positioned==false){
+              // RW-P3.3 (2026-06-02): first-show placement via FRAME::positioned
+              // + clamp to the current back buffer (see minimap/tmap). This block
+              // only runs when the character has spells (the panel is shown), so
+              // park it at its home position.
+              int hx=i2*32, hy=128-16+i2*32+256; //default
               if (cltset2_restored){ if (cltset2.party_spellbook_frame_offset_x[i2]!=32767){
-                party_spellbook_frame[i2]->offset_x=cltset2.party_spellbook_frame_offset_x[i2]; party_spellbook_frame[i2]->offset_y=cltset2.party_spellbook_frame_offset_y[i2];
+                hx=cltset2.party_spellbook_frame_offset_x[i2]; hy=cltset2.party_spellbook_frame_offset_y[i2];
                 cltset2.party_spellbook_frame_offset_x[i2]=32767;
               }}
+              placeFloatingPanelFirstShow(party_spellbook_frame[i2], hx, hy, 1);
             }
 
 
@@ -10528,20 +10533,28 @@ skiprefresh2:
   if (!clientframe) goto skiprefresh;
 
 
-  if (minimap_frame->offset_x==4096){
-    minimap_frame->offset_x=0; minimap_frame->offset_y=0; //default
+  // RW-P3.3 (2026-06-02): first-show placement keyed on FRAME::positioned, not
+  // the offset==4096 sentinel. The inclusive minimap/tmap hide-show toggle
+  // above (kPanelHideThresholdX/DeltaX == 4096) could consume the 4096 sentinel
+  // before this ran, and a cltset2-restored position saved on a larger window
+  // could land off the right edge. placeFloatingPanelFirstShow clamps the home
+  // fully on screen and parks it shown/hidden per peer/tmap.
+  if (!minimap_frame->positioned){
+    int hx=0, hy=0; //default
     if (cltset2_restored){ if (cltset2.minimap_offset_x!=32767){
-      minimap_frame->offset_x=cltset2.minimap_offset_x; minimap_frame->offset_y=cltset2.minimap_offset_y;
+      hx=cltset2.minimap_offset_x; hy=cltset2.minimap_offset_y;
       cltset2.minimap_offset_x=32767;
     }}
+    placeFloatingPanelFirstShow(minimap_frame, hx, hy, peer);
   }
 
-  if (tmap_frame->offset_x==4096){
-    tmap_frame->offset_x=0; tmap_frame->offset_y=0; //default
+  if (!tmap_frame->positioned){
+    int hx=0, hy=0; //default
     if (cltset2_restored){ if (cltset2.tmap_offset_x!=32767){
-      tmap_frame->offset_x=cltset2.tmap_offset_x; tmap_frame->offset_y=cltset2.tmap_offset_y;
+      hx=cltset2.tmap_offset_x; hy=cltset2.tmap_offset_y;
       cltset2.tmap_offset_x=32767;
     }}
+    placeFloatingPanelFirstShow(tmap_frame, hx, hy, tmap);
   }
 
   for (i=0;i<=7;i++){

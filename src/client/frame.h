@@ -37,6 +37,17 @@ typedef struct _FRAME {
     short default_size_x, default_size_y;
     bool scaling;
     float scale_x, scale_y;
+    // RW-P3.3 (2026-06-02): one-shot "first on-screen placement done" flag for
+    // the floating, hideable panels (minimap_frame, tmap_frame,
+    // party_spellbook_frame[]). These are created off-screen and positioned
+    // lazily the first time they're shown. The old scheme keyed that on
+    // offset_x==4096, but RW-P4.9 made kPanelHideThresholdX==kPanelHideDeltaX
+    // ==4096, so the inclusive hide/show toggle could consume the 4096 sentinel
+    // before the default-init ran — leaving a panel parked near the right edge
+    // (only its left sliver visible) on a resized window. Tracking first
+    // placement with this flag (set by placeFloatingPanelFirstShow) decouples
+    // it from the offset value. Zero-initialized to false by FRMnew()/ZeroMemory.
+    bool positioned;
 } FRAME;
 
 typedef struct _FRM_TYPE {

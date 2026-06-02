@@ -90,6 +90,16 @@ void getobjdescn1(txt *txtdesc, int typeparam);
 void updateoptioninfo();
 
 
+// RW-P3.3 (2026-06-02): one-shot, on-screen first placement for the floating
+// hideable panels (minimap_frame, tmap_frame, party_spellbook_frame[]).
+// Clamps the requested "home" (default or cltset2-restored) fully inside the
+// current back buffer, then parks the panel at its home (shown!=0) or in its
+// hidden slot home+kPanelHideDeltaX (shown==0), and sets FRAME::positioned so
+// the placement only happens once. Guarantees the panel is fully visible the
+// first time it appears on a resized window. See frame.h FRAME::positioned.
+void placeFloatingPanelFirstShow(FRAME *f, int homeX, int homeY, int shown);
+
+
 /* function prototypes */
 void function_client_init(void);
 

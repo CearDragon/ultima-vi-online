@@ -114,6 +114,23 @@ buffer being exactly 1024 wide.
 
 ### D.1 `setup_client.inc` static positions
 
+> **RW-P3.3 follow-up (2026-06-02): first-show placement.** The floating
+> hideable panels `minimap_frame`, `tmap_frame` and `party_spellbook_frame[]`
+> are created off-screen at `offset_x=4096` and positioned lazily the first
+> time they are shown. That `4096` value collided with
+> `kPanelHideThresholdX == kPanelHideDeltaX == 4096` (RW-P4.9), so the
+> inclusive hide/show toggle could consume the sentinel before the
+> default-init ran, and a `cltset2`-restored position saved on a larger window
+> could land past the right edge (only the panel's left sliver visible). Fixed
+> by `FRAME::positioned` (a one-shot flag, `frame.h`) + the
+> `placeFloatingPanelFirstShow()` helper (`function_client.cpp`), which clamps
+> the home fully inside the current back buffer and parks the panel shown or
+> hidden. Init sites: `loop_client.cpp` minimap/tmap (~10542/10551) and
+> spellbook (~5952). The `offset_x=4096` startup parks below remain valid (a
+> just-created panel is `positioned==false` until first shown).
+
+
+
 | File                          | Line | Snippet                                            | Meaning                                                | Phase   |
 | ----------------------------- | ---- | -------------------------------------------------- | ------------------------------------------------------ | ------- |
 | `src/client/setup_client.inc` | 435  | `inpf->offset_x=256+2048;`                         | Text-input frame, parked off screen                    | RW-P3.2 |

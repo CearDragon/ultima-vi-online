@@ -3914,6 +3914,28 @@ void applyscaleuipanelwidget(int uipi, int uiwi, int uisi, float scalex, float s
 }
 
 // obsolete
+// RW-P3.3 (2026-06-02): see function_client.h for the rationale. One-shot,
+// clamped, on-screen first placement for the floating hideable FRAME panels.
+void placeFloatingPanelFirstShow(FRAME *f, int homeX, int homeY, int shown) {
+    if (f == NULL || f->graphic == NULL) return;
+    const int bw = backbufferW();
+    const int bh = backbufferH();
+    const int w = (int) f->graphic->d.dwWidth;
+    const int h = (int) f->graphic->d.dwHeight;
+    // Clamp the home position so the whole panel fits inside the current back
+    // buffer (a position restored from cltset2 may have been saved while the
+    // window was larger). Keep the top-left corner on screen.
+    if (homeX + w > bw) homeX = bw - w;
+    if (homeY + h > bh) homeY = bh - h;
+    if (homeX < 0) homeX = 0;
+    if (homeY < 0) homeY = 0;
+    f->offset_y = (short) homeY;
+    // Park at home when shown, or in the hidden slot (off the right edge) so
+    // the hide/show toggle can recover home via offset_x -= kPanelHideDeltaX.
+    f->offset_x = (short) (shown ? homeX : homeX + kPanelHideDeltaX);
+    f->positioned = true;
+}
+
 void updateoptioninfo() {
     static txt *t = txtnew();
     static txt *t2 = txtnew();

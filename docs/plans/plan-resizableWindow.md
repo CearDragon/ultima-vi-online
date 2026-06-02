@@ -316,6 +316,18 @@ instead of cycling modes.
   `tmap_frame`, `statusmessage_viewnpc`) are NOT rerouted yet — they
   use off-screen sentinels and are placed by the same code that
   activates them. Done.)_
+  _(2026-06-02 follow-up — first-show placement bug fixed: the floating
+  hideable panels `minimap_frame`, `tmap_frame`, `party_spellbook_frame[]`
+  were created off-screen at `offset_x=4096` and positioned lazily on first
+  show. That sentinel collided with `kPanelHideThresholdX ==
+  kPanelHideDeltaX == 4096` (RW-P4.9): the inclusive hide/show toggle could
+  consume the sentinel before the default-init ran, and a `cltset2`-restored
+  position saved on a larger window could land past the right edge (only the
+  panel's left sliver visible at the far right). Fixed with a one-shot
+  `FRAME::positioned` flag (`frame.h`) + `placeFloatingPanelFirstShow()`
+  helper (`function_client.cpp`) that clamps the home fully inside the
+  current back buffer and parks the panel shown/hidden. Init sites updated in
+  `loop_client.cpp` (minimap/tmap ~10542/10551, spellbook ~5952).)_
 - ⬜ **RW-P3.4** Convert hard-coded equipment-slot offsets in
   `define_both.h` (`helmx=52`, `wep_rightx=20`, `armourx=52`, `bootsx=52`,
   …) into a `kEquipSlotLayout` table relative to the inventory panel's
