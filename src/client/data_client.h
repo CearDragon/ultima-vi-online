@@ -430,9 +430,6 @@ extern int uipanelpartymemberbar1;
 extern int uipanelpartymemberlock;
 
 
-// s222
-extern int soundn1;
-extern int combatsoundn1;
 
 // s333 get type of object at coordinate
 extern player combatinfoplayerprev;

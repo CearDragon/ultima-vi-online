@@ -218,8 +218,8 @@ without standing up a separate host process.
 
 | Concern                          | Files                                                  |
 | -------------------------------- | ------------------------------------------------------ |
-| Main host loop                   | `loop_host.cpp`, `loop_host.inc`                       |
-| Host bootstrap                   | `setup_host.inc`, `host_setup.h`, `host_setup.inc`     |
+| Main host loop                   | `loop_host.cpp` (compiled via `#include` into `u6o7.cpp`) |
+| Host bootstrap                   | `setup_host.inc`, `host_setup.h`                       |
 | Helper functions                 | `function_host.cpp/h`                                  |
 | Data definitions and globals     | `data_host.cpp/h`, `define_host.h`                     |
 | Misc host-side resources         | `host.inc`                                             |

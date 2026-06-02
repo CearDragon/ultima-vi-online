@@ -560,7 +560,6 @@ extern unsigned int windowsizecyclenum;
 // s555 turn on/off new changes
 extern int easymodehostn1;
 extern int enhancehostn1;
-extern int enhanceclientn1;
 
 
 /* init_function */

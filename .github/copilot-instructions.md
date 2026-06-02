@@ -108,7 +108,6 @@ ID prefixed `RW-P*` / `DOB-P*`:
 - Don't rename mover/sobj buffer fields or reorder `struct player` casually
   — it's wire-coupled.
 - Don't introduce STL containers in the mover/sobj/world-render hot paths.
-- Don't drop a `.inc` mirror when editing the matching `.cpp` "for real".
 - Don't compute mover/sobj positions from the client's dynamic `tpx`/`tpy`
   when interpreting host messages — use `tpx_legacy`/`tpy_legacy`.
 - Don't bump `U6O_VERSION` for non-wire changes. **Do** bump it for every
@@ -118,10 +117,10 @@ ID prefixed `RW-P*` / `DOB-P*`:
 
 1. Read the **Session handoff** sections of both plans under `docs/plans/`.
 2. `grep -n "\.inc" CMakeLists.txt` to see which `.inc` files compile.
-3. If editing `loop_host.cpp` or `loop_client.cpp`, plan to update its
-   `.inc` mirror in the same commit.
+3. Remember `loop_host.cpp` / `loop_client.cpp` are compiled by being
+   `#include`d into `src/common/u6o7.cpp`, not as standalone sources.
 4. If touching encode/decode or buffer dims: server encoder + server
-   decoder (if any) + `.inc` mirrors + client encoder/decoder +
-   `U6O_VERSION` — all in one PR.
+   decoder (if any) + client encoder/decoder + `U6O_VERSION` — all in one
+   PR.
 5. Tag code comments with the phase ID (`RW-P4.11:`, `DOB-P3.2:`, …).
 

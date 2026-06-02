@@ -456,9 +456,10 @@ A minimal recipe:
 
 ## 9. Common gotchas
 
-- **`loop_client.inc` is dead.** It used to be the canonical loop;
-  today only `loop_client.cpp` is compiled (via `#include` from
-  `u6o7.cpp:462`). Edit only `loop_client.cpp`. See hotspots-§B.
+- **`loop_client.inc` was deleted.** It used to be a dead mirror of the
+  canonical loop; today only `loop_client.cpp` exists and is compiled
+  (via `#include` from `u6o7.cpp:462`). Edit `loop_client.cpp`. See
+  hotspots-§B.
 - **`offset_x` is `short`.** Anything you assign to it from an `int`
   triggers a narrowing warning; that's the existing house style for
   this codebase. Don't widen panels past 32 767 px.

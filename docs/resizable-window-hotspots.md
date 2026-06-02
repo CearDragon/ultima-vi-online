@@ -24,7 +24,7 @@
 - 6 categories (A–G).
 - ~75 distinct hotspots, concentrated in 8 files.
 - Highest-density files (by hotspot count, descending):
-  1. `src/client/loop_client.cpp` (and its near-duplicate `loop_client.inc`)
+  1. `src/client/loop_client.cpp`
   2. `src/client/function_client.cpp`
   3. `src/client/setup_client.inc`
   4. `src/client/data_client.h` / `src/common/globals.inc` (declarations)
@@ -33,9 +33,8 @@
   7. `src/common/u6o7.cpp`
   8. `src/common/data_both.h`
 
-`loop_client.cpp` and `loop_client.inc` contain the same code; `function_client.cpp`
-and `function_client.h` ditto for some of the hotspots. When fixing a row
-in one file, also fix the duplicate.
+`function_client.cpp` and `function_client.h` share some of the hotspots.
+When fixing a row in one file, also fix the duplicate.
 
 ---
 
@@ -76,7 +75,6 @@ Hard limits that assume the visible game area is 1024×768 pixels.
 | ~~`src/client/loop_client.cpp`~~    | ~~8070~~ | ~~`if (x8>1024) x8=1024; if (y8>768) y8=768;`~~                                | Crop rect — now `bbW`/`bbH` from accessors                   | DONE RW-P2.3 |
 | ~~`src/client/loop_client.cpp`~~    | ~~8071~~ | ~~`ls_off_add=1024-(x8-x7);`~~                                                 | Pitch — now `lightingStride()-(x8-x7)`                       | DONE RW-P2.3 |
 | ~~`src/client/loop_client.cpp`~~    | ~~8076~~ | ~~`if ((z>>10)!=(ls_off>>10)) z=(ls_off>>10<<10)+1023;`~~                    | Row-boundary math at 1024-stride — `<<10` left in place; correct only while stride is a power-of-two 1024. TODO when stride becomes runtime. | RW-P2.3 (partial) |
-| `src/client/loop_client.inc`        | 6466-6472 | (duplicate of loop_client.cpp 8070-8076)                                     | Now stale — `loop_client.inc` appears unused; verify and delete | RW-P2.3 |
 | ~~`src/client/loop_client.cpp`~~    | ~~6587~~ | ~~`memcpy(&ls,&ls_moon1,1024*768);` (and ls_moon2..4)~~                        | Moonlight copy — now `lightingTotalBytes()`                  | DONE RW-P2.3 |
 | ~~`src/client/loop_client.cpp`~~    | ~~8285~~ | ~~`mov ebp,786432`~~                                                            | lightshow0 inline asm — now `mov ebp,_lsTotal` (local var = `lightingTotalBytes()`) | DONE RW-P2.3 |
 | ~~`src/client/function_client.cpp`~~| ~~1784~~ | ~~`mov esi,786432`~~                                                            | refresh() 16→32 inline asm — now `mov esi,_pxCount`         | DONE RW-P2.3 |
@@ -150,7 +148,6 @@ calls in RW-P3.
 | `src/client/loop_client.cpp`   | 5457, 5485                             | `musickeyboard`                                        |
 | `src/client/loop_client.cpp`   | 6261                                   | `statusmessage_viewnpc`                                |
 | `src/client/loop_client.cpp`   | 11206-11220                            | `party_spellbook_frame[i]`, `party_frame[i]` (Y-axis variant: `<768` / `+= 1536`) |
-| `src/client/loop_client.inc`   | 8676-8690                              | (duplicates of loop_client.cpp 11206-11220)            |
 
 ## E. Equipment-slot offsets (`define_both.h`)
 
@@ -228,10 +225,10 @@ the moment the accessors flip to runtime variables.
 
 ## Notes
 
-1. **Duplicate sources.** `loop_client.cpp` is a regenerated/refactored copy
-   of `loop_client.inc`; line numbers differ but the resize-hostile
-   patterns are duplicated 1:1. Same for `function_client.cpp` /
-   `function_client.h`. Edit both whenever a hotspot is fixed.
+1. **Single loop source.** `loop_client.cpp` is the one compiled copy (pulled
+   into `u6o7.cpp` via `#include`); the former `loop_client.inc` mirror has
+   been deleted. `function_client.cpp` / `function_client.h` still share some
+   patterns — edit both whenever a hotspot is fixed.
 
 2. **The 2048 idiom is structural, not layout.** Many `+= 2048` /
    `-= 2048` calls in `loop_client.cpp` are showing/hiding panels by
