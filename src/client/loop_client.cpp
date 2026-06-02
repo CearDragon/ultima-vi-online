@@ -13164,6 +13164,23 @@ wavinfo_next:
     goto wavinfo_next;
   }
   close(tfh);
+
+  // combatsoundfix (2026-06-02): wavinfo.txt only defines sound slots 0..35,
+  // but the enhanced combat path (combatsoundn1 != 0 -- default 2 because
+  // enhanceclientn1 = 1) routes every combat sound to the "N1" alternate
+  // slots (36..53). Those slots are never loaded, so u6osound[] is NULL there
+  // and soundplay2() returns silently -- this is why players hear no combat
+  // sounds while everything else (slots 0..35) works. Until the N1 wav assets
+  // ship, alias each missing N1 combat slot to its already-loaded base combat
+  // sound (and copy its computed volume) so combat is audible again. Guarded
+  // on ==0 so real N1 wavs, if added to wavinfo.txt later, take precedence.
+  if (u6osound[SOUND_COMBAT_HITN1] == 0)       { u6osound[SOUND_COMBAT_HITN1]       = u6osound[SOUND_COMBAT_HIT];      u6osound_volume[SOUND_COMBAT_HITN1]       = u6osound_volume[SOUND_COMBAT_HIT]; }
+  if (u6osound[SOUND_COMBAT_PLAYERHURTN1] == 0){ u6osound[SOUND_COMBAT_PLAYERHURTN1] = u6osound[SOUND_COMBAT_HIT];      u6osound_volume[SOUND_COMBAT_PLAYERHURTN1] = u6osound_volume[SOUND_COMBAT_HIT]; }
+  if (u6osound[SOUND_COMBAT_MISS1N1] == 0)     { u6osound[SOUND_COMBAT_MISS1N1]     = u6osound[SOUND_COMBAT_HIT];      u6osound_volume[SOUND_COMBAT_MISS1N1]     = u6osound_volume[SOUND_COMBAT_HIT]; }
+  if (u6osound[SOUND_COMBAT_MISS2N1] == 0)     { u6osound[SOUND_COMBAT_MISS2N1]     = u6osound[SOUND_COMBAT_HIT];      u6osound_volume[SOUND_COMBAT_MISS2N1]     = u6osound_volume[SOUND_COMBAT_HIT]; }
+  if (u6osound[SOUND_COMBAT_BOWN1] == 0)       { u6osound[SOUND_COMBAT_BOWN1]       = u6osound[SOUND_COMBAT_BOW];      u6osound_volume[SOUND_COMBAT_BOWN1]       = u6osound_volume[SOUND_COMBAT_BOW]; }
+  if (u6osound[SOUND_COMBAT_CROSSBOWN1] == 0)  { u6osound[SOUND_COMBAT_CROSSBOWN1]  = u6osound[SOUND_COMBAT_CROSSBOW]; u6osound_volume[SOUND_COMBAT_CROSSBOWN1]  = u6osound_volume[SOUND_COMBAT_CROSSBOW]; }
+  if (u6osound[SOUND_COMBAT_FIREBALLN1] == 0)  { u6osound[SOUND_COMBAT_FIREBALLN1]  = u6osound[SOUND_COMBAT_FIREBALL]; u6osound_volume[SOUND_COMBAT_FIREBALLN1]  = u6osound_volume[SOUND_COMBAT_FIREBALL]; }
 }//wavinfo_loaded
 
 
