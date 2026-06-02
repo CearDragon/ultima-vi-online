@@ -45,6 +45,18 @@ namespace u6o {
             int g_lighting_w = 0;
             int g_lighting_h = 0;
 
+            // RW-P2.3: row stride (in PIXELS) of the ls/ls_moon* buffers and the
+            // composited `ps` surface. This is the surface's actual pixel pitch
+            // (ps->d.lPitch / 2), which DirectDraw may pad ABOVE the world width
+            // (backbufferW()) at widths that aren't aligned to its internal
+            // granularity. Keeping the lighting buffers and the linear-walk
+            // compose passes on the surface's real pitch — rather than newW — is
+            // what stops the lit overlay from skewing diagonally (top-right →
+            // bottom-left) at intermediate window sizes. Seeded to the legacy
+            // 1024 floor; recreateBackbuffers()/setup overwrite it via
+            // set_lighting_stride(ps->d.lPitch / 2) before lighting_alloc().
+            int g_lighting_stride = kBackbufferLegacyW;
+
             // RW-P2.2: active back-buffer dimensions. Initialized to the legacy
             // 1024x768 floor so every site that calls backbufferW()/H() before
             // the first recreateBackbuffers() (i.e. at startup, before
@@ -73,8 +85,10 @@ namespace u6o {
 
         int backbufferW() { return g_active_w; }
         int backbufferH() { return g_active_h; }
-        int lightingStride() { return g_active_w; }
-        int lightingTotalBytes() { return g_active_w * g_active_h; }
+        // RW-P2.3: lightingStride() is the surface's PIXEL pitch (lPitch/2), not
+        // the world width. See g_lighting_stride for why these can differ.
+        int lightingStride() { return g_lighting_stride; }
+        int lightingTotalBytes() { return g_lighting_stride * g_active_h; }
 
         int viewTilesX() {
             // (windowResize early-return removed 2026-05-27. The legacy 32-tile
@@ -131,6 +145,16 @@ namespace u6o {
             g_active_h = h;
         }
 
+        // RW-P2.3: publish the active `ps` surface's pixel pitch so the lighting
+        // buffers and every linear-walk compose pass (lightshow0 asm, moon
+        // memcpy, stormcloak, ps_fakebuffer) advance in lockstep with `ps->o`.
+        // Called from recreateBackbuffers() and setup_client.inc with
+        // ps->d.lPitch / 2 BEFORE lighting_alloc(). Must be > 0; ignored
+        // otherwise so a bad surface report can't zero the stride.
+        void set_lighting_stride(int pixelStride) {
+            if (pixelStride > 0) g_lighting_stride = pixelStride;
+        }
+
         void lighting_free() {
             free_one(ls);
             free_one(ls_moon1);
@@ -143,12 +167,21 @@ namespace u6o {
 
         bool lighting_alloc(int w, int h) {
             if (w <= 0 || h <= 0) return false;
-            if (g_lighting_w == w && g_lighting_h == h && ls && ls_moon1 && ls_moon2 && ls_moon3 && ls_moon4) {
+            // RW-P2.3: allocate at the active surface's PIXEL pitch
+            // (g_lighting_stride), not the world width `w`. DirectDraw pads the
+            // ps row stride above newW*2 bytes at non-aligned widths; if ls/
+            // ls_moon* used `w` as their stride while the compose passes walk
+            // ps at lPitch, the lit overlay drifts one (lPitch - w*2) per row →
+            // the diagonal skew. set_lighting_stride() seeds g_lighting_stride
+            // from ps->d.lPitch/2 before we get here. `w` is still validated
+            // above but no longer drives the row stride.
+            const int stride = (g_lighting_stride > 0) ? g_lighting_stride : w;
+            if (g_lighting_w == stride && g_lighting_h == h && ls && ls_moon1 && ls_moon2 && ls_moon3 && ls_moon4) {
                 return true; // already sized correctly
             }
             lighting_free();
 
-            const size_t bytes = (size_t) w * (size_t) h;
+            const size_t bytes = (size_t) stride * (size_t) h;
             ls = (unsigned char *) malloc(bytes);
             ls_moon1 = (unsigned char *) malloc(bytes);
             ls_moon2 = (unsigned char *) malloc(bytes);
@@ -168,7 +201,10 @@ namespace u6o {
             memset(ls_moon3, 0, bytes);
             memset(ls_moon4, 0, bytes);
 
-            g_lighting_w = w;
+            // Store the allocated stride (not the world width) as the cache key
+            // so the idempotency check above matches what lightingStride()
+            // returns.
+            g_lighting_w = stride;
             g_lighting_h = h;
             return true;
         }

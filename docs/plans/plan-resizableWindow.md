@@ -230,6 +230,25 @@ instead of cycling modes.
   changes are behavior-identical at 1024×768 since the accessors still
   return the legacy constants. Sections A1–A4 of
   `resizable-window-hotspots.md` can now be marked DONE.)_
+  _(2026-06-02 — **BUG FIX: lighting skew at intermediate window sizes.**
+  Players reported the lit-up area in dark places skewing diagonally
+  (top-right → bottom-left) at window widths between the original 1024 and
+  maximized. Root cause: `lightingStride()` returned `backbufferW()` (= the
+  world width `newW`), but DirectDraw pads the `ps` surface row pitch
+  ABOVE `newW*2` bytes at widths that aren't aligned to its granularity.
+  The linear-walk compose passes (`lightshow0` asm, moon `memcpy`,
+  stormcloak, `ps_fakebuffer`, and the 16→32 `refresh()` loop) all walk
+  `ls`/`ps->o` assuming row stride == `lightingStride()` pixels, so each
+  row drifted by `(lPitch − newW*2)` → the skew. At 1024 and at aligned/
+  maximized widths `lPitch == newW*2`, so no skew there. Fix decouples the
+  lighting stride from the world width: new `g_lighting_stride` +
+  `set_lighting_stride(ps->d.lPitch/2)`, called from `recreateBackbuffers()`
+  and `setup_client.inc` before each `lighting_alloc()`. `lightingStride()`/
+  `lightingTotalBytes()` and the `ls`/`ls_moon*` allocation now use the
+  surface's real pixel pitch. The moon-populate loop's hard `*1024` became
+  `*lightingStride()`. No hot-loop edits — they already route through the
+  accessors. Not a wire change, so `U6O_VERSION` is unchanged. Files:
+  `viewport.{h,cpp}`, `function_client.cpp`, `setup_client.inc`.)_
 - ✅ **RW-P2.4** Update `refresh()` so `srcW/srcH` passed to
   `blit_letterbox` come from the actual surface dims (already does via
   `s->d.dwWidth/dwHeight` — verify and add an assert that they equal the

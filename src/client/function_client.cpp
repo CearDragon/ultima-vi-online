@@ -434,12 +434,8 @@ namespace u6o {
             // Pitch sanity check: in debug builds, log if DD's reported row
             // stride doesn't match `newW * 2` bytes. The original distortion
             // bug was caused by the lighting buffer (`malloc`'d at exactly
-            // `newW * newH` bytes) and the surface's row stride disagreeing.
-            // Adopting DD's lPitch as the canonical width broke worse on the
-            // user's setup (produced duplicated/striped output), so we now
-            // just trust newW and rely on DD not padding 16bpp sysmem
-            // surfaces. Most widths divisible by 16 should be safe; logging
-            // helps diagnose if/when this assumption fails.
+            // `newW * newH` bytes) and the surface's row stride disagreeing at
+            // widths DirectDraw pads above `newW * 2`.
 #ifdef _DEBUG
             {
                 long expectedPitch = (long) newW * 2;
@@ -453,7 +449,21 @@ namespace u6o {
             }
 #endif
 
-            // Re-allocate the lighting buffers at the requested stride so the
+            // RW-P2.3: adopt the surface's ACTUAL pixel pitch as the lighting
+            // stride before (re)allocating the lighting buffers. DirectDraw pads
+            // `ps->d.lPitch` above `newW * 2` at widths that aren't aligned to
+            // its granularity (i.e. most intermediate window sizes between the
+            // legacy 1024 and a maximized/aligned width). The lighting-compose
+            // passes (lightshow0 asm, moon memcpy, stormcloak, ps_fakebuffer)
+            // walk `ls`/`ps->o` linearly assuming row stride == lightingStride()
+            // pixels, so they must use lPitch/2 — not newW — or the lit overlay
+            // skews diagonally (top-right → bottom-left). Earlier attempts that
+            // made lPitch/2 the canonical *world* width broke the tile/wire
+            // frame; decoupling the lighting stride from backbufferW() is the
+            // fix. Set BEFORE lighting_alloc() so it sizes/strides to match.
+            set_lighting_stride((int) (ps->d.lPitch / 2));
+
+            // Re-allocate the lighting buffers at the surface pitch so the
             // linear-walk inline asm in the lighting compose pass at
             // loop_client.cpp:8294ff stays in lockstep with `ps->o`.
             if (!lighting_alloc(newW, newH) || !visibility_alloc(newW, newH)) {

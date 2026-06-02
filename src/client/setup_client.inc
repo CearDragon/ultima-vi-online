@@ -49,6 +49,20 @@ tmap_marker=newsurf(8,8,SURF_SYSMEM16); //surface for treasure map markers
 // r222 nothing changed here: just some constants which can't be changed
 
 ps=newsurf(resxo,resyo,SURF_SYSMEM16);
+// RW-P2.3: the provisional lighting buffers allocated above (line ~14) used
+// the default 1024 stride because no surface existed yet. Now that `ps` is
+// created, adopt its ACTUAL pixel pitch (lPitch/2) — DirectDraw may pad the
+// row stride above resxo*2 — and re-run lighting_alloc so ls/ls_moon* and the
+// linear-walk compose passes stay in lockstep with ps->o. At the legacy
+// 1024x768 this is a no-op (pitch == 2048); it only matters if the startup
+// surface is padded or larger. Must precede the moon-buffer populate below.
+if (ps) {
+    set_lighting_stride((int)(ps->d.lPitch / 2));
+    if (!lighting_alloc(backbufferW(), backbufferH())) {
+        MessageBox(NULL,"Failed to allocate lighting buffers","Ultima 6 Online",MB_OK);
+        exit(0);
+    }
+}
 if (DDRAW_display_pixelformat.dwRGBBitCount!=16){
 ps2=newsurf(resxo/2,resyo/2,SURF_SYSMEM);
 ps3=newsurf(resxo,resyo,SURF_SYSMEM);
@@ -647,16 +661,19 @@ x3=640.0f-sqrt((float)(x2+y2)); //0-640 highest in centre!
 if (x3<0) x3=0;
 x4=x3-448; if (x4<0) x4=0; //0-128
 x4+=47;
-ls_moon1[y*1024+x]=x4/48;
+// RW-P2.3: index by lightingStride() (== surface pixel pitch), not a hard
+// 1024, so the moon gradient rows line up with the ls buffer's real stride.
+// At populate time (startup, 1024-wide) this equals 1024 — identical output.
+ls_moon1[y*lightingStride()+x]=x4/48;
 x4=x3-384; if (x4<0) x4=0;
 x4+=63;
-ls_moon2[y*1024+x]=x4/64;
+ls_moon2[y*lightingStride()+x]=x4/64;
 x4=x3-320; if (x4<0) x4=0;
 x4+=79;
-ls_moon3[y*1024+x]=x4/80;
+ls_moon3[y*lightingStride()+x]=x4/80;
 x4=x3-256; if (x4<0) x4=0; //384
 x4+=95;
-ls_moon4[y*1024+x]=x4/96;
+ls_moon4[y*lightingStride()+x]=x4/96;
 }}
 
 //ls3

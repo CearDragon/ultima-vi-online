@@ -166,16 +166,20 @@ namespace u6o {
         int viewOffsetX();
         int viewOffsetY();
 
-        // Row stride (in pixels) of the `ls`/`ls_moon*` lighting buffers AND
-        // the `ps` DirectDraw back-buffer (16-bpp pixels). Both are
-        // re-allocated together by `recreateBackbuffers` so they stay in
-        // lock-step; the renderer assumes pitch == width for the whole
-        // back-buffer family.
+        // Row stride (in pixels) of the `ls`/`ls_moon*` lighting buffers, kept
+        // equal to the active `ps` DirectDraw back-buffer's actual pixel pitch
+        // (`ps->d.lPitch / 2`). DirectDraw may pad the surface row stride ABOVE
+        // `backbufferW() * 2` bytes at widths that aren't aligned to its
+        // internal granularity, so this can be larger than `backbufferW()`.
+        // The lighting-compose passes walk `ls` and `ps->o` in lockstep, so they
+        // MUST use this value (not the world width) or the lit overlay skews
+        // diagonally. Updated by `recreateBackbuffers`/`setup` via
+        // `set_lighting_stride` before each `lighting_alloc`.
         int lightingStride();
 
-        // Total byte count of one lighting buffer == active_W * active_H.
-        // Used for memcpy/ZeroMemory over `ls`/`ls_moon*` and as the loop
-        // count in the lighting-compose and 16->32 pixel-format inline-asm
+        // Total byte count of one lighting buffer == lightingStride() *
+        // active_H. Used for memcpy/ZeroMemory over `ls`/`ls_moon*` and as the
+        // loop count in the lighting-compose and 16->32 pixel-format inline-asm
         // loops.
         int lightingTotalBytes();
 
@@ -202,6 +206,12 @@ namespace u6o {
         // successful surface recreation. Called only from
         // `recreateBackbuffers`s implementation in function_client.cpp.
         void set_active_backbuffer_dims(int w, int h);
+
+        // RW-P2.3 internal: publish the active `ps` surface's pixel pitch
+        // (ps->d.lPitch / 2) so lightingStride()/lightingTotalBytes() and the
+        // next lighting_alloc() use the surface's real row stride. Call BEFORE
+        // lighting_alloc() in recreateBackbuffers()/setup_client.inc.
+        void set_lighting_stride(int pixelStride);
 #else
         // Host fallbacks so u6oh doesn't require viewport.cpp
         inline int backbufferW() { return 1024; }
@@ -227,6 +237,8 @@ namespace u6o {
 
         inline void set_active_backbuffer_dims(int, int) {
         }
+        inline void set_lighting_stride(int) {
+        }
 #endif
     }
 } // namespace u6o::client
@@ -250,6 +262,7 @@ inline bool recreateBackbuffers(int newW, int newH) {
 
 inline bool lighting_alloc(int w, int h) { return u6o::client::lighting_alloc(w, h); }
 inline void lighting_free() { u6o::client::lighting_free(); }
+inline void set_lighting_stride(int s) { u6o::client::set_lighting_stride(s); }
 inline bool visibility_alloc(int w, int h) { return u6o::client::visibility_alloc(w, h); }
 inline void visibility_free() { u6o::client::visibility_free(); }
 
