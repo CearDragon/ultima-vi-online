@@ -115,7 +115,25 @@ void KeyEventProc(KEY_EVENT_RECORD ker) {
 extern "C" WORD __stdcall RtlCaptureStackBackTrace(DWORD, DWORD, PVOID *, PDWORD);
 
 LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo) {
-    FILE *f = fopen("crash.txt", "a");
+    // Build a unique, sortable timestamp suffix so successive crashes don't
+    // clobber each other's logs/dumps. Format: YYYYMMDD_HHMMSS (local time).
+    // Used for both the human-readable crash log and the minidump. This
+    // applies to BOTH binaries (client and host) because the filter is
+    // installed unconditionally at the top of _tWinMain.
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    char stamp[32];
+    sprintf(stamp, "%04u%02u%02u_%02u%02u%02u",
+            st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+
+    char txtName[64];
+    char dmpName[64];
+    sprintf(txtName, "crash_%s.txt", stamp);
+    sprintf(dmpName, "crash_%s.dmp", stamp);
+
+    // Open with "w": each crash gets its own timestamped file, so there's no
+    // need to append to a shared log anymore.
+    FILE *f = fopen(txtName, "w");
     if (f) {
         fprintf(f, "Unhandled Exception Crash!\n");
         fprintf(f, "Exception Code: 0x%08X\n", ExceptionInfo->ExceptionRecord->ExceptionCode);
@@ -127,11 +145,11 @@ LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo
         for (WORD i = 0; i < frames; i++) {
             fprintf(f, "  [%d] %p\n", i, stack[i]);
         }
-        fprintf(f, "Generated crash.dmp for detailed debugging.\n");
+        fprintf(f, "Generated %s for detailed debugging.\n", dmpName);
         fclose(f);
     }
 
-    HANDLE hFile = CreateFileA("crash.dmp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE hFile = CreateFileA(dmpName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hFile != INVALID_HANDLE_VALUE) {
         MINIDUMP_EXCEPTION_INFORMATION mdei;
         mdei.ThreadId = GetCurrentThreadId();
