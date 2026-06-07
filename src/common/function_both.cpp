@@ -347,32 +347,17 @@ void getscreenoffset(long x, long y, long *mapx, long *mapy) {
         // surrounding void scrolled around it -- the reported "character
         // doesn't move but the camera does" bug.
         //
-        // IMPORTANT -- why this returns a CONSTANT, not `1285 - htx`:
-        // tpx/tpy here is the wire reference frame. The host streams sobj/mover
-        // offsets relative to its getscreenoffset(); the client decodes them
-        // relative to getscreenoffset_legacy() (tpx_legacy) and the two MUST
-        // produce the identical origin or the per-frame mover prune desyncs
-        // (host and client shrink tplayer->mv_i differently, MOVE/REMOVE
-        // indices then target the wrong slot, and the avatar/party movers
-        // freeze at their entry position -- the "walking just moves the camera"
-        // failure documented in loop_host.cpp). getscreenoffset_legacy() always
-        // uses 32/24, but THIS function's viewTilesX()/Y() is 32/24 only in the
-        // host-only build -- in the combined `both` build CLIENT is defined so
-        // viewTilesX()/Y() is the *dynamic* client viewport, which would make
-        // `1285 - htx` diverge from the legacy origin and break lockstep.
-        // Returning a constant (independent of htx/hty) keeps host == client ==
-        // client-legacy in EVERY build config, just like Toth's house above.
+        // Centering math: the room-center tile is (1285, 326). Reuse the same
+        // htx/hty half-extents as normal follow mode so this fixed camera stays
+        // centered for the active viewport size (legacy 32x24 => 1270,315).
         //
-        // The constant (1270, 315) centers the 12x15 room in the legacy 32x24
-        // reference (1270 = roomCenterX 1285 - legacy htx 15; 315 = roomCenterY
-        // 326 - legacy hty 11). Wider client viewports render the room left-of-
-        // center with void to the right, same as Toth's house -- but the avatar
-        // and party MOVE correctly, which is the point. U6O_VERSION is bumped
-        // because the region's tpx/tpy reference frame changed (a wire change).
+        // Wire coupling: host and getscreenoffset_legacy() both resolve this to
+        // the same legacy origin in host/client builds, which keeps sobj/mover
+        // decode and prune lockstep intact.
         //
         // Keep this block byte-for-byte in sync with getscreenoffset_legacy().
-        *mapx = 1270;
-        *mapy = 315;
+        *mapx = 1285 - htx;
+        *mapy = 326 - hty;
         return;
     }
     //undefined
@@ -411,12 +396,10 @@ void getscreenoffset_legacy(long x, long y, long *mapx, long *mapy) {
     if ((x >= 1280) && (x <= 1291) && (y >= 319) && (y <= 333)) {
         // Guardian Guild basement fixed camera -- MUST stay byte-for-byte
         // identical to the matching block in getscreenoffset() (see the full
-        // explanation there). Returns a CONSTANT (not htx/hty-derived) so the
-        // host emit frame and this legacy decode frame agree in every build
-        // config, keeping the mover prune in lockstep. (1270, 315) centers the
-        // room in the legacy 32x24 reference.
-        *mapx = 1270;
-        *mapy = 315;
+        // explanation there). With tx/ty == 32/24 this resolves to the host's
+        // legacy emit origin (1270,315), keeping decode/prune in lockstep.
+        *mapx = 1285 - htx;
+        *mapy = 326 - hty;
         return;
     }
     if (*mapx < 0) *mapx = 0;
