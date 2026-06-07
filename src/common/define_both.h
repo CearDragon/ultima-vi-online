@@ -1,7 +1,7 @@
 #ifndef DEFINE_BOTH_H
 #define DEFINE_BOTH_H
 
-#define U6O_VERSION 12
+#define U6O_VERSION 13
 #define U6O_DEBUG FALSE/* should probably put this on the compiler command line instead of here!! */
 #include "random/random.h"
 
