@@ -6230,6 +6230,11 @@ scene_update_message:
         static long tpx_legacy, tpy_legacy;
         getscreenoffset_legacy(x,y,&tpx_legacy,&tpy_legacy);
         getscreenoffset(x,y,&tpx,&tpy);
+        if ((x>=1280)&&(x<=1291)&&(y>=319)&&(y<=333)){
+          // Guardian Guild basement: keep render-space aligned to the host's
+          // legacy emit frame to avoid mover/screen desync at large view sizes.
+          tpx=tpx_legacy; tpy=tpy_legacy;
+        }
 
 
         ctpx2=tplayer->x; ctpy2=tplayer->y;
@@ -7150,6 +7155,10 @@ CLIENT_donemess:
 
     //calculate tpx,tpy from current x,y
     getscreenoffset(tplayer->x,tplayer->y,&tpx,&tpy);
+    if ((tplayer->x>=1280)&&(tplayer->x<=1291)&&(tplayer->y>=319)&&(tplayer->y<=333)){
+      // Match scene-update override above for per-frame world render/input math.
+      getscreenoffset_legacy(tplayer->x,tplayer->y,&tpx,&tpy);
+    }
 
 
 
