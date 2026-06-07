@@ -1989,6 +1989,13 @@ if
                         y = tplayer->py; //location where player died
                     }
 
+                    if ((x >= 1280) && (x <= 1291) && (y >= 319) && (y <= 333)) {
+                        // Guardian Guild basement safeguard: force scene flush
+                        // packets while in this fixed-room patch so client
+                        // mover/object buffers are rebuilt in lockstep.
+                        tplayer->resync = 1;
+                    }
+
                     //only send if changed
                     if ((x != tplayer->x) || (y != tplayer->y)) {
                         z = 1;
