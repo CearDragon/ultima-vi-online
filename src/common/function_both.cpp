@@ -347,17 +347,14 @@ void getscreenoffset(long x, long y, long *mapx, long *mapy) {
         // surrounding void scrolled around it -- the reported "character
         // doesn't move but the camera does" bug.
         //
-        // Centering math: the room-center tile is (1285, 326). Reuse the same
-        // htx/hty half-extents as normal follow mode so this fixed camera stays
-        // centered for the active viewport size (legacy 32x24 => 1270,315).
-        //
-        // Wire coupling: host and getscreenoffset_legacy() both resolve this to
-        // the same legacy origin in host/client builds, which keeps sobj/mover
-        // decode and prune lockstep intact.
+        // IMPORTANT: this is a wire-frame origin used by host emit and client
+        // legacy decode/prune paths. Keep it constant at the legacy 32x24
+        // center reference so host/client stay lockstep even in `both` builds
+        // where CLIENT is defined and viewTilesX/Y are dynamic.
         //
         // Keep this block byte-for-byte in sync with getscreenoffset_legacy().
-        *mapx = 1285 - htx;
-        *mapy = 326 - hty;
+        *mapx = 1270;
+        *mapy = 315;
         return;
     }
     //undefined
@@ -396,10 +393,10 @@ void getscreenoffset_legacy(long x, long y, long *mapx, long *mapy) {
     if ((x >= 1280) && (x <= 1291) && (y >= 319) && (y <= 333)) {
         // Guardian Guild basement fixed camera -- MUST stay byte-for-byte
         // identical to the matching block in getscreenoffset() (see the full
-        // explanation there). With tx/ty == 32/24 this resolves to the host's
-        // legacy emit origin (1270,315), keeping decode/prune in lockstep.
-        *mapx = 1285 - htx;
-        *mapy = 326 - hty;
+        // explanation there). Keep this byte-for-byte aligned with
+        // getscreenoffset() above for wire compatibility.
+        *mapx = 1270;
+        *mapy = 315;
         return;
     }
     if (*mapx < 0) *mapx = 0;
