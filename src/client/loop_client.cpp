@@ -6230,8 +6230,13 @@ scene_update_message:
         static long tpx_legacy, tpy_legacy;
         getscreenoffset_legacy(x,y,&tpx_legacy,&tpy_legacy);
         getscreenoffset(x,y,&tpx,&tpy);
-        // Keep normal follow behavior in basement/room transitions by using
-        // getscreenoffset() result directly for the render/input camera.
+        if ((x>=1280)&&(x<=1291)&&(y>=319)&&(y<=333)){
+          // Client-only follow camera for Guardian Guild basement. Common
+          // getscreenoffset() stays fixed here for host/wire compatibility;
+          // tpx_legacy/tpy_legacy above remains the decode/prune reference.
+          tpx=x-(viewTilesX()/2-1);
+          tpy=y-(viewTilesY()/2-1);
+        }
 
 
         ctpx2=tplayer->x; ctpy2=tplayer->y;
@@ -7152,8 +7157,12 @@ CLIENT_donemess:
 
     //calculate tpx,tpy from current x,y
     getscreenoffset(tplayer->x,tplayer->y,&tpx,&tpy);
-    // Keep per-frame render/input camera in the same follow mode as
-    // scene-update camera anchoring.
+    if ((tplayer->x>=1280)&&(tplayer->x<=1291)&&(tplayer->y>=319)&&(tplayer->y<=333)){
+      // Keep per-frame render/input camera in sync with scene-update follow
+      // override for this basement.
+      tpx=tplayer->x-(viewTilesX()/2-1);
+      tpy=tplayer->y-(viewTilesY()/2-1);
+    }
 
 
 
