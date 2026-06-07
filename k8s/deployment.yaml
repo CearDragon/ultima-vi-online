@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: u6o7-host-save-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: u6o7-host
+  labels:
+    app: u6o7-host
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: u6o7-host
+  template:
+    metadata:
+      labels:
+        app: u6o7-host
+    spec:
+      containers:
+      - name: host
+        image: u6o7-host:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 2593
+          protocol: TCP
+        volumeMounts:
+        - name: save-data
+          mountPath: C:\u6o7-host\save
+      volumes:
+      - name: save-data
+        persistentVolumeClaim:
+          claimName: u6o7-host-save-pvc
+      nodeSelector:
+        kubernetes.io/os: windows
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: u6o7-host-service
+spec:
+  selector:
+    app: u6o7-host
+  ports:
+    - protocol: TCP
+      port: 2593
+      targetPort: 2593
+  type: LoadBalancer
