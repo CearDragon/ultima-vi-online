@@ -7152,11 +7152,8 @@ CLIENT_donemess:
 
     //calculate tpx,tpy from current x,y
     getscreenoffset(tplayer->x,tplayer->y,&tpx,&tpy);
-    if ((tplayer->x>=1280)&&(tplayer->x<=1291)&&(tplayer->y>=319)&&(tplayer->y<=333)){
-      // Match scene-update override above for per-frame world render/input math.
-      tpx=1285-(viewTilesX()/2-1);
-      tpy=326-(viewTilesY()/2-1);
-    }
+    // Keep per-frame render/input camera in the same follow mode as
+    // scene-update camera anchoring.
 
 
 
