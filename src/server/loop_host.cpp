@@ -1944,6 +1944,7 @@ if
                 static unsigned long bitsi, bitsi2;
                 static unsigned short *tp2;
                 static unsigned char sceneupdaterequired;
+                static unsigned char gg_basement_room;
 
                 if (!tplayer->updatemessage) {
                     txtNEWLEN(t, -1048576); //create 1MB buffer
@@ -2009,6 +2010,8 @@ if
                     //if (tpx>2016) tpx=2016;
                     //if (tpy>1000) tpy=1000;
                     getscreenoffset(x, y, &tpx, &tpy);
+                    gg_basement_room = 0;
+                    if ((x >= 1280) && (x <= 1291) && (y >= 319) && (y <= 333)) gg_basement_room = 1;
 
                     //does screen+1 fit inside current buffer?
                     // RW sobj-fix: screen+1 in legacy frame grew from [tpx-1, tpx+32]
@@ -2325,6 +2328,9 @@ if
                         for (x = 0; x < SOBJ_TX_W; x++) {
                             mapx = tpx + x - SOBJ_TX_OFFX;
                             mapy = tpy + y - SOBJ_TX_OFFY;
+                            if (gg_basement_room) {
+                                if ((mapx < 1280) || (mapx > 1291) || (mapy < 319) || (mapy > 333)) goto objbuffer_outofrange;
+                            }
                             bufx = mapx - tplayer->sobj_bufoffx;
                             bufy = mapy - tplayer->sobj_bufoffy;
 
@@ -2649,6 +2655,9 @@ if
                             mapx = tpx + x - MV_TX_OFFX;
                             mapy = tpy + y - MV_TX_OFFY;
 
+                            if (gg_basement_room) {
+                                if ((mapx < 1280) || (mapx > 1291) || (mapy < 319) || (mapy > 333)) goto moverbuffer_outofrange;
+                            }
                             if (mapx < 0) goto moverbuffer_outofrange;
                             if (mapx > 2047) goto moverbuffer_outofrange;
                             if (mapy < 0) goto moverbuffer_outofrange;
@@ -3811,7 +3820,6 @@ if
                     //if (tpx>2016) tpx=2016;
                     //if (tpy>1000) tpy=1000;
                     getscreenoffset(x, y, &tpx, &tpy);
-
                     tpx >>= 3;
                     tpy >>= 3;
                     for (y = tpy; y <= tpy + 3; y++) {
