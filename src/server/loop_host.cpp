@@ -1988,17 +1988,6 @@ if
                         x = tplayer->px;
                         y = tplayer->py; //location where player died
                     }
-                    // Basement scene buffers need a one-shot resync on room
-                    // boundary transitions, but forcing it every tick freezes
-                    // mover frame progression client-side.
-                    // Skip re-arming while emitting a flush packet this tick.
-                    if (z != 35) {
-                        i = 0;
-                        if ((x >= 1280) && (x <= 1291) && (y >= 319) && (y <= 333)) i = 1;
-                        i2 = 0;
-                        if ((tplayer->x >= 1280) && (tplayer->x <= 1291) && (tplayer->y >= 319) && (tplayer->y <= 333)) i2 = 1;
-                        if (i != i2) tplayer->resync = 1;
-                    }
                     //only send if changed
                     if ((x != tplayer->x) || (y != tplayer->y)) {
                         z = 1;
