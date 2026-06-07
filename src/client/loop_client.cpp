@@ -6230,12 +6230,8 @@ scene_update_message:
         static long tpx_legacy, tpy_legacy;
         getscreenoffset_legacy(x,y,&tpx_legacy,&tpy_legacy);
         getscreenoffset(x,y,&tpx,&tpy);
-        if ((x>=1280)&&(x<=1291)&&(y>=319)&&(y<=333)){
-          // Client render/input camera for this fixed room stays centered to
-          // current viewport; legacy offsets above remain for wire decode/prune.
-          tpx=1285-(viewTilesX()/2-1);
-          tpy=326-(viewTilesY()/2-1);
-        }
+        // Keep normal follow behavior in basement/room transitions by using
+        // getscreenoffset() result directly for the render/input camera.
 
 
         ctpx2=tplayer->x; ctpy2=tplayer->y;
