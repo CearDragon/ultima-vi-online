@@ -329,34 +329,8 @@ void getscreenoffset(long x, long y, long *mapx, long *mapy) {
         *mapy = 319;
         return;
     }
-    if ((x >= 1280) && (x <= 1291) && (y >= 319) && (y <= 333)) {
-        // Guardian Guild basement (custom map patch guardianguild.txt).
-        //
-        // This is an isolated single-screen interior built in the far-east
-        // staging column (x=1280-1291, y=319-333), reached by ladder from the
-        // guild proper: (401,339) -> (1286,323). It is SMALLER than one screen
-        // (12x15 tiles) and surrounded by void / the castle strip directly
-        // above (which ends at y=318), so -- exactly like Toth's house -- the
-        // camera must be LOCKED and centered on the room rather than following
-        // the avatar.
-        //
-        // Without this case the region fell through to the default "undefined"
-        // following branch below, which keeps mapx = playerX - htx. The avatar
-        // (which the host streams to every client as a mover, drawn at
-        // (mv_x - tpx)*32) then stayed pinned to screen-center while the
-        // surrounding void scrolled around it -- the reported "character
-        // doesn't move but the camera does" bug.
-        //
-        // IMPORTANT: this is a wire-frame origin used by host emit and client
-        // legacy decode/prune paths. Keep it constant at the legacy 32x24
-        // center reference so host/client stay lockstep even in `both` builds
-        // where CLIENT is defined and viewTilesX/Y are dynamic.
-        //
-        // Keep this block byte-for-byte in sync with getscreenoffset_legacy().
-        *mapx = 1270;
-        *mapy = 315;
-        return;
-    }
+    // Guardian Guild basement uses normal follow behavior now; fall through to
+    // the default region handling below.
     //undefined
     if (*mapx < 0) *mapx = 0;
     if (*mapy < 0) *mapy = 0;
@@ -390,15 +364,8 @@ void getscreenoffset_legacy(long x, long y, long *mapx, long *mapy) {
         *mapy = 319;
         return;
     }
-    if ((x >= 1280) && (x <= 1291) && (y >= 319) && (y <= 333)) {
-        // Guardian Guild basement fixed camera -- MUST stay byte-for-byte
-        // identical to the matching block in getscreenoffset() (see the full
-        // explanation there). Keep this byte-for-byte aligned with
-        // getscreenoffset() above for wire compatibility.
-        *mapx = 1270;
-        *mapy = 315;
-        return;
-    }
+    // Guardian Guild basement uses normal follow behavior now; fall through to
+    // the default region handling below.
     if (*mapx < 0) *mapx = 0;
     if (*mapy < 0) *mapy = 0;
     if (*mapx > (2048 - tx)) *mapx = (2048 - tx);
