@@ -329,6 +329,45 @@ void getscreenoffset(long x, long y, long *mapx, long *mapy) {
         *mapy = 319;
         return;
     }
+    if ((x >= 1280) && (x <= 1291) && (y >= 319) && (y <= 333)) {
+        // Guardian Guild basement (custom map patch guardianguild.txt).
+        //
+        // This is an isolated single-screen interior built in the far-east
+        // staging column (x=1280-1291, y=319-333), reached by ladder from the
+        // guild proper: (401,339) -> (1286,323). It is SMALLER than one screen
+        // (12x15 tiles) and surrounded by void / the castle strip directly
+        // above (which ends at y=318), so -- exactly like Toth's house -- the
+        // camera must be LOCKED and centered on the room rather than following
+        // the avatar.
+        //
+        // Without this case the region fell through to the default "undefined"
+        // following branch below, which keeps mapx = playerX - htx. The avatar
+        // is drawn at (player.x - tpx)*32, so a following camera pinned the
+        // avatar to screen-center while the surrounding void scrolled around it
+        // -- the reported "character doesn't move but the camera does" bug. The
+        // resizable viewport (RW) amplified it: a wider view exposed more void.
+        //
+        // Centering math: the room-center tile is (1285, 326). We reuse the
+        // same htx/hty half-extents as the normal follow path so the room ends
+        // up centered for whatever viewport size this build renders at:
+        //   legacy 32x24 -> origin (1270, 315); larger client views shift the
+        //   origin left/up to keep the room centered.
+        //
+        // Wire coupling: the host build computes htx/hty from viewTilesX()/Y()
+        // == 32/24, and the client's getscreenoffset_legacy() hardcodes 32/24,
+        // so BOTH yield the identical legacy origin (1270, 315) that the sobj /
+        // mover transmit windows and tpx_legacy decode path rely on -- they
+        // stay in lockstep. The client's render-time getscreenoffset() may
+        // return a different (centered-for-its-view) origin; that is exactly
+        // the tpx vs tpx_legacy split the renderer already compensates for.
+        // Because this changes the tpx/tpy reference frame for the region,
+        // U6O_VERSION is bumped (see define_both.h).
+        //
+        // Keep this block byte-for-byte in sync with getscreenoffset_legacy().
+        *mapx = 1285 - htx;
+        *mapy = 326 - hty;
+        return;
+    }
     //undefined
     if (*mapx < 0) *mapx = 0;
     if (*mapy < 0) *mapy = 0;
@@ -360,6 +399,15 @@ void getscreenoffset_legacy(long x, long y, long *mapx, long *mapy) {
     if ((x >= 1327) && (y >= 319) && (x <= 1358) && (y <= 343)) {
         *mapx = 1327;
         *mapy = 319;
+        return;
+    }
+    if ((x >= 1280) && (x <= 1291) && (y >= 319) && (y <= 333)) {
+        // Guardian Guild basement fixed camera -- MUST stay byte-for-byte
+        // identical to the matching block in getscreenoffset() (see the full
+        // explanation there). With tx/ty == 32/24 here this yields the legacy
+        // origin (1270, 315) the host emits sobj/mover offsets against.
+        *mapx = 1285 - htx;
+        *mapy = 326 - hty;
         return;
     }
     if (*mapx < 0) *mapx = 0;
