@@ -30,7 +30,7 @@ spec:
         image: u6o7-host:latest
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 2593
+        - containerPort: 22
           protocol: TCP
         volumeMounts:
         - name: save-data
@@ -51,6 +51,6 @@ spec:
     app: u6o7-host
   ports:
     - protocol: TCP
-      port: 2593
-      targetPort: 2593
+      port: 22
+      targetPort: 22
   type: LoadBalancer

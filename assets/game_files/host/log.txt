@@ -1,0 +1,2 @@
+Date: 2026/06/07 Time: 19:13
+000:00:01:00 [In_Britania:][Framerate:32][vlnkb_last(MAX=65536):-1][objb_last(MAX=524228):45464]

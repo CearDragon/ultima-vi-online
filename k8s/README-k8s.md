@@ -49,7 +49,7 @@ kubectl get service u6o7-host-service
 
 ## Configuration
 
--   **Port**: The host is configured to listen on port `2593` (defined in `dns.txt` during build).
+-   **Port**: The host is configured to listen on port `22` (defined in `dns.txt` during build).
 -   **Persistence**: The `save` directory is mounted as a PersistentVolumeClaim to ensure player data and world state are preserved across pod restarts.
 -   **Logs**: You can view the server logs using:
     ```powershell
