@@ -92,6 +92,34 @@ namespace u6o {
                 panel->offset_x = x;
                 panel->offset_y = y;
             }
+
+            void center_frame_into_view(FRAME *panel, int clientW, int clientH, int nudgeX, int nudgeY) {
+                if (!panel) return;
+
+                int w = panel->size_x;
+                int h = panel->size_y;
+                if (panel->graphic && w == 0 && h == 0) {
+                    w = panel->graphic->d.dwWidth;
+                    h = panel->graphic->d.dwHeight;
+                }
+                if (w <= 0) w = 1;
+                if (h <= 0) h = 1;
+
+                panel->offset_x = (short) (clientW / 2 - w / 2 + nudgeX);
+                panel->offset_y = (short) (clientH / 2 - h / 2 + nudgeY);
+                force_frame_into_view(panel, clientW, clientH);
+            }
+
+            bool panel_recoverable(FRAME *panel) {
+                return panel && panel->display && panel->active;
+            }
+
+            bool party_has_spells(int i) {
+                for (int s = 0; s <= 255; ++s) {
+                    if (spell[i][s]) return true;
+                }
+                return false;
+            }
         }
 
         void RepositionAnchoredPanels(int clientW, int clientH) {
@@ -250,24 +278,42 @@ namespace u6o {
             if (clientH <= 0) clientH = backbufferH();
             if (clientW <= 0 || clientH <= 0) return;
 
-            // RW-P4.11: explicit recovery path should surface volcontrol.
-            g_volcontrol_visible = true;
-
             // Re-establish anchored defaults first, then force all requested
             // recoverable panels into the visible area.
             RepositionAnchoredPanels(clientW, clientH);
 
+            int recoveredFloating = 0;
             for (int i = 0; i < 8; ++i) {
-                force_frame_into_view(party_frame[i], clientW, clientH);
-                force_frame_into_view(party_spellbook_frame[i], clientW, clientH);
+                if (CLIENTplayer && CLIENTplayer->party[i] && panel_recoverable(party_frame[i])) {
+                    // RW-P4.11: recovery stacks floating windows near center so
+                    // users can always grab them on any window size.
+                    int nudgeX = (recoveredFloating % 3) * 24 - 24;
+                    int nudgeY = (recoveredFloating / 3) * 20 - 20;
+                    center_frame_into_view(party_frame[i], clientW, clientH, nudgeX, nudgeY);
+                    recoveredFloating++;
+                }
+                if (CLIENTplayer && CLIENTplayer->party[i] && party_has_spells(i) && panel_recoverable(party_spellbook_frame[i])) {
+                    int nudgeX = (recoveredFloating % 3) * 24 - 24;
+                    int nudgeY = (recoveredFloating / 3) * 20 - 20;
+                    center_frame_into_view(party_spellbook_frame[i], clientW, clientH, nudgeX, nudgeY);
+                    recoveredFloating++;
+                }
             }
-            force_frame_into_view(tmap_frame, clientW, clientH);
-            force_frame_into_view(minimap_frame, clientW, clientH);
-            force_frame_into_view(con_frm, clientW, clientH);
-            force_image_into_view(con_frm_img, clientW, clientH);
-            force_frame_into_view(qkstf, clientW, clientH);
-            force_frame_into_view(volcontrol, clientW, clientH);
-            force_frame_into_view(statusmessage_viewprev, clientW, clientH);
+
+            if (panel_recoverable(tmap_frame)) {
+                center_frame_into_view(tmap_frame, clientW, clientH, 24, 24);
+            }
+            if (panel_recoverable(minimap_frame)) {
+                center_frame_into_view(minimap_frame, clientW, clientH, -24, 24);
+            }
+
+            if (panel_recoverable(con_frm)) force_frame_into_view(con_frm, clientW, clientH);
+            // Keep con_frm_img tied to con_frm recovery only when it is not in
+            // its default parked-above-view state (-256).
+            if (con_frm_img && con_frm_img->offset_y > -256) force_image_into_view(con_frm_img, clientW, clientH);
+            if (panel_recoverable(qkstf)) force_frame_into_view(qkstf, clientW, clientH);
+            if (g_volcontrol_visible && panel_recoverable(volcontrol)) force_frame_into_view(volcontrol, clientW, clientH);
+            if (panel_recoverable(statusmessage_viewprev)) force_frame_into_view(statusmessage_viewprev, clientW, clientH);
         }
     }
 } // namespace u6o::client
