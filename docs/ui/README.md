@@ -95,7 +95,7 @@ every time the window resizes (`loop_client.cpp::OnClientResized`,
 | `con_frm_img` | `FRM_IMAGE*` | TopLeft `(0, -256)` | Conversation history image overlay (parked above viewport until scrolled in) | `ConvoHistory` |
 | `qkstf` | `FRAME*` | TopRight `(-128, 112)` | Party-list "quick stuff" panel (HP/MP per member) | `PartyList` |
 | `volcontrol` | `FRAME*` | BottomRight `(-128, -112)` | Volume sliders (music, SFX, voice). Toggled by **S** | `VolumeControl` |
-| `statusmessage_viewprev` | `FRAME*` | BottomLeft `(0, -48)` | "View previous status message" up-arrow | `StatusViewPrev` |
+| `statusmessage_viewprev` | `FRAME*` | BottomLeft `(0, -48)` | "View previous status message" up-arrow. Drag with button-2 to reposition (persisted); left-click toggles the log staying drawn constantly | `StatusViewPrev` |
 
 The anchored placements live in `kBuiltinPanels[]` in `ui_layout.cpp`.
 The seam that writes resolved rects into the live `FRAME*` globals is
@@ -245,16 +245,18 @@ asserts that the anchored panels stayed within `[0, clientW]` ×
 `statusmessage_viewprev`). Useful for catching layout regressions in
 debug builds.
 
-### 3.1 User-positioned overrides (`qkstf`, `volcontrol`)
+### 3.1 User-positioned overrides (`qkstf`, `volcontrol`, `statusmessage_viewprev`)
 
-If the user drags `qkstf` or `volcontrol` out of its anchored spot,
-`ui_layout` flips a per-panel flag and caches the offset:
+If the user drags `qkstf`, `volcontrol`, or `statusmessage_viewprev` out of
+its anchored spot, `ui_layout` flips a per-panel flag and caches the offset:
 
 ```cpp
 extern bool g_qkstf_user_positioned;
 extern int  g_qkstf_user_x, g_qkstf_user_y;
 extern bool g_volcontrol_user_positioned;
 extern int  g_volcontrol_user_x, g_volcontrol_user_y;
+extern bool g_statusprev_user_positioned;
+extern int  g_statusprev_user_x, g_statusprev_user_y;
 ```
 
 `RepositionAnchoredPanels()` then restores from the cache (clamped to
@@ -325,6 +327,7 @@ struct client_settings {
     unsigned char spellrecall_i[8];
     short minimap_offset_x, minimap_offset_y;
     short tmap_offset_x,    tmap_offset_y;
+    short statusprev_offset_x, statusprev_offset_y; // appended at end
 };
 extern client_settings cltset;   // live (mirrors current state)
 extern client_settings cltset2;  // restored-from-disk snapshot

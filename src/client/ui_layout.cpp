@@ -152,5 +152,9 @@ namespace u6o {
         bool g_volcontrol_user_positioned = false;
         int g_volcontrol_user_x = 0;
         int g_volcontrol_user_y = 0;
+
+        bool g_statusprev_user_positioned = false;
+        int g_statusprev_user_x = 0;
+        int g_statusprev_user_y = 0;
     }
 } // namespace u6o::client

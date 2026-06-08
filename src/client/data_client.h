@@ -31,6 +31,11 @@ struct client_settings {
     unsigned char spellrecall_i[8];
     short minimap_offset_x, minimap_offset_y;
     short tmap_offset_x, tmap_offset_y;
+    // Persisted position of the "view previous status message" arrow
+    // (statusmessage_viewprev). 32767 sentinel = "no override, use anchored
+    // default". Appended at the END of the struct: client_settings is a
+    // positional, untagged file format, so new fields must be added last.
+    short statusprev_offset_x, statusprev_offset_y;
 };
 
 struct inpmess_index {
@@ -650,6 +655,7 @@ extern surf *viewnpc2_temp;
 
 extern FRAME *statusmessage_viewnpc;
 extern FRAME *statusmessage_viewprev;
+extern unsigned char statusmessage_logpinned;
 extern FRAME *voicechat_frame;
 extern FRAME *volcontrol;
 extern FRAME *qkstf;

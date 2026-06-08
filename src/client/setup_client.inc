@@ -568,6 +568,7 @@ statusmessage_viewprev->graphic=statusmessage_arrowup;
 statusmessage_viewprev->offset_x=0;
 statusmessage_viewprev->offset_y=768-32-16;
 statusmessage_viewprev->no_focus=TRUE;
+statusmessage_viewprev->move=TRUE; // draggable (button 2) so its position can be remembered between sessions
 statusmessage_viewprev->graphic_use0pixel=TRUE;
 statusmessage_viewprev->mouse_over_transparent=TRUE;
 if (i2=getsetting("STATUSMESSAGE_VIEWPREVIOUSBOX_TRANSPARENCYLEVEL")) statusmessage_viewprev->mouse_over_transparent=i2-1;
@@ -822,6 +823,11 @@ if (cltset2.qkstf_offset_x!=32767){qkstf->offset_x=cltset2.qkstf_offset_x; qkstf
   u6o::client::g_qkstf_user_x = cltset2.qkstf_offset_x;
   u6o::client::g_qkstf_user_y = cltset2.qkstf_offset_y;
 }
+if (cltset2.statusprev_offset_x!=32767){statusmessage_viewprev->offset_x=cltset2.statusprev_offset_x; statusmessage_viewprev->offset_y=cltset2.statusprev_offset_y;
+  u6o::client::g_statusprev_user_positioned = true;
+  u6o::client::g_statusprev_user_x = cltset2.statusprev_offset_x;
+  u6o::client::g_statusprev_user_y = cltset2.statusprev_offset_y;
+}
 memcpy(&cltset,&cltset2,sizeof(client_settings));
 }else{
 //set default/unknown(32767) values
@@ -836,6 +842,7 @@ cltset.volcontrol_offset_x=32767;
 cltset.qkstf_offset_x=32767;
 cltset.minimap_offset_x=32767;
 cltset.tmap_offset_x=32767;
+cltset.statusprev_offset_x=32767;
 }
 FRAME_mbl[0]=FALSE; FRAME_mbl[1]=FALSE; lpn=NULL; //used by frame.h
 

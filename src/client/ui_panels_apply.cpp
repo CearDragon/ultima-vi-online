@@ -125,6 +125,21 @@ namespace u6o {
             }
             apply_to(statusmessage_viewprev, UiPanelId::StatusViewPrev, clientW, clientH);
 
+            // RW: honor a user-dragged position for the StatusViewPrev arrow,
+            // same rule as qkstf/volcontrol — clamp the live offset to the
+            // current client area for display but never write the clamp back
+            // to the cache (the cache is only mutated by an actual drag).
+            if (statusmessage_viewprev && g_statusprev_user_positioned) {
+                int x = g_statusprev_user_x;
+                int y = g_statusprev_user_y;
+                if (x < 0) x = 0;
+                if (x > clientW) x = clientW;
+                if (y < 0) y = 0;
+                if (y > clientH) y = clientH;
+                statusmessage_viewprev->offset_x = x;
+                statusmessage_viewprev->offset_y = y;
+            }
+
             ValidateUiMetrics();
         }
 

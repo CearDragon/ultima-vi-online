@@ -1495,6 +1495,11 @@ NULL
         u6o::client::g_volcontrol_user_x = drg->offset_x;
         u6o::client::g_volcontrol_user_y = drg->offset_y;
       }
+      if (drg == statusmessage_viewprev) {
+        u6o::client::g_statusprev_user_positioned = true;
+        u6o::client::g_statusprev_user_x = drg->offset_x;
+        u6o::client::g_statusprev_user_y = drg->offset_y;
+      }
     }
   }
 }
@@ -12032,7 +12037,7 @@ gotkey: //x2 is value of key
 
 
 
-  for(i=0;i<=22;i++){
+  for(i=0;i<=23;i++){
     if ((i>=0)&&(i<=7)) pmf=party_frame[i];
     if ((i>=8)&&(i<=15)) pmf=party_spellbook_frame[i-8];
     if (i==16) pmf=musickeyboard;
@@ -12042,6 +12047,7 @@ gotkey: //x2 is value of key
     if (i==20) pmf=qkstf;
     if (i==21) pmf=minimap_frame;
     if (i==22) pmf=tmap_frame;
+    if (i==23) pmf=statusmessage_viewprev;
     x=pmf->offset_x; y=pmf->offset_y;
     //get dimentions of frame as x2,y2
     if (pmf->graphic&&(pmf->size_x==0)&&(pmf->size_y==0)){
@@ -12109,6 +12115,18 @@ gotkey: //x2 is value of key
     }
     if (i==21){cltset.minimap_offset_x=pmf->offset_x; cltset.minimap_offset_y=pmf->offset_y;}
     if (i==22){cltset.tmap_offset_x=pmf->offset_x; cltset.tmap_offset_y=pmf->offset_y;}
+    // RW: mirror statusmessage_viewprev from the user-positioned cache (same
+    // rule as qkstf/volcontrol). The live offset is auto-clamped above to the
+    // current back-buffer, so reading the cache preserves a far-right/maximized
+    // position across a smaller-window session. 32767 = "no override".
+    if (i==23){
+      if (u6o::client::g_statusprev_user_positioned){
+        cltset.statusprev_offset_x=u6o::client::g_statusprev_user_x;
+        cltset.statusprev_offset_y=u6o::client::g_statusprev_user_y;
+      } else {
+        cltset.statusprev_offset_x=32767;
+      }
+    }
   }//i (frame)
   clientsettingsvalid=TRUE;
 
@@ -12457,7 +12475,15 @@ endgame_donemessage:
   }//endgame
 
 
-  if (statusmessage_viewprev->mouse_over){
+  // Left-clicking the "view previous status message" arrow toggles whether
+  // the status-message log stays drawn constantly. Hovering still shows it
+  // temporarily; the pin makes it persist until clicked off again. (Button-2
+  // is reserved for dragging the arrow, so only consume button-1 clicks here.)
+  if (statusmessage_viewprev->mouse_click&1){
+    statusmessage_viewprev->mouse_click=NULL;
+    if (drg!=statusmessage_viewprev) statusmessage_logpinned=!statusmessage_logpinned;
+  }
+  if (statusmessage_viewprev->mouse_over||statusmessage_logpinned){
     statusmessage_viewprev->mouse_over=FALSE;
     if (drg!=statusmessage_viewprev){
       x=statusmessage_viewprev->offset_x;

@@ -165,6 +165,15 @@ namespace u6o {
         extern bool g_volcontrol_user_positioned;
         extern int g_volcontrol_user_x;
         extern int g_volcontrol_user_y;
+
+        // StatusViewPrev arrow follows the same user-positioned override
+        // pattern as qkstf: a real drag (or a restored settings.bin value)
+        // flips the flag so RepositionAnchoredPanels stops snapping it back to
+        // the bottom-left anchor and the per-frame mirror persists the chosen
+        // offset to cltset.statusprev_offset_x/y.
+        extern bool g_statusprev_user_positioned;
+        extern int g_statusprev_user_x;
+        extern int g_statusprev_user_y;
     }
 } // namespace u6o::client
 
