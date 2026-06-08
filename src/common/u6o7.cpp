@@ -783,7 +783,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             LRESULT hit = DefWindowProc(hWnd, message, wParam, lParam);
             if (hit != HTCLIENT) {
                 // Caption, sysmenu, min/max boxes, or the real border already
-                // resolved — leave them alone.
+                // resolved — leave them alone. Only the real outer border is a
+                // resize edge; caption/buttons are not.
+                cursorOverResizeBorder =
+                        (hit == HTLEFT || hit == HTRIGHT || hit == HTTOP ||
+                         hit == HTBOTTOM || hit == HTTOPLEFT || hit == HTTOPRIGHT ||
+                         hit == HTBOTTOMLEFT || hit == HTBOTTOMRIGHT) ? 1 : 0;
                 return hit;
             }
 
@@ -815,22 +820,48 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             const bool inTopRow = pt.y < wr.top + cornerGrip;
             const bool inBottomRow = pt.y >= wr.bottom - cornerGrip;
 
-            if (nearTop && inLeftCol) return HTTOPLEFT;
-            if (nearTop && inRightCol) return HTTOPRIGHT;
-            if (nearBottom && inLeftCol) return HTBOTTOMLEFT;
-            if (nearBottom && inRightCol) return HTBOTTOMRIGHT;
-            if (nearLeft && inTopRow) return HTTOPLEFT;
-            if (nearLeft && inBottomRow) return HTBOTTOMLEFT;
-            if (nearRight && inTopRow) return HTTOPRIGHT;
-            if (nearRight && inBottomRow) return HTBOTTOMRIGHT;
+            LRESULT zone = HTCLIENT;
+            if (nearTop && inLeftCol) zone = HTTOPLEFT;
+            else if (nearTop && inRightCol) zone = HTTOPRIGHT;
+            else if (nearBottom && inLeftCol) zone = HTBOTTOMLEFT;
+            else if (nearBottom && inRightCol) zone = HTBOTTOMRIGHT;
+            else if (nearLeft && inTopRow) zone = HTTOPLEFT;
+            else if (nearLeft && inBottomRow) zone = HTBOTTOMLEFT;
+            else if (nearRight && inTopRow) zone = HTTOPRIGHT;
+            else if (nearRight && inBottomRow) zone = HTBOTTOMRIGHT;
+            else if (nearLeft) zone = HTLEFT;
+            else if (nearRight) zone = HTRIGHT;
+            else if (nearTop) zone = HTTOP;
+            else if (nearBottom) zone = HTBOTTOM;
 
-            // Edges.
-            if (nearLeft) return HTLEFT;
-            if (nearRight) return HTRIGHT;
-            if (nearTop) return HTTOP;
-            if (nearBottom) return HTBOTTOM;
+            // Remember whether we are over a resize edge so the client main
+            // loop yields cursor ownership to Windows (see WM_SETCURSOR and the
+            // cursor-assignment block in loop_client.cpp). Without this the
+            // per-frame SetCursor() would immediately overwrite the system
+            // resize arrows, making the edge feel un-grabbable.
+            cursorOverResizeBorder = (zone == HTCLIENT) ? 0 : 1;
+            return zone;
+        }
 
-            return HTCLIENT;
+        // RW-P1.4: let Windows own the cursor while it sits over a resize edge.
+        // The window class has hCursor = NULL and the game re-applies a custom
+        // cursor every frame, so without this the system resize arrows never
+        // show. When the low word of lParam (the prior WM_NCHITTEST result) is
+        // a sizing border, DefWindowProc loads the correct double-arrow cursor;
+        // we return TRUE to stop further processing. Anywhere else (HTCLIENT,
+        // caption, buttons) falls through to default handling.
+        case WM_SETCURSOR: {
+            const WORD ht = LOWORD(lParam);
+            if (ht == HTLEFT || ht == HTRIGHT || ht == HTTOP || ht == HTBOTTOM ||
+                ht == HTTOPLEFT || ht == HTTOPRIGHT || ht == HTBOTTOMLEFT ||
+                ht == HTBOTTOMRIGHT) {
+                cursorOverResizeBorder = 1;
+                return DefWindowProc(hWnd, message, wParam, lParam);
+            }
+            if (ht == HTCLIENT) {
+                cursorOverResizeBorder = 0;
+            }
+            return DefWindowProc(hWnd, message, wParam, lParam);
         }
 #endif
 

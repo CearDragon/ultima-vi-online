@@ -84,6 +84,12 @@ long clientW = 0;
 long clientH = 0;
 bool dirtyClientSize = false;
 
+// RW-P1.4: set by WM_NCHITTEST when the cursor is over the enlarged window
+// resize grip. The client main loop checks this before applying its custom
+// game cursor so Windows' resize arrows stay visible over the edges/corners
+// instead of flickering back to the play cursor every frame.
+unsigned char cursorOverResizeBorder = 0;
+
 // r999 new
 surf* uipanelsurf[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
 int uipanelx[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];

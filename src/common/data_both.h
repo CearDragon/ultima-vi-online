@@ -443,6 +443,10 @@ extern double blit_scale;
 extern long clientW;
 extern long clientH;
 extern bool dirtyClientSize;
+// RW-P1.4: set by WM_NCHITTEST while the cursor is over the enlarged resize
+// grip; read by the client main loop to suspend the custom game cursor so the
+// system resize arrows remain visible over the window edges and corners.
+extern unsigned char cursorOverResizeBorder;
 extern long mb; //mouse input values (mb returns the button status)
 extern unsigned long mbclick; //mbclick: recieved mouse_down message for mouse button
 extern unsigned long mbheld; //set if the physical mouse button is being held down and has not been released
