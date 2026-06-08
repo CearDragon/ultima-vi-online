@@ -1076,7 +1076,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 #ifdef CLIENT
             switch (LOWORD(wParam)) {
                 case IDM_ACTIONS_RESET_UI:
-                    // Clear user overrides and snap anchored panels back to defaults.
+                    // Clear user overrides and force key panels back on-screen.
                     u6o::client::g_qkstf_user_positioned = false;
                     u6o::client::g_qkstf_user_x = 0;
                     u6o::client::g_qkstf_user_y = 0;
@@ -1087,7 +1087,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                     cltset.qkstf_offset_y = 32767;
                     cltset.volcontrol_offset_x = 32767;
                     cltset.volcontrol_offset_y = 32767;
-                    RepositionAnchoredPanels(backbufferW(), backbufferH());
+                    ResetUiPanelsIntoView(backbufferW(), backbufferH());
                     InvalidateRect(hWnd, NULL, FALSE);
                     return 0;
 

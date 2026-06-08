@@ -27,6 +27,71 @@ namespace u6o {
                 panel->offset_x = r.left;
                 panel->offset_y = r.top;
             }
+
+            // RW-P4.11: bring a FRAME panel out of hide-sentinel space and clamp
+            // it to the live back-buffer bounds so it is immediately reachable.
+            void force_frame_into_view(FRAME *panel, int clientW, int clientH) {
+                if (!panel) return;
+
+                int x = panel->offset_x;
+                int y = panel->offset_y;
+                while (x >= kPanelHideThresholdX) x -= kPanelHideDeltaX;
+                while (y >= kPanelHideThresholdY) y -= kPanelHideDeltaY;
+
+                int w = panel->size_x;
+                int h = panel->size_y;
+                if (panel->graphic && w == 0 && h == 0) {
+                    w = panel->graphic->d.dwWidth;
+                    h = panel->graphic->d.dwHeight;
+                }
+                if (w <= 0) w = 1;
+                if (h <= 0) h = 1;
+
+                int minX = 8 - w;
+                int minY = 8 - h;
+                int maxX = clientW - 8;
+                int maxY = clientH - 8;
+
+                if (x < minX) x = minX;
+                if (x > maxX) x = maxX;
+                if (y < minY) y = minY;
+                if (y > maxY) y = maxY;
+
+                panel->offset_x = x;
+                panel->offset_y = y;
+            }
+
+            // FRM_IMAGE lacks size_x/size_y, so infer dimensions from its graphic.
+            void force_image_into_view(FRM_IMAGE *panel, int clientW, int clientH) {
+                if (!panel) return;
+
+                int x = panel->offset_x;
+                int y = panel->offset_y;
+                while (x >= kPanelHideThresholdX) x -= kPanelHideDeltaX;
+                while (y >= kPanelHideThresholdY) y -= kPanelHideDeltaY;
+
+                int w = 1;
+                int h = 1;
+                if (panel->graphic) {
+                    w = panel->graphic->d.dwWidth;
+                    h = panel->graphic->d.dwHeight;
+                    if (w <= 0) w = 1;
+                    if (h <= 0) h = 1;
+                }
+
+                int minX = 8 - w;
+                int minY = 8 - h;
+                int maxX = clientW - 8;
+                int maxY = clientH - 8;
+
+                if (x < minX) x = minX;
+                if (x > maxX) x = maxX;
+                if (y < minY) y = minY;
+                if (y > maxY) y = maxY;
+
+                panel->offset_x = x;
+                panel->offset_y = y;
+            }
         }
 
         void RepositionAnchoredPanels(int clientW, int clientH) {
@@ -179,5 +244,31 @@ namespace u6o {
             // in-sidebar minimap; the always-on world-overlay minimap is
             // covered by `minimapnewx`/`minimapnewy` above.
         }
+
+        void ResetUiPanelsIntoView(int clientW, int clientH) {
+            if (clientW <= 0) clientW = backbufferW();
+            if (clientH <= 0) clientH = backbufferH();
+            if (clientW <= 0 || clientH <= 0) return;
+
+            // RW-P4.11: explicit recovery path should surface volcontrol.
+            g_volcontrol_visible = true;
+
+            // Re-establish anchored defaults first, then force all requested
+            // recoverable panels into the visible area.
+            RepositionAnchoredPanels(clientW, clientH);
+
+            for (int i = 0; i < 8; ++i) {
+                force_frame_into_view(party_frame[i], clientW, clientH);
+                force_frame_into_view(party_spellbook_frame[i], clientW, clientH);
+            }
+            force_frame_into_view(tmap_frame, clientW, clientH);
+            force_frame_into_view(minimap_frame, clientW, clientH);
+            force_frame_into_view(con_frm, clientW, clientH);
+            force_image_into_view(con_frm_img, clientW, clientH);
+            force_frame_into_view(qkstf, clientW, clientH);
+            force_frame_into_view(volcontrol, clientW, clientH);
+            force_frame_into_view(statusmessage_viewprev, clientW, clientH);
+        }
     }
 } // namespace u6o::client
+
