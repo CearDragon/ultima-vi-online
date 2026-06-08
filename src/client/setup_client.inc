@@ -803,6 +803,13 @@ scrlog("Loading client settings [settings.bin]");
 tfh=open2(".\\dr\\settings.bin",OF_READWRITE|OF_SHARE_COMPAT);
 if (tfh->h!=HFILE_ERROR){
 cltset2_restored=1;
+// Pre-seed fields appended after the original file format with their
+// "no override" sentinel so a shorter settings.bin written by an older
+// build (which lacks these trailing bytes) leaves them at the default
+// instead of reading 0 and snapping the panel to (0,0). statusprev was
+// appended 2026-06-08; without this, upgraders saw the "view previous
+// status message" arrow pinned to the top-left corner.
+cltset2.statusprev_offset_x=32767; cltset2.statusprev_offset_y=32767;
 get(tfh,&cltset2,sizeof(client_settings));
 close(tfh);
 u6ovolume=cltset2.u6ovolume;
