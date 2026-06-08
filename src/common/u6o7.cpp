@@ -1092,8 +1092,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                     return 0;
 
                 case IDM_ABOUT:
+                    char aboutMsg[512];
+                    _snprintf(aboutMsg, sizeof(aboutMsg),
+                              "Ultima VI Online\n"
+                              "Client Version: %d\n\n"
+                              "Discord: https://discord.gg/FRURSGaWBU\n"
+                              "Website: http://ultimasixonline.thezogcabal.com/",
+                              U6O_VERSION);
                     MessageBox(hWnd,
-                               "Ultima VI Online\n\nUse Actions -> Reset UI to restore anchored panel positions.",
+                               aboutMsg,
                                "About",
                                MB_OK | MB_ICONINFORMATION);
                     return 0;
