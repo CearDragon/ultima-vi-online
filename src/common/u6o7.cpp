@@ -765,6 +765,106 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         case WM_SETFOCUS:
             break;
 
+#ifdef CLIENT
+        // RW-P1.4: widen the resize grab area. WS_OVERLAPPEDWINDOW already
+        // gives us a sizing border (WS_THICKFRAME), but on Windows 10/11 the
+        // *visible* frame is ~1 px and the actual grabbable border is only
+        // SM_CXSIZEFRAME + SM_CXPADDEDBORDER pixels — often just 4 px — so
+        // players reported it was hard to catch the edge to resize.
+        //
+        // We let DefWindowProc do the normal hit-test first. When it reports
+        // HTCLIENT (cursor is just inside the client edge) we re-classify the
+        // point as the matching border/corner if it falls within an enlarged
+        // grip margin. This makes the edges and corners far easier to grab
+        // without stealing clicks from anywhere but a thin strip along the
+        // window's outer rim. The caption, buttons, and menu are untouched
+        // because DefWindowProc only returns HTCLIENT for the play area.
+        case WM_NCHITTEST: {
+            LRESULT hit = DefWindowProc(hWnd, message, wParam, lParam);
+            if (hit != HTCLIENT) {
+                // Caption, sysmenu, min/max boxes, or the real border already
+                // resolved — leave them alone. Only the real outer border is a
+                // resize edge; caption/buttons are not.
+                cursorOverResizeBorder =
+                        (hit == HTLEFT || hit == HTRIGHT || hit == HTTOP ||
+                         hit == HTBOTTOM || hit == HTTOPLEFT || hit == HTTOPRIGHT ||
+                         hit == HTBOTTOMLEFT || hit == HTBOTTOMRIGHT) ? 1 : 0;
+                return hit;
+            }
+
+            // Grip thickness: the system border plus padding, but never less
+            // than a comfortable, DPI-aware floor (~8 px at 96 DPI). Corners
+            // use a slightly larger square so diagonal resize is easy to hit.
+            // SM_CXPADDEDBORDER (Vista+) may be absent if this TU's SDK target
+            // macros predate it; fall back to its documented index value (92).
+#ifndef SM_CXPADDEDBORDER
+#define SM_CXPADDEDBORDER 92
+#endif
+            const int sysGrip = GetSystemMetrics(SM_CXSIZEFRAME) +
+                                GetSystemMetrics(SM_CXPADDEDBORDER);
+            const int grip = (sysGrip > 8) ? sysGrip : 8;
+            const int cornerGrip = grip * 2;
+
+            POINT pt = {(LONG)(short) LOWORD(lParam), (LONG)(short) HIWORD(lParam)};
+            RECT wr;
+            GetWindowRect(hWnd, &wr);
+
+            const bool nearLeft = pt.x < wr.left + grip;
+            const bool nearRight = pt.x >= wr.right - grip;
+            const bool nearTop = pt.y < wr.top + grip;
+            const bool nearBottom = pt.y >= wr.bottom - grip;
+
+            // Corners first (use the larger square so they win over edges).
+            const bool inLeftCol = pt.x < wr.left + cornerGrip;
+            const bool inRightCol = pt.x >= wr.right - cornerGrip;
+            const bool inTopRow = pt.y < wr.top + cornerGrip;
+            const bool inBottomRow = pt.y >= wr.bottom - cornerGrip;
+
+            LRESULT zone = HTCLIENT;
+            if (nearTop && inLeftCol) zone = HTTOPLEFT;
+            else if (nearTop && inRightCol) zone = HTTOPRIGHT;
+            else if (nearBottom && inLeftCol) zone = HTBOTTOMLEFT;
+            else if (nearBottom && inRightCol) zone = HTBOTTOMRIGHT;
+            else if (nearLeft && inTopRow) zone = HTTOPLEFT;
+            else if (nearLeft && inBottomRow) zone = HTBOTTOMLEFT;
+            else if (nearRight && inTopRow) zone = HTTOPRIGHT;
+            else if (nearRight && inBottomRow) zone = HTBOTTOMRIGHT;
+            else if (nearLeft) zone = HTLEFT;
+            else if (nearRight) zone = HTRIGHT;
+            else if (nearTop) zone = HTTOP;
+            else if (nearBottom) zone = HTBOTTOM;
+
+            // Remember whether we are over a resize edge so the client main
+            // loop yields cursor ownership to Windows (see WM_SETCURSOR and the
+            // cursor-assignment block in loop_client.cpp). Without this the
+            // per-frame SetCursor() would immediately overwrite the system
+            // resize arrows, making the edge feel un-grabbable.
+            cursorOverResizeBorder = (zone == HTCLIENT) ? 0 : 1;
+            return zone;
+        }
+
+        // RW-P1.4: let Windows own the cursor while it sits over a resize edge.
+        // The window class has hCursor = NULL and the game re-applies a custom
+        // cursor every frame, so without this the system resize arrows never
+        // show. When the low word of lParam (the prior WM_NCHITTEST result) is
+        // a sizing border, DefWindowProc loads the correct double-arrow cursor;
+        // we return TRUE to stop further processing. Anywhere else (HTCLIENT,
+        // caption, buttons) falls through to default handling.
+        case WM_SETCURSOR: {
+            const WORD ht = LOWORD(lParam);
+            if (ht == HTLEFT || ht == HTRIGHT || ht == HTTOP || ht == HTBOTTOM ||
+                ht == HTTOPLEFT || ht == HTTOPRIGHT || ht == HTBOTTOMLEFT ||
+                ht == HTBOTTOMRIGHT) {
+                cursorOverResizeBorder = 1;
+                return DefWindowProc(hWnd, message, wParam, lParam);
+            }
+            if (ht == HTCLIENT) {
+                cursorOverResizeBorder = 0;
+            }
+            return DefWindowProc(hWnd, message, wParam, lParam);
+        }
+#endif
+
         // RW-P1.2: enforce a sensible minimum client size when the window is
         // resizable, so the renderer never has to cope with degenerate dims.
         case WM_GETMINMAXINFO: {

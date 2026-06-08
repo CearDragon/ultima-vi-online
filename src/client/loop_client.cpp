@@ -4228,6 +4228,14 @@ u6omidivolume_changed:
 
 
   //assign mouse cursor
+  // RW-P1.4: while the pointer is over the (enlarged) window resize border,
+  // let Windows keep ownership of the cursor so its double-arrow resize icon
+  // stays put. WndProc's WM_NCHITTEST/WM_SETCURSOR set cursorOverResizeBorder;
+  // re-applying our custom cursor here every frame is exactly what made the
+  // edge feel un-grabbable (the arrow flickered back to the play cursor).
+  if (cursorOverResizeBorder){
+    goto cursor_assign_done;
+  }
   if ((vf_mb2_x==0xFFFF)&&(vf_mb2_y==0xFFFF)){
     if (cur_type==1) SetCursor (cur1);
   }
@@ -4239,6 +4247,7 @@ u6omidivolume_changed:
   if (cur_type==5) SetCursor (cur5);
   if (cur_type==6) SetCursor (cur6);
   if (cur_type==9) SetCursor (cur9);
+cursor_assign_done:;
 
   //set mouse cursor type (based on previous loops state)
   cur_type=1;
