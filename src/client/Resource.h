@@ -10,6 +10,7 @@
 #define IDD_ABOUTBOX			103
 #define IDM_ABOUT				104
 #define IDM_EXIT				105
+#define IDM_ACTIONS_RESET_UI	106
 #define IDI_U6O7			107
 #define IDI_SMALL				108
 #define IDC_U6O7			109

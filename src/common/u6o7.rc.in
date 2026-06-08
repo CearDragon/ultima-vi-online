@@ -24,8 +24,10 @@ IDI_SMALL ICON "@GENERATED_ICON_SMALL_RC@"
 //
 IDC_U6O7 MENU
 BEGIN
-    POPUP "&File"
+    POPUP "&Actions"
     BEGIN
+        MENUITEM "&Reset UI",            IDM_ACTIONS_RESET_UI
+        MENUITEM SEPARATOR
         MENUITEM "E&xit",                IDM_EXIT
     END
     POPUP "&Help"
