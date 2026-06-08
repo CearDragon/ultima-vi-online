@@ -765,6 +765,75 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
         case WM_SETFOCUS:
             break;
 
+#ifdef CLIENT
+        // RW-P1.4: widen the resize grab area. WS_OVERLAPPEDWINDOW already
+        // gives us a sizing border (WS_THICKFRAME), but on Windows 10/11 the
+        // *visible* frame is ~1 px and the actual grabbable border is only
+        // SM_CXSIZEFRAME + SM_CXPADDEDBORDER pixels — often just 4 px — so
+        // players reported it was hard to catch the edge to resize.
+        //
+        // We let DefWindowProc do the normal hit-test first. When it reports
+        // HTCLIENT (cursor is just inside the client edge) we re-classify the
+        // point as the matching border/corner if it falls within an enlarged
+        // grip margin. This makes the edges and corners far easier to grab
+        // without stealing clicks from anywhere but a thin strip along the
+        // window's outer rim. The caption, buttons, and menu are untouched
+        // because DefWindowProc only returns HTCLIENT for the play area.
+        case WM_NCHITTEST: {
+            LRESULT hit = DefWindowProc(hWnd, message, wParam, lParam);
+            if (hit != HTCLIENT) {
+                // Caption, sysmenu, min/max boxes, or the real border already
+                // resolved — leave them alone.
+                return hit;
+            }
+
+            // Grip thickness: the system border plus padding, but never less
+            // than a comfortable, DPI-aware floor (~8 px at 96 DPI). Corners
+            // use a slightly larger square so diagonal resize is easy to hit.
+            // SM_CXPADDEDBORDER (Vista+) may be absent if this TU's SDK target
+            // macros predate it; fall back to its documented index value (92).
+#ifndef SM_CXPADDEDBORDER
+#define SM_CXPADDEDBORDER 92
+#endif
+            const int sysGrip = GetSystemMetrics(SM_CXSIZEFRAME) +
+                                GetSystemMetrics(SM_CXPADDEDBORDER);
+            const int grip = (sysGrip > 8) ? sysGrip : 8;
+            const int cornerGrip = grip * 2;
+
+            POINT pt = {(LONG)(short) LOWORD(lParam), (LONG)(short) HIWORD(lParam)};
+            RECT wr;
+            GetWindowRect(hWnd, &wr);
+
+            const bool nearLeft = pt.x < wr.left + grip;
+            const bool nearRight = pt.x >= wr.right - grip;
+            const bool nearTop = pt.y < wr.top + grip;
+            const bool nearBottom = pt.y >= wr.bottom - grip;
+
+            // Corners first (use the larger square so they win over edges).
+            const bool inLeftCol = pt.x < wr.left + cornerGrip;
+            const bool inRightCol = pt.x >= wr.right - cornerGrip;
+            const bool inTopRow = pt.y < wr.top + cornerGrip;
+            const bool inBottomRow = pt.y >= wr.bottom - cornerGrip;
+
+            if (nearTop && inLeftCol) return HTTOPLEFT;
+            if (nearTop && inRightCol) return HTTOPRIGHT;
+            if (nearBottom && inLeftCol) return HTBOTTOMLEFT;
+            if (nearBottom && inRightCol) return HTBOTTOMRIGHT;
+            if (nearLeft && inTopRow) return HTTOPLEFT;
+            if (nearLeft && inBottomRow) return HTBOTTOMLEFT;
+            if (nearRight && inTopRow) return HTTOPRIGHT;
+            if (nearRight && inBottomRow) return HTBOTTOMRIGHT;
+
+            // Edges.
+            if (nearLeft) return HTLEFT;
+            if (nearRight) return HTRIGHT;
+            if (nearTop) return HTTOP;
+            if (nearBottom) return HTBOTTOM;
+
+            return HTCLIENT;
+        }
+#endif
+
         // RW-P1.2: enforce a sensible minimum client size when the window is
         // resizable, so the renderer never has to cope with degenerate dims.
         case WM_GETMINMAXINFO: {
