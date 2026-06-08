@@ -329,6 +329,8 @@ void getscreenoffset(long x, long y, long *mapx, long *mapy) {
         *mapy = 319;
         return;
     }
+    // Guardian Guild basement uses normal follow behavior now; fall through to
+    // the default region handling below.
     //undefined
     if (*mapx < 0) *mapx = 0;
     if (*mapy < 0) *mapy = 0;
@@ -362,6 +364,8 @@ void getscreenoffset_legacy(long x, long y, long *mapx, long *mapy) {
         *mapy = 319;
         return;
     }
+    // Guardian Guild basement uses normal follow behavior now; fall through to
+    // the default region handling below.
     if (*mapx < 0) *mapx = 0;
     if (*mapy < 0) *mapy = 0;
     if (*mapx > (2048 - tx)) *mapx = (2048 - tx);

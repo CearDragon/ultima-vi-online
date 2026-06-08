@@ -1,0 +1,120 @@
+'Max of Britain
+
+ifkey look/txt a swarthy blacksmith.\"Hey, it'sa you. Hello again."\"What'sa you wanta nexta?"
+ifkey name/FLG_NAME=1/txt "I'ma nameda Max."
+ifkey job/txt "Whassamattayu, you blind or somethin'?"\"I makea de swords and stuff, what's it alook like I'ma doin' here?"\"You gotta somethin' to @sell oda somethin' you wanna @buy?"\"If you gotta lots to sell, you sell in @bulk."
+ifkey bye/txt "Goodbyea to you. Come abacka soon, ah?"
+
+if!= SCHEDULE,SCH_WANDER_WORK/jmp 3
+ifkey buy/txt "Do you wanta @weapons or @armor?"
+ifkey weap/txt "Awhicha one adese, @dagger, @spear, @sword or @2 @handed @sword?"
+ifkey armo/txt "Awhicha one adese, @cloth @armour, @chain @mail, @heater @shield, @iron @helm, @leather @armour or @plate @mail?"
+ifkey sell/jmp 4
+ifkey bulk/jmp 40
+if= FLG_JMP,41/jmp 41
+
+ifkey dagg/FLG_JMP=20/txt "That dagger, she'sa costa 10 agold."\"Interested?"
+ifkey spea/FLG_JMP=21/txt "That spear, she'sa costa 20 agold."\"Interested?"
+ifkey swor/FLG_JMP=22/txt "That sword, she'sa costa 50 agold."\"Interested?"
+ifkey 2han/FLG_JMP=23/txt "That 2 handed sword, she'sa costa 90 agold."\"Interested?"
+ifkey clot/FLG_JMP=24/txt "That cloth armour, she'sa costa 25 agold."\"Interested?"
+ifkey chai/FLG_JMP=25/txt "That chain mail, she'sa costa 60 agold."\"Interested?"
+ifkey heat/FLG_JMP=26/txt "That heater shield, she'sa costa 20 agold."\"Interested?"
+ifkey iron/FLG_JMP=27/txt "That iron helm, she'sa costa 20 agold."\"Interested?"
+ifkey leat/FLG_JMP=28/txt "That leather armour, she'sa costa 40 agold."\"Interested?"
+ifkey plat/FLG_JMP=29/txt "That plate mail, she'sa costa 120 agold."\"Interested?"
+
+if= FLG_JMP,20/jmp 20
+if= FLG_JMP,21/jmp 20
+if= FLG_JMP,22/jmp 20
+if= FLG_JMP,23/jmp 20
+if= FLG_JMP,24/jmp 20
+if= FLG_JMP,25/jmp 20
+if= FLG_JMP,26/jmp 20
+if= FLG_JMP,27/jmp 20
+if= FLG_JMP,28/jmp 20
+if= FLG_JMP,29/jmp 20
+
+if= FLG_JMP,10/jmp 10
+if= FLG_JMP,11/jmp 11
+if= FLG_JMP,12/jmp 12
+if= FLG_JMP,13/jmp 13
+if= FLG_JMP,14/jmp 14
+if= FLG_JMP,15/jmp 15
+if= FLG_JMP,16/jmp 16
+if= FLG_JMP,17/jmp 17
+if= FLG_JMP,18/jmp 18
+if= FLG_JMP,19/jmp 19
+
+3 FLG_JMP=0
+ifkey buy/txt "You to my shopa when shesa open!"
+ifkey weap/txt "You to my shopa when shesa open!"
+ifkey armo/txt "You to my shopa when shesa open!"
+ifkey sell/txt "You to my shopa when shesa open!"
+txt "Hey, my hearing, she's notsa so good. What you say?"
+
+20 ifkey yes/if= FLG_JMP,20/FLG_JMP=0/buy 38,1,10/if= ERROR,0/txt "She'sa done!"\After accepting the gold, he hands over the dagger.
+ifkey yes/if= FLG_JMP,21/FLG_JMP=0/buy 36,1,20/if= ERROR,0/txt "She'sa done!"\After accepting the gold, he hands over the spear.
+ifkey yes/if= FLG_JMP,22/FLG_JMP=0/buy 43,1,50/if= ERROR,0/txt "She'sa done!"\After accepting the gold, he hands over the sword.
+ifkey yes/if= FLG_JMP,23/FLG_JMP=0/buy 46,1,90/if= ERROR,0/txt "She'sa done!"\After accepting the gold, he hands over the 2 handed sword.
+ifkey yes/if= FLG_JMP,24/FLG_JMP=0/buy 17,1,25/if= ERROR,0/txt "She'sa done!"\After accepting the gold, he hands over the cloth armour.
+ifkey yes/if= FLG_JMP,25/FLG_JMP=0/buy 21,1,60/if= ERROR,0/txt "She'sa done!"\After accepting the gold, he hands over the chain mail.
+ifkey yes/if= FLG_JMP,26/FLG_JMP=0/buy 10,1,20/if= ERROR,0/txt "She'sa done!"\After accepting the gold, he hands over the heater shield.
+ifkey yes/if= FLG_JMP,27/FLG_JMP=0/buy 3,1,20/if= ERROR,0/txt "She'sa done!"\After accepting the gold, he hands over the iron helm.
+ifkey yes/if= FLG_JMP,28/FLG_JMP=0/buy 18,1,40/if= ERROR,0/txt "She'sa done!"\After accepting the gold, he hands over the leather armour.
+ifkey yes/if= FLG_JMP,29/FLG_JMP=0/buy 22,1,120/if= ERROR,0/txt "She'sa done!"\After accepting the gold, he hands over the plate mail.
+FLG_JMP=0
+if= ERROR,ERR_NOGOLD/txt "But she'sa costing too much for you!"
+if= ERROR,ERR_HEAVY/txt "But she'sa be making thee too heavy!"
+RANDOM=1/if= RANDOM,1/txt "Perhaps asomethinga else athen?"
+txt "Perhapsa some other atime athen."
+
+4 V1=0
+ifitem 38,1/V1=1/RANDOM=7/if= RANDOM,0/FLG_JMP=10/txt "Aye, you have asomething ofa interesta..."\"Will you take 5 gold for that dagger?"
+ifitem 36,1/V1=1/RANDOM=7/if= RANDOM,0/FLG_JMP=11/txt "Aye, you have asomething ofa interesta..."\"Will you take 10 gold for that spear?"
+ifitem 43,1/V1=1/RANDOM=7/if= RANDOM,0/FLG_JMP=12/txt "Aye, you have asomething ofa interesta..."\"Will you take 25 gold for that sword?"
+ifitem 46,1/V1=1/RANDOM=7/if= RANDOM,0/FLG_JMP=13/txt "Aye, you have asomething ofa interesta..."\"Will you take 45 gold for that 2 handed sword?"
+ifitem 17,1/V1=1/RANDOM=7/if= RANDOM,0/FLG_JMP=14/txt "Aye, you have asomething ofa interesta..."\"Will you take 12 gold for that cloth armour?"
+ifitem 21,1/V1=1/RANDOM=7/if= RANDOM,0/FLG_JMP=15/txt "Aye, you have asomething ofa interesta..."\"Will you take 30 gold for that chain mail?"
+ifitem 10,1/V1=1/RANDOM=7/if= RANDOM,0/FLG_JMP=16/txt "Aye, you have asomething ofa interesta..."\"Will you take 10 gold for that heater shield?"
+ifitem 3,1/V1=1/RANDOM=7/if= RANDOM,0/FLG_JMP=17/txt "Aye, you have asomething ofa interesta..."\"Will you take 10 gold for that iron helm?"
+ifitem 18,1/V1=1/RANDOM=7/if= RANDOM,0/FLG_JMP=18/txt "Aye, you have asomething ofa interesta..."\"Will you take 20 gold for that leather armour?"
+ifitem 22,1/V1=1/RANDOM=7/if= RANDOM,0/FLG_JMP=19/txt "Aye, you have asomething ofa interesta..."\"Will you take 60 gold for that plate mail? "
+if= V1,0/FLG_JMP=0/txt "Hey, atsa real shame, but anone of you hasa anything I'ma needing."
+jmp 4
+
+10 FLG_JMP=0/ifkey yes/sell 38,1,5/if= ERROR,0/txt "She'sa done!"\He hands you 5 gold pieces and takes the dagger.
+11 FLG_JMP=0/ifkey yes/sell 36,1,10/if= ERROR,0/txt "She'sa done!"\He hands you 10 gold pieces and takes the spear.
+12 FLG_JMP=0/ifkey yes/sell 43,1,25/if= ERROR,0/txt "She'sa done!"\He hands you 25 gold pieces and takes the sword.
+13 FLG_JMP=0/ifkey yes/sell 46,1,45/if= ERROR,0/txt "She'sa done!"\He hands you 45 gold pieces and takes the 2 handed sword.
+14 FLG_JMP=0/ifkey yes/sell 17,1,12/if= ERROR,0/txt "She'sa done!"\He hands you 12 gold pieces and takes the cloth Armour.
+15 FLG_JMP=0/ifkey yes/sell 21,1,30/if= ERROR,0/txt "She'sa done!"\He hands you 30 gold pieces and takes the chain mail.
+16 FLG_JMP=0/ifkey yes/sell 10,1,10/if= ERROR,0/txt "She'sa done!"\He hands you 10 gold pieces and takes the heater shield.
+17 FLG_JMP=0/ifkey yes/sell 3,1,10/if= ERROR,0/txt "She'sa done!"\He hands you 10 gold pieces and takes the iron helm.
+18 FLG_JMP=0/ifkey yes/sell 18,1,20/if= ERROR,0/txt "She'sa done!"\He hands you 20 gold pieces and takes the leather armour.
+19 FLG_JMP=0/ifkey yes/sell 22,1,60/if= ERROR,0/txt "She'sa done!"\He hands you 60 gold pieces and takes the plate mail.
+txt "Achanged your aminda, eh?"
+
+'bulk price
+40
+bulkreset
+bulktype 38,5/bulktype 36,10/bulktype 43,25/bulktype 46,45/bulktype 17,12
+bulktype 21,30/bulktype 10,10/bulktype 3,10/bulktype 18,20/bulktype 22,60
+V0=BULKPRICE
+if= V0,0/txt "Hey, atsa real shame, but anone of you hasa anything I'ma needing."
+FLG_JMP=41
+if>= V0,500/txt "Holy'moley, you havea more inventory than I have!"\"If you weren'ta the Avatar, I'da thought you lifted the Serpent's Hold!"\"How's about $V0 gold for all'adat stuff?"
+txt "How's about $V0 gold for all'adat stuff?"
+
+'bulk confirm
+41
+FLG_JMP=0
+ifkey yes/jmp 42
+txt "Achanged your aminda, eh?"
+
+'bulk sell
+42
+bulksell
+if= ERROR,1/txt "Whassadis, you're tryin' to short-change 'ol Max?"\I mighta talk funny, but I can'a still count!"
+V0=BULKPRICE
+txt "She'sa done!"\He hands you $V0 gold pieces in exchange for the items.

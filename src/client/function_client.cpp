@@ -434,12 +434,8 @@ namespace u6o {
             // Pitch sanity check: in debug builds, log if DD's reported row
             // stride doesn't match `newW * 2` bytes. The original distortion
             // bug was caused by the lighting buffer (`malloc`'d at exactly
-            // `newW * newH` bytes) and the surface's row stride disagreeing.
-            // Adopting DD's lPitch as the canonical width broke worse on the
-            // user's setup (produced duplicated/striped output), so we now
-            // just trust newW and rely on DD not padding 16bpp sysmem
-            // surfaces. Most widths divisible by 16 should be safe; logging
-            // helps diagnose if/when this assumption fails.
+            // `newW * newH` bytes) and the surface's row stride disagreeing at
+            // widths DirectDraw pads above `newW * 2`.
 #ifdef _DEBUG
             {
                 long expectedPitch = (long) newW * 2;
@@ -453,7 +449,21 @@ namespace u6o {
             }
 #endif
 
-            // Re-allocate the lighting buffers at the requested stride so the
+            // RW-P2.3: adopt the surface's ACTUAL pixel pitch as the lighting
+            // stride before (re)allocating the lighting buffers. DirectDraw pads
+            // `ps->d.lPitch` above `newW * 2` at widths that aren't aligned to
+            // its granularity (i.e. most intermediate window sizes between the
+            // legacy 1024 and a maximized/aligned width). The lighting-compose
+            // passes (lightshow0 asm, moon memcpy, stormcloak, ps_fakebuffer)
+            // walk `ls`/`ps->o` linearly assuming row stride == lightingStride()
+            // pixels, so they must use lPitch/2 — not newW — or the lit overlay
+            // skews diagonally (top-right → bottom-left). Earlier attempts that
+            // made lPitch/2 the canonical *world* width broke the tile/wire
+            // frame; decoupling the lighting stride from backbufferW() is the
+            // fix. Set BEFORE lighting_alloc() so it sizes/strides to match.
+            set_lighting_stride((int) (ps->d.lPitch / 2));
+
+            // Re-allocate the lighting buffers at the surface pitch so the
             // linear-walk inline asm in the lighting compose pass at
             // loop_client.cpp:8294ff stays in lockstep with `ps->o`.
             if (!lighting_alloc(newW, newH) || !visibility_alloc(newW, newH)) {
@@ -3914,6 +3924,28 @@ void applyscaleuipanelwidget(int uipi, int uiwi, int uisi, float scalex, float s
 }
 
 // obsolete
+// RW-P3.3 (2026-06-02): see function_client.h for the rationale. One-shot,
+// clamped, on-screen first placement for the floating hideable FRAME panels.
+void placeFloatingPanelFirstShow(FRAME *f, int homeX, int homeY, int shown) {
+    if (f == NULL || f->graphic == NULL) return;
+    const int bw = backbufferW();
+    const int bh = backbufferH();
+    const int w = (int) f->graphic->d.dwWidth;
+    const int h = (int) f->graphic->d.dwHeight;
+    // Clamp the home position so the whole panel fits inside the current back
+    // buffer (a position restored from cltset2 may have been saved while the
+    // window was larger). Keep the top-left corner on screen.
+    if (homeX + w > bw) homeX = bw - w;
+    if (homeY + h > bh) homeY = bh - h;
+    if (homeX < 0) homeX = 0;
+    if (homeY < 0) homeY = 0;
+    f->offset_y = (short) homeY;
+    // Park at home when shown, or in the hidden slot (off the right edge) so
+    // the hide/show toggle can recover home via offset_x -= kPanelHideDeltaX.
+    f->offset_x = (short) (shown ? homeX : homeX + kPanelHideDeltaX);
+    f->positioned = true;
+}
+
 void updateoptioninfo() {
     static txt *t = txtnew();
     static txt *t2 = txtnew();
