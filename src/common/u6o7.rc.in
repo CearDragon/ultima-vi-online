@@ -32,6 +32,9 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
+        MENUITEM "&Discord",            IDM_HELP_DISCORD
+        MENUITEM "&Website",            IDM_HELP_WEBSITE
+        MENUITEM SEPARATOR
         MENUITEM "&About ...",           IDM_ABOUT
     END
 END

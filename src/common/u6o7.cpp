@@ -6,6 +6,7 @@
 #include <math.h>
 #include <direct.h>
 #include <wininet.h>
+#include <shellapi.h>
 #include <winreg.h>
 #include <dbghelp.h>
 #pragma comment(lib, "dbghelp.lib")
@@ -1103,6 +1104,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                                aboutMsg,
                                "About",
                                MB_OK | MB_ICONINFORMATION);
+                    return 0;
+
+                case IDM_HELP_DISCORD:
+                    ShellExecuteA(hWnd, "open", "https://discord.gg/FRURSGaWBU", NULL, NULL, SW_SHOWNORMAL);
+                    return 0;
+
+                case IDM_HELP_WEBSITE:
+                    ShellExecuteA(hWnd, "open", "http://ultimasixonline.thezogcabal.com/", NULL, NULL, SW_SHOWNORMAL);
                     return 0;
 
                 case IDM_EXIT:
