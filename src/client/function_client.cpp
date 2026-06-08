@@ -1799,6 +1799,67 @@ void STATUSMESSadd(const char *t, int skippable, int num) {
 }
 
 
+// Draw-time word wrap for the "view previous status message" log. STATUSMESSadd
+// pre-wraps incoming text to ~1008px assuming it is drawn from x≈0, but the log
+// arrow is draggable, so a line that fit at the left edge runs off the right
+// edge once the arrow is moved. This re-wraps a single stored line to whatever
+// pixel budget the current draw position leaves, using GetTextExtentExPoint to
+// find the break point and backing up to the last space for clean word wrap.
+int STATUSMESSwrapline(txt *src, long maxwidth, txt **out, int maxlines) {
+    static HDC hdc;
+    static SIZE sz;
+    int fit;
+    long start, end, brk, i;
+    int n = 0;
+
+    if (maxlines < 1) return 0;
+    if (maxwidth < 1) maxwidth = 1;
+
+    // Empty source still consumes one (blank) line, matching legacy spacing.
+    if (src->l <= 0) {
+        txtset(out[0], "");
+        return 1;
+    }
+
+    ps->s->GetDC(&hdc);
+    SelectObject(hdc, fnt1naa);
+
+    start = 0;
+    while ((start < src->l) && (n < maxlines)) {
+        long avail = src->l - start;
+        fit = 0;
+        sz.cx = 0;
+        sz.cy = 0;
+        GetTextExtentExPoint(hdc, &src->d[start], (int) avail, (int) maxwidth, &fit, NULL, &sz);
+        if (fit >= avail) {
+            end = src->l; // remainder fits on this line
+        } else {
+            brk = start + fit;
+            if (brk <= start) brk = start + 1; // guarantee forward progress
+            // prefer to break at the last space before the hard limit
+            long sp = -1;
+            for (i = brk - 1; i > start; i--) {
+                if (src->d[i] == ' ') { sp = i; break; }
+            }
+            end = (sp > start) ? sp : brk;
+        }
+        long len = end - start;
+        if (len < 1) len = 1;
+        txtNEWLEN(out[n], -len);
+        memcpy(out[n]->d, &src->d[start], len);
+        n++;
+        // advance to next line, skipping the run of spaces we broke on
+        start = end;
+        while ((start < src->l) && (src->d[start] == ' ')) start++;
+    }
+
+    ps->s->ReleaseDC(hdc);
+
+    if (n == 0) { txtset(out[0], ""); n = 1; }
+    return n;
+}
+
+
 //X returned directly! unsigned long GETSETTING_OPTION;//a number from 0-? indicating the option chosen
 //if getsetting returns non-zero it succeeded
 long getsetting(const char *d) {

@@ -12486,50 +12486,52 @@ endgame_donemessage:
   if (statusmessage_viewprev->mouse_over||statusmessage_logpinned){
     statusmessage_viewprev->mouse_over=FALSE;
     if (drg!=statusmessage_viewprev){
+      // Scratch buffers for draw-time word wrapping (lazily allocated once).
+      static txt *statuswrap[16]={0};
+      if (!statuswrap[0]){ for (int si=0;si<16;si++) statuswrap[si]=txtnew(); }
       x=statusmessage_viewprev->offset_x;
       y=statusmessage_viewprev->offset_y-24;
+      // Wrap budget: keep text inside the live back buffer with an 8px margin.
+      // The arrow is draggable, so a line that fit at the left edge can run off
+      // the right edge once moved — re-wrap each stored line to fit from x.
+      long statuswrapmax=(long)backbufferW()-x-8;
+      txtfnt=fnt1naa;
       for (i=0;i<=7;i++){
         if (STATUSMESSprev[i]->l){
-          txtset(t,STATUSMESSprev[i]);
-          txtfnt=fnt1naa;
-          txtcol=rgb(0,0,0);
-          txtout(ps,x,y,t);
-          txtout(ps,x+2,y+2,t);
-          txtout(ps,x+2,y,t);
-          txtout(ps,x,y+2,t);
-          txtout(ps,x+1,y,t);
-          txtout(ps,x+2,y+1,t);
-          txtout(ps,x,y+1,t);
-          txtout(ps,x+1,y+2,t);
-          txtcol=rgb(255,255,255);
-
-		  // s333 change color of combat info text
-		  if (combatinfo) {
-			  txtset(t3, "P:");
-			  if ((txtsearch(t, t3) == 1)) {
-				  txtcol = rgb(255, 80, 80); // red
-			  }
-
-			  txtset(t3, "C:");
-			  if ((txtsearch(t, t3) == 1)) {
-				  txtcol = rgb(150, 255, 150); // green
-			  }
-
-			  txtset(t3, "O:");
-			  if ((txtsearch(t, t3) == 1)) {
-				  txtcol = rgb(255, 255, 80); // yellow
-			  }
-
-			  txtset(t3, "I:");
-			  if ((txtsearch(t, t3) == 1)) {
-				  txtcol = rgb(0, 255, 255); // cyan
-			  }
-		  }
-
-          //txtfnt=fnt1;
-          txtout(ps,x+1,y+1,t);
+          // Resolve this message's colour once (combat-info prefixes), then
+          // apply it to every wrapped physical line of the message.
+          DWORD linecol=rgb(255,255,255);
+          if (combatinfo){
+            txtset(t,STATUSMESSprev[i]);
+            txtset(t3,"P:"); if (txtsearch(t,t3)==1) linecol=rgb(255,80,80);   // red
+            txtset(t3,"C:"); if (txtsearch(t,t3)==1) linecol=rgb(150,255,150); // green
+            txtset(t3,"O:"); if (txtsearch(t,t3)==1) linecol=rgb(255,255,80);  // yellow
+            txtset(t3,"I:"); if (txtsearch(t,t3)==1) linecol=rgb(0,255,255);   // cyan
+          }
+          int nseg=STATUSMESSwrapline(STATUSMESSprev[i],statuswrapmax,statuswrap,16);
+          // Draw the message block so its first segment is on top (reads
+          // top-to-bottom) while the whole log still grows upward, newest line
+          // nearest the arrow.
+          long ytop=y-24*(nseg-1);
+          for (int k=0;k<nseg;k++){
+            long yk=ytop+24*k;
+            txtset(t,statuswrap[k]);
+            txtcol=rgb(0,0,0);
+            txtout(ps,x,yk,t);
+            txtout(ps,x+2,yk+2,t);
+            txtout(ps,x+2,yk,t);
+            txtout(ps,x,yk+2,t);
+            txtout(ps,x+1,yk,t);
+            txtout(ps,x+2,yk+1,t);
+            txtout(ps,x,yk+1,t);
+            txtout(ps,x+1,yk+2,t);
+            txtcol=linecol;
+            txtout(ps,x+1,yk+1,t);
+          }
+          y=ytop-24;
+        } else {
+          y-=24;
         }
-        y-=24;
       }//i
     }
   }
