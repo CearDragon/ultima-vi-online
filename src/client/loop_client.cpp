@@ -12864,10 +12864,16 @@ if
     STATUSMESSwait -= (et * (1.0f + (float) STATUSMESSpending->l * 0.005f));
     if (STATUSMESSwait <= 0.0f) {
         //add to the buffer
-        for (i = 7; i >= 1; i--) {
-            txtset(STATUSMESSprev[i], STATUSMESSprev[i - 1]);
-        } //i
-        txtset(STATUSMESSprev[0], STATUSMESSdisplaying);
+        if (statusmessage_loggedearly) {
+            // f: this "look" message was already pushed to the log when it
+            // first displayed; don't add it again, just clear the flag.
+            statusmessage_loggedearly = 0;
+        } else {
+            for (i = 7; i >= 1; i--) {
+                txtset(STATUSMESSprev[i], STATUSMESSprev[i - 1]);
+            } //i
+            txtset(STATUSMESSprev[0], STATUSMESSdisplaying);
+        }
         STATUSMESSwait = 0.0f;
         txtset(STATUSMESSdisplaying, "");
     } //STATUSMESSwait<=0.0f
@@ -12930,6 +12936,17 @@ l
 			if (txtsearch(STATUSMESSdisplaying, t3) > 0) {
 				STATUSMESSskipok = 1;
 			}
+		}
+
+		// f: push "look" text into the status log the instant it starts
+		// displaying, instead of waiting for the floating text to disappear.
+		// statusmessage_loggedearly suppresses the duplicate add that the
+		// timer-expiry path would otherwise perform for this same message.
+		txtset(t3, "Thou dost see");
+		if (txtsearch(STATUSMESSdisplaying, t3) > 0) {
+			for (i = 7; i >= 1; i--) txtset(STATUSMESSprev[i], STATUSMESSprev[i - 1]);
+			txtset(STATUSMESSprev[0], STATUSMESSdisplaying);
+			statusmessage_loggedearly = 1;
 		}
 	}
   }else{

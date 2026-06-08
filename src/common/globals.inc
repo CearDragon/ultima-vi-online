@@ -898,6 +898,10 @@ int hittarget = 0;
 int checkpendingstatusmessage = 0;
 int statusmessagependingprevlen = 0;
 int statusmessagechanged = 0;
+// f: set when a "look" status message has already been pushed into the
+// STATUSMESSprev log at the moment it started displaying, so the normal
+// "add to log when the message expires" path skips it (avoids a duplicate).
+int statusmessage_loggedearly = 0;
 int txtcolprev = 0;
 long lookatx = 0;
 long lookaty = 0;
