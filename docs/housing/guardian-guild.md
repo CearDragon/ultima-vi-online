@@ -326,18 +326,23 @@ house, and persisted independently to `save\guardianobjs.sav`.
    drop handling keep working.
 
 2. **Patch change** — `guardianguild.txt`:
-   - The 7 shelf registrations now target the absolute `GUARDIANGUILD_STORAGE_HOUSE`.
+   - Both storage rooms' shelf tiles (7 surface + 7 basement = **14 slots**) are
+     registered to the absolute `GUARDIANGUILD_STORAGE_HOUSE`.
+   - Each surface tile gets a `279` furniture head (the basement already had
+     them); without a head, dropped items become the tile head and the storage
+     save/load (which operates on `->next`) would skip them — that was why the
+     surface room never saved.
    - The redundant `+26` duplicate registration was deleted (it referenced the
-     same tiles and would have caused double-counting / double-restore).
-   - The shelf **furniture** (`OBJaddnew(..., 279+1024*n, ...)`) is unchanged.
+     basement tiles and would have caused double-counting / double-restore).
    - The guild **building** (`house 46`) is left ownable exactly as before; only
      its storage was decoupled.
 
 3. **Persistence** — `function_host.cpp`: `guardianguild_save()` /
    `guardianguild_load()`, declared in `function_host.h`. Both use
-   `gh = GUARDIANGUILD_STORAGE_HOUSE` (the absolute id), and each emits a
-   `GUARDIANGUILD: load/save house=200 shelfslots=7 ...` line to `log.txt` for
-   verification.
+   `gh = GUARDIANGUILD_STORAGE_HOUSE` (the absolute id) and iterate
+   `housestoragenext[gh]` slots, so they cover **both rooms** automatically. Each
+   emits a `GUARDIANGUILD: load/save house=200 shelfslots=14 ...` line to
+   `log.txt` for verification.
 
 ### `guardianobjs.sav` file format
 

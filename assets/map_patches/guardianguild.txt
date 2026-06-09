@@ -1067,6 +1067,50 @@ OBJaddnew(408,346,301+1024*2,0,256+basehousenumber+0);//doorframe
 
 OBJaddnew(408,347,301+1024*3,0,256+basehousenumber+0);//doorframe
 
+// Guardian Guild OVERWORLD (surface) communal storage shelves.
+// This is the 7-slot "safeSpot" room on the surface (x409-411, y346-348),
+// the counterpart to the 7-slot basement room registered above. Like the
+// basement, these tiles are registered to the dedicated, non-ownable storage
+// house (GUARDIANGUILD_STORAGE_HOUSE, see define_host.h) so their contents
+// never decay on logout and instead persist via guardianobjs.sav
+// (guardianguild_save/load in function_host.cpp). A shelf furniture head
+// (type 279) must exist on each tile so dropped items chain on ->next, which
+// is exactly what the storage save/load and drop handlers operate on.
+OBJaddnew(409,348,279+1024*0,0,0);
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+409;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+348;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
+
+OBJaddnew(410,348,279+1024*0,0,0);
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+410;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+348;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
+
+OBJaddnew(411,348,279+1024*0,0,0);
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+411;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+348;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
+
+OBJaddnew(411,347,279+1024*0,0,0);
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+411;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+347;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
+
+OBJaddnew(411,346,279+1024*0,0,0);
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+411;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+346;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
+
+OBJaddnew(410,346,279+1024*0,0,0);
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+410;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+346;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
+
+OBJaddnew(409,346,279+1024*0,0,0);
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+409;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+346;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
+
 // NOTE (2026-06): the guild storage shelves used to be registered a SECOND time
 // here to the guild building house (basehousenumber+26). That made the shelves
 // owner-tied (the building owner's logout wiped them). The shelves are now
