@@ -34,7 +34,7 @@ spec:
           protocol: TCP
         volumeMounts:
         - name: save-data
-          mountPath: C:\u6o7-host\save
+          mountPath: C:\host\save
       volumes:
       - name: save-data
         persistentVolumeClaim:
