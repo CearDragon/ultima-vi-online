@@ -1145,7 +1145,8 @@ FRAME* statusmessage_viewnpc;
 FRAME* statusmessage_viewprev;
 // When TRUE the previous-status-message log stays drawn constantly (toggled
 // by left-clicking the statusmessage_viewprev arrow) instead of only while
-// the cursor hovers the arrow. Not persisted — resets each session.
+// the cursor hovers the arrow. Persisted to settings.bin
+// (client_settings.statusprev_logpinned) so it survives between sessions.
 unsigned char statusmessage_logpinned;
 FRAME* voicechat_frame;
 FRAME* volcontrol;

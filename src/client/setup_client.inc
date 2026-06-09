@@ -810,11 +810,13 @@ cltset2_restored=1;
 // appended 2026-06-08; without this, upgraders saw the "view previous
 // status message" arrow pinned to the top-left corner.
 cltset2.statusprev_offset_x=32767; cltset2.statusprev_offset_y=32767;
+cltset2.statusprev_logpinned=0; // default: log not pinned (old/short files keep this)
 get(tfh,&cltset2,sizeof(client_settings));
 close(tfh);
 u6ovolume=cltset2.u6ovolume;
 u6omidivolume=cltset2.u6omidivolume;
 u6ovoicevolume=cltset2.u6ovoicevolume;
+statusmessage_logpinned=cltset2.statusprev_logpinned; // restore "keep text log visible" toggle
 memcpy(&spellrecall_partymember,&cltset2.spellrecall_partymember,8);
 memcpy(&spellrecall_i,&cltset2.spellrecall_i,8);
 if (cltset2.musickeyboard_offset_x!=32767){musickeyboard->offset_x=cltset2.musickeyboard_offset_x+kPanelHideDeltaX; musickeyboard->offset_y=cltset2.musickeyboard_offset_y;}
@@ -850,6 +852,7 @@ cltset.qkstf_offset_x=32767;
 cltset.minimap_offset_x=32767;
 cltset.tmap_offset_x=32767;
 cltset.statusprev_offset_x=32767;
+cltset.statusprev_logpinned=0;
 }
 FRAME_mbl[0]=FALSE; FRAME_mbl[1]=FALSE; lpn=NULL; //used by frame.h
 

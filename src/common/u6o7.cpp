@@ -354,6 +354,7 @@ PM_NOREMOVE
                 cltset.u6omidivolume = u6omidivolume;
                 cltset.u6ovolume = u6ovolume;
                 cltset.u6ovoicevolume = u6ovoicevolume;
+                cltset.statusprev_logpinned = statusmessage_logpinned; // persist "keep text log visible" toggle
                 memcpy(&cltset.spellrecall_partymember, &spellrecall_partymember, 8);
                 memcpy(&cltset.spellrecall_i, &spellrecall_i, 8);
                 tfh = open2(".\\dr\\settings.bin", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);

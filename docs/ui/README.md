@@ -328,6 +328,7 @@ struct client_settings {
     short minimap_offset_x, minimap_offset_y;
     short tmap_offset_x,    tmap_offset_y;
     short statusprev_offset_x, statusprev_offset_y; // appended at end
+    unsigned char statusprev_logpinned;             // appended at end (keep-log-visible toggle)
 };
 extern client_settings cltset;   // live (mirrors current state)
 extern client_settings cltset2;  // restored-from-disk snapshot

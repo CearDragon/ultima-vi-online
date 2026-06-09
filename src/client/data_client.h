@@ -36,6 +36,9 @@ struct client_settings {
     // default". Appended at the END of the struct: client_settings is a
     // positional, untagged file format, so new fields must be added last.
     short statusprev_offset_x, statusprev_offset_y;
+    // Persisted "keep the status text log visible" toggle (statusmessage_logpinned).
+    // 0 = off (default). Also appended at the end for the same reason.
+    unsigned char statusprev_logpinned;
 };
 
 struct inpmess_index {
