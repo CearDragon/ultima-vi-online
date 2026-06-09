@@ -898,6 +898,15 @@ int hittarget = 0;
 int checkpendingstatusmessage = 0;
 int statusmessagependingprevlen = 0;
 int statusmessagechanged = 0;
+// f: set when a "look" status message has already been pushed into the
+// STATUSMESSprev log at the moment it started displaying, so the normal
+// "add to log when the message expires" path skips it (avoids a duplicate).
+int statusmessage_loggedearly = 0;
+// f: deferred render state for the floating "look" text. It is captured while
+// the world/sfx layer renders but drawn after the UI panels are composited, so
+// it appears above the sidebar/panels and is clamped to stay on-screen.
+txt *looktext = NULL;
+int lookdisplay = 0;
 int txtcolprev = 0;
 long lookatx = 0;
 long lookaty = 0;
@@ -1134,6 +1143,11 @@ surf* viewnpc2_temp;
 
 FRAME* statusmessage_viewnpc;
 FRAME* statusmessage_viewprev;
+// When TRUE the previous-status-message log stays drawn constantly (toggled
+// by left-clicking the statusmessage_viewprev arrow) instead of only while
+// the cursor hovers the arrow. Persisted to settings.bin
+// (client_settings.statusprev_logpinned) so it survives between sessions.
+unsigned char statusmessage_logpinned;
 FRAME* voicechat_frame;
 FRAME* volcontrol;
 FRAME* qkstf;

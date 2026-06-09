@@ -6,6 +6,7 @@
 #include <math.h>
 #include <direct.h>
 #include <wininet.h>
+#include <shellapi.h>
 #include <winreg.h>
 #include <dbghelp.h>
 #pragma comment(lib, "dbghelp.lib")
@@ -353,6 +354,7 @@ PM_NOREMOVE
                 cltset.u6omidivolume = u6omidivolume;
                 cltset.u6ovolume = u6ovolume;
                 cltset.u6ovoicevolume = u6ovoicevolume;
+                cltset.statusprev_logpinned = statusmessage_logpinned; // persist "keep text log visible" toggle
                 memcpy(&cltset.spellrecall_partymember, &spellrecall_partymember, 8);
                 memcpy(&cltset.spellrecall_i, &spellrecall_i, 8);
                 tfh = open2(".\\dr\\settings.bin", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
@@ -666,6 +668,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
     AdjustWindowRect(&clrect, WS_OVERLAPPEDWINDOW, FALSE);
     hWnd2 = CreateWindow(szWindowClass, window_name, WS_OVERLAPPEDWINDOW,
                          0, 0, clrect.right - clrect.left, clrect.bottom - clrect.top, NULL, NULL, hInstance, NULL);
+
+    // Attach the resource-defined menu (Actions/Help) to the client window.
+    {
+        HMENU appMenu = LoadMenu(hInstance, MAKEINTRESOURCE(IDC_U6O7));
+        if (appMenu) {
+            SetMenu(hWnd2, appMenu);
+            DrawMenuBar(hWnd2);
+        }
+    }
 
     hWnd3 = NULL;
     // hWnd4 set NULL in function_client.cpp newmodeinit.
@@ -1063,17 +1074,53 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             wheel_move += delta;
             break;
 
-        /*
-		case WM_COMMAND:
-		wmId    = LOWORD(wParam); 
-		wmEvent = HIWORD(wParam); 
-		switch( wmId ) 
-		{
-		default:
-		return DefWindowProc( hWnd, message, wParam, lParam );
-		}
-		break;
-		*/
+        case WM_COMMAND:
+#ifdef CLIENT
+            switch (LOWORD(wParam)) {
+                case IDM_ACTIONS_RESET_UI:
+                    // Clear user overrides and force key panels back on-screen.
+                    u6o::client::g_qkstf_user_positioned = false;
+                    u6o::client::g_qkstf_user_x = 0;
+                    u6o::client::g_qkstf_user_y = 0;
+                    u6o::client::g_volcontrol_user_positioned = false;
+                    u6o::client::g_volcontrol_user_x = 0;
+                    u6o::client::g_volcontrol_user_y = 0;
+                    cltset.qkstf_offset_x = 32767;
+                    cltset.qkstf_offset_y = 32767;
+                    cltset.volcontrol_offset_x = 32767;
+                    cltset.volcontrol_offset_y = 32767;
+                    ResetUiPanelsIntoView(backbufferW(), backbufferH());
+                    InvalidateRect(hWnd, NULL, FALSE);
+                    return 0;
+
+                case IDM_ABOUT:
+                    char aboutMsg[512];
+                    _snprintf(aboutMsg, sizeof(aboutMsg),
+                              "Ultima VI Online\n"
+                              "Client Version: %d\n\n"
+                              "Discord: https://discord.gg/FRURSGaWBU\n"
+                              "Website: http://ultimasixonline.thezogcabal.com/",
+                              U6O_VERSION);
+                    MessageBox(hWnd,
+                               aboutMsg,
+                               "About",
+                               MB_OK | MB_ICONINFORMATION);
+                    return 0;
+
+                case IDM_HELP_DISCORD:
+                    ShellExecuteA(hWnd, "open", "https://discord.gg/FRURSGaWBU", NULL, NULL, SW_SHOWNORMAL);
+                    return 0;
+
+                case IDM_HELP_WEBSITE:
+                    ShellExecuteA(hWnd, "open", "http://ultimasixonline.thezogcabal.com/", NULL, NULL, SW_SHOWNORMAL);
+                    return 0;
+
+                case IDM_EXIT:
+                    DestroyWindow(hWnd);
+                    return 0;
+            }
+#endif
+            return DefWindowProc(hWnd, message, wParam, lParam);
 
         case WM_DESTROY:
 #ifdef CLIENT

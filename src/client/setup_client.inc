@@ -568,6 +568,7 @@ statusmessage_viewprev->graphic=statusmessage_arrowup;
 statusmessage_viewprev->offset_x=0;
 statusmessage_viewprev->offset_y=768-32-16;
 statusmessage_viewprev->no_focus=TRUE;
+statusmessage_viewprev->move=TRUE; // draggable (button 2) so its position can be remembered between sessions
 statusmessage_viewprev->graphic_use0pixel=TRUE;
 statusmessage_viewprev->mouse_over_transparent=TRUE;
 if (i2=getsetting("STATUSMESSAGE_VIEWPREVIOUSBOX_TRANSPARENCYLEVEL")) statusmessage_viewprev->mouse_over_transparent=i2-1;
@@ -802,11 +803,20 @@ scrlog("Loading client settings [settings.bin]");
 tfh=open2(".\\dr\\settings.bin",OF_READWRITE|OF_SHARE_COMPAT);
 if (tfh->h!=HFILE_ERROR){
 cltset2_restored=1;
+// Pre-seed fields appended after the original file format with their
+// "no override" sentinel so a shorter settings.bin written by an older
+// build (which lacks these trailing bytes) leaves them at the default
+// instead of reading 0 and snapping the panel to (0,0). statusprev was
+// appended 2026-06-08; without this, upgraders saw the "view previous
+// status message" arrow pinned to the top-left corner.
+cltset2.statusprev_offset_x=32767; cltset2.statusprev_offset_y=32767;
+cltset2.statusprev_logpinned=0; // default: log not pinned (old/short files keep this)
 get(tfh,&cltset2,sizeof(client_settings));
 close(tfh);
 u6ovolume=cltset2.u6ovolume;
 u6omidivolume=cltset2.u6omidivolume;
 u6ovoicevolume=cltset2.u6ovoicevolume;
+statusmessage_logpinned=cltset2.statusprev_logpinned; // restore "keep text log visible" toggle
 memcpy(&spellrecall_partymember,&cltset2.spellrecall_partymember,8);
 memcpy(&spellrecall_i,&cltset2.spellrecall_i,8);
 if (cltset2.musickeyboard_offset_x!=32767){musickeyboard->offset_x=cltset2.musickeyboard_offset_x+kPanelHideDeltaX; musickeyboard->offset_y=cltset2.musickeyboard_offset_y;}
@@ -822,6 +832,11 @@ if (cltset2.qkstf_offset_x!=32767){qkstf->offset_x=cltset2.qkstf_offset_x; qkstf
   u6o::client::g_qkstf_user_x = cltset2.qkstf_offset_x;
   u6o::client::g_qkstf_user_y = cltset2.qkstf_offset_y;
 }
+if (cltset2.statusprev_offset_x!=32767){statusmessage_viewprev->offset_x=cltset2.statusprev_offset_x; statusmessage_viewprev->offset_y=cltset2.statusprev_offset_y;
+  u6o::client::g_statusprev_user_positioned = true;
+  u6o::client::g_statusprev_user_x = cltset2.statusprev_offset_x;
+  u6o::client::g_statusprev_user_y = cltset2.statusprev_offset_y;
+}
 memcpy(&cltset,&cltset2,sizeof(client_settings));
 }else{
 //set default/unknown(32767) values
@@ -836,6 +851,8 @@ cltset.volcontrol_offset_x=32767;
 cltset.qkstf_offset_x=32767;
 cltset.minimap_offset_x=32767;
 cltset.tmap_offset_x=32767;
+cltset.statusprev_offset_x=32767;
+cltset.statusprev_logpinned=0;
 }
 FRAME_mbl[0]=FALSE; FRAME_mbl[1]=FALSE; lpn=NULL; //used by frame.h
 

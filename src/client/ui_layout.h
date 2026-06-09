@@ -141,6 +141,12 @@ namespace u6o {
         // this unconditionally.
         void RepositionAnchoredPanels(int clientW, int clientH);
 
+        // RW-P4.11: emergency UI recovery helper for menu action
+        // (Actions -> Reset UI). Re-snaps anchored panels and then forces the
+        // major floating/anchored panels into the visible back-buffer bounds,
+        // un-hiding any panel parked in hide-sentinel space.
+        void ResetUiPanelsIntoView(int clientW, int clientH);
+
         void ValidateUiMetrics();
 
         extern bool g_volcontrol_visible;
@@ -165,6 +171,15 @@ namespace u6o {
         extern bool g_volcontrol_user_positioned;
         extern int g_volcontrol_user_x;
         extern int g_volcontrol_user_y;
+
+        // StatusViewPrev arrow follows the same user-positioned override
+        // pattern as qkstf: a real drag (or a restored settings.bin value)
+        // flips the flag so RepositionAnchoredPanels stops snapping it back to
+        // the bottom-left anchor and the per-frame mirror persists the chosen
+        // offset to cltset.statusprev_offset_x/y.
+        extern bool g_statusprev_user_positioned;
+        extern int g_statusprev_user_x;
+        extern int g_statusprev_user_y;
     }
 } // namespace u6o::client
 
@@ -172,6 +187,10 @@ namespace u6o {
 // loop_client.cpp can use the name without the `u6o::client::` prefix.
 inline void RepositionAnchoredPanels(int clientW, int clientH) {
     u6o::client::RepositionAnchoredPanels(clientW, clientH);
+}
+
+inline void ResetUiPanelsIntoView(int clientW, int clientH) {
+    u6o::client::ResetUiPanelsIntoView(clientW, clientH);
 }
 
 inline void ValidateUiMetrics() {

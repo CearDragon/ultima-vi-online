@@ -285,6 +285,15 @@ void STATUSMESSadd(const char *t, int skippable);
 
 void STATUSMESSadd(const char *t, int skippable, int num);
 
+// Word-wrap one already-built status line `src` to a pixel width of
+// `maxwidth`, measuring with the fnt1naa font the status log is drawn with.
+// Fills out[0..n-1] in reading order (out must hold at least `maxlines`
+// pre-allocated txt*), hard-breaking any single word wider than maxwidth so
+// progress is always made. Returns the number of physical lines produced
+// (>=1, clamped to maxlines). Used by the draggable "view previous status
+// message" log so text re-wraps to stay on-screen wherever the arrow sits.
+int STATUSMESSwrapline(txt *src, long maxwidth, txt **out, int maxlines);
+
 
 long getsetting(const char *d);
 

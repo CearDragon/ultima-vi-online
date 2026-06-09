@@ -1495,6 +1495,11 @@ NULL
         u6o::client::g_volcontrol_user_x = drg->offset_x;
         u6o::client::g_volcontrol_user_y = drg->offset_y;
       }
+      if (drg == statusmessage_viewprev) {
+        u6o::client::g_statusprev_user_positioned = true;
+        u6o::client::g_statusprev_user_x = drg->offset_x;
+        u6o::client::g_statusprev_user_y = drg->offset_y;
+      }
     }
   }
 }
@@ -10398,30 +10403,35 @@ donesf2:;
     }//i3
 
 
+    lookdisplay=0;
     if (STATUSMESSwait){
       txtset(t,STATUSMESSdisplaying);
 
-      // Check if this is a "look" message and position it at click location
+      // Check if this is a "look" message.
       txtset(t3, "Thou dost see");
       if (txtsearch(t, t3) > 0) {
-        x = lookatx;
-        y = lookaty;
+        // f: defer the floating "look" text to the post-UI pass so it renders
+        // ABOVE the sidebar/panels and is clamped fully on-screen. Capture the
+        // text now; the actual draw happens after the FRAME panels are drawn
+        // (see the `lookdisplay` block).
+        if (!looktext) looktext=txtnew();
+        txtset(looktext,t);
+        lookdisplay=1;
       } else {
         x = 0;
         y = 768-32;
-      }
 
-      txtfnt=fnt1naa;
-      txtcol=rgb(0,0,0);
-      txtout(ps,x,y,t);
-      txtout(ps,x+2,y+2,t);
-      txtout(ps,x+2,y,t);
-      txtout(ps,x,y+2,t);
-      txtout(ps,x+1,y,t);
-      txtout(ps,x+2,y+1,t);
-      txtout(ps,x,y+1,t);
-      txtout(ps,x+1,y+2,t);
-      txtcol=rgb(255,255,255);
+        txtfnt=fnt1naa;
+        txtcol=rgb(0,0,0);
+        txtout(ps,x,y,t);
+        txtout(ps,x+2,y+2,t);
+        txtout(ps,x+2,y,t);
+        txtout(ps,x,y+2,t);
+        txtout(ps,x+1,y,t);
+        txtout(ps,x+2,y+1,t);
+        txtout(ps,x,y+1,t);
+        txtout(ps,x+1,y+2,t);
+        txtcol=rgb(255,255,255);
 
 	  // s333 change color of combat info text
 	  if (combatinfo) {
@@ -10453,8 +10463,9 @@ donesf2:;
 		  txtcol = txtcolprev;
 	  }
 
-      //txtfnt=fnt1;
-      txtout(ps,x+1,y+1,t);
+        //txtfnt=fnt1;
+        txtout(ps,x+1,y+1,t);
+      }
     }
 
 
@@ -12032,7 +12043,7 @@ gotkey: //x2 is value of key
 
 
 
-  for(i=0;i<=22;i++){
+  for(i=0;i<=23;i++){
     if ((i>=0)&&(i<=7)) pmf=party_frame[i];
     if ((i>=8)&&(i<=15)) pmf=party_spellbook_frame[i-8];
     if (i==16) pmf=musickeyboard;
@@ -12042,6 +12053,7 @@ gotkey: //x2 is value of key
     if (i==20) pmf=qkstf;
     if (i==21) pmf=minimap_frame;
     if (i==22) pmf=tmap_frame;
+    if (i==23) pmf=statusmessage_viewprev;
     x=pmf->offset_x; y=pmf->offset_y;
     //get dimentions of frame as x2,y2
     if (pmf->graphic&&(pmf->size_x==0)&&(pmf->size_y==0)){
@@ -12109,6 +12121,18 @@ gotkey: //x2 is value of key
     }
     if (i==21){cltset.minimap_offset_x=pmf->offset_x; cltset.minimap_offset_y=pmf->offset_y;}
     if (i==22){cltset.tmap_offset_x=pmf->offset_x; cltset.tmap_offset_y=pmf->offset_y;}
+    // RW: mirror statusmessage_viewprev from the user-positioned cache (same
+    // rule as qkstf/volcontrol). The live offset is auto-clamped above to the
+    // current back-buffer, so reading the cache preserves a far-right/maximized
+    // position across a smaller-window session. 32767 = "no override".
+    if (i==23){
+      if (u6o::client::g_statusprev_user_positioned){
+        cltset.statusprev_offset_x=u6o::client::g_statusprev_user_x;
+        cltset.statusprev_offset_y=u6o::client::g_statusprev_user_y;
+      } else {
+        cltset.statusprev_offset_x=32767;
+      }
+    }
   }//i (frame)
   clientsettingsvalid=TRUE;
 
@@ -12457,55 +12481,103 @@ endgame_donemessage:
   }//endgame
 
 
-  if (statusmessage_viewprev->mouse_over){
+  // Left-clicking the "view previous status message" arrow toggles whether
+  // the status-message log stays drawn constantly. Hovering still shows it
+  // temporarily; the pin makes it persist until clicked off again. (Button-2
+  // is reserved for dragging the arrow, so only consume button-1 clicks here.)
+  if (statusmessage_viewprev->mouse_click&1){
+    statusmessage_viewprev->mouse_click=NULL;
+    if (drg!=statusmessage_viewprev) statusmessage_logpinned=!statusmessage_logpinned;
+  }
+  if (statusmessage_viewprev->mouse_over||statusmessage_logpinned){
     statusmessage_viewprev->mouse_over=FALSE;
     if (drg!=statusmessage_viewprev){
+      // Scratch buffers for draw-time word wrapping (lazily allocated once).
+      static txt *statuswrap[16]={0};
+      if (!statuswrap[0]){ for (int si=0;si<16;si++) statuswrap[si]=txtnew(); }
       x=statusmessage_viewprev->offset_x;
       y=statusmessage_viewprev->offset_y-24;
+      // Wrap budget: keep text inside the live back buffer with an 8px margin.
+      // The arrow is draggable, so a line that fit at the left edge can run off
+      // the right edge once moved — re-wrap each stored line to fit from x.
+      long statuswrapmax=(long)backbufferW()-x-8;
+      txtfnt=fnt1naa;
       for (i=0;i<=7;i++){
         if (STATUSMESSprev[i]->l){
-          txtset(t,STATUSMESSprev[i]);
-          txtfnt=fnt1naa;
-          txtcol=rgb(0,0,0);
-          txtout(ps,x,y,t);
-          txtout(ps,x+2,y+2,t);
-          txtout(ps,x+2,y,t);
-          txtout(ps,x,y+2,t);
-          txtout(ps,x+1,y,t);
-          txtout(ps,x+2,y+1,t);
-          txtout(ps,x,y+1,t);
-          txtout(ps,x+1,y+2,t);
-          txtcol=rgb(255,255,255);
-
-		  // s333 change color of combat info text
-		  if (combatinfo) {
-			  txtset(t3, "P:");
-			  if ((txtsearch(t, t3) == 1)) {
-				  txtcol = rgb(255, 80, 80); // red
-			  }
-
-			  txtset(t3, "C:");
-			  if ((txtsearch(t, t3) == 1)) {
-				  txtcol = rgb(150, 255, 150); // green
-			  }
-
-			  txtset(t3, "O:");
-			  if ((txtsearch(t, t3) == 1)) {
-				  txtcol = rgb(255, 255, 80); // yellow
-			  }
-
-			  txtset(t3, "I:");
-			  if ((txtsearch(t, t3) == 1)) {
-				  txtcol = rgb(0, 255, 255); // cyan
-			  }
-		  }
-
-          //txtfnt=fnt1;
-          txtout(ps,x+1,y+1,t);
+          // Resolve this message's colour once (combat-info prefixes), then
+          // apply it to every wrapped physical line of the message.
+          DWORD linecol=rgb(255,255,255);
+          if (combatinfo){
+            txtset(t,STATUSMESSprev[i]);
+            txtset(t3,"P:"); if (txtsearch(t,t3)==1) linecol=rgb(255,80,80);   // red
+            txtset(t3,"C:"); if (txtsearch(t,t3)==1) linecol=rgb(150,255,150); // green
+            txtset(t3,"O:"); if (txtsearch(t,t3)==1) linecol=rgb(255,255,80);  // yellow
+            txtset(t3,"I:"); if (txtsearch(t,t3)==1) linecol=rgb(0,255,255);   // cyan
+          }
+          int nseg=STATUSMESSwrapline(STATUSMESSprev[i],statuswrapmax,statuswrap,16);
+          // Draw the message block so its first segment is on top (reads
+          // top-to-bottom) while the whole log still grows upward, newest line
+          // nearest the arrow.
+          long ytop=y-24*(nseg-1);
+          for (int k=0;k<nseg;k++){
+            long yk=ytop+24*k;
+            txtset(t,statuswrap[k]);
+            txtcol=rgb(0,0,0);
+            txtout(ps,x,yk,t);
+            txtout(ps,x+2,yk+2,t);
+            txtout(ps,x+2,yk,t);
+            txtout(ps,x,yk+2,t);
+            txtout(ps,x+1,yk,t);
+            txtout(ps,x+2,yk+1,t);
+            txtout(ps,x,yk+1,t);
+            txtout(ps,x+1,yk+2,t);
+            txtcol=linecol;
+            txtout(ps,x+1,yk+1,t);
+          }
+          y=ytop-24;
+        } else {
+          y-=24;
         }
-        y-=24;
       }//i
     }
+  }
+
+  // f: draw the floating "look" text above the UI and clamped fully on-screen.
+  // It was captured during the world/sfx pass (see the `lookdisplay` capture
+  // above) but is drawn here, after the FRAME panels are composited, so it is
+  // never hidden behind the sidebar/panels and never runs off the game window.
+  if (lookdisplay && looktext){
+    static SIZE looksz;
+    long lookw, lookh, lookbx, lookby, lookmaxx, lookmaxy;
+    ps->s->GetDC(&taghdc);
+    SelectObject(taghdc,fnt1naa);
+    looksz.cx=0; looksz.cy=0;
+    GetTextExtentPoint32(taghdc,looktext->d,looktext->l,&looksz);
+    ps->s->ReleaseDC(taghdc);
+    lookw=looksz.cx;
+    lookh=(looksz.cy>0)?looksz.cy:24;
+    // Clamp so the whole string plus its 2px outline stays inside the live
+    // back buffer (the visible game screen).
+    lookbx=lookatx; lookby=lookaty;
+    lookmaxx=(long)backbufferW()-lookw-2;
+    lookmaxy=(long)backbufferH()-lookh-2;
+    if (lookbx>lookmaxx) lookbx=lookmaxx;
+    if (lookby>lookmaxy) lookby=lookmaxy;
+    if (lookbx<0) lookbx=0;
+    if (lookby<0) lookby=0;
+    txtset(t,looktext);
+    txtfnt=fnt1naa;
+    txtcol=rgb(0,0,0);
+    txtout(ps,lookbx,lookby,t);
+    txtout(ps,lookbx+2,lookby+2,t);
+    txtout(ps,lookbx+2,lookby,t);
+    txtout(ps,lookbx,lookby+2,t);
+    txtout(ps,lookbx+1,lookby,t);
+    txtout(ps,lookbx+2,lookby+1,t);
+    txtout(ps,lookbx,lookby+1,t);
+    txtout(ps,lookbx+1,lookby+2,t);
+    txtcol=rgb(255,255,255);
+    txtout(ps,lookbx+1,lookby+1,t);
   }
 
   // r333 this is where mouse/cursor object is displayed
@@ -12836,10 +12908,16 @@ if
     STATUSMESSwait -= (et * (1.0f + (float) STATUSMESSpending->l * 0.005f));
     if (STATUSMESSwait <= 0.0f) {
         //add to the buffer
-        for (i = 7; i >= 1; i--) {
-            txtset(STATUSMESSprev[i], STATUSMESSprev[i - 1]);
-        } //i
-        txtset(STATUSMESSprev[0], STATUSMESSdisplaying);
+        if (statusmessage_loggedearly) {
+            // f: this "look" message was already pushed to the log when it
+            // first displayed; don't add it again, just clear the flag.
+            statusmessage_loggedearly = 0;
+        } else {
+            for (i = 7; i >= 1; i--) {
+                txtset(STATUSMESSprev[i], STATUSMESSprev[i - 1]);
+            } //i
+            txtset(STATUSMESSprev[0], STATUSMESSdisplaying);
+        }
         STATUSMESSwait = 0.0f;
         txtset(STATUSMESSdisplaying, "");
     } //STATUSMESSwait<=0.0f
@@ -12902,6 +12980,17 @@ l
 			if (txtsearch(STATUSMESSdisplaying, t3) > 0) {
 				STATUSMESSskipok = 1;
 			}
+		}
+
+		// f: push "look" text into the status log the instant it starts
+		// displaying, instead of waiting for the floating text to disappear.
+		// statusmessage_loggedearly suppresses the duplicate add that the
+		// timer-expiry path would otherwise perform for this same message.
+		txtset(t3, "Thou dost see");
+		if (txtsearch(STATUSMESSdisplaying, t3) > 0) {
+			for (i = 7; i >= 1; i--) txtset(STATUSMESSprev[i], STATUSMESSprev[i - 1]);
+			txtset(STATUSMESSprev[0], STATUSMESSdisplaying);
+			statusmessage_loggedearly = 1;
 		}
 	}
   }else{
