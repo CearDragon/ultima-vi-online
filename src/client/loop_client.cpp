@@ -10403,30 +10403,35 @@ donesf2:;
     }//i3
 
 
+    lookdisplay=0;
     if (STATUSMESSwait){
       txtset(t,STATUSMESSdisplaying);
 
-      // Check if this is a "look" message and position it at click location
+      // Check if this is a "look" message.
       txtset(t3, "Thou dost see");
       if (txtsearch(t, t3) > 0) {
-        x = lookatx;
-        y = lookaty;
+        // f: defer the floating "look" text to the post-UI pass so it renders
+        // ABOVE the sidebar/panels and is clamped fully on-screen. Capture the
+        // text now; the actual draw happens after the FRAME panels are drawn
+        // (see the `lookdisplay` block).
+        if (!looktext) looktext=txtnew();
+        txtset(looktext,t);
+        lookdisplay=1;
       } else {
         x = 0;
         y = 768-32;
-      }
 
-      txtfnt=fnt1naa;
-      txtcol=rgb(0,0,0);
-      txtout(ps,x,y,t);
-      txtout(ps,x+2,y+2,t);
-      txtout(ps,x+2,y,t);
-      txtout(ps,x,y+2,t);
-      txtout(ps,x+1,y,t);
-      txtout(ps,x+2,y+1,t);
-      txtout(ps,x,y+1,t);
-      txtout(ps,x+1,y+2,t);
-      txtcol=rgb(255,255,255);
+        txtfnt=fnt1naa;
+        txtcol=rgb(0,0,0);
+        txtout(ps,x,y,t);
+        txtout(ps,x+2,y+2,t);
+        txtout(ps,x+2,y,t);
+        txtout(ps,x,y+2,t);
+        txtout(ps,x+1,y,t);
+        txtout(ps,x+2,y+1,t);
+        txtout(ps,x,y+1,t);
+        txtout(ps,x+1,y+2,t);
+        txtcol=rgb(255,255,255);
 
 	  // s333 change color of combat info text
 	  if (combatinfo) {
@@ -10458,8 +10463,9 @@ donesf2:;
 		  txtcol = txtcolprev;
 	  }
 
-      //txtfnt=fnt1;
-      txtout(ps,x+1,y+1,t);
+        //txtfnt=fnt1;
+        txtout(ps,x+1,y+1,t);
+      }
     }
 
 
@@ -12534,6 +12540,44 @@ endgame_donemessage:
         }
       }//i
     }
+  }
+
+  // f: draw the floating "look" text above the UI and clamped fully on-screen.
+  // It was captured during the world/sfx pass (see the `lookdisplay` capture
+  // above) but is drawn here, after the FRAME panels are composited, so it is
+  // never hidden behind the sidebar/panels and never runs off the game window.
+  if (lookdisplay && looktext){
+    static SIZE looksz;
+    long lookw, lookh, lookbx, lookby, lookmaxx, lookmaxy;
+    ps->s->GetDC(&taghdc);
+    SelectObject(taghdc,fnt1naa);
+    looksz.cx=0; looksz.cy=0;
+    GetTextExtentPoint32(taghdc,looktext->d,looktext->l,&looksz);
+    ps->s->ReleaseDC(taghdc);
+    lookw=looksz.cx;
+    lookh=(looksz.cy>0)?looksz.cy:24;
+    // Clamp so the whole string plus its 2px outline stays inside the live
+    // back buffer (the visible game screen).
+    lookbx=lookatx; lookby=lookaty;
+    lookmaxx=(long)backbufferW()-lookw-2;
+    lookmaxy=(long)backbufferH()-lookh-2;
+    if (lookbx>lookmaxx) lookbx=lookmaxx;
+    if (lookby>lookmaxy) lookby=lookmaxy;
+    if (lookbx<0) lookbx=0;
+    if (lookby<0) lookby=0;
+    txtset(t,looktext);
+    txtfnt=fnt1naa;
+    txtcol=rgb(0,0,0);
+    txtout(ps,lookbx,lookby,t);
+    txtout(ps,lookbx+2,lookby+2,t);
+    txtout(ps,lookbx+2,lookby,t);
+    txtout(ps,lookbx,lookby+2,t);
+    txtout(ps,lookbx+1,lookby,t);
+    txtout(ps,lookbx+2,lookby+1,t);
+    txtout(ps,lookbx,lookby+1,t);
+    txtout(ps,lookbx+1,lookby+2,t);
+    txtcol=rgb(255,255,255);
+    txtout(ps,lookbx+1,lookby+1,t);
   }
 
   // r333 this is where mouse/cursor object is displayed

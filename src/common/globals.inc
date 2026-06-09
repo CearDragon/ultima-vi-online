@@ -902,6 +902,11 @@ int statusmessagechanged = 0;
 // STATUSMESSprev log at the moment it started displaying, so the normal
 // "add to log when the message expires" path skips it (avoids a duplicate).
 int statusmessage_loggedearly = 0;
+// f: deferred render state for the floating "look" text. It is captured while
+// the world/sfx layer renders but drawn after the UI panels are composited, so
+// it appears above the sidebar/panels and is clamped to stay on-screen.
+txt *looktext = NULL;
+int lookdisplay = 0;
 int txtcolprev = 0;
 long lookatx = 0;
 long lookaty = 0;
