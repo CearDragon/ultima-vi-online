@@ -921,39 +921,39 @@ OBJaddnew(1285,332,70+1024*0,0,3);
 // contents never decay when a player logs out and instead persist via
 // guardianobjs.sav (guardianguild_save/load in function_host.cpp).
 OBJaddnew(1281,331,279+1024*1,0,0);
-housestoragex[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchx+1281;
-housestoragey[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchy+331;
-housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]++;
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+1281;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+331;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
 
 OBJaddnew(1281,332,279+1024*1,0,0);
-housestoragex[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchx+1281;
-housestoragey[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchy+332;
-housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]++;
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+1281;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+332;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
 
 OBJaddnew(1284,333,279+1024*5,0,0);
-housestoragex[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchx+1284;
-housestoragey[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchy+333;
-housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]++;
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+1284;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+333;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
 
 OBJaddnew(1281,333,279+1024*9,0,0);
-housestoragex[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchx+1281;
-housestoragey[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchy+333;
-housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]++;
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+1281;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+333;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
 
 OBJaddnew(1281,330,279+1024*12,0,0);
-housestoragex[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchx+1281;
-housestoragey[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchy+330;
-housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]++;
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+1281;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+330;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
 
 OBJaddnew(1282,333,279+1024*4,0,0);
-housestoragex[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchx+1282;
-housestoragey[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchy+333;
-housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]++;
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+1282;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+333;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
 
 OBJaddnew(1283,333,279+1024*4,0,0);
-housestoragex[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchx+1283;
-housestoragey[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET][housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]]=patchy+333;
-housestoragenext[basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET]++;
+housestoragex[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchx+1283;
+housestoragey[GUARDIANGUILD_STORAGE_HOUSE][housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]]=patchy+333;
+housestoragenext[GUARDIANGUILD_STORAGE_HOUSE]++;
 
 OBJaddnew(1288,332,210+1024*0,0,0);
 
@@ -1071,7 +1071,7 @@ OBJaddnew(408,347,301+1024*3,0,256+basehousenumber+0);//doorframe
 // here to the guild building house (basehousenumber+26). That made the shelves
 // owner-tied (the building owner's logout wiped them). The shelves are now
 // registered once, above, to the dedicated non-ownable storage house
-// (basehousenumber+GUARDIANGUILD_STORAGE_HOUSEOFFSET), and persisted to
+// (GUARDIANGUILD_STORAGE_HOUSE), and persisted to
 // guardianobjs.sav, so this duplicate registration has been removed. The guild
 // building itself remains ownable below.
 

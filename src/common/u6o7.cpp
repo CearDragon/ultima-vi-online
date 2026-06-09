@@ -596,6 +596,7 @@ inbritannia_totalplayers
 )
  { /* make sure the games are saved */
       endprogram=TRUE; //useless ?
+      guardianguild_save(); // persist guild shelves at the host's quit decision point
       PostQuitMessage(0);
     }
 #endif

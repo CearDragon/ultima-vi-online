@@ -3919,7 +3919,7 @@ void guardianguild_save() {
     static int gg_iscont;
     static object *root, *o, *cur, *p;
 
-    gh = basehousenumber + GUARDIANGUILD_STORAGE_HOUSEOFFSET;
+    gh = GUARDIANGUILD_STORAGE_HOUSE;
 
     txtset(t, ""); // empty buffer
     txtaddshort(t, (unsigned short) GUARDIANGUILD_SAVE_MAGIC);
@@ -3998,6 +3998,35 @@ void guardianguild_save() {
     tfh = open2(".\\save\\guardianobjs.sav", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
     put(tfh, &t->d2[0], t->l);
     close(tfh);
+
+    // Diagnostic: confirm the save ran, against which house, and how much it wrote.
+    {
+        static txt *gl = txtnew(), *gn = txtnew();
+        static long s, total;
+        static object *r2;
+        total = 0;
+        for (s = 0; s < (long) housestoragenext[gh]; s++) {
+            r2 = (object *) od[housestoragey[gh][s]][housestoragex[gh][s]];
+            if (r2) r2 = (object *) r2->next;
+            while (r2) {
+                total++;
+                r2 = (object *) r2->next;
+            }
+        }
+        txtset(gl, "GUARDIANGUILD: save house=");
+        txtnumint(gn, gh);
+        txtadd(gl, gn);
+        txtadd(gl, " shelfslots=");
+        txtnumint(gn, (long) housestoragenext[gh]);
+        txtadd(gl, gn);
+        txtadd(gl, " top-level-items=");
+        txtnumint(gn, total);
+        txtadd(gl, gn);
+        txtadd(gl, " bytes=");
+        txtnumint(gn, t->l);
+        txtadd(gl, gn);
+        LOGadd(gl);
+    }
 }
 
 void guardianguild_load() {
@@ -4009,7 +4038,22 @@ void guardianguild_load() {
     static unsigned short gg_type, gg_info, gg_magic, gg_version, tx, ty;
     static object *o, *c, *p2;
 
-    gh = basehousenumber + GUARDIANGUILD_STORAGE_HOUSEOFFSET;
+    gh = GUARDIANGUILD_STORAGE_HOUSE;
+
+    // Diagnostic: record which storage house the guild keyed on and how many
+    // shelf slots it found. gh must match the house the patch registered to
+    // (see the basehousenumber notes in define_host.h); a mismatch -> nothing
+    // persists.
+    {
+        static txt *gl = txtnew(), *gn = txtnew();
+        txtset(gl, "GUARDIANGUILD: load house=");
+        txtnumint(gn, gh);
+        txtadd(gl, gn);
+        txtadd(gl, " shelfslots=");
+        txtnumint(gn, (long) housestoragenext[gh]);
+        txtadd(gl, gn);
+        LOGadd(gl);
+    }
 
     tfh = open2(".\\save\\guardianobjs.sav", OF_READWRITE | OF_SHARE_COMPAT);
     if (tfh->h == HFILE_ERROR) {

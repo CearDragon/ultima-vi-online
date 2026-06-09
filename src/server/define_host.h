@@ -29,7 +29,7 @@
 #define HOUSEMAX 256
 #define HOUSESTORAGESLOTMAX 600
 
-// Guardian Guild communal storage (2026-06).
+// Guardian Guild communal storage house (2026-06).
 //
 // The guild's storage shelves used to be registered to the guild *building*
 // house (basehousenumber+26) and to the shared scratch house (basehousenumber+0).
@@ -39,24 +39,31 @@
 // that owner logged back in.
 //
 // For the guild we want owner-INDEPENDENT, persistent storage. We register the
-// shelves to this dedicated house number instead. The number is intentionally
-// NOT player-ownable (no purchase path sets housecost for it), so:
-//   * no player ever has GNPCflags[28] == this house -> the logout
-//     save/remove path never touches the shelves (they "do not decay"); but
-//   * the tiles are still genuine housestorage slots, so the storage-shelf
-//     gameplay rules (stolen-item block, 8-item stack limit, drop handling
-//     that scans i3 = 1..255 in loop_host.cpp) keep working communally.
+// shelves to this dedicated house number instead. It is:
+//   * ABSOLUTE (not basehousenumber + offset). `basehousenumber` is NOT a
+//     constant — map patches reassign it as they load (bryan=48, steel=52,
+//     spiritwood=99, ...). guardianguild.txt runs while it is 20, but by the
+//     time guardianguild_save/load run (after house()) the last patch has left
+//     it at some other value. Deriving the house number from basehousenumber at
+//     save/load time therefore pointed at the WRONG (empty) house and nothing
+//     persisted. A fixed absolute number is immune to that.
+//   * UNIQUE. House 120 (what 20+100 produced) is ALSO used by spiritwood
+//     (99+21), so it is shared — keying on it would sweep spiritwood's storage
+//     into the guild file. 200 is unreachable by any patch's
+//     basehousenumber+offset (max basehousenumber is 99; offsets are small) and
+//     is well clear of every house number currently in use (top ~124).
+//   * NON-OWNABLE. No purchase path sets housecost for it, so no player ever has
+//     GNPCflags[28] == 200 -> the logout save/remove path never touches the
+//     shelves (they "do not decay"); but the tiles are still genuine
+//     housestorage slots, so the storage-shelf gameplay rules (stolen-item
+//     block, 8-item stack limit, drop handling that scans i3 = 1..255) keep
+//     working communally.
 //
 // Cross-restart persistence is handled separately by guardianobjs.sav via
-// guardianguild_save()/guardianguild_load() in function_host.cpp (saved on
-// host shutdown, loaded at host startup).
-//
-// Offset 100 -> house 120 with the default basehousenumber (20). Patch files
-// use the `basehousenumber + offset` convention, so this is an OFFSET, applied
-// as `basehousenumber + GUARDIANGUILD_STORAGE_HOUSEOFFSET` in both the patch
-// (assets/map_patches/guardianguild.txt) and function_host.cpp. Free offsets at
-// time of writing: 27..221, 223..235 (used: 0..26 and 222).
-#define GUARDIANGUILD_STORAGE_HOUSEOFFSET 100
+// guardianguild_save()/guardianguild_load() in function_host.cpp (saved on host
+// shutdown, loaded at host startup). Used identically (as an absolute house id)
+// in both that code and assets/map_patches/guardianguild.txt.
+#define GUARDIANGUILD_STORAGE_HOUSE 200
 #ifdef CLIENT
 #define FIRST_CLIENT 1
 #else
