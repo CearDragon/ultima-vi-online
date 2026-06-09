@@ -7054,6 +7054,31 @@ host_gotmessage:
         You can give another the ability to "give another the ability to give that power to others" eg. /GRANT3 BAN John
         You can revoke this LEVEL 3 PRIVILEGE from others eg. /UNGRANT3 BAN John (with the same privilege level or less)
         */
+                // /WHERE -- report the player's own current tile coordinates back
+                // to themselves as a system message. Handy for locating map tiles
+                // (e.g. which storage shelf you are standing on). Not gated on any
+                // privilege; reading your own position is harmless.
+                {
+                    static txt *wheretxt = txtnew();
+                    static object *whereobj;
+                    txtset(wheretxt, t);
+                    txtright(wheretxt, wheretxt->l - 1); // strip the leading '/'
+                    txtucase(wheretxt);
+                    txtset(t3, "WHERE");
+                    if (txtsearch(wheretxt, t3) == 1) {
+                        whereobj = playerlist[tpl]->party[0];
+                        txtset(t, "?");
+                        t->d2[0] = 8; // system message colour/type
+                        txtadd(t, "Location: x=");
+                        txtnumint(t3, whereobj ? whereobj->x : playerlist[tpl]->px);
+                        txtadd(t, t3);
+                        txtadd(t, " y=");
+                        txtnumint(t3, whereobj ? whereobj->y : playerlist[tpl]->py);
+                        txtadd(t, t3);
+                        NET_send(NETplayer, playerlist[tpl]->net, t);
+                        goto doneclmess;
+                    }
+                }
                 static unsigned char privileges_index;
                 txtset(t2, t);
                 txtright(t2, t2->l - 1);

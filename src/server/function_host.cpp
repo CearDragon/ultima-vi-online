@@ -3880,6 +3880,253 @@ void housesav_update() {
     close(tfh);
 }
 
+// ----------------------------------------------------------------------------
+// Guardian Guild communal storage persistence.
+//
+// The guild storage shelves are registered (in assets/map_patches/guardianguild.txt)
+// to the dedicated, non-ownable house `basehousenumber + GUARDIANGUILD_STORAGE_HOUSEOFFSET`.
+// Because no player owns that house, the per-player logout save/remove path never
+// touches the shelves, so their contents survive everyone logging out ("do not
+// decay"). These two functions add the only other thing needed: persistence
+// across host restarts, via the host-side file .\save\guardianobjs.sav.
+//
+// File format (host-only, little-endian, NOT a wire message -> no U6O_VERSION bump):
+//   u16 magic      = GUARDIANGUILD_SAVE_MAGIC
+//   u16 version    = GUARDIANGUILD_SAVE_VERSION
+//   u32 tilecount  = number of shelf slots that follow (== housestoragenext[gh])
+//   per tile:
+//     u32 nobj                 // flattened object count for this shelf tile
+//     per object (in OBJlist order, parents always precede their children):
+//       u16 type
+//       u16 info
+//       u32 more2              // raw more2 for non-containers (quantity/etc);
+//                              //   0 for containers (their children are stored
+//                              //   separately and re-linked on load)
+//       u32 parent             // 0 = sits directly on the shelf tile;
+//                              //   else 1-based index (within THIS tile's object
+//                              //   list) of the container holding this object
+// ----------------------------------------------------------------------------
+#define GUARDIANGUILD_SAVE_MAGIC   0x6747 /* 'Gg' */
+#define GUARDIANGUILD_SAVE_VERSION 1
+#define GUARDIANGUILD_MAXOBJ       65536  /* upper bound of objects per shelf tile */
+
+void guardianguild_save() {
+    static txt *t = txtnew();
+    static file *tfh;
+    static long gh, slot, k, j, n;
+    static unsigned short gg_type, gg_info, gg_weight;
+    static unsigned long gg_more2, gg_parent;
+    static int gg_iscont;
+    static object *root, *o, *cur, *p;
+
+    gh = GUARDIANGUILD_STORAGE_HOUSE;
+
+    txtset(t, ""); // empty buffer
+    txtaddshort(t, (unsigned short) GUARDIANGUILD_SAVE_MAGIC);
+    txtaddshort(t, (unsigned short) GUARDIANGUILD_SAVE_VERSION);
+    txtaddlong(t, (unsigned long) housestoragenext[gh]);
+
+    for (slot = 0; slot < (long) housestoragenext[gh]; slot++) {
+        // od[ty][tx] is the shelf FURNITURE object that house() placed; the
+        // stacked items start at ->next. Mirror loop_host.cpp's housestorageadd,
+        // which also saves/removes only od[...]->next (never the furniture head),
+        // so we don't duplicate the furniture on reload.
+        root = (object *) od[housestoragey[gh][slot]][housestoragex[gh][slot]];
+        if (root) root = (object *) root->next;
+
+        // flatten the stacked items (each item + its next-siblings + container contents)
+        OBJlist_last = 0;
+        n = 0;
+        if (root) n = OBJlist(root);
+        if (n > GUARDIANGUILD_MAXOBJ) n = GUARDIANGUILD_MAXOBJ;
+
+        txtaddlong(t, (unsigned long) n);
+
+        for (k = 0; k < n; k++) {
+            o = OBJlist_list[k];
+            gg_type = o->type;
+            gg_info = o->info;
+            gg_iscont = (obji[sprlnk[gg_type & 1023]].flags & 1024) ? 1 : 0;
+            gg_weight = obji[sprlnk[gg_type & 1023]].weight;
+
+            // mirror the housestorageadd invalid-item guard: never persist a
+            // weightless "phantom" item, it corrupts on reload.
+            if (gg_weight == 0) {
+                if (gg_iscont) {
+                    gg_type = OBJ_BAG;
+                    gg_info = 112;
+                } else {
+                    gg_type = 169; // rubber ducky
+                    gg_info = 112;
+                }
+            }
+
+            // containers store a pointer in the more/more2 union -> meaningless to
+            // persist; their children are stored separately and re-linked on load.
+            gg_more2 = gg_iscont ? 0 : o->more2;
+
+            // determine the parent container (if any) by walking prev pointers:
+            // a child's prev chain leads back to its container (whose ->more starts
+            // the chain); a top-level shelf item's prev chain ends at NULL.
+            gg_parent = 0;
+            cur = o;
+        gg_findparent:
+            p = (object *) cur->prev;
+            if (p) {
+                if ((obji[sprlnk[p->type & 1023]].flags & 1024) && ((object *) p->more == cur)) {
+                    // p is a container and cur is the first link of its contents
+                    for (j = 0; j < n; j++) {
+                        if (OBJlist_list[j] == p) {
+                            gg_parent = (unsigned long) (j + 1);
+                            break;
+                        }
+                    }
+                } else {
+                    cur = p; // sibling -> keep walking left
+                    goto gg_findparent;
+                }
+            }
+
+            txtaddshort(t, gg_type);
+            txtaddshort(t, gg_info);
+            txtaddlong(t, gg_more2);
+            txtaddlong(t, gg_parent);
+        } // k
+        OBJlist_last = 0;
+    } // slot
+
+    tfh = open2(".\\save\\guardianobjs.sav", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+    put(tfh, &t->d2[0], t->l);
+    close(tfh);
+
+    // Diagnostic: confirm the save ran, against which house, and how much it wrote.
+    {
+        static txt *gl = txtnew(), *gn = txtnew();
+        static long s, total;
+        static object *r2;
+        total = 0;
+        for (s = 0; s < (long) housestoragenext[gh]; s++) {
+            r2 = (object *) od[housestoragey[gh][s]][housestoragex[gh][s]];
+            if (r2) r2 = (object *) r2->next;
+            while (r2) {
+                total++;
+                r2 = (object *) r2->next;
+            }
+        }
+        txtset(gl, "GUARDIANGUILD: save house=");
+        txtnumint(gn, gh);
+        txtadd(gl, gn);
+        txtadd(gl, " shelfslots=");
+        txtnumint(gn, (long) housestoragenext[gh]);
+        txtadd(gl, gn);
+        txtadd(gl, " top-level-items=");
+        txtnumint(gn, total);
+        txtadd(gl, gn);
+        txtadd(gl, " bytes=");
+        txtnumint(gn, t->l);
+        txtadd(gl, gn);
+        LOGadd(gl);
+    }
+}
+
+void guardianguild_load() {
+    static txt *t = txtnew();
+    static file *tfh;
+    static object *gg_idx[GUARDIANGUILD_MAXOBJ];
+    static long gh;
+    static unsigned long pos, tilecount, slot, nobj, k, gg_parent, gg_more2;
+    static unsigned short gg_type, gg_info, gg_magic, gg_version, tx, ty;
+    static object *o, *c, *p2;
+
+    gh = GUARDIANGUILD_STORAGE_HOUSE;
+
+    // Diagnostic: record which storage house the guild keyed on and how many
+    // shelf slots it found. gh must match the house the patch registered to
+    // (see the basehousenumber notes in define_host.h); a mismatch -> nothing
+    // persists.
+    {
+        static txt *gl = txtnew(), *gn = txtnew();
+        txtset(gl, "GUARDIANGUILD: load house=");
+        txtnumint(gn, gh);
+        txtadd(gl, gn);
+        txtadd(gl, " shelfslots=");
+        txtnumint(gn, (long) housestoragenext[gh]);
+        txtadd(gl, gn);
+        LOGadd(gl);
+    }
+
+    tfh = open2(".\\save\\guardianobjs.sav", OF_READWRITE | OF_SHARE_COMPAT);
+    if (tfh->h == HFILE_ERROR) {
+        close(tfh);
+        return; // no save yet (first run) -> nothing to restore
+    }
+    if (lof(tfh) < 8) {
+        close(tfh);
+        return; // too short to contain a valid header
+    }
+    txtNEWLEN(t, -lof(tfh));
+    get(tfh, &t->d2[0], t->l);
+    close(tfh);
+
+    pos = 0;
+    gg_magic = *(unsigned short *) (t->d2 + pos);
+    pos += 2;
+    gg_version = *(unsigned short *) (t->d2 + pos);
+    pos += 2;
+    if (gg_magic != GUARDIANGUILD_SAVE_MAGIC) return; // not our file
+    if (gg_version != GUARDIANGUILD_SAVE_VERSION) return; // unknown layout
+    tilecount = *(unsigned long *) (t->d2 + pos);
+    pos += 4;
+
+    for (slot = 0; slot < tilecount; slot++) {
+        // guard against the shelf layout having shrunk since the save was written
+        if (slot >= housestoragenext[gh]) break;
+        tx = housestoragex[gh][slot];
+        ty = housestoragey[gh][slot];
+
+        nobj = *(unsigned long *) (t->d2 + pos);
+        pos += 4;
+
+        for (k = 0; k < nobj; k++) {
+            gg_type = *(unsigned short *) (t->d2 + pos);
+            pos += 2;
+            gg_info = *(unsigned short *) (t->d2 + pos);
+            pos += 2;
+            gg_more2 = *(unsigned long *) (t->d2 + pos);
+            pos += 4;
+            gg_parent = *(unsigned long *) (t->d2 + pos);
+            pos += 4;
+
+            o = OBJnew();
+            o->type = gg_type;
+            o->info = gg_info;
+            o->more2 = gg_more2;
+            if (k < GUARDIANGUILD_MAXOBJ) gg_idx[k] = o;
+
+            if (gg_parent == 0 || (gg_parent - 1) >= GUARDIANGUILD_MAXOBJ) {
+                // sits directly on the shelf tile
+                OBJadd(tx, ty, o);
+            } else {
+                // append to the end of the parent container's contents so that the
+                // original ordering is preserved
+                c = gg_idx[gg_parent - 1];
+                if (c->more == NULL) {
+                    c->more = o;
+                    o->prev = c;
+                    o->next = NULL;
+                } else {
+                    p2 = (object *) c->more;
+                    while (p2->next) p2 = (object *) p2->next;
+                    p2->next = o;
+                    o->prev = p2;
+                    o->next = NULL;
+                }
+            }
+        } // k
+    } // slot
+}
+
+
 long CON_gv(long v) {
     if (v == (65536 + 0)) return tplayer->NPCflags[CONnpc] & 255; //FLG_JMP
     if (v == (65536 + 1)) return CONerr; //ERROR
