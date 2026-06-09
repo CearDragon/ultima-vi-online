@@ -249,4 +249,9 @@ close(tfh);
 house();
 #include "host_setup.h"
 
+// Guardian Guild communal storage: house() has now registered the shelf slots,
+// so restore any items saved from the previous run onto the shelves. (Saved on
+// host shutdown by guardianguild_save(); see u6o7.cpp.)
+guardianguild_load();
+
 

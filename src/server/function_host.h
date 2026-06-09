@@ -309,6 +309,14 @@ unsigned char houseowner(player *p, long housenumber);
 //save housesav buffer to disk (with current date)
 void housesav_update();
 
+// Guardian Guild communal storage persistence (see GUARDIANGUILD_STORAGE_HOUSEOFFSET
+// in define_host.h). guardianguild_save() writes every object currently sitting
+// on the guild storage shelves to .\save\guardianobjs.sav; guardianguild_load()
+// reads them back and places them onto the same shelves. Save is called on host
+// shutdown, load on host startup (after house() has registered the shelf slots).
+void guardianguild_save();
+void guardianguild_load();
+
 
 long CON_gv(long v);
 

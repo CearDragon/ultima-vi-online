@@ -372,6 +372,9 @@ PM_NOREMOVE
 
 #ifdef HOST
 			if (NEThost) {
+                // Guardian Guild communal storage: persist the shelf contents
+                // before the process exits so they survive a host restart.
+                guardianguild_save();
                 closesocket(u6osocket);
                 for (i = 1; i <= socketclientlast; i++) {
                     if (socketclient[i] != INVALID_SOCKET) {

@@ -28,6 +28,35 @@
 #define MOVER_FOUND 65536
 #define HOUSEMAX 256
 #define HOUSESTORAGESLOTMAX 600
+
+// Guardian Guild communal storage (2026-06).
+//
+// The guild's storage shelves used to be registered to the guild *building*
+// house (basehousenumber+26) and to the shared scratch house (basehousenumber+0).
+// Because those houses can be owned by a player, the per-player logout path
+// (loop_host.cpp `housestorageadd`) saved the shelf contents into that player's
+// .sav and *removed* them from the world ("decay"), restoring them only when
+// that owner logged back in.
+//
+// For the guild we want owner-INDEPENDENT, persistent storage. We register the
+// shelves to this dedicated house number instead. The number is intentionally
+// NOT player-ownable (no purchase path sets housecost for it), so:
+//   * no player ever has GNPCflags[28] == this house -> the logout
+//     save/remove path never touches the shelves (they "do not decay"); but
+//   * the tiles are still genuine housestorage slots, so the storage-shelf
+//     gameplay rules (stolen-item block, 8-item stack limit, drop handling
+//     that scans i3 = 1..255 in loop_host.cpp) keep working communally.
+//
+// Cross-restart persistence is handled separately by guardianobjs.sav via
+// guardianguild_save()/guardianguild_load() in function_host.cpp (saved on
+// host shutdown, loaded at host startup).
+//
+// Offset 100 -> house 120 with the default basehousenumber (20). Patch files
+// use the `basehousenumber + offset` convention, so this is an OFFSET, applied
+// as `basehousenumber + GUARDIANGUILD_STORAGE_HOUSEOFFSET` in both the patch
+// (assets/map_patches/guardianguild.txt) and function_host.cpp. Free offsets at
+// time of writing: 27..221, 223..235 (used: 0..26 and 222).
+#define GUARDIANGUILD_STORAGE_HOUSEOFFSET 100
 #ifdef CLIENT
 #define FIRST_CLIENT 1
 #else
