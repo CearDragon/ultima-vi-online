@@ -113,20 +113,29 @@ symbols to refresh this list before each phase.
   both paths; `get_errors` shows no new diagnostics at the edit site.)_
 - 🟡 LH-P1.3 Map the full Win32-symbol inventory (table above) to shim
   entries; leave call-sites untouched this phase. _(2026-06-10. Sockets,
-  base types/macros, threads, and timing mapped in the new headers. Still to
-  map: file I/O (`HFILE`/`OF_*` — folded into LH-P2), console (`_cprintf`/
-  `SetConsoleTitle`), and the crash/`dbghelp` surface (LH-P5.3).)_
+  base types/macros, threads, and timing mapped in the new headers; file I/O
+  (`HFILE`/`OF_*`) now done in LH-P2 (`myfile.h`). Still to map: console
+  (`_cprintf`/`SetConsoleTitle`), and the crash/`dbghelp` surface
+  (LH-P5.3).)_
 - **Exit:** new headers compile on MSVC with zero diff to host behavior;
   `get_errors` clean on any touched compiled file.
 
 ## P2 — Portable file I/O (`myfile.cpp`)
 
-- ⬜ LH-P2.1 Reimplement `open`/`open2`/`get`/`put`/`seek`/`close`/`lof`/
-  `loadfile`/`waitforfile`/`deletefile` over `<cstdio>` on non-Windows;
-  `HFILE`→portable handle; `OF_*` flags → fopen modes.
-- ⬜ LH-P2.2 Route file-not-found to `LOGadd` instead of `MessageBox`.
+- ✅ LH-P2.1 Reimplement `open`/`open2`/`get`/`put`/`seek`/`close`/`lof`/
+  `loadfile`/`waitforfile`/`deletefile` over `<fcntl.h>`/`<unistd.h>` on
+  non-Windows; `HFILE`→`int` fd; `OF_*` flags → `open(2)` flags. _(2026-06-10.
+  Windows backend gated verbatim under `#ifdef _WIN32`; `OF_CREATE` maps to
+  `O_CREAT|O_TRUNC` to match Win32 truncate-on-create; `loadfile`'s legacy
+  inverted success check preserved intentionally. `struct file::h` kept so all
+  `tfh->h == HFILE_ERROR` call sites compile unchanged.)_
+- ✅ LH-P2.2 Route file-not-found to `LOGadd` instead of `MessageBox`.
+  _(2026-06-10. POSIX `u6o_notfound()` builds the same "File <name> not found"
+  text and calls `LOGadd` (forward-declared to avoid pulling
+  `function_both.h`/`<winsock2.h>`).)_
 - ⬜ LH-P2.3 Verify byte-identical `.sav`/`house.sav`/`guardianobjs.sav`
-  round-trip vs. a Windows-written fixture.
+  round-trip vs. a Windows-written fixture. _(Blocked on first Linux compile,
+  LH-P6.)_
 - **Exit:** host reads/writes the same bytes on both platforms.
 
 ## P3 — Portable sockets
@@ -243,6 +252,20 @@ symbols to refresh this list before each phase.
   **LH-P2** (portable `myfile.cpp`). Note: the POSIX branches of the new
   headers have NOT been compiler-checked yet — first real compile is LH-P6;
   treat them as drafts until then.
+- **2026-06-10 (LH-P2 portable file I/O)** — Rewrote `src/common/myfile.{h,cpp}`
+  as a dual-backend: the legacy Win32 `OpenFile`/`_hread`/`_hwrite`/`_llseek`
+  path is gated **verbatim** under `#ifdef _WIN32`; a POSIX backend
+  (`open`/`read`/`write`/`lseek`/`remove`) lives under `#else`. `struct file`
+  keeps its `h` member; `HFILE`→`int`, `HFILE_ERROR`→`-1`, and the `OF_*`
+  flag subset get exact-value definitions on non-Windows so the ~15 call
+  sites (`tfh->h == HFILE_ERROR`, `open2(..., OF_READWRITE|OF_CREATE)`) in
+  `host.inc`/`loop_host.cpp`/`function_host.cpp` compile unchanged.
+  `OF_CREATE`→`O_CREAT|O_TRUNC` (Win32 truncate-on-create); errors →
+  `LOGadd`. `get_errors` on both files shows only the file's pre-existing
+  clang-tidy style noise in the Windows branch — no errors, MSVC build
+  unaffected. **Resume at LH-P3** (wire socket call sites to
+  `plat_sockets.h`); LH-P2.3 byte-round-trip verification is deferred to the
+  first Linux build in LH-P6.
 
 To pick up cleanly:
 
