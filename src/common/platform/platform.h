@@ -28,6 +28,7 @@
 
 #include "plat_sockets.h" // must come before any <windows.h> on Win32
 #include "plat_types.h"
+#include "plat_win_gui.h"
 #include "plat_threads.h"
 #include "plat_time.h"
 

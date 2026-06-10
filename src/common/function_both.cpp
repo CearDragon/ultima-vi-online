@@ -1,5 +1,7 @@
 #include "function_both.h"
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include <stdio.h>
 #ifdef CONSOLE
 #include <conio.h>

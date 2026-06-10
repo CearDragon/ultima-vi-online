@@ -4,7 +4,11 @@
 * only prototypes and externs go in here, and MAYBE some inline functions 
 * actual global variable definitions should be moved to u6o7.cpp itself. (#include "global_vars.h")
 */
+#ifdef _WIN32
 #include <winsock2.h>
+#else
+#include "platform/platform.h" // LH-P3: BSD sockets + Win32 type/thread/time shims
+#endif
 #include "define_host.h" /* HOUSEMAX etc */
 #include "data_host.h"  /* od[][] etc. */
 #include "data_both.h" /*types*/

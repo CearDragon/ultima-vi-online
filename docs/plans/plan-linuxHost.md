@@ -114,9 +114,10 @@ symbols to refresh this list before each phase.
 - 🟡 LH-P1.3 Map the full Win32-symbol inventory (table above) to shim
   entries; leave call-sites untouched this phase. _(2026-06-10. Sockets,
   base types/macros, threads, and timing mapped in the new headers; file I/O
-  (`HFILE`/`OF_*`) now done in LH-P2 (`myfile.h`). Still to map: console
-  (`_cprintf`/`SetConsoleTitle`), and the crash/`dbghelp` surface
-  (LH-P5.3).)_
+  (`HFILE`/`OF_*`) done in LH-P2 (`myfile.h`); Win32 GUI/handle types +
+  `MessageBox` stubbed in `plat_win_gui.h` (LH-P3). Still to map: console
+  (`_cprintf`/`SetConsoleTitle`/`AllocConsole`) and the crash/`dbghelp`
+  surface — both fold into LH-P5.)_
 - **Exit:** new headers compile on MSVC with zero diff to host behavior;
   `get_errors` clean on any touched compiled file.
 
@@ -140,13 +141,26 @@ symbols to refresh this list before each phase.
 
 ## P3 — Portable sockets
 
-- ⬜ LH-P3.1 Replace Winsock in `function_both.cpp` (`sockets_send`,
+- ✅ LH-P3.1 Replace Winsock in `function_both.cpp` (`sockets_send`,
   `sockets_receive`, `sockets_disconnect`, `NET_send`) via `plat_sockets.h`.
-- ⬜ LH-P3.2 Replace Winsock in `setup_host.inc` (`WSAStartup`/`socket`/
+  _(2026-06-10. Done by routing `function_both.h`'s `#include <winsock2.h>`
+  through `platform/platform.h` on non-Windows and guarding
+  `function_both.cpp`'s `#include <windows.h>`. **No call-site edits needed** —
+  the shim presents `send`/`recv`/`shutdown`/`closesocket`/`SOCKET_ERROR`/
+  `WSAGetLastError`/`WSAEWOULDBLOCK`/`INVALID_SOCKET`/`SD_*` under their
+  existing names. Added `plat_win_gui.h` so the shared `MessageBox`/handle
+  decls parse on the host.)_
+- 🟡 LH-P3.2 Replace Winsock in `setup_host.inc` (`WSAStartup`/`socket`/
   `bind`/`listen`/`setsockopt`) and `function_host.cpp` (`sockets_accept`,
   `ioctlsocket(FIONBIO)`→`fcntl`, `closesocket`, `shutdown`).
-- ⬜ LH-P3.3 `errno`/`EWOULDBLOCK` for `WSAGetLastError`/`WSAEWOULDBLOCK`;
-  `-1` for `INVALID_SOCKET`/`SOCKET_ERROR`.
+  _(2026-06-10. `function_host.cpp` (standalone TU, incl. `sockets_accept`)
+  wired via `function_host.h`'s guarded shim include — call sites unchanged.
+  `setup_host.inc` is `#include`d into `u6o7.cpp`, so its socket symbols are
+  provisioned when `u6o7.cpp`'s top includes are ported in LH-P5; the call
+  sites themselves are already shim-covered (no edits expected).)_
+- ✅ LH-P3.3 `errno`/`EWOULDBLOCK` for `WSAGetLastError`/`WSAEWOULDBLOCK`;
+  `-1` for `INVALID_SOCKET`/`SOCKET_ERROR`. _(2026-06-10. Defined in
+  `plat_sockets.h`; `ioctlsocket(FIONBIO)` maps to `fcntl(O_NONBLOCK)`.)_
 - **Exit:** Linux host accepts a TCP connection and exchanges a signature.
 
 ## P4 — Portable threads & timing
@@ -266,6 +280,25 @@ symbols to refresh this list before each phase.
   unaffected. **Resume at LH-P3** (wire socket call sites to
   `plat_sockets.h`); LH-P2.3 byte-round-trip verification is deferred to the
   first Linux build in LH-P6.
+- **2026-06-10 (LH-P3 portable sockets)** — Routed the host networking TUs
+  through the shim with **zero socket call-site edits** (the thin-shim payoff):
+  guarded `function_both.h` and `function_host.h` `#include <winsock2.h>` to
+  pull `platform/platform.h` on non-Windows, and guarded `function_both.cpp`'s
+  `#include <windows.h>`. `function_both.cpp` (`sockets_send/receive/
+  disconnect`, `NET_send`) and `function_host.cpp` (`sockets_accept`) now see
+  POSIX `send`/`recv`/`shutdown`/`closesocket`/`ioctlsocket`→`fcntl`/
+  `WSAGetLastError`→`errno` under their existing names. Added
+  `src/common/platform/plat_win_gui.h` (opaque `HWND`/`HINSTANCE`/… handles,
+  `WPARAM`/`LPARAM`/`LRESULT`, and a headless `MessageBox`→stderr) so the
+  shared declarations and `function_host.cpp`'s "ERROR CORRECTION" MessageBox
+  calls parse/degrade gracefully; wired into `platform.h`. `get_errors` on the
+  touched compiled TUs shows only pre-existing clang-tidy style noise — MSVC
+  build unaffected. **Open item for LH-P5:** `setup_host.inc`'s socket symbols
+  ride on `u6o7.cpp`'s top-include port, and `function_both.cpp`'s CONSOLE
+  path (`_cprintf`/`<conio.h>`) needs a portable console (Linux CMake will
+  simply not define `CONSOLE`, or P5 adds a `printf` path). **Resume at
+  LH-P4** (threads/timing are already mapped in the headers — verify the
+  thread-proc trampoline + `TerminateThread`→`pthread_cancel` semantics).
 
 To pick up cleanly:
 
