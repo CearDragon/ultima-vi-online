@@ -1,0 +1,43 @@
+# Docker Compose for the headless Linux host (LH-P7).
+#
+# Reproduces the manual `docker run` start config (published port + persistent
+# save volume + auto-restart + graceful shutdown) so you don't have to remember
+# the long command line.
+#
+#   docker compose up -d --build      # build the image and start the host
+#   docker compose logs -f            # follow host logs
+#   docker compose stop               # graceful save-and-exit (SIGTERM)
+#   docker compose down               # stop + remove the container (keeps the volume)
+#
+# The host reads its listen port from dns.txt (baked as "localhost:22"), binds
+# INADDR_ANY, and the client's default dns.txt is "localhost:22" — so the 22:22
+# mapping below means a client on this machine connects with zero config. To
+# avoid a conflict with a local SSH server, change ONLY the left number, e.g.
+# "2222:22", and point the client's dns.txt at <host>:2222.
+
+services:
+  host:
+    build:
+      context: .
+      dockerfile: Dockerfile.linux
+    image: u6o-host:latest
+    container_name: u6o-host
+    # <host port>:<container port>. Container port is fixed at 22 (dns.txt).
+    ports:
+      - "22:22"
+    # Persist the world/player saves across container recreation. The host
+    # writes to ./save relative to its working dir (/u6o-host).
+    volumes:
+      - u6o-save:/u6o-host/save
+    restart: unless-stopped
+    # SIGTERM triggers the graceful save-and-exit path (u6o_posix_term_handler
+    # in u6o7.cpp). Give it time to flush saves before Docker SIGKILLs.
+    stop_signal: SIGTERM
+    stop_grace_period: 60s
+
+volumes:
+  u6o-save:
+    # Use the exact volume name (not the compose-prefixed default) so it lines
+    # up with any volume created by a manual `docker run -v u6o-save:...`.
+    name: u6o-save
+

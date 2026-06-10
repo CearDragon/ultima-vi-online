@@ -63,6 +63,39 @@ inline int MessageBox(HWND /*hWnd*/, const char *text, const char *caption,
     return IDOK;
 }
 
+// Win32 RECT — referenced by shared globals (e.g. desktop_rect). The host
+// never populates it, but the declarations must resolve.
+typedef struct tagRECT {
+    LONG left;
+    LONG top;
+    LONG right;
+    LONG bottom;
+} RECT, *LPRECT;
+
+// Virtual-key codes the shared keyboard-state array (`keyon[]`) is indexed by.
+// Only VK_SPACE is read on the host (debug walk-through), but provide the
+// common set so any shared reference resolves.
+#ifndef VK_RETURN
+#define VK_BACK    0x08
+#define VK_TAB     0x09
+#define VK_RETURN  0x0D
+#define VK_SHIFT   0x10
+#define VK_CONTROL 0x11
+#define VK_MENU    0x12
+#define VK_ESCAPE  0x1B
+#define VK_SPACE   0x20
+#define VK_INSERT  0x2D
+#define VK_DELETE  0x2E
+#endif
+
+// Win32 DeleteFile(A) — delete a file by path. Returns non-zero (TRUE) on
+// success, matching the Win32 contract; the host has its own lowercase
+// deletefile() helper, so this only covers the capitalized call sites.
+inline BOOL DeleteFile(const char *path) { return remove(path) == 0 ? TRUE : FALSE; }
+#ifndef DeleteFileA
+#define DeleteFileA DeleteFile
+#endif
+
 #endif // !_WIN32
 
 #endif // U6O_PLAT_WIN_GUI_H

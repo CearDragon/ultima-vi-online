@@ -7,6 +7,8 @@
 #ifndef _WIN32
 #include <fcntl.h>
 #include <unistd.h>
+#include <dirent.h>
+#include <strings.h>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -181,6 +183,117 @@ static file *u6o_make(HFILE h) {
     return tf;
 }
 
+// The legacy code spells every path Windows-style (".\\save\\house.sav",
+// ".\\ultima6\\chunks", ...). On Linux a backslash is an ordinary filename
+// character, so translate '\' -> '/' before hitting the filesystem. This lets
+// all ~hundreds of call sites keep their original path strings unchanged.
+static const char *u6o_normpath(const char *name, char *buf, size_t bufsz) {
+    size_t i = 0;
+    for (; name[i] && i + 1 < bufsz; i++) buf[i] = (name[i] == '\\') ? '/' : name[i];
+    buf[i] = 0;
+    return buf;
+}
+
+// Case-insensitive directory lookup: find an entry in `dir` whose name equals
+// `want` ignoring case, copying the real on-disk spelling into `found`.
+static bool u6o_ci_lookup(const char *dir, const char *want, char *found, size_t foundsz) {
+    DIR *d = ::opendir(dir[0] ? dir : ".");
+    if (!d) return false;
+    bool ok = false;
+    struct dirent *e;
+    while ((e = ::readdir(d)) != NULL) {
+        if (strcasecmp(e->d_name, want) == 0) {
+            snprintf(found, foundsz, "%s", e->d_name);
+            ok = true;
+            break;
+        }
+    }
+    ::closedir(d);
+    return ok;
+}
+
+// Resolve an already-'/'-normalized path case-insensitively, component by
+// component, against the real filesystem.
+//
+// Why this exists: Windows is case-insensitive, so the host freely mixes the
+// case of paths — hard-coded lowercase strings (".\\host\\crtenum.bin"), the
+// shipped game data in UPPER (CHUNKS, MAP, OBJBLKxx under SAVEGAME), and names
+// it BUILDS at runtime in UPPER (host.inc constructs "objblk" + (x+65)/(y+65)
+// → "objblkEB"). On a case-sensitive Linux filesystem none of these line up,
+// and there is NO single rename rule that fixes it (lowercasing the data
+// breaks the runtime-UPPER "objblkEB" lookups; leaving it breaks the lowercase
+// hard-coded ones). So instead of renaming game files we resolve case here:
+// for each segment we try the exact spelling first, and on a miss scan the
+// parent directory for a case-insensitive match and adopt the real name.
+//
+// If a segment has no match (a save file being created for the first time, or
+// a genuinely missing file) we keep the requested spelling for that segment
+// and append the remainder verbatim — so O_CREAT makes the file under the
+// requested name and a real miss still reports the requested name to the log.
+static const char *u6o_resolve_ci(const char *path, char *out, size_t outsz) {
+    // Fast path: the exact path already exists (common once saves are written
+    // by the host itself, and on a case-preserving/insensitive filesystem).
+    if (::access(path, F_OK) == 0) {
+        snprintf(out, outsz, "%s", path);
+        return out;
+    }
+
+    out[0] = 0;
+    size_t olen = 0;
+    const char *p = path;
+    bool failed = false; // once a segment can't be matched, stop scanning
+
+    if (*p == '/') { out[olen++] = '/'; out[olen] = 0; p++; }
+
+    while (*p) {
+        const char *seg = p;
+        while (*p && *p != '/') p++;
+        size_t seglen = (size_t) (p - seg);
+        if (*p == '/') p++;
+
+        char want[256];
+        if (seglen >= sizeof want) seglen = sizeof want - 1;
+        memcpy(want, seg, seglen);
+        want[seglen] = 0;
+
+        // Directory to scan for this segment = what we've resolved so far.
+        const char *dir = (olen == 0) ? "." : out;
+
+        // Build the exact candidate path for an access() probe.
+        char cand[1024];
+        if (olen == 0) snprintf(cand, sizeof cand, "%s", want);
+        else if (olen == 1 && out[0] == '/') snprintf(cand, sizeof cand, "/%s", want);
+        else snprintf(cand, sizeof cand, "%s/%s", out, want);
+
+        char chosen[256];
+        if (::access(cand, F_OK) == 0) {
+            snprintf(chosen, sizeof chosen, "%s", want);            // exact hit
+        } else if (!failed && u6o_ci_lookup(dir, want, chosen, sizeof chosen)) {
+            // adopted the real on-disk spelling
+        } else {
+            failed = true;
+            snprintf(chosen, sizeof chosen, "%s", want);            // keep requested
+        }
+
+        // Append chosen segment to out.
+        if (olen == 0) olen += snprintf(out, outsz, "%s", chosen);
+        else if (olen == 1 && out[0] == '/') olen += snprintf(out + olen, outsz - olen, "%s", chosen);
+        else olen += snprintf(out + olen, outsz - olen, "/%s", chosen);
+    }
+
+    if (olen == 0) snprintf(out, outsz, "%s", path);
+    return out;
+}
+
+// Normalize '\' -> '/' and resolve case in one step. All open paths go through
+// this so the host's original Windows-style, mixed-case path strings work
+// unchanged on a case-sensitive Linux filesystem.
+static const char *u6o_realpath(const char *name, char *buf, size_t bufsz) {
+    char nb[1024];
+    u6o_normpath(name, nb, sizeof nb);
+    return u6o_resolve_ci(nb, buf, bufsz);
+}
+
 // Mirror the Win32 "File <name> not found" diagnostic, but to the host log.
 static void u6o_notfound(const char *name) {
     file_error_name = txtnew();
@@ -193,13 +306,15 @@ static void u6o_notfound(const char *name) {
 }
 
 file *open(LPCSTR name) {
-    int fd = ::open(name, O_RDWR);
+    char nb[1024];
+    int fd = ::open(u6o_realpath(name, nb, sizeof nb), O_RDWR);
     if (fd < 0) u6o_notfound(name);
     return u6o_make(fd < 0 ? HFILE_ERROR : fd);
 }
 
 file *open2(LPCSTR name, unsigned long flags) {
-    int fd = ::open(name, u6o_oflags(flags), 0666);
+    char nb[1024];
+    int fd = ::open(u6o_realpath(name, nb, sizeof nb), u6o_oflags(flags), 0666);
     return u6o_make(fd < 0 ? HFILE_ERROR : fd);
 }
 
@@ -208,7 +323,8 @@ file *open2(txt *t, unsigned long flags) {
 }
 
 file *open(txt *t) {
-    int fd = ::open(t->d, O_RDWR);
+    char nb[1024];
+    int fd = ::open(u6o_realpath(t->d, nb, sizeof nb), O_RDWR);
     if (fd < 0) u6o_notfound(t->d);
     return u6o_make(fd < 0 ? HFILE_ERROR : fd);
 }
@@ -267,9 +383,11 @@ void *loadfile(LPCSTR name) {
 void waitforfile(LPCSTR name) {
     // Win32 spun on OF_SHARE_EXCLUSIVE | OF_READWRITE until it could open the
     // file. POSIX share semantics differ; the host's intent is "block until
-    // the file is present/openable", so retry an O_RDWR open.
+    // the file is present/openable", so retry an O_RDWR open. Resolve case
+    // each iteration so the file is found once it appears under any case.
     for (;;) {
-        int fd = ::open(name, O_RDWR);
+        char nb[1024];
+        int fd = ::open(u6o_realpath(name, nb, sizeof nb), O_RDWR);
         if (fd >= 0) {
             ::close(fd);
             return;
@@ -278,7 +396,8 @@ void waitforfile(LPCSTR name) {
 }
 
 void deletefile(LPCSTR name) {
-    ::remove(name);
+    char nb[1024];
+    ::remove(u6o_realpath(name, nb, sizeof nb));
 }
 
 #endif // _WIN32

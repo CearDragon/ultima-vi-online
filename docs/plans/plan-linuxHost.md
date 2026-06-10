@@ -134,6 +134,19 @@ symbols to refresh this list before each phase.
   _(2026-06-10. POSIX `u6o_notfound()` builds the same "File <name> not found"
   text and calls `LOGadd` (forward-declared to avoid pulling
   `function_both.h`/`<winsock2.h>`).)_
+- ✅ LH-P2.4 Case-insensitive path resolution (`u6o_resolve_ci`).
+  _(2026-06-10. Windows is case-insensitive so the host freely mixes path
+  case: lowercase hard-coded strings (".\\host\\crtenum.bin"), UPPER shipped
+  data (CHUNKS, MAP, SAVEGAME/OBJBLKxx), and names BUILT in UPPER at runtime
+  (host.inc `objblk`+(x+65) → "objblkEB"). On a case-sensitive Linux FS none
+  line up and there is **no single rename rule** that fixes all three. The
+  POSIX `open`/`open2`/`waitforfile`/`deletefile` now run paths through
+  `u6o_realpath` = `u6o_normpath` (`\`→`/`) + `u6o_resolve_ci`, which walks the
+  path segment-by-segment: exact match first, else an `opendir`/`strcasecmp`
+  scan adopts the real on-disk spelling. A miss keeps the requested spelling so
+  `O_CREAT` still makes new saves under their requested name and genuine misses
+  log correctly. This removed the need for any case-folding of the shipped data
+  in `Dockerfile.linux`.)_
 - ⬜ LH-P2.3 Verify byte-identical `.sav`/`house.sav`/`guardianobjs.sav`
   round-trip vs. a Windows-written fixture. _(Blocked on first Linux compile,
   LH-P6.)_
@@ -219,7 +232,7 @@ symbols to refresh this list before each phase.
 
 ## P6 — Linux toolchain (CMake)
 
-- 🟡 LH-P6.1 Gate every Win32-specific block in `CMakeLists.txt` behind
+- ✅ LH-P6.1 Gate every Win32-specific block in `CMakeLists.txt` behind
   `if(MSVC)`; add a GCC/Clang path building only `host` with `-m32`, no
   `.rc`/MASM, no import libs. _(2026-06-10. Added an `if (NOT WIN32)` branch
   right after `project()` that defines the `host` target (portable source
@@ -229,9 +242,18 @@ symbols to refresh this list before each phase.
   fixed: `stdafx.h` and `data_both.h` `#include <windows.h>` gated. Confirmed
   via grep that `loop_host.cpp`/`host.inc`/`host_setup.h` have **no** unshimmed
   Win32 calls (only `CONSOLE`-gated `_cprintf`/`SetConsoleTitle`, skipped on
-  Linux). **The first real `cmake --build` is still pending a Linux toolchain
-  (not available in this environment); it will surface GCC-strictness fixups
-  on the legacy code — that iteration completes P6.1.**)_
+  Linux). **Green build achieved** — first in WSL Ubuntu (g++ 13, case-
+  insensitive `/mnt/c` mount), then end-to-end inside the container (debian
+  bookworm g++ 12.2, case-sensitive FS). Container compile surfaced one extra
+  fixup the WSL build masked: `u6o7.h`'s `#include "resource.h"` (the file on
+  disk is `Resource.h`) — gated under `#ifdef _WIN32` since the Win32 resource
+  IDs are only used by the `_WIN32`/`CLIENT` windowing layer. WSL iteration
+  fixups: `<sys/ioctl.h>` (FIONBIO), `WSAData` typedef, `TCHAR`/`FillMemory`/
+  `RECT`/`VK_*`/`DeleteFile` shims, `plat_gfx_stubs.h` (surf/FRAME/loadimage),
+  `unsigned long(...)` functional-cast → `(unsigned long)(...)` seds in
+  `loop_host.cpp`/`function_host.cpp`, `txt.cpp` `_asm`/`commdlg.h` gating,
+  `accept_addr.sin_addr.S_un.S_addr`→`.s_addr`. Output: 32-bit ELF
+  `bin/host/linux/u6o-host`.)_
 - ✅ LH-P6.2 Add a `CMakePresets.json` `linux-host` preset; reuse the
   existing Ninja/`compile_commands.json` flow. _(2026-06-10. `linux-host`
   preset (Ninja, `build-linux/`, Release, host-Linux condition).)_
@@ -240,9 +262,20 @@ symbols to refresh this list before each phase.
 
 ## P7 — Container image & Kubernetes
 
-- ⬜ LH-P7.1 Add a Linux multi-stage `Dockerfile.linux` (build → slim
+- ✅ LH-P7.1 Add a Linux multi-stage `Dockerfile.linux` (build → slim
   runtime with 32-bit libs); copy host binary + `assets/` + `ultima6/`
-  map data + `dns.txt`.
+  map data + `dns.txt`. _(2026-06-10. Multi-stage: debian-bookworm build
+  stage (g++-multilib/cmake/ninja) → slim runtime stage (i386 libc/libstdc++/
+  libgcc). The host opens data by paths relative to CWD, so the binary and the
+  game tree both land in `/u6o-host`: `COPY assets/game_files/host/` (ultima6/
+  CHUNKS/MAP/SAVEGAME, host/ NPC+flag data, dr/, save/, *.txt) + map_patches/.
+  **Case handling: do NOT rename the data.** First attempt blanket-lowercased
+  every file; that broke startup because the host builds some filenames in
+  UPPER at runtime (`host.inc`: `objblk`+(x+65)/(y+65) → `objblkEB`), so the
+  lowercased `objblkeb` on the case-sensitive container FS missed → empty
+  world → SIGSEGV in `OBJmove2`/`OBJremove`. Fix moved into the POSIX file
+  shim instead — `u6o_resolve_ci` resolves case per path segment at open()
+  time (see LH-P2 note) — so the Dockerfile ships data verbatim.)_
 - ⬜ LH-P7.2 Update `k8s/deployment.yaml`: drop the Windows `nodeSelector`,
   fix the PVC `mountPath` to the Linux save path, keep the Service/port.
 - **Exit:** `kubectl apply` runs the host pod on a Linux node; client connects.
@@ -373,36 +406,35 @@ symbols to refresh this list before each phase.
   `#ifdef _WIN32`; a headless `#else` shutdown branch runs the WM_QUIT host
   cleanup on `endprogram`. `setup_host.inc`: `setupddraw()` gated. New
   `src/common/platform/plat_stubs.{h,cpp}`: no-op `frame_init`/`setupddraw`
-  for the reduced Linux source set. `get_errors` on `u6o7.cpp` shows only
-  pre-existing clang-tidy/MSVC-deprecation noise in the Windows paths — no
-  errors, MSVC build byte-identical. This unblocked LH-P3.2 (✅) since
-  `setup_host.inc` now sees the shim via `u6o7.cpp`. **Open follow-ups for
-  LH-P6/P7:** (1) the host's `CONSOLE` stdout path (`_cprintf`/`AllocConsole`)
-  is Win32-only and won't be defined on Linux, so add a `printf` logging path
-  for k8s observability (currently only `log.txt` is written); (2) `data_host.h`/
-  `data_both.h` may have stray direct Win32 includes that surface at first
-  Linux compile; (3) any stray graphics calls in `host.inc`/`host_setup.h`
-  surface at link → stub them. **Resume at LH-P6** (Linux CMake: GCC/Clang
-  `-m32`, `-rdynamic`, `-lpthread`, reduced source list incl. `plat_stubs.cpp`,
-  exclude DX `.cpp` + `.asm` + `.rc`) for the first real compile.
-- **2026-06-10 (LH-P6 Linux toolchain authored)** — Added the `if (NOT WIN32)`
-  branch to `CMakeLists.txt` (host-only target, `-m32`, forced
-  `-include platform.h`, `pthread`/`m`, `-rdynamic`, `return()` before all
-  Win32 logic) and `CMakePresets.json` (`linux-host`). Made `stdafx.h` and
-  `data_both.h` (`#include <windows.h>`) portable — these were the last core
-  shared headers pulling Win32 unconditionally. Grep-confirmed
-  `loop_host.cpp`/`host.inc`/`host_setup.h` carry **no** unshimmed Win32 API
-  (only `CONSOLE`-gated console I/O, which Linux doesn't define). MSVC build
-  re-validated clean (`data_both.cpp` → no errors). **What remains for P6.1:**
-  a real `cmake --preset linux-host && cmake --build build-linux` on a Linux
-  box with `g++-multilib`. I cannot run that here, so the legacy
-  GCC-strictness errors (implicit conversions, `goto`-into-scope, `register`,
-  default-int, `(unsigned long)` pointer casts, etc.) still need an
-  iterate-on-output pass. Expected hotspots: `loop_host.cpp` (size),
-  `function_host.cpp`, the `secret_*.inc`. **Resume:** run the build, paste
-  errors, fix in batches; then LH-P7 (Dockerfile.linux + k8s) and LH-P8
-  (cross-play validation). Also still open: a stdout logging path so k8s
-  captures host activity (currently only `log.txt`).
+  for the reduced Linux source set. MSVC build byte-identical. **Resume at
+  LH-P6.**
+- **2026-06-10 (LH-P6 green build — WSL then container)** — Drove the first
+  real compiles to green. WSL Ubuntu (g++ 13, case-insensitive `/mnt/c`)
+  surfaced and fixed: `<sys/ioctl.h>` for FIONBIO; `WSAData` typedef; `TCHAR`/
+  `FillMemory`/`RECT`/`VK_*`/`DeleteFile` shims; new `plat_gfx_stubs.h`
+  (`surf`/FRAME/`loadimage`); `unsigned long(...)` functional-cast →
+  `(unsigned long)(...)` (sed in `loop_host.cpp`/`function_host.cpp`, too large
+  for edit tools); `txt.cpp` `_asm`/`commdlg.h` gating; `S_un.S_addr`→`s_addr`.
+  Then the **container** build (debian bookworm g++ 12.2, case-SENSITIVE FS)
+  surfaced one more the WSL mount had masked: `u6o7.h` `#include "resource.h"`
+  vs the on-disk `Resource.h` — gated under `#ifdef _WIN32` (the resource IDs
+  are only referenced by `_WIN32`/`CLIENT` windowing code). Output: 32-bit ELF.
+- **2026-06-10 (LH-P7 container + case-insensitive file shim)** — `docker build
+  -f Dockerfile.linux` builds and runs, but the host SIGSEGV'd at startup
+  (exit 139) after a flood of `File .\ultima6\savegame\objblkEB not found`. Root
+  cause: the Dockerfile's blanket lowercase case-fold of the game data. The
+  host builds objblk filenames in **UPPER** at runtime (`host.inc`:
+  `objblk`+(x+65)/(y+65) → `objblkEB`), so the lowercased `objblkeb` missed on
+  the case-sensitive FS → 0 world objects → null deref in `OBJmove2`/
+  `OBJremove`. Because the host mixes lowercase hard-coded paths with
+  runtime-UPPER names, **no rename rule works**. Fixed properly in the POSIX
+  file shim: `myfile.cpp` now resolves case per path segment at open()
+  (`u6o_resolve_ci`: exact match first, else `opendir`/`strcasecmp` adopts the
+  real spelling; misses keep the requested name so `O_CREAT` saves + miss-logs
+  still work). Removed the case-fold `RUN` from `Dockerfile.linux` — data ships
+  verbatim. **Resume at LH-P8** (cross-play + `.sav` interop + CI). Still open:
+  a stdout logging path so k8s captures host activity (currently `log.txt`
+  only; `LOGadd` already echoes to stdout on non-Windows — verify it's enough).
 
 To pick up cleanly:
 

@@ -49,6 +49,10 @@ typedef char *        LPSTR;
 typedef void *        HANDLE;
 typedef DWORD *       LPDWORD;
 
+// The host is built ANSI (not UNICODE), so the "generic text" char is plain
+// char. szWindowClass/window_name/szTitle etc. are declared with it.
+typedef char          TCHAR;
+
 // Calling-convention / entry-point annotations are meaningless on POSIX.
 #ifndef WINAPI
 #define WINAPI
@@ -71,6 +75,10 @@ typedef DWORD *       LPDWORD;
 // Small helper macros used throughout the host sources.
 #ifndef ZeroMemory
 #define ZeroMemory(dest, len) memset((dest), 0, (len))
+#endif
+// Win32 FillMemory(Destination, Length, Fill) -> memset(dest, fill, length).
+#ifndef FillMemory
+#define FillMemory(dest, len, fill) memset((dest), (fill), (len))
 #endif
 #ifndef MAKEWORD
 #define MAKEWORD(a, b) \

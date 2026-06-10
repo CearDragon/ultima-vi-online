@@ -32,6 +32,7 @@
 // --- POSIX: BSD-socket equivalents of the Winsock names the host uses ------
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h> // FIONBIO
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
@@ -67,6 +68,7 @@ inline int WSAGetLastError(void) { return errno; }
 // Winsock startup/teardown have no POSIX analogue — make them no-ops so the
 // setup_host.inc / shutdown call sites compile unchanged.
 typedef struct { int unused; } WSADATA;
+typedef WSADATA WSAData; // the host spells the struct both ways
 inline int  WSAStartup(unsigned short /*version*/, WSADATA * /*data*/) { return 0; }
 inline int  WSACleanup(void) { return 0; }
 
