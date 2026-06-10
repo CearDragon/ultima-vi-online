@@ -1,9 +1,10 @@
-// stdafx.h : include file for standard system include files,
-// or project specific include files that are used frequently, but
-// are changed infrequently
-//
-
 #pragma once
+
+// LH-P6: stdafx.h is included by many host translation units. On Windows it
+// pulls the full Win32 runtime (unchanged below). On the headless Linux host
+// it pulls the platform shim + portable C-runtime headers instead, so those
+// same TUs compile without <windows.h>.
+#ifdef _WIN32
 
 // Modify the following defines if you have to target a platform prior to the ones specified below.
 // Refer to MSDN for the latest info on corresponding values for different platforms.
@@ -33,5 +34,13 @@
 #include <memory.h>
 #include <tchar.h>
 
+#else // ---------------------------------------------------------------------
+
+// Headless Linux host: Win32 type/socket/thread/time/gui shims + portable CRT.
+#include "platform/platform.h"
+#include <cstdlib>
+#include <cstring>
+
+#endif // _WIN32
 
 // TODO: reference additional headers your program requires here

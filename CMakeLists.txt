@@ -1,8 +1,91 @@
 cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
 
-set(CMAKE_SYSTEM_VERSION 10.0 CACHE STRING "" FORCE)
+# Win32 resource targeting only makes sense for the MSVC/Windows build.
+if (CMAKE_HOST_WIN32)
+    set(CMAKE_SYSTEM_VERSION 10.0 CACHE STRING "" FORCE)
+endif ()
 
 project(u6o7 CXX)
+
+# ============================================================================
+# LH-P6: Headless Linux host build (GCC/Clang, i386).
+#
+# When configured with a non-Windows toolchain, build ONLY the `host` binary,
+# OS-independent, for running in a Linux container. The entire Windows/MSVC
+# path below (icon pipeline, RC compiler, the `both`/`client`/`host` Win32
+# targets, DirectX link libs) is skipped via the early return().
+#
+# Key choices (see docs/plans/plan-linuxHost.md):
+#   * -m32 : preserve the 32-bit data model so .sav/wire layout and the
+#            `txt`/struct sizes match the Windows client byte-for-byte.
+#   * -include platform.h : force the platform shim into every TU so the Win32
+#            type/socket/thread/time/gui aliases are always defined, regardless
+#            of per-header include order.
+#   * DirectX/UI TUs (myddraw/frame/dmusic/sound) and stdafx.cpp are NOT
+#            compiled; platform/plat_stubs.cpp supplies the no-op entry points.
+#   * -rdynamic : symbol names for the POSIX crash backtrace().
+#
+# Prerequisites on the build host (Debian/Ubuntu):
+#   sudo apt-get install g++-multilib   # 32-bit libstdc++/libc + libpthread
+#
+# Build:
+#   cmake --preset linux-host           # or: cmake -S . -B build-linux -G Ninja
+#   cmake --build build-linux           #     -DCMAKE_CXX_FLAGS=-m32 ...
+# ============================================================================
+if (NOT WIN32)
+    message(STATUS "u6o7: configuring headless Linux host (i386)")
+
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+    add_executable(host
+            src/common/u6o7.cpp                 # #includes loop_host.cpp, setup_host.inc, host.inc, ...
+            src/common/data_both.cpp
+            src/server/data_host.cpp
+            src/common/function_both.cpp
+            src/server/function_host.cpp
+            src/common/house.cpp
+            src/common/myfile.cpp
+            src/common/random/randi.cpp
+            src/common/random/random.cpp
+            src/common/spell_code/spell_code.cpp
+            src/common/txt.cpp
+            src/common/use_code/use_code.cpp
+            src/common/Xenkan.cpp
+            src/common/platform/plat_stubs.cpp  # no-op frame_init()/setupddraw()
+    )
+
+    target_include_directories(host PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/common
+            ${CMAKE_SOURCE_DIR}/src/common/include
+            ${CMAKE_SOURCE_DIR}/src/client
+            ${CMAKE_SOURCE_DIR}/src/server
+    )
+
+    # HOST selects the server build variant. CONSOLE is intentionally NOT
+    # defined (it pulls Win32 _cprintf/<conio.h>); see the stdout-logging
+    # follow-up in the plan. _WIN32 is naturally absent on this toolchain.
+    target_compile_definitions(host PRIVATE HOST)
+
+    target_compile_options(host PRIVATE
+            -m32
+            # Keep "-include <path>" as a single shell token so CMake never
+            # splits/reorders the flag away from its argument.
+            "SHELL:-include ${CMAKE_SOURCE_DIR}/src/common/platform/platform.h"
+            -fpermissive   # legacy C-with-extensions leans on lax conversions
+            -w             # silence the legacy warning flood (matches /W1 intent) for now
+    )
+
+    target_link_options(host PRIVATE -m32 -rdynamic)
+    target_link_libraries(host PRIVATE pthread m)
+
+    set_target_properties(host PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/host/linux
+            OUTPUT_NAME u6o-host
+    )
+
+    return()
+endif ()
 
 # Enable the Win32 resource compiler so target-attached .rc files are
 # built and linked into the EXE (icons, version info, dialogs, etc.).

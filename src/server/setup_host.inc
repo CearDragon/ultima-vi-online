@@ -28,7 +28,9 @@ txtset(t2,"u6o Host, ");
 txtadd(t2,t);
 SetConsoleTitle(t2->d);
 #endif
+#ifdef _WIN32
 setupddraw();
+#endif
 
 inbritannia=txtnew();
 

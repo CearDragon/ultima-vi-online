@@ -1,9 +1,14 @@
 //ws2_32.lib winmm.lib
+#ifdef _WIN32
 #include "stdafx.h"
+#endif
 #include "u6o7.h"
 #include <stdio.h>
+#ifdef _WIN32
 #include <winsock2.h>
+#endif
 #include <math.h>
+#ifdef _WIN32
 #include <direct.h>
 #include <wininet.h>
 #include <shellapi.h>
@@ -11,13 +16,25 @@
 #include <dbghelp.h>
 #pragma comment(lib, "dbghelp.lib")
 #include "dmusic.h"
+#endif
 #include "myfile.h"
+#ifdef _WIN32
 #include "myddraw.h"
+#endif
 #include "mytxt.h"
+#ifdef _WIN32
 #include "sound.h"
 #include "myddraw.h"
 #include "frame.h"
 #include "windows.h"
+#else
+// LH-P5.1: headless host — pull the platform shim (BSD sockets, Win32 type/
+// thread/time/gui stubs) instead of the Win32 + DirectX stack, and the
+// no-op declarations for the severed graphics/audio entry points.
+#include "platform/platform.h"
+#include "platform/plat_stubs.h"
+#include <cstring> // strncat/strlen for the argv->command-line synthesis
+#endif
 
 #ifdef CLIENT
 // Pre-game splash screen helper (CLIENT only). See splash.h / splash.cpp.
@@ -113,6 +130,7 @@ void KeyEventProc(KEY_EVENT_RECORD ker) {
 }
 #endif
 
+#ifdef _WIN32
 extern "C" WORD __stdcall RtlCaptureStackBackTrace(DWORD, DWORD, PVOID *, PDWORD);
 
 LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo) {
@@ -171,11 +189,77 @@ LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo
     return EXCEPTION_EXECUTE_HANDLER;
 }
 
+#else // ===== POSIX crash + shutdown signal handling (LH-P5.3) ==============
+
+#include <csignal>
+#include <execinfo.h> // backtrace (glibc); link with -rdynamic for symbol names
+#include <ctime>
+
+// Best-effort crash dump to a timestamped file + stderr, then re-raise the
+// default handler. Not strictly async-signal-safe, but mirrors the Win32
+// minidump filter's best-effort intent — the process is already dying.
+static void u6o_posix_crash_handler(int sig) {
+    time_t tt = time(NULL);
+    struct tm tmv;
+    localtime_r(&tt, &tmv);
+    char stamp[32];
+    strftime(stamp, sizeof(stamp), "%Y%m%d_%H%M%S", &tmv);
+    char fname[64];
+    snprintf(fname, sizeof(fname), "crash_%s.txt", stamp);
+    void *bt[100];
+    int n = backtrace(bt, 100);
+    FILE *f = fopen(fname, "w");
+    if (f) {
+        fprintf(f, "Fatal signal %d\n", sig);
+        backtrace_symbols_fd(bt, n, fileno(f));
+        fclose(f);
+    }
+    fprintf(stderr, "u6o host: fatal signal %d (backtrace in %s)\n", sig, fname);
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+
+// Graceful shutdown on container stop: k8s sends SIGTERM, Ctrl-C sends SIGINT.
+// Request the host's normal save-and-exit path; the main loop's host
+// quit-decision observes `exitrequest` and unwinds cleanly (saving players).
+static void u6o_posix_term_handler(int /*sig*/) {
+    exitrequest = TRUE;
+    exitrequest_noconfirm = TRUE;
+}
+
+static void u6o_install_crash_handlers(void) {
+    signal(SIGSEGV, u6o_posix_crash_handler);
+    signal(SIGABRT, u6o_posix_crash_handler);
+    signal(SIGFPE, u6o_posix_crash_handler);
+    signal(SIGILL, u6o_posix_crash_handler);
+    signal(SIGBUS, u6o_posix_crash_handler);
+    signal(SIGTERM, u6o_posix_term_handler);
+    signal(SIGINT, u6o_posix_term_handler);
+}
+
+#endif // _WIN32
+
+#ifdef _WIN32
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                        HINSTANCE hPrevInstance,
                        LPTSTR lpCmdLine,
                        int nCmdShow) {
     SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
+#else
+int main(int argc, char **argv) {
+    // LH-P5.1: synthesize a Win32-style command-line string from argv so the
+    // shared "host"/flag parsing below is unchanged. The dedicated host build
+    // also force-sets NEThost (see the `#ifndef CLIENT` block).
+    static char _u6o_cmdline[1024];
+    _u6o_cmdline[0] = 0;
+    for (int _ai = 1; _ai < argc; _ai++) {
+        if (_u6o_cmdline[0])
+            strncat(_u6o_cmdline, " ", sizeof(_u6o_cmdline) - strlen(_u6o_cmdline) - 1);
+        strncat(_u6o_cmdline, argv[_ai], sizeof(_u6o_cmdline) - strlen(_u6o_cmdline) - 1);
+    }
+    char *lpCmdLine = _u6o_cmdline;
+    u6o_install_crash_handlers();
+#endif
 
 #ifdef CLIENT
     // Pre-game splash screen (CLIENT only — the dedicated host runs without
@@ -280,12 +364,14 @@ cmdline_length:
 #endif
 
     //SHARED SETUP
+#ifdef _WIN32
     MSG msg;
     HACCEL hAccelTable;
     MyRegisterClass(hInstance);
 
     //2007fix hAccelTable=LoadAccelerators(hInstance,(LPCTSTR)IDC_ULTIMATE);
     hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_U6O7));
+#endif
 
 
 //basic setup ONLY initializes static arrays or loads info from files
@@ -305,12 +391,18 @@ if (NEThost){
 _cprintf (
 "This is a dedicated u6o host running on port %d.\nTo quit type q or ctrl-c to force quit.\n", global_TCP_listen_port);
 #endif
+#if !defined(_WIN32)
+// LH-P6: headless host startup banner on stdout (no Win32 console).
+printf("This is a dedicated u6o host running on port %d.\n(send SIGTERM/SIGINT to shut down)\n", global_TCP_listen_port);
+fflush(stdout);
+#endif
 SCRLOG_FILEONLY=TRUE;
 //begin main loop _________________________________________________________________
 oldtime=timeGetTime
 ();
 mainloop : delay_overprocess
 : //check for messages again
+#ifdef _WIN32
 if
 (PeekMessage
 (&msg
@@ -438,6 +530,28 @@ TRUE
 )
 goto
 mainloop;
+#else
+// LH-P5.1: headless host has no Win32 message pump. Shutdown is driven by
+// `exitrequest` (set by the SIGTERM/SIGINT handler) flowing into the host
+// quit-decision below, which sets `endprogram`. When that happens, run the
+// same host cleanup the WM_QUIT path performs and return from main().
+if (endprogram == TRUE) {
+#ifdef HOST
+    if (NEThost) {
+        guardianguild_save();
+        closesocket(u6osocket);
+        for (i = 1; i <= socketclientlast; i++) {
+            if (socketclient[i] != INVALID_SOCKET) {
+                shutdown(socketclient[i], SD_RECEIVE | SD_SEND);
+                SleepEx(2048, NULL);
+                closesocket(socketclient[i]);
+            }
+        }
+    }
+#endif
+    return 0;
+}
+#endif
 
 #ifdef CLIENT
 if (U6O_DISABLEJOYSTICK==FALSE &&!JDISABLED){ //should do only once? and after that skip this
@@ -597,7 +711,9 @@ inbritannia_totalplayers
  { /* make sure the games are saved */
       endprogram=TRUE; //useless ?
       guardianguild_save(); // persist guild shelves at the host's quit decision point
+#ifdef _WIN32
       PostQuitMessage(0);
+#endif
     }
 #endif
 #ifdef CONSOLE /* check if the user is requesting quit */
@@ -618,6 +734,7 @@ return
 0; //This line exists purely to keep the compiler happy!
 }
 
+#ifdef _WIN32
 WNDCLASSEX wcex;
 
 ATOM MyRegisterClass(HINSTANCE hInstance) {
@@ -1161,3 +1278,4 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
     }
     return 0;
 }
+#endif // _WIN32 (windowing layer: MyRegisterClass / InitInstance / WndProc)

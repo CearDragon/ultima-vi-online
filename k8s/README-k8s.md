@@ -9,7 +9,10 @@ This directory contains the necessary files to run the Ultima VI Online Host in 
 2.  **Kubernetes** enabled in Docker Desktop settings.
 3.  **Build the Host**: The Dockerfile expects the host to be built in Release mode.
     - Ensure `bin\host\release\Ultima VI Online Host.exe` exists.
-4.  **Map Data**: The `ultima6` folder must exist at the project root and contain the original Ultima 6 map files (`chunks`, `map`, etc.).
+4.  **Map Data**: The host game data (including the original Ultima 6 map
+    files such as `chunks`, `map`, etc.) is bundled in the repo under
+    `assets/game_files/host/` and is copied next to the executable by the
+    Dockerfile. No separate `ultima6` folder at the project root is required.
 
 ## Deployment Steps
 
@@ -64,4 +67,6 @@ This error occurs when Docker Desktop is set to **Linux Containers** mode but yo
 
 ### Pod stays in "Pending"
 - Ensure you have Windows nodes available. In Docker Desktop, the single node should support both Linux and Windows containers if configured correctly, but Windows containers require "Switch to Windows containers" to be active.
--   If map data is missing, the host will fail to start. Ensure the `ultima6` folder is populated before building the image.
+-   If map data is missing, the host will fail to start. The data is bundled
+    under `assets/game_files/host/` and copied into the image at build time, so
+    a clean checkout already contains it.

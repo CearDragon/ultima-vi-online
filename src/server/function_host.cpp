@@ -120,7 +120,7 @@ sockets_accept_next:
     tnewsocket = accept(u6osocket, (sockaddr *) &accept_addr, (int *) &x);
     tnewsocket_ip = NULL;
     if (accept_addr.sin_family == AF_INET) {
-        tnewsocket_ip = accept_addr.sin_addr.S_un.S_addr;
+        tnewsocket_ip = accept_addr.sin_addr.s_addr;
     }
 
     //ban by IP?
@@ -945,16 +945,16 @@ void addu6monsterdropitems(object *crtobj) {
                     //1/3 times it's in the top half of the range
                     chanceresult = rnd * 3;
                     //gold(quantity 10-60)
-                    invobj->more2 = unsigned long(rnd * 26) + 10;
-                    if (chanceresult == 2) invobj->more2 = unsigned long(rnd * 26) + 35;
+                    invobj->more2 = (unsigned long)(rnd * 26) + 10;
+                    if (chanceresult == 2) invobj->more2 = (unsigned long)(rnd * 26) + 35;
                     //CHEST ITEM: gold (quantity 10-100)
                     if (i == 3) {
-                        invobj->more2 = unsigned long(rnd * 46) + 10;
-                        if (chanceresult == 2) invobj->more2 = unsigned long(rnd * 46) + 55;
+                        invobj->more2 = (unsigned long)(rnd * 46) + 10;
+                        if (chanceresult == 2) invobj->more2 = (unsigned long)(rnd * 46) + 55;
                     }
                     //old code
-                    //invobj->more2=unsigned long(rnd*51)+10;//gold (quantity 10-60)
-                    //if (i==3) invobj->more2=unsigned long(rnd*91)+10;//CHEST ITEM: gold (quantity 10-100)
+                    //invobj->more2=(unsigned long)(rnd*51)+10;//gold (quantity 10-60)
+                    //if (i==3) invobj->more2=(unsigned long)(rnd*91)+10;//CHEST ITEM: gold (quantity 10-100)
                 } //item==88
 
 
@@ -967,7 +967,7 @@ void addu6monsterdropitems(object *crtobj) {
                 if (item == 90) {
                     //torch(es)
                     //CHEST ITEM
-                    invobj->more2 = unsigned long(rnd * 3) + 1;
+                    invobj->more2 = (unsigned long)(rnd * 3) + 1;
                 }
 
                 if (item == 77) {
@@ -1000,13 +1000,13 @@ void addu6monsterdropitems(object *crtobj) {
                         chanceresult = rnd * 3;
                         if (chanceresult != 2) {
                             if (chanceresult == 1) invobj->type = 128; //bread
-                            invobj->more2 = unsigned long(rnd * 5) + 1;
+                            invobj->more2 = (unsigned long)(rnd * 5) + 1;
                         } else {
                             invobj->type = 133; //ham
                             invobj->more2 = 0;
                         }
                     } else {
-                        invobj->more2 = unsigned long(rnd * 3) + 1;
+                        invobj->more2 = (unsigned long)(rnd * 3) + 1;
                     }
                 }
 
@@ -4761,10 +4761,18 @@ unsigned char objvisible(player *p, object *myobj) {
 } //objvisible
 
 long roundfloat(float f) {
+    // LH-P1.2: portability seam. The x86 `fld/fistp` converts using the
+    // current FPU rounding mode (round-to-nearest-even by default). lrintf
+    // honors the same mode, so the result is identical on the i386 Linux
+    // host. roundfloat_l is preserved as the staging global on both paths.
+#ifdef _WIN32
     __asm {
             fld f
             fistp roundfloat_l
             }
+#else
+    roundfloat_l = __builtin_lrintf(f);
+#endif
     return roundfloat_l;
 }
 

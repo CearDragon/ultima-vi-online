@@ -25,22 +25,25 @@ spec:
       labels:
         app: u6o7-host
     spec:
+      # LH-P7: graceful shutdown. SIGTERM (sent on pod delete) triggers the
+      # host's save-and-exit path; give it time to flush before SIGKILL.
+      terminationGracePeriodSeconds: 60
       containers:
       - name: host
-        image: u6o7-host:latest
+        image: u6o-host:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 22
           protocol: TCP
         volumeMounts:
         - name: save-data
-          mountPath: C:\u6o7-host\save
+          mountPath: /u6o-host/save
       volumes:
       - name: save-data
         persistentVolumeClaim:
           claimName: u6o7-host-save-pvc
       nodeSelector:
-        kubernetes.io/os: windows
+        kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service

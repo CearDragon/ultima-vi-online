@@ -1,6 +1,8 @@
 #include "stdafx.h"
+#ifdef _WIN32
 #include "resource.h"
 #include "commdlg.h"
+#endif
 #include <stdio.h>
 
 extern HWND hWnd;
@@ -133,11 +135,12 @@ void txtleft(txt *t, long n) {
 
 bool txtsame(txt *t, txt *t2) //comparison of two txt items
 {
+    if (t->l != t2->l) return FALSE;
+#ifdef _WIN32
     static DWORD tempoffset;
     static DWORD tempoffset2;
     static DWORD tempoffset3;
 
-    if (t->l != t2->l) return FALSE;
     tempoffset = (DWORD) t->d;
     tempoffset2 = (DWORD) t2->d;
     tempoffset3 = (DWORD) t->l;
@@ -163,6 +166,10 @@ bool txtsame(txt *t, txt *t2) //comparison of two txt items
             }
     if (tempoffset3 == 0) return FALSE;
     return TRUE;
+#else
+    // Portable equivalent of the x86 byte-compare loop above.
+    return memcmp(t->d, t2->d, (size_t) t->l) == 0 ? TRUE : FALSE;
+#endif
 }
 
 void txtmid(txt *t, long position, long length) {
@@ -198,6 +205,7 @@ void txtright(txt *t, long length) {
 unsigned char currentdirectry[1024];
 
 void txtgetfilename(txt *t) {
+#ifdef _WIN32
     GetCurrentDirectory(1024, (LPSTR) & currentdirectry);
     ShowCursor(TRUE);
     static char filename[10000];
@@ -227,6 +235,12 @@ nobyte:
     ShowCursor(FALSE);
     SetCurrentDirectory((LPSTR) & currentdirectry);
     return;
+#else
+    // Headless host: native file-open dialog is unavailable. The dedicated
+    // host never invokes the file picker (it's a client char-transfer flow),
+    // so return an empty selection.
+    txtNEWLEN(t, 0);
+#endif
 }
 
 //number string functions

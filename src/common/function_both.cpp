@@ -1,5 +1,7 @@
 #include "function_both.h"
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include <stdio.h>
 #ifdef CONSOLE
 #include <conio.h>
@@ -71,6 +73,12 @@ txtadd(t3,t2);
     txtfileout(t3, log2file);
 #ifdef CONSOLE
     _cprintf("%s\n", t3->d);
+#endif
+#if !defined(_WIN32)
+    // LH-P6: headless host — echo log lines to stdout so the container/k8s log
+    // captures host activity (the Win32 CONSOLE/_cprintf path is unavailable).
+    printf("%s\n", t3->d);
+    fflush(stdout);
 #endif
 }
 

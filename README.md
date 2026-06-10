@@ -16,6 +16,7 @@ engine, server, and supporting assets.
 - [Build targets](#build-targets)
 - [Building](#building)
 - [Running](#running)
+- [Linux host (headless)](#linux-host-headless)
 - [Where things live](#where-things-live)
 - [Documentation and plans](#documentation-and-plans)
 - [Tools](#tools)
@@ -30,9 +31,14 @@ engine, server, and supporting assets.
 ```text
 ultima-vi-online/
 ├── CMakeLists.txt              # Three EXE targets: both, host, client
+├── CMakePresets.json           # `linux-host` preset (headless i386 host build)
 ├── CMake/                      # Toolchain helpers (Default*.cmake, Utils.cmake)
+├── Dockerfile.linux            # Headless Linux host image (multi-stage, i386)
+├── docker-compose.yml          # One-command host: port + save volume + restart
+├── k8s/                        # Kubernetes manifests for the Linux host
 ├── assets/
 │   ├── images/icon.png         # Source PNG for window/EXE icons
+│   ├── game_files/host/        # Bundled host runtime data (ultima6/, host/, …)
 │   └── map_patches/            # Plain-text overlays applied on top of U6 map data
 ├── src/
 │   ├── client/                 # Client-only code (renderer, UI, input, sound)
@@ -55,6 +61,9 @@ ultima-vi-online/
 because the rendering inner loops still rely on 32-bit inline assembly
 (`src/common/inline_asm/fast*.asm`) and the original DirectPlay / DirectDraw
 calling conventions.
+
+> The dedicated **host** additionally builds headless on **Linux (i386)** for
+> Docker/Kubernetes — see [Linux host (headless)](#linux-host-headless).
 
 | Target        | Output EXE name                | Defines               | Subsystem | Purpose                                                                                                |
 | ------------- | ------------------------------ | --------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
@@ -104,7 +113,9 @@ Headers/`.lib`s for the above are bundled under `src/common/include` and
 
 ### Prerequisites
 
-- Windows 10/11 build host (cross-compilation is not supported).
+- Windows 10/11 build host (this section covers the Win32 client/host/both
+  builds; for the headless Linux host see
+  [Linux host (headless)](#linux-host-headless)).
 - Visual Studio 2019 or newer with the **Desktop development with C++**
   workload and the **MSVC v143 (x86)** components.
 - CMake **≥ 3.16**.
@@ -191,6 +202,108 @@ initial world load.
 `Ultima VI Online Full.exe` (the `both` target) hosts the world *and*
 connects to it locally — convenient for solo testing of server-side changes
 without standing up a separate host process.
+
+---
+
+## Linux host (headless)
+
+The dedicated **host** also builds and runs on Linux as a headless, no-GUI
+process so the server can run in a Docker container (e.g. on Kubernetes).
+Only the host is portable — the client stays Windows/DirectX-only.
+
+Key properties (see [`docs/plans/plan-linuxHost.md`](docs/plans/plan-linuxHost.md)
+for the full design):
+
+- **32-bit (`-m32`).** Built as i386 so `struct`/`txt` layout and the wire +
+  `.sav` formats stay byte-compatible with Windows clients and hosts. The
+  protocol version is **not** bumped — a Windows client connects to a Linux
+  host unchanged.
+- **Thin platform shim.** All Win32 calls are wrapped behind
+  `src/common/platform/` (`#ifdef _WIN32` pass-through on Windows, POSIX
+  sockets/pthreads/`clock_gettime`/stdio elsewhere). The MSVC build is
+  untouched.
+- **Case-insensitive file access.** The host mixes path case freely
+  (lowercase hard-coded strings, UPPER-case game data, names it builds in
+  UPPER at runtime like `objblkEB`). The POSIX file shim resolves case per
+  path segment at `open()` (`src/common/myfile.cpp` `u6o_resolve_ci`), so the
+  game files are shipped verbatim — no renaming/case-folding.
+- **Graceful shutdown.** `SIGTERM`/`SIGINT` trigger a save-and-exit
+  (`u6o_posix_term_handler`), so `docker stop` / `kubectl delete` persist the
+  world.
+
+### Native Linux build
+
+Prerequisites (Debian/Ubuntu):
+
+```bash
+sudo apt-get install g++-multilib cmake ninja-build   # 32-bit libstdc++/libc/pthread
+```
+
+Build with the bundled preset (or the spelled-out commands):
+
+```bash
+cmake --preset linux-host && cmake --build --preset linux-host
+# equivalently:
+cmake -S . -B build-linux -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build-linux
+```
+
+Output: `bin/host/linux/u6o-host` (a 32-bit ELF). The CMake `if (NOT WIN32)`
+branch builds **only** the `host` target and skips the Win32 resource/MASM/
+DirectX paths.
+
+To run it natively, the binary must sit **next to** the host game data
+(`ultima6/`, `host/`, `save/`, `dns.txt`, `motd.txt`, …). The repo bundles a
+ready-to-run tree under `assets/game_files/host/`:
+
+```bash
+cp bin/host/linux/u6o-host assets/game_files/host/
+cd assets/game_files/host
+echo "localhost:22" > dns.txt        # "<host>:<port>"; bind is INADDR_ANY
+./u6o-host host
+```
+
+You should see `This is a dedicated u6o host running on port 22.`
+
+### Docker container
+
+The image is defined by [`Dockerfile.linux`](Dockerfile.linux) (multi-stage:
+compile the 32-bit host, then a slim runtime with the i386 C/C++ runtime + the
+bundled game data copied next to the binary).
+
+The simplest path is the provided [`docker-compose.yml`](docker-compose.yml),
+which captures the published port, a persistent save volume, auto-restart, and
+graceful shutdown:
+
+```bash
+docker compose up -d --build     # build the image and start the host
+docker compose logs -f           # follow host logs
+docker compose stop              # graceful save-and-exit (SIGTERM, 60s grace)
+docker compose down              # stop + remove container (the save volume persists)
+```
+
+The host listens on container port **22** (from `dns.txt`). The compose file
+maps it to host port `22` so a client on the same machine connects with the
+default `dns.txt` (`localhost:22`) — no client changes needed. If port 22 is
+taken (e.g. a local SSH server), change only the left side of the mapping in
+`docker-compose.yml` (e.g. `"2222:22"`) and point the client's `dns.txt` at
+`<host>:2222`.
+
+Saves are kept in the named volume `u6o-save` (mounted at `/u6o-host/save`),
+so they survive `docker compose down` and image rebuilds.
+
+Prefer plain Docker? The equivalent without compose:
+
+```bash
+docker build -f Dockerfile.linux -t u6o-host:latest .
+docker volume create u6o-save
+docker run -d --name u6o-host --restart unless-stopped \
+    -p 22:22 -v u6o-save:/u6o-host/save u6o-host:latest
+docker stop -t 60 u6o-host        # graceful save-and-exit
+```
+
+For Kubernetes, see [`k8s/deployment.yaml`](k8s/deployment.yaml) and
+[`k8s/README-k8s.md`](k8s/README-k8s.md).
 
 ---
 

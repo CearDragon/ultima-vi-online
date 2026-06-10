@@ -390,7 +390,7 @@ if
                                     stormcloak_y[stormcloak_last] = myobj->y;
                                     stormcloak_player[stormcloak_last] = tplayer;
 
-                                    if (unsigned long(ett) != unsigned long(ett - et)) {
+                                    if ((unsigned long)(ett) != (unsigned long)(ett - et)) {
                                         myobj2->more2++;
                                         if (myobj2->more2 >= 1024) {
                                             //~16-32mins
