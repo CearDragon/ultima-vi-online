@@ -25,14 +25,22 @@
 #include <cstring>  // memset, for ZeroMemory
 #include <cstdio>   // snprintf, for _snprintf
 
-// Fixed-width Win32 integer aliases (i386 widths).
-typedef uint32_t      DWORD;
-typedef uint16_t      WORD;
-typedef uint8_t       BYTE;
-typedef int           BOOL;
-typedef unsigned int  UINT;
-typedef long          LONG;
-typedef unsigned long ULONG;
+// Win32 base integer aliases. These mirror the EXACT underlying types Win32
+// uses (not just matching widths), because the legacy code freely interchanges
+// e.g. DWORD and `unsigned long` — it casts thread-id pointers as
+// `(unsigned long*)` to fill an `LPDWORD`, and the wire/save code uses
+// `unsigned long` for 32-bit fields. On the i386 (-m32) build `unsigned long`
+// is 32-bit, so `DWORD == unsigned long` is both width-correct AND
+// type-compatible with those casts. (Do NOT use uint32_t here: that is
+// `unsigned int` on Linux x86, which makes `unsigned long*` -> `DWORD*` a hard
+// type error.)
+typedef unsigned long  DWORD;
+typedef unsigned short WORD;
+typedef unsigned char  BYTE;
+typedef int            BOOL;
+typedef unsigned int   UINT;
+typedef long           LONG;
+typedef unsigned long  ULONG;
 
 // Pointer/handle aliases.
 typedef void *        LPVOID;

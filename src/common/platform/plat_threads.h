@@ -9,6 +9,15 @@
 // Mapped surface: CreateThread, ExitThread, TerminateThread,
 // LPTHREAD_START_ROUTINE, thread HANDLE/DWORD id.
 //
+// LH-P4 verification (2026-06-10): the host uses NO Win32 synchronization
+// primitives (no CRITICAL_SECTION / Interlocked* / Event / Mutex / Semaphore /
+// WaitForSingleObject). Threads coordinate purely through polled shared flags
+// (`exit_thread`, `socket_disconnect`), so this shim needs only create / exit /
+// cancel — no lock or event mapping. Thread creation sites pass the per-client
+// index as `(void*)i` and capture the id via `(unsigned long*)&...thread_id`
+// (`thread_id` is `unsigned long`, data_both.h); `DWORD == unsigned long` on the
+// i386 build makes that `LPDWORD` cast well-typed.
+//
 // IMPORTANT (validated in LH-P4): the legacy disconnect path stores the
 // numeric thread id and later calls TerminateThread((void*)thread_id, 0).
 // To keep that working we make the returned HANDLE and the written thread id

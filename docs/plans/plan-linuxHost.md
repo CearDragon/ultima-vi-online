@@ -165,13 +165,27 @@ symbols to refresh this list before each phase.
 
 ## P4 — Portable threads & timing
 
-- ⬜ LH-P4.1 `plat_threads.h`: map `CreateThread`/`ExitThread`/
+- ✅ LH-P4.1 `plat_threads.h`: map `CreateThread`/`ExitThread`/
   `TerminateThread` + `DWORD WINAPI` proc signature to pthreads; keep the
-  existing thread-proc bodies (gotos intact).
-- ⬜ LH-P4.2 `plat_time.h`: `timeGetTime`→monotonic ms, `SleepEx`→
-  `nanosleep`, `GetLocalTime`/`SYSTEMTIME`→`localtime_r`.
-- ⬜ LH-P4.3 `ZeroMemory`/`_snprintf`/`MAKEWORD` shims.
+  existing thread-proc bodies (gotos intact). _(2026-06-10. Verified against
+  every call site: creation passes `(void*)i` + `(unsigned long*)&thread_id`,
+  termination is `TerminateThread((void*)thread_id)`. Audit found the host
+  uses **no** Win32 sync primitives (no CRITICAL_SECTION/Interlocked/Event/
+  Mutex/WaitForSingleObject) — coordination is lock-free flag polling, so the
+  shim needs only create/exit/cancel. **Fixed a shim bug:** `DWORD` was
+  `uint32_t` (= `unsigned int` on Linux x86), which made the `(unsigned long*)`
+  thread-id casts ill-typed; changed to `DWORD = unsigned long` (4-byte on
+  -m32, matches Win32 and the wire/save code).)_
+- ✅ LH-P4.2 `plat_time.h`: `timeGetTime`→monotonic ms, `SleepEx`→
+  `nanosleep`, `GetLocalTime`/`SYSTEMTIME`→`localtime_r`. _(2026-06-10.
+  Standalone host TUs use only `SleepEx` (covered, incl. `SleepEx(.., NULL)`);
+  `timeGetTime`/`GetLocalTime` sites live in `host.inc`/`setup_host.inc`/
+  `u6o7.cpp` and resolve when those are include-ported in LH-P5.)_
+- ✅ LH-P4.3 `ZeroMemory`/`_snprintf`/`MAKEWORD` shims. _(2026-06-10. In
+  `plat_types.h`.)_
 - **Exit:** Linux host runs the accept + per-client send/receive threads.
+  _(Runtime exercise gated on the first Linux build, LH-P6; shim verified by
+  call-site inspection.)_
 
 ## P5 — Headless entry point & graphics severance
 
@@ -299,6 +313,23 @@ symbols to refresh this list before each phase.
   simply not define `CONSOLE`, or P5 adds a `printf` path). **Resume at
   LH-P4** (threads/timing are already mapped in the headers — verify the
   thread-proc trampoline + `TerminateThread`→`pthread_cancel` semantics).
+- **2026-06-10 (LH-P4 threads & timing — shim verified + DWORD fix)** — Audited
+  every thread/timing call site. Host uses **no** Win32 synchronization
+  primitives (grep clean: no CRITICAL_SECTION/Interlocked/Event/Mutex/
+  Semaphore/WaitForSingleObject) — threads coordinate via polled `exit_thread`/
+  `socket_disconnect` flags, so `plat_threads.h` (create/exit/cancel) is
+  sufficient. Verified `CreateThread(NULL,0,proc,(void*)i,0,(unsigned long*)
+  &thread_id)` and `TerminateThread((void*)thread_id)` against the shim.
+  **Corrected `plat_types.h`: `DWORD` `uint32_t`→`unsigned long`** so the
+  pervasive `(unsigned long*)`↔`LPDWORD` casts and DWORD/`unsigned long`
+  interchange are well-typed on the -m32 build (uint32_t is `unsigned int` on
+  Linux x86 → hard type error). Timing: standalone host TUs use only `SleepEx`
+  (covered); `timeGetTime`/`GetLocalTime` ride on the LH-P5 include port.
+  No compiled-on-Windows file changed, so the MSVC build is untouched.
+  **Resume at LH-P5** (headless `int main()` + sever graphics + crash filter;
+  this is where `u6o7.cpp`/`setup_host.inc`/`host.inc` finally pull the shim,
+  unblocking LH-P3.2 / LH-P4.2 symbol provisioning and the first Linux compile
+  in LH-P6).
 
 To pick up cleanly:
 
