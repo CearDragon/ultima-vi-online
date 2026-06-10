@@ -4761,10 +4761,18 @@ unsigned char objvisible(player *p, object *myobj) {
 } //objvisible
 
 long roundfloat(float f) {
+    // LH-P1.2: portability seam. The x86 `fld/fistp` converts using the
+    // current FPU rounding mode (round-to-nearest-even by default). lrintf
+    // honors the same mode, so the result is identical on the i386 Linux
+    // host. roundfloat_l is preserved as the staging global on both paths.
+#ifdef _WIN32
     __asm {
             fld f
             fistp roundfloat_l
             }
+#else
+    roundfloat_l = __builtin_lrintf(f);
+#endif
     return roundfloat_l;
 }
 
