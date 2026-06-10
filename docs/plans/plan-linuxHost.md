@@ -219,12 +219,24 @@ symbols to refresh this list before each phase.
 
 ## P6 — Linux toolchain (CMake)
 
-- ⬜ LH-P6.1 Gate every Win32-specific block in `CMakeLists.txt` behind
+- 🟡 LH-P6.1 Gate every Win32-specific block in `CMakeLists.txt` behind
   `if(MSVC)`; add a GCC/Clang path building only `host` with `-m32`, no
-  `.rc`/MASM, no import libs.
-- ⬜ LH-P6.2 Add a `CMakePresets.json` `linux-host` preset; reuse the
-  existing Ninja/`compile_commands.json` flow.
+  `.rc`/MASM, no import libs. _(2026-06-10. Added an `if (NOT WIN32)` branch
+  right after `project()` that defines the `host` target (portable source
+  list incl. `plat_stubs.cpp`, excl. DX `.cpp`s + `stdafx.cpp`), forces
+  `-include platform.h` into every TU, links `pthread`/`m` with `-m32`
+  `-rdynamic`, then `return()`s before all Win32 logic. Portability prereqs
+  fixed: `stdafx.h` and `data_both.h` `#include <windows.h>` gated. Confirmed
+  via grep that `loop_host.cpp`/`host.inc`/`host_setup.h` have **no** unshimmed
+  Win32 calls (only `CONSOLE`-gated `_cprintf`/`SetConsoleTitle`, skipped on
+  Linux). **The first real `cmake --build` is still pending a Linux toolchain
+  (not available in this environment); it will surface GCC-strictness fixups
+  on the legacy code — that iteration completes P6.1.**)_
+- ✅ LH-P6.2 Add a `CMakePresets.json` `linux-host` preset; reuse the
+  existing Ninja/`compile_commands.json` flow. _(2026-06-10. `linux-host`
+  preset (Ninja, `build-linux/`, Release, host-Linux condition).)_
 - **Exit:** `cmake --preset linux-host && cmake --build` produces an ELF host.
+  _(Authoring complete; green build pending a Linux runner — see LH-P6.1.)_
 
 ## P7 — Container image & Kubernetes
 
@@ -373,6 +385,24 @@ symbols to refresh this list before each phase.
   surface at link → stub them. **Resume at LH-P6** (Linux CMake: GCC/Clang
   `-m32`, `-rdynamic`, `-lpthread`, reduced source list incl. `plat_stubs.cpp`,
   exclude DX `.cpp` + `.asm` + `.rc`) for the first real compile.
+- **2026-06-10 (LH-P6 Linux toolchain authored)** — Added the `if (NOT WIN32)`
+  branch to `CMakeLists.txt` (host-only target, `-m32`, forced
+  `-include platform.h`, `pthread`/`m`, `-rdynamic`, `return()` before all
+  Win32 logic) and `CMakePresets.json` (`linux-host`). Made `stdafx.h` and
+  `data_both.h` (`#include <windows.h>`) portable — these were the last core
+  shared headers pulling Win32 unconditionally. Grep-confirmed
+  `loop_host.cpp`/`host.inc`/`host_setup.h` carry **no** unshimmed Win32 API
+  (only `CONSOLE`-gated console I/O, which Linux doesn't define). MSVC build
+  re-validated clean (`data_both.cpp` → no errors). **What remains for P6.1:**
+  a real `cmake --preset linux-host && cmake --build build-linux` on a Linux
+  box with `g++-multilib`. I cannot run that here, so the legacy
+  GCC-strictness errors (implicit conversions, `goto`-into-scope, `register`,
+  default-int, `(unsigned long)` pointer casts, etc.) still need an
+  iterate-on-output pass. Expected hotspots: `loop_host.cpp` (size),
+  `function_host.cpp`, the `secret_*.inc`. **Resume:** run the build, paste
+  errors, fix in batches; then LH-P7 (Dockerfile.linux + k8s) and LH-P8
+  (cross-play validation). Also still open: a stdout logging path so k8s
+  captures host activity (currently only `log.txt`).
 
 To pick up cleanly:
 

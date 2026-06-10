@@ -74,6 +74,12 @@ txtadd(t3,t2);
 #ifdef CONSOLE
     _cprintf("%s\n", t3->d);
 #endif
+#if !defined(_WIN32)
+    // LH-P6: headless host — echo log lines to stdout so the container/k8s log
+    // captures host activity (the Win32 CONSOLE/_cprintf path is unavailable).
+    printf("%s\n", t3->d);
+    fflush(stdout);
+#endif
 }
 
 

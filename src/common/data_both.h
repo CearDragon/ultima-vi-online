@@ -3,7 +3,11 @@
 
 #include "define_both.h"
 #include "mytxt.h"
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include "platform/platform.h" // LH-P6: Win32 type/socket/gui shims for the headless host
+#endif
 /* data structure definitions */
 
 #pragma region

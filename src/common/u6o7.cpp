@@ -391,6 +391,11 @@ if (NEThost){
 _cprintf (
 "This is a dedicated u6o host running on port %d.\nTo quit type q or ctrl-c to force quit.\n", global_TCP_listen_port);
 #endif
+#if !defined(_WIN32)
+// LH-P6: headless host startup banner on stdout (no Win32 console).
+printf("This is a dedicated u6o host running on port %d.\n(send SIGTERM/SIGINT to shut down)\n", global_TCP_listen_port);
+fflush(stdout);
+#endif
 SCRLOG_FILEONLY=TRUE;
 //begin main loop _________________________________________________________________
 oldtime=timeGetTime
