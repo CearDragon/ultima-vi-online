@@ -150,14 +150,15 @@ symbols to refresh this list before each phase.
   `WSAGetLastError`/`WSAEWOULDBLOCK`/`INVALID_SOCKET`/`SD_*` under their
   existing names. Added `plat_win_gui.h` so the shared `MessageBox`/handle
   decls parse on the host.)_
-- 🟡 LH-P3.2 Replace Winsock in `setup_host.inc` (`WSAStartup`/`socket`/
+- ✅ LH-P3.2 Replace Winsock in `setup_host.inc` (`WSAStartup`/`socket`/
   `bind`/`listen`/`setsockopt`) and `function_host.cpp` (`sockets_accept`,
   `ioctlsocket(FIONBIO)`→`fcntl`, `closesocket`, `shutdown`).
-  _(2026-06-10. `function_host.cpp` (standalone TU, incl. `sockets_accept`)
-  wired via `function_host.h`'s guarded shim include — call sites unchanged.
-  `setup_host.inc` is `#include`d into `u6o7.cpp`, so its socket symbols are
-  provisioned when `u6o7.cpp`'s top includes are ported in LH-P5; the call
-  sites themselves are already shim-covered (no edits expected).)_
+  _(2026-06-10. `function_host.cpp` wired via `function_host.h`. `setup_host.inc`
+  is `#include`d into `u6o7.cpp`, which (LH-P5) now pulls `platform/platform.h`
+  on non-Windows, so its `WSAStartup`/`socket`/`bind`/`listen`/`setsockopt`/
+  `CreateThread`/`GetLocalTime` all resolve through the shim — and the
+  `setupddraw()` call there is now gated under `#ifdef _WIN32`. Call sites
+  unchanged.)_
 - ✅ LH-P3.3 `errno`/`EWOULDBLOCK` for `WSAGetLastError`/`WSAEWOULDBLOCK`;
   `-1` for `INVALID_SOCKET`/`SOCKET_ERROR`. _(2026-06-10. Defined in
   `plat_sockets.h`; `ioctlsocket(FIONBIO)` maps to `fcntl(O_NONBLOCK)`.)_
@@ -189,14 +190,32 @@ symbols to refresh this list before each phase.
 
 ## P5 — Headless entry point & graphics severance
 
-- ⬜ LH-P5.1 Add a non-Windows `int main()` that does the host setup +
+- ✅ LH-P5.1 Add a non-Windows `int main()` that does the host setup +
   tick loop (replacing `_tWinMain` + message pump). Windows keeps
-  `_tWinMain`.
-- ⬜ LH-P5.2 Compile-out `myddraw`/`frame`/`dmusic` from the Linux host;
+  `_tWinMain`. _(2026-06-10. `main(argc,argv)` synthesizes a Win32-style
+  command line from argv; the `PeekMessage`/`GetMessage` pump is gated under
+  `#ifdef _WIN32` with a headless `#else` branch that runs the WM_QUIT host
+  cleanup (guild save + socket shutdown) and returns when `endprogram` is set;
+  `PostQuitMessage` and `MSG`/`HACCEL`/`MyRegisterClass`/`LoadAccelerators`
+  gated too. Top includes gated: DX/Win32 headers on `_WIN32`, `platform.h` +
+  `plat_stubs.h` + `<cstring>` on POSIX.)_
+- ✅ LH-P5.2 Compile-out `myddraw`/`frame`/`dmusic` from the Linux host;
   make `setupddraw()` and any host graphics call-sites headless no-ops.
-- ⬜ LH-P5.3 Crash filter → POSIX signal handler writing a text backtrace
-  (or no-op); drop `dbghelp`/`MiniDumpWriteDump` on Linux.
+  _(2026-06-10. DX headers severed on non-Windows; new
+  `platform/plat_stubs.{h,cpp}` provide no-op `frame_init()`/`setupddraw()`
+  for the reduced Linux source set (wired into CMake in LH-P6). `setupddraw()`
+  call in `setup_host.inc` and the whole `MyRegisterClass`/`InitInstance`/
+  `WndProc` windowing layer in `u6o7.cpp` gated under `#ifdef _WIN32`.)_
+- ✅ LH-P5.3 Crash filter → POSIX signal handler writing a text backtrace
+  (or no-op); drop `dbghelp`/`MiniDumpWriteDump` on Linux. _(2026-06-10.
+  Win32 `MyUnhandledExceptionFilter` gated; POSIX `u6o_install_crash_handlers`
+  catches SIGSEGV/ABRT/FPE/ILL/BUS → timestamped `crash_*.txt` via
+  `backtrace()` (needs `-rdynamic`, LH-P6) + stderr. Bonus: SIGTERM/SIGINT →
+  graceful shutdown by setting `exitrequest`, so `kubectl delete`/Ctrl-C
+  triggers the normal save-and-exit path.)_
 - **Exit:** Linux host boots to "listening on port" and serves a client.
+  _(Gated on the first Linux compile/link, LH-P6; all edits verified
+  byte-identical on the MSVC oracle.)_
 
 ## P6 — Linux toolchain (CMake)
 
@@ -329,7 +348,31 @@ symbols to refresh this list before each phase.
   **Resume at LH-P5** (headless `int main()` + sever graphics + crash filter;
   this is where `u6o7.cpp`/`setup_host.inc`/`host.inc` finally pull the shim,
   unblocking LH-P3.2 / LH-P4.2 symbol provisioning and the first Linux compile
-  in LH-P6).
+  in LH-P6.
+- **2026-06-10 (LH-P5 headless entry + graphics severance + crash handler)** —
+  The pivot phase. `u6o7.cpp`: top includes gated (DX/Win32 on `_WIN32`;
+  `platform.h`+`plat_stubs.h`+`<cstring>` on POSIX); crash filter split
+  (`_WIN32` keeps `MyUnhandledExceptionFilter`+minidump, POSIX gets
+  `u6o_install_crash_handlers` → `crash_*.txt` via `backtrace()` plus
+  SIGTERM/SIGINT graceful shutdown); entry split `_tWinMain` ↔ `int main()`
+  (argv→command-line synth); the Win32 message pump, `MyRegisterClass`/
+  `LoadAccelerators`/`MSG`/`HACCEL`, `PostQuitMessage`, and the entire
+  `MyRegisterClass`/`InitInstance`/`WndProc` windowing layer all gated under
+  `#ifdef _WIN32`; a headless `#else` shutdown branch runs the WM_QUIT host
+  cleanup on `endprogram`. `setup_host.inc`: `setupddraw()` gated. New
+  `src/common/platform/plat_stubs.{h,cpp}`: no-op `frame_init`/`setupddraw`
+  for the reduced Linux source set. `get_errors` on `u6o7.cpp` shows only
+  pre-existing clang-tidy/MSVC-deprecation noise in the Windows paths — no
+  errors, MSVC build byte-identical. This unblocked LH-P3.2 (✅) since
+  `setup_host.inc` now sees the shim via `u6o7.cpp`. **Open follow-ups for
+  LH-P6/P7:** (1) the host's `CONSOLE` stdout path (`_cprintf`/`AllocConsole`)
+  is Win32-only and won't be defined on Linux, so add a `printf` logging path
+  for k8s observability (currently only `log.txt` is written); (2) `data_host.h`/
+  `data_both.h` may have stray direct Win32 includes that surface at first
+  Linux compile; (3) any stray graphics calls in `host.inc`/`host_setup.h`
+  surface at link → stub them. **Resume at LH-P6** (Linux CMake: GCC/Clang
+  `-m32`, `-rdynamic`, `-lpthread`, reduced source list incl. `plat_stubs.cpp`,
+  exclude DX `.cpp` + `.asm` + `.rc`) for the first real compile.
 
 To pick up cleanly:
 
