@@ -75,6 +75,17 @@ Change with care and keep host/client logic aligned.
 - Fixed-room camera anchoring in shared offset helpers while client tried to follow dynamically.
 - Host fill windows sampling outside isolated room bounds, producing non-room NPCs and stale mover collisions.
 - Repeated buffer flush or resync behavior causing mover frame continuity loss.
+- Type-416 view redirectors inside the room (e.g. the shop's "look down the
+  hole" tiles) resolving a mover to a far-away tile (the floor below). The
+  mover ADD encodes position window-relative (`mv_x - tpx + MV_TX_OFFX` in
+  `MV_TX_BITS`); a far target overflows those bits, so the client stores a
+  garbage in-window position while the host keeps the real far coords. The
+  next offscreen prune then removes it on the host but not the client, the
+  per-player mover arrays diverge, every mover index desyncs, and the
+  avatar's slot gets reassigned -- the classic "walking just moves the
+  camera, avatar frozen then invisible." Triggered only when a mover (often a
+  wandering shopkeeper NPC) stands on a viewed tile, so it can appear minutes
+  after entry and look intermittent.
 
 ## Fix strategy for any new basement or custom room
 
@@ -103,7 +114,14 @@ Then constrain both streaming loops while in that room.
 
 This prevents cross-room object and NPC bleed-through.
 
-### 3) Keep animation rendering
+If the room contains type-416 view redirectors (they rewrite `mapx`/`mapy`
+mid-loop to the tile being "viewed"), the mover loop needs the room-bounds
+check **twice**: once before reading `od[mapy][mapx]` (the pre-redirect
+position) and once again right before the mover is added to the list (the
+post-redirect position). Otherwise a redirected mover pointing at a far tile
+is collected, ADD-encoded with an overflowed window offset, and desyncs the
+client mover array. See the `shop_2f_room` checks in
+`src/server/loop_host.cpp` (`goto mover_add_complete`).### 3) Keep animation rendering
 
 Animation relies on stable mover lifecycle and frame deltas.
 Avoid logic that repeatedly flushes mover buffers in-room.

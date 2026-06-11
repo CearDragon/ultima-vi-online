@@ -2712,6 +2712,24 @@ if
                                 }
 
 
+                                // shop-2f fix: a type-416 view redirector (the shop's "look down the
+                                // hole" tiles) can resolve mapx/mapy to the 1st floor -- far
+                                // outside the room and the MV_TX transmit window. The ADD
+                                // encode below uses mv_x-tpx+MV_TX_OFFX and overflows
+                                // MV_TX_BITS for such a mover, so the client stores a garbage
+                                // in-window position while the host stores the real (far)
+                                // coords; the next offscreen prune then diverges between host
+                                // and client and every mover index desyncs -- the avatar slot
+                                // gets reassigned and "walking just moves the camera".
+                                // Reject redirected movers outside the room so fill stays
+                                // room-bounded (mirrors the pre-redirect checks; harmless for
+                                // gg_basement, which has no redirectors).
+                                if (gg_basement_room) {
+                                    if ((mapx < 1280) || (mapx > 1291) || (mapy < 319) || (mapy > 333)) goto mover_add_complete;
+                                }
+                                if (shop_2f_room) {
+                                    if ((mapx < 1280) || (mapx > 1340) || (mapy < 395) || (mapy > 432)) goto mover_add_complete;
+                                }
                                 //add it to the list
                                 i++;
                                 mv_object[i] = myobj;
