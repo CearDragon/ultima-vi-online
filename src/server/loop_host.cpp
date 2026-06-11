@@ -1944,7 +1944,17 @@ if
                 static unsigned long bitsi, bitsi2;
                 static unsigned short *tp2;
                 static unsigned char sceneupdaterequired;
-                static unsigned char gg_basement_room;
+                // ROOMSYNC-P1: cached "is the selected player inside a registered
+                // isolated room, and if so what are its bounds" -- replaces the
+                // legacy hardcoded gg_basement_room flag. Filled by getroom() once
+                // per scene update and consumed by the sobj + mover fill loops to
+                // suppress streaming of objects/movers from neighbouring open
+                // map. See docs/rendering/global-room-sync.md.
+                static unsigned char playerroom_inroom;
+                static long playerroom_x0, playerroom_y0, playerroom_x1, playerroom_y1;
+                // ROOMSYNC-P1: scratch values for the pre-flush auto-resync check.
+                static long roomsync_targetx, roomsync_targety;
+                static long roomsync_dx, roomsync_dy;
 
                 if (!tplayer->updatemessage) {
                     txtNEWLEN(t, -1048576); //create 1MB buffer
@@ -1952,6 +1962,55 @@ if
                     bitsi = 0;
                     bitsi2 = 0;
                     sceneupdaterequired = 0;
+
+                    // ROOMSYNC-P1: AUTO-RESYNC TRIGGER. The historical root cause
+                    // of "player disappears / can't move / NPCs flicker" inside
+                    // basements was that the host kept its per-player mover and
+                    // sobj buffers across discontinuous coordinate jumps (ladder
+                    // use, moongate, red gate, partyadd, etc.) and across crosses
+                    // of an isolated-room boundary. The diff encoder then walked
+                    // pre-jump mover indices against post-jump tile contents and
+                    // shipped remove/move/add bits that overwrote the wrong
+                    // client-side slots -- famously the avatar's own slot 0,
+                    // which then got reassigned to some NPC. The avatar sprite
+                    // vanished while the camera kept tracking the never-updated
+                    // tplayer->x/y.
+                    //
+                    // The fix is to detect either condition BEFORE the existing
+                    // resync branch flushes buffers, and let that branch run.
+                    // No per-teleport code change required: every ladder /
+                    // partyadd / spell that moves the avatar > 3 tiles or
+                    // crosses a registered room border auto-resyncs now.
+                    //
+                    // Skip when tplayer->x/y is (0, 0): that's the initial
+                    // connect state -- the first scene update is already a
+                    // clean build and forcing another resync would waste a
+                    // frame. The same myobj selection logic runs again below
+                    // when the actual position is emitted; we just need it
+                    // early here so the resync decision is made before the
+                    // existing tplayer->resync handler clears the buffers.
+                    if (myobj = tplayer->party[tplayer->selected_partymember]) {
+                        roomsync_targetx = myobj->x;
+                        roomsync_targety = myobj->y;
+                        if (tplayer->wizardeyetimeleft) {
+                            roomsync_targetx = tplayer->wizardeyex;
+                            roomsync_targety = tplayer->wizardeyey;
+                        }
+                    } else {
+                        roomsync_targetx = tplayer->px;
+                        roomsync_targety = tplayer->py;
+                    }
+                    if (tplayer->x || tplayer->y) {
+                        roomsync_dx = roomsync_targetx - (long)tplayer->x;
+                        roomsync_dy = roomsync_targety - (long)tplayer->y;
+                        if (roomsync_dx < -3 || roomsync_dx > 3 ||
+                            roomsync_dy < -3 || roomsync_dy > 3) {
+                            tplayer->resync = 1; //teleport: force clean rebuild
+                        } else if (!sameroom(roomsync_targetx, roomsync_targety,
+                                             tplayer->x, tplayer->y)) {
+                            tplayer->resync = 1; //room boundary crossed
+                        }
+                    }
 
                     z = 31;
                     if (tplayer->resync) {
@@ -2010,8 +2069,17 @@ if
                     //if (tpx>2016) tpx=2016;
                     //if (tpy>1000) tpy=1000;
                     getscreenoffset(x, y, &tpx, &tpy);
-                    gg_basement_room = 0;
-                    if ((x >= 1280) && (x <= 1291) && (y >= 319) && (y <= 333)) gg_basement_room = 1;
+                    // ROOMSYNC-P1: cache the player's room bounds once for
+                    // this scene update. The sobj fill loop and the mover
+                    // fill loop both consult playerroom_inroom + bounds to
+                    // skip tiles that aren't part of the same isolated room
+                    // as the player. Replaces the hardcoded
+                    // gg_basement_room flag, so a new room added to the
+                    // registry in src/common/function_both.cpp gets correct
+                    // streaming with no host-side code change.
+                    playerroom_inroom = (unsigned char)getroom(x, y,
+                        &playerroom_x0, &playerroom_y0,
+                        &playerroom_x1, &playerroom_y1);
 
                     //does screen+1 fit inside current buffer?
                     // RW sobj-fix: screen+1 in legacy frame grew from [tpx-1, tpx+32]
@@ -2328,8 +2396,16 @@ if
                         for (x = 0; x < SOBJ_TX_W; x++) {
                             mapx = tpx + x - SOBJ_TX_OFFX;
                             mapy = tpy + y - SOBJ_TX_OFFY;
-                            if (gg_basement_room) {
-                                if ((mapx < 1280) || (mapx > 1291) || (mapy < 319) || (mapy > 333)) goto objbuffer_outofrange;
+                            // ROOMSYNC-P1: if player is in a registered isolated
+                            // room, only stream sobj entries from tiles inside
+                            // that same room. Prevents items/doors/signs from
+                            // the neighbouring open map (e.g. gargoyle land at
+                            // x<1280 next to the Guardian Guild basement) from
+                            // bleeding into the basement view.
+                            if (playerroom_inroom) {
+                                if ((mapx < playerroom_x0) || (mapx > playerroom_x1) ||
+                                    (mapy < playerroom_y0) || (mapy > playerroom_y1))
+                                    goto objbuffer_outofrange;
                             }
                             bufx = mapx - tplayer->sobj_bufoffx;
                             bufy = mapy - tplayer->sobj_bufoffy;
@@ -2655,8 +2731,16 @@ if
                             mapx = tpx + x - MV_TX_OFFX;
                             mapy = tpy + y - MV_TX_OFFY;
 
-                            if (gg_basement_room) {
-                                if ((mapx < 1280) || (mapx > 1291) || (mapy < 319) || (mapy > 333)) goto moverbuffer_outofrange;
+                            // ROOMSYNC-P1: same room-isolation rule as the
+                            // sobj fill above -- if the player is in a
+                            // registered isolated room, drop movers from
+                            // tiles outside it. The historical "ghost NPC
+                            // from gargoyle land in the basement" bug was
+                            // this filter being missing.
+                            if (playerroom_inroom) {
+                                if ((mapx < playerroom_x0) || (mapx > playerroom_x1) ||
+                                    (mapy < playerroom_y0) || (mapy > playerroom_y1))
+                                    goto moverbuffer_outofrange;
                             }
                             if (mapx < 0) goto moverbuffer_outofrange;
                             if (mapx > 2047) goto moverbuffer_outofrange;

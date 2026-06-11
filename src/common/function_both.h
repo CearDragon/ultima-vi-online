@@ -43,6 +43,37 @@ void getscreenoffset(long x, long y, long *mapx, long *mapy);
 
 void getscreenoffset_legacy(long x, long y, long *mapx, long *mapy);
 
+// ROOMSYNC-P1: Global isolated-room registry. See docs/rendering/global-room-sync.md
+// for the design and rationale.
+//
+// An "isolated room" is any rectangular world region that is logically
+// disconnected from the surrounding map but lives in the same 2048x1024 bt[]
+// / od[] grid. Examples: the Guardian Guild basement at x=1280..1291,
+// y=319..333. Such a room sits in a stretch of world coords that the host's
+// mover/sobj transmit windows would otherwise overlap into the neighbouring
+// open map -- pulling foreign NPCs, items, and base tiles into the room
+// view and silently desyncing the per-player mover/sobj buffers.
+//
+// Both helpers are pure / read-only; they consult a static table and can be
+// called freely from host and client.
+struct GameRoom {
+    long x0, y0; // inclusive top-left world coords
+    long x1, y1; // inclusive bottom-right world coords
+};
+
+// If (x, y) is inside a registered isolated room, returns 1 and writes the
+// room's bounds into the out params (any may be NULL). Returns 0 if (x, y)
+// is in the open world (overworld, gargoyle lands, or unregistered area).
+int getroom(long x, long y, long *rx0, long *ry0, long *rx1, long *ry1);
+
+// Returns 1 if (ax, ay) and (bx, by) are in the SAME isolated room, OR if
+// both are in the open world. Returns 0 if they're in different rooms or if
+// one is inside an isolated room and the other is not. This is the single
+// authoritative predicate used by the host fill loops, the client tile
+// renderer, and the auto-resync trigger to decide whether two tiles should
+// be considered "visible" from each other.
+int sameroom(long ax, long ay, long bx, long by);
+
 //getnbits returns the number of bits required to store n combinations
 //if combinations is 1, getnbits returns 0 (only 1 combination requires 0 bits represent)
 //if combinations is 2, getnbits returns 1

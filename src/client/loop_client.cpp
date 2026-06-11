@@ -6244,12 +6244,16 @@ scene_update_message:
         static long tpx_legacy, tpy_legacy;
         getscreenoffset_legacy(x,y,&tpx_legacy,&tpy_legacy);
         getscreenoffset(x,y,&tpx,&tpy);
-        if ((x>=1280)&&(x<=1291)&&(y>=319)&&(y<=333)){
-          // Client-only follow camera for Guardian Guild basement. Common
-          // getscreenoffset() stays fixed here for host/wire compatibility;
-          // tpx_legacy/tpy_legacy above remains the decode/prune reference.
-          tpx=x-(viewTilesX()/2-1);
-          tpy=y-(viewTilesY()/2-1);
+        // ROOMSYNC-P1: generic isolated-room follow camera override. For any
+        // (x, y) inside a registered room, force a centered-on-player camera
+        // -- bypassing the world-edge clamps that getscreenoffset() applies
+        // in known regions. tpx_legacy/tpy_legacy above stays in the legacy
+        // (host) reference frame because that's what the host's sobj/mover
+        // encoders use; ONLY the dynamic render camera (tpx/tpy) follows.
+        // See docs/rendering/global-room-sync.md.
+        if (getroom(x, y, NULL, NULL, NULL, NULL)) {
+          tpx = x - (viewTilesX()/2 - 1);
+          tpy = y - (viewTilesY()/2 - 1);
         }
 
 
@@ -7171,11 +7175,15 @@ CLIENT_donemess:
 
     //calculate tpx,tpy from current x,y
     getscreenoffset(tplayer->x,tplayer->y,&tpx,&tpy);
-    if ((tplayer->x>=1280)&&(tplayer->x<=1291)&&(tplayer->y>=319)&&(tplayer->y<=333)){
-      // Keep per-frame render/input camera in sync with scene-update follow
-      // override for this basement.
-      tpx=tplayer->x-(viewTilesX()/2-1);
-      tpy=tplayer->y-(viewTilesY()/2-1);
+    // ROOMSYNC-P1: must match the scene-update camera override above. If the
+    // two camera assignment sites disagree (one centers in the room, the
+    // other applies world-edge clamps) the input/render mapping diverges
+    // and keypresses move the avatar to one tile while the camera renders
+    // at another -- the user-visible "ghost camera / stuck character"
+    // symptom we're eliminating. See docs/rendering/global-room-sync.md.
+    if (getroom(tplayer->x, tplayer->y, NULL, NULL, NULL, NULL)) {
+      tpx = tplayer->x - (viewTilesX()/2 - 1);
+      tpy = tplayer->y - (viewTilesY()/2 - 1);
     }
 
 
