@@ -1963,6 +1963,31 @@ if
                     bitsi2 = 0;
                     sceneupdaterequired = 0;
 
+                    // ROOMSYNC-P1.2: periodic safety-resync heartbeat. Even
+                    // with every event-based trigger below firing on
+                    // teleport / room cross / camera jump / first scene,
+                    // a player who sits completely still in a busy area
+                    // (the shop reproducer) can still see slow drift in
+                    // their per-player mover slot order over time --
+                    // NPC scheduled movement, mover object spawn /
+                    // OBJrelease churn, and similar host-side activity
+                    // that doesn't show up as a player coord delta.
+                    // Once per ROOMSYNC_HEARTBEAT_SECONDS (defined in
+                    // define_both.h) force an unconditional resync so
+                    // any accumulated drift self-heals on a bounded
+                    // schedule. Skip when tplayer->x/y is still zero
+                    // (first frame -- the P1.1 first-scene rule handles
+                    // that case and we'd otherwise double-resync).
+                    if (tplayer->x || tplayer->y) {
+                        tplayer->resync_timer += et;
+                        if (tplayer->resync_timer >= ROOMSYNC_HEARTBEAT_SECONDS) {
+                            tplayer->resync = 1;
+                            tplayer->resync_timer = 0.0f;
+                        }
+                    } else {
+                        tplayer->resync_timer = 0.0f;
+                    }
+
                     // ROOMSYNC-P1: AUTO-RESYNC TRIGGER. The historical root cause
                     // of "player disappears / can't move / NPCs flicker" inside
                     // basements was that the host kept its per-player mover and
@@ -2000,6 +2025,26 @@ if
                         roomsync_targetx = tplayer->px;
                         roomsync_targety = tplayer->py;
                     }
+                    // ROOMSYNC-P1.1: first-scene resync. A freshly malloc'd /
+                    // ZeroMemory'd player struct (NETconnect path in
+                    // loop_host.cpp around L4577) starts with x == y == 0.
+                    // The normal diff stream then has to ADD every visible
+                    // mover in a single packet from a guaranteed-empty
+                    // tplayer->mv_x[] -- on a dense spawn area like the
+                    // shop (x=1280..1341 / y=376..432, sitting right against
+                    // the gargoyle land x=1280 clamp boundary) this was
+                    // observed to leave slot 0 of the per-player mover list
+                    // bound to the wrong mover after a cold server start, so
+                    // the avatar sprite vanished and input went nowhere.
+                    // Subsequent visits to the same area never reproduced
+                    // because by then tplayer->x/y were non-zero and the
+                    // delta / room / camera-jump triggers below were able
+                    // to catch the transition. Forcing the first scene
+                    // emit to be a packet-35 (explicit flush + rebuild)
+                    // makes both ends start from an unambiguous zero state.
+                    if (!tplayer->x && !tplayer->y) {
+                        tplayer->resync = 1;
+                    }
                     if (tplayer->x || tplayer->y) {
                         roomsync_dx = roomsync_targetx - (long)tplayer->x;
                         roomsync_dy = roomsync_targety - (long)tplayer->y;
@@ -2009,6 +2054,39 @@ if
                         } else if (!sameroom(roomsync_targetx, roomsync_targety,
                                              tplayer->x, tplayer->y)) {
                             tplayer->resync = 1; //room boundary crossed
+                        } else {
+                            // ROOMSYNC-P1.1: camera-anchor jump. Even when
+                            // the player coordinate delta is small (a 1-tile
+                            // walk), the camera anchor tpx/tpy returned by
+                            // getscreenoffset() can jump by up to ~17 tiles
+                            // in a single frame when the player crosses one
+                            // of the hardcoded region boundaries in
+                            // function_both.cpp -- the gargoyle clamp ends
+                            // at x=1279, the very next tile x=1280 falls
+                            // into the default fall-through branch which
+                            // has no clamp. When tpx shifts that much in
+                            // one frame the host's mover/sobj transmit
+                            // window also shifts, the per-player 96x72
+                            // sobj buffer has to relocate, and the diff
+                            // encoder is forced to emit a large batch of
+                            // remove+add operations on a single bit-stream.
+                            // That batch had the same slot-misalignment
+                            // failure mode as a true teleport. Detect the
+                            // camera jump and upgrade the implicit partial
+                            // rebuild to an explicit full one.
+                            static long ar_oldtpx, ar_oldtpy;
+                            static long ar_newtpx, ar_newtpy;
+                            static long ar_dtpx, ar_dtpy;
+                            getscreenoffset((long)tplayer->x, (long)tplayer->y,
+                                            &ar_oldtpx, &ar_oldtpy);
+                            getscreenoffset(roomsync_targetx, roomsync_targety,
+                                            &ar_newtpx, &ar_newtpy);
+                            ar_dtpx = ar_newtpx - ar_oldtpx;
+                            ar_dtpy = ar_newtpy - ar_oldtpy;
+                            if (ar_dtpx < -3 || ar_dtpx > 3 ||
+                                ar_dtpy < -3 || ar_dtpy > 3) {
+                                tplayer->resync = 1;
+                            }
                         }
                     }
 

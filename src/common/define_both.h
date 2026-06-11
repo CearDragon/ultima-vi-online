@@ -15,6 +15,30 @@
 //#define rnd ((float)((RandomMers()<<8)>>16)/65536.0f)
 //#define rnd ((float)((Randomc()<<8)>>16)/65536.0f)
 #define rnd Randomc()
+
+// ROOMSYNC-P1.2: how long the host will let a player run on the same
+// per-player mover / sobj buffer state before force-sending a resync
+// (packet 35) to flush + rebuild from scratch. See
+// docs/rendering/global-room-sync.md.
+//
+// The event-based ROOMSYNC-P1 / P1.1 triggers (teleport, room boundary,
+// camera anchor jump, first scene update) catch every observable
+// transition, but a few drift sources -- NPC scheduled movement
+// reshuffling slot indices in tplayer->mv_x[], object spawn/despawn
+// inside the transmit window, mover object pointer reuse after
+// OBJrelease/OBJnew, etc. -- can in principle accumulate while the
+// player is sitting completely still and no event fires. The shop
+// reproducer ("sat in the shop for a while and eventually lost
+// control") is the canary symptom. The heartbeat puts a hard
+// self-heal ceiling on any such drift.
+//
+// 60 seconds is a balance: short enough that the user notices at most
+// one minute of degraded behaviour before recovery; long enough that
+// the resync packet (a flush + full mover/sobj add list, typically a
+// few KB on a dense area) is amortised cleanly over the per-player
+// bandwidth. Wire-protocol-neutral: a resync just sends packet 35
+// which the client has handled since the /RESYNC chat command shipped.
+#define ROOMSYNC_HEARTBEAT_SECONDS 60.0f
 //equipped item positions (REVISE) (warning: left and right refer to the character's hand hence they are reversed on screen)
 #define helmx 52
 #define helmy 132

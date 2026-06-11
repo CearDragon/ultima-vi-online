@@ -199,6 +199,18 @@ struct player {
 
     unsigned char resync; //set to 1 if resync has been requested
 
+    // ROOMSYNC-P1.2: periodic safety-resync heartbeat. Accumulated by the
+    // host scene-update path each frame (et seconds); when it crosses the
+    // ROOMSYNC_HEARTBEAT_SECONDS threshold the host force-sets resync = 1
+    // and zeroes the timer. The point is to put an upper bound on how long
+    // any slow drift in tplayer->mv_x[] / sobj buffers can persist before
+    // it self-heals -- catches the "sat still in the shop for a while and
+    // eventually lost control" symptom that the event-based P1/P1.1
+    // triggers can't see because no coordinate change ever fires them.
+    // Host-only state: zero on a freshly malloc'd / ZeroMemory'd player
+    // struct (the NETconnect path); the client never reads it.
+    float resync_timer;
+
     float wizardeyetimeleft; //timeleft is in seconds
     short wizardeyex;
     short wizardeyey;

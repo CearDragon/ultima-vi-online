@@ -1,4 +1,4 @@
-# Global Room Sync (ROOMSYNC-P1)
+# Global Room Sync (ROOMSYNC-P1 / P1.1 / P1.2)
 
 **Status:** Shipped, June 2026 (`feature/global-rendering`).
 **Replaces:** Per-room patches in `getscreenoffset()` / `getscreenoffset_legacy()`, the
@@ -196,6 +196,152 @@ move-delta encoder that can express `dx, dy in [-3 .. +3]`. Any larger
 jump is necessarily encoded as remove+add anyway; setting `resync = 1`
 just upgrades the partial-rebuild to a full one.
 
+### P1.1 follow-up: first-scene and camera-anchor guards (June 2026)
+
+The initial ROOMSYNC-P1 commit left two edges uncovered, and both
+reproduced as the user-reported "first visit to the shop after a cold
+server start triggers the bug, subsequent visits are fine" symptom:
+
+1. **First scene update for any player.** A freshly malloc'd /
+   `ZeroMemory`'d player struct (the `NETconnect` path around
+   `loop_host.cpp:4577`) starts with `tplayer->x == tplayer->y == 0`.
+   The original P1 trigger guarded all of its delta / room / camera
+   checks with `if (tplayer->x || tplayer->y)`, so the very first
+   emit fell through to the normal diff path with an empty mover
+   buffer and was forced to ADD every visible mover from an empty
+   `tplayer->mv_x[]` in a single packet. On dense spawn areas — the
+   shop at `(x=1280..1341, y=376..432)`, which sits right against
+   the `x=1280` gargoyle-land clamp boundary, is the canary — that
+   single packet was observed to leave slot 0 bound to the wrong
+   mover after a cold start, exactly reproducing the avatar-vanish
+   bug. Once the player had moved at all, every subsequent visit's
+   transition was caught by one of the other triggers and worked
+   correctly. The P1.1 fix forces the first scene emit to be a
+   packet-35 (explicit flush + rebuild) so both ends start from an
+   unambiguous zero state:
+
+   ```cpp
+   // Before the existing if (tplayer->x || tplayer->y) block:
+   if (!tplayer->x && !tplayer->y) {
+       tplayer->resync = 1;
+   }
+   ```
+
+2. **Camera-anchor jump on a 1-tile walk across a region clamp.** The
+   hardcoded `getscreenoffset()` clamp for gargoyle land ends at
+   `x = 1279`; the very next tile `x = 1280` falls into the default
+   fall-through branch which has no clamp at all. A player who walks
+   that single tile causes the host's camera anchor `tpx` to shift by
+   up to ~17 columns in one frame. The host's mover/sobj transmit
+   window then shifts the same amount, the per-player 96x72 sobj
+   buffer has to relocate, and the diff encoder is forced to emit a
+   large batch of remove+add operations — same failure mode as a
+   true teleport, but with the player coordinate delta only being 1
+   so neither the `dx>3` nor the `sameroom()` triggers fire. P1.1
+   adds an explicit camera-jump check inside the same trigger block:
+
+   ```cpp
+   // Inside the if (tplayer->x || tplayer->y) block, AFTER the
+   // delta/room checks. Only run if neither of them already fired.
+   } else {
+       static long ar_oldtpx, ar_oldtpy;
+       static long ar_newtpx, ar_newtpy;
+       static long ar_dtpx, ar_dtpy;
+       getscreenoffset((long)tplayer->x, (long)tplayer->y,
+                       &ar_oldtpx, &ar_oldtpy);
+       getscreenoffset(roomsync_targetx, roomsync_targety,
+                       &ar_newtpx, &ar_newtpy);
+       ar_dtpx = ar_newtpx - ar_oldtpx;
+       ar_dtpy = ar_newtpy - ar_oldtpy;
+       if (ar_dtpx < -3 || ar_dtpx > 3 ||
+           ar_dtpy < -3 || ar_dtpy > 3) {
+           tplayer->resync = 1;
+       }
+   }
+   ```
+
+   This also covers the symmetric case of walking *out* of a clamped
+   region into the default zone, the gargoyle `y` edges at `y=256`
+   and `y=512`, the overworld edge at `x/y=1023`, and any future
+   region boundary added to `getscreenoffset()`.
+
+Both P1.1 guards are tagged `ROOMSYNC-P1.1:` in `loop_host.cpp`.
+
+### P1.2 follow-up: periodic safety-resync heartbeat (June 2026)
+
+P1 and P1.1 together cover every observable *transition* — teleport,
+room boundary, sub-map / region-clamp camera jump, first scene
+update. But they're all **event-based**: the host only re-evaluates
+the resync decision when the player's avatar coordinate changes.
+
+A player who sits completely still in a busy area (the original "shop
+reproducer": "after sitting still in the shop for a while I eventually
+lost control of the player") can still experience slow drift in their
+per-player `tplayer->mv_x[]` slot order over time. Plausible drift
+sources, none of which surface as a player coord delta:
+
+- NPC scheduled movement reshuffling slot indices as nearby merchants
+  walk in and out of the mover transmit window.
+- Object spawn / despawn (timed candles burning out, dropped items
+  decaying, monster respawn timers) inside the window.
+- Mover object pointer reuse after `OBJrelease` / `OBJnew` -- the
+  diff encoder's `mv_object[i] == mv_object[i2]` identity check is
+  pointer-equality, so a freed-and-reallocated pointer can match the
+  *wrong* identity if it happens to be the same address.
+- Other-player movement through the player's window.
+
+P1.2 puts a **bounded self-heal ceiling** on any such drift: a
+host-only `resync_timer` on each `player` struct accumulates `et`
+each scene-update tick, and once it crosses
+`ROOMSYNC_HEARTBEAT_SECONDS` (defined in `define_both.h`, currently
+`60.0f`) the host force-sets `resync = 1` and zeroes the timer. The
+existing resync handler then flushes both ends and rebuilds cleanly.
+
+```cpp
+// Added at the top of every scene-update build, BEFORE the existing
+// P1 / P1.1 event-based triggers, so heartbeat counts toward the
+// trigger evaluation.
+if (tplayer->x || tplayer->y) {
+    tplayer->resync_timer += et;
+    if (tplayer->resync_timer >= ROOMSYNC_HEARTBEAT_SECONDS) {
+        tplayer->resync = 1;
+        tplayer->resync_timer = 0.0f;
+    }
+} else {
+    tplayer->resync_timer = 0.0f;
+}
+```
+
+Design choices:
+
+- **60 seconds.** Short enough that the user notices at most one
+  minute of degraded behaviour before recovery, long enough that the
+  resync packet (a flush + full mover/sobj add list — typically a few
+  KB on a dense area like the shop) is amortised cleanly over the
+  per-player bandwidth budget. Tunable via the
+  `ROOMSYNC_HEARTBEAT_SECONDS` macro without any code change.
+
+- **`resync_timer` is host-only state.** It lives on the `player`
+  struct (so it's allocated and zeroed by the existing
+  `malloc` + `ZeroMemory` `NETconnect` path) but the client never
+  reads or writes it. The struct layout change is therefore not a
+  wire-protocol change. `U6O_VERSION` is intentionally NOT bumped.
+
+- **Skip while `tplayer->x == 0 && tplayer->y == 0`.** That's the
+  P1.1 first-scene state; the first-scene rule already fires a
+  resync there and we don't want to double-trigger. Zeroing the
+  timer in this branch also means the heartbeat clock starts from
+  "first frame with a real position", not from `NETconnect`.
+
+- **Phase-staggered naturally.** Different players connect at
+  different times, so their heartbeat phases are inherently
+  decorrelated -- no thundering herd of simultaneous resyncs across
+  the player population.
+
+Tagged `ROOMSYNC-P1.2:` in `src/common/data_both.h` (field),
+`src/common/define_both.h` (threshold), and `src/server/loop_host.cpp`
+(trigger).
+
 ### Client-side use ([`src/client/loop_client.cpp`](../../src/client/loop_client.cpp))
 
 The two camera-follow override sites (scene-update at packet-31 / packet-35
@@ -264,6 +410,9 @@ warning unrelated to this work).
 | Spam `/RESYNC` | Identical behaviour to pre-fix (resync was always available manually). |
 | Walk one tile across a basement door (`(1280, y) ↔ (1279, y)`) | Camera re-anchors; no mover ghosts on either side. |
 | Add a NEW basement to `gameRooms[]` (no other code change) | Same correct behaviour at the new coordinates without per-site patches. |
+| **Cold server start, log in with saved position inside the shop (`x=1280..1341, y=376..432`)** | **P1.1: First scene update fires as packet-35 resync, avatar is visible & responsive from the first frame.** |
+| **Walk from gargoyle land into the shop (cross `x=1279 → x=1280`)** | **P1.1: Camera-jump guard fires resync, mover slot 0 stays bound to the avatar across the transition.** |
+| **Sit completely still in the shop for > `ROOMSYNC_HEARTBEAT_SECONDS` (default 60s)** | **P1.2: Heartbeat fires a forced resync; avatar stays controllable indefinitely. The exact symptom "after sitting still in the shop for a while I lost control" no longer reproduces because any accumulated drift self-heals at most once per minute.** |
 
 ### Adding a new room
 
@@ -293,7 +442,9 @@ Constraints:
 |---|---|
 | `src/common/function_both.h` | `GameRoom`, `getroom()`, `sameroom()` declarations. |
 | `src/common/function_both.cpp` | Registry, `getroom()`, `sameroom()` definitions; cleaned stale basement comment in `getscreenoffset()` / `getscreenoffset_legacy()`. |
-| `src/server/loop_host.cpp` | (1) Auto-resync trigger at top of scene update. (2) `gg_basement_room` → cached `playerroom_*` from `getroom()`. (3+4) Sobj + mover fill loops use cached bounds. All four edits tagged `ROOMSYNC-P1:`. |
+| `src/common/data_both.h` | `resync_timer` field on `player` (P1.2). |
+| `src/common/define_both.h` | `ROOMSYNC_HEARTBEAT_SECONDS` macro (P1.2). |
+| `src/server/loop_host.cpp` | (1) Auto-resync trigger at top of scene update (P1) + first-scene and camera-anchor-jump guards (P1.1) + periodic safety-resync heartbeat (P1.2). (2) `gg_basement_room` → cached `playerroom_*` from `getroom()`. (3+4) Sobj + mover fill loops use cached bounds. All edits tagged `ROOMSYNC-P1:` / `ROOMSYNC-P1.1:` / `ROOMSYNC-P1.2:`. |
 | `src/client/loop_client.cpp` | Two camera-follow overrides (scene-update intake + per-frame render) call `getroom()` instead of hardcoding the basement bounds. Tagged `ROOMSYNC-P1:`. |
 
 ## Relationship to existing work
