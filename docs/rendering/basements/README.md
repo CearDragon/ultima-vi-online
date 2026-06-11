@@ -24,6 +24,35 @@ with that room's bounds: add a host room flag and bound the sobj + mover fill
 loops to it in `src/server/loop_host.cpp`, and add the follow-camera override at
 both client camera sites in `src/client/loop_client.cpp`.
 
+## Global safety net: pin the local avatar to its logical position
+
+The room-specific patches above all chase the same underlying fragility: the
+local player's own avatar is rendered from the index-based mover delta list,
+which can desync for many reasons (teleport, login / player-slot reuse,
+redirector overflow, a single dropped/duplicated index). When it desyncs, the
+avatar slot drifts away from the camera and you get "the camera moves logically
+but the avatar sprite is stuck / invisible" -- anywhere, not just in a room.
+
+There is a single global fix for the *avatar* (independent of all the room
+work): the scene-update header `tplayer->x`/`tplayer->y` is the authoritative
+avatar position the camera already follows, and the host stores the avatar's
+own mover at that exact world tile (`mv_x[i] = mapx`). So at the end of the
+client's type-31 handler (`src/client/loop_client.cpp`), pin our own mover
+entry to `(tplayer->x, tplayer->y)` every update:
+
+- Identify "self" via `clientplayerid`; bootstrap it from a player-mover sitting
+  on the logical tile (true the frame the avatar is added, e.g. right after
+  login/resync, before the slower name-match path resolves `clientplayerid`).
+- Set that entry's `mv_x`/`mv_y` to the logical position. This is **self-healing**
+  (it converges the client value toward the host's, since both equal the avatar's
+  real position) and a **no-op when already in sync**, so it does not perturb the
+  wire protocol.
+
+This guarantees the avatar always renders at the camera centre everywhere. The
+room patches remain worthwhile because they keep the *rest* of the scene correct
+(no foreign-NPC bleed, correct mover encoding, clean index sync for animation),
+but the avatar itself no longer depends on perfect mover-list sync.
+
 ## Core model to keep in mind
 
 There are two coordinate frames active at once.

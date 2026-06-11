@@ -6729,6 +6729,42 @@ mover_add_getstate_next: if (BITSget(t,&bitsi,1)){
                          goto mover_add_next;
                 }
 
+                // GLOBAL local-avatar follow fix: the player's own avatar is drawn
+                // from the mover list, but the index-based mover delta protocol can
+                // desync (teleport, login / player-slot reuse, redirector overflow, a
+                // dropped/duplicated index, ...) and the avatar's slot drifts off the
+                // camera -- "the camera moves logically but the avatar sprite is stuck
+                // or vanishes." The scene-update header (tplayer->x/y) is the
+                // authoritative position the camera already follows, and the host
+                // stores the avatar's own mover at that same real world tile (mv_x =
+                // mapx), so pinning our own mover entry to (tplayer->x, tplayer->y)
+                // every update re-syncs it toward the host value (self-healing, and a
+                // no-op when already in sync) and guarantees the avatar always renders
+                // at the camera centre anywhere in the world. clientplayerid identifies
+                // "self"; bootstrap it from a player-mover sitting on the logical tile
+                // (true the frame the avatar is added, e.g. right after login/resync,
+                // before the slower name-match path resolves clientplayerid).
+                {
+                    long si;
+                    if (clientplayerid == 0) {
+                        for (si = 0; si < tplayer->mv_i; si++) {
+                            if (tplayer->mv_playerid[si] && (tplayer->mv_x[si] == tplayer->x) && (tplayer->mv_y[si] == tplayer->y)) {
+                                clientplayerid = tplayer->mv_playerid[si];
+                                break;
+                            }
+                        }
+                    }
+                    if (clientplayerid) {
+                        for (si = 0; si < tplayer->mv_i; si++) {
+                            if (tplayer->mv_playerid[si] == clientplayerid) {
+                                tplayer->mv_x[si] = tplayer->x;
+                                tplayer->mv_y[si] = tplayer->y;
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 tplayer=tplayer_backup;
                 goto CLIENT_donemess;
       }//31
