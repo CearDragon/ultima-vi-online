@@ -1950,6 +1950,12 @@ if
                 // Same room-bound streaming model as gg_basement_room --
                 // see docs/rendering/basements/README.md.
                 static unsigned char shop_2f_room;
+                // Per-player-slot latch: set while the selected player is inside an
+                // isolated room so the one-shot entry resync below fires exactly once
+                // per entry. A separate latch is required because the resync flush
+                // zeroes tplayer->x/y, so "was in room last update" cannot be derived
+                // from the wire-tracking position. Indexed by tpl (playerlist[1024]).
+                static unsigned char player_in_isolated_room[1024];
 
                 if (!tplayer->updatemessage) {
                     txtNEWLEN(t, -1048576); //create 1MB buffer
@@ -2019,6 +2025,23 @@ if
                     if ((x >= 1280) && (x <= 1291) && (y >= 319) && (y <= 333)) gg_basement_room = 1;
                     shop_2f_room = 0;
                     if ((x >= 1280) && (x <= 1340) && (y >= 395) && (y <= 432)) shop_2f_room = 1;
+                    // One-shot resync when ENTERING an isolated room by any means
+                    // (ladder, login already inside, teleport, spell). The first view of
+                    // such a room can fire one-time global state -- e.g. waking the shop's
+                    // downstairs NPC through the type-416 view hole during the object-
+                    // activation scan -- which desyncs the incremental mover stream and
+                    // sticks the avatar to the entry tile while the camera follows. A
+                    // type-35 resync rebuilds the client mover/object buffers from scratch
+                    // and is immune to it. Latched per slot so it fires once per entry
+                    // (NOT per tick -- a per-tick resync would kill walk animation).
+                    if (gg_basement_room || shop_2f_room) {
+                        if (!player_in_isolated_room[tpl]) {
+                            player_in_isolated_room[tpl] = 1;
+                            tplayer->resync = 1;
+                        }
+                    } else {
+                        player_in_isolated_room[tpl] = 0;
+                    }
 
                     //does screen+1 fit inside current buffer?
                     // RW sobj-fix: screen+1 in legacy frame grew from [tpx-1, tpx+32]
@@ -23721,18 +23744,6 @@ if
                                 //}
                                 //}
                                 partyadd(tplayer, x2, y2);
-                                // shop-2f / gg-basement fix: a ladder into an isolated room
-                                // needs a one-time clean resync. The first shop view after
-                                // server start activates the downstairs shopkeeper through the
-                                // type-416 view hole (object info |= 32768, done once); that
-                                // cold dormant->active transition desyncs the incremental mover
-                                // stream so the avatar sticks to the ladder while the camera
-                                // still follows. A resync (type 35) rebuilds the client
-                                // mover/object buffers from scratch and is immune to the
-                                // transient; harmless (one clean rebuild) on later entries.
-                                // See docs/map_rendering/README.md step 2.
-                                if ((x2 >= 1280) && (x2 <= 1291) && (y2 >= 319) && (y2 <= 333)) tplayer->resync = 1;
-                                if ((x2 >= 1280) && (x2 <= 1340) && (y2 >= 395) && (y2 <= 432)) tplayer->resync = 1;
                             } //->craft
                             goto finishuse;
                         }

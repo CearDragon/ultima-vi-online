@@ -134,12 +134,22 @@ mover stream, so the avatar sticks to the ladder while the camera follows.
 Every entry afterwards finds the object already active, so only the first entry
 after server start breaks -- the classic "works after the first time" tell.
 
-Fix: when a teleport/ladder lands the party inside the room, set
-`tplayer->resync = 1` (see the ladder handler in `src/server/loop_host.cpp`).
-The next scene update sends a type-35 resync that rebuilds the client
-mover/object buffers from scratch, which is immune to the transient.
+Fix: detect room *entry* (rising edge) in the host scene update and set
+`tplayer->resync = 1` once. Do **not** hook this to the ladder handler alone --
+a player can arrive in the room without using a ladder (logging in already
+inside, a teleport/spell, an admin move), and those paths would be missed.
+Detect the edge with a per-player-slot latch (`player_in_isolated_room[tpl]`):
+set it + resync when the player is in the room and the latch is clear, clear it
+when the player is outside. The next scene update sends a type-35 resync that
+rebuilds the client mover/object buffers from scratch, which is immune to the
+transient. See `src/server/loop_host.cpp` just after `shop_2f_room` is set.
 
-This is a **one-shot resync on the entry event**, which is different from -- and
+Why a separate latch instead of comparing the previous position: the resync
+flush zeroes `tplayer->x`/`tplayer->y`, so deriving "was I in the room last
+update" from the wire-tracking position would re-fire every tick -- an infinite
+resync loop that kills animation. The latch survives the flush.
+
+This is a **one-shot resync on the entry edge**, which is different from -- and
 must not be confused with -- a per-tick resync while standing in the room (see
 below), which kills animation.
 
@@ -162,7 +172,7 @@ If camera moves but avatar is pinned, suspect wrong mover stream origin or stale
 - Bound sobj streaming to the room when room flag is active.
 - Bound mover streaming to the room when room flag is active.
 - For rooms with type-416 view holes, also reject redirected movers post-redirect.
-- Set `tplayer->resync = 1` on the teleport/ladder event that lands the party in the room (one-shot, not per tick).
+- Detect room entry (rising edge, per-slot latch) in the scene update and set `tplayer->resync = 1` once per entry -- covers ladder, login-inside, and teleport (one-shot, not per tick).
 - Verify no per-tick forced resync remains tied to room presence.
 - Verify client decode still uses legacy decode anchors where required (`tpx_legacy` and `tpy_legacy`).
 
@@ -186,6 +196,7 @@ Use this order when debugging basement rendering bugs.
 - Confirm no disappearance after several seconds of movement.
 - Repeat entry and exit cycle several times.
 - **Restart the server, then enter the room for the very first time and move immediately** (catches one-time global init / activation transients).
+- **Log out inside the room, restart the server, log back in inside the room, and move immediately** (catches entry that bypasses the ladder handler).
 
 ## Data flow map
 
