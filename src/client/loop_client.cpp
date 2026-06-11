@@ -6244,6 +6244,12 @@ scene_update_message:
         static long tpx_legacy, tpy_legacy;
         getscreenoffset_legacy(x,y,&tpx_legacy,&tpy_legacy);
         getscreenoffset(x,y,&tpx,&tpy);
+        if ((x>=1280)&&(x<=1340)&&(y>=395)&&(y<=432)){
+          // Client-only follow camera for the Brit 2nd-floor shop.
+          // Mirrors the gg basement override -- see basements README.
+          tpx=x-(viewTilesX()/2-1);
+          tpy=y-(viewTilesY()/2-1);
+        }
         if ((x>=1280)&&(x<=1291)&&(y>=319)&&(y<=333)){
           // Client-only follow camera for Guardian Guild basement. Common
           // getscreenoffset() stays fixed here for host/wire compatibility;
@@ -7171,6 +7177,12 @@ CLIENT_donemess:
 
     //calculate tpx,tpy from current x,y
     getscreenoffset(tplayer->x,tplayer->y,&tpx,&tpy);
+    if ((tplayer->x>=1280)&&(tplayer->x<=1340)&&(tplayer->y>=395)&&(tplayer->y<=432)){
+      // Keep per-frame render/input camera in sync with scene-update
+      // follow override for the Brit 2nd-floor shop (see basements README).
+      tpx=tplayer->x-(viewTilesX()/2-1);
+      tpy=tplayer->y-(viewTilesY()/2-1);
+    }
     if ((tplayer->x>=1280)&&(tplayer->x<=1291)&&(tplayer->y>=319)&&(tplayer->y<=333)){
       // Keep per-frame render/input camera in sync with scene-update follow
       // override for this basement.

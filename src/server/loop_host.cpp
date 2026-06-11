@@ -1945,6 +1945,11 @@ if
                 static unsigned short *tp2;
                 static unsigned char sceneupdaterequired;
                 static unsigned char gg_basement_room;
+                // Brit 2nd-floor shop is an isolated room on the x=1280
+                // sub-map boundary (gargoyle lands abuts it to the west).
+                // Same room-bound streaming model as gg_basement_room --
+                // see docs/rendering/basements/README.md.
+                static unsigned char shop_2f_room;
 
                 if (!tplayer->updatemessage) {
                     txtNEWLEN(t, -1048576); //create 1MB buffer
@@ -2012,6 +2017,8 @@ if
                     getscreenoffset(x, y, &tpx, &tpy);
                     gg_basement_room = 0;
                     if ((x >= 1280) && (x <= 1291) && (y >= 319) && (y <= 333)) gg_basement_room = 1;
+                    shop_2f_room = 0;
+                    if ((x >= 1280) && (x <= 1340) && (y >= 395) && (y <= 432)) shop_2f_room = 1;
 
                     //does screen+1 fit inside current buffer?
                     // RW sobj-fix: screen+1 in legacy frame grew from [tpx-1, tpx+32]
@@ -2330,6 +2337,9 @@ if
                             mapy = tpy + y - SOBJ_TX_OFFY;
                             if (gg_basement_room) {
                                 if ((mapx < 1280) || (mapx > 1291) || (mapy < 319) || (mapy > 333)) goto objbuffer_outofrange;
+                            }
+                            if (shop_2f_room) {
+                                if ((mapx < 1280) || (mapx > 1340) || (mapy < 395) || (mapy > 432)) goto objbuffer_outofrange;
                             }
                             bufx = mapx - tplayer->sobj_bufoffx;
                             bufy = mapy - tplayer->sobj_bufoffy;
@@ -2657,6 +2667,9 @@ if
 
                             if (gg_basement_room) {
                                 if ((mapx < 1280) || (mapx > 1291) || (mapy < 319) || (mapy > 333)) goto moverbuffer_outofrange;
+                            }
+                            if (shop_2f_room) {
+                                if ((mapx < 1280) || (mapx > 1340) || (mapy < 395) || (mapy > 432)) goto moverbuffer_outofrange;
                             }
                             if (mapx < 0) goto moverbuffer_outofrange;
                             if (mapx > 2047) goto moverbuffer_outofrange;

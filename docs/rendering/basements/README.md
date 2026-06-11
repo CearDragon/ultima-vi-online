@@ -6,14 +6,23 @@ This guide documents how to keep rendering stable when a player enters a basemen
 This includes camera follow behavior, mover and scene streaming boundaries, and walk animation continuity.
 Use this as the first reference before touching viewport math, mover packet formats, or scene buffer logic.
 
-## Current known basement room
+## Current known isolated rooms
 
-The Guardian Guild basement currently uses these world bounds.
+These rooms use the room-bound streaming + client follow-camera model below.
+Both sit on the `x: 1280` sub-map boundary (the gargoyle-lands sub-map abuts
+them to the west), so unbounded host streaming bleeds foreign movers/objects in
+and desyncs the mover stream — the "player gets stuck on the ladder, then turns
+invisible" bug.
 
-- `x: 1280..1291`
-- `y: 319..333`
+| Room | World bounds | Host flag |
+| --- | --- | --- |
+| Guardian Guild basement | `x: 1280..1291`, `y: 319..333` | `gg_basement_room` |
+| Brit 2nd-floor shop | `x: 1280..1340`, `y: 395..432` | `shop_2f_room` |
 
-If you add another basement or isolated custom room, follow the same pattern with that room's bounds.
+If you add another basement or isolated custom room, follow the same pattern
+with that room's bounds: add a host room flag and bound the sobj + mover fill
+loops to it in `src/server/loop_host.cpp`, and add the follow-camera override at
+both client camera sites in `src/client/loop_client.cpp`.
 
 ## Core model to keep in mind
 
