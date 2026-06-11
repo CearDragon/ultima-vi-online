@@ -23721,6 +23721,18 @@ if
                                 //}
                                 //}
                                 partyadd(tplayer, x2, y2);
+                                // shop-2f / gg-basement fix: a ladder into an isolated room
+                                // needs a one-time clean resync. The first shop view after
+                                // server start activates the downstairs shopkeeper through the
+                                // type-416 view hole (object info |= 32768, done once); that
+                                // cold dormant->active transition desyncs the incremental mover
+                                // stream so the avatar sticks to the ladder while the camera
+                                // still follows. A resync (type 35) rebuilds the client
+                                // mover/object buffers from scratch and is immune to the
+                                // transient; harmless (one clean rebuild) on later entries.
+                                // See docs/map_rendering/README.md step 2.
+                                if ((x2 >= 1280) && (x2 <= 1291) && (y2 >= 319) && (y2 <= 333)) tplayer->resync = 1;
+                                if ((x2 >= 1280) && (x2 <= 1340) && (y2 >= 395) && (y2 <= 432)) tplayer->resync = 1;
                             } //->craft
                             goto finishuse;
                         }
