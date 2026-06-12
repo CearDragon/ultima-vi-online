@@ -1955,6 +1955,14 @@ if
                 // ROOMSYNC-P1: scratch values for the pre-flush auto-resync check.
                 static long roomsync_targetx, roomsync_targety;
                 static long roomsync_dx, roomsync_dy;
+                // ROOMSYNC-P1.3: DISPLAY tile of the mover currently being added.
+                // A type-416 view redirector (the shop interior at x=1280..1341 /
+                // y=395..432 is built almost entirely from redirectors pointing back
+                // to the overworld building footprint at x~330..376 / y~361..394)
+                // overwrites mapx/mapy with the redirect SOURCE tile while the fill
+                // loop walks it. Preserve the in-window DISPLAY tile here, exactly
+                // like the sobj loop keeps bufx/bufy from before its own redirect.
+                static long mv_dispx, mv_dispy;
 
                 if (!tplayer->updatemessage) {
                     txtNEWLEN(t, -1048576); //create 1MB buffer
@@ -2824,6 +2832,10 @@ if
                             if (mapx > 2047) goto moverbuffer_outofrange;
                             if (mapy < 0) goto moverbuffer_outofrange;
                             if (mapy > 1023) goto moverbuffer_outofrange;
+                            // ROOMSYNC-P1.3: remember the display tile before the view-
+                            // redirector branch below can overwrite mapx/mapy.
+                            mv_dispx = mapx;
+                            mv_dispy = mapy;
                             myobj = od[mapy][mapx];
                         mvobjskip:
                             if (myobj) {
@@ -2876,8 +2888,14 @@ if
                                 // right, and "walking just moves the camera" because the player's
                                 // own mover sprite drifted away from the real player position.
                                 // Not a wire change -- mv_x/mv_y are host-side state only.
-                                mv_x[i] = mapx;
-                                mv_y[i] = mapy;
+                                // ROOMSYNC-P1.3: store the DISPLAY tile, not the (possibly
+                                // redirected) source tile. Using the post-redirect source coord
+                                // here put movers ~950 tiles outside the transmit window inside
+                                // redirector interiors (the shop), so the diff encoder bit-packed
+                                // an out-of-range offset and corrupted the whole mover stream --
+                                // desyncing slot 0 (the avatar): character vanished, camera moved.
+                                mv_x[i] = mv_dispx;
+                                mv_y[i] = mv_dispy;
                                 mv_type[i] = myobj->type & 1023;
                                 mv_dir[i] = objgetdir(myobj->type);
                                 mv_frame[i] = OBJGETDIR_FRAME;
