@@ -74,7 +74,17 @@
 #include "loop_client_part_intro_b.cpp"   // CONTINUES: states 200/202 (login/menu)
 #include "loop_client_part_intro_c.cpp"   // CONTINUES: states 206/203/204/205 (create/transfer)
 #include "loop_client_part_intro_d.cpp"   // CONTINUES+CLOSES: state 201 + timer tail + `}`
-#include "loop_client_part_00.cpp"
+// LCS-P4: the in-game per-frame block `{ ... }`, split across five files at
+// interior depth-1 brace seams. MUST stay in this order and contiguous:
+// game_open OPENS the `{` block; net / world_render / player_walk CONTINUE it;
+// panel_draw CONTINUES + CLOSES it (its trailing `}` balances the opener).
+// Net (sobj/mover decode) is WIRE-COUPLED and world_render is a HOT PATH —
+// both are move-only; do not edit, no STL, do not bump U6O_VERSION.
+#include "loop_client_part_game_open.cpp"     // OPENS: `{` + early per-frame setup
+#include "loop_client_part_net.cpp"           // CONTINUES: CLIENT_readnext..read-local-message (sobj/mover decode)
+#include "loop_client_part_world_render.cpp"  // CONTINUES: render/lighting/floating-text (HOT PATH)
+#include "loop_client_part_player_walk.cpp"   // CONTINUES: skiprefresh2 + movement + tmap/upflags
+#include "loop_client_part_panel_draw.cpp"    // CONTINUES+CLOSES: panel draw + endgame + sfx shift + `}`
 // LCS-P2.4: part_refresh_tail — the shared `intro_refresh:` refresh block
 // through EOF (MIDI/WAV info loops, status-message timing, font-leak
 // workaround; former lines ~12676..13074). MUST stay LAST: `intro_refresh:` is

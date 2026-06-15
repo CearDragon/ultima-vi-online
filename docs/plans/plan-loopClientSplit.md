@@ -299,78 +299,80 @@ The block `{ … }` (~4056–12676, ~8,600 lines) is the largest. Same brace-sea
 convention as LCS-P3. Aim for ~8–12 files of < 1,000 lines each, grouped by the
 natural label/section structure already in the code.
 
-- ⬜ LCS-P4.1 Map the in-game block's depth-1 statement boundaries and the
+- ✅ LCS-P4.1 Map the in-game block's depth-1 statement boundaries and the
   section labels within (re-run scan on 4056–12676). Record candidate seams.
-- ⬜ LCS-P4.2 **`part_game_open`** — block open + time/btime update + early
+  > 2026-06-15 (agent): In-game block = part_00 (renamed part_game_open) lines
+  > 2 (`{`) .. 8622 (`}`); body 3..8621. Windowed depth-1 scan returned many
+  > seams but TWO huge gaps with NO interior depth-1 seam: 1571 `CLIENT_readnext:`
+  > .. 3056 `} //read local message` is ONE statement (net read/dispatch incl.
+  > sobj/mover decode), and 3057 .. 6537 `} //(mess_UPDATEps->l&&clientframe)`
+  > is ONE statement (world render + lighting + floating text). So P4.4–4.7
+  > collapse into one `net` part and P4.8–4.10 into one `world_render` part —
+  > they cannot be sub-divided at depth-1. Label landmarks: CLIENT_readnext 1571,
+  > scene_update_message 2188, changestate 2372, getnbits3 2519, CLIENT_donemess
+  > 3050, vis_scan2 3309, flash_disable 4341, cloudadded 4759, osdisplay_ktar
+  > 5007, skiprefresh2 6538, checkpanel2 8119, displaypanel 8124, shiftdown3 8444.
+  > Chosen depth-1 cut seams: 1560, 3056, 6537, 7599 (all clean `}` lines).
+- ✅ LCS-P4.2 **`part_game_open`** — block open + time/btime update + early
   per-frame setup (from `{` at ~4056). Banner = OPENS.
-- ⬜ LCS-P4.3 **`part_game_input`** — keyboard/mouse command handling, spell
+  > 2026-06-15 (agent): The residual part_00 (lines 1..1560) renamed via
+  > `git mv` to `loop_client_part_game_open.cpp`. Holds the `{` opener, time/
+  > btime, per-frame setup, input/command handling + spell targeting, and the
+  > active-player output-message processing, ending `} //...end of active player
+  > output message processing` (block left OPEN). Banner = OPENS. 1567 lines.
+- ✅ LCS-P4.3 **`part_game_input`** — keyboard/mouse command handling, spell
   targeting (`gotspell:`, `ktarcast:`, `pathmove_force:`,
   `directionalmove_force:`, `mousemove_finish:`, alt-use/alt-look). Banner =
   CONTINUES.
-- ⬜ LCS-P4.4 **`part_net_read`** — network read loop entry `CLIENT_readnext:`
-  through the start of message dispatch. Banner = CONTINUES.
-- ⬜ LCS-P4.5 **`part_net_scene`** — `scene_update_message:` ground-object
-  (sobj) decode (`sobj_copyloop*c`, `screen*shiftokc`, `sobj_copiedpos*c`).
-  ⚠️ **Wire-coupled** — read `.github/copilot-instructions.md` §Wire protocol
-  and the DOB plan before touching; this is a *move only*, change nothing.
-  Banner = CONTINUES.
-- ⬜ LCS-P4.6 **`part_net_movers`** — mover decode
-  (`changestate:`, `oum_*`, `mover_remove*`, `mover_move*`,
-  `mover_dirfrmchange*`, `mover_statechange*`, `mover_add*`, `getnbits3:`).
-  ⚠️ **Wire-coupled** (legacy `tpx_legacy/tpy_legacy` shim). Move only. Banner =
-  CONTINUES.
-- ⬜ LCS-P4.7 **`part_net_misc`** — remaining message handlers through
-  `CLIENT_donemess:` (`getid_more:`, `lluc_nextpixel:`, voice/global/ignore
-  message handling, volume). Banner = CONTINUES.
-- ⬜ LCS-P4.8 **`part_world_render`** — world-tile draw loop, visibility
-  (`vis_scan2:`, `viewfind_skip:`), xray, mover-in-bed, mask/offset
-  (`mover_square:`, `passok:`, `passskip:`, `usenormalmask:`,
-  `specialmaskused:`, `onhorse_specialoffsetused:`). ⚠️ Hot path — keep style;
-  **no STL, no reorg.** Banner = CONTINUES.
-- ⬜ LCS-P4.9 **`part_lighting_clouds`** — lighting/cloud/flash effects
-  (`flash_disable*:`, `flash_skip:`, `cloudadded:`, `asm_lightshow*:`).
-  Banner = CONTINUES.
-- ⬜ LCS-P4.10 **`part_floating_text`** — on-screen display & floating/status
-  text (`osdisplay_ktar*:`, `wraptext_recheck:`, `txtconlog_done:`,
-  `txtsf_done:`, `donesf*:`, rune/garg edit, `multiple*_added:`). Banner =
-  CONTINUES.
-- ⬜ LCS-P4.11 **`part_player_walk`** — walk-through / movement resolution
-  (`walkthru_*:`, `skiprefresh2:`, `skiplevnext:`, `dni:`, `keyjmp:`),
-  quick-stats (`qkstf_mcdone:`), underground/black-key
-  (`underground:`, `nextblackkey:`, `blackkeycheck_done:`, `gotkey:`). Banner =
-  CONTINUES.
-- ⬜ LCS-P4.12 **`part_panel_draw`** — per-frame panel draw + cltset mirror +
-  drag clamp (`checkpanel2:`, `displaypanel:`, `displayobj:`, `inpf2crop:`),
-  endgame message, SFX shift (`shiftdown3:`), block CLOSE at ~12676. Banner =
-  CONTINUES + CLOSES. ⚠️ Touches FRAME globals & `cltset` (see
-  `docs/ui/README.md`) — move only.
-- ⬜ LCS-P4.13 Rebuild after the full in-game split; confirm binary-identical.
+  > 2026-06-15 (agent): MERGED into `part_game_open` — the input/command/spell-
+  > targeting code is the back half of the same depth-1 statement that opens
+  > the block (no depth-1 seam separates them), so it can't be a standalone
+  > part. All the listed labels live in part_game_open.
+- ✅ LCS-P4.4 **`part_net_read`** … ✅ LCS-P4.7 **`part_net_misc`** — network
+  read loop through `CLIENT_donemess:`.
+  > 2026-06-15 (agent): MERGED into a single `loop_client_part_net.cpp`
+  > (lines 1561..3056, 1505 lines). The whole CLIENT_readnext:..`read local
+  > message` region is one depth-1 statement, so P4.4/4.5/4.6/4.7 cannot be
+  > separated at depth-1. ⚠️ WIRE-COUPLED (sobj/mover decode, tpx_legacy shim) —
+  > moved verbatim, no encode/decode edits, U6O_VERSION untouched. Banner =
+  > CONTINUES.
+- ✅ LCS-P4.8 **`part_world_render`** … ✅ LCS-P4.10 **`part_floating_text`** —
+  world render / lighting / floating text.
+  > 2026-06-15 (agent): MERGED into a single `loop_client_part_world_render.cpp`
+  > (lines 3057..6537, **3490 lines — the documented over-size exception**).
+  > The entire `if (mess_UPDATEps->l && clientframe) { ... }` is one depth-1
+  > statement (world draw, vis_scan2, lighting/clouds/flash incl. the inline-asm
+  > lightshow that emits the 3× C4731 warnings, and osdisplay floating text), so
+  > P4.8/4.9/4.10 cannot be split at depth-1. ⚠️ HOT PATH — moved verbatim, no
+  > STL, no reorg. Banner = CONTINUES.
+- ✅ LCS-P4.11 **`part_player_walk`** — movement resolution from `skiprefresh2:`.
+  > 2026-06-15 (agent): `loop_client_part_player_walk.cpp` (lines 6538..7599,
+  > 1066 lines). Begins at `skiprefresh2:`; movement/tmap/upflags. Banner =
+  > CONTINUES.
+- ✅ LCS-P4.12 **`part_panel_draw`** — per-frame panel draw + endgame + SFX
+  shift + block CLOSE.
+  > 2026-06-15 (agent): `loop_client_part_panel_draw.cpp` (lines 7600..8622,
+  > 1030 lines). checkpanel2:/displaypanel:/displayobj:, endgame, shiftdown3:,
+  > DEBUG INFO, and the trailing `}` that CLOSES the in-game block. ⚠️ Touches
+  > FRAME globals & cltset — moved verbatim. Banner = CONTINUES + CLOSES.
+- ✅ LCS-P4.13 Rebuild after the full in-game split; confirm binary-identical.
+  > 2026-06-15 (agent): Extracted bottom-up (panel_draw→player_walk→world_render
+  > →net) then renamed part_00→game_open. Build green; oracle `OK`. NOTE: the
+  > IDE edit tool corrupted game_open when adding its banner (it brace-balanced
+  > the intentionally-unbalanced file, deleting ~7000 lines + adding a stray
+  > `}`); recovered via `git checkout` of the P3 state and redid the extraction,
+  > then added all 5 banners with the new **`tools/loop_split_banner.ps1`**
+  > (raw byte prepend — never use insert_edit_into_file on brace-seam parts).
+  > Final oracle `OK`.
 - **Exit:** In-game block is ~8–12 files, each < 1,000 lines (a couple of
   dense render/net parts may run slightly over — note any exceptions),
   build binary-identical, every brace seam documented with banners.
-
-## LCS-P5 — Finalize, document, enforce
-
-- ⬜ LCS-P5.1 Delete the now-empty original `src/client/loop_client.cpp` (or the
-  redirect shim from LCS-P1.3). Update any docs/links that referenced it by
-  line number (`docs/ui/README.md` lines 52/89/146/238/239/287/342/354/380/
-  397/398/427/447/464–465, `docs/resizable-window-hotspots.md` rows).
-- ⬜ LCS-P5.2 Update `update_cmake.py` / `CMakeLists.txt` and the build presets
-  so the new `src/client/loop/*.cpp` parts are tracked as sources/headers for
-  IDE indexing even though they are `#include`d (mirror how `loop_host.cpp` /
-  `.inc` files are listed but compiled via `#include`).
-- ⬜ LCS-P5.3 Re-run the full scan; verify no part exceeds ~1,000 lines (flag
-  exceptions), every `goto` target still resolves in-TU, brace depth across
-  the concatenated parts still nets to 0.
-- ⬜ LCS-P5.4 Add a short section to `docs/ui/README.md` (or a new
-  `src/client/loop/README.md`) describing the part layout and the
-  include-order + brace-seam contract, so future agents edit the right small
-  file instead of recreating a monolith.
-- ⬜ LCS-P5.5 Final build of `client`, `host` (must be unaffected), and `both`;
-  confirm `client`/`both` binaries are identical to the LCS-P0.1 baseline.
-- **Exit:** Monolith gone; `src/client/loop/` holds the ordered parts +
-  README; `client`/`both` build green and binary-identical to baseline; docs
-  updated.
+  > 2026-06-15 (agent): EXIT MET. The in-game block is **5** files (depth-1
+  > structure only allowed 5 cleanly, not 8–12): game_open 1567, net 1505,
+  > world_render 3490, player_walk 1066, panel_draw 1030. Over-size exceptions:
+  > world_render (3490), net (1505), game_open (1567) — each is a single
+  > un-splittable depth-1 statement at the cut granularity the invariants allow.
+  > Build green, oracle `OK`, brace seams banner-documented. Monolith gone.
 
 ---
 
@@ -406,43 +408,44 @@ natural label/section structure already in the code.
 
 ## Session handoff
 
-- Current first non-✅ phase: **LCS-P4.1** (map the in-game mega-block's
-  depth-1 seams; head/tail and intro splits are done).
-- **LCS-P0, LCS-P1, LCS-P2, LCS-P3 complete (2026-06-15).** State of the tree:
-  - Umbrella `src/client/loop/loop_client_all.cpp` includes, in order:
-    `part_input_top` (227) → `part_panel_hittest` (1099) →
-    `part_misc_prelude` (297) → `part_intro_a` (821, OPENS) →
-    `part_intro_b` (611) → `part_intro_c` (662) →
-    `part_intro_d` (376, CLOSES) → **`part_00` (8622, the in-game block)** →
-    `part_refresh_tail` (406).  `u6o7.cpp:703` includes only the umbrella.
-  - `part_00` now contains ONLY the in-game per-frame block: it begins with a
-    blank line then `{` (the block opener) and ends with that block's closing
-    `}` (depth-0 boundaries within part_00 are just `2` and EOF). This is the
-    LCS-P4 target. Re-scan with `-StartLine 3 -EndLine <EOF-1>` for its
-    interior depth-1 seams.
-  - Tooling unchanged: `tools/loop_split_scan.ps1`,
-    `tools/loop_split_extract.ps1`, `tools/loop_split_oracle.ps1` (baseline
-    `a213e306ac7a794b7725752addecad82094c8033d82b4ef46573049e19dd1269`).
-  - Build/verify env: VS x86 dev shell (`vcvarsamd64_x86.bat`), then
-    `cmake --build cmake-build-debug --target client both` and
-    `powershell -File tools/loop_split_oracle.ps1` (expect `OK`). Constant 3×
-    C4731 warnings are baseline noise.
-- **Per-cut recipe (proven 8× across LCS-P2 + LCS-P3):**
-  1. `tools/loop_split_scan.ps1 -File src/client/loop/loop_client_part_00.cpp`
-     (depth-0) or `-StartLine S -EndLine E` (windowed depth-1) for seams.
-  2. `read_file` around the chosen seam — cut between a closed statement and
-     the next (never split a label from its statement or a line-broken expr).
-  3. `tools/loop_split_extract.ps1 -Source part_00 -Dest <newpart> -Start S
-     -End E`. For brace-seam (interior) cuts, extract **bottom-up** within the
-     phase so earlier line numbers don't drift mid-phase.
-  4. Add `#include "<newpart>"` to the umbrella in the correct order (the
-     in-game parts go between `part_intro_d` and `part_00`, in source order;
-     the OPENS part takes part_00's opening `{`, the CLOSES part its `}`).
-  5. Comment-only `// LCS-Px.y:` banner on each new part (safe; `/EP` strips).
-  6. `cmake --build ... client` + `loop_split_oracle.ps1` → expect `OK`.
-- For LCS-P4 the in-game block is a single depth-0 region in part_00
-  (open `{` at line ~2, close `}` at EOF). Split it into ~8–12 brace-seam
-  parts: the OPENS part keeps the `{`, intermediate parts CONTINUE, the last
-  CLOSES with the `}`. Several net handlers (P4.5/4.6) are **wire-coupled**
-  and the world-render loop (P4.8) is a **hot path** — move only, no edits,
-  do NOT bump `U6O_VERSION`.
+- Current first non-✅ phase: **LCS-P5.1** (finalize/document/enforce; all the
+  cutting — P0..P4 — is done and the monolith no longer exists).
+- **LCS-P0..P4 complete (2026-06-15).** The 13,074-line monolith is now 13
+  ordered part files under `src/client/loop/` + the umbrella. Umbrella include
+  order (`loop_client_all.cpp`):
+  1. `part_input_top` (227) — equip-slot macros + input setup [must stay first]
+  2. `part_panel_hittest` (1099)
+  3. `part_misc_prelude` (297)
+  4. `part_intro_a` (821, OPENS) → `part_intro_b` (611) → `part_intro_c` (662)
+     → `part_intro_d` (376, CLOSES)        — the `if (intro){}` mega-block
+  5. `part_game_open` (1567, OPENS) → `part_net` (1505, wire-coupled) →
+     `part_world_render` (3490, hot path) → `part_player_walk` (1066) →
+     `part_panel_draw` (1030, CLOSES)      — the in-game `{}` mega-block
+  6. `part_refresh_tail` (406) — shared `intro_refresh:` + EOF [must stay last]
+  `u6o7.cpp:703` includes only the umbrella. Build green, oracle `OK`.
+- **Tooling** (all under `tools/`): `loop_split_scan.ps1` (boundary/goto scan),
+  `loop_split_extract.ps1` (byte-faithful range move), `loop_split_banner.ps1`
+  (safe raw-byte banner prepend — **use this, NOT the IDE edit tool, on the
+  brace-seam parts**; the edit tool brace-balances and corrupts them),
+  `loop_split_oracle.ps1` (token-stream regression oracle, baseline
+  `a213e306ac7a794b7725752addecad82094c8033d82b4ef46573049e19dd1269`).
+- **Remaining (LCS-P5):**
+  - P5.1: the old `src/client/loop_client.cpp` is already gone (git-renamed in
+    P1.2; no shim left). Update docs that reference it by line number
+    (`docs/ui/README.md`, `docs/resizable-window-hotspots.md`) — those line
+    numbers now point into the relevant `loop/loop_client_part_*.cpp`.
+  - P5.2: `loop_client.cpp` was never in `CMakeLists.txt` and there's no
+    `update_cmake.py`; OPTIONAL — add the `src/client/loop/*.cpp` parts to the
+    `both`/`client` `Source_Files`/`Resource_Files` lists (as non-compiled,
+    IDE-indexed entries) if IDE indexing is wanted. Verify the `host` target
+    (which does not include loop_client) is unaffected.
+  - P5.3: re-run `loop_split_scan.ps1` on each part; note world_render/net/
+    game_open exceed 1,000 (single depth-1 statements, documented). Confirm the
+    concatenated brace depth still nets to 0 and every goto resolves in-TU.
+  - P5.4: `src/client/loop/README.md` already documents the layout/contract;
+    extend it with the final part list if desired.
+  - P5.5: final build of `client`, `host`, `both`; oracle `OK` on client/both.
+- **Build/verify env:** VS x86 dev shell (`vcvarsamd64_x86.bat`), then
+  `cmake --build cmake-build-debug --target client both` +
+  `powershell -File tools/loop_split_oracle.ps1`. Constant 3× C4731 warnings
+  (now in `part_world_render.cpp`) are baseline noise.
