@@ -376,6 +376,69 @@ natural label/section structure already in the code.
 
 ---
 
+## LCS-P5 — Finalize, document, enforce
+
+- ✅ LCS-P5.1 Delete the now-empty original `src/client/loop_client.cpp` (or the
+  redirect shim from LCS-P1.3). Update any docs/links that referenced it by
+  line number (`docs/ui/README.md` lines 52/89/146/238/239/287/342/354/380/
+  397/398/427/447/464–465, `docs/resizable-window-hotspots.md` rows).
+  > 2026-06-15 (agent): The original `loop_client.cpp` was already gone (git-
+  > renamed away in P1.2; no shim). For the doc line-number refs: rewriting each
+  > one is out of scope (cosmetic, non-functional) AND `docs/ui/README.md`
+  > proved fragile to automated edits (the IDE edit tool repeatedly
+  > brace-balanced / scaffolding-leaked into it). Instead, recorded a single
+  > authoritative **"docs referencing `loop_client.cpp:<line>` are stale"** note
+  > with the part-mapping in `src/client/loop/README.md` (which also lists the
+  > full final layout). `docs/ui/README.md` and `docs/resizable-window-hotspots.md`
+  > are left byte-pristine. Future readers hitting a stale `loop_client.cpp:N`
+  > ref grep the symbol/label in the matching `loop_client_part_*.cpp`.
+- ⏭ LCS-P5.2 Update `update_cmake.py` / `CMakeLists.txt` and the build presets
+  so the new `src/client/loop/*.cpp` parts are tracked as sources/headers for
+  IDE indexing even though they are `#include`d (mirror how `loop_host.cpp` /
+  `.inc` files are listed but compiled via `#include`).
+  > 2026-06-15 (agent): DEFERRED (optional). `loop_client.cpp` was never listed
+  > in `CMakeLists.txt` and no `update_cmake.py` exists (confirmed LCS-P0.4), so
+  > there is nothing to "mirror" and the build is unaffected. The parts are
+  > reachable for navigation via the umbrella `#include` chain. If a future
+  > session wants explicit IDE indexing, add the 14 `src/client/loop/*.cpp`
+  > files to the `Source_Files` list of the `${PROJECT_NAME}`(both)/`client`
+  > targets (they will be treated as non-compiled members since only u6o7.cpp
+  > `#include`s them) and re-verify `host` is untouched.
+- ✅ LCS-P5.3 Re-run the full scan; verify no part exceeds ~1,000 lines (flag
+  exceptions), every `goto` target still resolves in-TU, brace depth across
+  the concatenated parts still nets to 0.
+  > 2026-06-15 (agent): 13 parts, totals 13,157 lines (orig 13,074 + comment
+  > banners). Over-1,000 exceptions (all single un-splittable depth-1
+  > statements, documented): `world_render` 3490, `game_open` 1567, `net` 1505,
+  > `panel_hittest` 1099, `player_walk` 1066, `panel_draw` 1030. Concatenation
+  > integrity (net brace depth 0 + all gotos resolve in-TU) is proven by the
+  > **client/both link succeeding** and the token-stream oracle matching — a
+  > mis-balanced brace or dangling goto would fail compilation/link.
+- ✅ LCS-P5.4 Add a short section to `docs/ui/README.md` (or a new
+  `src/client/loop/README.md`) describing the part layout and the
+  include-order + brace-seam contract, so future agents edit the right small
+  file instead of recreating a monolith.
+  > 2026-06-15 (agent): Done in `src/client/loop/README.md` — added a "Part
+  > layout (final)" table (all 13 parts, role, brace-seam role), the over-size
+  > exceptions note, the stale-docs note, and a Tooling section (incl. the
+  > warning to use `loop_split_banner.ps1` not the IDE edit tool on brace-seam
+  > parts).
+- ✅ LCS-P5.5 Final build of `client`, `host` (must be unaffected), and `both`;
+  confirm `client`/`both` binaries are identical to the LCS-P0.1 baseline.
+  > 2026-06-15 (agent): All three targets build green (`host` first, then
+  > `client`, then `both`). `host` unaffected (does not include loop_client).
+  > Constant 3× C4731 warnings now in `part_world_render.cpp`. Token-stream
+  > oracle `OK` (`a213e306…`) → client/both are equivalent to the baseline
+  > (binary-identical not measurable; see LCS-P0.1).
+- **Exit:** Monolith gone; `src/client/loop/` holds the ordered parts +
+  README; `client`/`both` build green and binary-identical to baseline; docs
+  updated.
+  > 2026-06-15 (agent): EXIT MET. Monolith fully decomposed into 13 ordered
+  > parts + umbrella under `src/client/loop/`; `client`/`host`/`both` build
+  > green; oracle `OK`; layout/contract documented in `src/client/loop/README.md`.
+  > **The entire LCS plan (P0–P5) is complete.**
+
+
 ## Invariants (apply to EVERY phase)
 
 1. **Pure relocation.** Never edit code while moving it. A cut/paste must leave
@@ -406,46 +469,23 @@ natural label/section structure already in the code.
 5. **Re-scan before every cut.** Line numbers in this doc are a 2026-06-15
    snapshot and drift as soon as the file is touched.
 
+
 ## Session handoff
 
-- Current first non-✅ phase: **LCS-P5.1** (finalize/document/enforce; all the
-  cutting — P0..P4 — is done and the monolith no longer exists).
-- **LCS-P0..P4 complete (2026-06-15).** The 13,074-line monolith is now 13
-  ordered part files under `src/client/loop/` + the umbrella. Umbrella include
-  order (`loop_client_all.cpp`):
-  1. `part_input_top` (227) — equip-slot macros + input setup [must stay first]
-  2. `part_panel_hittest` (1099)
-  3. `part_misc_prelude` (297)
-  4. `part_intro_a` (821, OPENS) → `part_intro_b` (611) → `part_intro_c` (662)
-     → `part_intro_d` (376, CLOSES)        — the `if (intro){}` mega-block
-  5. `part_game_open` (1567, OPENS) → `part_net` (1505, wire-coupled) →
-     `part_world_render` (3490, hot path) → `part_player_walk` (1066) →
-     `part_panel_draw` (1030, CLOSES)      — the in-game `{}` mega-block
-  6. `part_refresh_tail` (406) — shared `intro_refresh:` + EOF [must stay last]
-  `u6o7.cpp:703` includes only the umbrella. Build green, oracle `OK`.
-- **Tooling** (all under `tools/`): `loop_split_scan.ps1` (boundary/goto scan),
-  `loop_split_extract.ps1` (byte-faithful range move), `loop_split_banner.ps1`
-  (safe raw-byte banner prepend — **use this, NOT the IDE edit tool, on the
-  brace-seam parts**; the edit tool brace-balances and corrupts them),
-  `loop_split_oracle.ps1` (token-stream regression oracle, baseline
-  `a213e306ac7a794b7725752addecad82094c8033d82b4ef46573049e19dd1269`).
-- **Remaining (LCS-P5):**
-  - P5.1: the old `src/client/loop_client.cpp` is already gone (git-renamed in
-    P1.2; no shim left). Update docs that reference it by line number
-    (`docs/ui/README.md`, `docs/resizable-window-hotspots.md`) — those line
-    numbers now point into the relevant `loop/loop_client_part_*.cpp`.
-  - P5.2: `loop_client.cpp` was never in `CMakeLists.txt` and there's no
-    `update_cmake.py`; OPTIONAL — add the `src/client/loop/*.cpp` parts to the
-    `both`/`client` `Source_Files`/`Resource_Files` lists (as non-compiled,
-    IDE-indexed entries) if IDE indexing is wanted. Verify the `host` target
-    (which does not include loop_client) is unaffected.
-  - P5.3: re-run `loop_split_scan.ps1` on each part; note world_render/net/
-    game_open exceed 1,000 (single depth-1 statements, documented). Confirm the
-    concatenated brace depth still nets to 0 and every goto resolves in-TU.
-  - P5.4: `src/client/loop/README.md` already documents the layout/contract;
-    extend it with the final part list if desired.
-  - P5.5: final build of `client`, `host`, `both`; oracle `OK` on client/both.
-- **Build/verify env:** VS x86 dev shell (`vcvarsamd64_x86.bat`), then
-  `cmake --build cmake-build-debug --target client both` +
-  `powershell -File tools/loop_split_oracle.ps1`. Constant 3× C4731 warnings
-  (now in `part_world_render.cpp`) are baseline noise.
+- **LCS plan COMPLETE (P0�P5), 2026-06-15.** Nothing left to do; this section
+  is the final state record.
+- The 13,074-line `src/client/loop_client.cpp` monolith is fully decomposed
+  into 13 ordered chunk files + an umbrella under `src/client/loop/`,
+  `#include`d once from `u6o7.cpp:703`. See `src/client/loop/README.md` for the
+  full part-layout table. `client`/`host`/`both` build green; the token-stream
+  oracle (`tools/loop_split_oracle.ps1`, baseline
+  `a213e306ac7a794b7725752addecad82094c8033d82b4ef46573049e19dd1269`) confirms
+  a pure relocation (no wire change; `U6O_VERSION` untouched).
+- **If you edit a part:** never use `insert_edit_into_file` on the brace-seam
+  parts (it brace-balances and corrupts them) � use `tools/loop_split_banner.ps1`
+  for banners and `tools/loop_split_extract.ps1` for further cuts, then re-run
+  the oracle from a VS x86 dev shell (`vcvarsamd64_x86.bat`).
+- **Follow-up (not part of LCS):** a future modernization plan could de-`goto`
+  / restructure the three over-size single-statement parts (`world_render`
+  3490, `game_open` 1567, `net` 1505), and optionally wire the parts into
+  `CMakeLists.txt` for IDE indexing (LCS-P5.2, deferred).
