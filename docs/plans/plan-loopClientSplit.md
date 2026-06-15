@@ -246,26 +246,52 @@ cannot be cut at depth 0 internally. Use the **brace-seam convention**:
 > Cuts are made only at interior **depth-1** statement boundaries (where the
 > block's direct child statements end), never inside a nested expression.
 
-- ⬜ LCS-P3.1 Map the intro block's depth-1 statement boundaries (re-run the
+- ✅ LCS-P3.1 Map the intro block's depth-1 statement boundaries (re-run the
   scan limited to lines 1608–4054, tracking depth relative to the block).
   Record the candidate interior cut lines and the labels they contain
   (`intro_done:`, `login:`, `maxminmini:`, `transferachar_*`, `createachar_*`,
   `autoformat_*_cull3`, `vquesnew:`/`nextvques:`/`ab_noselection:`,
   `vialmix2:`).
-- ⬜ LCS-P3.2 **`part_intro_a`** — block open + intro animation/backdrop +
+  > 2026-06-15 (agent): At cut time the intro block was part_00 lines 1..2447
+  > (`if`/`(intro) {` at 1–2 … closing `}` + `goto intro_refresh;` at 2446–2447).
+  > Windowed depth-1 scan (`-StartLine 3 -EndLine 2446`) gave interior seams
+  > `24,26,37,709,768,815,1235,1421,1501,1857,1991,2078,2436`. The block is a
+  > chain of `if (intro == N) { ... } //intro==N` states; each `} //intro==N`
+  > is a clean depth-1 seam. State order: 100(709) 101(768) 102(815) 200(1235)
+  > 202(1421) 206(1501) 203(1857) 204(1991) 205(2078) 201(2436) then the tail.
+- ✅ LCS-P3.2 **`part_intro_a`** — block open + intro animation/backdrop +
   main-menu selection, up to the first clean depth-1 seam. Opens the `if
   (intro)` block; banner = OPENS.
-- ⬜ LCS-P3.3 **`part_intro_b`** — login / username-password entry / autoformat
+  > 2026-06-15 (agent): Cut lines 1..815 (states 100/101/102, intro animation/
+  > gypsy/backdrop). Ends with `} //intro==102` (block left OPEN). Banner =
+  > OPENS. 821 lines.
+- ✅ LCS-P3.3 **`part_intro_b`** — login / username-password entry / autoformat
   culling, between seams. Banner = CONTINUES.
-- ⬜ LCS-P3.4 **`part_intro_c`** — create-character / transfer-character flows,
+  > 2026-06-15 (agent): Cut lines 816..1421 (states 200 main-menu + 202
+  > transfer-character / login). Banner = CONTINUES. 611 lines.
+- ✅ LCS-P3.4 **`part_intro_c`** — create-character / transfer-character flows,
   between seams. Banner = CONTINUES.
-- ⬜ LCS-P3.5 **`part_intro_d`** — remainder through `intro_done:` and the
+  > 2026-06-15 (agent): Cut lines 1422..2078 (states 206 custom-controls menu,
+  > 203 key remap, 204/205 custom portrait). Banner = CONTINUES. 662 lines.
+- ✅ LCS-P3.5 **`part_intro_d`** — remainder through `intro_done:` and the
   closing `}` at ~4054 (which ends with `goto intro_refresh;`). Banner =
   CONTINUES + CLOSES. Verify `intro_done:` and `goto intro_refresh` straddle
   correctly across the chunk boundary (they're in the same TU, so fine).
-- ⬜ LCS-P3.6 Rebuild after the full intro split; confirm binary-identical.
+  > 2026-06-15 (agent): Cut lines 2079..2447 (state 201 create-a-character +
+  > `intro_done:` + timer tail + the closing `}` ending in `goto
+  > intro_refresh;`). Banner = CONTINUES + CLOSES. 376 lines. `intro_refresh:`
+  > resides in part_refresh_tail (later in the same TU) so the goto resolves.
+- ✅ LCS-P3.6 Rebuild after the full intro split; confirm binary-identical.
+  > 2026-06-15 (agent): Extracted bottom-up (d→c→b→a) so line numbers didn't
+  > drift mid-phase, inserted the 4 includes between misc_prelude and part_00.
+  > Build green; oracle `OK` (token stream identical). Banners added afterward,
+  > oracle re-confirmed `OK`.
 - **Exit:** Intro state machine is 3–4 files, each ≲ 1,000 lines, build
   binary-identical, brace seams documented.
+  > 2026-06-15 (agent): EXIT MET. 4 files (821/611/662/376 lines), all ≲ 1,000;
+  > umbrella order misc_prelude → intro_a(OPENS) → intro_b → intro_c →
+  > intro_d(CLOSES) → part_00 → refresh_tail. part_00 now 8622 lines = the
+  > in-game mega-block only (LCS-P4 target).
 
 ## LCS-P4 — Split the in-game per-frame block (`{ … }`, the big one)
 
@@ -380,40 +406,43 @@ natural label/section structure already in the code.
 
 ## Session handoff
 
-- Current first non-✅ phase: **LCS-P3.1** (map the intro mega-block's
-  depth-1 seams; the head/tail depth-0 cuts of LCS-P2 are done).
-- **LCS-P0, LCS-P1, LCS-P2 complete (2026-06-15).** State of the tree:
+- Current first non-✅ phase: **LCS-P4.1** (map the in-game mega-block's
+  depth-1 seams; head/tail and intro splits are done).
+- **LCS-P0, LCS-P1, LCS-P2, LCS-P3 complete (2026-06-15).** State of the tree:
   - Umbrella `src/client/loop/loop_client_all.cpp` includes, in order:
     `part_input_top` (227) → `part_panel_hittest` (1099) →
-    `part_misc_prelude` (297) → **`part_00` (11069, the two mega-blocks)** →
+    `part_misc_prelude` (297) → `part_intro_a` (821, OPENS) →
+    `part_intro_b` (611) → `part_intro_c` (662) →
+    `part_intro_d` (376, CLOSES) → **`part_00` (8622, the in-game block)** →
     `part_refresh_tail` (406).  `u6o7.cpp:703` includes only the umbrella.
-  - `part_00` now begins at `if (intro) {` and ends at the in-game block's
-    closing `}` (the line before the old `intro_refresh:`, which is now in
-    `part_refresh_tail`).
-  - Tooling: `tools/loop_split_scan.ps1` (boundary/goto scan, supports
-    `-StartLine/-EndLine` for windowed depth-1 seam scans),
-    `tools/loop_split_extract.ps1` (byte-faithful line-range move), and
-    `tools/loop_split_oracle.ps1` (token-stream oracle, baseline
+  - `part_00` now contains ONLY the in-game per-frame block: it begins with a
+    blank line then `{` (the block opener) and ends with that block's closing
+    `}` (depth-0 boundaries within part_00 are just `2` and EOF). This is the
+    LCS-P4 target. Re-scan with `-StartLine 3 -EndLine <EOF-1>` for its
+    interior depth-1 seams.
+  - Tooling unchanged: `tools/loop_split_scan.ps1`,
+    `tools/loop_split_extract.ps1`, `tools/loop_split_oracle.ps1` (baseline
     `a213e306ac7a794b7725752addecad82094c8033d82b4ef46573049e19dd1269`).
   - Build/verify env: VS x86 dev shell (`vcvarsamd64_x86.bat`), then
     `cmake --build cmake-build-debug --target client both` and
     `powershell -File tools/loop_split_oracle.ps1` (expect `OK`). Constant 3×
     C4731 warnings are baseline noise.
-- **Per-cut recipe (proven 4× in LCS-P2):**
+- **Per-cut recipe (proven 8× across LCS-P2 + LCS-P3):**
   1. `tools/loop_split_scan.ps1 -File src/client/loop/loop_client_part_00.cpp`
-     for current depth-0 boundaries (use `-StartLine/-EndLine` for the
-     mega-block interior depth-1 scan in P3/P4).
-  2. `read_file` the lines around the chosen seam to cut between a closed
-     statement and the next one (never split a label from its statement or a
-     line-broken expression).
+     (depth-0) or `-StartLine S -EndLine E` (windowed depth-1) for seams.
+  2. `read_file` around the chosen seam — cut between a closed statement and
+     the next (never split a label from its statement or a line-broken expr).
   3. `tools/loop_split_extract.ps1 -Source part_00 -Dest <newpart> -Start S
-     -End E`.
-  4. Add the `#include "<newpart>"` to the umbrella in the correct order.
-  5. Add a comment-only `// LCS-Px.y:` banner to the new part (safe — `/EP`
-     strips comments).
+     -End E`. For brace-seam (interior) cuts, extract **bottom-up** within the
+     phase so earlier line numbers don't drift mid-phase.
+  4. Add `#include "<newpart>"` to the umbrella in the correct order (the
+     in-game parts go between `part_intro_d` and `part_00`, in source order;
+     the OPENS part takes part_00's opening `{`, the CLOSES part its `}`).
+  5. Comment-only `// LCS-Px.y:` banner on each new part (safe; `/EP` strips).
   6. `cmake --build ... client` + `loop_split_oracle.ps1` → expect `OK`.
-- For LCS-P3/P4 the cut is an **interior depth-1 brace seam**: the opening part
-  ends with the brace left OPEN (banner `OPENS`), the next begins mid-block
-  (banner `CONTINUES`), the last closes it (banner `CONTINUES + CLOSES`). The
-  intro block is the depth-0 region currently spanning part_00 lines ~1..2447
-  (re-scan to confirm), the in-game block ~2449..end-of-part_00.
+- For LCS-P4 the in-game block is a single depth-0 region in part_00
+  (open `{` at line ~2, close `}` at EOF). Split it into ~8–12 brace-seam
+  parts: the OPENS part keeps the `{`, intermediate parts CONTINUE, the last
+  CLOSES with the `}`. Several net handlers (P4.5/4.6) are **wire-coupled**
+  and the world-render loop (P4.8) is a **hot path** — move only, no edits,
+  do NOT bump `U6O_VERSION`.

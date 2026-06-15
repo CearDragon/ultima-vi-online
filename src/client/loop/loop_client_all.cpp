@@ -64,6 +64,16 @@
 // hit-test routine and before the intro/menu state machine (former lines
 // ~1313..1605). Ends just before `if (intro) {`.
 #include "loop_client_part_misc_prelude.cpp"
+// LCS-P3: the intro / main-menu state machine `if (intro) { ... }`, split
+// across four files at interior depth-1 brace seams (each `} //intro==N`).
+// These four parts MUST stay in this order and contiguous: intro_a OPENS the
+// `if (intro)` block, _b/_c CONTINUE it, _d CONTINUES + CLOSES it (its closing
+// `}` ends with `goto intro_refresh;`). Splitting them or reordering breaks
+// the brace balance / the goto.
+#include "loop_client_part_intro_a.cpp"   // OPENS: intro states 100/101/102
+#include "loop_client_part_intro_b.cpp"   // CONTINUES: states 200/202 (login/menu)
+#include "loop_client_part_intro_c.cpp"   // CONTINUES: states 206/203/204/205 (create/transfer)
+#include "loop_client_part_intro_d.cpp"   // CONTINUES+CLOSES: state 201 + timer tail + `}`
 #include "loop_client_part_00.cpp"
 // LCS-P2.4: part_refresh_tail — the shared `intro_refresh:` refresh block
 // through EOF (MIDI/WAV info loops, status-message timing, font-leak
