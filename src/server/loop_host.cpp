@@ -1988,7 +1988,22 @@ if
                     // that case and we'd otherwise double-resync).
                     if (tplayer->x || tplayer->y) {
                         tplayer->resync_timer += et;
-                        if (tplayer->resync_timer >= ROOMSYNC_HEARTBEAT_SECONDS) {
+                        // ROOMSYNC-P1.5: inside a registered isolated room a STATIONARY
+                        // bystander has no coordinate delta to force a scene-update send,
+                        // so it relies entirely on the sobj/mover diff to learn that ANOTHER
+                        // player rearranged the ground items. Shorten the safety heartbeat
+                        // dramatically while in-room so any missed diff self-heals in a
+                        // fraction of a second instead of waiting for an unrelated event
+                        // (the other player logging out, a teleport, the 60s heartbeat) --
+                        // exactly the reported "two players in the guild basement see items
+                        // in the wrong place until someone logs out" bug. The room is tiny
+                        // so the packet-35 rebuild is cheap. See define_both.h
+                        // ROOMSYNC_ROOM_HEARTBEAT_SECONDS.
+                        static float roomsync_hb_interval;
+                        roomsync_hb_interval = ROOMSYNC_HEARTBEAT_SECONDS;
+                        if (getroom((long)tplayer->x, (long)tplayer->y, 0, 0, 0, 0))
+                            roomsync_hb_interval = ROOMSYNC_ROOM_HEARTBEAT_SECONDS;
+                        if (tplayer->resync_timer >= roomsync_hb_interval) {
                             tplayer->resync = 1;
                             tplayer->resync_timer = 0.0f;
                         }
@@ -2482,17 +2497,6 @@ if
                         for (x = 0; x < SOBJ_TX_W; x++) {
                             mapx = tpx + x - SOBJ_TX_OFFX;
                             mapy = tpy + y - SOBJ_TX_OFFY;
-                            // ROOMSYNC-P1: if player is in a registered isolated
-                            // room, only stream sobj entries from tiles inside
-                            // that same room. Prevents items/doors/signs from
-                            // the neighbouring open map (e.g. gargoyle land at
-                            // x<1280 next to the Guardian Guild basement) from
-                            // bleeding into the basement view.
-                            if (playerroom_inroom) {
-                                if ((mapx < playerroom_x0) || (mapx > playerroom_x1) ||
-                                    (mapy < playerroom_y0) || (mapy > playerroom_y1))
-                                    goto objbuffer_outofrange;
-                            }
                             bufx = mapx - tplayer->sobj_bufoffx;
                             bufy = mapy - tplayer->sobj_bufoffy;
 
@@ -2531,6 +2535,27 @@ if
                             }
 
                             i = 0;
+
+                            // ROOMSYNC-P1.4: if the player is in a registered isolated room, only
+                            // stream sobj entries from tiles inside that same room. Prevents
+                            // items/doors/signs from the neighbouring open map (e.g. gargoyle
+                            // land at x<1280 next to the Guardian Guild basement) from bleeding
+                            // into the basement view. This check MUST run HERE -- after bufx/bufy
+                            // and i=0 are set, jumping to the SAME objbuffer_outofrange handler
+                            // the world-bounds checks below use. The original ROOMSYNC-P1
+                            // placement jumped BEFORE bufx/bufy/i were initialised for the
+                            // current tile, so objbuffer_outofrange compared a STALE buffer cell
+                            // against a STALE object count, corrupting the per-cell sobj diff
+                            // state for in-room cells touched on prior iterations. That is why
+                            // ground items dropped inside the Guardian Guild basement never
+                            // synced to other clients. Treating an out-of-room tile exactly like
+                            // an out-of-world tile (current cell, i==0) lets the existing
+                            // length-check path correctly clear the cell instead.
+                            if (playerroom_inroom) {
+                                if ((mapx < playerroom_x0) || (mapx > playerroom_x1) ||
+                                    (mapy < playerroom_y0) || (mapy > playerroom_y1))
+                                    goto objbuffer_outofrange;
+                            }
 
                             if (mapx < 0) goto objbuffer_outofrange;
                             if (mapx > 2047) goto objbuffer_outofrange;

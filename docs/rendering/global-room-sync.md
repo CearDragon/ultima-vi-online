@@ -342,6 +342,98 @@ Tagged `ROOMSYNC-P1.2:` in `src/common/data_both.h` (field),
 `src/common/define_both.h` (threshold), and `src/server/loop_host.cpp`
 (trigger).
 
+### P1.4 follow-up: sobj room filter placement (June 2026)
+
+The original P1 sobj room filter (Cause 1, cross-region stream bleed)
+worked for *movers* but silently corrupted the *sobj* (scene-object /
+ground-item) diff stream for players standing inside a registered room.
+
+The host's per-player sobj transmit buffer is a grid of cells indexed by
+`bufx = mapx - sobj_bufoffx`, `bufy = mapy - sobj_bufoffy`. The fill loop
+walks the full `SOBJ_TX_W × SOBJ_TX_H` (79×63) window; for each tile it
+computes `bufx`/`bufy`, resets the per-tile object count `i = 0`, gathers
+the visible objects into `vbuf[]`, then falls into the
+`objbuffer_outofrange:` length-check handler which diffs
+`sobj_bufsize[bufx][bufy]` / `sobj[bufx][bufy]` against the freshly built
+`vbuf[]` and emits an update only on change.
+
+The P1 room check was placed **at the very top of the loop body**, before
+`bufx`, `bufy`, and `i` were assigned for the current tile, and it jumped
+straight to `objbuffer_outofrange:`. For a 12×15 room inside a 79×63
+window the *vast majority* of iterations are out-of-room, so on almost
+every tile the handler ran with **stale `bufx`/`bufy` from a prior
+iteration and a stale `i`**. That compared the wrong buffer cell against
+the wrong count, and could overwrite the per-cell diff state of in-room
+cells touched earlier in the same pass. The net effect: ground items
+dropped inside the Guardian Guild basement were never reliably
+transmitted to other clients — the camera, tile rendering, animations,
+and movers (which use a no-op skip label, not a buffer-cell handler) all
+worked, but **sobj sync did not**.
+
+The fix moves the room check to sit **immediately before the world-bounds
+checks**, after `bufx`/`bufy`/`i = 0` are set. An out-of-room tile is now
+treated identically to an out-of-world tile (current cell, `i == 0`), so
+the existing length-check path correctly clears the cell instead of
+corrupting an unrelated one. No wire-format change; `U6O_VERSION` not
+bumped. Tagged `ROOMSYNC-P1.4:` in `src/server/loop_host.cpp`.
+
+### P1.5 follow-up: room-scoped safety-resync heartbeat (June 2026)
+
+P1.4 fixed the single-player case (the actor always has a coordinate delta,
+which unconditionally sets `sceneupdaterequired` at the top of the scene
+build, so the actor's own item moves always ship). But **two players** in a
+room exposed a second bug:
+
+> Two players are in the Guardian Guild basement. Player A picks an item up
+> off one tile and drops it on another. On player B's screen the item still
+> appears on the *old* tile even though it logically moved. The stale view
+> persists until some unrelated event forces B to resync — most visibly when
+> A logs out, after which B suddenly sees every item in its correct place.
+
+Root cause: a **stationary bystander** (B) never changes its own avatar
+coordinate, so B's scene update is only sent when (a) B's coordinate
+changes [never], (b) the per-player sobj/mover screen+1 diff flags a change,
+or (c) a resync fires. The bystander therefore depends *entirely* on the
+sobj diff to learn that *another* player rearranged the ground. When that
+diff fails to flag the change on the frames B's build actually runs (the
+build alternates via the host-only `updatemessage` frame gate, and the
+sobj two-pass screen+1 optimization only inspects the inner visible
+region), B's buffer is left believing the old tile still holds the item.
+Nothing re-evaluates it until the global 60 s heartbeat (`P1.2`) or an
+external event (A's logout teardown mutating `od[][]`, a teleport, a manual
+`/RESYNC`) fires a packet-35 full rebuild — which is exactly the observed
+"fixed when the other player logs out" behaviour.
+
+The actor never sees the bug because A walked to pick up / drop, so A's
+coordinate delta keeps A's send path alive every move.
+
+Fix: while the player is inside a registered isolated room, run the
+existing safety-resync heartbeat on a **much shorter interval**
+(`ROOMSYNC_ROOM_HEARTBEAT_SECONDS`, default `0.5 s`) instead of the 60 s
+global one. A room is tiny (the basement is 12×15) so the packet-35 full
+rebuild is only a few hundred bytes; a sub-second cadence is imperceptible
+and bandwidth-trivial, and it bounds any bystander desync to a fraction of
+a second regardless of the exact diff edge case. This reuses the proven
+`P1.2` heartbeat + `resync` flush machinery and the always-available
+packet-35 path, so it is wire-neutral — `U6O_VERSION` is **not** bumped.
+
+```cpp
+// loop_host.cpp, inside the heartbeat block (ROOMSYNC-P1.2):
+tplayer->resync_timer += et;
+static float roomsync_hb_interval;
+roomsync_hb_interval = ROOMSYNC_HEARTBEAT_SECONDS;
+if (getroom((long)tplayer->x, (long)tplayer->y, 0, 0, 0, 0))
+    roomsync_hb_interval = ROOMSYNC_ROOM_HEARTBEAT_SECONDS;
+if (tplayer->resync_timer >= roomsync_hb_interval) {
+    tplayer->resync = 1;
+    tplayer->resync_timer = 0.0f;
+}
+```
+
+Tagged `ROOMSYNC-P1.5:` in `src/common/define_both.h` (the
+`ROOMSYNC_ROOM_HEARTBEAT_SECONDS` macro) and `src/server/loop_host.cpp`
+(the in-room interval selection in the heartbeat trigger).
+
 ### Client-side use ([`src/client/loop_client.cpp`](../../src/client/loop_client.cpp))
 
 The two camera-follow override sites (scene-update at packet-31 / packet-35

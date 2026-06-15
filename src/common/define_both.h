@@ -39,6 +39,23 @@
 // bandwidth. Wire-protocol-neutral: a resync just sends packet 35
 // which the client has handled since the /RESYNC chat command shipped.
 #define ROOMSYNC_HEARTBEAT_SECONDS 60.0f
+// ROOMSYNC-P1.5: a MUCH shorter heartbeat that applies only while the player
+// is standing inside a registered isolated room (getroom() != 0). Inside a
+// small room the per-player sobj/mover diff stream is the ONLY thing that
+// tells a STATIONARY bystander that ANOTHER player rearranged the ground
+// items -- the bystander has no coordinate delta of their own to force a
+// scene-update send. If that diff ever fails to flag a change (e.g. the item
+// move lands on a frame the bystander's alternating updatemessage gate is
+// skipping, or any future sobj-diff edge case), the bystander would keep
+// rendering the item at its old tile until some UNRELATED event (the other
+// player logging out, a teleport, the 60s heartbeat) finally forced a
+// resync -- exactly the reported 'two players in the guild basement see
+// items in the wrong place until someone logs out' bug. Because a room is
+// tiny (the Guardian Guild basement is 12x15) the packet-35 full rebuild is
+// only a few hundred bytes and a sub-second cadence is imperceptible and
+// bandwidth-trivial. Outside any room the normal 60s heartbeat still
+// applies. Wire-neutral (packet 35 only); U6O_VERSION not bumped.
+#define ROOMSYNC_ROOM_HEARTBEAT_SECONDS 0.5f
 //equipped item positions (REVISE) (warning: left and right refer to the character's hand hence they are reversed on screen)
 #define helmx 52
 #define helmy 132
