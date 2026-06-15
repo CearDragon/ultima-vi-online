@@ -700,7 +700,7 @@ if
     if (client_frameskip != 0) goto mainloop;
 }
 #ifdef CLIENT
-#include "loop_client.cpp"
+#include "loop/loop_client_all.cpp"
 #else
 if
 (exitrequest &&
