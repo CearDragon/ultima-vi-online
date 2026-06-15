@@ -21,20 +21,6 @@ Concise, repo-specific guidance. Read this in full before editing.
   fallbacks for the host (the host's `viewTilesX()` / `viewTilesY()` return
   the legacy **32 / 24**, intentionally — see §Wire protocol below).
 
-## `.cpp` / `.inc` mirror convention (read this — easy to get wrong)
-
-- The largest source files have a `.cpp` AND a `.inc` copy:
-  - `src/server/loop_host.{cpp,inc}`
-  - `src/client/loop_client.{cpp,inc}`
-- **Only the `.cpp` is compiled.** The `.inc` is a reference/backup mirror.
-- Repo convention: **mirror every change to the `.inc`** so the two stay in
-  lock-step, even though only the `.cpp` affects runtime. PRs that update one
-  without the other will be sent back.
-- Other `.inc` files (`host.inc`, `setup_*.inc`, `globals.inc`,
-  `*_bmp.inc`, `new_getspr.inc`, `old_getspr.inc`, `secret_*.inc`) **are**
-  compiled — they're listed in `CMakeLists.txt`. Grep `CMakeLists.txt` to
-  tell the difference. Do NOT assume an `.inc` is dead code.
-
 ## Wire protocol — where most bugs land
 
 - Host ↔ client messages bit-pack offsets with hard-coded multipliers and

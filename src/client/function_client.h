@@ -49,12 +49,6 @@ extern txt *STATUSMESSpending;
 extern txt *GETSETTING_RAW; //the actualt text between the square brackets [...]
 extern txt *li2_t;
 
-
-//void updatepartyframe1(FRAME* f, int partyindex, double scale);
-
-// r999 new
-void inituidatan1();
-
 void applyscaleuipanelwidget(int uipi, int uiwi, int uisi, float scalex, float scaley);
 
 int gethituipaneli(int x, int y);
@@ -64,9 +58,6 @@ int gethituipanelwidgeti(int x, int y, int uipaneli);
 int gethituipanelwidgeti(int x, int y);
 
 int testhituipanel(int x, int y, int uipaneli);
-
-void updateoverlaysurfn1(surf * s);
-
 
 // s333 get type of object at coordinate
 void backupplayermvinfon1(player * tplayer);

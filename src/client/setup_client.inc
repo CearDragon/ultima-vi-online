@@ -504,14 +504,6 @@ con_frm_img=FRM_IMAGEnew(con_frm,newsurf(1024,256,SURF_SYSMEM16));
 con_frm_img->offset_x=0;
 con_frm_img->offset_y=-256;
 
-// r222 init new mode stuff
-extern void newmodeinit();
-
-if (newmodestatus == 1) {
-	newmodestatus++;
-	newmodeinit();
-}
-
 for (i=0;i<=7;i++){
 party_surf[i]=newsurf(256,256,SURF_SYSMEM16);
 party_frame[i]=FRMnew();

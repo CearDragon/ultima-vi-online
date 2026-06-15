@@ -165,33 +165,45 @@ if
         for (i = 1; i <= 7; i++) {
             if (tplay->party[i]) {
                 txtset(exitrequest_t, "Dupre");
-                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
-                    NULL, "Dupre cannot stay in your party, if you leave his items will be lost!", "Ultima 6 Online",
-                    MB_OK);
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t))
+                    MessageBox(
+                        NULL, "Dupre cannot stay in your party, if you leave his items will be lost!",
+                        "Ultima 6 Online",
+                        MB_OK);
                 txtset(exitrequest_t, "Shamino");
-                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
-                    NULL, "Shamino cannot stay in your party, if you leave his items will be lost!", "Ultima 6 Online",
-                    MB_OK);
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t))
+                    MessageBox(
+                        NULL, "Shamino cannot stay in your party, if you leave his items will be lost!",
+                        "Ultima 6 Online",
+                        MB_OK);
                 txtset(exitrequest_t, "Iolo");
-                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
-                    NULL, "Iolo cannot stay in your party, if you leave his items will be lost!", "Ultima 6 Online",
-                    MB_OK);
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t))
+                    MessageBox(
+                        NULL, "Iolo cannot stay in your party, if you leave his items will be lost!", "Ultima 6 Online",
+                        MB_OK);
                 txtset(exitrequest_t, "Beh Lem");
-                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
-                    NULL, "Beh Lem cannot stay in your party, if you leave his items will be lost!", "Ultima 6 Online",
-                    MB_OK);
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t))
+                    MessageBox(
+                        NULL, "Beh Lem cannot stay in your party, if you leave his items will be lost!",
+                        "Ultima 6 Online",
+                        MB_OK);
                 txtset(exitrequest_t, "Sentri");
-                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
-                    NULL, "Sentri cannot stay in your party, if you leave his items will be lost!", "Ultima 6 Online",
-                    MB_OK);
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t))
+                    MessageBox(
+                        NULL, "Sentri cannot stay in your party, if you leave his items will be lost!",
+                        "Ultima 6 Online",
+                        MB_OK);
                 txtset(exitrequest_t, "Sherry");
-                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
-                    NULL, "Sherry cannot stay in your party, if you leave her items will be lost!", "Ultima 6 Online",
-                    MB_OK);
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t))
+                    MessageBox(
+                        NULL, "Sherry cannot stay in your party, if you leave her items will be lost!",
+                        "Ultima 6 Online",
+                        MB_OK);
                 txtset(exitrequest_t, "Seggallion");
-                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t)) MessageBox(
-                    NULL, "Seggallion cannot stay in your party, if you leave his items will be lost!",
-                    "Ultima 6 Online", MB_OK);
+                if (txtsame(((npc *) tplay->party[i]->more)->name, exitrequest_t))
+                    MessageBox(
+                        NULL, "Seggallion cannot stay in your party, if you leave his items will be lost!",
+                        "Ultima 6 Online", MB_OK);
             }
         }
         if (IDYES == MessageBox(NULL, "Leave Britannia?", "Ultima 6 Online", MB_YESNO)) {
@@ -393,29 +405,24 @@ if
                                 updateworldmapn1 = 1;
 
                             worldmapindexn1 = 1;
-
                         } else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6P) {
                             if (worldmapindexn1 != 2)
                                 updateworldmapn1 = 1;
 
                             worldmapindexn1 = 2;
-
                         } else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6G) {
                             if (worldmapindexn1 != 3)
                                 updateworldmapn1 = 1;
 
                             worldmapindexn1 = 3;
-
                         } else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_U6RUNE) {
                             if (worldmapindexn1 != 4)
                                 updateworldmapn1 = 1;
 
                             worldmapindexn1 = 4;
-
                         } else if (hituiwidgeti == UI_WIDGET_MAPBUTTON_CLOSE) {
                             showworldmapn1 = 0;
                             uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 0;
-
                         }
                     }
                 }
@@ -529,7 +536,6 @@ if
                                     setdroplocation = 0;
                                 else
                                     setdroplocation = 1;
-
                             }
 
                             mbclick = 0;
@@ -565,7 +571,6 @@ if
                             } else {
                                 uipanelhitenable[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF] = 1;
                             }
-
                         } else if (hituiwidgeti == UI_WIDGET_ACTIONBUTTON_COMBATLOG) {
                             // combatlog
                             combatinfo++;
@@ -578,7 +583,6 @@ if
                                 STATUSMESSadd("Combat log enabled. (experimental)  Warning: may cause game to crash.",
                                               1);
                             }
-
                         }
                     }
                 } // actionbar2
@@ -607,7 +611,6 @@ if
                             key_gotrelease[i] = TRUE;
                             actionpending = 5;
                             mbclick = 0;
-
                         } else if (hituiwidgeti == UI_WIDGET_OPTIONBUTTON_QUIT) {
                             // quit
                             actionreset = 0;
@@ -1007,6 +1010,7 @@ f=
 1.0f;
 if
 (
+
 int ((ett
 /
 f
@@ -1048,6 +1052,7 @@ isit=TRUE;
 
 if
 (
+
 !
 NEThost
 )
@@ -1129,6 +1134,7 @@ omb=FRAME_mb; //find old button value using FRAME_mb (which now contains old val
 FRAME_mb=mb; //backup physical mouse value
 if
 ((mb&
+
 1
 )
 ==
@@ -1137,6 +1143,7 @@ if
 FRAME_mbl [0]=FALSE; //disabled mouse locks
 if
 ((mb&
+
 2
 )
 ==
@@ -1160,7 +1167,7 @@ TRUE
   if (mb&2) mb=mb-2;
 }
 pn=firstpanel;
-checkpanel : 
+checkpanel :
 if
 (pn
 !=
@@ -1304,7 +1311,7 @@ maskcheckfailed:;
   }}}}
   pn=(FRAME*)pn->next; goto checkpanel; //next frame pointer
 }
-checkdone : 
+checkdone :
 
 // r222 handle mouse click for party[0] (the player avatar) for new resolution mode top-right inventory window
 // r222 we are just simulating the clicking/variables as if it is being performed on the actual inventory in the 1024 res.  the rest is handle by the original 1024 res code/logic.
@@ -1442,6 +1449,7 @@ NULL
 )
 &&
 ((FRAME_mb&
+
 1
 )
 ==
@@ -1455,6 +1463,7 @@ NULL
 }
 if
 ((FRAME_mb&
+
 2
 )
 ==
@@ -1510,6 +1519,7 @@ FALSE
 )
 &&
 ((mb&
+
 1
 )
 ==
@@ -1527,6 +1537,7 @@ FALSE
 )
 &&
 ((mb&
+
 2
 )
 ==
@@ -1571,6 +1582,7 @@ f=
 4.0f;
 if
 (
+
 int ((ett
 /
 f
@@ -2196,7 +2208,8 @@ if
                                 if (IDNO == MessageBox(
                                         NULL,
                                         "If you select a non-blinking answer the total of your strength, dexterity and intelligence will be lower. Are you sure?",
-                                        "Ultima 6 Online", MB_YESNO)) vques[vtext] = 0;
+                                        "Ultima 6 Online", MB_YESNO))
+                                    vques[vtext] = 0;
                             }
                         }
                     }
@@ -2209,7 +2222,8 @@ if
                                 if (IDNO == MessageBox(
                                         NULL,
                                         "If you select a non-blinking answer the total of your strength, dexterity and intelligence will be lower. Are you sure?",
-                                        "Ultima 6 Online", MB_YESNO)) vques[vtext] = 0;
+                                        "Ultima 6 Online", MB_YESNO))
+                                    vques[vtext] = 0;
                             }
                         }
                     }
@@ -4193,10 +4207,10 @@ u6omidivolume_changed:
     txtadd(t,t2); //virtue answers
     txtset(t2,"?"); t2->d2[0]=u6o_user_name->l; txtadd(t,t2); txtadd(t,u6o_user_name); //user_name
     if (pw_encrypt==SHA2_ENCRYPTION) {
-      SHA2(u6o_user_password,t3); 
+      SHA2(u6o_user_password,t3);
       txtset(t2,"?"); t2->d2[0]=t3->l; txtadd(t,t2);  txtadd(t,t3); //user_password
       txtset(t2,"?"); t2->d2[0]=u6o_createcharacter; txtadd(t,t2);
-      SHA2(u6o_new_user_password,t3); 
+      SHA2(u6o_new_user_password,t3);
       txtset(t2,"?"); t2->d2[0]=t3->l; txtadd(t,t2); txtadd(t,t3); //user_password
     }
     else {
@@ -4568,12 +4582,12 @@ inpf_scroll_failed:
       mwspWaveFormParameters.ulSamplesPerSec = 11025;
       mwspWaveFormParameters.usBitsPerSample = 8;
       mciSendCommand (SoundDevice.usSoundDeviceID,
-      MCI_SET,                      
-      MCI_WAIT,                      
+      MCI_SET,
+      MCI_WAIT,
       MCI_WAVE_SET_SAMPLESPERSEC,
       MCI_WAVE_SET_BITSPERSAMPLE,
-      (PVOID)&mwspWaveFormParameters, 
-      0);                             
+      (PVOID)&mwspWaveFormParameters,
+      0);
       */
 
       /*
@@ -4678,7 +4692,7 @@ voicechat_permissionrequestfinished:
 deadglobalmessage_return:
 
   if (inpmess->l){ //send input message to the host
-    txtset(t2,"?"); t2->d2[0]=6; 
+    txtset(t2,"?"); t2->d2[0]=6;
     if (inprec_global){t2->d2[0]=12; client_globalwait=0;}//global message
     if (talkprev) t2->d2[0]=34;
     txtadd(t2,inpmess);
@@ -5184,7 +5198,7 @@ u6okattackdone:
 pathmove_force:
             pathmove_mbheld=1;
             if (cur_type==1) SetCursor(cur8);
-            if (omb&2){ 
+            if (omb&2){
               pathmove_wait+=et;
               if (pathmove_wait<=0.25f) goto mousemove_finish;
             }
@@ -6105,7 +6119,7 @@ getid_more:
 
 
             }//==
-          }//z2 
+          }//z2
         }//!=-1
         goto CLIENT_donemess;
       } //10
@@ -6734,7 +6748,7 @@ mover_add_getstate_next: if (BITSget(t,&bitsi,1)){
       if (t->d2[0]==32){//send time
         if (U6O_DEBUG) {
           scrlog("Time update via message 32.");
-          txtset(t2,"Client time was: "); 
+          txtset(t2,"Client time was: ");
           txtset(t3,"                                ");
           _snprintf((char *)t3->d2,32,"%e",btime2);
           txtadd(t2,t3);
@@ -6743,7 +6757,7 @@ mover_add_getstate_next: if (BITSget(t,&bitsi,1)){
         txtright(t,8);
         if (!NEThost) btime2=t->dd[0];
         if (U6O_DEBUG) {
-          txtset(t2,"Server time was: "); 
+          txtset(t2,"Server time was: ");
           txtset(t3,"                                ");
           _snprintf((char *)t3->d2,32,"%e",btime2);
           txtadd(t2,t3);
@@ -7232,7 +7246,7 @@ CLIENT_donemess:
           for (i3=i+1;i3<=(i+i2);i3++){
             x3=objfixed_type[i3];
             myobj->type=x3;
-            if ((x3>=29)&&(x3<=32)){//overlay floor: edit basetile 
+            if ((x3>=29)&&(x3<=32)){//overlay floor: edit basetile
               if (x3==29) x4=108;
               if (x3==30) x4=208;
               if (x3==31) x4=210;
@@ -7347,7 +7361,7 @@ CLIENT_donemess:
     if (vis_window[x-1][y]) vis[x-1][y]=0;
     i++; vis_index_x[i]=x; vis_index_y[i]=y;
 vis_scan2:
-    x=vis_index_x[i2]; y=vis_index_y[i2]; 
+    x=vis_index_x[i2]; y=vis_index_y[i2];
     if (vis[x-1][y]==0){i++; vis_index_x[i]=x-1; vis_index_y[i]=y; vis[x-1][y]=4;}
     if (vis[x+1][y]==0){i++; vis_index_x[i]=x+1; vis_index_y[i]=y; vis[x+1][y]=4;}
     if (vis[x][y-1]==0){i++; vis_index_x[i]=x; vis_index_y[i]=y-1; vis[x][y-1]=4;}
@@ -7949,7 +7963,7 @@ moverinbed:
                           z3=1;
                           osvol[osn]=-1; if (idlst[z2]!=clientplayerid) osvol[osn]=idlst_volume[z2];
                         }
-                      }//z2 
+                      }//z2
                     }//!=-1
                     if (z3==0){ //add new id
                       idlstn++;
@@ -8036,7 +8050,7 @@ passok:
                   if (vis_slime[x+1+1][y+1]) x4|=2;
                   if (vis_slime[x+1][y+1+1]) x4|=4;
                   if (vis_slime[x+1-1][y+1]) x4|=8;
-                  myobj->type=375+x4*1024; 
+                  myobj->type=375+x4*1024;
                 }//slime
 
                 if (flash_skip==0){
@@ -9260,7 +9274,7 @@ osdisplay_ktar_skip:;
 
 					txtadd(t3, t4);
 				}
-				
+
 
 				txtadd(t3, " is hit for ");
 				txtadd(t3, t);
@@ -9527,7 +9541,7 @@ pw_jmp:
 			if (i4 == 8) {
 				soundplay2(u6osound[SOUND_COMBAT_FIREBALL], u6osound_volume[SOUND_COMBAT_FIREBALL]);
 			}
-			
+
 
           }//first instance only!
 
@@ -10481,9 +10495,18 @@ donesf2:;
     if (U6O_WALKTHRU){
 walkthru_pos_skip0:
 
+      // RW-P4 follow-up: dr/walkthru.txt coordinates were recorded as legacy
+      // 32x24 screen offsets (pre-RW-P4.1 tpx/tpy; the WALK HERE icon's world
+      // tile is walkthru_x+15, walkthru_y+11). The client's dynamic tpx/tpy
+      // origin shifts with the window size, so the proximity check must use
+      // the legacy reference frame (same shim as the mover/sobj decoders) or
+      // the walkthrough never advances once the view is no longer 32x24.
+      static long wt_tpx_legacy, wt_tpy_legacy;
+      getscreenoffset_legacy(tplayer->x,tplayer->y,&wt_tpx_legacy,&wt_tpy_legacy);
+
       i=0;
       if (!walkthru_x) i=1;
-      x=abs(tpx-walkthru_x); y=abs(tpy-walkthru_y);
+      x=abs(wt_tpx_legacy-walkthru_x); y=abs(wt_tpy_legacy-walkthru_y);
       if ((x<=3)&&(y<=3)) i=1;
       if (walkthru_pos_skip) i=1;
 
@@ -10492,7 +10515,7 @@ walkthru_pos_skip0:
 
         i2=seek(walkthru_fh);
         if (seek(walkthru_fh)<lof(walkthru_fh)){
-          txtfilein(t,walkthru_fh); if (walkthru_pos_skip) walkthru_pos_skip--; 
+          txtfilein(t,walkthru_fh); if (walkthru_pos_skip) walkthru_pos_skip--;
           walkthru_pos++;
           if ((t->d2[0]>=48)&&(t->d2[0]<=57)){
             walkthru_x=txtnum(t);
@@ -11098,7 +11121,7 @@ keyjmp:
           txtfnt=fnt1;
         }
         //display item +
-		 else if ((obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].v1 || 
+		 else if ((obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].v1 ||
           obji[sprlnk[myobj->type&1023]+(myobj->type>>10)].v2 || (myobj->type&1023)==448) && myobj->more2) {
             x2=x+16;
             y2=y+2;
@@ -11238,7 +11261,7 @@ diskip:
 
 
 
-			
+
 		// r666 for new mode: display actionbar
 		//img(psnew1b, actionbarx, actionbary, actionbarsurf);
 		//img(psnew1b, actiontalkx, actiontalky, actiontalksurf);
@@ -11347,7 +11370,7 @@ diskip:
 		img0(minimap_surf_new, minimapplayerx, minimapplayery, darrow);
 		img(panelsurf[0], minimapnewx, minimapnewy, minimap_surf_new);
 
-			
+
 		//img0(psnew1b, party_frame_new[0]->offset_x+minimapdeltax, resyn1w-256-2+minimapdeltay, darrow);
 		//img0(psnew1b, minimapdeltax, minimapdeltay, darrow);
 		//img0(psnew1b, minimapplayerx, minimapplayery, darrow);
@@ -11500,7 +11523,6 @@ diskip:
 		if (enhancen1 > 0) {
 			imguiw(psnew1b, uipaneloptionbar1, UI_WIDGET_OPTIONBUTTON_ENHANCE, enhancen1);
 		}
-
 
 
 		// r444 for new mode: display minimap
@@ -11846,7 +11868,7 @@ qkstf_mcdone:;
     if (f>=12.0f) f3=-(f-12.0f); else f3=12.0f-f;
     f3/=1.1875f;
 
-    f2=btime+f3; 
+    f2=btime+f3;
     f4=f; f=12.0f;
     if (f2>=24.0f) f2-=24.0f;
     if (f2<0.0f) f2+=24.0f;
