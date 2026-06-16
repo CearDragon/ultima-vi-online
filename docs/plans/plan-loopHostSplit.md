@@ -132,8 +132,16 @@ the outer `if (NEThost) {`):
 
 ## LHS-P0 — Safety net & tooling (do FIRST, no moves yet)
 
-- ⬜ LHS-P0.1 Capture a baseline `host` (and `both`) build; record the exact
-  warning count. As with the client (see LCS-P0.1), the MSVC debug EXE is **not
+- ✅ LHS-P0.1 (2026-06-16) Host oracle `tools/loop_split_oracle_host.ps1`
+  created (copy of the client oracle with `-DHOST -DCONSOLE`, no `-DCLIENT`,
+  plus a `-Both` switch for the `-DHOST -DCLIENT` secondary). Baselines
+  captured: host = `38344f3963d664cf95a0bf50eebaa00929309b96f4fb31369f1d2bf510bdfb7b`
+  (`tools/loop_split_host_oracle_baseline.sha256`), both =
+  `361d1ae612cb09ef60a92336474629caecd7ab0e51175543f179419b5ca1e718`
+  (`tools/loop_split_host_both_oracle_baseline.sha256`). `cl /EP` runs cleanly
+  from the current shell (MSVC 14.44 HostX86/x86 on PATH).
+  Capture a baseline `host` (and `both`) build; record the exact
+  warning count. As with the client (see LCS-P0.1), the MSVC debug EXE is **not**
   byte-stable** across rebuilds (`/ZI` PDB GUID + PE timestamp), so a
   binary-hash oracle is unusable. Instead create a **host preprocessor-output
   oracle**: `tools/loop_split_oracle_host.ps1` (copy of
@@ -154,7 +162,17 @@ the outer `if (NEThost) {`):
   TU (`-DHOST -DCLIENT`) as a secondary oracle, since `both` exercises the
   `#ifdef CLIENT` branches that pure `host` does not.
 
-- ⬜ LHS-P0.2 Add host-aware scanning. The existing `tools/loop_split_scan.ps1`
+- ✅ LHS-P0.2 (2026-06-16) Added `tools/loop_split_scan_host.ps1` (host-aware
+  sibling of `loop_split_scan.ps1`). It tracks `#ifdef/#ifndef/#else/#endif`
+  nesting and counts braces only in host-active branches (skip `#ifdef CLIENT`,
+  keep its `#else`; `#ifndef _DEBUG` counted as-is since it is brace-balanced).
+  Verified it reproduces the snapshot exactly: **26,875 lines**, **final
+  host-aware depth 0**, **30 depth-1 seams** (`22, 48, 81, 97, 114, 127, 140,
+  164, 189, 213, 227, 237, 248, 263, 4105, 4120, 4206, 4248, 11056, 11069,
+  11076, 11100, 11242, 11326, 11521, 17520, 26403, 26841, 26850, 26870`), and
+  the four dead external goto targets. Supports `-SeamLevel N` +
+  `-StartLine/-EndLine` windowed scans for mega-block interiors.
+  Add host-aware scanning. The existing `tools/loop_split_scan.ps1`
   is preprocessor-blind and miscounts this file (fact 4 above). Either add a
   `-HostView` switch to it or add a sibling `tools/loop_split_scan_host.ps1`
   that, while walking braces, tracks `#ifdef CLIENT` / `#ifndef CLIENT` /
@@ -169,13 +187,21 @@ the outer `if (NEThost) {`):
   (`-StartLine`/`-EndLine`, depth tracked relative to the window) so the
   mega-block interior seams (LHS-P3…P6) can be enumerated.
 
-- ⬜ LHS-P0.3 Create the destination directory `src/server/loop/` with a
+- ✅ LHS-P0.3 (2026-06-16) Created `src/server/loop/` with `README.md` stating
+  the include-order contract, the whole-file-is-one-block brace-seam convention
+  (first part OPENS, last CLOSES), the wire-coupling warning for the A/B/D/tail
+  parts, the tooling list, and a link back to this plan.
+  Create the destination directory `src/server/loop/` with a
   `README.md` that states the include-order contract, the
   **whole-file-is-one-block** brace-seam convention (the first part OPENS, the
   last CLOSES), the wire-coupling warning for the A/B/D/tail parts, and links
   back to this plan.
 
-- ⬜ LHS-P0.4 Confirm the `host`/`both` targets reach `loop_host.cpp` via
+- ✅ LHS-P0.4 (2026-06-16) Confirmed exactly one `#include "loop_host.cpp"`
+  (at `u6o7.cpp:691`); `loop_host.cpp` is **not** a CMake source (only the
+  doc comment at `CMakeLists.txt:42`); the sibling `.inc` include sites
+  (`setup_host.inc` @ u6o7.cpp:382, `host.inc`) are out of scope and untouched.
+  Confirm the `host`/`both` targets reach `loop_host.cpp` via
   `u6o7.cpp` only (grep proves a single `#include "loop_host.cpp"`), record the
   include site (`u6o7.cpp:691`), and confirm `loop_host.cpp` is **not** listed
   as a source in `CMakeLists.txt` (only `u6o7.cpp` is; the host loop is reached
@@ -395,7 +421,14 @@ files of < 1,000 lines.
   those line-number refs only if cheap and safe; otherwise leave the docs
   byte-pristine and rely on the part mapping + symbol/label grep (mirrors
   LCS-P5.1).
-- ⬜ LHS-P7.2 (optional, may defer like LCS-P5.2) Add the new
+- ⏭ LHS-P7.2 (2026-06-16 DEFERRED, mirroring LCS-P5.2) Adding the
+  `src/server/loop/*.cpp` parts to the `host`/`both` `Source_Files` for IDE
+  indexing is deferred: they are `.cpp` fragments, so CMake would try to
+  *compile* them as standalone TUs (they are not) unless flagged
+  `HEADER_FILE_ONLY` — extra risk for cosmetic IDE benefit. They build correctly
+  via `#include` regardless. `client` is untouched (does not include the host
+  loop).
+  (optional, may defer like LCS-P5.2) Add the new
   `src/server/loop/*.cpp` parts to the `host` and `both` targets'
   `Source_Files`/`Header_Files` lists in `CMakeLists.txt` for IDE indexing
   (they are compiled only via `#include`, so they become non-compiled members,
@@ -452,22 +485,49 @@ files of < 1,000 lines.
 
 ## Session handoff
 
-- **Plan authored 2026-06-16; execution NOT started.** All phases are ⬜.
-- The 26,875-line `src/server/loop_host.cpp` is a single `if (NEThost) { … }`
-  block (`#include`d at `u6o7.cpp:691` under `#ifdef HOST`). It decomposes into:
-  an OPEN head part, four mega-blocks (A: per-player UPDATE + sobj/mover encode;
-  B: `host_gotmessage:` client-message dispatch; C: object/creature/NPC AI;
-  D: per-player INPUT — the biggest), and a CLOSE tail part (NPC-frame encode).
-- **Start here:** do LHS-P0 (build the **host** oracle
-  `tools/loop_split_oracle_host.ps1` with `-DHOST -DCONSOLE`, and the host-aware
-  scan), then LHS-P1 (umbrella + `git mv` to
-  `src/server/loop/loop_host_part_00.cpp`), then carve P2 boundaries, then split
-  P3→P6 bottom-up (extract the *last* sub-part of each mega-block first so line
-  numbers above the cut don't drift mid-phase, mirroring the client split).
-- **Tooling reuse:** `tools/loop_split_extract.ps1` and
-  `tools/loop_split_banner.ps1` work as-is. The scan and oracle need host
-  variants (LHS-P0.1/0.2). After every cut, re-run the host oracle from a VS
-  x86 dev shell (`vcvarsamd64_x86.bat`).
-- **Wire/version:** nothing in this plan changes the wire format; leave
-  `U6O_VERSION` alone.
+- **Status 2026-06-16: COMPLETE.** LHS-P0…P7 all ✅ (P7.2 ⏭ deferred). The
+  monolith `src/server/loop_host.cpp` is gone (`git mv`'d, then fully carved and
+  the residual `part_00` `git rm`'d). `src/server/loop/` holds the umbrella
+  `loop_host_all.cpp` + **35 ordered part files**. `u6o7.cpp:691` includes only
+  the umbrella.
+- **Verification:** host oracle and `-Both` oracle both print `OK`
+  (token-stream identical to the pre-split baseline). The reconstructed
+  concatenation host-aware-scans to **final brace depth 0**, **30 depth-1
+  seams**, and **only the 4 known-dead external goto targets** (every live
+  cross-part goto resolves in-TU). `host`, `both`, and `client` all build +
+  link green (the only warnings are pre-existing client `C4731` inline-asm
+  warnings in `loop_client_part_world_render.cpp`, unrelated to this split).
+- **Part inventory:** see the table in `src/server/loop/README.md`. Split:
+  open(1) + MEGA A(5) + MEGA B(8) + MEGA C(8) + MEGA D(12) + tail(1) = 35 parts.
+  Seven parts marginally exceed 1,000 lines (flagged exceptions — deeply-nested
+  goto regions with no interior brace seams): `part_a_save`, `part_a_housestore`,
+  `part_b_admin_exec`, `part_b_chat_npc`, `part_b_leave_resurrect_house`,
+  `part_d_cast`, `part_d_chainbolt`.
+- **New tooling (kept for any future re-split / modernization pass):**
+  `tools/loop_split_oracle_host.ps1` (host + `-Both`),
+  `tools/loop_split_scan_host.ps1` (host-aware seam scan), and
+  `tools/loop_split_commentcheck.ps1` (cut-safety: is a candidate line inside a
+  block comment?). Baselines:
+  `tools/loop_split_host_oracle_baseline.sha256`,
+  `tools/loop_split_host_both_oracle_baseline.sha256`.
+- **HARD-WON LESSONS (apply to any future loop re-split):**
+  1. **Comment hazard.** A `/* … */` block comment cannot span an `#include`
+     boundary → MSVC `C1071`. This code has large commented-out reference
+     blocks (a 448-line one in MEGA A). **Always run
+     `tools/loop_split_commentcheck.ps1 -Lines a,b,c` (via `&`, not
+     `powershell -File`, so the int[] binds) on every candidate cut and require
+     `insideBlockComment = False`.** Host-aware brace seams are inherently
+     comment-safe; label/blank boundaries are not until checked.
+  2. **Banner escaping.** Use a single-quoted here-string `@'...'@` with
+     `tools/loop_split_banner.ps1` and ASCII only (`--` not `—`, no backticks);
+     a double-quoted `@"..."@` makes PowerShell process `` `f ``/`` `n `` etc.
+     and corrupt the banner.
+  3. **Umbrella edits.** Re-check the include list after every edit — a stray
+     duplicate `#include` silently doubles a part and fails the oracle.
+  4. **Most mega-blocks are ONE deeply-nested block** (`for/if(playerlist){…}`)
+     with no shallow interior seams, so cuts land on section *labels* (a label
+     starting a part keeps its own statement; a preceding `if(){` left open in
+     the prior part is a valid brace seam). MEGA B was the exception (a real
+     `if(x3){` dispatch with many depth-1 seams).
+- **Wire/version:** the split changed no wire format; `U6O_VERSION` untouched.
 

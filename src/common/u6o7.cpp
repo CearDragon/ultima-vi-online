@@ -688,7 +688,7 @@ FALSE
 
 #ifdef HOST
 if (NEThost){
-#include "loop_host.cpp"
+#include "loop/loop_host_all.cpp"
 }
 #endif
 
