@@ -2,21 +2,36 @@
 // LCS brace-seam: CONTINUES the in-game `{ ... }` block. Begins at the
 // skiprefresh2: label; contains walk-through / movement resolution, tmap, and
 // upflags update. Pure relocation — do not edit. See docs/plans/plan-loopClientSplit.md.
-skiprefresh2:
+skiprefresh2 : 
 
 
+if
+(nodisplay)
+goto
+skiprefresh;
+if
+(
+!
+clientframe
+)
+goto
+skiprefresh;
 
-  if (nodisplay) goto skiprefresh;
-  if (!clientframe) goto skiprefresh;
 
-
-  // RW-P3.3 (2026-06-02): first-show placement keyed on FRAME::positioned, not
-  // the offset==4096 sentinel. The inclusive minimap/tmap hide-show toggle
-  // above (kPanelHideThresholdX/DeltaX == 4096) could consume the 4096 sentinel
-  // before this ran, and a cltset2-restored position saved on a larger window
-  // could land off the right edge. placeFloatingPanelFirstShow clamps the home
-  // fully on screen and parks it shown/hidden per peer/tmap.
-  if (!minimap_frame->positioned){
+// RW-P3.3 (2026-06-02): first-show placement keyed on FRAME::positioned, not
+// the offset==4096 sentinel. The inclusive minimap/tmap hide-show toggle
+// above (kPanelHideThresholdX/DeltaX == 4096) could consume the 4096 sentinel
+// before this ran, and a cltset2-restored position saved on a larger window
+// could land off the right edge. placeFloatingPanelFirstShow clamps the home
+// fully on screen and parks it shown/hidden per peer/tmap.
+if
+(
+!
+minimap_frame
+->
+positioned
+)
+{
     int hx=0, hy=0; //default
     if (cltset2_restored){ if (cltset2.minimap_offset_x!=32767){
       hx=cltset2.minimap_offset_x; hy=cltset2.minimap_offset_y;
@@ -25,7 +40,14 @@ skiprefresh2:
     placeFloatingPanelFirstShow(minimap_frame, hx, hy, peer);
   }
 
-  if (!tmap_frame->positioned){
+if
+(
+!
+tmap_frame
+->
+positioned
+)
+{
     int hx=0, hy=0; //default
     if (cltset2_restored){ if (cltset2.tmap_offset_x!=32767){
       hx=cltset2.tmap_offset_x; hy=cltset2.tmap_offset_y;
@@ -34,7 +56,16 @@ skiprefresh2:
     placeFloatingPanelFirstShow(tmap_frame, hx, hy, tmap);
   }
 
-  for (i=0;i<=7;i++){
+for
+(i=
+0;
+i
+<=
+7;
+i
+++
+)
+{
 
 
     if (CLIENTplayer->party[i]!=NULL){
@@ -634,12 +665,17 @@ diskip:
   } //0-7 for/next
 
 
-	// r222 for new mode: display party member frame at the top right of window, outside the playing area.
-	//party_frame[i]->graphic = pspartyorg;
-	//img(pspartyorg, pspartytemp);
-	//refresh(pspartyorg);
+// r222 for new mode: display party member frame at the top right of window, outside the playing area.
+//party_frame[i]->graphic = pspartyorg;
+//img(pspartyorg, pspartytemp);
+//refresh(pspartyorg);
 
-	if (smallwindow && windowsizecyclenum == 1) {
+if
+(smallwindow &&windowsizecyclenum
+==
+1
+)
+ {
 		//txtset(t, "2 img..........");
 		//LOGadd(t);
 		//img(psnew1b, statusbar_b255);

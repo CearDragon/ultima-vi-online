@@ -7,112 +7,103 @@
 // Pure relocation — do not edit. See docs/plans/plan-loopClientSplit.md.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  if (qkstf_update){
-    qkstf_update=FALSE;
+if
+(qkstf_update) {
+    qkstf_update = FALSE;
     //refresh qkstf
-    x=0;
-    for (i=0;i<=7;i++){
-      if (CLIENTplayer->party[i]!=NULL){
-        x++; //count party members
-      }}
-    if (qkstf->graphic->d.dwHeight!=(x*64+32)){
-      free(qkstf->graphic);
-      qkstf->graphic=newsurf(128,x*64+32,SURF_SYSMEM16);  //adjust frame size
-    }
-
-    for (i=0;i<=x;i++){
-      img(qkstf->graphic,0,i*64+32,mini_2);
-    }
-    img(qkstf->graphic,0,x*64,mini_3);
-
-    i=-1;
-    for (i2=0;i2<=7;i2++){
-      if (CLIENTplayer->party[i2]!=NULL){
-        i++;
-        tnpc=(npc*)CLIENTplayer->party[i2]->more; //shortcut
-
-        img0(qkstf->graphic,4,i*64-2+32,getportrait(tnpc->port));
-
-
-
-        txtset(t,tnpc->name);
-        x=8; y=i*64+32+16-8+32;
-        txtcol=rgb(0,0,0);
-        txtout(qkstf->graphic,x,y,t);
-        txtout(qkstf->graphic,x+2,y+2,t);
-        txtout(qkstf->graphic,x+2,y,t);
-        txtout(qkstf->graphic,x,y+2,t);
-        txtcol=rgb(255,255,255);
-        if (i2==0) txtcol=namecolour;
-        txtout(qkstf->graphic,x+1,y+1,t);
-        txtcol=rgb(255,255,255);
-
-        x2=tnpc->hp&32767;
-        txtnumint(t,x2);
-        x=64+32-16+4; y=i*64+4+32;
-        if (x2<100) x=x+10;
-        if (x2<10) x=x+10;
-
-
-        txtcol=rgb(168,30,24);
-        if (tnpc->hp&32768) txtcol=rgb(24,168,24);
-        txtout(qkstf->graphic,x,y,t);
-        txtout(qkstf->graphic,x+2,y+2,t);
-        txtout(qkstf->graphic,x+2,y,t);
-        txtout(qkstf->graphic,x,y+2,t);
-        txtcol=rgb(255,64,32);
-        if (tnpc->hp&32768) txtcol=rgb(64,255,64);
-        txtout(qkstf->graphic,x+1,y+1,t);
-
-        txtnumint(t,tnpc->mp);
-        x=64+32-16+4; y=i*64+4+16+4+32;
-        if (tnpc->mp<100) x=x+10;
-        if (tnpc->mp<10) x=x+10;
-
-
-        txtcol=rgb(72,72,168);
-        txtout(qkstf->graphic,x,y,t);
-        txtout(qkstf->graphic,x+2,y+2,t);
-        txtout(qkstf->graphic,x+2,y,t);
-        txtout(qkstf->graphic,x,y+2,t);
-        txtcol=rgb(96,128,255);
-        txtout(qkstf->graphic,x+1,y+1,t);
-
-
-        x2=0;
-        for (x=0;x<=255;x++){
-          if (spell[i2][x]) x2=1;
+    x = 0;
+    for (i = 0; i <= 7; i++) {
+        if (CLIENTplayer->party[i] != NULL) {
+            x++; //count party members
         }
-        if (x2){
-          if (client_spellwait[i2]){
-            img0(qkstf->graphic,4+56-2-2,i*64-16+32+32+1,spellbookmini2);
-          }else{
-            img0(qkstf->graphic,4+56-2-2,i*64-16+32+32+1,spellbookmini);
-          }
-        }
-
-
-      }
+    }
+    if (qkstf->graphic->d.dwHeight != (x * 64 + 32)) {
+        free(qkstf->graphic);
+        qkstf->graphic = newsurf(128, x * 64 + 32, SURF_SYSMEM16); //adjust frame size
     }
 
-  } //upflags_update==TRUE;
+    for (i = 0; i <= x; i++) {
+        img(qkstf->graphic, 0, i * 64 + 32, mini_2);
+    }
+    img(qkstf->graphic, 0, x * 64, mini_3);
 
-  if (qkstf->mouse_click){
+    i = -1;
+    for (i2 = 0; i2 <= 7; i2++) {
+        if (CLIENTplayer->party[i2] != NULL) {
+            i++;
+            tnpc = (npc *) CLIENTplayer->party[i2]->more; //shortcut
+
+            img0(qkstf->graphic, 4, i * 64 - 2 + 32, getportrait(tnpc->port));
+
+
+            txtset(t, tnpc->name);
+            x = 8;
+            y = i * 64 + 32 + 16 - 8 + 32;
+            txtcol = rgb(0, 0, 0);
+            txtout(qkstf->graphic, x, y, t);
+            txtout(qkstf->graphic, x + 2, y + 2, t);
+            txtout(qkstf->graphic, x + 2, y, t);
+            txtout(qkstf->graphic, x, y + 2, t);
+            txtcol = rgb(255, 255, 255);
+            if (i2 == 0) txtcol = namecolour;
+            txtout(qkstf->graphic, x + 1, y + 1, t);
+            txtcol = rgb(255, 255, 255);
+
+            x2 = tnpc->hp & 32767;
+            txtnumint(t, x2);
+            x = 64 + 32 - 16 + 4;
+            y = i * 64 + 4 + 32;
+            if (x2 < 100) x = x + 10;
+            if (x2 < 10) x = x + 10;
+
+
+            txtcol = rgb(168, 30, 24);
+            if (tnpc->hp & 32768) txtcol = rgb(24, 168, 24);
+            txtout(qkstf->graphic, x, y, t);
+            txtout(qkstf->graphic, x + 2, y + 2, t);
+            txtout(qkstf->graphic, x + 2, y, t);
+            txtout(qkstf->graphic, x, y + 2, t);
+            txtcol = rgb(255, 64, 32);
+            if (tnpc->hp & 32768) txtcol = rgb(64, 255, 64);
+            txtout(qkstf->graphic, x + 1, y + 1, t);
+
+            txtnumint(t, tnpc->mp);
+            x = 64 + 32 - 16 + 4;
+            y = i * 64 + 4 + 16 + 4 + 32;
+            if (tnpc->mp < 100) x = x + 10;
+            if (tnpc->mp < 10) x = x + 10;
+
+
+            txtcol = rgb(72, 72, 168);
+            txtout(qkstf->graphic, x, y, t);
+            txtout(qkstf->graphic, x + 2, y + 2, t);
+            txtout(qkstf->graphic, x + 2, y, t);
+            txtout(qkstf->graphic, x, y + 2, t);
+            txtcol = rgb(96, 128, 255);
+            txtout(qkstf->graphic, x + 1, y + 1, t);
+
+
+            x2 = 0;
+            for (x = 0; x <= 255; x++) {
+                if (spell[i2][x]) x2 = 1;
+            }
+            if (x2) {
+                if (client_spellwait[i2]) {
+                    img0(qkstf->graphic, 4 + 56 - 2 - 2, i * 64 - 16 + 32 + 32 + 1, spellbookmini2);
+                } else {
+                    img0(qkstf->graphic, 4 + 56 - 2 - 2, i * 64 - 16 + 32 + 32 + 1, spellbookmini);
+                }
+            }
+        }
+    }
+} //upflags_update==TRUE;
+
+if
+(qkstf
+->
+mouse_click
+)
+{
     qkstf->mouse_click=FALSE;
     i2=(qkstf->mouse_y-32)/64;
     x=qkstf->mouse_x; y=qkstf->mouse_y-32-64*i2;
@@ -153,17 +144,31 @@ qkstf_mcdone:;
 
 
 
-  img(tmini_1,0,0,mini_1); //copy original background
+img(tmini_1, 0, 0, mini_1); //copy original background
 
-  //underground?
-  moonlight=0;
-  if (AMBIENTLIGHT_SHOWSUN==FALSE){
+//underground?
+moonlight=
+0;
+if
+(AMBIENTLIGHT_SHOWSUN
+==
+FALSE
+)
+{
     img0(tmini_1,7,4,cave); goto underground;
   }
 
 
-  //use btime
-  if ((btime>5)&&(btime<20)){
+//use btime
+if
+((btime
+>
+5
+)
+&&
+(btime<20)
+)
+{
     x=(float)128.0f-((btime-5.0f)*6.5f)-32+8+4-8;
     y=16+4-(sin((btime-5.0f)/4.8f)*14.0f)-8;
     if ((btime>7)&&(btime<18)){
@@ -174,12 +179,38 @@ qkstf_mcdone:;
   }
 
 
-  if (moon1==NULL) {moon1=OBJnew_local(); moon1->type=73;}
+if
+(moon1
+==
+NULL
+)
+ {moon1=OBJnew_local(); moon1->type=73;}
 
-  //display moons!
-  f=btime2*1.125f+3.0f; //first moon fixed offset sun+4 hours
-  x=f/24; f-=(float)x*24.0f;
-  if ((f>5)&&(f<20)){
+//display moons!
+f=btime2
+*
+1.125f
++
+3.0f; //first moon fixed offset sun+4 hours
+x=f
+/
+24;
+f
+-=
+(
+float
+)
+x *
+24.0f;
+if
+((f
+>
+5
+)
+&&
+(f<20)
+)
+{
 
     if (f>=12.0f) f3=-(f-12.0f); else f3=12.0f-f;
     f3/=1.125f;
@@ -213,10 +244,31 @@ qkstf_mcdone:;
     img0(tmini_1,x,y,bt32);
   }
 
-  //display moons! (lol this will be interesting!)
-  f=btime2*1.1875f+5.0f; //first moon fixed offset sun+4 hours
-  x=f/24; f-=(float)x*24.0f;
-  if ((f>5)&&(f<20)){
+//display moons! (lol this will be interesting!)
+f=btime2
+*
+1.1875f
++
+5.0f; //first moon fixed offset sun+4 hours
+x=f
+/
+24;
+f
+-=
+(
+float
+)
+x *
+24.0f;
+if
+((f
+>
+5
+)
+&&
+(f<20)
+)
+{
 
     //calculate moon phase!
     if (f>=12.0f) f3=-(f-12.0f); else f3=12.0f-f;
@@ -250,23 +302,59 @@ qkstf_mcdone:;
 
 
 
-  if ((btime>7)&&(btime<18)){
+if
+((btime
+>
+7
+)
+&&
+(btime<18)
+)
+{
 
 
     img0(tmini_1,0,16,horizon);//GPFGPF
     //img0(tmini_1,0,16,horizontesting);//GPFGPF testing
-  }else{
+  }else
+{
     img0(tmini_1,0,16,horizon2);
   }
 
 
 
-  txtset(t,"");
-  if (windy2==1) txtset(t,"N");
-  if (windy2==-1) txtset(t,"S");
-  if (windx2==1) txtadd(t,"W");
-  if (windx2==-1) txtadd(t,"E");
-  if (t->l){
+txtset(t, "");
+if
+(windy2
+==
+1
+)
+txtset(t, "N");
+if
+(windy2
+==
+-
+1
+)
+txtset(t, "S");
+if
+(windx2
+==
+1
+)
+txtadd(t, "W");
+if
+(windx2
+==
+-
+1
+)
+txtadd(t, "E");
+if
+(t
+->
+l
+)
+{
     txtfnt=fnt2;
     x=128-8-t->l*8; y=2;
     txtcol=rgb(168,60,0);
@@ -274,21 +362,30 @@ qkstf_mcdone:;
     txtfnt=fnt1;
   }
 
-underground:
-  img(qkstf->graphic,0,0,tmini_1); //moon and sun on qk stat
+underground : img(qkstf->graphic, 0, 0, tmini_1); //moon and sun on qk stat
 
-  img(volcontrol_surf,0,0,volcontrol_background);
-  img(volcontrol_surf,46+u6ovolume*20/72-4,8+3,volcontrol_tab1);
-  img(volcontrol_surf,46+u6omidivolume*20/72-4,32+8-5,volcontrol_tab3);
-  img(volcontrol_surf,46+u6ovoicevolume*20/72-4,32+8-5+24,volcontrol_tab2);
-  if (u6ovoicevolume==0){
+img(volcontrol_surf, 0, 0, volcontrol_background);
+img(volcontrol_surf, 46 + u6ovolume * 20 / 72 - 4, 8 + 3, volcontrol_tab1);
+img(volcontrol_surf, 46 + u6omidivolume * 20 / 72 - 4, 32 + 8 - 5, volcontrol_tab3);
+img(volcontrol_surf, 46 + u6ovoicevolume * 20 / 72 - 4, 32 + 8 - 5 + 24, volcontrol_tab2);
+if
+(u6ovoicevolume
+==
+0
+)
+{
     img0(volcontrol_surf,12,60,vm_volmmute);
   }
 
 
 
 
-  if (musickeyboard->mouse_click){
+if
+(musickeyboard
+->
+mouse_click
+)
+{
     //calculate key pressed
     x=musickeyboard->mouse_x;
     //black key?
@@ -349,85 +446,106 @@ gotkey: //x2 is value of key
 
 
 
-  if (portraitlook_wait){
+if
+(portraitlook_wait) {
+    static object *portraitlook_obj = OBJnew_local();
+    if (portraitlook_equip) {
+        for (i = 0; i < 8; i++) {
+            if (portraitlook_obj->type = portraitlook_type[i]) {
+                getspr(portraitlook_obj);
 
 
+                if (i == 0) img0(statusmessage_viewnpc->graphic, helmx + 112, helmy - 128, bt32);
+                if (i == 1) img0(statusmessage_viewnpc->graphic, wep_rightx + 112, wep_righty - 128, bt32);
+                if (i == 2) img0(statusmessage_viewnpc->graphic, wep_leftx + 112, wep_lefty - 128, bt32);
+                if (i == 3) img0(statusmessage_viewnpc->graphic, armourx + 112, armoury - 128, bt32);
+                if (i == 4) img0(statusmessage_viewnpc->graphic, bootsx + 112, bootsy - 128, bt32);
+                if (i == 5) img0(statusmessage_viewnpc->graphic, ring_rightx + 112, ring_righty - 128, bt32);
+                if (i == 6) img0(statusmessage_viewnpc->graphic, ring_leftx + 112, ring_lefty - 128, bt32);
+                if (i == 7) img0(statusmessage_viewnpc->graphic, neckx + 112, necky - 128, bt32);
+
+                if (portraitlook_plusbonus[i]) {
+                    if (i == 0) {
+                        x = helmx;
+                        y = helmy;
+                    }
+                    if (i == 1) {
+                        x = wep_rightx;
+                        y = wep_righty;
+                    }
+                    if (i == 2) {
+                        x = wep_leftx;
+                        y = wep_lefty;
+                    }
+                    if (i == 3) {
+                        x = armourx;
+                        y = armoury;
+                    }
+                    if (i == 4) {
+                        x = bootsx;
+                        y = bootsy;
+                    }
+                    if (i == 5) {
+                        x = ring_rightx;
+                        y = ring_righty;
+                    }
+                    if (i == 6) {
+                        x = ring_leftx;
+                        y = ring_lefty;
+                    }
+                    if (i == 7) {
+                        x = neckx;
+                        y = necky;
+                    }
+                    x += 112;
+                    y -= 128;
+                    x += 24;
+                    txtset(t, "+");
+                    txtnumint(t2, portraitlook_plusbonus[i]);
+                    txtadd(t, t2);
+                    txtfnt = fnt3;
+                    txtcol = 0;
+                    txtout(statusmessage_viewnpc->graphic, x, y - 1, t);
+                    txtout(statusmessage_viewnpc->graphic, x - 1, y, t);
+                    txtout(statusmessage_viewnpc->graphic, x + 1, y, t);
+                    txtout(statusmessage_viewnpc->graphic, x, y + 1, t);
+                    txtout(statusmessage_viewnpc->graphic, x - 1, y - 1, t);
+                    txtout(statusmessage_viewnpc->graphic, x + 1, y - 1, t);
+                    txtout(statusmessage_viewnpc->graphic, x + 1, y + 1, t);
+                    txtout(statusmessage_viewnpc->graphic, x - 1, y + 1, t);
+                    txtcol = rgb(32, 255, 32);
+                    txtout(statusmessage_viewnpc->graphic, x, y, t);
+                    txtfnt = fnt1;
+                    txtcol = rgb(255, 255, 255);
+                }
+            } //portraitlook_type[i]
+        } //i
+    } //portraitlook_equip
+
+    txtset(t, portraitlook_name);
+    x = 56 - 4 * t->l;
+    y = 128 - 16 - 8;
+    txtcol = rgb(0, 0, 0);
+    txtout(statusmessage_viewnpc->graphic, x, y, t);
+    txtout(statusmessage_viewnpc->graphic, x + 2, y + 2, t);
+    txtout(statusmessage_viewnpc->graphic, x + 2, y, t);
+    txtout(statusmessage_viewnpc->graphic, x, y + 2, t);
+    txtcol = portraitlook_namecolour;
+    txtout(statusmessage_viewnpc->graphic, x + 1, y + 1, t);
+    txtcol = rgb(255, 255, 255);
+}
 
 
-
-    static object* portraitlook_obj=OBJnew_local();
-    if (portraitlook_equip){
-      for (i=0;i<8;i++){
-        if (portraitlook_obj->type=portraitlook_type[i]){
-          getspr(portraitlook_obj);
-
-
-          if (i==0) img0(statusmessage_viewnpc->graphic,helmx+112,helmy-128,bt32);
-          if (i==1) img0(statusmessage_viewnpc->graphic,wep_rightx+112,wep_righty-128,bt32);
-          if (i==2) img0(statusmessage_viewnpc->graphic,wep_leftx+112,wep_lefty-128,bt32);
-          if (i==3) img0(statusmessage_viewnpc->graphic,armourx+112,armoury-128,bt32);
-          if (i==4) img0(statusmessage_viewnpc->graphic,bootsx+112,bootsy-128,bt32);
-          if (i==5) img0(statusmessage_viewnpc->graphic,ring_rightx+112,ring_righty-128,bt32);
-          if (i==6) img0(statusmessage_viewnpc->graphic,ring_leftx+112,ring_lefty-128,bt32);
-          if (i==7) img0(statusmessage_viewnpc->graphic,neckx+112,necky-128,bt32);
-
-          if (portraitlook_plusbonus[i]){
-
-            if (i==0){x=helmx;y=helmy;}
-            if (i==1){x=wep_rightx;y=wep_righty;}
-            if (i==2){x=wep_leftx;y=wep_lefty;}
-            if (i==3){x=armourx;y=armoury;}
-            if (i==4){x=bootsx;y=bootsy;}
-            if (i==5){x=ring_rightx;y=ring_righty;}
-            if (i==6){x=ring_leftx;y=ring_lefty;}
-            if (i==7){x=neckx;y=necky;}
-            x+=112; y-=128;
-            x+=24;
-            txtset(t,"+");
-            txtnumint(t2,portraitlook_plusbonus[i]);
-            txtadd(t,t2);
-            txtfnt=fnt3; txtcol=0;
-            txtout(statusmessage_viewnpc->graphic,x,y-1,t);
-            txtout(statusmessage_viewnpc->graphic,x-1,y,t);
-            txtout(statusmessage_viewnpc->graphic,x+1,y,t);
-            txtout(statusmessage_viewnpc->graphic,x,y+1,t);
-            txtout(statusmessage_viewnpc->graphic,x-1,y-1,t);
-            txtout(statusmessage_viewnpc->graphic,x+1,y-1,t);
-            txtout(statusmessage_viewnpc->graphic,x+1,y+1,t);
-            txtout(statusmessage_viewnpc->graphic,x-1,y+1,t);
-            txtcol=rgb(32,255,32);
-            txtout(statusmessage_viewnpc->graphic,x,y,t);
-            txtfnt=fnt1; txtcol=rgb(255,255,255);
-          }
-
-
-
-
-
-
-
-
-        }//portraitlook_type[i]
-      }//i
-    }//portraitlook_equip
-
-    txtset(t,portraitlook_name);
-    x=56-4*t->l; y=128-16-8;
-    txtcol=rgb(0,0,0);
-    txtout(statusmessage_viewnpc->graphic,x,y,t);
-    txtout(statusmessage_viewnpc->graphic,x+2,y+2,t);
-    txtout(statusmessage_viewnpc->graphic,x+2,y,t);
-    txtout(statusmessage_viewnpc->graphic,x,y+2,t);
-    txtcol=portraitlook_namecolour;
-    txtout(statusmessage_viewnpc->graphic,x+1,y+1,t);
-    txtcol=rgb(255,255,255);
-
-  }
-
-
-
-
-  for(i=0;i<=23;i++){
+for
+(i=
+0;
+i
+<=
+23;
+i
+++
+)
+{
     if ((i>=0)&&(i<=7)) pmf=party_frame[i];
     if ((i>=8)&&(i<=15)) pmf=party_spellbook_frame[i-8];
     if (i==16) pmf=musickeyboard;
@@ -518,19 +636,29 @@ gotkey: //x2 is value of key
       }
     }
   }//i (frame)
-  clientsettingsvalid=TRUE;
+clientsettingsvalid=TRUE;
 
 
-  // r333 no changes are made here
-  //frame: display
-  pn=firstpanel;
-checkpanel2:
-  if (pn!=NULL){
+// r333 no changes are made here
+//frame: display
+pn=firstpanel;
+checkpanel2 : 
+if
+(pn
+!=
+NULL
+)
+{
     lpn=pn; pn=(FRAME*)pn->next; goto checkpanel2;
   }
-  pn=lpn;
-displaypanel:
-  if (pn!=NULL){
+pn=lpn;
+displaypanel : 
+if
+(pn
+!=
+NULL
+)
+{
     if (pn->graphic!=NULL){
       if (pn->graphic_use0pixel==TRUE){
 
@@ -685,195 +813,238 @@ inpf2crop:
   }
 
 
-  if (shiftnum_show){
-    x=14*32;
-    y=12*32;
-    txtset(t,"How many? ");
-    txtadd(t,tshiftnum);
-    txtcol=0;
-    txtout(ps,x,y,t);
-    txtout(ps,x+2,y+2,t);
-    txtout(ps,x+2,y,t);
-    txtout(ps,x,y+2,t);
-    txtcol=rgb(255,255,255);
-    txtout(ps,x+1,y+1,t);
-  }
+if
+(shiftnum_show) {
+    x = 14 * 32;
+    y = 12 * 32;
+    txtset(t, "How many? ");
+    txtadd(t, tshiftnum);
+    txtcol = 0;
+    txtout(ps, x, y, t);
+    txtout(ps, x + 2, y + 2, t);
+    txtout(ps, x + 2, y, t);
+    txtout(ps, x, y + 2, t);
+    txtcol = rgb(255, 255, 255);
+    txtout(ps, x + 1, y + 1, t);
+}
 
 
-  if (endgame){
-    if (endgame_timer<=140.0f){
+if
+(endgame) {
+    if (endgame_timer <= 140.0f) {
+        x = 0;
+        txtset(t5, "");
+        x5 = 187;
 
-      x=0; txtset(t5,""); x5=187;
 
-
-      if (endgame_message==0){
-        STATUSMESSadd("The Codex has vanished!");
-        endgame_message++;
-      }
-
-      if (endgame_message==1){
-        if (endgame_timer>=4.0f){
-          txtset(t5,"A glowing portal springs from the floor!");
-          endgame_message++;
+        if (endgame_message == 0) {
+            STATUSMESSadd("The Codex has vanished!");
+            endgame_message++;
         }
-      }
 
-      if (endgame_message==2){
-        x=1;
-        if (endgame_timer>=8.0f){
-          STATUSMESSadd("You have gained strength, dexterity and intelligence!");
-          txtset(t5,"From its crimson depths Lord British emerges, trailed by the mage Nystul.");
-          endgame_message++;
+        if (endgame_message == 1) {
+            if (endgame_timer >= 4.0f) {
+                txtset(t5, "A glowing portal springs from the floor!");
+                endgame_message++;
+            }
         }
-      }
 
-      if (endgame_message==3){
-        x=2;
-        if (endgame_timer>=12.0f){
-          x5=5; txtset(t5,"Anguish and disbelief prevail on the royal seer's face.");
-          endgame_message++;
+        if (endgame_message == 2) {
+            x = 1;
+            if (endgame_timer >= 8.0f) {
+                STATUSMESSadd("You have gained strength, dexterity and intelligence!");
+                txtset(t5, "From its crimson depths Lord British emerges, trailed by the mage Nystul.");
+                endgame_message++;
+            }
         }
-      }
 
-      if (endgame_message==4){
-        x=2;
-        if (endgame_timer>=16.0f){
-          x5=4;
-          txtset(t5,"But Lord British directs his stony gaze at you and speaks as if to a wayward child.\\\"Thou didst have just cause to burgle our Codex, I trust\", his Majesty says.\\\"But for Virtue's sake...\"\\\"WHAT HAST THOU DONE WITH IT?\"");
-          endgame_message++;
+        if (endgame_message == 3) {
+            x = 2;
+            if (endgame_timer >= 12.0f) {
+                x5 = 5;
+                txtset(t5, "Anguish and disbelief prevail on the royal seer's face.");
+                endgame_message++;
+            }
         }
-      }
 
-      if (endgame_message==5){
-        x=2;
-        if (endgame_timer>=32.0f){
-          if (tplay->party[0]){
-            tnpc=(npc*)tplay->party[0]->more;
-            x5=tnpc->port;
-          }else x5=portlast;
-          txtset(t5,"\"Was the book ever truly ours, your majesty?\"\\\"Was it written for Britannia alone?\"\\\"Thou dost no longer hold the Codex, but is its wisdom indeed lost?\"\\\"Look into the Vortex, and let the Codex answer for itself!\"\\You pick up the concave lens and pass it to the King.");
-          endgame_message++;
+        if (endgame_message == 4) {
+            x = 2;
+            if (endgame_timer >= 16.0f) {
+                x5 = 4;
+                txtset(
+                    t5,
+                    "But Lord British directs his stony gaze at you and speaks as if to a wayward child.\\\"Thou didst have just cause to burgle our Codex, I trust\", his Majesty says.\\\"But for Virtue's sake...\"\\\"WHAT HAST THOU DONE WITH IT?\"");
+                endgame_message++;
+            }
         }
-      }
 
-      if (endgame_message==6){
-        x=2;
-        if (endgame_timer>=52.0f){
-          x5=4; txtset(t5,"Lord British holds the glass before the wall.");
-          endgame_message++;
+        if (endgame_message == 5) {
+            x = 2;
+            if (endgame_timer >= 32.0f) {
+                if (tplay->party[0]) {
+                    tnpc = (npc *) tplay->party[0]->more;
+                    x5 = tnpc->port;
+                } else x5 = portlast;
+                txtset(
+                    t5,
+                    "\"Was the book ever truly ours, your majesty?\"\\\"Was it written for Britannia alone?\"\\\"Thou dost no longer hold the Codex, but is its wisdom indeed lost?\"\\\"Look into the Vortex, and let the Codex answer for itself!\"\\You pick up the concave lens and pass it to the King.");
+                endgame_message++;
+            }
         }
-      }
 
-      if (endgame_message==7){
-        x=3;
-        if (endgame_timer>=56.0f){
-          txtset(t5,"The Codex of Ultimate Wisdom wavers into view against a myriad of swimming stars!\\Yet the book remains closed.");
-          endgame_message++;
+        if (endgame_message == 6) {
+            x = 2;
+            if (endgame_timer >= 52.0f) {
+                x5 = 4;
+                txtset(t5, "Lord British holds the glass before the wall.");
+                endgame_message++;
+            }
         }
-      }
 
-      if (endgame_message==8){
-        x=3;
-        if (endgame_timer>=64.0f){
-          txtset(t5,"And waves of heat shimmer in the air, heralding the birth of another red gate!");
-          endgame_message++;
+        if (endgame_message == 7) {
+            x = 3;
+            if (endgame_timer >= 56.0f) {
+                txtset(
+                    t5,
+                    "The Codex of Ultimate Wisdom wavers into view against a myriad of swimming stars!\\Yet the book remains closed.");
+                endgame_message++;
+            }
         }
-      }
 
-      if (endgame_message==9){
-        x=4;
-        if (endgame_timer>=68.0f){
-          x5=166; txtset(t5,"King Draxinusom of the Gargoyles strides forward.\\Flanked by a small army of wingless attendants.\\Like Lord British, he seems to suppress his rage only through a heroic effort of will.\\His scaly hand grasps your shoulder, and your Amulet of Submission grows very warm.\\\"Thy time hath come, Thief\", he says.");
-          endgame_message++;
+        if (endgame_message == 8) {
+            x = 3;
+            if (endgame_timer >= 64.0f) {
+                txtset(t5, "And waves of heat shimmer in the air, heralding the birth of another red gate!");
+                endgame_message++;
+            }
         }
-      }
 
-      if (endgame_message==10){
-        x=5;
-        if (endgame_timer>=88.0f){
-          if (tplay->party[0]){
-            tnpc=(npc*)tplay->party[0]->more;
-            x5=tnpc->port;
-          }else x5=portlast;
-          txtset(t5,"\"Join my Lord in his search for peace, I beg thee.\"\\Quickly you reach down to seize the convex lens...\\...and you press it into the hand of the towering Gargoyle king, meeting his sunken eyes.");
-          endgame_message++;
+        if (endgame_message == 9) {
+            x = 4;
+            if (endgame_timer >= 68.0f) {
+                x5 = 166;
+                txtset(
+                    t5,
+                    "King Draxinusom of the Gargoyles strides forward.\\Flanked by a small army of wingless attendants.\\Like Lord British, he seems to suppress his rage only through a heroic effort of will.\\His scaly hand grasps your shoulder, and your Amulet of Submission grows very warm.\\\"Thy time hath come, Thief\", he says.");
+                endgame_message++;
+            }
         }
-      }
 
-      if (endgame_message==11){
-        x=6;
-        if (endgame_timer>=100.0f){
-          x5=166; txtset(t5,"At your urging, King Draxinusom reluctantly raises his lens to catch the light.");
-          endgame_message++;
+        if (endgame_message == 10) {
+            x = 5;
+            if (endgame_timer >= 88.0f) {
+                if (tplay->party[0]) {
+                    tnpc = (npc *) tplay->party[0]->more;
+                    x5 = tnpc->port;
+                } else x5 = portlast;
+                txtset(
+                    t5,
+                    "\"Join my Lord in his search for peace, I beg thee.\"\\Quickly you reach down to seize the convex lens...\\...and you press it into the hand of the towering Gargoyle king, meeting his sunken eyes.");
+                endgame_message++;
+            }
         }
-      }
 
-      if (endgame_message==12){
-        x=8;
-        if (endgame_timer>=104.0f){
-          txtset(t5,"As Lord British holds up his own lens, every eye in the room, human and Gargoyle alike,\\fixes upon the image of the Codex which shines upon the wall.");
-          endgame_message++;
+        if (endgame_message == 11) {
+            x = 6;
+            if (endgame_timer >= 100.0f) {
+                x5 = 166;
+                txtset(t5, "At your urging, King Draxinusom reluctantly raises his lens to catch the light.");
+                endgame_message++;
+            }
         }
-      }
 
-      if (endgame_message==13){
-        x=8;
-        if (endgame_timer>=112.0f){
-          STATUSMESSadd("Your Amulet of Submission has shattered!");
-          soundplay2(u6osound[18],u6osound_volume[18]);
-          txtset(t5,"The ancient book opens.\\Both kings gaze upon its pages in spellbound silence, as the eloquence of Ultimate Wisdom is revealed\\in the tongues of each lord's domain.\\You, too, can read the answers the Codex gives...\\...and when its wisdom is gleaned, when Lord British  and King Draxinusom turn to each other as friends,\\hating no longer, fearing no more, you know that your mission in Britannia has ended at last.");
-          endgame_message++;
+        if (endgame_message == 12) {
+            x = 8;
+            if (endgame_timer >= 104.0f) {
+                txtset(
+                    t5,
+                    "As Lord British holds up his own lens, every eye in the room, human and Gargoyle alike,\\fixes upon the image of the Codex which shines upon the wall.");
+                endgame_message++;
+            }
         }
-      }
 
-      if (endgame_message==14){
-        x=9;
-      }
+        if (endgame_message == 13) {
+            x = 8;
+            if (endgame_timer >= 112.0f) {
+                STATUSMESSadd("Your Amulet of Submission has shattered!");
+                soundplay2(u6osound[18], u6osound_volume[18]);
+                txtset(
+                    t5,
+                    "The ancient book opens.\\Both kings gaze upon its pages in spellbound silence, as the eloquence of Ultimate Wisdom is revealed\\in the tongues of each lord's domain.\\You, too, can read the answers the Codex gives...\\...and when its wisdom is gleaned, when Lord British  and King Draxinusom turn to each other as friends,\\hating no longer, fearing no more, you know that your mission in Britannia has ended at last.");
+                endgame_message++;
+            }
+        }
 
-      if (t5->l){
-        for (i3=0;i3<=255;i3++){ if (sfx[i3].type==0){
-          sfx[i3].type=3;
-          sfx[i3].x=920;
-          sfx[i3].y=851-3;
-          sfx[i3].x2=t5->l;
-          static txt *dbgt5;
-          dbgt5=txtnew();
-          txtset(dbgt5,t5);
-          sfx[i3].p=dbgt5;
-          txtset(t,(txt*)sfx[i3].p);
-          txtset(t2,"?"); t2->d2[0]=92;
-          z=txtsearch(t,t2);
-          if (z==0) z=t->l; else z--;
-          f=(float)z/10.0f;
-          if (f<1)f=1;
-          if(f>4)f=4;
-          sfx[i3].wait=f;
-          sfx[i3].more=x5;
-shiftdown3:
-          for (i2=0;i2<=255;i2++){ if ((sfx[i2].type==3)&&(i2!=i3)){
-            if ((sfx[i3].y==sfx[i2].y)||(sfx[i3].y==(sfx[i2].y+1))||(sfx[i3].y==(sfx[i2].y-1))) {sfx[i3].y=sfx[i2].y+2; goto shiftdown3;}
-          }}
-          goto endgame_donemessage;
-        }}
-      }//t5->l
-endgame_donemessage:
+        if (endgame_message == 14) {
+            x = 9;
+        }
 
-      img(ps,608,476,endgame_image[x]);
-      endgame_timer+=et;
+        if (t5->l) {
+            for (i3 = 0; i3 <= 255; i3++) {
+                if (sfx[i3].type == 0) {
+                    sfx[i3].type = 3;
+                    sfx[i3].x = 920;
+                    sfx[i3].y = 851 - 3;
+                    sfx[i3].x2 = t5->l;
+                    static txt *dbgt5;
+                    dbgt5 = txtnew();
+                    txtset(dbgt5, t5);
+                    sfx[i3].p = dbgt5;
+                    txtset(t, (txt *) sfx[i3].p);
+                    txtset(t2, "?");
+                    t2->d2[0] = 92;
+                    z = txtsearch(t, t2);
+                    if (z == 0) z = t->l;
+                    else z--;
+                    f = (float) z / 10.0f;
+                    if (f < 1)f = 1;
+                    if (f > 4)f = 4;
+                    sfx[i3].wait = f;
+                    sfx[i3].more = x5;
+                shiftdown3:
+                    for (i2 = 0; i2 <= 255; i2++) {
+                        if ((sfx[i2].type == 3) && (i2 != i3)) {
+                            if ((sfx[i3].y == sfx[i2].y) || (sfx[i3].y == (sfx[i2].y + 1)) || (
+                                    sfx[i3].y == (sfx[i2].y - 1))) {
+                                sfx[i3].y = sfx[i2].y + 2;
+                                goto shiftdown3;
+                            }
+                        }
+                    }
+                    goto endgame_donemessage;
+                }
+            }
+        } //t5->l
+    endgame_donemessage:
 
-    }//timer<=140.0f
-  }//endgame
+        img(ps, 608, 476, endgame_image[x]);
+        endgame_timer += et;
+    } //timer<=140.0f
+} //endgame
 
 
-  // Left-clicking the "view previous status message" arrow toggles whether
-  // the status-message log stays drawn constantly. Hovering still shows it
-  // temporarily; the pin makes it persist until clicked off again. (Button-2
-  // is reserved for dragging the arrow, so only consume button-1 clicks here.)
-  if (statusmessage_viewprev->mouse_click&1){
+// Left-clicking the "view previous status message" arrow toggles whether
+// the status-message log stays drawn constantly. Hovering still shows it
+// temporarily; the pin makes it persist until clicked off again. (Button-2
+// is reserved for dragging the arrow, so only consume button-1 clicks here.)
+if
+(statusmessage_viewprev
+->
+mouse_click &
+1
+)
+{
     statusmessage_viewprev->mouse_click=NULL;
     if (drg!=statusmessage_viewprev) statusmessage_logpinned=!statusmessage_logpinned;
   }
-  if (statusmessage_viewprev->mouse_over||statusmessage_logpinned){
+if
+(statusmessage_viewprev
+->
+mouse_over
+||
+statusmessage_logpinned
+)
+{
     statusmessage_viewprev->mouse_over=FALSE;
     if (drg!=statusmessage_viewprev){
       // Scratch buffers for draw-time word wrapping (lazily allocated once).
@@ -926,46 +1097,56 @@ endgame_donemessage:
     }
   }
 
-  // f: draw the floating "look" text above the UI and clamped fully on-screen.
-  // It was captured during the world/sfx pass (see the `lookdisplay` capture
-  // above) but is drawn here, after the FRAME panels are composited, so it is
-  // never hidden behind the sidebar/panels and never runs off the game window.
-  if (lookdisplay && looktext){
+// f: draw the floating "look" text above the UI and clamped fully on-screen.
+// It was captured during the world/sfx pass (see the `lookdisplay` capture
+// above) but is drawn here, after the FRAME panels are composited, so it is
+// never hidden behind the sidebar/panels and never runs off the game window.
+if
+(lookdisplay &&looktext) {
     static SIZE looksz;
     long lookw, lookh, lookbx, lookby, lookmaxx, lookmaxy;
     ps->s->GetDC(&taghdc);
-    SelectObject(taghdc,fnt1naa);
-    looksz.cx=0; looksz.cy=0;
-    GetTextExtentPoint32(taghdc,looktext->d,looktext->l,&looksz);
+    SelectObject(taghdc, fnt1naa);
+    looksz.cx = 0;
+    looksz.cy = 0;
+    GetTextExtentPoint32(taghdc, looktext->d, looktext->l, &looksz);
     ps->s->ReleaseDC(taghdc);
-    lookw=looksz.cx;
-    lookh=(looksz.cy>0)?looksz.cy:24;
+    lookw = looksz.cx;
+    lookh = (looksz.cy > 0) ? looksz.cy : 24;
     // Clamp so the whole string plus its 2px outline stays inside the live
     // back buffer (the visible game screen).
-    lookbx=lookatx; lookby=lookaty;
-    lookmaxx=(long)backbufferW()-lookw-2;
-    lookmaxy=(long)backbufferH()-lookh-2;
-    if (lookbx>lookmaxx) lookbx=lookmaxx;
-    if (lookby>lookmaxy) lookby=lookmaxy;
-    if (lookbx<0) lookbx=0;
-    if (lookby<0) lookby=0;
-    txtset(t,looktext);
-    txtfnt=fnt1naa;
-    txtcol=rgb(0,0,0);
-    txtout(ps,lookbx,lookby,t);
-    txtout(ps,lookbx+2,lookby+2,t);
-    txtout(ps,lookbx+2,lookby,t);
-    txtout(ps,lookbx,lookby+2,t);
-    txtout(ps,lookbx+1,lookby,t);
-    txtout(ps,lookbx+2,lookby+1,t);
-    txtout(ps,lookbx,lookby+1,t);
-    txtout(ps,lookbx+1,lookby+2,t);
-    txtcol=rgb(255,255,255);
-    txtout(ps,lookbx+1,lookby+1,t);
-  }
+    lookbx = lookatx;
+    lookby = lookaty;
+    lookmaxx = (long) backbufferW() - lookw - 2;
+    lookmaxy = (long) backbufferH() - lookh - 2;
+    if (lookbx > lookmaxx) lookbx = lookmaxx;
+    if (lookby > lookmaxy) lookby = lookmaxy;
+    if (lookbx < 0) lookbx = 0;
+    if (lookby < 0) lookby = 0;
+    txtset(t, looktext);
+    txtfnt = fnt1naa;
+    txtcol = rgb(0, 0, 0);
+    txtout(ps, lookbx, lookby, t);
+    txtout(ps, lookbx + 2, lookby + 2, t);
+    txtout(ps, lookbx + 2, lookby, t);
+    txtout(ps, lookbx, lookby + 2, t);
+    txtout(ps, lookbx + 1, lookby, t);
+    txtout(ps, lookbx + 2, lookby + 1, t);
+    txtout(ps, lookbx, lookby + 1, t);
+    txtout(ps, lookbx + 1, lookby + 2, t);
+    txtcol = rgb(255, 255, 255);
+    txtout(ps, lookbx + 1, lookby + 1, t);
+}
 
-  // r333 this is where mouse/cursor object is displayed
-  if (CLIENTplayer->mobj!=NULL){ //show mobject: active player
+// r333 this is where mouse/cursor object is displayed
+if
+(CLIENTplayer
+->
+mobj
+!=
+NULL
+)
+{ //show mobject: active player
     getspr(CLIENTplayer->mobj);
     img0(ps,mx-16,my-16,bt32);
 
@@ -995,10 +1176,15 @@ endgame_donemessage:
   }
 
 
-  //DISPLAY DEBUG INFO WHEN SPACE IS HELD (ONLY IF U6O_DEBUG IS TRUE)
-  // rrr
+//DISPLAY DEBUG INFO WHEN SPACE IS HELD (ONLY IF U6O_DEBUG IS TRUE)
+// rrr
 //  if (keyon[VK_SPACE]) {
-  if (keyon[VK_SPACE]&&U6O_DEBUG){
+if
+(keyon[VK_SPACE]
+&&
+U6O_DEBUG
+)
+{
     txtnumint(t,btimeh); txtout(ps,512,32,t);
 //    txtnumint(t,framerate); txtout(ps,512,16,t);
 	txtset(t2, "FPS: "); txtnumint(t, framerate); txtadd(t2, t); txtout(ps, 512, 16, t2);

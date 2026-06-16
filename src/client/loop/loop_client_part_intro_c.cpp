@@ -5,7 +5,12 @@
 // custom portrait / name-colour flows). Pure relocation — do not edit. See
 // docs/plans/plan-loopClientSplit.md.
 
-    if (intro == 206) {
+if
+(intro
+==
+206
+)
+ {
         //custom keys: main menu
         if (intro_setup == 0) {
             f = 0;
@@ -85,7 +90,12 @@
     } //intro==206
 
 
-    if (intro == 203) {
+if
+(intro
+==
+203
+)
+ {
         //custom keys
         static unsigned char nextkey;
         static unsigned short key1, key2;
@@ -441,10 +451,15 @@
     } //intro==203
 
 
-    static surf *customport;
+static surf *customport;
 
 
-    if (intro == 204) {
+if
+(intro
+==
+204
+)
+ {
         //custom portrait
         if (intro_setup == 0) {
             intro_setup = 1;
@@ -575,7 +590,12 @@
     } //intro==204
 
 
-    if (intro == 205) {
+if
+(intro
+==
+205
+)
+ {
         //confirm custom portrait
         if (intro_setup == 0) {
             intro_setup = 1;
