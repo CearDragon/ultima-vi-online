@@ -1,5 +1,14 @@
 ﻿# Server Modernization Plan (Trackable)
 
+> ⚠️ **SUPERSEDED (2026-06-16).** This plan predates the `LHS` loop split — its
+> P4.4 still describes a monolithic `loop_host.cpp` (~30k lines) that no longer
+> exists (the host loop is now 35 ordered `#include` fragments under
+> `src/server/loop/`). The active, loop-split-aware successor is
+> [`modernization/plan-modernize-server.md`](./modernization/plan-modernize-server.md)
+> (phase prefix `MSRV-P*`), sequenced by
+> [`modernization/README.md`](./modernization/README.md). This file is kept for
+> historical reference; do **not** start new work from it.
+
 Status legend: ⬜ todo · 🟡 in-progress · ✅ done · ⏭ deferred · ❌ blocked
 Update the checkbox + add a short note (date, commit, author) when status changes.
 Each phase has an **Exit criteria** that must be green before starting the next phase.
