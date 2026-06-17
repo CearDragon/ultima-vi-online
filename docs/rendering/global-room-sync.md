@@ -434,6 +434,58 @@ Tagged `ROOMSYNC-P1.5:` in `src/common/define_both.h` (the
 `ROOMSYNC_ROOM_HEARTBEAT_SECONDS` macro) and `src/server/loop_host.cpp`
 (the in-room interval selection in the heartbeat trigger).
 
+### P1.6 follow-up: event-driven in-room ground-object resync (June 2026)
+
+P1.5 *bounded* the in-room floor-item desync with a 0.5 s time-based
+heartbeat, but it remained a band-aid: the per-player sobj diff was still the
+primary sync path, and the reported symptom kept reproducing —
+
+> Two players are online and one stands in the Guardian Guild basement
+> (ladder at `(1286, 323)`). They drop floor items and slide them around with
+> the cursor. The items move **logically** (picking one up at its new tile
+> lands it on the cursor), but they keep **rendering on their original tile**
+> until the other player "leaves Britannia", after which everything snaps into
+> place. With only one player online it always rendered correctly.
+
+Root cause (the part P1.4/P1.5 mis-attributed to the diff "missing" the
+change): a player rearranging items **with the cursor never walks**, so it has
+**no avatar-coordinate delta**. The host's scene-update *send* is gated by
+`sceneupdaterequired`, which is set reliably by coordinate deltas and mover
+changes but — behind the alternating `updatemessage` frame gate and the
+screen+1 two-pass optimisation — *not* dependably by a pure sobj change for a
+stationary player once a second client perturbs the host's frame cadence. The
+per-player sobj **buffer is correct**; the **send just doesn't fire**, so the
+client never receives the diff. Because a packet-35 rebuild reads the
+authoritative `od[][]` grid, *any* resync (the other player's logout teardown,
+a teleport, `/RESYNC`, the 60 s / 0.5 s heartbeats) fixes it — which is exactly
+the "fixed when the other player logs out" tell.
+
+Fix: drive the correction **deterministically from the world mutation** instead
+of a timer. `roomObjectChanged(x, y)` (in
+[`src/server/function_host.cpp`](../../src/server/function_host.cpp)) flags
+every player whose selected party member is inside the registered room that
+contains `(x, y)` for a packet-35 resync. It is called from the two central
+object-grid mutators, `OBJadd()` and `OBJremove()`, **gated on
+`tclass_object[type]`** so it fires for scene objects (dropped items, doors,
+signs, fields, containers) but **never** for movers — avatar/NPC walking
+mutates `od[][]` every step and must not trigger a resync. Because a drop is an
+`OBJadd` and a pickup/move is an `OBJremove` (+ `OBJadd`), the very next scene
+update after any floor-item change is a full rebuild, so the move renders
+immediately for the actor and every co-located bystander, regardless of the
+diff/gate timing or how many players are online.
+
+`getroom()` early-outs for the entire world outside a room, so the per-call
+cost for the ~all non-room object mutations is a handful of integer compares;
+the `resync` flag is idempotent, so even a field spreading across many room
+tiles in one tick schedules at most one rebuild per player per frame. The P1.5
+heartbeat is retained as defence-in-depth for *non-object* in-room drift (mover
+slot reshuffles, pointer reuse). Wire-neutral — packet 35 only; `U6O_VERSION`
+is **not** bumped.
+
+Tagged `ROOMSYNC-P1.6:` in `src/server/function_host.cpp` (the
+`roomObjectChanged()` helper + the `OBJadd`/`OBJremove` call sites) and
+`src/server/function_host.h` (the declaration).
+
 ### Client-side use ([`src/client/loop_client.cpp`](../../src/client/loop_client.cpp))
 
 The two camera-follow override sites (scene-update at packet-31 / packet-35

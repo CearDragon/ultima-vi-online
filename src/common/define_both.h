@@ -55,6 +55,15 @@
 // only a few hundred bytes and a sub-second cadence is imperceptible and
 // bandwidth-trivial. Outside any room the normal 60s heartbeat still
 // applies. Wire-neutral (packet 35 only); U6O_VERSION not bumped.
+//
+// ROOMSYNC-P1.6 (2026-06): the floor-item case this heartbeat was added for is
+// now corrected DETERMINISTICALLY and immediately by roomObjectChanged() in
+// src/server/function_host.cpp -- it resyncs in-room players the instant a
+// scene object is added to / removed from a room tile (OBJadd/OBJremove), so
+// floor-item moves no longer wait up to ROOMSYNC_ROOM_HEARTBEAT_SECONDS to
+// render. This heartbeat is retained as defence-in-depth for NON-object in-room
+// drift (mover slot reshuffles, object-pointer reuse). See
+// docs/rendering/global-room-sync.md (P1.6).
 #define ROOMSYNC_ROOM_HEARTBEAT_SECONDS 0.5f
 //equipped item positions (REVISE) (warning: left and right refer to the character's hand hence they are reversed on screen)
 #define helmx 52

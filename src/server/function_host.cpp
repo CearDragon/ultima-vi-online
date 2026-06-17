@@ -457,6 +457,54 @@ OBJcf1:
     bt[y][x] = (bt[y][x] & 1023) + OBJcheckflags_flags * 1024;
 }
 
+/**
+ * @brief ROOMSYNC-P1.6: force an immediate scene resync for players inside a
+ *        registered isolated room whose floor objects just changed.
+ *
+ * When a ground/scene object (anything the per-player sobj buffer renders --
+ * dropped items, doors, signs, fields, containers) is added to / removed from
+ * a tile that lies inside a registered isolated room (see gameRooms[] /
+ * getroom() in function_both.cpp), every connected player whose selected
+ * party member is currently inside that same room is flagged for a resync
+ * (packet-35 full rebuild) on their next scene update.
+ *
+ * Why this exists (the "Guardian Guild basement" desync):
+ *   Inside a tiny room a player who rearranges floor items with the cursor --
+ *   or a stationary bystander watching someone else do it -- produces no
+ *   avatar-coordinate delta, so the host's normal "only send a scene update
+ *   when the player's position changed" path never fires. Synchronisation then
+ *   depends entirely on the per-player sobj diff, which is evaluated behind the
+ *   host-only alternating `updatemessage` frame gate and the screen+1 two-pass
+ *   optimisation. That combination proved unreliable once a second player was
+ *   online: floor items moved logically but kept rendering on their old tile
+ *   until some unrelated event (the other player logging out, a teleport, the
+ *   60 s safety heartbeat) forced a rebuild. The earlier ROOMSYNC-P1.5 change
+ *   bounded the desync with a 0.5 s in-room time-based heartbeat; this drives
+ *   the correction deterministically from the actual world mutation instead of
+ *   a timer, so the move renders on the very next frame.
+ *
+ * Wire-neutral: only schedules an already-supported packet-35 resync. No wire
+ * format, struct layout, or save format changes, so U6O_VERSION is NOT bumped.
+ * Cheap: getroom() early-outs for the ~entire world that is not inside a room,
+ * and callers gate on tclass_object[] so mover (avatar/NPC) movement -- which
+ * mutates od[][] every step -- never reaches here.
+ *
+ * @param x World tile X that changed.
+ * @param y World tile Y that changed.
+ */
+void roomObjectChanged(long x, long y) {
+    long rx0, ry0, rx1, ry1;
+    if (!getroom(x, y, &rx0, &ry0, &rx1, &ry1)) return; // not inside a room: no-op
+    for (long p = 0; p <= playerlist_last; p++) {
+        player *pl = playerlist[p];
+        if (pl == NULL || pl->net == INVALID_NET) continue;
+        object *member = pl->party[pl->selected_partymember];
+        long px = member ? (long) member->x : (long) pl->px;
+        long py = member ? (long) member->y : (long) pl->py;
+        if (px >= rx0 && px <= rx1 && py >= ry0 && py <= ry1) pl->resync = 1;
+    }
+}
+
 unsigned char OBJadd(unsigned long x, unsigned long y, object *obj) {
     if (od[y][x] == NULL) {
         od[y][x] = obj;
@@ -498,6 +546,11 @@ unsigned char OBJadd(unsigned long x, unsigned long y, object *obj) {
 
 OBJaddflt1:
     OBJcheckflags(x, y);
+    // ROOMSYNC-P1.6: a scene object just appeared on this tile -- if it is
+    // inside a registered isolated room, force co-located players to resync so
+    // the change renders immediately (see roomObjectChanged()). Gated on
+    // tclass_object[] so mover (avatar/NPC) movement never triggers a resync.
+    if (tclass_object[obj->type]) roomObjectChanged((long) x, (long) y);
     return 0; //success
 }
 
@@ -1605,6 +1658,14 @@ OBJaddflt1new:
 
 void OBJremove(object *obj) {
     //OBJremove detects container objects
+    // ROOMSYNC-P1.6: capture the world tile + scene-object class BEFORE the
+    // unlink below zeroes obj->x/obj->y, so an in-room ground-object removal
+    // (floor item picked up / moved / decayed) can force a resync for
+    // co-located players. Gated on tclass_object[] so mover (avatar/NPC)
+    // movement never triggers a resync. See roomObjectChanged().
+    long roomsync_oldx = (long) obj->x;
+    long roomsync_oldy = (long) obj->y;
+    unsigned char roomsync_isobj = tclass_object[obj->type];
     OBJtmp = (object *) obj->prev;
     OBJtmp2 = (object *) obj->next;
     if (OBJtmp == NULL) {
@@ -1645,6 +1706,9 @@ void OBJremove(object *obj) {
     obj->prev = NULL;
     obj->x = 0;
     obj->y = 0;
+    // ROOMSYNC-P1.6: a scene object just left this tile -- resync co-located
+    // in-room players so the removal/move renders immediately.
+    if (roomsync_isobj) roomObjectChanged(roomsync_oldx, roomsync_oldy);
 }
 
 unsigned char OBJmove(object *obj, unsigned long x, unsigned long y) {
