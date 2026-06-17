@@ -529,7 +529,12 @@
                             //if (tpx<0) tpx=0; if (tpy<0) tpy=0;
                             //if (tpx>2016) tpx=2016;
                             //if (tpy>1000) tpy=1000;
-                            getscreenoffset(x, y, &tpx, &tpy);
+                            // ROOMSYNC-P1.7: legacy 32x24 frame (the scan bounds
+                            // below are hard-coded -8..31+8 / -8..23+8, i.e. the
+                            // legacy view + 8 fence) so it covers the right tiles
+                            // in the `both`/Full build too. See the
+                            // getscreenoffset_legacy note in the scene-update emit.
+                            getscreenoffset_legacy(x, y, &tpx, &tpy);
 
                             for (y = -8; y <= (23 + 8); y++) {
                                 for (x = -8; x <= (31 + 8); x++) {
@@ -760,9 +765,13 @@
                             static long ar_oldtpx, ar_oldtpy;
                             static long ar_newtpx, ar_newtpy;
                             static long ar_dtpx, ar_dtpy;
-                            getscreenoffset((long)tplayer->x, (long)tplayer->y,
+                            // ROOMSYNC-P1.7: use the legacy emit frame (see the
+                            // getscreenoffset_legacy note at the scene-offset
+                            // calc below) so the camera-anchor jump is measured
+                            // in the SAME frame the host actually emits in.
+                            getscreenoffset_legacy((long)tplayer->x, (long)tplayer->y,
                                             &ar_oldtpx, &ar_oldtpy);
-                            getscreenoffset(roomsync_targetx, roomsync_targety,
+                            getscreenoffset_legacy(roomsync_targetx, roomsync_targety,
                                             &ar_newtpx, &ar_newtpy);
                             ar_dtpx = ar_newtpx - ar_oldtpx;
                             ar_dtpy = ar_newtpy - ar_oldtpy;
@@ -829,7 +838,27 @@
                     //if (tpx<0) tpx=0; if (tpy<0) tpy=0;
                     //if (tpx>2016) tpx=2016;
                     //if (tpy>1000) tpy=1000;
-                    getscreenoffset(x, y, &tpx, &tpy);
+                    // ROOMSYNC-P1.7 (wire-frame invariant): the host MUST emit
+                    // every sobj/mover offset -- and relocate/prune its
+                    // per-player buffers -- in the legacy 32x24 reference frame,
+                    // because the client decodes them against tpx_legacy
+                    // (getscreenoffset_legacy, hard-coded 32x24). getscreenoffset()
+                    // derives its view size from viewTilesX()/viewTilesY(), which
+                    // is the LEGACY 32/24 only in the pure `host` build
+                    // (#ifndef CLIENT). In the `both`/Full build (HOST+CLIENT) it
+                    // is the DYNAMIC resizable viewport, so a Full-build host with
+                    // a resized window emitted a non-legacy frame -- host and
+                    // client then crossed their screen+1/screen+8 buffer-relocation
+                    // thresholds at different player positions, the per-player sobj
+                    // buffer offsets drifted apart as players walked, and ground
+                    // items rendered on stale cells (the "two players in the
+                    // basement see items duplicate / drift until a resync flushes
+                    // both buffers" desync). Using getscreenoffset_legacy() here
+                    // pins the emit frame to 32x24 in ALL builds; it is identical
+                    // to getscreenoffset() in the pure host build, so this is a
+                    // no-op there and a fix for `both`. Wire-format unchanged
+                    // (same bit widths/windows) -- U6O_VERSION NOT bumped.
+                    getscreenoffset_legacy(x, y, &tpx, &tpy);
                     // ROOMSYNC-P1: cache the player's room bounds once for
                     // this scene update. The sobj fill loop and the mover
                     // fill loop both consult playerroom_inroom + bounds to

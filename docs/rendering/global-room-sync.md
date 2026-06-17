@@ -486,6 +486,67 @@ Tagged `ROOMSYNC-P1.6:` in `src/server/function_host.cpp` (the
 `roomObjectChanged()` helper + the `OBJadd`/`OBJremove` call sites) and
 `src/server/function_host.h` (the declaration).
 
+### P1.7 follow-up: host emit frame must be legacy in the `both`/Full build (June 2026)
+
+P1.6 made in-room item changes resync deterministically, but two players who
+**walked around** a basement still saw items **drift and then visually
+duplicate** after a while, recovering only when a resync (P1.5 heartbeat /
+P1.6 / logout) flushed both buffers. The tell was that it was *basement*
+specific ("the rest of the world looks fine") and that movement — not item
+drops — drove it.
+
+Root cause: a violated **wire-frame invariant**. The client always decodes
+sobj/mover offsets against `tpx_legacy = getscreenoffset_legacy()` (hard-coded
+32×24). The host is supposed to *emit* in that same legacy frame — and it does
+in the pure `host` target, because `getscreenoffset()` derives its view size
+from `viewTilesX()/viewTilesY()`, which are the legacy `32/24` **only when
+`CLIENT` is not defined** (`src/client/viewport.h`):
+
+```cpp
+#ifdef CLIENT
+    int viewTilesX();              // DYNAMIC resizable viewport (up to 63)
+#else
+    inline int viewTilesX() { return 32; }   // legacy — pure `host` only
+#endif
+```
+
+In the **`both`/Full target** (`HOST` *and* `CLIENT` defined) `viewTilesX()` is
+the **dynamic** resizable value. So a Full-build host **with a resized window**
+fed a non-32 width into `getscreenoffset()`, and the host scene-update then
+emitted sobj/mover offsets — and ran its screen+1/screen+8 buffer-relocation
+and mover-prune thresholds — in that dynamic frame, while every client decoded
+against the legacy 32×24 frame. The constant frame offset is partly hidden in
+the three clamped `getscreenoffset()` regions (overworld / gargoyle / Toth),
+but the Guardian Guild basement falls through to the **unclamped** default
+branch, so it took the full divergence. As players walked, the host and client
+crossed their relocation thresholds at *different* player positions, the
+per-player `sobj_bufoffx/y` drifted apart, and ground items landed on stale
+buffer cells — rendering at two places until a resync zeroed both offsets.
+(Two players matters because each one's movement keeps producing the
+position deltas that trigger the mismatched relocations.)
+
+Fix: the host scene-update path now calls **`getscreenoffset_legacy()`**
+(always 32×24) instead of `getscreenoffset()` for its emit/relocation/prune
+anchor and for the resync camera-jump check and the active-object (`oul`) scan.
+In the pure `host` build this is byte-for-byte identical (both are 32×24), so
+it is a **no-op there**; in the `both`/Full build it pins the emit frame back
+to legacy so host and client agree in every build. The wire *format* (bit
+widths, window dims, multipliers) is unchanged, and the client already decodes
+in this frame, so `U6O_VERSION` is **not** bumped.
+
+Tagged `ROOMSYNC-P1.7:` in `src/server/loop/loop_host_part_a_housestore.cpp`
+(the scene-offset, resync camera-jump, and `oul`-scan calls). Note the client's
+render camera (`tpx`/`tpy` via `getscreenoffset()` + the room-centre override)
+intentionally stays **dynamic** — only the wire/decode frame (`tpx_legacy`) and
+now the host's emit frame are pinned to 32×24.
+
+> Remaining same-invariant call sites that are **not** wire-critical to the
+> sobj/mover stream (host-internal SFX field scan in `part_a_display_sfx`,
+> the `/who`-style admin/slash camera math in `part_b_*`, and the input click
+> map in `part_d_open`) still call `getscreenoffset()`; in the pure `host`
+> build they are already legacy, and they do not move ground-item pixels.
+> Convert them too if a `both`-build host shows shifted SFX or click targets.
+
 ### Client-side use ([`src/client/loop_client.cpp`](../../src/client/loop_client.cpp))
 
 The two camera-follow override sites (scene-update at packet-31 / packet-35
