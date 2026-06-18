@@ -389,11 +389,11 @@ if (NEThost){
 
 #ifdef CONSOLE
 _cprintf (
-"This is a dedicated u6o host running on port %d.\nTo quit type q or ctrl-c to force quit.\n", global_TCP_listen_port);
+"This is a dedicated u6o host (v%d) running on port %d.\nTo quit type q or ctrl-c to force quit.\n", U6O_VERSION, global_TCP_listen_port);
 #endif
 #if !defined(_WIN32)
 // LH-P6: headless host startup banner on stdout (no Win32 console).
-printf("This is a dedicated u6o host running on port %d.\n(send SIGTERM/SIGINT to shut down)\n", global_TCP_listen_port);
+printf("This is a dedicated u6o host (v%d) running on port %d.\n(send SIGTERM/SIGINT to shut down)\n", U6O_VERSION, global_TCP_listen_port);
 fflush(stdout);
 #endif
 SCRLOG_FILEONLY=TRUE;
@@ -1220,7 +1220,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                               "Ultima VI Online\n"
                               "Client Version: %d\n\n"
                               "Discord: https://discord.gg/FRURSGaWBU\n"
-                              "Website: http://ultimasixonline.thezogcabal.com/",
+                              "Website: https://ultima-vi-online.com",
                               U6O_VERSION);
                     MessageBox(hWnd,
                                aboutMsg,
@@ -1233,7 +1233,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                     return 0;
 
                 case IDM_HELP_WEBSITE:
-                    ShellExecuteA(hWnd, "open", "http://ultimasixonline.thezogcabal.com/", NULL, NULL, SW_SHOWNORMAL);
+                    ShellExecuteA(hWnd, "open", "https://ultima-vi-online.com", NULL, NULL, SW_SHOWNORMAL);
                     return 0;
 
                 case IDM_EXIT:
