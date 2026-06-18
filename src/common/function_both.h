@@ -43,6 +43,56 @@ void getscreenoffset(long x, long y, long *mapx, long *mapy);
 
 void getscreenoffset_legacy(long x, long y, long *mapx, long *mapy);
 
+// MDD: shared map-download primitives (host computes, client verifies).
+//
+// Content checksum is FNV-1a/32 over the raw file bytes -- cheap, allocation
+// free, and identical on the Win32 client and the i386 Linux host (both
+// little-endian, 32-bit). The streaming form lets the client fold each
+// arriving chunk into a running hash and lets it hash the two non-contiguous
+// in-memory arrays (index then type) without concatenating them, while the
+// one-shot form is what the host uses on the baked .bin files. The streaming
+// functions obey  MAP_checksum(d,n) == final(update(init(), d, n)).
+unsigned long MAP_checksum_init(void);
+unsigned long MAP_checksum_update(unsigned long state, const void *data, unsigned long len);
+unsigned long MAP_checksum_final(unsigned long state);
+unsigned long MAP_checksum(const void *data, unsigned long len);
+
+// Returns the host-side source / client-side fallback path (".\\dr\\bt.bin",
+// ".\\dr\\objfixed.bin", ".\\dr\\tobjfix.bin") for a MAP_FILE_* id, or NULL
+// if the id is out of range.
+const char *MAP_file_path(int fileId);
+
+// ROOMSYNC-P1: Global isolated-room registry. See docs/rendering/global-room-sync.md
+// for the design and rationale.
+//
+// An "isolated room" is any rectangular world region that is logically
+// disconnected from the surrounding map but lives in the same 2048x1024 bt[]
+// / od[] grid. Examples: the Guardian Guild basement at x=1280..1291,
+// y=319..333. Such a room sits in a stretch of world coords that the host's
+// mover/sobj transmit windows would otherwise overlap into the neighbouring
+// open map -- pulling foreign NPCs, items, and base tiles into the room
+// view and silently desyncing the per-player mover/sobj buffers.
+//
+// Both helpers are pure / read-only; they consult a static table and can be
+// called freely from host and client.
+struct GameRoom {
+    long x0, y0; // inclusive top-left world coords
+    long x1, y1; // inclusive bottom-right world coords
+};
+
+// If (x, y) is inside a registered isolated room, returns 1 and writes the
+// room's bounds into the out params (any may be NULL). Returns 0 if (x, y)
+// is in the open world (overworld, gargoyle lands, or unregistered area).
+int getroom(long x, long y, long *rx0, long *ry0, long *rx1, long *ry1);
+
+// Returns 1 if (ax, ay) and (bx, by) are in the SAME isolated room, OR if
+// both are in the open world. Returns 0 if they're in different rooms or if
+// one is inside an isolated room and the other is not. This is the single
+// authoritative predicate used by the host fill loops, the client tile
+// renderer, and the auto-resync trigger to decide whether two tiles should
+// be considered "visible" from each other.
+int sameroom(long ax, long ay, long bx, long by);
+
 //getnbits returns the number of bits required to store n combinations
 //if combinations is 1, getnbits returns 0 (only 1 combination requires 0 bits represent)
 //if combinations is 2, getnbits returns 1

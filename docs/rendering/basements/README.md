@@ -1,5 +1,17 @@
 ﻿# Rendering Basement and Custom-Coordinate Guide
 
+> **Update (June 2026 — ROOMSYNC-P1):** the patterns below — per-room
+> camera follow overrides in two client sites, per-room fill-window
+> filters in the host, and the "remember `tplayer->resync = 1` after
+> `partyadd()`" discipline — have been superseded by the global
+> isolated-room registry. See
+> [`docs/rendering/global-room-sync.md`](../global-room-sync.md). To add a
+> new room, append a single rectangle to `gameRooms[]` in
+> `src/common/function_both.cpp` and the host auto-resyncs on entry/exit
+> and clips streaming to the room bounds; the client camera follows the
+> player without any per-room `if (x >= ... && y <= ...)` block. This
+> guide remains useful for historical context.
+
 ## Purpose
 
 This guide documents how to keep rendering stable when a player enters a basement or any custom world coordinate room.

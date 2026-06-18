@@ -107,77 +107,56 @@ void house() {
 #include "../../assets/map_patches/bryan.txt"
 #include "../../assets/map_patches/darrell.txt"
 #include "../../assets/map_patches/notir.txt"
-//#include "../../assets/map_patches/toth.txt" //a house floating in the void with respawning staff. A BIG NO NO
 #include "../../assets/map_patches/forestfix.txt"
 #include "../../assets/map_patches/farm.txt"
 #include "../../assets/map_patches/spiritwood.txt"
 #include "../../assets/map_patches/steel.txt"
 #include "../../assets/map_patches/misc.txt"
 #include "../../assets/map_patches/shop.txt"
-//#include "../../assets/map_patches/dungeontest.txt"
 
-/*
-if (easymodehostn1) {
-#include "../../assets/map_patches/newhouse01.txt"
-#include "../../assets/map_patches/newhouse02.txt"
-#include "../../assets/map_patches/newhouse03.txt"
-}
-*/
+    int housenumnew = 0;
+    int storageusednew = 0;
 
-// s111 check house storage slots used/placed and show warning on host if it is exceeded.  Items may/will be lost.
-int housenumnew = 0;
-int storageusednew = 0;
+    for (int i = 0; i < HOUSEMAX; i++) {
+        if (housecost[i] > 0) {
+            if (housestoragenext[i] > storageusednew) {
+                storageusednew = housestoragenext[i];
+                housenumnew = i;
+            }
+        }
+    }
 
-for
-(
+    //if (TRUE) {
+    //if (storageusednew >= 240) {
+    if
+    (storageusednew
+     >=
+     HOUSESTORAGESLOTMAX
+     -
+     30
+    ) {
+        txt *t2 = txtnew();
+        txt *t3 = txtnew();
 
-int i = 0;
-i<HOUSEMAX;
-i
-++
-)
- {
-	if (housecost[i] > 0) {
-		if (housestoragenext[i] > storageusednew) {
-			storageusednew = housestoragenext[i];
-			housenumnew = i;
-		}
-	}
-}
-
-//if (TRUE) {
-//if (storageusednew >= 240) {
-if
-(storageusednew
->=
-HOUSESTORAGESLOTMAX
--
-30
-)
- {
-	txt *t2=txtnew();
-	txt *t3=txtnew();
-
-	txtset(t2, "--- WARNING!!! ---> One or more house has exceeded (or almost exceeded) the house storage slots limit!  ITEMS may/will be LOST!");
-	LOGadd(t2);
-	txtset(t2, "--- Recommended action ---> Shutdown the server, backup saves, and fix the problem.");
-	LOGadd(t2);
-	txtset(t2, "storage used = housestoragenext = ");
-	txtnumint(t3, storageusednew);
-	txtadd(t2, t3);
-	LOGadd(t2);
-	txtset(t2, "storage max = HOUSESTORAGESLOTMAX = ");
-	txtnumint(t3, HOUSESTORAGESLOTMAX);
-	txtadd(t2, t3);
-	LOGadd(t2);
-	txtset(t2, "house number affected = ");
-	txtnumint(t3, housenumnew);
-	txtadd(t2, t3);
-	LOGadd(t2);
-}
-
-
-
+        txtset(
+            t2,
+            "--- WARNING!!! ---> One or more house has exceeded (or almost exceeded) the house storage slots limit!  ITEMS may/will be LOST!");
+        LOGadd(t2);
+        txtset(t2, "--- Recommended action ---> Shutdown the server, backup saves, and fix the problem.");
+        LOGadd(t2);
+        txtset(t2, "storage used = housestoragenext = ");
+        txtnumint(t3, storageusednew);
+        txtadd(t2, t3);
+        LOGadd(t2);
+        txtset(t2, "storage max = HOUSESTORAGESLOTMAX = ");
+        txtnumint(t3, HOUSESTORAGESLOTMAX);
+        txtadd(t2, t3);
+        LOGadd(t2);
+        txtset(t2, "house number affected = ");
+        txtnumint(t3, housenumnew);
+        txtadd(t2, t3);
+        LOGadd(t2);
+    }
 } //house
 
 

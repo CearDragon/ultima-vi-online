@@ -2,6 +2,34 @@
 
 Concise, repo-specific guidance. Read this in full before editing.
 
+## Project direction: modernization in progress
+
+This project is undergoing a **deliberate, large-scale modernization refactor**
+away from its 1990s C-with-extensions origins toward clean, readable,
+well-documented modern C++ (C++17/20). **Embrace this direction**: remove
+`goto` chains, give variables meaningful names, extract duplication into
+well-named functions, replace magic numbers/strings with named constants,
+convert inline assembly to portable C++, introduce namespaces where they help,
+and add Doxygen documentation. Prefer to *improve* the code you touch rather
+than mirror the legacy style — and new code should be modern from the start.
+
+- **Use the `cpp-modernizer` agent** (`.github/agents/cpp-modernizer.agent.md`)
+  for refactoring work. It encodes the safe-modernization discipline for this
+  repo — risk tiers, verification methods, and how to handle wire/save code,
+  hot paths, and inline asm. The whole project is in scope, hot paths included.
+- **The one rule that never bends: behavior preservation.** Modernization must
+  not change the network wire format, `.sav` byte layout, rendered pixels, RNG
+  draw sequence, or observable timing. The transformation must be
+  *semantics-preserving*; prove it (characterization tests, byte-stream / pixel
+  captures, benchmarks) before shipping — see the agent's §Verification.
+- **Hot paths and inline asm ARE in scope** (the old "don't touch the hot
+  paths" guidance is retired). They simply carry the highest verification bar:
+  pixel/byte-exact golden comparison **plus** a before/after benchmark proving
+  no meaningful performance regression.
+- Track larger modernization efforts under `docs/modernization/` (a sibling of
+  `docs/plans/`), tagging commits/comments with a phase ID like the existing
+  plans do.
+
 ## Build topology
 
 - Two binaries from one source tree:
@@ -10,30 +38,34 @@ Concise, repo-specific guidance. Read this in full before editing.
   - `both` — combined "full" target (defines both `HOST` and `CLIENT`)
 - Source layout:
   - `src/common/` — shared by both binaries (`data_both.h`, `define_both.h`,
-    `function_both.{h,cpp}`, `globals.inc`).
-  - `src/client/` — client-only (`loop_client.cpp`, `viewport.{h,cpp}`,
-    `function_client.{h,cpp}`, `ui_*`).
-  - `src/server/` — host-only (`loop_host.cpp`, `function_host.{h,cpp}`,
-    `host.inc`, `setup_host.inc`).
+    `function_both.{h,cpp}`, `globals.inc`, `u6o7.cpp` — holds WinMain and the
+    main loop).
+  - `src/client/` — client-only (`viewport.{h,cpp}`, `function_client.{h,cpp}`,
+    `ui_*`, and the per-frame loop, now decomposed under `src/client/loop/`).
+  - `src/server/` — host-only (`function_host.{h,cpp}`, `host.inc`,
+    `setup_host.inc`, and the per-tick loop, now decomposed under
+    `src/server/loop/`).
+- **The per-frame / per-tick loops are now split into ordered `#include`
+  fragments** — the monolithic `loop_client.cpp` and `loop_host.cpp` are gone:
+  - Client: `src/client/loop/loop_client_all.cpp` (umbrella) `#include`s
+    `loop_client_part_*.cpp` in order. See `docs/plans/plan-loopClientSplit.md`
+    and `src/client/loop/README.md`.
+  - Host: `src/server/loop/loop_host_all.cpp` (umbrella) `#include`s
+    `loop_host_part_*.cpp` in order. See `docs/plans/plan-loopHostSplit.md` and
+    `src/server/loop/README.md` for the full part-layout table.
+  - `u6o7.cpp` `#include`s the two umbrellas inside the main loop (under
+    `#ifdef CLIENT` / `#ifdef HOST`). The fragment files are **NOT translation
+    units** — they are raw statement blocks concatenated into one function
+    scope, share locals declared in `u6o7.cpp`, contain intentionally
+    unbalanced braces (brace-seam parts), and have `goto`s that cross fragment
+    boundaries. Edit them with `replace_string_in_file` (tight context) or the
+    `tools/loop_split_*` raw-byte tools; **never** `insert_edit_into_file` (it
+    re-balances braces and corrupts these files).
 - Build dirs: `cmake-build-debug/` (VS) and `cmake-build-debug-visual-studio/`
   (Ninja). Outputs land in `bin/{client,host}/debug/`.
 - `viewport.h` exposes display sizing functions on the client and stub
   fallbacks for the host (the host's `viewTilesX()` / `viewTilesY()` return
   the legacy **32 / 24**, intentionally — see §Wire protocol below).
-
-## `.cpp` / `.inc` mirror convention (read this — easy to get wrong)
-
-- The largest source files have a `.cpp` AND a `.inc` copy:
-  - `src/server/loop_host.{cpp,inc}`
-  - `src/client/loop_client.{cpp,inc}`
-- **Only the `.cpp` is compiled.** The `.inc` is a reference/backup mirror.
-- Repo convention: **mirror every change to the `.inc`** so the two stay in
-  lock-step, even though only the `.cpp` affects runtime. PRs that update one
-  without the other will be sent back.
-- Other `.inc` files (`host.inc`, `setup_*.inc`, `globals.inc`,
-  `*_bmp.inc`, `new_getspr.inc`, `old_getspr.inc`, `secret_*.inc`) **are**
-  compiled — they're listed in `CMakeLists.txt`. Grep `CMakeLists.txt` to
-  tell the difference. Do NOT assume an `.inc` is dead code.
 
 ## Wire protocol — where most bugs land
 
@@ -79,23 +111,40 @@ ID prefixed `RW-P*` / `DOB-P*`:
 3. Tag code comments and PR titles with the phase ID (`RW-P4.11:`,
    `DOB-P3.2:`, etc.).
 
-## Code style
+## Code style — legacy today, modern tomorrow
 
-- C-with-C++-extensions. Raw 2D arrays, `goto`-driven control flow,
-  single-letter loop vars (`x`, `y`, `i`, `i2`, `z`, `z2`, …), `static`
-  locals reused as scratch globals across labels.
-- **Match the surrounding style.** Do not refactor toward modern C++ in hot
-  paths (`loop_host.cpp` mover/sobj loops, `loop_client.cpp` world-render
-  loops) — the fixed arrays and goto chains are intentional and
-  performance-sensitive.
-- New shared constants go in `src/common/define_both.h`. New client-only
-  display constants go in `src/client/viewport.h`. Always add a comment
-  block that explains the math, the wire coupling (if any), and the
-  invariants — mirror the style of `kViewportTilesXMax`, `MV_TX_W`,
-  `kPanelHide*`.
+- **Legacy baseline (what you'll find):** C-with-C++-extensions, raw 2D arrays,
+  `goto`-driven control flow, single-letter scratch vars (`x`, `y`, `i`, `i2`,
+  `z`, `z2`, …) — frequently `static` locals reused as ad-hoc globals across
+  labels — and very large functions.
+- **Direction (where we're going):** modern, readable C++. When you touch a
+  region, **prefer to modernize it** — de-`goto`, name things, extract helpers,
+  add docs — rather than mirror the legacy style. The whole project, hot paths
+  included, is in scope. The only hard constraint is **behavior preservation**
+  (§Project direction): prove the change is semantics-preserving, and for hot
+  paths/asm add a benchmark. Run refactors through the `cpp-modernizer` agent.
+- **The static-scratch-reuse trap:** a single-letter local is often `static`
+  and reused as a pseudo-global across labels/sections. Rename or extract **all**
+  of its uses together, or none — a partial rename splits one variable into two
+  and silently changes behavior. Confirm every use with `grep_search` first.
+- New shared constants go in `src/common/define_both.h`. New client-only display
+  constants go in `src/client/viewport.h`. Always add a comment block that
+  explains the math, the wire coupling (if any), and the invariants — mirror the
+  style of `kViewportTilesXMax`, `MV_TX_W`, `kPanelHide*`. Prefer reusing the
+  already-planned names in `docs/resizable-window-hotspots.md` for the
+  `96/72/32/24` family over inventing new ones.
 
 ## Tooling
 
+- `cpp-modernizer` agent (`.github/agents/cpp-modernizer.agent.md`) — the
+  safe-modernization workflow (risk tiers, equivalence verification, hot-path
+  and inline-asm handling). Drive refactors through it.
+- `tools/loop_split_*` — the loop-decomposition toolkit (raw-byte, brace-aware):
+  `loop_split_scan_host.ps1` (host-aware brace/seam + goto/label inventory),
+  `loop_split_extract.ps1` (byte-faithful line-range move), `loop_split_banner.ps1`
+  (safe banner prepend), `loop_split_commentcheck.ps1` (is a line inside a block
+  comment?), `loop_split_oracle*.ps1` (preprocessor token-stream oracle for
+  *pure relocation* — note: NOT valid for behavior-changing modernization).
 - `tools/symbolize.exe` + `tools/analyze_dump.ps1` — crash-dump analysis;
   inputs in `tools/crash/`, bug captures in `tools/bug-images/`.
 - `tools/build_icon.ps1` — icon regen (matches CMake's `generate_icons`
@@ -103,24 +152,46 @@ ID prefixed `RW-P*` / `DOB-P*`:
 - `assets/map_patches/*.txt` — host data files loaded at startup, not
   generated.
 
-## Don'ts
+## Don'ts (correctness rails — these still bind during modernization)
 
-- Don't rename mover/sobj buffer fields or reorder `struct player` casually
-  — it's wire-coupled.
-- Don't introduce STL containers in the mover/sobj/world-render hot paths.
-- Don't compute mover/sobj positions from the client's dynamic `tpx`/`tpy`
-  when interpreting host messages — use `tpx_legacy`/`tpy_legacy`.
-- Don't bump `U6O_VERSION` for non-wire changes. **Do** bump it for every
-  wire change, in the same commit.
+These are about **correctness**, not style, so they survive the modernization
+push. (The old "don't modernize hot paths / don't use STL in hot paths" rules
+are **retired** — hot paths are now refactorable *with* benchmarks + behavioral
+proof; see §Project direction.)
+
+- Don't change the wire format, `struct player` byte layout, or `.sav` format
+  as a side effect of a refactor. A correct modernization changes **no** wire
+  bytes — if yours would, that's a behavior change: stop. Genuine wire changes
+  require encoder + decoder updated together in **both** the `.cpp` and the
+  `.inc` mirror, in **both** client and host, **and** a `U6O_VERSION` bump, all
+  in one commit.
+- Don't bump `U6O_VERSION` for non-wire changes.
+- Don't compute mover/sobj positions from the client's dynamic `tpx`/`tpy` when
+  interpreting host messages — use `tpx_legacy`/`tpy_legacy` (the host emits the
+  legacy 32×24 reference frame).
+- Don't rename mover/sobj buffer fields or reorder `struct player` until you've
+  accounted for every byte-blit and wire use (rename *all* uses together).
+- Don't ship a refactor without a behavioral-equivalence check appropriate to
+  its risk tier (cpp-modernizer §Verification). Hot-path / inline-asm changes
+  additionally need a before/after benchmark.
+- Don't use `insert_edit_into_file` on the brace-seam loop fragments under
+  `src/{client,server}/loop/` — it corrupts their intentionally-unbalanced
+  braces.
 
 ## New-session quick-start
 
-1. Read the **Session handoff** sections of both plans under `docs/plans/`.
+1. Read the **Session handoff** sections of the plans under `docs/plans/`
+   (incl. the loop-split plans) and any active records under
+   `docs/modernization/`.
 2. `grep -n "\.inc" CMakeLists.txt` to see which `.inc` files compile.
-3. Remember `loop_host.cpp` / `loop_client.cpp` are compiled by being
-   `#include`d into `src/common/u6o7.cpp`, not as standalone sources.
-4. If touching encode/decode or buffer dims: server encoder + server
-   decoder (if any) + client encoder/decoder + `U6O_VERSION` — all in one
-   PR.
-5. Tag code comments with the phase ID (`RW-P4.11:`, `DOB-P3.2:`, …).
+3. The per-frame/per-tick loops live in `src/client/loop/` and
+   `src/server/loop/` as ordered `#include` fragments behind the umbrellas
+   `loop_client_all.cpp` / `loop_host_all.cpp`, which `u6o7.cpp` `#include`s into
+   the main loop (they are not standalone sources). See each dir's `README.md`.
+4. If touching encode/decode or buffer dims: server encoder + server decoder
+   (if any) + client encoder/decoder + `U6O_VERSION` — all in one PR.
+5. For refactoring/modernization, use the `cpp-modernizer` agent; capture an
+   equivalence baseline before editing.
+6. Tag code comments with the relevant phase ID (`RW-P4.11:`, `DOB-P3.2:`,
+   `LHS-P*`, or a `docs/modernization/` phase ID).
 

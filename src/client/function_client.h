@@ -49,12 +49,6 @@ extern txt *STATUSMESSpending;
 extern txt *GETSETTING_RAW; //the actualt text between the square brackets [...]
 extern txt *li2_t;
 
-
-//void updatepartyframe1(FRAME* f, int partyindex, double scale);
-
-// r999 new
-void inituidatan1();
-
 void applyscaleuipanelwidget(int uipi, int uiwi, int uisi, float scalex, float scaley);
 
 int gethituipaneli(int x, int y);
@@ -64,9 +58,6 @@ int gethituipanelwidgeti(int x, int y, int uipaneli);
 int gethituipanelwidgeti(int x, int y);
 
 int testhituipanel(int x, int y, int uipaneli);
-
-void updateoverlaysurfn1(surf * s);
-
 
 // s333 get type of object at coordinate
 void backupplayermvinfon1(player * tplayer);
@@ -308,6 +299,14 @@ void setsetting_int(const char *name, long value);
 void refresh(); // FIXME Inline assembly alert!
 
 void scrlog(const char *d); //screen log
+
+// MDD: client map-data download driver entry points. Called from the network
+// read loop (loop_client_part_net.cpp) when the host's manifest / chunk
+// messages arrive. Implemented in function_client.cpp. See define_both.h and
+// docs/plans/plan-clientMapDownload.md.
+void MAPDL_on_manifest(txt *t); // MSG_MAPMANIFEST: parse + start the sync
+void MAPDL_on_chunk(txt *t);    // MSG_MAPCHUNK_RESP: assemble / verify / cache
+
 
 surf *loadimage2(LPCSTR name);
 

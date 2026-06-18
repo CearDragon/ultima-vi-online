@@ -1,7 +1,12 @@
 #ifndef DEFINE_BOTH_H
 #define DEFINE_BOTH_H
 
-#define U6O_VERSION 13
+// MDD-P1.4: bumped 13 -> 14 for the client map-data download wire messages
+// (MSG_MAPMANIFEST / MSG_MAPCHUNK_REQ / MSG_MAPCHUNK_RESP, see below and
+// docs/plans/plan-clientMapDownload.md). Mixed-version binaries refuse to
+// connect (the host's version check rejects), which is the intended graceful
+// degradation -- a clean refusal beats silently misdecoding the new messages.
+#define U6O_VERSION 14
 #define U6O_DEBUG FALSE/* should probably put this on the compiler command line instead of here!! */
 #include "random/random.h"
 
@@ -15,6 +20,56 @@
 //#define rnd ((float)((RandomMers()<<8)>>16)/65536.0f)
 //#define rnd ((float)((Randomc()<<8)>>16)/65536.0f)
 #define rnd Randomc()
+
+// ROOMSYNC-P1.2: how long the host will let a player run on the same
+// per-player mover / sobj buffer state before force-sending a resync
+// (packet 35) to flush + rebuild from scratch. See
+// docs/rendering/global-room-sync.md.
+//
+// The event-based ROOMSYNC-P1 / P1.1 triggers (teleport, room boundary,
+// camera anchor jump, first scene update) catch every observable
+// transition, but a few drift sources -- NPC scheduled movement
+// reshuffling slot indices in tplayer->mv_x[], object spawn/despawn
+// inside the transmit window, mover object pointer reuse after
+// OBJrelease/OBJnew, etc. -- can in principle accumulate while the
+// player is sitting completely still and no event fires. The shop
+// reproducer ("sat in the shop for a while and eventually lost
+// control") is the canary symptom. The heartbeat puts a hard
+// self-heal ceiling on any such drift.
+//
+// 60 seconds is a balance: short enough that the user notices at most
+// one minute of degraded behaviour before recovery; long enough that
+// the resync packet (a flush + full mover/sobj add list, typically a
+// few KB on a dense area) is amortised cleanly over the per-player
+// bandwidth. Wire-protocol-neutral: a resync just sends packet 35
+// which the client has handled since the /RESYNC chat command shipped.
+#define ROOMSYNC_HEARTBEAT_SECONDS 60.0f
+// ROOMSYNC-P1.5: a MUCH shorter heartbeat that applies only while the player
+// is standing inside a registered isolated room (getroom() != 0). Inside a
+// small room the per-player sobj/mover diff stream is the ONLY thing that
+// tells a STATIONARY bystander that ANOTHER player rearranged the ground
+// items -- the bystander has no coordinate delta of their own to force a
+// scene-update send. If that diff ever fails to flag a change (e.g. the item
+// move lands on a frame the bystander's alternating updatemessage gate is
+// skipping, or any future sobj-diff edge case), the bystander would keep
+// rendering the item at its old tile until some UNRELATED event (the other
+// player logging out, a teleport, the 60s heartbeat) finally forced a
+// resync -- exactly the reported 'two players in the guild basement see
+// items in the wrong place until someone logs out' bug. Because a room is
+// tiny (the Guardian Guild basement is 12x15) the packet-35 full rebuild is
+// only a few hundred bytes and a sub-second cadence is imperceptible and
+// bandwidth-trivial. Outside any room the normal 60s heartbeat still
+// applies. Wire-neutral (packet 35 only); U6O_VERSION not bumped.
+//
+// ROOMSYNC-P1.6 (2026-06): the floor-item case this heartbeat was added for is
+// now corrected DETERMINISTICALLY and immediately by roomObjectChanged() in
+// src/server/function_host.cpp -- it resyncs in-room players the instant a
+// scene object is added to / removed from a room tile (OBJadd/OBJremove), so
+// floor-item moves no longer wait up to ROOMSYNC_ROOM_HEARTBEAT_SECONDS to
+// render. This heartbeat is retained as defence-in-depth for NON-object in-room
+// drift (mover slot reshuffles, object-pointer reuse). See
+// docs/rendering/global-room-sync.md (P1.6).
+#define ROOMSYNC_ROOM_HEARTBEAT_SECONDS 0.5f
 //equipped item positions (REVISE) (warning: left and right refer to the character's hand hence they are reversed on screen)
 #define helmx 52
 #define helmy 132
@@ -136,6 +191,60 @@
 #define SOBJ_S1_TOP    12   // screen+1 top    distance from tpy
 #define SOBJ_S1_BOTTOM 36   // screen+1 bottom distance from tpy (max view bottom edge + 1)
 #define SOBJ_S1_INSET  (SOBJ_TX_OFFX - SOBJ_S1_LEFT)  // = 7 (fence delta 8-1)
+
+// ============================================================================
+// MDD: client map-data download (see docs/plans/plan-clientMapDownload.md).
+//
+// The host bakes three client-facing map files in src/server/host_setup.h
+// right after house():
+//   bt.bin       base tiles               bt[1024][2048]                       (u16)
+//   objfixed.bin fixed objects index+type objfixed_index[1024][2048] + objfixed_type[65536]
+//   tobjfix.bin  "top" fixed objects      tobjfixed_index[1024][2048] + tobjfixed_type[65536]
+// Historically the client read these from its OWN local .\dr\ folder, so a
+// client with a stale copy rendered fixed geometry the host no longer had
+// (the "shop that won't disappear"). This feature streams the host's CURRENT
+// files at connect time. bt.bin is NOT downloaded in multiplayer -- base
+// tiles already stream live via scene-update message type 31; only the two
+// fixed-object files (which never streamed) are pulled.
+//
+// Pull model (manifest -> flow-controlled chunks):
+//   1. host  -> client  MSG_MAPMANIFEST : MAP_FILE_COUNT * {length u32,
+//                       checksum u32}. The checksum is FNV-1a/32 over the
+//                       exact file bytes (MAP_checksum() in function_both.cpp).
+//   2. client -> host   MSG_MAPCHUNK_REQ : {fileId u8, offset u32, length u32}.
+//   3. host  -> client  MSG_MAPCHUNK_RESP: {fileId u8, offset u32, count u32,
+//                       bytes...}. The client requests the next chunk only
+//                       after the previous response arrives -- a single
+//                       in-flight request, which naturally throttles the
+//                       transfer so it never starves the gameplay packet
+//                       stream (flow-controlled by the existing send loop).
+// The client verifies each assembled file against the manifest checksum,
+// caches it atomically under .\dr\hostcache\, and loads it into the live
+// objfixed_*/tobjfixed_* arrays. ANY failure (bad checksum, disconnect,
+// alloc failure) leaves the setup-loaded local .\dr\ data untouched -- a
+// strict superset of the legacy behavior, so the feature can only improve
+// freshness, never break a client that already worked.
+//
+// WIRE-COUPLED: the encoder and decoder for each message must change together
+// in BOTH client and host (and any .inc mirror). Bump U6O_VERSION whenever any
+// of the constants or layouts below change.
+//
+// Chunk size: 16 KB keeps each framed MSG_MAPCHUNK_RESP message (count + the
+// 1+1+4+4 = 10-byte header) far below the 65535-byte wire length field AND
+// below the 65536-byte socket receive accumulation buffer
+// (socketclient_ri[i]->t, allocated -65536 in function_both.cpp /
+// setup_client.inc) even when one partial message is already queued
+// (worst-case transient accumulation ~= 49 KB). Do NOT raise toward 32 KB
+// without re-checking that headroom in sockets_receive().
+#define MAP_FILE_COUNT      3
+#define MAP_FILE_BT         0   // bt.bin        -- base tiles (not downloaded in MP)
+#define MAP_FILE_OBJFIXED   1   // objfixed.bin  -- fixed objects (index + type)
+#define MAP_FILE_TOBJFIX    2   // tobjfix.bin   -- "top" fixed objects (index + type)
+#define MAP_CHUNK_BYTES     16384
+#define MSG_MAPMANIFEST     60  // host   -> client : per-file length + checksum
+#define MSG_MAPCHUNK_REQ    61  // client -> host   : request a file byte slice
+#define MSG_MAPCHUNK_RESP   62  // host   -> client : a file byte slice + payload
+
 #define MV_LIGHTBRIGHT 1
 #define MV_LIGHTGLOW 2
 #define MV_INVISIBLE 4

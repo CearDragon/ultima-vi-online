@@ -21,7 +21,10 @@ This directory contains the necessary files to run the Ultima VI Online Host in 
 Run the following command from the project root:
 
 ```powershell
-docker build -t u6o7-host:latest .
+docker build -t u6o-host:latest .
+docker tag u6o-host:latest acrultimavionline.azurecr.io/u6o-host:latest
+az acr login --name acrultimavionline
+docker push acrultimavionline.azurecr.io/u6o-host:latest
 ```
 
 *Note: The Dockerfile in the root is used by default.*
@@ -39,7 +42,7 @@ kubectl apply -f k8s/deployment.yaml
 Check the status of the pods:
 
 ```powershell
-kubectl get pods -l app=u6o7-host
+kubectl get pods -l app=u6o-host
 ```
 
 *Note: Windows pods may take several minutes to start as the base image is large.*
@@ -47,7 +50,7 @@ kubectl get pods -l app=u6o7-host
 Check the service to find the external IP/port:
 
 ```powershell
-kubectl get service u6o7-host-service
+kubectl get service u6o-host-service
 ```
 
 ## Configuration
@@ -56,7 +59,7 @@ kubectl get service u6o7-host-service
 -   **Persistence**: The `save` directory is mounted as a PersistentVolumeClaim to ensure player data and world state are preserved across pod restarts.
 -   **Logs**: You can view the server logs using:
     ```powershell
-    kubectl logs -f deployment/u6o7-host
+    kubectl logs -f deployment/u6o-host
     ```
 
 ## Troubleshooting

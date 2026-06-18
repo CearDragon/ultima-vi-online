@@ -337,8 +337,13 @@ void getscreenoffset(long x, long y, long *mapx, long *mapy) {
         *mapy = 319;
         return;
     }
-    // Guardian Guild basement uses normal follow behavior now; fall through to
-    // the default region handling below.
+    // ROOMSYNC-P1: registered isolated rooms (see getroom() below and
+    // docs/rendering/global-room-sync.md) get centered follow-camera
+    // semantics from the default fall-through formula; no per-room block
+    // is needed here. The host always uses viewTilesX/Y == 32/24 so its
+    // tpx/tpy stays in the legacy reference frame, which keeps the wire
+    // encoding stable. The client clamps the camera per-room in
+    // loop_client.cpp via getroom().
     //undefined
     if (*mapx < 0) *mapx = 0;
     if (*mapy < 0) *mapy = 0;
@@ -372,12 +377,89 @@ void getscreenoffset_legacy(long x, long y, long *mapx, long *mapy) {
         *mapy = 319;
         return;
     }
-    // Guardian Guild basement uses normal follow behavior now; fall through to
-    // the default region handling below.
+    // ROOMSYNC-P1: same note as getscreenoffset(). The legacy variant is
+    // the wire-reference frame used by client mover/sobj decoders; the
+    // default fall-through is intentional and must stay aligned with the
+    // host's getscreenoffset() output for every isolated room.
     if (*mapx < 0) *mapx = 0;
     if (*mapy < 0) *mapy = 0;
     if (*mapx > (2048 - tx)) *mapx = (2048 - tx);
     if (*mapy > (1024 - ty)) *mapy = (1024 - ty);
+}
+
+// MDD: map-download content checksum (FNV-1a, 32-bit). See function_both.h.
+#define MAP_FNV_OFFSET 2166136261u
+#define MAP_FNV_PRIME  16777619u
+
+unsigned long MAP_checksum_init(void) {
+    return MAP_FNV_OFFSET;
+}
+
+unsigned long MAP_checksum_update(unsigned long state, const void *data, unsigned long len) {
+    const unsigned char *p = (const unsigned char *) data;
+    for (unsigned long i = 0; i < len; i++) {
+        state ^= p[i];
+        state *= MAP_FNV_PRIME;
+    }
+    return state;
+}
+
+unsigned long MAP_checksum_final(unsigned long state) {
+    return state;
+}
+
+unsigned long MAP_checksum(const void *data, unsigned long len) {
+    return MAP_checksum_final(MAP_checksum_update(MAP_checksum_init(), data, len));
+}
+
+const char *MAP_file_path(int fileId) {
+    switch (fileId) {
+        case MAP_FILE_BT:       return ".\\dr\\bt.bin";
+        case MAP_FILE_OBJFIXED: return ".\\dr\\objfixed.bin";
+        case MAP_FILE_TOBJFIX:  return ".\\dr\\tobjfix.bin";
+        default:                return NULL;
+    }
+}
+
+// ROOMSYNC-P1: Isolated-room registry. Adding a new room here is the ONLY
+// change required to make a new basement / hidden chamber / custom-coord
+// region behave correctly w.r.t. mover streaming, sobj streaming, camera
+// follow, and tile rendering. See docs/rendering/global-room-sync.md.
+//
+// Bounds are inclusive in both x and y. Rooms must not overlap; the host
+// expects exactly one room (or none) to contain any given world tile.
+static const GameRoom gameRooms[] = {
+    // Guardian Guild basement -- a 12x15 chamber straddling the x=1280
+    // gargoyle-land boundary. Was the original "disappearing player"
+    // canary that motivated this registry.
+    { 1280, 319, 1291, 333 },
+};
+static const int gameRoomsCount = (int)(sizeof(gameRooms) / sizeof(gameRooms[0]));
+
+int getroom(long x, long y, long *rx0, long *ry0, long *rx1, long *ry1) {
+    static int gri;
+    for (gri = 0; gri < gameRoomsCount; gri++) {
+        if (x >= gameRooms[gri].x0 && x <= gameRooms[gri].x1 &&
+            y >= gameRooms[gri].y0 && y <= gameRooms[gri].y1) {
+            if (rx0) *rx0 = gameRooms[gri].x0;
+            if (ry0) *ry0 = gameRooms[gri].y0;
+            if (rx1) *rx1 = gameRooms[gri].x1;
+            if (ry1) *ry1 = gameRooms[gri].y1;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int sameroom(long ax, long ay, long bx, long by) {
+    static long ax0, ay0, ax1, ay1;
+    static long bx0, by0, bx1, by1;
+    static int ain, bin;
+    ain = getroom(ax, ay, &ax0, &ay0, &ax1, &ay1);
+    bin = getroom(bx, by, &bx0, &by0, &bx1, &by1);
+    if (ain != bin) return 0;          // exactly one side is in a room -> mismatch
+    if (!ain) return 1;                // both in open world
+    return (ax0 == bx0 && ay0 == by0 && ax1 == bx1 && ay1 == by1);
 }
 
 /* luteijn: this looks extermely inefficient, replaced with an inline function */

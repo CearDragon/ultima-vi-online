@@ -1199,6 +1199,56 @@ put(tfh, &bt, 1024 * 2048 * 2);
 close (tfh);
 //later we will compress and encrypt this
 
+// MDD-P1.1: compute the client map-file manifest (byte length + FNV-1a/32
+// checksum) for each baked file. Connecting clients receive this in
+// MSG_MAPMANIFEST and use it to decide whether their cached/local copy is
+// current; if not, they pull the file in chunks (MSG_MAPCHUNK_REQ/RESP). We
+// checksum the bytes ON DISK -- exactly what the chunk server later streams --
+// so a manifest match guarantees the client ends up byte-identical to the
+// host. See define_both.h / docs/plans/plan-clientMapDownload.md.
+{
+    file *mfh;
+    long mlen;
+    unsigned char *mbuf;
+    for (int mfid = 0; mfid < MAP_FILE_COUNT; mfid++) {
+        MAP_manifest_len[mfid] = 0;
+        MAP_manifest_sum[mfid] = MAP_checksum_init();
+        mfh = open2((LPCSTR) MAP_file_path(mfid), OF_READ | OF_SHARE_COMPAT);
+        if (mfh->h == HFILE_ERROR) { close(mfh); continue; }
+        mlen = lof(mfh);
+        if (mlen > 0) {
+            mbuf = (unsigned char *) malloc(mlen);
+            if (mbuf) {
+                seek(mfh, 0);
+                get(mfh, mbuf, mlen);
+                MAP_manifest_len[mfid] = (unsigned long) mlen;
+                MAP_manifest_sum[mfid] = MAP_checksum(mbuf, (unsigned long) mlen);
+                free(mbuf);
+            }
+        }
+        close(mfh);
+    }
+    {
+        // Build the diagnostic line with the txt numeric helpers (mytxt.h) so
+        // host_setup.h pulls in no extra CRT dependency for this log.
+        txt *mlogt = txtnew();
+        txt *mnumt = txtnew();
+        txtset(mlogt, "MDD: map-file manifest built");
+        for (int mfid = 0; mfid < MAP_FILE_COUNT; mfid++) {
+            txtadd(mlogt, " [len=");
+            txtnumint(mnumt, (long) MAP_manifest_len[mfid]);
+            txtadd(mlogt, mnumt);
+            txtadd(mlogt, " sum=");
+            txtnumhex(mnumt, (DWORD) MAP_manifest_sum[mfid]);
+            txtadd(mlogt, mnumt);
+            txtadd(mlogt, "]");
+        }
+        LOGadd(mlogt);
+        free(mlogt);
+        free(mnumt);
+    }
+}
+
 //NEWCODE
 if
 (NEThost) {

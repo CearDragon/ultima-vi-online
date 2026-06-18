@@ -1,5 +1,17 @@
 # House and Basement Rendering Issues
 
+> **Update (June 2026 — ROOMSYNC-P1):** the per-room workarounds described
+> below are **obsolete for any room registered in `gameRooms[]`**. The
+> global fix in
+> [`docs/rendering/global-room-sync.md`](../rendering/global-room-sync.md)
+> handles auto-resync on teleport / room boundary crossings and clips
+> the host's mover/sobj transmit windows to the player's room
+> automatically. To add a new basement / custom-coordinate room, append
+> one line to `gameRooms[]` in `src/common/function_both.cpp` — no
+> changes to `getscreenoffset()`, `loop_host.cpp`, `loop_client.cpp`,
+> or teleport call sites required. Read this document as historical
+> root-cause analysis only.
+
 This document describes how to diagnose and solve issues related to rendering custom house basements or specialized map regions in Ultima VI Online.
 
 ## Symptom: The "Disappearing Player" Bug

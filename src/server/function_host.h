@@ -222,6 +222,14 @@ object *OBJnew();
 
 unsigned char OBJadd(unsigned long x, unsigned long y, object *obj);
 
+// ROOMSYNC-P1.6: force an immediate packet-35 resync for players inside the
+// registered isolated room that contains (x, y), when a floor/scene object on
+// that tile changes. Deterministic, event-driven replacement for the timing-
+// fragile per-player sobj diff inside small rooms (the "two players in the
+// Guardian Guild basement see floor items in the wrong place until someone
+// logs out" desync). Wire-neutral; no U6O_VERSION bump. See function_host.cpp.
+void roomObjectChanged(long x, long y);
+
 void OBJrelease(object * obj);
 
 /* free structures properly from memory */

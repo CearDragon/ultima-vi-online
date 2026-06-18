@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: u6o7-host-save-pvc
+  name: u6o-host-save-pvc
 spec:
   accessModes:
     - ReadWriteOnce
@@ -12,18 +12,18 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: u6o7-host
+  name: u6o-host
   labels:
-    app: u6o7-host
+    app: u6o-host
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: u6o7-host
+      app: u6o-host
   template:
     metadata:
       labels:
-        app: u6o7-host
+        app: u6o-host
     spec:
       # LH-P7: graceful shutdown. SIGTERM (sent on pod delete) triggers the
       # host's save-and-exit path; give it time to flush before SIGKILL.
@@ -31,7 +31,7 @@ spec:
       containers:
       - name: host
         image: u6o-host:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 22
           protocol: TCP
@@ -41,17 +41,17 @@ spec:
       volumes:
       - name: save-data
         persistentVolumeClaim:
-          claimName: u6o7-host-save-pvc
+          claimName: u6o-host-save-pvc
       nodeSelector:
         kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: u6o7-host-service
+  name: u6o-host-service
 spec:
   selector:
-    app: u6o7-host
+    app: u6o-host
   ports:
     - protocol: TCP
       port: 22
