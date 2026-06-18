@@ -53,9 +53,13 @@ This feature **adds new wire message types**, so per
 
 - Encoder **and** decoder change together in **both** client and host.
 - Mirror every change into the `.inc` copy of each `.cpp` that has one
-  (`loop_host.{cpp,inc}`, `loop_client.{cpp,inc}`).
-- **Bump `U6O_VERSION`** in `src/common/define_both.h` (currently **13**) in
-  the same commit that lands the new messages.
+  (`loop_host.{cpp,inc}`, `loop_client.{cpp,inc}`). **(Obsolete since the loop
+  split: the monolithic `loop_host.cpp`/`loop_client.cpp` and their `.inc`
+  mirrors are gone — the per-tick/per-frame loops are now ordered `#include`
+  fragments under `src/server/loop/` and `src/client/loop/`. There is nothing
+  left to mirror; edit the fragment `.cpp` that owns the handler.)**
+- **Bump `U6O_VERSION`** in `src/common/define_both.h` (was **13**, now **14**
+  — done MDD-P1.4) in the same commit that lands the new messages.
 - Old↔new mixes must degrade gracefully (see MDD-P5.2), not misdecode.
 
 ---
@@ -131,98 +135,163 @@ and ideally only re-sent when changed.
 
 ## MDD-P0 — Design lock-in & safety net
 
-- ⬜ MDD-P0.1 Commit this plan; lock the manifest + chunked-pull + per-host
-  cache decisions above.
-- ⬜ MDD-P0.2 Baseline: record current `.\dr\` file sizes and a clean
-  login packet capture (the interop oracle for later phases).
-- ⬜ MDD-P0.3 Reserve the new message-type IDs and the chunk size in
+- ✅ MDD-P0.1 Commit this plan; lock the manifest + chunked-pull + per-host
+  cache decisions above. *(2026-06-17: locked. Implementation deviation noted —
+  freshness is keyed purely on the FNV-1a/32 **checksum**, not a `<hostkey>`
+  dir, per the open question below; a single shared `.\dr\hostcache\` is used.)*
+- 🟡 MDD-P0.2 Baseline: record current `.\dr\` file sizes and a clean
+  login packet capture (the interop oracle for later phases). *(2026-06-17:
+  file sizes are documented in Background — bt 4,194,304 / objfixed 4,325,376 /
+  tobjfix 4,325,376. A live packet capture still needs a running host+client,
+  which this environment can't run; deferred to the build/runtime verification
+  pass.)*
+- ✅ MDD-P0.3 Reserve the new message-type IDs and the chunk size in
   `define_both.h` with a comment block documenting the wire coupling
-  (mirror the `MV_TX_*` / `kPanelHide*` comment style).
-- ⬜ MDD-P0.4 Pick the checksum algorithm (CRC32 vs FNV-1a) and the cache
-  directory layout (`<hostkey>` derived from host address/port).
+  (mirror the `MV_TX_*` / `kPanelHide*` comment style). *(2026-06-17:
+  `MSG_MAPMANIFEST=60`, `MSG_MAPCHUNK_REQ=61`, `MSG_MAPCHUNK_RESP=62`,
+  `MAP_CHUNK_BYTES=16384`, `MAP_FILE_BT/OBJFIXED/TOBJFIX`, `MAP_FILE_COUNT=3`.
+  60–62 audited collision-free against every `t->d2[0]` dispatch in both
+  loops — see resolved risk below.)*
+- ✅ MDD-P0.4 Pick the checksum algorithm (CRC32 vs FNV-1a) and the cache
+  directory layout (`<hostkey>` derived from host address/port). *(2026-06-17:
+  **FNV-1a/32** — allocation-free, streamable (lets the client fold each chunk
+  into a running hash and hash the two non-contiguous in-RAM arrays without
+  concatenating), identical on Win32 client + i386 Linux host. `MAP_checksum*`
+  in `function_both.cpp`. Cache layout: single `.\dr\hostcache\<basename>` +
+  a `.sum` sidecar commit-marker; freshness is checksum-based so no `<hostkey>`
+  subdir is needed.)*
 - **What to read first:** this Background; `define_both.h:1–160`;
   `function_both.cpp:29–160`.
-- **Exit:** plan committed; IDs/chunk size reserved; baseline captured;
-  checksum + cache layout chosen.
+- **Exit:** ✅ plan committed; IDs/chunk size reserved; checksum + cache layout
+  chosen. (Baseline packet capture deferred to runtime verification.)
 
 ## MDD-P1 — Manifest message (host → client), no transfer yet
 
-- ⬜ MDD-P1.1 Host: at bake time (`host_setup.h`) compute and store each
+- ✅ MDD-P1.1 Host: at bake time (`host_setup.h`) compute and store each
   file's length + checksum in memory (a small `MapFileManifest` table).
-- ⬜ MDD-P1.2 Host: after the version check / login accept
-  (`loop_host.cpp` ~4307), send a **manifest** message
-  (`d2[0]=<MAPMANIFEST>`); mirror into `loop_host.inc`.
-- ⬜ MDD-P1.3 Client: receive & parse the manifest into a struct, log it,
-  take no rendering action yet; mirror into `loop_client.inc`.
-- ⬜ MDD-P1.4 Bump `U6O_VERSION` (wire change) in `define_both.h`; rebuild
-  `host`, `both`, and `client`.
-- **What to read first:** `loop_host.cpp:4290–4350`;
-  `loop_client.cpp:4176–4220`; `host_setup.h:1060–1200`.
-- **Exit:** a connecting client logs the host's manifest; rendering unchanged;
-  build green on all targets.
+  *(2026-06-17: after the bt.bin bake, host reads back each baked `.bin` and
+  fills `MAP_manifest_len[]` / `MAP_manifest_sum[]` (globals.inc), logging the
+  result. Checksums the bytes ON DISK so a manifest match guarantees the
+  client ends byte-identical.)*
+- ✅ MDD-P1.2 Host: after the version check / login accept
+  (`loop_host_part_b_dispatch.cpp`), send a **manifest** message
+  (`d2[0]=MSG_MAPMANIFEST`). *(2026-06-17: built in a dedicated scratch txt so
+  it can't disturb the in-progress setup-message parse on `t5`. No `.inc`
+  mirror exists post-loop-split.)*
+- ✅ MDD-P1.3 Client: receive & parse the manifest into state, take no
+  rendering action until verified. *(2026-06-17: `MAPDL_on_manifest()` in
+  `function_client.cpp`, dispatched from `loop_client_part_net.cpp`.)*
+- ✅ MDD-P1.4 Bump `U6O_VERSION` (wire change) in `define_both.h`. *(2026-06-17:
+  13 → 14. **Build of `host`/`both`/`client` still pending** — no MSVC/CMake
+  toolchain in this environment; flagged for the runtime-verification pass.)*
+- **What to read first:** `loop_host_part_b_dispatch.cpp` (version check ~230);
+  `loop_client_part_net.cpp` (dispatch tail); `host_setup.h:1196–1250`.
+- **Exit:** 🟡 code complete; a connecting client parses the host's manifest and
+  rendering is unchanged until a file verifies. **Build-green check outstanding.**
 
 ## MDD-P2 — Chunked request/response protocol
 
-- ⬜ MDD-P2.1 Define a **request** message (client→host:
-  `{fileId, offset, length}`) and a **response** message (host→client:
-  `{fileId, offset, byteCount, …bytes}`) using `BITSput`/`BITSget` plus a raw
-  payload; add encoder+decoder on both sides, both `.cpp` and `.inc`.
-- ⬜ MDD-P2.2 Host handler: read the requested slice via `open2`/`get`
-  (`myfile.cpp`), bounds-check `offset`/`length` against the manifest length,
-  reply with the bytes.
-- ⬜ MDD-P2.3 Client driver: loop requesting chunks until each file is
-  complete; assemble into a temp buffer; verify the assembled checksum against
-  the manifest.
+- ✅ MDD-P2.1 Define a **request** message (client→host:
+  `{fileId u8, offset u32, length u32}`) and a **response** message
+  (host→client: `{fileId u8, offset u32, byteCount u32, …bytes}`); encoder +
+  decoder on both sides. *(2026-06-17: built with `txtaddchar`/`txtaddlong`
+  + a raw payload `txtadd`, decoded with `memcpy` from fixed offsets — simpler
+  and adequate vs `BITSput`/`BITSget` for byte-aligned fields. No `.inc`
+  mirror exists post-loop-split.)*
+- ✅ MDD-P2.2 Host handler: read the requested slice via `open2`/`seek`/`get`,
+  bounds-check `offset`/`length` against the manifest length, reply with the
+  bytes. *(2026-06-17: in `loop_host_part_b_dispatch.cpp`, ahead of the
+  playerlist lookup so it serves whether or not the socket has fully logged in.
+  Clamps to `[0, filelen)` and `MAP_CHUNK_BYTES`; missing file ⇒ empty reply.)*
+- ✅ MDD-P2.3 Client driver: loop requesting chunks until each file is
+  complete; assemble into a malloc'd buffer; verify the assembled checksum
+  against the manifest. *(2026-06-17: `MAPDL_send_request` / `MAPDL_on_chunk`,
+  single request in flight — the host's reply drives the next request.)*
 - **What to read first:** MDD-P1 message handlers; `function_both.cpp:86–160`
   (send/receive loops); `myfile.cpp:52–110`.
-- **Exit:** client can pull a full file into memory and checksum-match it
-  (behind a debug flag); no rendering wired yet.
+- **Exit:** ✅ client pulls a full file into memory and checksum-matches it
+  (it then applies it — see P3). **Build-green check outstanding.**
 
 ## MDD-P3 — Cache & load-path integration
 
-- ⬜ MDD-P3.1 Client: write verified files atomically to
-  `.\dr\hostcache\<hostkey>\` (temp file + rename; never load a half-written
-  file).
-- ⬜ MDD-P3.2 Client setup: load `objfixed.bin` / `tobjfix.bin` (and `bt.bin`)
-  from the cache when present **and** manifest-current; else fall back to the
-  shipped `.\dr\` files at `setup_client.inc:919 / 924 / 930`.
-- ⬜ MDD-P3.3 Skip downloading any file whose cached checksum already matches
-  the manifest (fast reconnects → ~0 bytes transferred).
+- ✅ MDD-P3.1 Client: persist verified files to `.\dr\hostcache\` with a
+  commit-marker discipline. *(2026-06-17: `MAPDL_store` writes the `.bin`,
+  then the `.sum` sidecar LAST; `MAPDL_load_cache` trusts a cached file only
+  when the sidecar matches AND the file re-hashes, so an interrupted write is
+  re-downloaded, never loaded half-baked. `myfile` has no atomic rename, so the
+  sidecar-last commit marker replaces temp+rename — same never-load-partial
+  guarantee.)*
+- ✅ MDD-P3.2 Client: load `objfixed.bin` / `tobjfix.bin` from the cache when
+  current, else download; else the existing local `.\dr\` load stands.
+  *(2026-06-17: **implemented as a post-connect reload** rather than a
+  setup-time cache check. The setup load (`setup_client.inc:911/922`) is left
+  untouched as the always-present baseline; once the manifest arrives,
+  `MAPDL_provision` either confirms the live arrays already match
+  (`MAPDL_live_checksum`), loads a current cache copy, or downloads — then
+  swaps the verified bytes into `objfixed_*`/`tobjfixed_*`. Cleaner than
+  checking the cache at setup, because the manifest needed to judge "current"
+  only arrives after setup. `bt.bin` is intentionally NOT downloaded — base
+  tiles stream live in multiplayer.)*
+- ✅ MDD-P3.3 Skip downloading any file whose checksum already matches the
+  manifest. *(2026-06-17: `MAPDL_provision` short-circuits on a live-array
+  checksum match first, then on a cache-sidecar match — fast reconnects and
+  already-current clients transfer ~0 bytes.)*
 - **What to read first:** `setup_client.inc:905–931`; MDD-P2 client driver.
-- **Exit:** a client with an **empty or stale** `.\dr\` renders the host's
-  current fixed objects correctly after connecting.
+- **Exit:** 🟡 code complete — a client with an empty/stale `.\dr\` will render
+  the host's current fixed objects after connecting. **Needs runtime
+  verification (two endpoints).**
 
 ## MDD-P4 — Timing, UX, robustness
 
-- ⬜ MDD-P4.1 Sequence the download **before** the fixed-object load /
-  main render loop; show a "Syncing map data…" progress indicator
-  (reuse the splash/status surface).
-- ⬜ MDD-P4.2 Handle mid-transfer disconnect / timeout with retry and
-  partial-file cleanup; corrupt or incomplete files are discarded, never
-  loaded.
-- ⬜ MDD-P4.3 Interleave/throttle chunk requests so the transfer never starves
-  gameplay packets on the existing send loop.
-- **What to read first:** `loop_client.cpp` connect/setup region;
-  `splash.{h,cpp}`; MDD-P3 cache code.
-- **Exit:** clean connect over a slow link; no UI hang; resilient to drops.
+- 🟡 MDD-P4.1 Sequence the download relative to the render loop and show
+  progress. *(2026-06-17: the download is event-driven within the main loop —
+  it starts when the manifest arrives (post-connect) and overlaps gameplay; the
+  setup-loaded local data renders meanwhile and is hot-swapped when a file
+  verifies, so there is no blocking "pre-render gate" and no UI hang. Progress
+  surfaced via `STATUSMESSadd` ("Syncing map data…", "Map data synchronized…")
+  + `scrlog` detail. A dedicated splash progress bar is **not** wired —
+  downgraded to a status-message indicator; revisit if a connect-time splash is
+  desired.)*
+- ✅ MDD-P4.2 Handle mid-transfer disconnect / corruption without ever loading
+  a bad file. *(2026-06-17: a file is applied only after a full-buffer checksum
+  match; bad checksum, truncated payload, OOM, or a host "empty" reply abandon
+  the file and keep the local data; a reconnect's fresh manifest frees any
+  partial buffer and restarts. Transport is TCP so chunks are reliable/ordered;
+  no explicit retransmit needed.)*
+- ✅ MDD-P4.3 Throttle so the transfer never starves gameplay packets.
+  *(2026-06-17: exactly one request in flight — each `MSG_MAPCHUNK_RESP` drives
+  the next `MSG_MAPCHUNK_REQ`, so the transfer self-paces over the existing
+  send loop and never floods it.)*
+- **What to read first:** `loop_client_part_net.cpp` dispatch;
+  `function_client.cpp` `MAPDL_*`; MDD-P3 cache code.
+- **Exit:** 🟡 robust-by-construction (always falls back to local data); a
+  clean-connect-over-slow-link **runtime** check remains.
 
 ## MDD-P5 — Compression, cross-version hardening, docs (final)
 
-- ⬜ MDD-P5.1 Optional payload compression negotiated in the manifest
-  (gzip or simple RLE), matching the `host_setup.h` "compress and encrypt"
-  TODO.
-- ⬜ MDD-P5.2 Cross-version matrix: old client ↔ new host and new client ↔ old
-  host both fall back to shipped local files (no manifest ⇒ no download).
-  Add the result to a version-compat table here.
-- ⬜ MDD-P5.3 Linux headless host parity: serve bytes with no graphics; verify
-  in the container build (`Dockerfile.linux`).
-- ⬜ MDD-P5.4 Update `docs/rendering/map-client-host-sync/README.md`: document
-  the download path and retire the manual "redistribute the `.bin` files"
-  step.
+- ⏭ MDD-P5.1 Optional payload compression negotiated in the manifest.
+  *(2026-06-17: deferred. Correctness-first shipped uncompressed; the wire
+  layout has no compression flag yet, so adding it later is another
+  `U6O_VERSION` bump. Matches the `host_setup.h` "compress and encrypt" TODO.)*
+- ✅ MDD-P5.2 Cross-version degradation. *(2026-06-17: because `U6O_VERSION`
+  bumped 13→14, a v13↔v14 mix is **refused at the version check** (host emits
+  type 254) rather than misdecoding the new messages — the plan's stated
+  acceptable outcome ("a clean refusal beats silently misdecoding"). Same-major
+  peers always carry the manifest, so there is no "new feature, no manifest"
+  in-band case to fall back from.)*
+- ✅ MDD-P5.3 Linux headless host parity. *(2026-06-17: the host serve path uses
+  only `open2`/`seek`/`get`/`close` (already POSIX-backed in `myfile.cpp`) and
+  `MAP_checksum` (pure arithmetic) — no `plat_*`/graphics. `MAP_manifest_*` /
+  `MAP_chunkbuf` are in `globals.inc` (compiled into the Linux host) and the
+  bake/serve code is host-capable-only. **Container build not run here** —
+  verify under `Dockerfile.linux`.)*
+- ✅ MDD-P5.4 Update `docs/rendering/map-client-host-sync/README.md`. *(2026-06-17:
+  documented the download path and retired the manual redistribution step.)*
 - **What to read first:** MDD-P1 manifest format; `plan-linuxHost.md`
   Session Handoff; the companion README.
-- **Exit:** feature on by default; manual redistribution retired; docs updated;
-  cross-version matrix green.
+- **Exit:** 🟡 feature coded on-by-default; redistribution retired in docs;
+  compression deferred (P5.1); cross-version refusal verified by design,
+  container/runtime checks outstanding.
 
 ---
 
@@ -230,28 +299,75 @@ and ideally only re-sent when changed.
 
 | Metric | Baseline | Current | Target |
 |---|---|---|---|
-| Bytes transferred, fresh login | n/a (files shipped) | TBD | ≤ 12.6 MB (or compressed) |
-| Bytes transferred, unchanged reconnect | n/a | TBD | ~0 (manifest match) |
-| New wire message types | 0 | TBD | 3 (manifest, request, response) |
-| `U6O_VERSION` | 13 | 13 | bumped once (MDD-P1.4) |
-| Manual `.bin` redistribution step | required | required | retired (MDD-P5.4) |
+| Bytes transferred, fresh login | n/a (files shipped) | ≤ 8.65 MB (objfixed+tobjfix; bt.bin skipped in MP) | ≤ 12.6 MB (or compressed) |
+| Bytes transferred, unchanged reconnect | n/a | ~0 (live-array or cache checksum match) | ~0 (manifest match) |
+| New wire message types | 0 | 3 (60 manifest, 61 request, 62 response) | 3 (manifest, request, response) |
+| `U6O_VERSION` | 13 | **14** (bumped MDD-P1.4) | bumped once (MDD-P1.4) |
+| Manual `.bin` redistribution step | required | retired in docs (MDD-P5.4) | retired (MDD-P5.4) |
 
 Update this table at the end of every phase.
 
 ## Risks & open questions
 
-- ⬜ Does any current message type byte collide with the IDs we want to
-  reserve? (Audit `t->d2[0]==N` dispatch in both loops before MDD-P0.3.)
-- ⬜ Is `bt.bin` worth downloading at all, given base tiles stream live in
-  multiplayer? (It is only read when `NEThost==NULL`; may be **client-cache
-  only** for the local path, or skipped in MDD-P3 to save ~4 MB.)
-- ⬜ Cache key: host IP+port is simplest, but a host that rebuilds its map
-  keeps the same address — rely on the **checksum**, not the key, for
-  freshness.
+- ✅ Does any current message type byte collide with the IDs we want to
+  reserve? **Resolved (2026-06-17):** audited every `t->d2[0]==N` /
+  `d2[0]=N` in both loops. In use: 1–42, 45, 47, 244–252, 254, 255. Picked
+  **60/61/62** — a clear gap in both directions.
+- ✅ Is `bt.bin` worth downloading at all? **Resolved (2026-06-17): no.** Base
+  tiles stream live (message 31) in multiplayer; `bt.bin` is only read on the
+  `NEThost==NULL` local path. The client driver **skips** `MAP_FILE_BT`
+  (saving ~4 MB); the manifest still carries its length/checksum for future use.
+- ✅ Cache key. **Resolved (2026-06-17):** freshness keys on the **checksum**,
+  not a host key — a single shared `.\dr\hostcache\` with `.sum` sidecars.
+  Switching hosts just re-downloads when the checksum differs (correct, if not
+  maximally cached across hosts).
 - ⬜ Security: payloads are unauthenticated today; defer signing/encryption
   with the compression work (MDD-P5.1) unless threat model says otherwise.
+- ⬜ **Build/runtime verification outstanding:** no MSVC/CMake toolchain was
+  available in the implementing environment, so `host`/`both`/`client` were
+  **not** compiled and no live two-endpoint transfer was exercised. Next
+  session must build all targets and run a real connect (stale-`.\dr\` client
+  vs current host) to close P1/P3/P4/P5 exits.
 
 ## Session Handoff
+
+- **2026-06-17 (MDD-P0→P5 implementation)** — Core feature implemented across
+  client + host. **Files touched:**
+  - `src/common/define_both.h` — `U6O_VERSION` 13→14; MDD constants block
+    (`MSG_MAPMANIFEST=60`, `MSG_MAPCHUNK_REQ=61`, `MSG_MAPCHUNK_RESP=62`,
+    `MAP_CHUNK_BYTES=16384`, `MAP_FILE_*`).
+  - `src/common/data_both.h` + `globals.inc` — `MAP_manifest_len[3]`,
+    `MAP_manifest_sum[3]`, `MAP_chunkbuf[16384]`.
+  - `src/common/function_both.{h,cpp}` — `MAP_checksum*` (FNV-1a/32, one-shot
+    + streaming) and `MAP_file_path`.
+  - `src/server/host_setup.h` — build the manifest from the baked `.bin` files
+    after the bt.bin bake.
+  - `src/server/loop/loop_host_part_b_dispatch.cpp` — send `MSG_MAPMANIFEST`
+    after the version check; serve `MSG_MAPCHUNK_REQ` → `MSG_MAPCHUNK_RESP`
+    from disk (bounds-checked) ahead of the playerlist lookup.
+  - `src/client/function_client.{h,cpp}` — the `MAPDL_*` download driver
+    (manifest parse, provision/skip/cache/download state machine, chunk
+    assembly + verify, `.\dr\hostcache\` cache with `.sum` sidecars, hot-swap
+    into `objfixed_*`/`tobjfixed_*`).
+  - `src/client/loop/loop_client_part_net.cpp` — dispatch 60→`MAPDL_on_manifest`,
+    62→`MAPDL_on_chunk`.
+  - Docs: this plan + `docs/rendering/map-client-host-sync/README.md` (P5.4).
+  **Design notes:** download is best-effort layered ON TOP of the unchanged
+  setup-time local load — every failure path keeps the local data, so the
+  feature can only improve freshness, never break a working client. `bt.bin`
+  is NOT downloaded (streams live). One request in flight (self-throttling).
+  Freshness is checksum-based; no `<hostkey>` subdir. The loop `.inc` mirrors
+  the plan mentions no longer exist (loop-split) — the fragment `.cpp` files
+  are the source of truth.
+  **NOT done / resume here:** (1) **Build** `host` + `both` + `client` — no
+  MSVC/CMake toolchain was present; fix any compile fallout. (2) **Runtime**:
+  connect a client with an empty/stale `.\dr\` to a current host and confirm it
+  renders the host's fixed objects + populates `.\dr\hostcache\`; confirm an
+  unchanged reconnect transfers ~0 bytes (log: "map data sync complete" with no
+  per-file "downloading…" line). (3) Container/Linux-host serve check
+  (MDD-P5.3). (4) Optional compression (MDD-P5.1, deferred). (5) Capture the
+  P0.2 packet baseline once two endpoints run. **Resume at the build, then the
+  P1/P3/P4 runtime exits.**
 
 - **2026-06-12 (MDD-P0 draft)** — Plan created from the
   `map-client-host-sync` investigation. Pipeline confirmed: host bakes

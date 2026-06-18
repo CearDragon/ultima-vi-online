@@ -2488,5 +2488,240 @@ surf *loadimage2(txt *name, long flags) {
     //txtset(li2_t,"Loading .BMP image ["); txtadd(li2_t,name); txtadd(li2_t,"]"); scrlog(li2_t->d);
     return loadimage(name, flags);
 }
+
+// ============================================================================
+// MDD: client map-data download driver (see docs/plans/plan-clientMapDownload.md
+// and the MDD block in define_both.h).
+//
+// On connect the host sends MSG_MAPMANIFEST (per-file length + FNV-1a/32
+// checksum). For each fixed-object file (objfixed.bin, tobjfix.bin) whose live
+// in-RAM copy does NOT already match the manifest, the client either loads a
+// current copy from its .\dr\hostcache\ cache or pulls it from the host in
+// flow-controlled MAP_CHUNK_BYTES slices (one request in flight at a time),
+// verifies the assembled file against the manifest checksum, caches it, and
+// swaps it into the live objfixed_*/tobjfixed_* arrays. bt.bin is skipped --
+// base tiles stream live via scene-update message 31 in multiplayer.
+//
+// SAFETY: every failure path (malformed manifest, OOM, bad checksum, missing
+// chunk, disconnect) simply leaves the setup-loaded local .\dr\ data in place,
+// so the worst case is exactly the legacy "client may render slightly stale
+// fixed objects" behavior -- never a crash or a blank world.
+// ============================================================================
+static unsigned char  MAPDL_state = 0;        // 0 idle, 1 downloading, 2 complete
+static unsigned long  MAPDL_len[MAP_FILE_COUNT];
+static unsigned long  MAPDL_sum[MAP_FILE_COUNT];
+static int            MAPDL_file = -1;         // file id of the in-flight download, or -1
+static unsigned long  MAPDL_off = 0;           // bytes assembled so far for MAPDL_file
+static unsigned char *MAPDL_buf = NULL;        // assembly buffer for MAPDL_file
+static int            MAPDL_cursor = 0;        // next file id to consider in MAPDL_advance
+static unsigned char  MAPDL_downloaded_any = 0;
+static txt           *MAPDL_req = NULL;        // scratch MSG_MAPCHUNK_REQ message
+
+// objfixed.bin / tobjfix.bin byte layout = index array then type array.
+#define MAPDL_IDX_BYTES   (2048u * 1024u * 2u) // objfixed_index[1024][2048] (u16)
+#define MAPDL_TYPE_BYTES  (65536u * 2u)        // objfixed_type[65536]       (u16)
+
+static const char *MAPDL_basename(int fileId) {
+    switch (fileId) {
+        case MAP_FILE_BT:       return "bt.bin";
+        case MAP_FILE_OBJFIXED: return "objfixed.bin";
+        case MAP_FILE_TOBJFIX:  return "tobjfix.bin";
+        default:                return "unknown.bin";
+    }
+}
+
+static const char *MAPDL_cache_bin(int fileId) {
+    static char b[128];
+    wsprintfA(b, ".\\dr\\hostcache\\%s", MAPDL_basename(fileId));
+    return b;
+}
+
+static const char *MAPDL_cache_sum(int fileId) {
+    static char b[128];
+    wsprintfA(b, ".\\dr\\hostcache\\%s.sum", MAPDL_basename(fileId));
+    return b;
+}
+
+static void MAPDL_ensure_cachedir(void) {
+    CreateDirectoryA(".\\dr", NULL);          // harmless if it already exists
+    CreateDirectoryA(".\\dr\\hostcache", NULL);
+}
+
+// FNV-1a/32 over the two live in-RAM arrays in file-byte order, matching what
+// the host checksummed on disk. Only OBJFIXED / TOBJFIX have live arrays.
+static unsigned long MAPDL_live_checksum(int fileId) {
+    unsigned long s = MAP_checksum_init();
+    if (fileId == MAP_FILE_OBJFIXED) {
+        s = MAP_checksum_update(s, &objfixed_index, MAPDL_IDX_BYTES);
+        s = MAP_checksum_update(s, &objfixed_type, MAPDL_TYPE_BYTES);
+    } else if (fileId == MAP_FILE_TOBJFIX) {
+        s = MAP_checksum_update(s, &tobjfixed_index, MAPDL_IDX_BYTES);
+        s = MAP_checksum_update(s, &tobjfixed_type, MAPDL_TYPE_BYTES);
+    } else {
+        return ~MAPDL_sum[fileId]; // BT has no live array; never "already current"
+    }
+    return MAP_checksum_final(s);
+}
+
+// Swap a verified file image into the live fixed-object arrays.
+static void MAPDL_apply(int fileId, const unsigned char *buf, unsigned long len) {
+    if (len != MAPDL_IDX_BYTES + MAPDL_TYPE_BYTES) return; // unexpected -> keep local
+    if (fileId == MAP_FILE_OBJFIXED) {
+        memcpy(&objfixed_index, buf, MAPDL_IDX_BYTES);
+        memcpy(&objfixed_type, buf + MAPDL_IDX_BYTES, MAPDL_TYPE_BYTES);
+    } else if (fileId == MAP_FILE_TOBJFIX) {
+        memcpy(&tobjfixed_index, buf, MAPDL_IDX_BYTES);
+        memcpy(&tobjfixed_type, buf + MAPDL_IDX_BYTES, MAPDL_TYPE_BYTES);
+    }
+}
+
+// MDD-P3.2/P3.3: if a current cached copy exists on disk, verify and apply it.
+// Returns true if the live arrays now hold the manifest-current file.
+static bool MAPDL_load_cache(int fileId, unsigned long len, unsigned long sum) {
+    unsigned long cachedsum = 0;
+    file *sfh = open2((LPCSTR) MAPDL_cache_sum(fileId), OF_READ | OF_SHARE_COMPAT);
+    if (sfh->h == HFILE_ERROR) { close(sfh); return false; }
+    if (lof(sfh) < 4) { close(sfh); return false; }
+    seek(sfh, 0);
+    get(sfh, &cachedsum, 4);
+    close(sfh);
+    if (cachedsum != sum) return false;            // sidecar says cache is stale
+
+    file *fh = open2((LPCSTR) MAPDL_cache_bin(fileId), OF_READ | OF_SHARE_COMPAT);
+    if (fh->h == HFILE_ERROR) { close(fh); return false; }
+    if ((unsigned long) lof(fh) != len) { close(fh); return false; }
+    unsigned char *buf = (unsigned char *) malloc(len);
+    if (!buf) { close(fh); return false; }
+    seek(fh, 0);
+    get(fh, buf, (long) len);
+    close(fh);
+    if (MAP_checksum(buf, len) != sum) { free(buf); return false; } // half-written/corrupt
+    MAPDL_apply(fileId, buf, len);
+    free(buf);
+    return true;
+}
+
+// MDD-P3.1: persist a verified file image. The sidecar .sum is written LAST and
+// is the commit marker -- MAPDL_load_cache trusts a cached file only when its
+// sidecar checksum matches AND the file re-hashes correctly, so an interrupted
+// write is simply re-downloaded next time (never loaded half-baked).
+static void MAPDL_store(int fileId, const unsigned char *buf, unsigned long len) {
+    MAPDL_ensure_cachedir();
+    file *fh = open2((LPCSTR) MAPDL_cache_bin(fileId),
+                     OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+    if (fh->h != HFILE_ERROR) put(fh, (void *) buf, (long) len);
+    close(fh);
+    unsigned long sum = MAPDL_sum[fileId];
+    file *sfh = open2((LPCSTR) MAPDL_cache_sum(fileId),
+                      OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+    if (sfh->h != HFILE_ERROR) put(sfh, &sum, 4);
+    close(sfh);
+    MAPDL_apply(fileId, buf, len);
+}
+
+// MDD-P2.3/P4.3: ask the host for the next slice of the in-flight file. One
+// request in flight at a time -- the host's reply drives the next request, so
+// the transfer is self-throttling and never floods the send loop.
+static void MAPDL_send_request(void) {
+    unsigned long remaining = MAPDL_len[MAPDL_file] - MAPDL_off;
+    unsigned long want = (remaining > MAP_CHUNK_BYTES) ? MAP_CHUNK_BYTES : remaining;
+    if (!MAPDL_req) MAPDL_req = txtnew();
+    txtset(MAPDL_req, "?");
+    MAPDL_req->d2[0] = MSG_MAPCHUNK_REQ;
+    txtaddchar(MAPDL_req, (unsigned char) MAPDL_file);
+    txtaddlong(MAPDL_req, MAPDL_off);
+    txtaddlong(MAPDL_req, want);
+    NET_send(NETplayer, NULL, MAPDL_req);   // client -> host (host is socket 0)
+}
+
+static void MAPDL_finish(void) {
+    MAPDL_state = 2;
+    if (MAPDL_downloaded_any) STATUSMESSadd("Map data synchronized with host.");
+    scrlog("MDD: map data sync complete");
+}
+
+// Make the live arrays for fileId match the manifest. Returns true if it
+// STARTED a download (caller must wait for chunks); false if the file was
+// already current (from RAM or the disk cache) and the caller should advance.
+static bool MAPDL_provision(int fileId) {
+    unsigned long wantlen = MAPDL_len[fileId];
+    unsigned long want = MAPDL_sum[fileId];
+    if (wantlen == 0) return false;                       // host has no such file
+    if (MAPDL_live_checksum(fileId) == want) return false; // shipped/local already matches
+    if (MAPDL_load_cache(fileId, wantlen, want)) return false; // cache was current
+    if (MAPDL_buf) { free(MAPDL_buf); MAPDL_buf = NULL; }
+    MAPDL_buf = (unsigned char *) malloc(wantlen);
+    if (!MAPDL_buf) return false;                          // OOM -> keep local data
+    MAPDL_file = fileId;
+    MAPDL_off = 0;
+    MAPDL_downloaded_any = 1;
+    if (fileId == MAP_FILE_OBJFIXED) scrlog("MDD: downloading fixed objects (objfixed.bin) from host...");
+    else if (fileId == MAP_FILE_TOBJFIX) scrlog("MDD: downloading top fixed objects (tobjfix.bin) from host...");
+    MAPDL_send_request();
+    return true;
+}
+
+// Walk the file list provisioning each; stop and wait when a download starts.
+static void MAPDL_advance(void) {
+    while (MAPDL_cursor < MAP_FILE_COUNT) {
+        int f = MAPDL_cursor;
+        MAPDL_cursor++;
+        if (f == MAP_FILE_BT) continue;     // base tiles stream live in multiplayer
+        if (MAPDL_provision(f)) return;     // download started -> wait for chunks
+    }
+    MAPDL_finish();
+}
+
+void MAPDL_on_manifest(txt *t) {
+    if (t->l < (long) (1 + MAP_FILE_COUNT * 8)) return; // malformed -> ignore, keep local
+    for (int f = 0; f < MAP_FILE_COUNT; f++) {
+        memcpy(&MAPDL_len[f], &t->d2[1 + f * 8], 4);
+        memcpy(&MAPDL_sum[f], &t->d2[1 + f * 8 + 4], 4);
+    }
+    if (MAPDL_buf) { free(MAPDL_buf); MAPDL_buf = NULL; } // discard any prior partial
+    MAPDL_file = -1;
+    MAPDL_off = 0;
+    MAPDL_cursor = 0;
+    MAPDL_downloaded_any = 0;
+    MAPDL_state = 1;
+    MAPDL_advance();
+}
+
+void MAPDL_on_chunk(txt *t) {
+    if (MAPDL_state != 1) return;
+    if (t->l < 10) return;
+    unsigned char file = t->d2[1];
+    unsigned long off, count;
+    memcpy(&off, &t->d2[2], 4);
+    memcpy(&count, &t->d2[6], 4);
+    if ((int) file != MAPDL_file) return;   // foreign / stale response
+    if (off != MAPDL_off) return;           // out of order (shouldn't happen on TCP)
+    if (!MAPDL_buf) return;
+    if (count == 0) {                       // host could not serve -> abandon, keep local
+        free(MAPDL_buf);
+        MAPDL_buf = NULL;
+        MAPDL_file = -1;
+        MAPDL_advance();
+        return;
+    }
+    if (off + count > MAPDL_len[file]) count = MAPDL_len[file] - off;
+    if ((unsigned long) t->l < 10 + count) return; // truncated payload -> bail (keep local)
+    memcpy(MAPDL_buf + off, &t->d2[10], count);
+    MAPDL_off += count;
+    if (MAPDL_off < MAPDL_len[file]) {
+        MAPDL_send_request();               // pull the next slice
+        return;
+    }
+    // file fully assembled -> verify against the manifest checksum
+    if (MAP_checksum(MAPDL_buf, MAPDL_len[file]) == MAPDL_sum[file]) {
+        MAPDL_store(file, MAPDL_buf, MAPDL_len[file]);
+    } else {
+        scrlog("MDD: downloaded map file failed checksum -- keeping local copy");
+    }
+    free(MAPDL_buf);
+    MAPDL_buf = NULL;
+    MAPDL_file = -1;
+    MAPDL_advance();
+}
 #undef loadimage
 #define loadimage loadimage2

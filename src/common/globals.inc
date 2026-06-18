@@ -439,6 +439,12 @@ unsigned short tobjfixed_next;
 unsigned short tobjfixed_type[65536]; //[number of objects],[object type(s)],...
 unsigned short tobjfixed_index[1024][2048];
 
+// MDD: host map-file manifest (length + FNV-1a/32 checksum per MAP_FILE_* id)
+// and the host's chunk-serving scratch buffer. See define_both.h.
+unsigned long MAP_manifest_len[MAP_FILE_COUNT];
+unsigned long MAP_manifest_sum[MAP_FILE_COUNT];
+unsigned char MAP_chunkbuf[MAP_CHUNK_BYTES];
+
 float btime;
 float btime_last;
 double btime2; //ultra precise universal britannian clock!

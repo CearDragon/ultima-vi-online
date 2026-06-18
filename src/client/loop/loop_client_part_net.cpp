@@ -1851,6 +1851,18 @@ if
             img0(tmap_frame->graphic, 8, 8, ps8);
             goto CLIENT_donemess;
         } //treasure map look message
+
+        if (t->d2[0] == MSG_MAPMANIFEST) {
+            //MDD-P1.3: host map-file manifest -> start / refresh the map-data sync
+            MAPDL_on_manifest(t);
+            goto CLIENT_donemess;
+        } //60
+
+        if (t->d2[0] == MSG_MAPCHUNK_RESP) {
+            //MDD-P2.3: a downloaded map-file slice -> assemble / verify / cache
+            MAPDL_on_chunk(t);
+            goto CLIENT_donemess;
+        } //62
     } //l!=0
 CLIENT_donemess:
 

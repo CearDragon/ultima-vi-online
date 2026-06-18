@@ -200,6 +200,47 @@ host_gotmessage:
             goto doneclmess;
         }
 
+        // MDD-P2.1/P2.2: client requested a slice of a baked map file. Serve it
+        // straight from disk, bounds-checked against the manifest length, as
+        // MSG_MAPCHUNK_RESP. Handled here -- ahead of the playerlist lookup --
+        // so it works whether or not the requesting socket has fully logged in
+        // yet (it needs only the socket index tnet, not a player object).
+        // WIRE (MSG_MAPCHUNK_REQ -> MSG_MAPCHUNK_RESP), see define_both.h.
+        if (t->d2[0] == MSG_MAPCHUNK_REQ) {
+            unsigned char mreq_file = t->d2[1];
+            unsigned long mreq_off, mreq_len;
+            memcpy(&mreq_off, &t->d2[2], 4);
+            memcpy(&mreq_len, &t->d2[6], 4);
+            if (mreq_file < MAP_FILE_COUNT) {
+                unsigned long mreq_filelen = MAP_manifest_len[mreq_file];
+                if (mreq_len > MAP_CHUNK_BYTES) mreq_len = MAP_CHUNK_BYTES;
+                if (mreq_off > mreq_filelen) mreq_off = mreq_filelen;
+                if (mreq_off + mreq_len > mreq_filelen) mreq_len = mreq_filelen - mreq_off;
+                if (mreq_len) {
+                    file *mreq_fh = open2((LPCSTR) MAP_file_path(mreq_file), OF_READ | OF_SHARE_COMPAT);
+                    if (mreq_fh->h != HFILE_ERROR) {
+                        seek(mreq_fh, (long) mreq_off);
+                        get(mreq_fh, MAP_chunkbuf, (long) mreq_len);
+                    } else {
+                        mreq_len = 0; // file missing -- reply empty; client keeps local data
+                    }
+                    close(mreq_fh);
+                }
+                txtset(t2, "?");
+                t2->d2[0] = MSG_MAPCHUNK_RESP;
+                txtaddchar(t2, mreq_file);
+                txtaddlong(t2, mreq_off);
+                txtaddlong(t2, mreq_len);
+                if (mreq_len) {
+                    txtNEWLEN(t3, (long) mreq_len);
+                    memcpy(t3->d2, MAP_chunkbuf, mreq_len);
+                    txtadd(t2, t3);
+                }
+                NET_send(NETplayer, tnet, t2);
+            }
+            goto doneclmess;
+        }
+
         //KEEP ALIVE MESSAGE 251 IS POSSIBLE WITH OR WITHOUT A LOGGED IN PLAYER
 
         //check playerlist[] for tnet
@@ -243,6 +284,24 @@ host_gotmessage:
             printf("%s\n", version_msg);
             goto doneclmess;
         }
+
+        // MDD-P1.2: version accepted -- send this client the map-file manifest
+        // (per-file byte length + FNV-1a/32 checksum). The client compares it
+        // against its cached/local copies and pulls only the stale files via
+        // MSG_MAPCHUNK_REQ. Built in a dedicated scratch txt so it cannot
+        // disturb the setup-message parse still walking t5. WIRE (MSG_MAPMANIFEST)
+        // -- see define_both.h / docs/plans/plan-clientMapDownload.md.
+        {
+            static txt *MAPmanifest_t = txtnew();
+            txtset(MAPmanifest_t, "?");
+            MAPmanifest_t->d2[0] = MSG_MAPMANIFEST;
+            for (int mfid = 0; mfid < MAP_FILE_COUNT; mfid++) {
+                txtaddlong(MAPmanifest_t, MAP_manifest_len[mfid]);
+                txtaddlong(MAPmanifest_t, MAP_manifest_sum[mfid]);
+            }
+            NET_send(NETplayer, tnet, MAPmanifest_t);
+        }
+
         txtright(t5, t5->l - 2);
 
         y9 = t5->d2[0]; //pw encryption

@@ -300,6 +300,14 @@ void refresh(); // FIXME Inline assembly alert!
 
 void scrlog(const char *d); //screen log
 
+// MDD: client map-data download driver entry points. Called from the network
+// read loop (loop_client_part_net.cpp) when the host's manifest / chunk
+// messages arrive. Implemented in function_client.cpp. See define_both.h and
+// docs/plans/plan-clientMapDownload.md.
+void MAPDL_on_manifest(txt *t); // MSG_MAPMANIFEST: parse + start the sync
+void MAPDL_on_chunk(txt *t);    // MSG_MAPCHUNK_RESP: assemble / verify / cache
+
+
 surf *loadimage2(LPCSTR name);
 
 surf *loadimage2(txt * name);

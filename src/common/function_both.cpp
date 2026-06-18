@@ -387,6 +387,40 @@ void getscreenoffset_legacy(long x, long y, long *mapx, long *mapy) {
     if (*mapy > (1024 - ty)) *mapy = (1024 - ty);
 }
 
+// MDD: map-download content checksum (FNV-1a, 32-bit). See function_both.h.
+#define MAP_FNV_OFFSET 2166136261u
+#define MAP_FNV_PRIME  16777619u
+
+unsigned long MAP_checksum_init(void) {
+    return MAP_FNV_OFFSET;
+}
+
+unsigned long MAP_checksum_update(unsigned long state, const void *data, unsigned long len) {
+    const unsigned char *p = (const unsigned char *) data;
+    for (unsigned long i = 0; i < len; i++) {
+        state ^= p[i];
+        state *= MAP_FNV_PRIME;
+    }
+    return state;
+}
+
+unsigned long MAP_checksum_final(unsigned long state) {
+    return state;
+}
+
+unsigned long MAP_checksum(const void *data, unsigned long len) {
+    return MAP_checksum_final(MAP_checksum_update(MAP_checksum_init(), data, len));
+}
+
+const char *MAP_file_path(int fileId) {
+    switch (fileId) {
+        case MAP_FILE_BT:       return ".\\dr\\bt.bin";
+        case MAP_FILE_OBJFIXED: return ".\\dr\\objfixed.bin";
+        case MAP_FILE_TOBJFIX:  return ".\\dr\\tobjfix.bin";
+        default:                return NULL;
+    }
+}
+
 // ROOMSYNC-P1: Isolated-room registry. Adding a new room here is the ONLY
 // change required to make a new basement / hidden chamber / custom-coord
 // region behave correctly w.r.t. mover streaming, sobj streaming, camera

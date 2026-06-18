@@ -1,6 +1,9 @@
 # Map Data: Host ↔ Client Sync
 
-**Status:** Documented June 2026.
+**Status:** Documented June 2026. **Updated 2026-06-17** — clients now download
+the host's current fixed-object files at connect time (see
+[§ Client map-data download](#client-map-data-download-mdd-since-u6o_version-14)),
+which removes the manual `.bin` redistribution step described below.
 **Applies to:** anyone editing `assets/map_patches/*.txt`, `house()` in
 `src/common/house.cpp`, or the baked `.\dr\*.bin` map files.
 **Origin:** a "`#include`d map patch was commented out, host rebuilt, but the
@@ -18,10 +21,13 @@ building still showed in game" investigation. See [§Worked example](#worked-exa
   (`chunks` → `house()` patches → bake `.\dr\bt.bin`, `objfixed.bin`,
   `tobjfix.bin`).
   No world-save persists it.
-- The client gets map data via **three different paths**, and one of them —
-  **fixed objects** — does **not** stream over the wire.
-  Stale `objfixed.bin` / `tobjfix.bin` on a client is the most common
-  "I changed the map but the client still shows the old geometry" cause.
+- The client gets map data via **three different paths**. Historically one of
+  them — **fixed objects** — did **not** stream over the wire, so a stale
+  `objfixed.bin` / `tobjfix.bin` on a client was the most common "I changed
+  the map but the client still shows the old geometry" cause. **Since
+  `U6O_VERSION` 14 the client downloads the host's current fixed-object files
+  at connect time** (see below), so this staleness no longer happens against
+  an up-to-date host.
 - Bump `U6O_VERSION` only when the **wire format** changes, never for ordinary
   content edits.
 
@@ -156,8 +162,48 @@ So if a map edit adds, moves, or removes a *fixed* object (most static
 furniture, decorative walls drawn as objects, etc.), a client running an old
 `.\dr\` keeps drawing the old geometry no matter how current the host is.
 
+**This is the staleness the connect-time download (below) fixes.** Against an
+up-to-date host, a connecting client now pulls the host's current `objfixed.bin`
+/ `tobjfix.bin` and renders them, so manual redistribution is no longer
+required. The paragraph below describes the *legacy* manual workflow, retained
+for older hosts/clients and for the single-player (`NEThost==NULL`) path.
+
 When map data changes, the regenerated `bt.bin`, `objfixed.bin`, and
-`tobjfix.bin` must be **redistributed** into every client's `.\dr\`.
+`tobjfix.bin` are picked up automatically by connected clients (download);
+for the single-player set they still need to be copied into the local `.\dr\`.
+
+## Client map-data download (MDD, since `U6O_VERSION` 14)
+
+Plan: [`docs/plans/plan-clientMapDownload.md`](../../plans/plan-clientMapDownload.md).
+
+To remove the fixed-object staleness trap, a connecting client now downloads
+the host's **current** fixed-object files instead of trusting whatever shipped
+in its `.\dr\`:
+
+1. **Manifest.** Right after the host accepts the client's version, it sends
+   `MSG_MAPMANIFEST` (type `60`): a `{length, FNV-1a/32 checksum}` pair for each
+   of `bt.bin`, `objfixed.bin`, `tobjfix.bin`. The host computes this once at
+   bake time in `src/server/host_setup.h`.
+2. **Skip-if-current.** For each fixed-object file the client compares the
+   manifest checksum against (a) its **live in-RAM** arrays and (b) any
+   `.\dr\hostcache\` copy. A match ⇒ no transfer.
+3. **Chunked pull.** Otherwise the client requests the file in 16 KB slices
+   (`MSG_MAPCHUNK_REQ`, type `61`), one request in flight; the host serves each
+   slice from disk (`MSG_MAPCHUNK_RESP`, type `62`). The client verifies the
+   assembled file against the manifest checksum, caches it under
+   `.\dr\hostcache\<name>` (+ a `.sum` commit-marker sidecar), and hot-swaps it
+   into the live `objfixed_*` / `tobjfixed_*` arrays.
+
+`bt.bin` is **not** downloaded — base tiles already stream live (message `31`)
+in multiplayer. Every failure path (bad checksum, disconnect, OOM, version
+mismatch) leaves the setup-loaded local `.\dr\` data untouched, so the feature
+can only improve freshness, never break a client that already worked. Mixed
+`U6O_VERSION` peers are refused at the version check (no misdecode).
+
+Implementation: `MAP_checksum*` / `MAP_file_path` in `function_both.cpp`;
+manifest globals in `globals.inc`; host send/serve in
+`loop_host_part_b_dispatch.cpp`; client `MAPDL_*` driver in
+`function_client.cpp`; client dispatch in `loop_client_part_net.cpp`.
 
 ## Workflow to keep host and client in sync
 
@@ -182,10 +228,12 @@ Checklist:
    old map.
    After restart, connected clients pick up new **base tiles** and **dynamic
    objects** live, with no client rebuild.
-3. **If fixed objects changed, regenerate and redistribute** the baked files:
-   run the rebuilt host once so it rewrites `.\dr\bt.bin`, `objfixed.bin`,
-   `tobjfix.bin`, then copy those into every client's `.\dr\`
-   (and into the single-player data set, which reads `bt.bin` locally).
+3. **If fixed objects changed:** against an up-to-date host (≥ `U6O_VERSION`
+   14) connected clients now **download** the regenerated `objfixed.bin` /
+   `tobjfix.bin` automatically — no redistribution needed. *(Legacy path, for
+   the single-player set or pre-14 builds: run the rebuilt host once so it
+   rewrites `.\dr\bt.bin`, `objfixed.bin`, `tobjfix.bin`, then copy those into
+   the single-player data set, which reads `bt.bin` locally.)*
 4. **Keep host and client pointed at the same `.\dr\`** during local testing,
    or you will mix new host output with an old client `.\dr\`.
 5. **Verify the new code actually ran:** after launching the host, confirm
@@ -255,7 +303,14 @@ connection.
 | Client loads `objfixed.bin` (always) | `src/client/setup_client.inc:919` |
 | Client loads `bt.bin` (no-host only) | `src/client/setup_client.inc:922`–`928` |
 | Client loads `tobjfix.bin` (always) | `src/client/setup_client.inc:930` |
-| Client base-tile scene update (live) | `src/client/loop_client.cpp` message type `31` (~line 6212) |
+| Client base-tile scene update (live) | `src/client/loop/loop_client_part_net.cpp` message type `31` |
 | `house.cpp` compiled (targets) | `CMakeLists.txt:47, 293, 508` (not the `client` target) |
 | Wire-version constant | `src/common/define_both.h` (`U6O_VERSION`) |
+| **MDD** wire constants / message IDs | `src/common/define_both.h` (MDD block: `MSG_MAPMANIFEST/REQ/RESP`, `MAP_*`) |
+| **MDD** checksum + file paths | `src/common/function_both.cpp` (`MAP_checksum*`, `MAP_file_path`) |
+| **MDD** host manifest build | `src/server/host_setup.h` (after the bt.bin bake) |
+| **MDD** host manifest send + chunk serve | `src/server/loop/loop_host_part_b_dispatch.cpp` |
+| **MDD** client download driver | `src/client/function_client.cpp` (`MAPDL_*`) |
+| **MDD** client message dispatch (60/62) | `src/client/loop/loop_client_part_net.cpp` |
+| **MDD** plan | `docs/plans/plan-clientMapDownload.md` |
 

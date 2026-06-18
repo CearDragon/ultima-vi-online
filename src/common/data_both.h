@@ -526,6 +526,17 @@ extern unsigned short tobjfixed_next;
 extern unsigned short tobjfixed_type[65536]; //[number of objects],[object type(s)],...
 extern unsigned short tobjfixed_index[1024][2048];
 
+// MDD: host-computed map-file manifest -- byte length and FNV-1a/32 checksum
+// for each MAP_FILE_* id. Populated in src/server/host_setup.h after the .bin
+// files are baked, then sent to every connecting client in MSG_MAPMANIFEST.
+// On the pure client build these stay zero (the host send path is not
+// compiled); the client uses its own received-manifest state instead. See
+// define_both.h and docs/plans/plan-clientMapDownload.md.
+extern unsigned long MAP_manifest_len[MAP_FILE_COUNT];
+extern unsigned long MAP_manifest_sum[MAP_FILE_COUNT];
+// Scratch buffer the host fills with a file slice when serving MSG_MAPCHUNK_RESP.
+extern unsigned char MAP_chunkbuf[MAP_CHUNK_BYTES];
+
 extern float btime;
 extern float btime_last;
 extern double btime2; //ultra precise universal britannian clock!

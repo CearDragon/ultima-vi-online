@@ -43,6 +43,25 @@ void getscreenoffset(long x, long y, long *mapx, long *mapy);
 
 void getscreenoffset_legacy(long x, long y, long *mapx, long *mapy);
 
+// MDD: shared map-download primitives (host computes, client verifies).
+//
+// Content checksum is FNV-1a/32 over the raw file bytes -- cheap, allocation
+// free, and identical on the Win32 client and the i386 Linux host (both
+// little-endian, 32-bit). The streaming form lets the client fold each
+// arriving chunk into a running hash and lets it hash the two non-contiguous
+// in-memory arrays (index then type) without concatenating them, while the
+// one-shot form is what the host uses on the baked .bin files. The streaming
+// functions obey  MAP_checksum(d,n) == final(update(init(), d, n)).
+unsigned long MAP_checksum_init(void);
+unsigned long MAP_checksum_update(unsigned long state, const void *data, unsigned long len);
+unsigned long MAP_checksum_final(unsigned long state);
+unsigned long MAP_checksum(const void *data, unsigned long len);
+
+// Returns the host-side source / client-side fallback path (".\\dr\\bt.bin",
+// ".\\dr\\objfixed.bin", ".\\dr\\tobjfix.bin") for a MAP_FILE_* id, or NULL
+// if the id is out of range.
+const char *MAP_file_path(int fileId);
+
 // ROOMSYNC-P1: Global isolated-room registry. See docs/rendering/global-room-sync.md
 // for the design and rationale.
 //
