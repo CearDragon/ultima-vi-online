@@ -34,8 +34,11 @@
         tagxy.cx = 0;
         tagxy.cy = 0;
         ps->s->GetDC(&taghdc);
-        SelectObject(taghdc, txtfnt);
-        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        {
+            HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            SelectObject(taghdc, _old);
+        }
         ps->s->ReleaseDC(taghdc);
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 2 + 22;
@@ -57,8 +60,11 @@
         tagxy.cx = 0;
         tagxy.cy = 0;
         ps->s->GetDC(&taghdc);
-        SelectObject(taghdc, txtfnt);
-        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        {
+            HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            SelectObject(taghdc, _old);
+        }
         ps->s->ReleaseDC(taghdc);
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 3 + 22;
@@ -80,8 +86,11 @@
         tagxy.cx = 0;
         tagxy.cy = 0;
         ps->s->GetDC(&taghdc);
-        SelectObject(taghdc, txtfnt);
-        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        {
+            HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            SelectObject(taghdc, _old);
+        }
         ps->s->ReleaseDC(taghdc);
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 4 + 22;
@@ -103,8 +112,11 @@
         tagxy.cx = 0;
         tagxy.cy = 0;
         ps->s->GetDC(&taghdc);
-        SelectObject(taghdc, txtfnt);
-        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        {
+            HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            SelectObject(taghdc, _old);
+        }
         ps->s->ReleaseDC(taghdc);
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 5 + 22;
@@ -126,8 +138,11 @@
         tagxy.cx = 0;
         tagxy.cy = 0;
         ps->s->GetDC(&taghdc);
-        SelectObject(taghdc, txtfnt);
-        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        {
+            HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            SelectObject(taghdc, _old);
+        }
         ps->s->ReleaseDC(taghdc);
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 6 + 22;
@@ -149,8 +164,11 @@
         tagxy.cx = 0;
         tagxy.cy = 0;
         ps->s->GetDC(&taghdc);
-        SelectObject(taghdc, txtfnt);
-        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        {
+            HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            SelectObject(taghdc, _old);
+        }
         ps->s->ReleaseDC(taghdc);
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 7 + 22;
@@ -182,8 +200,11 @@
             tagxy.cx = 0;
             tagxy.cy = 0;
             ps->s->GetDC(&taghdc);
-            SelectObject(taghdc, txtfnt);
-            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            {
+                HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+                GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+                SelectObject(taghdc, _old);
+            }
             ps->s->ReleaseDC(taghdc);
             x5 = 160 - tagxy.cx / 2;
             y5 = 64 * 2 + 22;
@@ -207,8 +228,11 @@
             tagxy.cx = 0;
             tagxy.cy = 0;
             ps->s->GetDC(&taghdc);
-            SelectObject(taghdc, txtfnt);
-            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            {
+                HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+                GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+                SelectObject(taghdc, _old);
+            }
             ps->s->ReleaseDC(taghdc);
             x5 = 160 - tagxy.cx / 2;
             y5 = 64 * 3 + 22;
@@ -238,8 +262,11 @@
             tagxy.cx = 0;
             tagxy.cy = 0;
             ps->s->GetDC(&taghdc);
-            SelectObject(taghdc, txtfnt);
-            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            {
+                HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+                GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+                SelectObject(taghdc, _old);
+            }
             ps->s->ReleaseDC(taghdc);
             x5 = 160 - tagxy.cx / 2;
             y5 = 64 * 4 + 22;
@@ -266,8 +293,11 @@
             tagxy.cx = 0;
             tagxy.cy = 0;
             ps->s->GetDC(&taghdc);
-            SelectObject(taghdc, txtfnt);
-            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            {
+                HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+                GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+                SelectObject(taghdc, _old);
+            }
             ps->s->ReleaseDC(taghdc);
             x5 = 160 - tagxy.cx / 2;
             y5 = 64 * 5 + 22;
@@ -294,8 +324,11 @@
             tagxy.cx = 0;
             tagxy.cy = 0;
             ps->s->GetDC(&taghdc);
-            SelectObject(taghdc, txtfnt);
-            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            {
+                HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+                GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+                SelectObject(taghdc, _old);
+            }
             ps->s->ReleaseDC(taghdc);
             x5 = 160 - tagxy.cx / 2;
             y5 = 64 * 6 + 22;
@@ -323,8 +356,11 @@
             tagxy.cx = 0;
             tagxy.cy = 0;
             ps->s->GetDC(&taghdc);
-            SelectObject(taghdc, txtfnt);
-            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            {
+                HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+                GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+                SelectObject(taghdc, _old);
+            }
             ps->s->ReleaseDC(taghdc);
             x5 = 160 - tagxy.cx / 2;
             y5 = 64 * 7 + 22;
@@ -455,8 +491,11 @@
         tagxy.cx = 0;
         tagxy.cy = 0;
         ps->s->GetDC(&taghdc);
-        SelectObject(taghdc, txtfnt);
-        GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+        {
+            HGDIOBJ _old = SelectObject(taghdc, txtfnt);
+            GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
+            SelectObject(taghdc, _old);
+        }
         ps->s->ReleaseDC(taghdc);
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 4 + 22;

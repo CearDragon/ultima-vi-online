@@ -428,6 +428,8 @@ scrlog("Mouse Cursors loaded");
 
 //fonts
 //fonts
+// MM-P3.3 (2026-06-24): create all client fonts once at startup.
+// The legacy per-frame recreate workaround is retired.
 AddFontResource(".\\dr\\u6o.ttf");
 AddFontResource(".\\dr\\gargish.ttf");
 AddFontResource(".\\dr\\runes.ttf");

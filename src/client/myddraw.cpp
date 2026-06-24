@@ -199,7 +199,8 @@ bool setupddraw() {
     ts->s->GetPixelFormat(&DDRAW_display_pixelformat);
     //exit(DDRAW_display_pixelformat.dwGBitMask);
     ts->s->Release();
-    //free((void*)ts);
+    // ts was allocated only to query the primary surface pixel format; free it.
+    free((void *) ts);
     //static long i;
     ZeroMemory(&surflist[0], sizeof(surf *) * 16384);
     return TRUE;
@@ -689,52 +690,36 @@ DWORD fixcol(DWORD c) {
 }*/
 
 void txtout(surf *s, long x, long y, txt *t)
-//MEMLEAKING A LOT! thats why I added delete object and it works, but the font is fucked up if deleted right away
 {
-    static HDC pdc;
-    static HGDIOBJ last_font;
+    HDC pdc;
     s->s->GetDC(&pdc);
-    last_font = SelectObject(pdc, txtfnt);
-    SelectObject(pdc, txtfnt);
-    if ((txtcol & 0xFF000000) == 0) SetBkMode(pdc, TRANSPARENT);
-    SetTextColor(pdc, fixcol(txtcol));
-    TextOut(pdc, x, y, t->d, t->l);
-    //clear_font(SelectObject(pdc, last_font));
-    //DeleteObject(SelectObject(pdc, last_font));
-    /*if(fobjs==1024) {//buffer not big enough !
-    clear_font_buffer();
-  }
-  font_objs[fobjs]=SelectObject(pdc, last_font);;
-  fobjs++;*/
-    //s->s->ReleaseDC(pdc);
+    {
+        HGDIOBJ old_font = SelectObject(pdc, txtfnt);
+        if ((txtcol & 0xFF000000) == 0) SetBkMode(pdc, TRANSPARENT);
+        SetTextColor(pdc, fixcol(txtcol));
+        TextOut(pdc, x, y, t->d, t->l);
+        SelectObject(pdc, old_font);
+    }
     s->s->ReleaseDC(pdc);
-    /*if(!(s->s->ReleaseDC(pdc))){
-    //error releasing shit!
-    clear_font_buffer();
-  }*/
-
     return;
 }
 
 void txtouts(surf *s, long x, long y, txt *t) //creates a shadow behind the text (8,8,8)
 {
-    static HDC pdc;
-    static HGDIOBJ last_font;
+    HDC pdc;
     s->s->GetDC(&pdc);
-    //last_font=SelectObject(pdc,txtfnt);
-    SelectObject(pdc, txtfnt);
-    if ((txtcol & 0xFF000000) == 0) SetBkMode(pdc, TRANSPARENT);
-    SetTextColor(pdc, 8 + 8 * 256 + 8 * 65536); //8,8,8
-    TextOut(pdc, x - 1, y, t->d, t->l);
-    TextOut(pdc, x + 1, y, t->d, t->l);
-    TextOut(pdc, x, y - 1, t->d, t->l);
-    TextOut(pdc, x, y + 1, t->d, t->l);
-    SetTextColor(pdc, fixcol(txtcol));
-    TextOut(pdc, x, y, t->d, t->l);
-
-    //clear_font(SelectObject(pdc, last_font));
-
-    //DeleteObject(SelectObject(pdc, last_font));
+    {
+        HGDIOBJ old_font = SelectObject(pdc, txtfnt);
+        if ((txtcol & 0xFF000000) == 0) SetBkMode(pdc, TRANSPARENT);
+        SetTextColor(pdc, 8 + 8 * 256 + 8 * 65536); //8,8,8
+        TextOut(pdc, x - 1, y, t->d, t->l);
+        TextOut(pdc, x + 1, y, t->d, t->l);
+        TextOut(pdc, x, y - 1, t->d, t->l);
+        TextOut(pdc, x, y + 1, t->d, t->l);
+        SetTextColor(pdc, fixcol(txtcol));
+        TextOut(pdc, x, y, t->d, t->l);
+        SelectObject(pdc, old_font);
+    }
     s->s->ReleaseDC(pdc);
     return;
 }
@@ -762,10 +747,26 @@ void purgesurfaces() {
     static long i;
     for (i = 0; i < 16384; i++) {
         if (surflist[i] != NULL) {
-            surflist[i]->s->Release();
+            // Use the module's surf cleanup which releases the surface and
+            // frees the malloc'd surf struct (free(surf*) is defined below).
+            free(surflist[i]);
         }
     }
     return;
+}
+
+void ddrawshutdown() {
+    // MM-P2.2: release all tracked surfaces first, then the DirectDraw
+    // interfaces. This keeps COM teardown ordering explicit on client exit.
+    purgesurfaces();
+    if (dd) {
+        dd->Release();
+        dd = NULL;
+    }
+    if (dd1) {
+        dd1->Release();
+        dd1 = NULL;
+    }
 }
 
 /*
@@ -830,10 +831,15 @@ surf *loadimage(LPCSTR name, long flags) {
     bmy = (DWORD) bm.bmHeight;
     s = newsurf(bmx, bmy, flags); //1=SURF_SYSMEM
     bdc = CreateCompatibleDC(NULL);
-    SelectObject(bdc, bmh);
+    // Select the loaded bitmap into the temporary DC, saving the previous object
+    // so we can restore it before deleting the bitmap. Deleting a GDI object
+    // while it's still selected into a DC is undefined and can leak resources.
+    HGDIOBJ _old_bmp = SelectObject(bdc, bmh);
     s->s->GetDC(&sdc);
     BitBlt(sdc, 0, 0, bmx, bmy, bdc, 0, 0, SRCCOPY);
     s->s->ReleaseDC(sdc);
+    // Restore the previous object into the DC before deleting the bitmap and DC.
+    SelectObject(bdc, _old_bmp);
     DeleteDC(bdc);
     DeleteObject(bmh);
     return s;

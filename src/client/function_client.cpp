@@ -1727,7 +1727,8 @@ txtmakeu6ocompatible_loop:
 void STATUSMESSadd(txt *t) {
     static long i, i2;
     ps->s->GetDC(&taghdc);
-    SelectObject(taghdc, fnt1);
+    {
+        HGDIOBJ _old_tag_font = SelectObject(taghdc, fnt1);
     if (STATUSMESSpending->l) txtaddchar(STATUSMESSpending, 13);
     i2 = STATUSMESSpending->l; //starting scan position
     for (i = 0; i < t->l; i++) {
@@ -1743,6 +1744,8 @@ void STATUSMESSadd(txt *t) {
             i2 = STATUSMESSpending->l;
         } //tagxy.cx>=1008
     } //i
+        SelectObject(taghdc, _old_tag_font);
+    }
     ps->s->ReleaseDC(taghdc);
 }
 
@@ -1750,7 +1753,8 @@ void STATUSMESSadd(const char *t) {
     static long i, i2, i3;
     i3 = strlen(t);
     ps->s->GetDC(&taghdc);
-    SelectObject(taghdc, fnt1);
+    {
+        HGDIOBJ _old_tag_font = SelectObject(taghdc, fnt1);
     if (STATUSMESSpending->l) txtaddchar(STATUSMESSpending, 13);
     i2 = STATUSMESSpending->l; //starting scan position
     for (i = 0; i < i3; i++) {
@@ -1766,6 +1770,8 @@ void STATUSMESSadd(const char *t) {
             i2 = STATUSMESSpending->l;
         } //tagxy.cx>=1008
     } //i
+        SelectObject(taghdc, _old_tag_font);
+    }
     ps->s->ReleaseDC(taghdc);
 }
 
@@ -1822,7 +1828,8 @@ int STATUSMESSwrapline(txt *src, long maxwidth, txt **out, int maxlines) {
     }
 
     ps->s->GetDC(&hdc);
-    SelectObject(hdc, fnt1naa);
+    {
+        HGDIOBJ _old_hdc_font = SelectObject(hdc, fnt1naa);
 
     start = 0;
     while ((start < src->l) && (n < maxlines)) {
@@ -1853,6 +1860,8 @@ int STATUSMESSwrapline(txt *src, long maxwidth, txt **out, int maxlines) {
         while ((start < src->l) && (src->d[start] == ' ')) start++;
     }
 
+        SelectObject(hdc, _old_hdc_font);
+    }
     ps->s->ReleaseDC(hdc);
 
     if (n == 0) { txtset(out[0], ""); n = 1; }

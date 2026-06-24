@@ -345,12 +345,12 @@ cmdline_length:
         if (txtsearch(t, t2)) {
             NEThost = 1;
         }
-#ifdef CLIENT
-        txtset(t2, "-l"); if (txtsearch(t, t2)) {
-            leak = 1;
-        }
-#endif
+        // MM-P3.4 (2026-06-24): legacy "-l" per-frame font workaround parsing
+        // is retired. Fonts are now startup-owned and released at shutdown only.
     }
+#ifdef CLIENT
+    leak = 0; // legacy workaround mode is intentionally disabled.
+#endif
 
 #ifndef CLIENT
     NEThost = 1; //"host" param is assumed
@@ -419,8 +419,30 @@ PM_NOREMOVE
 {
 		if (!GetMessage(&msg,NULL,0,0)){
 
+#ifdef _DEBUG
+            auto mm_p7_log_shutdown = [](const char *msg_text) {
+                OutputDebugStringA(msg_text);
+                OutputDebugStringA("\n");
+            };
+#endif
+
+      // MM-P7.1 (2026-06-24): shutdown checklist (normal exit path).
+      // Host:
+      //   1) Persist host state (guild storage).
+      //   2) Close listener and all client sockets.
+      // Client:
+      //   1) Delete one-time startup fonts/resources.
+      //   2) Persist client settings.
+      //   3) Stop/release DirectMusic.
+      //   4) Stop/release DirectSound voices/device.
+      //   5) Release DirectDraw surfaces/device.
+      //   6) Close socket and run WSACleanup.
+
 #ifdef CLIENT
 			if (fonts_added) {
+                // MM-P3.3/MM-P3.4: fonts are created once in setup_client.inc.
+                // Safe to delete at shutdown because SelectObject call sites now
+                // restore prior GDI objects before ReleaseDC.
                 DeleteObject(fnt1);
                 DeleteObject(fnt1naa);
                 DeleteObject(fnt2);
@@ -463,10 +485,19 @@ PM_NOREMOVE
 #endif
 
 #ifdef HOST
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P7.2: host shutdown start");
+      #endif
 			if (NEThost) {
+        #ifdef _DEBUG
+        mm_p7_log_shutdown("MM-P7.2: host save guardianguild");
+        #endif
                 // Guardian Guild communal storage: persist the shelf contents
                 // before the process exits so they survive a host restart.
                 guardianguild_save();
+        #ifdef _DEBUG
+        mm_p7_log_shutdown("MM-P7.2: host close listener socket");
+        #endif
                 closesocket(u6osocket);
                 for (i = 1; i <= socketclientlast; i++) {
                     if (socketclient[i] != INVALID_SOCKET) {
@@ -475,10 +506,16 @@ PM_NOREMOVE
                         closesocket(socketclient[i]);
                     }
                 }
+        #ifdef _DEBUG
+        mm_p7_log_shutdown("MM-P7.2: host client sockets closed");
+        #endif
             }
 #endif
 
 #ifdef CLIENT
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P7.2: client shutdown start");
+      #endif
 			// Fast / clean shutdown (2026-05-28): the previous shutdown path
 			// blocked on SleepEx(2048) AFTER asking the socket to shut down,
 			// AND never told DirectMusic to stop or release. Net effect: the
@@ -498,6 +535,9 @@ PM_NOREMOVE
 			//      overkill on the client (one socket; the OS-level
 			//      linger handles it). 50ms is plenty.
 			if (u6omidisetup &&u6omidi) {
+				#ifdef _DEBUG
+				mm_p7_log_shutdown("MM-P7.2: client stop/release DirectMusic");
+				#endif
                 u6omidi->Stop();
                 delete u6omidi;
                 u6omidi = NULL;
@@ -507,9 +547,23 @@ PM_NOREMOVE
 			// Implementation lives in src/client/sound.cpp where the static
 			// tempsound[] array is visible.
 			soundshutdown();
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P7.2: client stop/release DirectSound");
+      #endif
+      // MM-P2.2: release all DirectDraw surfaces/interfaces on client exit.
+      ddrawshutdown();
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P7.2: client release DirectDraw");
+      #endif
 
 			shutdown (socketclient[0],SD_RECEIVE|SD_SEND); SleepEx (50,NULL); closesocket (socketclient[0]);
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P7.2: client socket closed");
+      #endif
 			WSACleanup();
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P7.2: client WSACleanup complete");
+      #endif
 			if (midiout_setup) midiOutClose(midiout_handle);
 #endif
 

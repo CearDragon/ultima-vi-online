@@ -259,6 +259,15 @@ socket_disconnect_receive_close_wait:
     }
 
     socketclient[(unsigned long) i] = INVALID_SOCKET;
+    // Free per-connection socketinfo structures allocated at connect time.
+    if (socketclient_ri[(unsigned long) i]) {
+        free((void *) socketclient_ri[(unsigned long) i]);
+        socketclient_ri[(unsigned long) i] = NULL;
+    }
+    if (socketclient_si[(unsigned long) i]) {
+        free((void *) socketclient_si[(unsigned long) i]);
+        socketclient_si[(unsigned long) i] = NULL;
+    }
     ExitThread(0);
     return 0;
 }

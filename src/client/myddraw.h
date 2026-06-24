@@ -63,6 +63,8 @@ extern DDPIXELFORMAT DDRAW_display_pixelformat;
 
 void purgesurfaces();
 
+void ddrawshutdown();
+
 void img0(surf *d, long x, long y, surf *s);
 
 surf *loadimage(LPCSTR name);

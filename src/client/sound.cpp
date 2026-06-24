@@ -160,18 +160,18 @@ void free(sound *s) {
     if (DirectSoundCreate_fail) return;
     if (soundsetupf == FALSE) return;
     if (s != NULL) {
-        s->s->Release();
+        if (s->s) s->s->Release();
         static long i;
         for (i = 0; i < 256; i++) {
             if (tempsound[i] != NULL) {
                 if (tempsound[i]->ss == s) {
-                    tempsound[i]->s->Release();
+                    if (tempsound[i]->s) tempsound[i]->s->Release();
                     free((void *) tempsound[i]);
                     tempsound[i] = NULL;
                 }
-                free((void *) s);
             }
         }
+        free((void *) s);
     }
     return;
 }

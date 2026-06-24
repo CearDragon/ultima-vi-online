@@ -705,7 +705,6 @@ CMidiMusic::~CMidiMusic() {
         SAFE_RELEASE(m_pMusicPort);
     }
 
-    SAFE_RELEASE(m_pMusicPort);
 
     CoUninitialize();
 }

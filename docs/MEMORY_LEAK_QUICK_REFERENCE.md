@@ -77,6 +77,17 @@ if (leak) {
 2. Move font creation to setup (`setup_client.inc`) instead of every frame
 3. Remove the `-l` flag parsing and workaround loop
 
+**Progress (updated):**
+
+- ✅ MM-P3.1 / MM-P3.2: The SelectObject/GetDC/ReleaseDC misuse has been fixed in the codebase so fonts are no longer left selected into device contexts and can be deleted safely. The following files were updated:
+  - `src/client/myddraw.cpp` — corrected `txtout()` / `txtouts()` to save/restore HFONT and use local HDCs.
+  - `src/client/function_client.cpp` — `STATUSMESSadd()` and `STATUSMESSwrapline()` now save/restore fonts around `GetTextExtent*` calls.
+  - `src/client/loop/loop_client_part_intro_b.cpp`, `_c.cpp`, `_d.cpp` — intro-screen text extent calls now save/restore fonts.
+
+- Remaining work:
+  - MM-P3.3 (font pooling / create-once in `setup_client.inc`) — planned next action.
+  - MM-P3.4 (remove `-l` per-frame recreate workaround) — will be removed after pooling is in place and smoke-tested.
+
 ---
 
 ### 4. Socket Buffer Structure Leaks (MM-P4)
