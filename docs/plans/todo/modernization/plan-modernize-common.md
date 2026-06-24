@@ -7,7 +7,7 @@ Each phase has an **Exit criteria** that must be green before the next phase sta
 > Source of truth: this file.
 > Phase ID prefix: **`MCOM-P*`** ("Modernize COMmon"). Tag PR titles and code
 > comments with the phase ID (`MCOM-P3.2:`, etc.).
-> Read [`README.md`](./README.md) first — it owns the Prime Directive, the risk
+> Read [`README.md`](README.md) first — it owns the Prime Directive, the risk
 > tiers (T0–T3), the `MOD-P0` shared safety net, and the coordination rules with
 > the in-flight `DOB` / `LH` / `RW` plans.
 > Execute with the **`cpp-modernizer` agent**.

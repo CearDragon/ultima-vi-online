@@ -23,11 +23,11 @@ The work is split by source tree so increments stay small and reviewable:
 
 | Plan | Phase prefix | Tree | Scope headline |
 |---|---|---|---|
-| [`plan-modernize-common.md`](./plan-modernize-common.md) | `MCOM-P*` | `src/common/` | shared constants, structs, `txt`/`file`, wire bit-packers, globals, `WinMain`/main loop, `house.cpp`, RNG, platform seam |
-| [`plan-modernize-client.md`](./plan-modernize-client.md) | `MCLI-P*` | `src/client/` | `function_client.cpp`, `myddraw.cpp` + inline asm, the `loop_client` parts, UI panels, viewport, audio |
-| [`plan-modernize-server.md`](./plan-modernize-server.md) | `MSRV-P*` | `src/server/` | `function_host.cpp` god-functions, `.inc` elimination, the `loop_host` parts, global-state encapsulation, AI hot paths |
+| [`plan-modernize-common.md`](plan-modernize-common.md) | `MCOM-P*` | `src/common/` | shared constants, structs, `txt`/`file`, wire bit-packers, globals, `WinMain`/main loop, `house.cpp`, RNG, platform seam |
+| [`plan-modernize-client.md`](plan-modernize-client.md) | `MCLI-P*` | `src/client/` | `function_client.cpp`, `myddraw.cpp` + inline asm, the `loop_client` parts, UI panels, viewport, audio |
+| [`plan-modernize-server.md`](plan-modernize-server.md) | `MSRV-P*` | `src/server/` | `function_host.cpp` god-functions, `.inc` elimination, the `loop_host` parts, global-state encapsulation, AI hot paths |
 
-The pre-existing [`docs/plans/plan-serverRefactor.md`](../plan-serverRefactor.md)
+The pre-existing [`docs/plans/plan-serverRefactor.md`](../../plan-serverRefactor.md)
 is the ancestor of `plan-modernize-server.md`; it predates the loop split and is
 now **superseded** (see the banner at its top). Its phase content is folded into
 `MSRV-P*`.

@@ -33,17 +33,6 @@ Establish a baseline understanding and reproducible test case.
 
 - ✅ **MM-P1.1** Identify all memory-leak hotspots in the codebase (see Background section below).
   - Completed 2026-06-24: Full audit of DirectDraw, font, socket, sound, and DirectMusic leak sites.
-- ⬜ **MM-P1.2** Create a benchmark: measure memory growth over 10 minutes of gameplay
-  - Build a test scenario (connect, move around, chat, cast spells, use inventory) that exercises the main UI and network loops.
-  - Capture heap snapshots at 0m, 5m, 10m using a profiler (e.g., Windows Task Manager, Visual Studio Memory Profiler, or Dr. Memory).
-  - Document the baseline: typical memory growth rate (MB/min), peak allocations, and which subsystems dominate.
-  - **Status:** Deferred pending completion of MM-P2/P3/P4/P5 fixes.
-- ⬜ **MM-P1.3** Verify that `-l` flag reproduces the original symptom
-  - Measure frame rate and memory growth with `-l` enabled vs. disabled.
-  - Confirm that recreation loop (7 fonts × 60 FPS = ~420 font creations/sec) is CPU-measurable but doesn't fix the underlying leak.
-  - **Status:** Historical only; `-l` parsing/workaround removed in MM-P3.4 (2026-06-24).
-- **Exit:** Baseline memory profile (text table: time, heap size, top allocators); reproduction of `-l` behavior.
-
 ---
 
 ### MM-P2 — DirectDraw surface memory leak (High-impact, T1)

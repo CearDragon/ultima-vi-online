@@ -137,6 +137,29 @@ This produces `u6o7.sln` in `cmake-build-debug/` which can also be opened
 directly in Visual Studio. Build the `ALL_BUILD` project to compile all three
 EXEs, or build individual targets (`both`, `host`, `client`).
 
+#### Fast incremental builds (recommended)
+
+Once `cmake-build-debug/` has been configured **once**, build individual
+targets against that existing tree — this is the recommended day-to-day form
+and the one automated agents should use:
+
+```powershell
+# <target> is one of: client, host, both
+cmake.exe --build cmake-build-debug --target client -j 18
+cmake.exe --build cmake-build-debug --target host   -j 18
+cmake.exe --build cmake-build-debug --target both   -j 18
+```
+
+`-j 18` parallelizes the compile across cores; tune the number to your CPU.
+
+> **Don't reconfigure a throwaway build directory just to compile.** Building
+> through the already-configured `cmake-build-debug/` tree reuses its bundled
+> DirectX 7 / Win32 SDK include paths (`src/common/include`) and the MSVC x86
+> toolchain. Spinning up a fresh build dir in a bare shell frequently fails
+> with **missing Windows header files** (`windows.h`, `ddraw.h`, …). If you
+> must reconfigure, do it from a **Developer PowerShell** so the Windows SDK
+> environment is present.
+
 ### Generate and build (Ninja / CLion)
 
 CLion's bundled CMake works out of the box; it stores its tree in
@@ -149,6 +172,26 @@ cmake -S . -B cmake-build-debug-visual-studio -G Ninja `
       -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
 cmake --build cmake-build-debug-visual-studio
 ```
+
+### Shared run configurations and CMake profiles
+
+The repo ships **shared, version-controlled** JetBrains/CLion run
+configurations and CMake profiles so everyone builds and launches the targets
+the same way. **Prefer these over hand-rolling your own** — they encode the
+correct target, working directory, and build-before-run wiring:
+
+| File | What it provides |
+| --------------------------------- | ----------------------------------------------------------------------------- |
+| `.run/client.run.xml`             | Runs the `client` target with its working dir set to `test/client/`.          |
+| `.run/host.run.xml`               | Runs the `host` target.                                                       |
+| `.run/both.run.xml`               | Runs the combined `both` (host + client) target.                              |
+| `.run/generate_icons.run.xml`     | Runs the icon-generation target (`tools/build_icon.ps1`).                     |
+| `.idea/cmake.xml`                 | Shared CMake profiles: **Debug** and **Release** (both enabled).              |
+
+In CLion these appear automatically in the **Run/Debug configuration**
+dropdown and the **CMake profile** selector — pick one and build/run. They map
+directly onto the `client` / `host` / `both` CMake targets described above, so
+they stay in sync with the command-line `--target` builds.
 
 ### The icon pipeline
 
@@ -211,7 +254,7 @@ The dedicated **host** also builds and runs on Linux as a headless, no-GUI
 process so the server can run in a Docker container (e.g. on Kubernetes).
 Only the host is portable — the client stays Windows/DirectX-only.
 
-Key properties (see [`docs/plans/plan-linuxHost.md`](docs/plans/plan-linuxHost.md)
+Key properties (see [`docs/plans/plan-linuxHost.md`](docs/plans/done/plan-linuxHost.md)
 for the full design):
 
 - **32-bit (`-m32`).** Built as i386 so `struct`/`txt` layout and the wire +
@@ -392,18 +435,36 @@ All developer-facing docs live under `docs/`.
 
 ### Multi-phase refactor plans (`docs/plans/`)
 
-- [`plan-resizableWindow.md`](docs/plans/plan-resizableWindow.md) — RW-P1..Pn
+Plans are filed in **lifecycle status folders** so the current state of any
+effort is visible at a glance:
+
+| Folder | Meaning | When a plan moves here |
+| ----------------------------- | -------------------------- | --------------------------------------------- |
+| `docs/plans/todo/`            | Not yet started            | A new plan is **always created here**.        |
+| `docs/plans/in-progress/`     | Actively being worked      | Move it here when its first phase is picked up. |
+| `docs/plans/done/`            | Finished (all phases ✅)   | Move it here when the work is complete.       |
+
+A plan lives in exactly one folder — moving the file *is* the status change.
+Update any links (this README, the modernization master index, and code-comment
+phase tags) when you move one.
+
+Representative plans:
+
+- [`plan-resizableWindow.md`](docs/plans/done/plan-resizableWindow.md) — RW-P1..Pn
   phased plan to make the client window freely resizable. Phases include the
   dynamic backbuffer recreation (RW-P2), viewport expansion (RW-P3/P4), and
-  UI re-layout work.
-- [`plan-dynamicObjectBuffer.md`](docs/plans/plan-dynamicObjectBuffer.md) —
-  replacing the fixed-size object pools with growable arenas.
+  UI re-layout work. *(done)*
+- [`plan-dynamicObjectBuffer.md`](docs/plans/todo/plan-dynamicObjectBuffer.md) —
+  replacing the fixed-size object pools with growable arenas. *(todo)*
+- [`plan-memoryManagement.md`](docs/plans/in-progress/plan-memoryManagement.md) —
+  memory-leak investigation and management work. *(in-progress)*
 - [`plan-serverRefactor.md`](docs/plans/plan-serverRefactor.md) — incremental
   decomposition of the monolithic host loop.
 
-When adding new long-form work, add a `plan-<feature>.md` to
-`docs/plans/` and link to it from the relevant code path with an `RW-P*` /
-`SR-P*` / `DOB-P*` tag in comments so future readers can find context.
+When adding new long-form work, create `plan-<feature>.md` in
+`docs/plans/todo/` and link to it from the relevant code path with an `RW-P*` /
+`SR-P*` / `DOB-P*` tag in comments so future readers can find context. Promote
+it to `in-progress/` when work begins and `done/` when it lands.
 
 ---
 
@@ -418,6 +479,46 @@ When adding new long-form work, add a `plan-<feature>.md` to
 | `symbolize.cpp` / `symbolize.exe` | Address-to-symbol resolver used by `analyze_dump.ps1`. Rebuild with `cl symbolize.cpp dbghelp.lib` if needed. |
 | `crash/crash-reports/`        | Drop landing area for `.dmp` files collected from users for triage.                                         |
 | `bug-images/`                 | Screenshots attached to bug reports (e.g. `bug.png`).                                                       |
+
+### Crash analysis with WinDbg / CDB (recommended)
+
+The richest crash triage (and what the **`crash-report` agent** prefers) uses
+the **Debugging Tools for Windows** — `cdb.exe`, `windbg.exe`, and friends.
+Install the WinDbg kit from PowerShell and put `cdb.exe` on your `PATH`:
+
+```powershell
+# Install the modern WinDbg (ships the debugging engine + cdb.exe).
+winget install --id Microsoft.WinDbg --source winget
+
+# Or install the classic "Debugging Tools for Windows" via the Windows SDK,
+# which lays cdb.exe down under the Windows Kits Debuggers folder:
+winget install --id Microsoft.WindowsSDK --source winget
+```
+
+The classic console debugger `cdb.exe` typically lands at:
+
+```text
+C:\Program Files (x86)\Windows Kits\10\Debuggers\x86\cdb.exe   # 32-bit (this project)
+C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe   # 64-bit
+```
+
+Add the appropriate `Debuggers\x86` (or `x64`) directory to your **system
+`PATH`** so `cdb` resolves from any shell — for the current user, persistently:
+
+```powershell
+$dbg = 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x86'
+[Environment]::SetEnvironmentVariable(
+    'Path',
+    ([Environment]::GetEnvironmentVariable('Path', 'User') + ';' + $dbg),
+    'User')
+# Open a new shell, then verify:
+cdb -version
+```
+
+With `cdb.exe` on `PATH`, the `crash-report` agent symbolicates against
+`build/Ultima VI Online.pdb` and walks the stack automatically. The
+dependency-free `analyze_dump.ps1` + `symbolize.exe` path remains available as
+a fallback when the WinDbg kit isn't installed.
 
 ---
 

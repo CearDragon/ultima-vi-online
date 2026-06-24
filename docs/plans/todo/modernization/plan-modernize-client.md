@@ -7,7 +7,7 @@ Each phase has an **Exit criteria** that must be green before the next phase sta
 > Source of truth: this file.
 > Phase ID prefix: **`MCLI-P*`** ("Modernize CLIent"). Tag PR titles and code
 > comments with the phase ID (`MCLI-P4.3:`, etc.).
-> Read [`README.md`](./README.md) first — Prime Directive, risk tiers (T0–T3),
+> Read [`README.md`](README.md) first — Prime Directive, risk tiers (T0–T3),
 > the `MOD-P0` shared safety net, and the coordination rules (especially with
 > the **`RW-P*`** resizable-window plan, which owns viewport/lighting).
 > Execute with the **`cpp-modernizer` agent`**.

@@ -2,7 +2,7 @@
 
 These files are the decomposed pieces of what used to be the monolithic
 `src/client/loop_client.cpp` (≈13,000 lines). See the trackable plan:
-[`docs/plans/plan-loopClientSplit.md`](../../../docs/plans/plan-loopClientSplit.md)
+[`docs/plans/plan-loopClientSplit.md`](../../../docs/plans/done/plan-loopClientSplit.md)
 (phase prefix `LCS-P*`).
 
 ## What this directory is

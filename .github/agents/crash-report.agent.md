@@ -67,8 +67,29 @@ before finishing.
     directory, and a list of EXE-relative RVAs (hex), prints
     `function + offset` and `file:line` for each. Built with the VS x86
     dev prompt.
-- **No `cdb.exe` / `windbg.exe` is installed** on this machine. Don't waste
-  time hunting for them; the two tools above replace them.
+- **Prefer the WinDbg kit (`cdb.exe`) when it is available.** The console
+  debugger `cdb.exe` (and `windbg.exe`) from *Debugging Tools for Windows*
+  gives a fully-symbolicated stack walk in one command and should be your
+  **first choice**. Probe for it before falling back to the in-repo scripts:
+
+  ```powershell
+  # On PATH?
+  Get-Command cdb.exe -ErrorAction SilentlyContinue
+  # Common kit locations (32-bit project → prefer the x86 build).
+  # Note the brace syntax: the env var name itself contains "(x86)".
+  $cdb = @(
+      "${Env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x86\cdb.exe",
+      "${Env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe"
+  ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+  ```
+
+  If neither `Get-Command` nor the kit paths resolve, the kit isn't installed —
+  recommend the user install it from PowerShell and add it to `PATH`
+  (`winget install --id Microsoft.WinDbg` **or**
+  `winget install --id Microsoft.WindowsSDK`; then add
+  `C:\Program Files (x86)\Windows Kits\10\Debuggers\x86` to the system `PATH`),
+  and fall back to the dependency-free `analyze_dump.ps1` + `symbolize.exe`
+  pair below, which fully replace `cdb.exe` for this workflow.
 - **MSVC toolset**: VS 2022 Professional at
   `C:\Program Files\Microsoft Visual Studio\2022\Professional`. Activate
   the x86 toolchain via:
@@ -153,6 +174,35 @@ not exact).
 
 ### Step 3 — Parse the minidump
 
+**Preferred (WinDbg kit, if `cdb.exe` resolved in the Project-context probe):**
+let `cdb.exe` load the dump, the EXE, and the PDB and do the stack walk +
+symbolication for you in one shot. This subsumes Steps 3 **and** 4:
+
+```powershell
+# $cdb = path resolved earlier; -z dump, -y symbol path, -i image path,
+# then run a one-shot command block and quit (-c "...;q").
+& $cdb -z C:\repos\ultima-vi-online\tools\crash\crash.dmp `
+       -y "C:\repos\ultima-vi-online\build;C:\repos\ultima-vi-online\bin\client\debug" `
+       -i "C:\repos\ultima-vi-online\bin\client\debug" `
+       -lines -c ".lines -e; .ecxr; kv; r; lm; q"
+```
+
+What each command yields:
+- `.ecxr` — switch to the exception context (EIP/ESP/EBP at the fault).
+- `kv` — fully-symbolicated stack with `module!function+offset` and
+  `file:line` (because `-lines`/`.lines -e` is on and the PDB matches).
+- `r` — register dump for the §Step 5 evidence.
+- `lm` — loaded-module list with runtime bases.
+
+For a **host** crash swap the EXE/PDB dir to `bin/host/debug` +
+`build/Ultima VI Online Host.pdb`; for the **Full** build use
+`Ultima VI Online Full.pdb`. If `cdb` reports the PDB as mismatched/deferred
+(`*** WARNING: Unable to verify ...` / `symbols deferred`), the PDB GUID/age
+doesn't match the EXE — re-check Step 2 before trusting line numbers. When
+`cdb` gives a clean symbolicated `kv`, **skip Step 4** and go to Step 5.
+
+**Fallback (no WinDbg kit installed):** use the dependency-free in-repo parser.
+
 ```powershell
 powershell -ExecutionPolicy Bypass -File C:\repos\ultima-vi-online\tools\analyze_dump.ps1
 ```
@@ -172,6 +222,11 @@ usually noise from the SEH path and the CRT thread thunk; flag them but
 don't symbolize.
 
 ### Step 4 — Symbolize the EXE-relative RVAs
+
+> **Skip this step if Step 3's `cdb.exe` path already produced a clean,
+> symbolicated `kv` stack** — `cdb` resolves `file:line` directly. This step is
+> the **fallback** symbolizer for when the WinDbg kit isn't installed and you
+> walked the stack with `analyze_dump.ps1`.
 
 DbgHelp will not find the PDB if it isn't next to the EXE or on the
 search path. The fastest reliable recipe (copy PDB next to EXE, then
