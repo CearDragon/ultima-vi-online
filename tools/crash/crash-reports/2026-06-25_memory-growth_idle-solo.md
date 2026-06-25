@@ -135,4 +135,50 @@ All three targets build clean.
 4. Report the three numbers (surf_live, txt_live, commit) at start and after a
    few minutes; that uniquely identifies the pool and I'll fix the specific site.
 
+### Result of the first instrumented run (2026-06-25) — surf/txt RULED OUT
+
+User ran the diagnostic client idle. Findings:
+
+- `surf_live` and `txt_live` are **flat** (818→834, 842→862 — bounded jitter,
+  not growth) while Working Set and Commit **rise steadily**. → The leak is
+  **neither** a DirectDraw-surface **nor** a `txt` leak. Every prior theory
+  (inpmess/idlst, portraits, surfaces) is now empirically dead.
+- **The leak reproduces at the login/main-menu screen**, *before* "Journey
+  Onward", with `surf_live`/`txt_live` flat there too. At that screen there is
+  **no network**, **no sfx**, and the only per-frame work is render (verified
+  clean — `txtout`/`txtouts`/menu all pair `GetDC`/`ReleaseDC`) plus a single
+  DirectMusic `IsPlaying()` poll. The audible constant is **MIDI music**.
+- On exit the process **hangs 5–8 s while the MIDI keeps playing**, then ends —
+  consistent with DirectMusic/DirectSound still holding committed buffers.
+
+This points away from our counted pools and toward an **uncounted** pool: raw
+CRT heap (malloc/new), GDI/USER handles, or **DirectX-internal** memory
+(dsound/dmusic/ddraw). Music being the sole common factor at the login screen
+makes the audio subsystem the leading suspect by elimination.
+
+### Action taken — heartbeat upgraded to 4-pool localization
+
+`src/client/myddraw.cpp` heartbeat now also reports (every 5 s):
+
+```
+U6O-DIAG surf_live=<n> txt_live=<n> heapKB=<n> heapN=<n> gdi=<n> user=<n>
+```
+
+- `heapKB` / `heapN` — outstanding debug-CRT heap (malloc/new) bytes & block
+  count (`_CrtMemCheckpoint`, `_NORMAL_BLOCK`). Debug build only.
+- `gdi` / `user` — process GDI and USER handle counts (`GetGuiResources`,
+  user32 — no new link dependency).
+
+Interpretation on the next run, alongside Task Manager **Commit**:
+
+| What climbs | Leak is in | Next step |
+|---|---|---|
+| `heapKB`/`heapN` | raw `malloc`/`new` | `_CrtSetBreakAlloc(heapN-at-leak)` to catch the call site |
+| `gdi` / `user` | GDI / USER handle | find the unmatched Create*/GetDC |
+| `surf_live` / `txt_live` | DirectDraw surface / txt | (already ruled out, but re-confirm) |
+| **none**, but Commit rises | **DirectX-internal** (dsound/dmusic/ddraw) | instrument the audio play/duplicate paths |
+
+All three targets build clean.
+
+
 

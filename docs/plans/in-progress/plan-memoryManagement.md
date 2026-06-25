@@ -313,6 +313,22 @@ sluggish past ~200–300 MB. Full discovery + root-cause write-up:
     with DebugView, watch which counter tracks the memory climb (or both flat →
     raw `malloc`), then fix that specific site. See the report addendum in
     `tools/crash/crash-reports/2026-06-25_memory-growth_idle-solo.md`.
+  - **First instrumented run (2026-06-25) — surf/txt RULED OUT:** `surf_live`
+    and `txt_live` stayed flat (818→834, 842→862) while Working Set/Commit rose
+    steadily. The leak also reproduces **at the login/main-menu screen** (before
+    "Journey Onward"), where there is no network, no sfx, and the only constant
+    is **MIDI music**; on exit the process hangs 5–8 s while the MIDI keeps
+    playing. → leak is in an **uncounted pool** (raw CRT heap, GDI/USER handles,
+    or DirectX-internal audio buffers), with the audio subsystem the leading
+    suspect by elimination.
+  - **Action — heartbeat upgraded to 4-pool localization:** `txtout()` now also
+    emits `heapKB`/`heapN` (outstanding debug-CRT malloc/new via
+    `_CrtMemCheckpoint`, `_NORMAL_BLOCK`) and `gdi`/`user`
+    (`GetGuiResources` — user32, no new link dep):
+    `U6O-DIAG surf_live=.. txt_live=.. heapKB=.. heapN=.. gdi=.. user=..`.
+    Next run reads which of those four climbs with Commit; if none do, it's a
+    DirectX-internal (dsound/dmusic/ddraw) leak and the audio play/duplicate
+    paths get instrumented next. All three targets build clean.
 - **Exit:** No per-message surface growth on portrait refreshes; chat/name lists
   freed on teardown; 10-minute idle profile flat (±small caching).
 

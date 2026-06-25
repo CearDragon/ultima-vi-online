@@ -5,6 +5,12 @@
 #pragma warning(disable: 4018 4244 4731)
 #include "myfile.h"
 #include "commdlg.h"
+// MM-P9 diagnostic (2026-06-25): debug-CRT heap checkpoint for the txtout()
+// heartbeat. Lets us read outstanding malloc/new bytes to tell a raw-heap leak
+// apart from a DirectX-internal one. Debug build only; harmless if absent.
+#ifdef _DEBUG
+#include <crtdbg.h>
+#endif
 // r999
 #include "define_both.h"
 #include "viewport.h" // RW-P2.4: backbufferW()/H() for blit_letterbox sanity check
@@ -702,17 +708,35 @@ void txtout(surf *s, long x, long y, txt *t)
     // many times per frame, so this is a convenient always-available hook to
     // sample the resource pools without touching the brace-seam loop fragments.
     // It emits one OutputDebugString line every ~5s reporting the live
-    // DirectDraw-surface and txt-object counts. Watch it in DebugView / the
-    // debugger alongside Task Manager's private/commit bytes: whichever counter
-    // climbs in lockstep with memory is the leaking pool. Remove once the leak
-    // is identified. Cheap (a GetTickCount compare); the log only fires every 5s.
+    // DirectDraw-surface and txt-object counts PLUS the outstanding debug-CRT
+    // heap (malloc/new) bytes/blocks and the process GDI+USER handle counts.
+    // Watch it in DebugView / the debugger alongside Task Manager's commit:
+    //   * surf_live / txt_live climb  -> DirectDraw-surface / txt leak
+    //   * heapKB / heapN climb        -> raw malloc/new leak (find via _CrtSetBreakAlloc)
+    //   * gdi / user climb            -> GDI / USER handle leak
+    //   * NONE climb but commit does  -> DirectX-internal (dsound/dmusic/ddraw) leak
+    // Remove once the leak is identified. Cheap: a GetTickCount compare; the
+    // sampling + log only fire every 5s.
     {
         static DWORD _diag_last = 0;
         DWORD _diag_now = GetTickCount();
         if (_diag_now - _diag_last >= 5000) {
             _diag_last = _diag_now;
-            char _diag[160];
-            wsprintfA(_diag, "U6O-DIAG surf_live=%ld txt_live=%ld\n", g_surf_live, g_txt_live);
+            long _diag_heap_kb = -1;
+            long _diag_heap_n = -1;
+#ifdef _DEBUG
+            // _NORMAL_BLOCK (index 1) is where malloc/new land in the debug CRT.
+            _CrtMemState _diag_ms;
+            _CrtMemCheckpoint(&_diag_ms);
+            _diag_heap_kb = (long) (_diag_ms.lSizes[1] / 1024);
+            _diag_heap_n = (long) _diag_ms.lCounts[1];
+#endif
+            DWORD _diag_gdi = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
+            DWORD _diag_user = GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS);
+            char _diag[224];
+            wsprintfA(_diag,
+                      "U6O-DIAG surf_live=%ld txt_live=%ld heapKB=%ld heapN=%ld gdi=%lu user=%lu\n",
+                      g_surf_live, g_txt_live, _diag_heap_kb, _diag_heap_n, _diag_gdi, _diag_user);
             OutputDebugStringA(_diag);
         }
     }
