@@ -175,6 +175,11 @@ namespace u6o {
         }
 
         bool lighting_alloc(int w, int h) {
+            // MM-P8.1: RAII candidate — ls / ls_moon1..4 are five parallel raw
+            // malloc'd buffers kept in lockstep with g_lighting_w/h. A small
+            // owning buffer type (or std::unique_ptr<unsigned char[]>) per plane,
+            // grouped in a struct, would make lighting_free()/the rollback block
+            // below disappear and guarantee all-or-nothing sizing structurally.
             if (w <= 0 || h <= 0) return false;
             // RW-P2.3: allocate at the active surface's PIXEL pitch
             // (g_lighting_stride), not the world width `w`. DirectDraw pads the

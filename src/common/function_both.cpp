@@ -223,6 +223,12 @@ sockets_receive_close:
 
 
 DWORD WINAPI sockets_disconnect(LPVOID i) {
+    // MM-P8.1: RAII candidate — socketclient_ri[]/socketclient_si[] are
+    // raw-malloc'd per-connection socketinfo structs whose nested ->d[]/->t
+    // buffers are also heap-owned. A "Connection" RAII type owning the socket
+    // handle + both socketinfo blocks (closing/freeing in its dtor) would make
+    // this hand-rolled wait-then-free teardown safe-by-construction and also
+    // cover the still-unreclaimed nested ->d[n]->d / ->t buffers (follow-up).
     if (socketclient_si[(unsigned long) i]->exit_thread == 0) socketclient_si[(unsigned long) i]->exit_thread = 1;
     if (socketclient_ri[(unsigned long) i]->exit_thread == 0) socketclient_ri[(unsigned long) i]->exit_thread = 1;
     shutdown(socketclient[(unsigned long) i], SD_RECEIVE | SD_SEND);

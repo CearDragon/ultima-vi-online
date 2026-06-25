@@ -181,6 +181,12 @@ void free(sound *s) {
 // shutdown path in u6o7.cpp so dsound.dll releases its hold on client.exe
 // (and any in-flight WAV stops audibly) before ExitProcess runs. Safe when
 // sound setup never completed -- guards on per-entry and global pointers.
+//
+// MM-P8.1: RAII candidate — the tempsound[] voice pool + the global dsnd
+// device form a self-contained "SoundManager" subsystem. Wrapping each voice
+// in a small RAII type (Stop()+Release() in its dtor) and the device in a
+// ComPtr would let pool teardown happen automatically and remove this manual
+// Stop/Release/free triad.
 void soundshutdown() {
     if (soundsetupf == FALSE) return;
     for (long i = 0; i < 256; i++) {

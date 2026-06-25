@@ -758,6 +758,12 @@ void purgesurfaces() {
 void ddrawshutdown() {
     // MM-P2.2: release all tracked surfaces first, then the DirectDraw
     // interfaces. This keeps COM teardown ordering explicit on client exit.
+    //
+    // MM-P8.1: RAII candidate — the DirectDraw device pair (dd/dd1) plus the
+    // surflist[] surface registry are a textbook RAII subsystem. A future
+    // "DDDevice" type (ctor = CreateDD/QueryInterface, dtor = this teardown)
+    // and a ComPtr-backed surf wrapper would make this explicit shutdown call
+    // unnecessary and remove the malloc/Release split in surfstruct()/free().
     purgesurfaces();
     if (dd) {
         dd->Release();

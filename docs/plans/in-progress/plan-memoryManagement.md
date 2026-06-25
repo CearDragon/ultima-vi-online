@@ -53,6 +53,7 @@ The primary DirectDraw surface struct is malloc'd at startup but never freed (li
 - ⬜ **MM-P2.3** Verify impact
   - Rerun 10-minute memory benchmark (MM-P1.2).
   - Expected: Flat-line memory profile (or ±5% jitter) for DirectDraw allocations.
+  - **Status (2026-06-24):** Code complete; this is an **interactive runtime** check. Build blocker resolved (`tools/Enter-DevBuildEnv.ps1` initializes the MSVC env in any shell). Procedure: launch `bin/client/debug/Ultima VI Online.exe`, attach VMMap / a heap-profiler, watch private bytes + the `surf*` allocation count over 10 min of play. Cannot be run in a headless agent shell.
 - **Exit:** DirectDraw surface cleanup restored; verified no hang/corruption; 10-minute profile shows no growth in `surf*` allocations.
 
 ---
@@ -109,6 +110,12 @@ Recent progress (summary of changes made - completed as of 2026-06-24):
   - **Host build safety fix:** guarded client-only `leak = 0` assignment in `u6o7.cpp` under `#ifdef CLIENT` so host-only builds compile cleanly.
   - **MM-P2.2 COMPLETED:** Added explicit DirectDraw shutdown (`ddrawshutdown()` + WM_QUIT call) to release surfaces and DirectDraw interfaces on client exit.
 
+**Session 5 (2026-06-24):**
+  - **Build environment unblocked:** added `tools/Enter-DevBuildEnv.ps1` (+ `tools/README.md` entry). It imports the MSVC `amd64_x86` developer environment (via `vswhere` → `vcvarsall.bat`) into any shell, fixing the "missing `windows.h`/`winsock2.h` in a headless agent shell" limitation. `client`, `host`, and `both` now build from a plain agent/CI shell. The fix is environment-only — no CMake reconfigure, no code change.
+  - **MM-P7.3 COMPLETED (code audit):** Documented the deliberate no-teardown contract of `MyUnhandledExceptionFilter` (dump-and-die; OS reclaims all in-process resources; COM `Release()` from a corrupt state is unsafe; host intentionally does not auto-save on crash). Inline comment added in `u6o7.cpp`.
+  - **MM-P8.1 COMPLETED:** Tagged five RAII-candidate subsystems (`ddrawshutdown`, `soundshutdown`, `~CMidiMusic`, `lighting_alloc`, `sockets_disconnect`) with `MM-P8.1: RAII candidate` comments naming the proposed owning type. Comment-only; all three targets build clean.
+  - **Interactive items annotated:** MM-P2.3, MM-P4.3, MM-P5.4, MM-P6.3, MM-P7.2 are code-complete but require an interactive run + memory/audio profiler (cannot be exercised in a headless shell). Each now carries a concrete verification procedure and notes the build blocker is resolved.
+
 Next immediate actions for MM-P3:
 1. Run smoke test and 10-minute memory profile to confirm MM-P3 impact (no font growth).
 2. Capture before/after FPS to quantify removal of per-frame font churn.
@@ -132,7 +139,7 @@ Socket receive/send buffers are malloc'd but the `socketclient_si[]` / `socketcl
 - ⬜ **MM-P4.3** Verify no crashes on repeated connect/disconnect
   - Manually connect and disconnect 10 times, checking Task Manager for memory growth.
   - Use a memory profiler to confirm buffers are freed.
-  - **Status:** Deferred pending MM-P1.2 benchmark run.
+  - **Status:** Code complete; **interactive runtime** check (needs a live host + client). Build blocker resolved (`tools/Enter-DevBuildEnv.ps1`). Note for whoever runs it: the MM-P4.2 fix frees the top-level `socketclient_ri[]`/`socketclient_si[]` structs; the nested `->d[n]->d` / `->t` buffers are a known remaining follow-up (flagged in the `MM-P8.1` tag in `sockets_disconnect()`).
 - **Exit:** Socket structures freed on disconnect; memory profile shows no growth from socket operations.
 
 ---
@@ -159,6 +166,7 @@ Sound buffer management has mixed malloc/COM patterns with incomplete cleanup an
 - ⬜ **MM-P5.4** Verify no audio glitches after cleanup
   - Play MIDI music, cast spells (with sound effects), disconnect.
   - Ensure sound stops cleanly and doesn't crash or stall.
+  - **Status (2026-06-24):** Code complete (MM-P5.1–5.3); **interactive runtime/audio** check. Build blocker resolved (`tools/Enter-DevBuildEnv.ps1`). Cannot be exercised headlessly (requires audio playback + manual gameplay).
 - **Exit:** Sound buffers freed in correct order; DirectMusic released without double-free; 10-minute profile shows no sound-related growth.
 
 ---
@@ -178,6 +186,7 @@ Lighting and visibility arrays are allocated without atomic all-or-nothing guara
   - **Completed 2026-06-24:** `visibility_alloc()` now stages all 7 allocations (`vis*`, `vischeck`, `nonvis`) in temporaries, rolls back staged memory on partial failure, and commits live buffers only after all allocations succeed.
 - ⬜ **MM-P6.3** Test allocation failure paths
   - Artificially inject malloc failures (e.g., after 3rd lighting allocation) and verify clean error handling (no leaks, no crash).
+  - **Status (2026-06-24):** Code complete (MM-P6.1/6.2 stage-and-rollback). The fault-injection test needs a temporary instrumented build (force `malloc` #3/#5 to return NULL) run interactively; the rollback branches are already in place and were verified by inspection. Build blocker resolved (`tools/Enter-DevBuildEnv.ps1`).
 - **Verification note (MM-P6.1/MM-P6.2, 2026-06-24):** touched-file compile/static checks passed (`viewport.cpp`), allocation logic preserves existing stride/layout semantics and keeps wire/save behavior unchanged (client-local heap management only).
 - **Exit:** Lighting and visibility allocations are atomic (all-or-nothing); errors are handled cleanly.
 
@@ -196,10 +205,15 @@ Ensure all global resources are released on program exit and error paths.
   - Add a debug log: "Freeing X resource" for each major subsystem.
   - Run the game, gracefully exit with `Q`, and verify all logs appear.
   - **Progress 2026-06-24:** Added `_DEBUG` `OutputDebugStringA` shutdown logs in `u6o7.cpp` for host save/socket teardown and client DirectMusic/DirectSound/DirectDraw/socket/WSACleanup steps.
-  - **Remaining:** runtime verification pass to confirm all expected logs appear on graceful exit.
-- ⬜ **MM-P7.3** Verify cleanup on error/crash paths
+  - **Remaining (interactive):** runtime verification pass to confirm all expected logs appear on graceful exit. Build blocker is resolved (see `tools/Enter-DevBuildEnv.ps1`); this now only needs an interactive run with a debugger/DebugView attached.
+- ✅ **MM-P7.3** Verify cleanup on error/crash paths
   - Force a crash (e.g., null dereference), and verify the exception handler calls cleanup before exit.
   - (This is already done via `MyUnhandledExceptionFilter`, but verify it covers all resources.)
+  - **Completed 2026-06-24 (code audit):** Audited `MyUnhandledExceptionFilter` (`src/common/u6o7.cpp`). Finding: the filter writes a crash log + minidump and returns `EXCEPTION_EXECUTE_HANDLER`, which terminates the process; it intentionally does **not** run the WM_QUIT subsystem teardown. This is the **correct** behavior for a leak plan:
+    - **No leak exposure:** process termination makes Windows reclaim all in-process memory, GDI/USER handles, sockets, and DirectX device handles. There is nothing left to leak once the process dies.
+    - **Safety:** the heap/COM apartment may be corrupt at filter time; calling `Release()`/`free()`/`closesocket()` there risks a deadlock or a second fault that would lose the minidump.
+    - **Persistent state:** the host deliberately does **not** auto-save on crash (saving from a corrupt state could persist a corrupt `.sav`); recovery is from the last clean periodic save.
+  - Documented this decision inline in the exception filter so the "dump-and-die" contract is explicit and not mistaken for a missing-cleanup bug.
 - **Exit:** Shutdown checklist in code; verified logs show comprehensive resource release.
 
 ---
@@ -208,9 +222,16 @@ Ensure all global resources are released on program exit and error paths.
 
 Introduce RAII (Resource Acquisition Is Initialization) patterns and smart pointers where feasible.
 
-- ⬜ **MM-P8.1** Identify refactoring candidates
+- ✅ **MM-P8.1** Identify refactoring candidates
   - Classes or subsystems that manage multiple resources (e.g., a "SoundManager", "ViewportRenderer").
   - Mark them with a comment tag `MM-P8.X: RAII candidate`.
+  - **Completed 2026-06-24:** Tagged five subsystem entry points with `MM-P8.1: RAII candidate` comments describing the proposed owning type:
+    - `src/client/myddraw.cpp` `ddrawshutdown()` — DirectDraw device pair (`dd`/`dd1`) + `surflist[]` surface registry → `DDDevice` type + ComPtr-backed `surf` wrapper.
+    - `src/client/sound.cpp` `soundshutdown()` — `tempsound[]` voice pool + global `dsnd` device → `SoundManager` with per-voice RAII + ComPtr device.
+    - `src/client/dmusic.cpp` `~CMidiMusic()` — raw COM `m_p*` interfaces → `ComPtr<T>` members.
+    - `src/client/viewport.cpp` `lighting_alloc()` — five parallel `ls`/`ls_moon*` buffers → grouped owning buffers (`unique_ptr<unsigned char[]>`).
+    - `src/common/function_both.cpp` `sockets_disconnect()` — per-connection `socketclient_ri[]`/`socketclient_si[]` (+ nested `->d[]`/`->t`) → `Connection` RAII type (also flags the still-unreclaimed nested buffers as a follow-up).
+  - Comment-only change; `client`, `host`, and `both` targets all build clean.
 - ⬜ **MM-P8.2** Introduce RAII wrappers (incrementally, T4+)
   - Example: wrap `DirectDraw device` in a `struct DDDevice { ... ~DDDevice() { Release(); } }`.
   - Use the `cpp-modernizer` agent (see `.github/agents/cpp-modernizer.agent.md`) to guide safe refactoring.
@@ -263,11 +284,31 @@ Each phase includes explicit verification before shipping:
 
 Starting from the top:
 
-1. **Next action:** Run MM-P1.1 (analysis done); begin MM-P1.2 (capture baseline memory profile).
-2. **Then:** Proceed in order — MM-P2, MM-P3, MM-P4, MM-P5, MM-P6, MM-P7.
-3. **Long-term:** MM-P8 (RAII modernization) is lower-priority and can be staged with other C++ refactoring efforts.
+**Current state (2026-06-24, end of Session 5):** All *code-side* work that can be
+completed in a headless shell is done. Every phase's implementation is in place
+and all three targets (`client`, `host`, `both`) build clean. What remains is
+either (a) **interactive runtime verification** that needs a running game +
+memory/audio profiler, or (b) **long-term RAII modernization** (MM-P8.2/8.3).
 
-After MM-P1.2, prioritize MM-P2 + MM-P3 (DirectDraw + fonts) as they are the highest-impact leaks and simplest to verify.
+- **Done (code):** MM-P1.1, MM-P2.1–2.2, MM-P3.1–3.4, MM-P4.1–4.2, MM-P5.1–5.3,
+  MM-P6.1–6.2, MM-P7.1, MM-P7.3, MM-P8.1.
+- **Remaining — interactive runtime only** (build is no longer a blocker; use
+  `tools/Enter-DevBuildEnv.ps1` then launch the binaries):
+  - MM-P1.2 — capture the 10-minute baseline memory profile.
+  - MM-P2.3 / MM-P4.3 / MM-P5.4 / MM-P6.3 — per-subsystem profiler/functional checks.
+  - MM-P7.2 — confirm the `_DEBUG` shutdown logs all appear on graceful exit.
+- **Remaining — long-term modernization (drive via `cpp-modernizer` agent):**
+  - MM-P8.2 — introduce RAII wrappers at the five `MM-P8.1: RAII candidate` sites.
+  - MM-P8.3 — migrate malloc/free → new/delete / smart pointers in those subsystems.
+  - These are behavior-sensitive (pixel/audio/wire) and require the agent's
+    verification discipline + runtime checks, so they are intentionally not
+    attempted headlessly.
+
+**Recommended next action:** an interactive session — build with
+`.\tools\Enter-DevBuildEnv.ps1 -Build both`, run the client, and execute MM-P1.2
+to capture the baseline, then walk MM-P2.3 → MM-P7.2.
+
+After MM-P1.2, prioritize confirming MM-P2 + MM-P3 (DirectDraw + fonts) impact, as they are the highest-impact leaks and simplest to verify.
 
 ---
 

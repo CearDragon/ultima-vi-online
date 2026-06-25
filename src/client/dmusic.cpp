@@ -686,6 +686,11 @@ HRESULT CMidiMusic::SetEffect(BOOL bActivate, int nEffect) {
 // Uninitialize COM
 
 CMidiMusic::~CMidiMusic() {
+    // MM-P8.1: RAII candidate — every member here is a raw COM interface that
+    // must be SAFE_RELEASE'd in a precise order. Migrating the m_p* members to
+    // a ComPtr<T> smart pointer (Microsoft::WRL::ComPtr or a local equivalent)
+    // would make this destructor reduce to just the RemovePort()/CloseDown()
+    // performance teardown, and make leak-on-early-return impossible.
     if (m_pLoader) {
         m_pLoader->ReleaseObjectByUnknown(m_pSegment);
         SAFE_RELEASE(m_pLoader);
