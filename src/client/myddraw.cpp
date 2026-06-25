@@ -733,10 +733,16 @@ void txtout(surf *s, long x, long y, txt *t)
 #endif
             DWORD _diag_gdi = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
             DWORD _diag_user = GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS);
-            char _diag[224];
+            // MM-P9 diagnostic: cumulative DirectMusic call counts (defined in
+            // dmusic.cpp) so the leak's firing rate is visible and the audio-leak
+            // fixes can be confirmed.
+            extern long g_midi_play_n;
+            extern long g_midi_load_n;
+            char _diag[256];
             wsprintfA(_diag,
-                      "U6O-DIAG surf_live=%ld txt_live=%ld heapKB=%ld heapN=%ld gdi=%lu user=%lu\n",
-                      g_surf_live, g_txt_live, _diag_heap_kb, _diag_heap_n, _diag_gdi, _diag_user);
+                      "U6O-DIAG surf_live=%ld txt_live=%ld heapKB=%ld heapN=%ld gdi=%lu user=%lu midiPlay=%ld midiLoad=%ld\n",
+                      g_surf_live, g_txt_live, _diag_heap_kb, _diag_heap_n, _diag_gdi, _diag_user,
+                      g_midi_play_n, g_midi_load_n);
             OutputDebugStringA(_diag);
         }
     }

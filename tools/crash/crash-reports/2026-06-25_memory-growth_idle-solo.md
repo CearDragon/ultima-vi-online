@@ -180,5 +180,51 @@ Interpretation on the next run, alongside Task Manager **Commit**:
 
 All three targets build clean.
 
+### Result of the second instrumented run (2026-06-25) — DIAGNOSED: DirectMusic
+
+User reported: **none** of `surf_live` / `txt_live` / `heapKB` / `heapN` / `gdi`
+/ `user` climb, yet **Commit keeps rising**. Combined with "leaks at the login
+screen with only music" and "process hangs 5–8 s on the MIDI at exit", this
+localizes the leak to **DirectX-internal audio memory** — the one subsystem
+active with only music playing. A code audit of `src/client/dmusic.cpp`
+(`CMidiMusic`) found two genuine, behavior-preserving leaks:
+
+1. **`Play()` — leaked COM reference.** It overwrote `m_pSegmentState8` with a
+   fresh `QueryInterface` result **without releasing the previous one**. Every
+   track loop leaked an `IDirectMusicSegmentState8`, and holding that reference
+   also blocked the performance from reclaiming the segment's internal
+   event/track data → unbounded, uncounted commit growth.
+2. **`LoadMidiFromFile` / `…FromResource` / `…FromMemory` — `Download()` without
+   `Unload()`.** `SAFE_RELEASE(m_pSegment)` dropped the segment, but the DLS
+   instruments/bands it had `Download()`ed into the synth stayed resident.
+   Every in-game music change (foreground combat / background area swap) leaked
+   that segment's instrument data — the classic DirectMusic leak, and large
+   (instruments are KB–MB each).
+
+### Fix shipped (2026-06-25)
+
+`src/client/dmusic.cpp`:
+- `Play()`: `SAFE_RELEASE(m_pSegmentState8)` before the overwriting
+  `QueryInterface` (NULL-safe on first call).
+- `LoadMidiFromFile/Resource/Memory`: `m_pSegment->Unload(m_pPerformance)`
+  before `SAFE_RELEASE(m_pSegment)`; the destructor `Unload`s the final segment
+  too.
+- Added cumulative counters `g_midi_play_n` / `g_midi_load_n`, surfaced in the
+  heartbeat as `midiPlay=` / `midiLoad=`, so the next run quantifies firing rate
+  and **confirms** Commit growth has stopped.
+
+Heartbeat is now:
+
+```
+U6O-DIAG surf_live=.. txt_live=.. heapKB=.. heapN=.. gdi=.. user=.. midiPlay=.. midiLoad=..
+```
+
+All three targets build clean. **Next interactive step:** rerun idle (login
+screen is enough) and confirm Commit is now flat. If a residual climb remains,
+`midiPlay` / `midiLoad` reveal whether re-`Play()`/re-`Load()` is firing faster
+than expected (the remaining suspect would then be the DirectMusic performance
+itself or its DirectSound output buffers).
+
+
 
 

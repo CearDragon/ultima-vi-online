@@ -329,6 +329,22 @@ sluggish past ~200–300 MB. Full discovery + root-cause write-up:
     Next run reads which of those four climbs with Commit; if none do, it's a
     DirectX-internal (dsound/dmusic/ddraw) leak and the audio play/duplicate
     paths get instrumented next. All three targets build clean.
+  - **Second instrumented run (2026-06-25) — DIAGNOSED: DirectMusic.** User
+    reported **none** of surf/txt/heapKB/heapN/gdi/user climb while **Commit
+    keeps rising** → DirectX-internal audio memory (only subsystem active with
+    music-only at the login screen; exit hangs 5–8 s on the MIDI). Audit of
+    `src/client/dmusic.cpp` found two real leaks: (1) `Play()` overwrote
+    `m_pSegmentState8` via `QueryInterface` **without releasing the prior ref**
+    (leaked one segment-state per track loop + blocked the performance from
+    reclaiming its event data); (2) `LoadMidiFromFile/Resource/Memory` called
+    `Download()` then released the segment **without `Unload()`**, leaving the
+    DLS instruments resident in the synth on every music change (large).
+  - **Fix shipped (2026-06-25):** `Play()` `SAFE_RELEASE(m_pSegmentState8)`
+    before the overwriting QI; `LoadMidiFrom*` + destructor
+    `m_pSegment->Unload(m_pPerformance)` before `SAFE_RELEASE`. Added
+    `g_midi_play_n`/`g_midi_load_n` counters → heartbeat `midiPlay=`/`midiLoad=`
+    to confirm the firing rate and that Commit growth stops. All three targets
+    build clean. **Next interactive step:** rerun idle, confirm Commit is flat.
 - **Exit:** No per-message surface growth on portrait refreshes; chat/name lists
   freed on teardown; 10-minute idle profile flat (±small caching).
 

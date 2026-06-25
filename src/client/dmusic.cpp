@@ -19,6 +19,14 @@ All rights reserved.
 
 extern unsigned char u6omidisetup;
 
+// MM-P9 diagnostic (2026-06-25): cumulative DirectMusic call counters, surfaced
+// by the txtout() U6O-DIAG heartbeat. They let the next run quantify how often
+// Play()/LoadMidiFrom*() actually fire (rate sanity-check) and confirm the
+// segment-state / instrument-download leak fixes below. Remove with the rest of
+// the MM-P9 instrumentation once the idle-leak is confirmed fixed.
+long g_midi_play_n = 0;
+long g_midi_load_n = 0;
+
 // The constructor, member variables initialisation
 
 CMidiMusic::CMidiMusic() {
@@ -172,9 +180,20 @@ HRESULT CMidiMusic::LoadMidiFromFile(LPCSTR szMidi, BOOL bMidiFile) {
     WCHAR wstrMidi[256];
     HRESULT hr;
 
+    g_midi_load_n++; // MM-P9 diagnostic: count LoadMidiFromFile() invocations.
+
     // If exists a segment before, then release it
-    if (m_pSegment)
+    if (m_pSegment) {
+        // MM-P9 fix (2026-06-25): Unload the DLS instruments/bands this segment
+        // previously Download()ed into the synth BEFORE releasing it. Releasing
+        // the segment does NOT undo a Download(), so every in-game music change
+        // (foreground combat / background area swap) leaked the segment's
+        // resident instrument data inside DirectMusic — a large, uncounted
+        // DirectX-internal commit climb. Behavior-preserving: the next segment
+        // re-downloads its own instruments; audio output is unchanged.
+        m_pSegment->Unload(m_pPerformance);
         SAFE_RELEASE(m_pSegment);
+    }
 
     // Converts ANSI (8-bits) to the UNICODE (16-bit) string
     MultiByteToWideChar(CP_ACP, 0, szMidi, -1, wstrMidi, 256);
@@ -211,7 +230,14 @@ HRESULT CMidiMusic::LoadMidiFromResource(TCHAR *strResource, TCHAR *strResourceT
     DMUS_OBJECTDESC objdesc;
 
 
-    SAFE_RELEASE(m_pSegment);
+    // MM-P9 fix (2026-06-25): Unload before release so the prior segment's
+    // downloaded instruments don't stay resident in the synth (see
+    // LoadMidiFromFile for the rationale). Guard for the first-load NULL case.
+    g_midi_load_n++;
+    if (m_pSegment) {
+        m_pSegment->Unload(m_pPerformance);
+        SAFE_RELEASE(m_pSegment);
+    }
 
     // Find the resource
     hres = FindResource(NULL, strResource, strResourceType);
@@ -262,7 +288,12 @@ HRESULT CMidiMusic::LoadMidiFromMemory(void *offset, unsigned long bytes, BOOL b
 
     HRESULT hr;
     DMUS_OBJECTDESC objdesc;
-    SAFE_RELEASE(m_pSegment);
+    // MM-P9 fix (2026-06-25): Unload before release (see LoadMidiFromFile).
+    g_midi_load_n++;
+    if (m_pSegment) {
+        m_pSegment->Unload(m_pPerformance);
+        SAFE_RELEASE(m_pSegment);
+    }
 
     // Set up our object description 
     ZeroMemory(&objdesc, sizeof(DMUS_OBJECTDESC));
@@ -300,6 +331,8 @@ HRESULT CMidiMusic::Play() {
 
     HRESULT hr;
 
+    g_midi_play_n++; // MM-P9 diagnostic: count Play() invocations.
+
     // Plays a segment and stores the segment state
     if (FAILED(hr = m_pPerformance->PlaySegmentEx(
                    m_pSegment,
@@ -313,6 +346,16 @@ HRESULT CMidiMusic::Play() {
                )))
         return hr;
 
+
+    // MM-P9 fix (2026-06-25): release the PREVIOUS segment-state8 before the
+    // QueryInterface below overwrites the member. Without this, every Play()
+    // (each track loop) leaked one IDirectMusicSegmentState8 reference, which
+    // also prevented the performance from reclaiming that segment's internal
+    // event/track data — an unbounded DirectX-internal commit climb that the
+    // surf/txt/heap/GDI heartbeat counters do not see. SAFE_RELEASE is NULL-safe
+    // (m_pSegmentState8 starts NULL from the ctor), so the first Play() is
+    // unaffected. Behavior-preserving: the old state was already finished/leaked.
+    SAFE_RELEASE(m_pSegmentState8);
 
     // Gets the new interface for SegmentState
     if (FAILED(hr = m_pSegmentState->QueryInterface(IID_IDirectMusicSegmentState8,
@@ -700,6 +743,10 @@ CMidiMusic::~CMidiMusic() {
     SAFE_RELEASE(m_pSegmentState8);
     SAFE_RELEASE(m_p3DAudioPath);
     SAFE_RELEASE(m_pDSB);
+    // MM-P9 fix (2026-06-25): undo the final segment's Download() before
+    // releasing it, mirroring the LoadMidiFrom* runtime fix (m_pPerformance is
+    // still alive here; it is torn down below).
+    if (m_pSegment && m_pPerformance) m_pSegment->Unload(m_pPerformance);
     SAFE_RELEASE(m_pSegment);
     SAFE_RELEASE(m_pMusic);
     SAFE_RELEASE(m_pMusic8);
