@@ -2732,5 +2732,36 @@ void MAPDL_on_chunk(txt *t) {
     MAPDL_file = -1;
     MAPDL_advance();
 }
-#undef loadimage
-#define loadimage loadimage2
+
+// MM-P9.1: Clean up input message history linked list (inpmess_mostrecent).
+// Allocated in loop_client_part_game_open.cpp:344,825 when player types chat.
+// Prevents unbounded memory growth from chat history accumulation.
+void cleanup_input_message_history(void) {
+    inpmess_index *current = inpmess_mostrecent;
+    while (current != NULL) {
+        inpmess_index *temp = current;
+        current = current->next;
+        if (temp->t) {
+            free(temp->t);  // Free the txt object
+            temp->t = NULL;
+        }
+        free(temp);  // Free the inpmess_index struct
+    }
+    inpmess_mostrecent = NULL;
+}
+
+// MM-P9.2: Clean up player name list (idlst_name[]).
+// Allocated in loop_client_part_world_render.cpp:870 when players are discovered.
+// Prevents unbounded memory growth from accumulating player names.
+void cleanup_player_namelist(void) {
+    static unsigned long i;
+    for (i = 0; i <= (unsigned long)idlstn && i < 1024; i++) {
+        if (idlst_name[i] != NULL) {
+            free(idlst_name[i]);  // Free the txt object
+            idlst_name[i] = NULL;
+        }
+    }
+    idlstn = -1;  // Reset the player list counter
+}
+
+
