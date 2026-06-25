@@ -516,6 +516,16 @@ PM_NOREMOVE
       #ifdef _DEBUG
       mm_p7_log_shutdown("MM-P7.2: client shutdown start");
       #endif
+      // MM-P9.1 / MM-P9.2: free the chat-history linked list and the player
+      // name-tag txt list on client teardown. These accumulate across a long
+      // session / repeated reconnects; freeing them here keeps shutdown clean.
+      // (The dominant in-session leak — repeated portrait surface reloads — is
+      // fixed at its source in loadportrait()/the type-43 handler; see MM-P9.3.)
+      cleanup_input_message_history();
+      cleanup_player_namelist();
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P9: client game-state lists freed");
+      #endif
 			// Fast / clean shutdown (2026-05-28): the previous shutdown path
 			// blocked on SleepEx(2048) AFTER asking the socket to shut down,
 			// AND never told DirectMusic to stop or release. Net effect: the

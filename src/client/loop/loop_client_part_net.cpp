@@ -1658,8 +1658,19 @@ if
             x2 = t->ds[0];
             txtright(t, t->l - 2);
 
+            // MM-P9.3: portrait reload surface leak (dominant idle leak). The
+            // host re-pushes portrait data (message type 43) for already-loaded
+            // indices — the local player and nearby NPCs as they update — so
+            // unconditionally allocating a fresh 56x64 surface here leaked one
+            // DirectDraw SURF_SYSMEM16 per message (piling up in surflist[] and
+            // slowing every blit). Reuse the existing cached portrait surface on
+            // reload: its pixels are fully overwritten by the decompressor below,
+            // and keeping the same pointer means inpf->graphic (which can hold
+            // getportrait(x2) == portrait[x2]) never dangles. Only allocate the
+            // first time this index is seen.
             static surf *receiveport = NULL;
-            receiveport = newsurf(56, 64, SURF_SYSMEM16);
+            if (portrait_loaded[x2] && portrait[x2]) receiveport = portrait[x2];
+            else receiveport = newsurf(56, 64, SURF_SYSMEM16);
 
 
             /*

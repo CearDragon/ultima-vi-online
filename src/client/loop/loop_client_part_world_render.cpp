@@ -865,12 +865,21 @@ moverinbed:
                       }//z2
                     }//!=-1
                     if (z3==0){ //add new id
+                      // MM-P9.2 hardening: idlst[], idlst_name[], idlst_namecolour[]
+                      // are sized [1024] and indexed by idlstn (starts at -1).
+                      // idlstn++ had no bound, so encountering >1024 distinct
+                      // player ids in one session overran the arrays (heap
+                      // corruption / crash). Cap at the last valid slot (1023);
+                      // any further new players simply render without a cached
+                      // name-tag entry instead of corrupting memory.
+                      if (idlstn < 1023){
                       idlstn++;
                       idlst[idlstn]=tplayer->mv_playerid[i];
                       idlst_name[idlstn]=txtnew();
                       txtset(idlst_name[idlstn],"reading data");
                       idlst_namecolour[idlstn]=0xFFFFFF;
                       txtset(t2,"?"); t2->d2[0]=9; txtset(t3,"????"); t3->dl[0]=tplayer->mv_playerid[i]; txtadd(t2,t3); NET_send(NETplayer,NULL,t2);
+                      }
                     }//z3==0
                     if (tplayer->mv_flags[i]&MV_TYPING){
                       osn++;

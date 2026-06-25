@@ -139,7 +139,7 @@ Socket receive/send buffers are malloc'd but the `socketclient_si[]` / `socketcl
 - ⬜ **MM-P4.3** Verify no crashes on repeated connect/disconnect
   - Manually connect and disconnect 10 times, checking Task Manager for memory growth.
   - Use a memory profiler to confirm buffers are freed.
-  - **Status:** Code complete; **interactive runtime** check (needs a live host + client). Build blocker resolved (`tools/Enter-DevBuildEnv.ps1`). Note for whoever runs it: the MM-P4.2 fix frees the top-level `socketclient_ri[]`/`socketclient_si[]` structs; the nested `->d[n]->d` / `->t` buffers are a known remaining follow-up (flagged in the `MM-P8.1` tag in `sockets_disconnect()`).
+  - **Status:** Code complete; **interactive runtime** check (needs a live host + client). Build blocker resolved (`tools/Enter-DevBuildEnv.ps1`). Update 2026-06-25: the previously-flagged nested `->d[0..255]` / `->t` buffers are **now also freed** in `sockets_disconnect()` (host-only path; reconnect re-allocates via the dispatch loop's `else` branch). So the per-connection disconnect leak is fully closed at the struct **and** nested level.
 - **Exit:** Socket structures freed on disconnect; memory profile shows no growth from socket operations.
 
 ---
@@ -242,6 +242,64 @@ Introduce RAII (Resource Acquisition Is Initialization) patterns and smart point
 
 ---
 
+### MM-P9 — Game-loop / per-message unbounded allocations (High-impact, T1)
+
+Discovered 2026-06-25 from start/end heap dumps after a ~10-minute session where
+the client climbed to ~500 MB **while alone, idle, and barely moving**, becoming
+sluggish past ~200–300 MB. Full discovery + root-cause write-up:
+`MM_P9_GAME_LOOP_LEAKS.md` (same folder).
+
+- ✅ **MM-P9.3** Portrait reload surface leak — **DOMINANT in-session leak**
+  - The host re-streams portrait data (net message **type 43**) for already-loaded
+    indices (the local player + nearby NPCs as they update). The handler allocated
+    a fresh 56×64 source surface per message, and `loadportrait()` overwrote the
+    cached 112×128 / 28×32 surfaces **without releasing the old ones** — ~37 KB of
+    `SURF_SYSMEM16` leaked per portrait message, accumulating in `surflist[16384]`
+    (→ steady RAM climb **and** progressive blit slowdown). This is the *only*
+    per-message/per-frame surface allocation in the client (the render path
+    allocates none), so it dominates idle growth.
+  - **Completed 2026-06-25:**
+    - `loadportrait()` (`src/client/function_client.cpp`) now frees the prior
+      `portrait_doublesize[i]` / `portrait_halfsize[i]` (typed `free(surf*)`)
+      before rebuilding them. Verified safe: both are only transient `img0` blit
+      sources (`getportrait_doublesize`/`_halfsize`), never stored as a long-lived
+      `->graphic`.
+    - The type-43 handler (`src/client/loop/loop_client_part_net.cpp`) now
+      **reuses** the cached 56×64 surface on reload instead of allocating a new
+      one, keeping `portrait[i]`'s pointer stable so `inpf->graphic`
+      (`== getportrait(i)`) cannot dangle. Pixels are fully overwritten by the
+      decompressor, so output is identical.
+  - Behavior-preserving (identical pixels, no wire change). `client`/`host`/`both`
+    build clean.
+- ✅ **MM-P9.1** Input message (chat) history linked list
+  - `inpmess_mostrecent` grows by one malloc'd `inpmess_index` + `txtnew()` per
+    *new unique* chat line typed (bounded by chat activity; not an idle leak).
+  - **Completed 2026-06-25:** `cleanup_input_message_history()` made crash-safe
+    (re-creates the empty sentinel node the chat handler requires rather than
+    leaving `inpmess_mostrecent = NULL`) and wired into the client WM_QUIT
+    teardown in `u6o7.cpp`.
+- ✅ **MM-P9.2** Player name-tag list (`idlst_name[]`)
+  - One `txtnew()` per *genuinely new* player id seen (`z3==0` path); reused on
+    later frames. For an idle solo player this allocates one entry and stops — not
+    an idle leak.
+  - **Completed 2026-06-25:** `cleanup_player_namelist()` wired into the client
+    WM_QUIT teardown. Not called mid-session (it resets `idlstn = -1`, only safe
+    between frames).
+  - **Overflow hardening (2026-06-25):** `idlst[]`/`idlst_name[]`/`idlst_namecolour[]`
+    are `[1024]` but `idlstn++` was unbounded — seeing >1024 distinct player ids in
+    one session overran the arrays (heap corruption). Added an `if (idlstn < 1023)`
+    guard in `loop_client_part_world_render.cpp` so excess players render without a
+    cached name tag instead of corrupting memory.
+- ⬜ **MM-P9.4** Verify impact (interactive)
+  - Rebuild (`tools/Enter-DevBuildEnv.ps1`), run the client, recapture start/end
+    dumps over ~10 idle minutes. Expect the steady climb + sluggishness to be
+    gone (residual growth = small bounded caching). If a large climb remains,
+    chase the next host-driven allocation.
+- **Exit:** No per-message surface growth on portrait refreshes; chat/name lists
+  freed on teardown; 10-minute idle profile flat (±small caching).
+
+---
+
 ## Background: Identified leak sites
 
 ### Critical leaks (MM-P2, MM-P3, MM-P4, MM-P5)
@@ -290,8 +348,30 @@ and all three targets (`client`, `host`, `both`) build clean. What remains is
 either (a) **interactive runtime verification** that needs a running game +
 memory/audio profiler, or (b) **long-term RAII modernization** (MM-P8.2/8.3).
 
+**Update (2026-06-25, Session 6):** Start/end heap dumps from a real ~10-minute
+session (client climbed to ~500 MB while idle/solo) surfaced a **new phase
+MM-P9**. The dominant in-session leak was found to be the **portrait reload
+surface leak (MM-P9.3)** — fixed at the source in `loadportrait()` + the type-43
+net handler (reuse cached surfaces instead of leaking ~37 KB/message). The two
+leaks the crash-report agent originally flagged (MM-P9.1 chat history, MM-P9.2
+name list) are real but **bounded** for an idle solo player; they're fixed as
+teardown housekeeping. All three targets still build clean. **Next: interactive
+re-test (MM-P9.4)** — recapture a 10-minute idle profile and confirm the climb is
+gone.
+
+**Hardening follow-ups (2026-06-25, same session):** Two safe, headless-fixable
+items closed after a final memory-concern sweep (which otherwise found the
+render/present/resize/net paths all balanced):
+1. **Nested socket buffers** — `sockets_disconnect()` now frees the per-connection
+   `->d[0..255]` message txts (×2) and the receive struct's `->t`, not just the
+   top-level structs (host-only path; reconnect re-allocates fresh). Closes the
+   per-disconnect leak completely.
+2. **`idlst` overflow guard** — bounded `idlstn` to the `[1024]` arrays
+   (`if (idlstn < 1023)`), preventing heap corruption if >1024 distinct players
+   are seen in one session. All three targets rebuild clean.
+
 - **Done (code):** MM-P1.1, MM-P2.1–2.2, MM-P3.1–3.4, MM-P4.1–4.2, MM-P5.1–5.3,
-  MM-P6.1–6.2, MM-P7.1, MM-P7.3, MM-P8.1.
+  MM-P6.1–6.2, MM-P7.1, MM-P7.3, MM-P8.1, **MM-P9.1, MM-P9.2, MM-P9.3**.
 - **Remaining — interactive runtime only** (build is no longer a blocker; use
   `tools/Enter-DevBuildEnv.ps1` then launch the binaries):
   - MM-P1.2 — capture the 10-minute baseline memory profile.

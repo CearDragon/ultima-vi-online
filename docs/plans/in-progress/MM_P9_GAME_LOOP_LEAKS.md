@@ -1,5 +1,82 @@
 # MM-P9 Discovery Report — Game-Loop Unbounded Allocations (2026-06-25)
 
+## ⚠️ Correction / root-cause update (2026-06-25, follow-up session)
+
+A code re-audit (triggered by the symptom *"~500 MB while alone, idle, and
+barely moving"*) found that the two leaks originally reported below
+(**MM-P9.1 inpmess**, **MM-P9.2 idlst**) are **real but bounded** for an idle
+solo player, so they **cannot** be the dominant cause of the in-session climb:
+
+- **MM-P9.1 (chat history)** only grows when *you type a new unique message*.
+- **MM-P9.2 (player name list)** only allocates for a *genuinely new player id*
+  (`z3==0` path); `idlstn` is initialized once to `-1` and the entry is reused
+  on every later frame. Alone → it allocates **one** `txt` (yourself) and stops.
+
+Neither grows while you stand still. The **dominant, continuous, in-session
+leak is a DirectDraw surface leak in the portrait reload path** — see
+**MM-P9.3** below. That is what produces both the steady private-bytes climb and
+the progressive sluggishness (surfaces pile up in `surflist[]`, slowing every
+blit). MM-P9.1/MM-P9.2 are retained as **housekeeping** (they matter across long
+sessions / repeated reconnects) and are now wired into client teardown.
+
+---
+
+### MM-P9.3: Portrait reload surface leak  ⟵ DOMINANT in-session leak
+
+**File(s):**
+`src/client/loop/loop_client_part_net.cpp` (type-43 handler, ~line 1662),
+`src/client/function_client.cpp` (`loadportrait`, ~line 1517)
+
+**Leak pattern:**
+```cpp
+// type-43 "receive portrait data" — runs every time the host pushes a portrait
+static surf *receiveport = NULL;
+receiveport = newsurf(56, 64, SURF_SYSMEM16);   // NEW 56x64 surface every message
+...
+loadportrait(x2, receiveport);                  // stores it as portrait[x2]
+
+// loadportrait():
+portrait[i] = s;
+portrait_doublesize[i] = newsurf(112, 128, SURF_SYSMEM16);  // overwrites prior — leaked (~28 KB)
+portrait_halfsize[i]   = newsurf(28, 32,  SURF_SYSMEM16);   // overwrites prior — leaked (~1.8 KB)
+```
+
+**Root cause:**
+- The host re-streams portrait data (message type 43) for already-loaded
+  indices — the local player and nearby NPCs as they move / update. Each such
+  message allocated a **fresh** 56×64 source surface *and* `loadportrait`
+  overwrote the cached 112×128 and 28×32 surfaces for that slot **without
+  releasing the previous ones**.
+- Net effect: **~37 KB of `SURF_SYSMEM16` leaked per portrait message**, each
+  also consuming a `surflist[16384]` slot. This is the only per-message /
+  per-frame *surface* allocation in the whole client (the render path allocates
+  no surfaces), which is why it dominates and why it degrades blit speed.
+
+**Why it looks like "idle" growth:** you don't have to move — the host keeps
+sending portrait refreshes for you and surrounding NPCs, so the leak advances
+while you stand still.
+
+**Fix implemented (this session):**
+1. **`loadportrait()`** now releases the prior `portrait_doublesize[i]` /
+   `portrait_halfsize[i]` (via the typed `free(surf*)`) before rebuilding them.
+   These are only ever used as transient `img0` blit sources
+   (`getportrait_doublesize`/`_halfsize`), never stored as a long-lived
+   `->graphic`, so freeing is safe.
+2. The **type-43 handler** now **reuses** the existing cached 56×64 surface on
+   reload (`if (portrait_loaded[x2] && portrait[x2]) receiveport = portrait[x2];`)
+   instead of allocating a new one. The decompressor fully overwrites its
+   pixels, and keeping the same pointer means `inpf->graphic`
+   (which can hold `getportrait(x2) == portrait[x2]`) never dangles.
+
+Result: **zero** net surface growth on portrait refreshes (steady-state), which
+removes the dominant idle leak and the surface-churn sluggishness.
+
+**Build status:** ✅ `client`, `host`, and `both` all build clean.
+
+---
+
+## Original report (MM-P9.1 / MM-P9.2)
+
 ## Context
 
 While analyzing the 277 MB memory growth observed over 10 minutes (from dumps taken with code that already included MM-P2–MM-P7 fixes), a codebase-wide search identified two additional **game-loop-resident memory leaks** NOT covered by the original MM-P2–MM-P7 phases. These leaks accumulate unbounded during normal gameplay because the allocations happen in the game loop's per-frame or per-player rendering code without any cleanup mechanism.
@@ -100,32 +177,51 @@ void cleanup_player_namelist(void) {
 
 ## Next Steps
 
-### Immediate
+### Done (2026-06-25 follow-up session)
 
-1. **Identify call sites** for the cleanup functions:
-   - When player returns to login screen / new game load
-   - When player disconnects / quits
-   - Optionally: on a periodic timer (e.g., every 5–10 minutes during idle phases)
+1. **MM-P9.3 (dominant) fixed at the source** — portrait reload no longer leaks
+   surfaces (see the correction section at the top). This is the fix that
+   addresses the reported idle climb + sluggishness.
+2. **MM-P9.1 cleanup made crash-safe** — `cleanup_input_message_history()` now
+   re-creates the empty sentinel node the chat handler requires instead of
+   leaving `inpmess_mostrecent = NULL` (which would have crashed the next
+   keystroke). 
+3. **MM-P9.1 / MM-P9.2 cleanups wired** into the client teardown path in
+   `src/common/u6o7.cpp` (single-threaded WM_QUIT shutdown — no UAF/cross-thread
+   risk). They were intentionally **not** called mid-session: `cleanup_player_namelist`
+   resets `idlstn = -1`, which is only safe between frames, and the in-session
+   growth of both lists is bounded anyway.
 
-2. **Add cleanup calls** to strategic game-state-transition points (e.g., when `intro` is set to 200 to return to menu, or in `sockets_disconnect()`)
+### Remaining (interactive)
 
-3. **Retest memory profile** with the new binary:
-   - Expected: Memory growth should flatten significantly after ~10 minutes
-   - If still 200+ MB growth: there may be additional undiscovered leaks
+1. **Retest the 10-minute memory profile** with the new binary (use
+   `tools/Enter-DevBuildEnv.ps1` to build, then run the client). Expectation:
+   the steady idle climb is gone; residual growth should be small, bounded
+   game-state caching. If a large climb remains, capture start/end dumps again —
+   there may be a further host-driven allocation to chase.
 
 ### Long-Term
 
-- **MM-P9 belongs in the Plan Lifecycle**: Move or create a new phased entry under `docs/plans/in-progress/plan-memoryManagement.md` to document MM-P9.1 and MM-P9.2
-- **Revisit MM-P1.2 baseline** with the new fixes to quantify improvement
-- **Consider RAII for txt objects** (MM-P8 long-term modernization) to prevent similar leaks in new code
+- **Consider RAII for `surf`/`txt`** (MM-P8 modernization) so reload paths can't
+  reintroduce this class of leak.
 
 ---
 
 ## Summary
 
-**Impact:** These two leaks together likely account for **100–200 MB** of the 277 MB growth observed in the test, depending on player activity (chat volume, number of players encountered). Fixing them should reduce the 10-minute growth to **50–100 MB** (mostly expected game-state caching).
+**Corrected impact:** The dominant in-session leak for an idle/solo player is
+**MM-P9.3 (portrait reload surface leak)** — ~37 KB of `SURF_SYSMEM16` per
+portrait message the host pushes, accumulating in `surflist[]`. This is the
+fix expected to flatten the idle climb and remove the surface-churn sluggishness.
+**MM-P9.1 (chat history)** and **MM-P9.2 (player name list)** are real but
+**bounded** for an idle solo player; they are fixed as housekeeping (freed on
+client teardown) and matter mainly for very long sessions / repeated reconnects.
 
-**Risk:** Low — the cleanup functions are additive and isolated; they have no side effects if called at the right time. Calling them too early could cause use-after-free bugs if the data is still referenced; calling them late simply delays the cleanup (no memory is lost, just accumulated until cleanup runs).
+**Risk:** Low. MM-P9.3 is behavior-preserving (identical pixels; reused
+scratch surface is fully overwritten before use; no `->graphic` dangles). The
+MM-P9.1/9.2 cleanups run only at single-threaded shutdown.
 
-**Status Code:** MM-P9 (NEW) — Game-loop unbounded-allocation leaks, fix implemented, pending integration into shutdown/game-transition paths.
+**Status Code:** MM-P9 — MM-P9.1, MM-P9.2, MM-P9.3 all implemented; `client` /
+`host` / `both` build clean; pending an interactive 10-minute profile re-test.
+
 

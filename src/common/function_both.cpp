@@ -227,8 +227,8 @@ DWORD WINAPI sockets_disconnect(LPVOID i) {
     // raw-malloc'd per-connection socketinfo structs whose nested ->d[]/->t
     // buffers are also heap-owned. A "Connection" RAII type owning the socket
     // handle + both socketinfo blocks (closing/freeing in its dtor) would make
-    // this hand-rolled wait-then-free teardown safe-by-construction and also
-    // cover the still-unreclaimed nested ->d[n]->d / ->t buffers (follow-up).
+    // this hand-rolled wait-then-free teardown safe-by-construction. The nested
+    // ->d[0..255] / ->t buffers ARE now reclaimed below (MM-P9 follow-up).
     if (socketclient_si[(unsigned long) i]->exit_thread == 0) socketclient_si[(unsigned long) i]->exit_thread = 1;
     if (socketclient_ri[(unsigned long) i]->exit_thread == 0) socketclient_ri[(unsigned long) i]->exit_thread = 1;
     shutdown(socketclient[(unsigned long) i], SD_RECEIVE | SD_SEND);
@@ -265,12 +265,35 @@ socket_disconnect_receive_close_wait:
     }
 
     socketclient[(unsigned long) i] = INVALID_SOCKET;
-    // Free per-connection socketinfo structures allocated at connect time.
+    // MM-P9 follow-up (2026-06-25): free the per-connection socketinfo structs
+    // AND their nested heap buffers allocated at connect time (see the host
+    // dispatch loop, loop_host_part_b_dispatch.cpp): every ->d[0..255] is a
+    // txtnew(), and the RECEIVE struct's ->t is a txtnew() (the send struct's
+    // ->t stays NULL from its ZeroMemory init). MM-P4.2 freed only the top-level
+    // structs, leaking the 256 message txts (×2) and ->t per disconnect.
+    //
+    // Safe because: (a) both worker threads have already exited above (we waited
+    // on exit_thread==2 / TerminateThread), so nothing else references these;
+    // (b) sockets_disconnect is HOST-ONLY (its sole caller is the host dispatch
+    // loop), so it never touches the client's persistent index-0 buffers; and
+    // (c) a reconnect on this slot re-allocates via the dispatch loop's `else`
+    // branch (gated on `if (socketclient_si[i])`), so NULLing the slot routes
+    // reconnect to a fresh allocation rather than the reuse path.
+    // free(txt*) is the typed overload (releases the txt's inner buffer + node);
+    // free((void*)struct) releases the struct itself.
     if (socketclient_ri[(unsigned long) i]) {
+        for (unsigned long _b = 0; _b <= 255; _b++) {
+            if (socketclient_ri[(unsigned long) i]->d[_b]) free(socketclient_ri[(unsigned long) i]->d[_b]);
+        }
+        if (socketclient_ri[(unsigned long) i]->t) free(socketclient_ri[(unsigned long) i]->t);
         free((void *) socketclient_ri[(unsigned long) i]);
         socketclient_ri[(unsigned long) i] = NULL;
     }
     if (socketclient_si[(unsigned long) i]) {
+        for (unsigned long _b = 0; _b <= 255; _b++) {
+            if (socketclient_si[(unsigned long) i]->d[_b]) free(socketclient_si[(unsigned long) i]->d[_b]);
+        }
+        if (socketclient_si[(unsigned long) i]->t) free(socketclient_si[(unsigned long) i]->t);
         free((void *) socketclient_si[(unsigned long) i]);
         socketclient_si[(unsigned long) i] = NULL;
     }

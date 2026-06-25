@@ -1516,6 +1516,25 @@ void getlight(unsigned short type, long x, long y) {
 //portraits 2.0 functions
 void loadportrait(unsigned short i, surf *s) {
     //s is assumed to be a valid source of the original portrait which will not be deallocated/changed
+    // MM-P9.3: portrait reload leak (dominant idle leak). loadportrait is called
+    // from the type-43 net handler every time the host pushes portrait data —
+    // including repeated refreshes for the local player and nearby NPCs. The
+    // previous doublesize/halfsize surfaces for this slot were overwritten below
+    // without being released, leaking ~30KB of DirectDraw SURF_SYSMEM16 per
+    // reload (they accumulate in surflist[] and progressively slow every blit).
+    // Release them before rebuilding. These two are only ever used as transient
+    // img0 blit sources (getportrait_doublesize/_halfsize), never stored as a
+    // long-lived ->graphic, so freeing here cannot dangle a cached pointer.
+    // The 56x64 `s` is the SAME cached surface as the previous portrait[i] (the
+    // type-43 handler now reuses it), so portrait[i]'s pointer stays stable and
+    // inpf->graphic (== getportrait(i)) does not dangle. This runs in the main
+    // loop's message pass, not concurrently with rendering.
+    if (portrait_loaded[i]) {
+        if (portrait_doublesize[i]) free(portrait_doublesize[i]);
+        if (portrait_halfsize[i]) free(portrait_halfsize[i]);
+        portrait_doublesize[i] = NULL;
+        portrait_halfsize[i] = NULL;
+    }
     portrait_loaded[i] = TRUE;
     portrait[i] = s;
     portrait_doublesize[i] = newsurf(112, 128, SURF_SYSMEM16);
@@ -2736,6 +2755,13 @@ void MAPDL_on_chunk(txt *t) {
 // MM-P9.1: Clean up input message history linked list (inpmess_mostrecent).
 // Allocated in loop_client_part_game_open.cpp:344,825 when player types chat.
 // Prevents unbounded memory growth from chat history accumulation.
+//
+// IMPORTANT: the chat input handler (loop_client_part_game_open.cpp) and the
+// startup code (setup_client.inc) require inpmess_mostrecent to ALWAYS be a
+// valid node: it derefs inpmess_mostrecent->t and walks ->next to a NULL tail.
+// So this must not leave the head NULL — it frees every node (including the old
+// empty sentinel) and then re-creates a fresh empty sentinel, exactly mirroring
+// setup_client.inc's initialization.
 void cleanup_input_message_history(void) {
     inpmess_index *current = inpmess_mostrecent;
     while (current != NULL) {
@@ -2747,7 +2773,10 @@ void cleanup_input_message_history(void) {
         }
         free(temp);  // Free the inpmess_index struct
     }
-    inpmess_mostrecent = NULL;
+    // Re-establish the empty sentinel the chat code depends on.
+    inpmess_mostrecent = (inpmess_index *) malloc(sizeof(inpmess_index));
+    inpmess_mostrecent->t = txtnew();
+    inpmess_mostrecent->next = NULL;
 }
 
 // MM-P9.2: Clean up player name list (idlst_name[]).
