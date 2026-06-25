@@ -1,9 +1,0 @@
-Unhandled Exception Crash!
-Exception Code: 0xC0000005
-Exception Address: 00B5D6E9
-Call Stack (Pointers):
-  [0] 00BA764F
-  [1] 76D54512
-  [2] 771CE1BD
-  [3] 771CE0B1
-Generated crash.dmp for detailed debugging.
