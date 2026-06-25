@@ -37,6 +37,6 @@ test/*
 *.ico
 src/common/u6o7.rc
 
-# Memory/crash dumps — too large for GitHub (>100 MB)
-*.DMP
-*.dmp
+# Memory/crash dumps ï¿½ too large for GitHub (>100 MB)
+tools/crash/crash-reports/*.DMP
+tools/crash/crash-reports/*.dmp

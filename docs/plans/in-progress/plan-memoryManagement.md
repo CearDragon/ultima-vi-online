@@ -292,9 +292,13 @@ sluggish past ~200–300 MB. Full discovery + root-cause write-up:
     cached name tag instead of corrupting memory.
 - ⬜ **MM-P9.4** Verify impact (interactive)
   - Rebuild (`tools/Enter-DevBuildEnv.ps1`), run the client, recapture start/end
-    dumps over ~10 idle minutes. Expect the steady climb + sluggishness to be
-    gone (residual growth = small bounded caching). If a large climb remains,
-    chase the next host-driven allocation.
+  - dumps over ~10 idle minutes. Expect the steady climb + sluggishness to be
+  - gone (residual growth = small bounded caching). If a large climb remains,
+  - chase the next host-driven allocation.
+  - **Baseline evidence (2026-06-25):** `Start.DMP` → `End.DMP` on the captured
+    binary showed committed private memory rising from 108,453,888 bytes to
+    570,376,192 bytes (+461,922,304 bytes) and committed private regions rising
+    from 263 to 3,540 while the UI thread sat in `gdi32full!TextOutA`.
 - **Exit:** No per-message surface growth on portrait refreshes; chat/name lists
   freed on teardown; 10-minute idle profile flat (±small caching).
 
@@ -359,6 +363,12 @@ teardown housekeeping. All three targets still build clean. **Next: interactive
 re-test (MM-P9.4)** — recapture a 10-minute idle profile and confirm the climb is
 gone.
 
+**Update (2026-06-25, baseline capture):** `tools/crash/crash-reports/Start.DMP`
+and `End.DMP` are the comparison pair for MM-P9.4. They document the stale
+pre-rebuild binary that still climbed from ~100 MB to ~570 MB while idle. The
+current source tree already contains the MM-P9 fixes, so the next meaningful step
+is to rebuild and repeat the idle walk on the new executable.
+
 **Hardening follow-ups (2026-06-25, same session):** Two safe, headless-fixable
 items closed after a final memory-concern sweep (which otherwise found the
 render/present/resize/net paths all balanced):
@@ -398,4 +408,3 @@ After MM-P1.2, prioritize confirming MM-P2 + MM-P3 (DirectDraw + fonts) impact, 
 - **Memory growth on modern hardware (2026):** 20-year-old code running on systems with GB of RAM often goes unnoticed until the leak is significant. The 10-minute threshold suggests a steady-state leak rate of ~50-100 MB/min under typical gameplay.
 - **No wire-format changes in this plan.** All fixes are internal resource management; they do **not** change `U6O_VERSION` or the network protocol.
 - **Use the `cpp-modernizer` agent** for refactoring work (MM-P8 and beyond).
-
