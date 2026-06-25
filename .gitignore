@@ -36,3 +36,7 @@ test/*
 # src/ but are now build-time artifacts only.
 *.ico
 src/common/u6o7.rc
+
+# Memory/crash dumps — too large for GitHub (>100 MB)
+*.DMP
+*.dmp
