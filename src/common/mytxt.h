@@ -20,6 +20,9 @@ struct txt {
 //basic operations
 txt *txtnew();
 
+// MM-P9 diagnostic: live txt-object count (txtnew minus free(txt*)).
+extern long g_txt_live;
+
 void txtNEWLEN(txt *t, long l);
 
 void txtset(txt *t, const char *d);

@@ -135,6 +135,12 @@ IDirectDraw4 *dd = NULL;
 DWORD txtcol = 0xFFFFFF;
 HFONT txtfnt = NULL;
 
+// MM-P9 diagnostic (2026-06-25): live DirectDraw-surface count. ++ in
+// surfstruct() (every newsurf), -- in free(surf*). Logged by the 5-second
+// heartbeat in txtout() so a memory climb can be attributed to (or cleared of)
+// leaked surfaces. Behavior-preserving (a single long).
+long g_surf_live = 0;
+
 struct surf {
     DDSURFACEDESC2 d;
     LPDIRECTDRAWSURFACE4 s;
@@ -212,6 +218,7 @@ surf *surfstruct() {
     ts = (surf *) malloc(sizeof(surf));
     ZeroMemory(ts, sizeof(surf));
     ts->d.dwSize = sizeof(DDSURFACEDESC2);
+    g_surf_live++; // MM-P9 diagnostic: live DirectDraw-surface count
     for (i = 0; i < 16384; i++) {
         if (surflist[i] == NULL) {
             surflist[i] = ts;
@@ -691,6 +698,24 @@ DWORD fixcol(DWORD c) {
 
 void txtout(surf *s, long x, long y, txt *t)
 {
+    // MM-P9 diagnostic (2026-06-25): 5-second heartbeat. txtout() is called
+    // many times per frame, so this is a convenient always-available hook to
+    // sample the resource pools without touching the brace-seam loop fragments.
+    // It emits one OutputDebugString line every ~5s reporting the live
+    // DirectDraw-surface and txt-object counts. Watch it in DebugView / the
+    // debugger alongside Task Manager's private/commit bytes: whichever counter
+    // climbs in lockstep with memory is the leaking pool. Remove once the leak
+    // is identified. Cheap (a GetTickCount compare); the log only fires every 5s.
+    {
+        static DWORD _diag_last = 0;
+        DWORD _diag_now = GetTickCount();
+        if (_diag_now - _diag_last >= 5000) {
+            _diag_last = _diag_now;
+            char _diag[160];
+            wsprintfA(_diag, "U6O-DIAG surf_live=%ld txt_live=%ld\n", g_surf_live, g_txt_live);
+            OutputDebugStringA(_diag);
+        }
+    }
     HDC pdc;
     s->s->GetDC(&pdc);
     {
@@ -870,6 +895,7 @@ void free(surf *s) {
     }
     s->s->Release();
     free((void *) s);
+    g_surf_live--; // MM-P9 diagnostic
     return;
 }
 

@@ -299,6 +299,20 @@ sluggish past ~200–300 MB. Full discovery + root-cause write-up:
     binary showed committed private memory rising from 108,453,888 bytes to
     570,376,192 bytes (+461,922,304 bytes) and committed private regions rising
     from 263 to 3,540 while the UI thread sat in `gdi32full!TextOutA`.
+  - **Rebuild still leaks → attribution withdrawn (2026-06-25):** rebuilding from
+    current source (MM-P9 fixes present) still climbed ~100→570 MB idle/solo. A
+    fresh audit ruled out portraits (load-once, gated by `portrait_requested[]`),
+    **all** `newsurf`/`loadimage` sites (startup/guarded/free-before-realloc),
+    sound (bounded `tempsound[256]` ring), movers/sobj, inpmess/idlst, and GDI
+    handles (pool-capped). The leak is not statically identifiable and the dumps
+    can't be re-introspected here (no `cdb`; `.DMP` not in repo).
+  - **Action — diagnostic build:** added behavior-preserving live counters
+    `g_surf_live` (DirectDraw; ++ in `surfstruct`, -- in `free(surf*)`) and
+    `g_txt_live` (++ in `txtnew`, -- in `free(txt*)`) plus a 5-second `U6O-DIAG`
+    `OutputDebugStringA` heartbeat in `txtout()`. **Next interactive step:** run
+    with DebugView, watch which counter tracks the memory climb (or both flat →
+    raw `malloc`), then fix that specific site. See the report addendum in
+    `tools/crash/crash-reports/2026-06-25_memory-growth_idle-solo.md`.
 - **Exit:** No per-message surface growth on portrait refreshes; chat/name lists
   freed on teardown; 10-minute idle profile flat (±small caching).
 

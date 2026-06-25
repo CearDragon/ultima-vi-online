@@ -80,3 +80,59 @@ The work is already tracked in `docs/plans/in-progress/plan-memoryManagement.md`
 - The most useful baseline for future comparisons is committed private bytes, not just task-manager working set.
 - The current plan file already contains the full MM-P9 root-cause write-up; this report is the concise evidence record for this particular idle-session capture.
 
+---
+
+## Investigation addendum (2026-06-25, follow-up) — attribution corrected
+
+The user **rebuilt from the current source** (which already contains the MM-P9
+portrait fixes) and the idle climb **still reproduces** (~100 MB → ~570 MB). That
+contradicts this report's "stale binary / MM-P9.3 portrait reload" conclusion, so
+that attribution is **withdrawn**. A fresh source audit established:
+
+- The MM-P9.3 portrait fix is present and correct, and `getportrait*` gates
+  requests via `portrait_requested[]` (never reset), so the host sends portrait
+  data (type 43) **once per index** — portraits load once, bounded. Not the leak.
+- **Every** `newsurf`/`loadimage` call site in the client is startup-only,
+  guarded by a one-time flag, or frees-before-realloc (resize, `qkstf`,
+  `loadportrait`, `receiveport` reuse). There is **no per-frame surface
+  creation**, so surfaces should not leak.
+- Movers/sobj write fixed arrays (sobj frees-before-realloc); DirectSound voices
+  are a bounded `tempsound[256]` ring; `inpmess`/`idlst` are bounded; the
+  status-log wrap txts are reused; GDI handles are pool-capped (cannot account
+  for 461 MB). All ruled out.
+
+Conclusion: the previous two agent reports (inpmess/idlst, then portraits) both
+**mis-attributed** the leak. The true leaker is not identifiable by static
+reading and the dumps can't be re-introspected here (no `cdb`/WinDbg, and the
+`.DMP` files are not in the repo).
+
+### Action taken — diagnostic build (ship + measure)
+
+Added low-risk, behavior-preserving live-count instrumentation so the next run
+**measures** the leaking pool instead of guessing:
+
+- `src/common/txt.cpp` / `mytxt.h` — `g_txt_live` (++ in `txtnew`, -- in `free(txt*)`).
+- `src/client/myddraw.cpp` — `g_surf_live` (++ in `surfstruct`, -- in `free(surf*)`),
+  plus a **5-second heartbeat** in `txtout()` that emits
+  `U6O-DIAG surf_live=<n> txt_live=<n>` via `OutputDebugStringA`.
+
+All three targets build clean.
+
+### How to use it (one short run)
+
+1. Launch the rebuilt client and attach **DebugView** (Sysinternals) or run under
+   the debugger; filter on `U6O-DIAG`.
+2. Stand idle ~3–5 minutes while watching the heartbeat **alongside Task
+   Manager's "Commit size" / private bytes** for the client.
+3. Read the result:
+   - `surf_live` climbs in lockstep with memory → a **DirectDraw surface** leak
+     (re-audit `newsurf` callers / `free(surf*)`; there is a hidden per-frame
+     surface allocation or a missing free).
+   - `txt_live` climbs → a **txt** leak (find the per-frame/per-message `txtnew`
+     without a matching `free`).
+   - **Both flat** while memory climbs → a **raw `malloc`** leak (next suspects:
+     per-message buffers, map-download `MAPDL_*`, DirectSound duplicates).
+4. Report the three numbers (surf_live, txt_live, commit) at start and after a
+   few minutes; that uniquely identifies the pool and I'll fix the specific site.
+
+
