@@ -345,12 +345,57 @@ cmdline_length:
         if (txtsearch(t, t2)) {
             NEThost = 1;
         }
+        // MM-P3.4 (2026-06-24): legacy "-l" per-frame font workaround parsing
+        // is retired. Fonts are now startup-owned and released at shutdown only.
 #ifdef CLIENT
-        txtset(t2, "-l"); if (txtsearch(t, t2)) {
-            leak = 1;
+        // MM-P9 diagnostic (2026-06-26): per-frame leak bisection toggle.
+        //   "diagpresent2" -> mode 2 (skip present + on-surface text GetDC)
+        //   "diagpresent1" -> mode 1 (skip present only)
+        // See g_diag_present_mode in myddraw.cpp. Default 0 = normal rendering.
+        {
+            extern int g_diag_present_mode;
+            txtset(t2, "diagpresent2");
+            if (txtsearch(t, t2)) {
+                g_diag_present_mode = 2;
+            } else {
+                txtset(t2, "diagpresent1");
+                if (txtsearch(t, t2)) g_diag_present_mode = 1;
+            }
+        }
+        // MM-P9.5 (2026-06-27): cached on-surface text-DC gating switch.
+        //   "oldtextdc" -> g_text_dc_cache = 0 (legacy per-string GetDC path)
+        //   (absent)    -> g_text_dc_cache = 1 (new cached-DC path, default ON)
+        // Lets the user A/B the NVIDIA legacy-ddraw GetDC leak fix on real
+        // hardware. See g_text_dc_cache in myddraw.cpp.
+        {
+            extern int g_text_dc_cache;
+            txtset(t2, "oldtextdc");
+            if (txtsearch(t, t2)) g_text_dc_cache = 0;
+        }
+        // MM-P9.6 (2026-06-26): per-category DirectDraw Blt skip, to localize the
+        // residual ~120 KB/s NVIDIA leak. "diagbltskip1/2/3" -> g_diag_blt_skip
+        // (1=cls colour-fill, 2=img copy, 3=img0 keyed). Default 0 = normal.
+        // See g_diag_blt_skip in myddraw.cpp.
+        {
+            extern int g_diag_blt_skip;
+            txtset(t2, "diagbltskip3");
+            if (txtsearch(t, t2)) {
+                g_diag_blt_skip = 3;
+            } else {
+                txtset(t2, "diagbltskip2");
+                if (txtsearch(t, t2)) {
+                    g_diag_blt_skip = 2;
+                } else {
+                    txtset(t2, "diagbltskip1");
+                    if (txtsearch(t, t2)) g_diag_blt_skip = 1;
+                }
+            }
         }
 #endif
     }
+#ifdef CLIENT
+    leak = 0; // legacy workaround mode is intentionally disabled.
+#endif
 
 #ifndef CLIENT
     NEThost = 1; //"host" param is assumed
@@ -419,8 +464,30 @@ PM_NOREMOVE
 {
 		if (!GetMessage(&msg,NULL,0,0)){
 
+#ifdef _DEBUG
+            auto mm_p7_log_shutdown = [](const char *msg_text) {
+                OutputDebugStringA(msg_text);
+                OutputDebugStringA("\n");
+            };
+#endif
+
+      // MM-P7.1 (2026-06-24): shutdown checklist (normal exit path).
+      // Host:
+      //   1) Persist host state (guild storage).
+      //   2) Close listener and all client sockets.
+      // Client:
+      //   1) Delete one-time startup fonts/resources.
+      //   2) Persist client settings.
+      //   3) Stop/release DirectMusic.
+      //   4) Stop/release DirectSound voices/device.
+      //   5) Release DirectDraw surfaces/device.
+      //   6) Close socket and run WSACleanup.
+
 #ifdef CLIENT
 			if (fonts_added) {
+                // MM-P3.3/MM-P3.4: fonts are created once in setup_client.inc.
+                // Safe to delete at shutdown because SelectObject call sites now
+                // restore prior GDI objects before ReleaseDC.
                 DeleteObject(fnt1);
                 DeleteObject(fnt1naa);
                 DeleteObject(fnt2);
@@ -463,10 +530,19 @@ PM_NOREMOVE
 #endif
 
 #ifdef HOST
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P7.2: host shutdown start");
+      #endif
 			if (NEThost) {
+        #ifdef _DEBUG
+        mm_p7_log_shutdown("MM-P7.2: host save guardianguild");
+        #endif
                 // Guardian Guild communal storage: persist the shelf contents
                 // before the process exits so they survive a host restart.
                 guardianguild_save();
+        #ifdef _DEBUG
+        mm_p7_log_shutdown("MM-P7.2: host close listener socket");
+        #endif
                 closesocket(u6osocket);
                 for (i = 1; i <= socketclientlast; i++) {
                     if (socketclient[i] != INVALID_SOCKET) {
@@ -475,10 +551,26 @@ PM_NOREMOVE
                         closesocket(socketclient[i]);
                     }
                 }
+        #ifdef _DEBUG
+        mm_p7_log_shutdown("MM-P7.2: host client sockets closed");
+        #endif
             }
 #endif
 
 #ifdef CLIENT
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P7.2: client shutdown start");
+      #endif
+      // MM-P9.1 / MM-P9.2: free the chat-history linked list and the player
+      // name-tag txt list on client teardown. These accumulate across a long
+      // session / repeated reconnects; freeing them here keeps shutdown clean.
+      // (The dominant in-session leak — repeated portrait surface reloads — is
+      // fixed at its source in loadportrait()/the type-43 handler; see MM-P9.3.)
+      cleanup_input_message_history();
+      cleanup_player_namelist();
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P9: client game-state lists freed");
+      #endif
 			// Fast / clean shutdown (2026-05-28): the previous shutdown path
 			// blocked on SleepEx(2048) AFTER asking the socket to shut down,
 			// AND never told DirectMusic to stop or release. Net effect: the
@@ -498,6 +590,9 @@ PM_NOREMOVE
 			//      overkill on the client (one socket; the OS-level
 			//      linger handles it). 50ms is plenty.
 			if (u6omidisetup &&u6omidi) {
+				#ifdef _DEBUG
+				mm_p7_log_shutdown("MM-P7.2: client stop/release DirectMusic");
+				#endif
                 u6omidi->Stop();
                 delete u6omidi;
                 u6omidi = NULL;
@@ -507,9 +602,23 @@ PM_NOREMOVE
 			// Implementation lives in src/client/sound.cpp where the static
 			// tempsound[] array is visible.
 			soundshutdown();
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P7.2: client stop/release DirectSound");
+      #endif
+      // MM-P2.2: release all DirectDraw surfaces/interfaces on client exit.
+      ddrawshutdown();
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P7.2: client release DirectDraw");
+      #endif
 
 			shutdown (socketclient[0],SD_RECEIVE|SD_SEND); SleepEx (50,NULL); closesocket (socketclient[0]);
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P7.2: client socket closed");
+      #endif
 			WSACleanup();
+      #ifdef _DEBUG
+      mm_p7_log_shutdown("MM-P7.2: client WSACleanup complete");
+      #endif
 			if (midiout_setup) midiOutClose(midiout_handle);
 #endif
 

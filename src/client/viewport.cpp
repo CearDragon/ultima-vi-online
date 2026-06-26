@@ -73,6 +73,15 @@ namespace u6o {
                 }
             }
 
+            // MM-P6.1: temporary allocation rollback helper used by transactional
+            // lighting_alloc() so partial malloc failures never leak.
+            void free_temp_block(unsigned char *&p) {
+                if (p) {
+                    free(p);
+                    p = nullptr;
+                }
+            }
+
             inline int sidePanelW() {
                 return (uipanelsidebar >= 0) ? uipanelsizex[uipanelsidebar][0][0] : 260;
             }
@@ -166,6 +175,11 @@ namespace u6o {
         }
 
         bool lighting_alloc(int w, int h) {
+            // MM-P8.1: RAII candidate — ls / ls_moon1..4 are five parallel raw
+            // malloc'd buffers kept in lockstep with g_lighting_w/h. A small
+            // owning buffer type (or std::unique_ptr<unsigned char[]>) per plane,
+            // grouped in a struct, would make lighting_free()/the rollback block
+            // below disappear and guarantee all-or-nothing sizing structurally.
             if (w <= 0 || h <= 0) return false;
             // RW-P2.3: allocate at the active surface's PIXEL pitch
             // (g_lighting_stride), not the world width `w`. DirectDraw pads the
@@ -179,27 +193,44 @@ namespace u6o {
             if (g_lighting_w == stride && g_lighting_h == h && ls && ls_moon1 && ls_moon2 && ls_moon3 && ls_moon4) {
                 return true; // already sized correctly
             }
-            lighting_free();
 
             const size_t bytes = (size_t) stride * (size_t) h;
-            ls = (unsigned char *) malloc(bytes);
-            ls_moon1 = (unsigned char *) malloc(bytes);
-            ls_moon2 = (unsigned char *) malloc(bytes);
-            ls_moon3 = (unsigned char *) malloc(bytes);
-            ls_moon4 = (unsigned char *) malloc(bytes);
-            if (!ls || !ls_moon1 || !ls_moon2 || !ls_moon3 || !ls_moon4) {
-                lighting_free();
+            unsigned char *new_ls = (unsigned char *) malloc(bytes);
+            unsigned char *new_ls_moon1 = (unsigned char *) malloc(bytes);
+            unsigned char *new_ls_moon2 = (unsigned char *) malloc(bytes);
+            unsigned char *new_ls_moon3 = (unsigned char *) malloc(bytes);
+            unsigned char *new_ls_moon4 = (unsigned char *) malloc(bytes);
+            if (!new_ls || !new_ls_moon1 || !new_ls_moon2 || !new_ls_moon3 || !new_ls_moon4) {
+                // MM-P6.1: all-or-nothing rollback on partial allocation failure.
+                free_temp_block(new_ls);
+                free_temp_block(new_ls_moon1);
+                free_temp_block(new_ls_moon2);
+                free_temp_block(new_ls_moon3);
+                free_temp_block(new_ls_moon4);
                 return false;
             }
             // Match the BSS-zero behavior of the previous static arrays. The
             // moonN buffers are overwritten by setup_client.inc before first use,
             // but ls is read by getsound() / lightshow before the first frame
             // populates it — zero-init keeps that path well-defined.
-            memset(ls, 0, bytes);
-            memset(ls_moon1, 0, bytes);
-            memset(ls_moon2, 0, bytes);
-            memset(ls_moon3, 0, bytes);
-            memset(ls_moon4, 0, bytes);
+            memset(new_ls, 0, bytes);
+            memset(new_ls_moon1, 0, bytes);
+            memset(new_ls_moon2, 0, bytes);
+            memset(new_ls_moon3, 0, bytes);
+            memset(new_ls_moon4, 0, bytes);
+
+            // MM-P6.1: commit point — old buffers are released only after all new
+            // allocations/initialization succeeded.
+            free_one(ls);
+            free_one(ls_moon1);
+            free_one(ls_moon2);
+            free_one(ls_moon3);
+            free_one(ls_moon4);
+            ls = new_ls;
+            ls_moon1 = new_ls_moon1;
+            ls_moon2 = new_ls_moon2;
+            ls_moon3 = new_ls_moon3;
+            ls_moon4 = new_ls_moon4;
 
             // Store the allocated stride (not the world width) as the cache key
             // so the idempotency check above matches what lightingStride()
@@ -219,6 +250,15 @@ namespace u6o {
                     arr.data = nullptr;
                 }
                 arr.stride = 0;
+            }
+
+            // MM-P6.2: temporary allocation rollback helper used by transactional
+            // visibility_alloc() so partial malloc failures never leak.
+            void free_visibility_temp(unsigned char *&p) {
+                if (p) {
+                    free(p);
+                    p = nullptr;
+                }
             }
         }
 
@@ -240,7 +280,6 @@ namespace u6o {
                 vischeck && nonvis) {
                 return true;
             }
-            visibility_free();
 
             int tilesX = w / 32;
             int tilesY = h / 32;
@@ -251,19 +290,46 @@ namespace u6o {
             size_t padSize = (size_t) padX * padY;
             size_t viewSize = (size_t) tilesX * tilesY;
 
-            vis.data = (unsigned char *) malloc(padSize);
-            vis_window.data = (unsigned char *) malloc(padSize);
-            vis_chair.data = (unsigned char *) malloc(padSize);
-            vis_bed.data = (unsigned char *) malloc(padSize);
-            vis_slime.data = (unsigned char *) malloc(padSize);
-            vischeck.data = (unsigned char *) malloc(viewSize);
-            nonvis.data = (unsigned char *) malloc(viewSize);
+            unsigned char *new_vis = (unsigned char *) malloc(padSize);
+            unsigned char *new_vis_window = (unsigned char *) malloc(padSize);
+            unsigned char *new_vis_chair = (unsigned char *) malloc(padSize);
+            unsigned char *new_vis_bed = (unsigned char *) malloc(padSize);
+            unsigned char *new_vis_slime = (unsigned char *) malloc(padSize);
+            unsigned char *new_vischeck = (unsigned char *) malloc(viewSize);
+            unsigned char *new_nonvis = (unsigned char *) malloc(viewSize);
 
-            if (!vis.data || !vis_window.data || !vis_chair.data || !vis_bed.data || !vis_slime.data || !vischeck.data
-                || !nonvis.data) {
-                visibility_free();
+            if (!new_vis || !new_vis_window || !new_vis_chair || !new_vis_bed || !new_vis_slime || !new_vischeck
+                || !new_nonvis) {
+                // MM-P6.2: all-or-nothing rollback on partial allocation failure.
+                free_visibility_temp(new_vis);
+                free_visibility_temp(new_vis_window);
+                free_visibility_temp(new_vis_chair);
+                free_visibility_temp(new_vis_bed);
+                free_visibility_temp(new_vis_slime);
+                free_visibility_temp(new_vischeck);
+                free_visibility_temp(new_nonvis);
                 return false;
             }
+
+            memset(new_vis, 0, padSize);
+            memset(new_vis_window, 0, padSize);
+            memset(new_vis_chair, 0, padSize);
+            memset(new_vis_bed, 0, padSize);
+            memset(new_vis_slime, 0, padSize);
+            memset(new_vischeck, 0, viewSize);
+            memset(new_nonvis, 0, viewSize);
+
+            // MM-P6.2: commit point — preserve prior buffers if any allocation
+            // fails above; replace live buffers only after full success.
+            visibility_free();
+
+            vis.data = new_vis;
+            vis_window.data = new_vis_window;
+            vis_chair.data = new_vis_chair;
+            vis_bed.data = new_vis_bed;
+            vis_slime.data = new_vis_slime;
+            vischeck.data = new_vischeck;
+            nonvis.data = new_nonvis;
 
             vis.stride = padY;
             vis_window.stride = padY;
@@ -273,13 +339,6 @@ namespace u6o {
             vischeck.stride = tilesY;
             nonvis.stride = tilesY;
 
-            memset(vis.data, 0, padSize);
-            memset(vis_window.data, 0, padSize);
-            memset(vis_chair.data, 0, padSize);
-            memset(vis_bed.data, 0, padSize);
-            memset(vis_slime.data, 0, padSize);
-            memset(vischeck.data, 0, viewSize);
-            memset(nonvis.data, 0, viewSize);
 
             g_visibility_w = w;
             g_visibility_h = h;

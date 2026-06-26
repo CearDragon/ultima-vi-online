@@ -3,7 +3,7 @@
 These files are the decomposed pieces of what used to be the monolithic
 `src/server/loop_host.cpp` (26,875 lines / ~1.1 MB at the 2026-06-16 snapshot).
 See the trackable plan:
-[`docs/plans/plan-loopHostSplit.md`](../../../docs/plans/plan-loopHostSplit.md)
+[`docs/plans/plan-loopHostSplit.md`](../../../docs/plans/done/plan-loopHostSplit.md)
 (phase prefix `LHS-P*`).
 
 ## What this directory is

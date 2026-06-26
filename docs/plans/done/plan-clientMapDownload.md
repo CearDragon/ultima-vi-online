@@ -12,7 +12,7 @@ Each phase has an **Exit criteria** that must be green before starting the next 
 > that is not ✅. Every phase has a "What to read first" list so context
 > can be rebuilt cheaply.
 >
-> Companion doc: [`docs/rendering/map-client-host-sync/README.md`](../rendering/map-client-host-sync/README.md)
+> Companion doc: [`docs/rendering/map-client-host-sync/README.md`](../../rendering/map-client-host-sync/README.md)
 > explains the current pipeline this plan replaces.
 
 ---

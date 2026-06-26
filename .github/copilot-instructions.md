@@ -63,6 +63,26 @@ than mirror the legacy style — and new code should be modern from the start.
     re-balances braces and corrupts these files).
 - Build dirs: `cmake-build-debug/` (VS) and `cmake-build-debug-visual-studio/`
   (Ninja). Outputs land in `bin/{client,host}/debug/`.
+- **Build command (use this exact form):**
+
+  ```powershell
+  cmake.exe --build cmake-build-debug --target <target> -j 18
+  ```
+
+  where `<target>` is `client`, `host`, or `both`. **Always build through
+  this pre-configured `cmake-build-debug/` tree** — do **not** re-run `cmake`
+  to configure a fresh build directory from scratch. The existing tree already
+  has the DirectX 7 / Win32 SDK include paths (under `src/common/include`) and
+  the MSVC x86 toolchain wired up; a from-scratch configure in an agent shell
+  routinely fails with **missing Windows header files** (`windows.h`,
+  `ddraw.h`, etc.). If `cmake-build-debug/` is missing or stale, prefer the IDE
+  (CLion/VS) run configurations in `.run/` over hand-configuring — see the
+  README's *Shared run configurations* section.
+- Prefer the **shared IDE run configurations** (`.run/{client,host,both,
+  generate_icons}.run.xml`) and the **shared CMake profiles** (`.idea/cmake.xml`,
+  Debug + Release) when working in CLion — they encode the correct target,
+  working directory, and build-before-run wiring. They are committed to the
+  repo on purpose; reuse them rather than inventing one-off configs.
 - `viewport.h` exposes display sizing functions on the client and stub
   fallbacks for the host (the host's `viewTilesX()` / `viewTilesY()` return
   the legacy **32 / 24**, intentionally — see §Wire protocol below).
@@ -91,12 +111,41 @@ than mirror the legacy style — and new code should be modern from the start.
   use the client's dynamic `tpx`/`tpy` to decode host-emitted offsets — that
   was the "movers teleport then disappear" desync.
 
+## Plan lifecycle — where plans live by status
+
+Plans under `docs/plans/` are organized by **lifecycle status folder**. When
+you generate or move a plan, put it in the folder that matches its state:
+
+- `docs/plans/todo/` — **new / not-yet-started** plans. **Always create a new
+  plan here.**
+- `docs/plans/in-progress/` — move a plan here **when work first begins** on it
+  (its first phase is picked up).
+- `docs/plans/done/` — move a plan here **when it is finished** (all phases ✅).
+
+Rules:
+
+1. A plan lives in exactly one status folder; moving it *is* the status change.
+2. **Before picking up any plan** (moving it from `todo/` to `in-progress/` and
+   starting its first phase), check the current git branch. If you are not
+   already on a branch named `plan/<plan-name>`, create and switch to one:
+   ```powershell
+   git checkout -b plan/<plan-name>
+   ```
+   where `<plan-name>` is the plan's filename without the `.md` extension and
+   without the `plan-` prefix (e.g. `plan-memoryManagement.md` →
+   `plan/memoryManagement`). All commits for that plan's work go on that branch.
+3. Update any links to a plan when you move it (the README, the
+   `docs/plans/.../modernization/README.md` master index, and any
+   `RW-P*` / `DOB-P*` / `MSRV-P*` code-comment references).
+4. Keep the phase-ID tagging convention — the folder tracks lifecycle, the
+   phase checkboxes inside the plan track granular progress.
+
 ## Resizable-window / dynamic-object plans
 
 Two long-running, checkbox-tracked plans gate most rendering / wire changes:
 
-- `docs/plans/plan-resizableWindow.md` — phases `RW-P0` … `RW-P5`.
-- `docs/plans/plan-dynamicObjectBuffer.md` — phases `DOB-P0` … `DOB-P5`.
+- `docs/plans/done/plan-resizableWindow.md` — phases `RW-P0` … `RW-P5`.
+- `docs/plans/todo/plan-dynamicObjectBuffer.md` — phases `DOB-P0` … `DOB-P5`.
 
 Hotspot tables (literal `96`/`72`/`32`/`24` audit, etc.) live in
 `docs/resizable-window-hotspots.md`.
@@ -182,7 +231,9 @@ proof; see §Project direction.)
 
 1. Read the **Session handoff** sections of the plans under `docs/plans/`
    (incl. the loop-split plans) and any active records under
-   `docs/modernization/`.
+   `docs/modernization/`. Plans are filed by status: `docs/plans/todo/`,
+   `docs/plans/in-progress/`, `docs/plans/done/` (see §Plan lifecycle) — the
+   `in-progress/` folder is the fastest way to see what's actively being worked.
 2. `grep -n "\.inc" CMakeLists.txt` to see which `.inc` files compile.
 3. The per-frame/per-tick loops live in `src/client/loop/` and
    `src/server/loop/` as ordered `#include` fragments behind the umbrellas
@@ -194,4 +245,7 @@ proof; see §Project direction.)
    equivalence baseline before editing.
 6. Tag code comments with the relevant phase ID (`RW-P4.11:`, `DOB-P3.2:`,
    `LHS-P*`, or a `docs/modernization/` phase ID).
+7. Build with `cmake.exe --build cmake-build-debug --target <client|host|both>
+   -j 18` against the existing build tree — never configure a fresh one (it
+   fails on missing Windows headers). Prefer the shared `.run/` configs in CLion.
 

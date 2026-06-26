@@ -7,7 +7,7 @@
 >
 > Companion documents:
 >
-> - [`docs/resizable-window-hotspots.md`](../resizable-window-hotspots.md) —
+> - [`docs/resizable-window-hotspots.md`](resizable-window-hotspots.md) —
 >   catalog of hard-coded `1024×768` literals that interact with UI
 >   layout. Cross-referenced throughout this README as "hotspots-§X".
 > - [`docs/plans/`](../plans/) — multi-phase refactor plans

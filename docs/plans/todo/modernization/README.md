@@ -23,11 +23,11 @@ The work is split by source tree so increments stay small and reviewable:
 
 | Plan | Phase prefix | Tree | Scope headline |
 |---|---|---|---|
-| [`plan-modernize-common.md`](./plan-modernize-common.md) | `MCOM-P*` | `src/common/` | shared constants, structs, `txt`/`file`, wire bit-packers, globals, `WinMain`/main loop, `house.cpp`, RNG, platform seam |
-| [`plan-modernize-client.md`](./plan-modernize-client.md) | `MCLI-P*` | `src/client/` | `function_client.cpp`, `myddraw.cpp` + inline asm, the `loop_client` parts, UI panels, viewport, audio |
-| [`plan-modernize-server.md`](./plan-modernize-server.md) | `MSRV-P*` | `src/server/` | `function_host.cpp` god-functions, `.inc` elimination, the `loop_host` parts, global-state encapsulation, AI hot paths |
+| [`plan-modernize-common.md`](plan-modernize-common.md) | `MCOM-P*` | `src/common/` | shared constants, structs, `txt`/`file`, wire bit-packers, globals, `WinMain`/main loop, `house.cpp`, RNG, platform seam |
+| [`plan-modernize-client.md`](plan-modernize-client.md) | `MCLI-P*` | `src/client/` | `function_client.cpp`, `myddraw.cpp` + inline asm, the `loop_client` parts, UI panels, viewport, audio |
+| [`plan-modernize-server.md`](plan-modernize-server.md) | `MSRV-P*` | `src/server/` | `function_host.cpp` god-functions, `.inc` elimination, the `loop_host` parts, global-state encapsulation, AI hot paths |
 
-The pre-existing [`docs/plans/plan-serverRefactor.md`](../plan-serverRefactor.md)
+The pre-existing [`docs/plans/plan-serverRefactor.md`](plan-serverRefactor.md)
 is the ancestor of `plan-modernize-server.md`; it predates the loop split and is
 now **superseded** (see the banner at its top). Its phase content is folded into
 `MSRV-P*`.
@@ -135,6 +135,7 @@ flowchart TD
     LH[plan-linuxHost LH-P*<br/>in progress] -. coordinate platform/ .-> CM
     DOB[plan-dynamicObjectBuffer DOB-P*<br/>not started, WIRE] -. owns sobj_*/mv_* .-> CM
     RW[plan-resizableWindow RW-P*<br/>mostly done] -. owns viewport/lighting .-> CL
+    MPRES[plan-modernPresenter MPRES-P*<br/>not started, T3 present] -. consumes RW blit_* .-> CL
     LCS[loopClientSplit ✅] --> CL
     LHS[loopHostSplit ✅] --> SV
 ```
@@ -156,6 +157,16 @@ Hard coordination rules:
 - The loop splits (`LCS`/`LHS`) are **done** — the `loop_*` parts are the
   raw material for `MCLI`/`MSRV` hot-path modernization, edited only with
   `replace_string_in_file` (tight context) or the `tools/loop_split_*` tools.
+- **`MPRES-P*` owns the client present path** — see
+  [`../plan-modernPresenter.md`](../plan-modernPresenter.md). It replaces the
+  emulated-DirectDraw 7 present (`setupddraw`/`refresh`/`blit_letterbox`/
+  `newsurf`, the `p16to32*`/`p16to16*` asm converters, and the `img`/`img0` DD
+  `Blt`s) with a Direct3D 11 / DXGI swap chain, structurally curing the NVIDIA
+  legacy-emulation leak class that `MM-P9` point-fixed. It is a **T3 pixel-exact**
+  present-path change: coordinate the asm-converter removal (`MPRES-P2`) and
+  blit conversion (`MPRES-P4`) with `MCLI`, and **consume** (never redefine)
+  the `RW-P*` viewport/`blit_*` scale math. Host/`both` are unaffected (the
+  presenter is `#ifdef CLIENT` + Win32-only; the headless host never renders).
 
 ---
 

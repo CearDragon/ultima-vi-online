@@ -12,6 +12,14 @@ extern bool u6o_sound;
 extern unsigned char u6ovolume;
 bool DirectSoundCreate_fail = FALSE;
 
+// MM-P9 diagnostic (2026-06-25): DirectSound voice-ring counters, surfaced by
+// the txtout() U6O-DIAG heartbeat. g_snd_dup_n is cumulative DuplicateSoundBuffer
+// calls (sfx fire rate); g_snd_live is the current count of live tempsound[]
+// voices (must stay bounded <=256). Lets the next run confirm the sfx ring is
+// NOT the in-game accelerator. Remove with the rest of the MM-P9 instrumentation.
+long g_snd_dup_n = 0;
+long g_snd_live = 0;
+
 struct sound {
     DSBUFFERDESC d;
     WAVEFORMATEX wf;
@@ -111,10 +119,13 @@ busysound:
         if (i2 & DSBSTATUS_PLAYING) goto busysound;
         tempsound[i]->s->Release();
         free((void *) tempsound[i]);
+        g_snd_live--; // MM-P9 diagnostic: finished voice reclaimed.
     }
     sound *ts = (sound *) malloc(sizeof(sound));
     memcpy(ts, s, sizeof(sound));
     dsnd->DuplicateSoundBuffer(s->s, &ts->s);
+    g_snd_dup_n++; // MM-P9 diagnostic: count voice duplicates.
+    g_snd_live++;
     tempsound[i] = ts;
     tempsound[i]->ss = s;
     ts->s->Play(NULL, NULL, NULL);
@@ -140,10 +151,13 @@ busysound2:
         if (i2 & DSBSTATUS_PLAYING) goto busysound2;
         tempsound[i]->s->Release();
         free((void *) tempsound[i]);
+        g_snd_live--; // MM-P9 diagnostic: finished voice reclaimed.
     }
     sound *ts = (sound *) malloc(sizeof(sound));
     memcpy(ts, s, sizeof(sound));
     dsnd->DuplicateSoundBuffer(s->s, &ts->s);
+    g_snd_dup_n++; // MM-P9 diagnostic: count voice duplicates.
+    g_snd_live++;
     tempsound[i] = ts;
     tempsound[i]->ss = s;
     f = v;
@@ -160,18 +174,18 @@ void free(sound *s) {
     if (DirectSoundCreate_fail) return;
     if (soundsetupf == FALSE) return;
     if (s != NULL) {
-        s->s->Release();
+        if (s->s) s->s->Release();
         static long i;
         for (i = 0; i < 256; i++) {
             if (tempsound[i] != NULL) {
                 if (tempsound[i]->ss == s) {
-                    tempsound[i]->s->Release();
+                    if (tempsound[i]->s) tempsound[i]->s->Release();
                     free((void *) tempsound[i]);
                     tempsound[i] = NULL;
                 }
-                free((void *) s);
             }
         }
+        free((void *) s);
     }
     return;
 }
@@ -181,6 +195,12 @@ void free(sound *s) {
 // shutdown path in u6o7.cpp so dsound.dll releases its hold on client.exe
 // (and any in-flight WAV stops audibly) before ExitProcess runs. Safe when
 // sound setup never completed -- guards on per-entry and global pointers.
+//
+// MM-P8.1: RAII candidate — the tempsound[] voice pool + the global dsnd
+// device form a self-contained "SoundManager" subsystem. Wrapping each voice
+// in a small RAII type (Stop()+Release() in its dtor) and the device in a
+// ComPtr would let pool teardown happen automatically and remove this manual
+// Stop/Release/free triad.
 void soundshutdown() {
     if (soundsetupf == FALSE) return;
     for (long i = 0; i < 256; i++) {

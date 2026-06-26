@@ -9,6 +9,12 @@ extern HWND hWnd;
 
 #include "myfile.h"
 
+// MM-P9 diagnostic (2026-06-25): live txt-object counter. Incremented in
+// txtnew(), decremented in free(txt*). Read by the client's 5-second heartbeat
+// in myddraw.cpp::txtout() to identify whether a memory climb is driven by
+// leaked txt objects. Behavior-preserving (a single long; no allocation change).
+long g_txt_live = 0;
+
 txt *txtnew() //*externally available
 {
     txt *t;
@@ -17,6 +23,7 @@ txt *txtnew() //*externally available
     t->d[0] = 0;
     t->l = 0;
     t->bl = 1;
+    g_txt_live++;
     return t;
 }
 
@@ -397,6 +404,7 @@ void free(txt *t) //*externally available
 {
     free(t->d);
     free((void *) t);
+    g_txt_live--;
     return;
 }
 

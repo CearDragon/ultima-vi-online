@@ -316,4 +316,10 @@ surf *loadimage2(LPCSTR name, long flags);
 
 surf *loadimage2(txt *name, long flags);
 
+// MM-P9.1 & MM-P9.2: Memory leak cleanup functions for unbounded game-loop allocations.
+// Call these when disconnecting or loading new game state to prevent accumulation
+// of input message history and player name lists over extended play sessions.
+void cleanup_input_message_history(void);  // Free inpmess_mostrecent linked list
+void cleanup_player_namelist(void);         // Free idlst_name[] array + reset counter
+
 #endif /* FUNCTION_CLIENT_H */

@@ -174,7 +174,7 @@ for the single-player set they still need to be copied into the local `.\dr\`.
 
 ## Client map-data download (MDD, since `U6O_VERSION` 14)
 
-Plan: [`docs/plans/plan-clientMapDownload.md`](../../plans/plan-clientMapDownload.md).
+Plan: [`docs/plans/plan-clientMapDownload.md`](../../plans/done/plan-clientMapDownload.md).
 
 To remove the fixed-object staleness trap, a connecting client now downloads
 the host's **current** fixed-object files instead of trusting whatever shipped

@@ -376,31 +376,6 @@ if
 keyon [0xD8]=FALSE;
 keyon [0xD9]=FALSE; //release mousewheel "buttons"
 
-//not a real fix and that is why command line parameter is needed to use this "hidden" "fix"
-if
-(leak) {
-    DeleteObject(fnt1);
-    DeleteObject(fnt1naa);
-    DeleteObject(fnt2);
-    DeleteObject(fnt3);
-    DeleteObject(fnt4);
-    DeleteObject(fnt5);
-    DeleteObject(fnt6);
-    DeleteObject(fnt7);
-    fnt1 = CreateFont(22, NULL, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                      DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Avatar");
-    fnt1naa = CreateFont(22, NULL, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                         NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Avatar");
-    fnt2 = CreateFont(16, NULL, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                      NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Avatar");
-    fnt3 = CreateFont(8, NULL, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                      NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Terminal");
-    fnt4 = CreateFont(22, 8, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                      DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Avatar");
-    fnt5 = CreateFont(22, NULL, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                      DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Ultima Runes");
-    fnt6 = CreateFont(22, 0, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                      DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Gargish");
-    fnt7 = CreateFont(24, 9, 0, 0, 0, NULL, NULL, NULL, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                      DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "PerryGothic");
-}
+// The old per-frame font recreation workaround has been removed. Fonts are
+// created once during startup in `setup_client.inc` and released during
+// shutdown in `u6o7.cpp` WM_QUIT/WM_DESTROY handling.

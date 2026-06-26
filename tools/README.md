@@ -1,5 +1,34 @@
 # tools/
 Build-time utilities invoked by `CMakeLists.txt`.
+
+## `Enter-DevBuildEnv.ps1`
+Initializes the MSVC **x86** developer environment (`INCLUDE` / `LIB` / `PATH`)
+in the current shell so the Ninja-based CMake build can find the Windows SDK /
+Win32 headers (`windows.h`, `winsock2.h`, `ddraw.h`, `stdlib.h`, ...).
+
+**Why you need it:** the repo builds the x86 target with the `Hostx64/x86`
+MSVC toolchain via CLion's bundled Ninja. With Ninja, `cl.exe` resolves system
+headers from the `INCLUDE` env var. CLion (and a venv-activated dev shell)
+populate that by running the Visual Studio developer environment; a bare agent
+or CI shell does **not**, so the build fails with
+`cannot open source file "windows.h"`. This is the "missing Windows header
+files in a from-scratch agent shell" limitation noted in the root README /
+copilot-instructions — and the fix is environment setup, **not** re-running
+`cmake` to configure a fresh tree.
+
+```powershell
+# One-shot: init the env and build (client | host | both)
+.\tools\Enter-DevBuildEnv.ps1 -Build both
+
+# Or dot-source it once, then use the repo's standard build command repeatedly:
+. .\tools\Enter-DevBuildEnv.ps1
+cmake.exe --build cmake-build-debug --target both -j 18
+```
+
+It locates Visual Studio with `vswhere` (falling back to the well-known 2022
+edition roots), so it isn't hard-coded to one edition. It is idempotent: if
+`INCLUDE`/`LIB`/`cl.exe` are already present it skips re-initialization.
+
 ## `build_icon.ps1`
 Wraps a single square PNG in an ICO file as the only sub-image, then
 lets Windows handle every size the shell needs. This avoids GDI+'s

@@ -5,6 +5,16 @@
 #pragma warning(disable: 4018 4244 4731)
 #include "myfile.h"
 #include "commdlg.h"
+// MM-P9 diagnostic (2026-06-25): debug-CRT heap checkpoint for the txtout()
+// heartbeat. Lets us read outstanding malloc/new bytes to tell a raw-heap leak
+// apart from a DirectX-internal one. Debug build only; harmless if absent.
+#ifdef _DEBUG
+#include <crtdbg.h>
+#endif
+// MM-P9 diagnostic (2026-06-25): toolhelp for a per-process thread count. All
+// of CreateToolhelp32Snapshot/Thread32First/Next live in kernel32 (already
+// linked), so this adds no new link dependency.
+#include <tlhelp32.h>
 // r999
 #include "define_both.h"
 #include "viewport.h" // RW-P2.4: backbufferW()/H() for blit_letterbox sanity check
@@ -115,8 +125,21 @@ static void blit_letterbox(HWND hWndDst, HDC srcdc, long srcW, long srcH) {
     if (dstW == srcW && dstH == srcH) {
         BitBlt(winhdc, dstX, dstY, srcW, srcH, srcdc, 0, 0, SRCCOPY);
     } else {
-        SetStretchBltMode(winhdc, HALFTONE);
-        SetBrushOrgEx(winhdc, 0, 0, NULL);
+        // MM-P9 fix (2026-06-25): use COLORONCOLOR, NOT HALFTONE, for the
+        // per-frame downscale present. SetStretchBltMode(HALFTONE) + StretchBlt
+        // leaks GDI/kernel-heap memory on every call (it allocates an internal
+        // halftone palette that is not reliably freed). Because that memory is
+        // committed by win32k on the process's behalf, it shows up as a steady
+        // private/commit climb (~0.4 MB/s at 16 fps here) while the GDI *object*
+        // count, USER handles, kernel handles, CRT heap and our surface/txt
+        // counters all stay flat — which is exactly the leak signature we saw.
+        // This path runs every frame whenever the window is not 1:1 with the
+        // back-buffer (the menu often presents 1:1 via the BitBlt branch above,
+        // which is why the leak was far faster in-game). COLORONCOLOR allocates
+        // nothing per call. Trade-off: downscaled present is point-sampled
+        // (sharper/aliased) instead of HALFTONE-smoothed; the back-buffer pixels
+        // themselves are unchanged and native (s==1.0) presents still BitBlt.
+        SetStretchBltMode(winhdc, COLORONCOLOR);
         StretchBlt(winhdc, dstX, dstY, dstW, dstH, srcdc, 0, 0, srcW, srcH, SRCCOPY);
     }
 
@@ -135,6 +158,72 @@ IDirectDraw4 *dd = NULL;
 DWORD txtcol = 0xFFFFFF;
 HFONT txtfnt = NULL;
 
+// MM-P9 diagnostic (2026-06-25): live DirectDraw-surface count. ++ in
+// surfstruct() (every newsurf), -- in free(surf*). Logged by the 5-second
+// heartbeat in txtout() so a memory climb can be attributed to (or cleared of)
+// leaked surfaces. Behavior-preserving (a single long).
+long g_surf_live = 0;
+
+// MM-P9 diagnostic (2026-06-26): per-frame leak BISECTION toggle. Set from the
+// command line in WinMain (see u6o7.cpp): pass "diagpresent1" or "diagpresent2".
+//   0 (default) = normal rendering, no behavior change.
+//   1 = skip the per-frame present in refresh() (the window GetDC + BitBlt and
+//       the back-buffer IDirectDrawSurface::GetDC). Isolates whether the leak
+//       lives in the final present path.
+//   2 = also skip the per-string IDirectDrawSurface::GetDC text draw in
+//       txtout()/txtouts(). Isolates the on-surface text DC churn.
+// The "constant rate at all window sizes" symptom rules out blit-AREA scaling
+// and points at a fixed-cost-per-frame, driver-dependent allocation; the most
+// likely source is repeated IDirectDrawSurface::GetDC/ReleaseDC cycles, which
+// some WDDM ddraw7-emulation drivers leak per call regardless of surface size.
+// Read the result by watching Task Manager's commit / the U6O-DIAG commitKB:
+//   * mode 1 flattens commit       -> leak is the refresh() present.
+//   * mode 1 climbs, mode 2 flat   -> leak is the txtout()/txtouts() text DCs.
+//   * mode 2 still climbs          -> leak is elsewhere (world-render Blt/img,
+//                                     Lock/Unlock, or DirectX audio).
+// Default 0 keeps shipped behavior identical; remove once the leak is found.
+int g_diag_present_mode = 0;
+
+// MM-P9.5 (2026-06-27): cached on-surface text-DC toggle (gating switch so the
+// fix can be A/B'd on real NVIDIA hardware before it ships as the only path).
+//   1 (default) = NEW cached-DC path: txtout()/txtouts() acquire the
+//                 IDirectDrawSurface DC ONCE (lazily) and reuse it across
+//                 consecutive text draws; it is released the next time a
+//                 DirectDraw method (Blt/Flip/Lock/GetDC) runs on that surface.
+//                 This collapses the per-string GetDC/ReleaseDC churn that
+//                 leaks under NVIDIA's legacy DirectDraw emulation.
+//   0 = LEGACY path: GetDC/ReleaseDC around every individual text string
+//       (exactly the pre-MM-P9.5 behavior). Selected with command-line
+//       substring "oldtextdc" (parsed in u6o7.cpp), mirroring how
+//       "diagpresent1/2" sets g_diag_present_mode.
+// Both paths issue the IDENTICAL GDI call sequence per TextOut (same surface,
+// same DC type, same font / text-colour / bk-mode state), so rendered pixels
+// are byte-for-byte identical; only the GetDC/ReleaseDC *count* per frame
+// differs. Watch the U6O-DIAG `commitKB` heartbeat: with the new path ON the
+// idle commit climb should drop sharply vs `oldtextdc`.
+int g_text_dc_cache = 1;
+
+// MM-P9.6 diagnostic (2026-06-26): localize the residual ~120 KB/s NVIDIA leak
+// that persists with every per-frame IDirectDrawSurface::GetDC suppressed
+// (diagpresent mode 2). The only per-frame DirectDraw operations left are Blts,
+// in three categories. These cumulative counters are emitted by the txtout()
+// heartbeat so a run can attribute the commit climb: for each category compute
+// Δcommit / Δcount between two heartbeats = bytes leaked per Blt of that kind.
+// Behavior-preserving (three longs ++'d at the existing Blt sites).
+long g_blt_fill_n = 0; // cls()            — DDBLT_COLORFILL
+long g_blt_copy_n = 0; // img(d,s) / img(d,s,rect) — plain DDBLT copy
+long g_blt_key_n = 0;  // img0(d,s)        — DDBLT_KEYSRC (colour-keyed) copy
+
+// MM-P9.6 bisection: skip ONE Blt category to confirm it is the leak — watch the
+// heartbeat commitKB go flat. Opt-in via command-line substring "diagbltskip1/2/3"
+// (parsed in u6o7.cpp, mirroring diagpresent). Default 0 = normal rendering.
+//   1 = skip cls() colour-fill   (screen may show stale pixels — cosmetic only)
+//   2 = skip img()/img() copy    (composited surfaces won't draw)
+//   3 = skip img0() keyed copy   (transparent sprites won't draw)
+// Skipping breaks that category's VISUALS only; the game keeps running so the
+// idle commit slope is still measurable.
+int g_diag_blt_skip = 0;
+
 struct surf {
     DDSURFACEDESC2 d;
     LPDIRECTDRAWSURFACE4 s;
@@ -144,6 +233,12 @@ struct surf {
         unsigned char *o1;
         unsigned short *o2;
     };
+
+    // MM-P9.5: cached on-surface GDI DC for the text path — keep this layout in
+    // lockstep with the mirror definition in myddraw.h. NULL when no DC is held.
+    // See myddraw.h for the full rationale (NVIDIA legacy-ddraw GetDC leak fix).
+    // Not serialized — surf is never byte-blitted to disk/wire.
+    HDC cachedTextDC;
 
     //IDirect3DTexture2* t; //only valid if SURF_TEX flag is used *REDUNDANT
 };
@@ -199,7 +294,8 @@ bool setupddraw() {
     ts->s->GetPixelFormat(&DDRAW_display_pixelformat);
     //exit(DDRAW_display_pixelformat.dwGBitMask);
     ts->s->Release();
-    //free((void*)ts);
+    // ts was allocated only to query the primary surface pixel format; free it.
+    free((void *) ts);
     //static long i;
     ZeroMemory(&surflist[0], sizeof(surf *) * 16384);
     return TRUE;
@@ -211,6 +307,7 @@ surf *surfstruct() {
     ts = (surf *) malloc(sizeof(surf));
     ZeroMemory(ts, sizeof(surf));
     ts->d.dwSize = sizeof(DDSURFACEDESC2);
+    g_surf_live++; // MM-P9 diagnostic: live DirectDraw-surface count
     for (i = 0; i < 16384; i++) {
         if (surflist[i] == NULL) {
             surflist[i] = ts;
@@ -295,6 +392,37 @@ ns_sysmem:
     return ts;
 }
 
+// MM-P9.5 (2026-06-27): cached on-surface text-DC helpers. See surf::cachedTextDC
+// in myddraw.h and the g_text_dc_cache toggle above for the full rationale.
+//
+// surf_text_dc_acquire(): return the surface's cached GDI DC, lazily creating it
+// via a single IDirectDrawSurface::GetDC the first time. Mirrors the legacy
+// per-string GetDC exactly (same surface, same DC type) so TextOut output is
+// pixel-identical; only the number of GetDC calls per frame changes. On GetDC
+// failure cachedTextDC stays NULL and we return NULL — the same observable
+// outcome as the legacy code, which also ignored GetDC's return and operated on
+// whatever HDC came back.
+static HDC surf_text_dc_acquire(surf *s) {
+    if (s->cachedTextDC == NULL) {
+        HDC dc = NULL;
+        s->s->GetDC(&dc);
+        s->cachedTextDC = dc;
+    }
+    return s->cachedTextDC;
+}
+
+// surf_text_dc_release(): release the cached DC (if any) so the surface is legal
+// for the next DirectDraw method call. DirectDraw forbids Blt/Flip/Lock/GetDC
+// while a DC is held; every such call site in this module (and the event-driven
+// GetDC sites in function_client.cpp) calls this first. No-op when none is held.
+void surf_text_dc_release(surf *s) {
+    if (s == NULL) return;
+    if (s->cachedTextDC != NULL) {
+        s->s->ReleaseDC(s->cachedTextDC);
+        s->cachedTextDC = NULL;
+    }
+}
+
 void pset(surf *s, long x, long y, DWORD c) {
     if (x < 0) return;
     if (y < 0) return;
@@ -316,6 +444,48 @@ DWORD point(surf *s, long x, long y) {
 
 void cls(surf *s, DWORD c) {
     static DDBLTFX b;
+    // MM-P9.6: count + optional skip (colour-fill category).
+    g_blt_fill_n++;
+    if (g_diag_blt_skip == 1) return;
+    // MM-P9.6 FIX (2026-06-26): fill via the locked system-memory pixel pointer
+    // instead of IDirectDrawSurface::Blt(DDBLT_COLORFILL). On NVIDIA's legacy-
+    // DirectDraw emulation each colour-fill Blt leaks ~7 KB of committed memory;
+    // cls() runs once per frame (the back-buffer clear), so that was the residual
+    // ~115 KB/s idle leak (confirmed: the bltFill count tracked commitKB 1:1). A
+    // raw memory fill calls NO DirectDraw method, so it cannot leak, and writes
+    // the IDENTICAL pixels: DDBLT_COLORFILL writes dwFillColor as a value already
+    // in the surface's pixel format, which is exactly what each store below does.
+    // s->o is the stable pointer from the surface's creation-time Lock (the asm
+    // blitters use it the same way); it is NULL only for video-memory surfaces
+    // (SURF_VIDMEM), for which we keep the legacy Blt.
+    if (s->o != NULL) {
+        const DWORD w = s->d.dwWidth;
+        const DWORD h = s->d.dwHeight;
+        const long pitch = s->d.lPitch;
+        unsigned char *row = (unsigned char *) s->o;
+        if (s->d.ddpfPixelFormat.dwRGBBitCount == 32) {
+            const unsigned long v32 = (unsigned long) c;
+            for (DWORD yy = 0; yy < h; yy++) {
+                unsigned long *px = (unsigned long *) row;
+                for (DWORD xx = 0; xx < w; xx++) px[xx] = v32;
+                row += pitch;
+            }
+        } else {
+            const unsigned short v16 = (unsigned short) c;
+            for (DWORD yy = 0; yy < h; yy++) {
+                unsigned short *px = (unsigned short *) row;
+                for (DWORD xx = 0; xx < w; xx++) px[xx] = v16;
+                row += pitch;
+            }
+        }
+        return;
+    }
+    // Fallback: video-memory / unlocked surface (s->o == NULL) — keep legacy Blt.
+    // MM-P9.6: only THIS path calls a DirectDraw method, so release the cached
+    // text DC here. The raw-fill path above writes memory directly and must NOT
+    // release — releasing every frame would force the present/text DC to be
+    // re-acquired per frame, reintroducing the per-frame ddraw-GetDC leak.
+    surf_text_dc_release(s);
     b.dwSize = sizeof(DDBLTFX);
     b.dwFillColor = c;
     s->s->Blt(NULL, NULL, NULL, DDBLT_WAIT | DDBLT_COLORFILL, &b);
@@ -333,10 +503,28 @@ void cls(surf *s, DWORD c) {
 // frame, and the WndProc mouse handler maps client coords back through
 // those globals.
 void refresh(surf *s) {
+    // MM-P9.6 (2026-06-26): present via the cached on-surface text DC instead of
+    // a fresh IDirectDrawSurface::GetDC every frame. The present needs a GDI DC
+    // for `s` (= ps) to BitBlt to the window; doing GetDC/ReleaseDC per frame
+    // leaked ~6 KB/frame on NVIDIA's legacy-ddraw emulation (~94 KB/s at 16 fps) —
+    // the SAME per-call ddraw-GetDC leak fixed for text. ps is never a DirectDraw
+    // Blt destination (the world is composed by the asm/raw blitters into ps->o)
+    // and cls() now raw-fills it without releasing, so the cached DC persists for
+    // the whole session: one ddraw GetDC total instead of one per frame. The
+    // legacy `oldtextdc` path keeps the per-frame GetDC/ReleaseDC for A/B.
+    if (g_diag_present_mode >= 1) return; // diag: skip present entirely
     HDC ddhdc;
-    s->s->GetDC(&ddhdc);
-    blit_letterbox(hWnd, ddhdc, (long) s->d.dwWidth, (long) s->d.dwHeight);
-    s->s->ReleaseDC(ddhdc);
+    if (g_text_dc_cache != 0) {
+        ddhdc = surf_text_dc_acquire(s); // reuse the one cached DC; do NOT release
+        if (ddhdc != NULL)
+            blit_letterbox(hWnd, ddhdc, (long) s->d.dwWidth, (long) s->d.dwHeight);
+    } else {
+        // Legacy baseline: ensure DC-free, then per-frame GetDC/ReleaseDC.
+        surf_text_dc_release(s);
+        s->s->GetDC(&ddhdc);
+        blit_letterbox(hWnd, ddhdc, (long) s->d.dwWidth, (long) s->d.dwHeight);
+        s->s->ReleaseDC(ddhdc);
+    }
 } //refresh end
 
 
@@ -598,6 +786,13 @@ return;
 void img(surf *d, surf *s) {
     if (s == NULL) return;
     if (d == NULL) return;
+    // MM-P9.5: a DirectDraw Blt touches BOTH surfaces, so release any cached
+    // text DC on the source and the destination before the Blt.
+    surf_text_dc_release(d);
+    surf_text_dc_release(s);
+    // MM-P9.6: count + optional skip (plain-copy category).
+    g_blt_copy_n++;
+    if (g_diag_blt_skip == 2) return;
     d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT, NULL);
 }
 
@@ -605,6 +800,12 @@ void img(surf *d, surf *s) {
 // r999 img to handle resizing and positioning
 void img(surf *d, surf *s, int x, int y, int x2, int y2) {
     RECT drect;
+    // MM-P9.5: release cached text DCs on both surfaces before the Blt.
+    surf_text_dc_release(d);
+    surf_text_dc_release(s);
+    // MM-P9.6: count + optional skip (plain-copy category).
+    g_blt_copy_n++;
+    if (g_diag_blt_skip == 2) return;
     drect.left = x;
     drect.right = x2;
     drect.top = y;
@@ -688,54 +889,204 @@ DWORD fixcol(DWORD c) {
   }
 }*/
 
-void txtout(surf *s, long x, long y, txt *t)
-//MEMLEAKING A LOT! thats why I added delete object and it works, but the font is fucked up if deleted right away
-{
-    static HDC pdc;
-    static HGDIOBJ last_font;
-    s->s->GetDC(&pdc);
-    last_font = SelectObject(pdc, txtfnt);
-    SelectObject(pdc, txtfnt);
-    if ((txtcol & 0xFF000000) == 0) SetBkMode(pdc, TRANSPARENT);
-    SetTextColor(pdc, fixcol(txtcol));
-    TextOut(pdc, x, y, t->d, t->l);
-    //clear_font(SelectObject(pdc, last_font));
-    //DeleteObject(SelectObject(pdc, last_font));
-    /*if(fobjs==1024) {//buffer not big enough !
-    clear_font_buffer();
-  }
-  font_objs[fobjs]=SelectObject(pdc, last_font);;
-  fobjs++;*/
-    //s->s->ReleaseDC(pdc);
-    s->s->ReleaseDC(pdc);
-    /*if(!(s->s->ReleaseDC(pdc))){
-    //error releasing shit!
-    clear_font_buffer();
-  }*/
+// MM-P9 diagnostic (2026-06-25): process-wide probes for the heartbeat. These
+// catch leaks that bypass every other counter: thread stacks (threads), kernel
+// objects (handles), and driver/DirectX-internal commits (private bytes). All
+// are resolved dynamically or via kernel32/toolhelp, so no new link dependency.
 
+// Private (committed) bytes for this process. Resolves GetProcessMemoryInfo at
+// runtime (kernel32!K32GetProcessMemoryInfo first, then psapi.dll) so we never
+// link psapi.lib. Returns bytes, or 0 if unavailable.
+static SIZE_T _diag_private_bytes() {
+    // Local mirror of PROCESS_MEMORY_COUNTERS_EX (x86 layout) so we don't need
+    // psapi.h (which can drag in a #pragma comment(lib, "psapi.lib")).
+    struct _DIAG_PMCEX {
+        DWORD  cb;
+        DWORD  PageFaultCount;
+        SIZE_T PeakWorkingSetSize;
+        SIZE_T WorkingSetSize;
+        SIZE_T QuotaPeakPagedPoolUsage;
+        SIZE_T QuotaPagedPoolUsage;
+        SIZE_T QuotaPeakNonPagedPoolUsage;
+        SIZE_T QuotaNonPagedPoolUsage;
+        SIZE_T PagefileUsage;
+        SIZE_T PeakPagefileUsage;
+        SIZE_T PrivateUsage;
+    };
+    typedef BOOL(WINAPI *PGPMI)(HANDLE, void *, DWORD);
+    static PGPMI pfn = NULL;
+    static bool tried = false;
+    if (!tried) {
+        tried = true;
+        HMODULE hk = GetModuleHandleA("kernel32.dll");
+        if (hk) pfn = (PGPMI) GetProcAddress(hk, "K32GetProcessMemoryInfo");
+        if (!pfn) {
+            HMODULE hp = LoadLibraryA("psapi.dll");
+            if (hp) pfn = (PGPMI) GetProcAddress(hp, "GetProcessMemoryInfo");
+        }
+    }
+    if (!pfn) return 0;
+    _DIAG_PMCEX pmc;
+    ZeroMemory(&pmc, sizeof(pmc));
+    pmc.cb = sizeof(pmc);
+    if (pfn(GetCurrentProcess(), &pmc, sizeof(pmc))) return pmc.PrivateUsage;
+    return 0;
+}
+
+// Open kernel handle count for this process. Resolved dynamically because the
+// legacy SDK headers here may not declare GetProcessHandleCount.
+static DWORD _diag_handle_count() {
+    typedef BOOL(WINAPI *PGPHC)(HANDLE, PDWORD);
+    static PGPHC pfn = NULL;
+    static bool tried = false;
+    if (!tried) {
+        tried = true;
+        HMODULE hk = GetModuleHandleA("kernel32.dll");
+        if (hk) pfn = (PGPHC) GetProcAddress(hk, "GetProcessHandleCount");
+    }
+    if (!pfn) return 0;
+    DWORD n = 0;
+    if (pfn(GetCurrentProcess(), &n)) return n;
+    return 0;
+}
+
+// Live thread count for this process (toolhelp snapshot).
+static long _diag_thread_count() {
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    if (snap == INVALID_HANDLE_VALUE) return -1;
+    THREADENTRY32 te;
+    ZeroMemory(&te, sizeof(te));
+    te.dwSize = sizeof(te);
+    DWORD pid = GetCurrentProcessId();
+    long n = 0;
+    if (Thread32First(snap, &te)) {
+        do {
+            if (te.th32OwnerProcessID == pid) n++;
+        } while (Thread32Next(snap, &te));
+    }
+    CloseHandle(snap);
+    return n;
+}
+
+void txtout(surf *s, long x, long y, txt *t)
+{
+    // MM-P9 diagnostic (2026-06-25): 5-second heartbeat. txtout() is called
+    // many times per frame, so this is a convenient always-available hook to
+    // sample the resource pools without touching the brace-seam loop fragments.
+    // It emits one OutputDebugString line every ~5s reporting the live
+    // DirectDraw-surface and txt-object counts PLUS the outstanding debug-CRT
+    // heap (malloc/new) bytes/blocks and the process GDI+USER handle counts.
+    // Watch it in DebugView / the debugger alongside Task Manager's commit:
+    //   * surf_live / txt_live climb  -> DirectDraw-surface / txt leak
+    //   * heapKB / heapN climb        -> raw malloc/new leak (find via _CrtSetBreakAlloc)
+    //   * gdi / user climb            -> GDI / USER handle leak
+    //   * NONE climb but commit does  -> DirectX-internal (dsound/dmusic/ddraw) leak
+    // Remove once the leak is identified. Cheap: a GetTickCount compare; the
+    // sampling + log only fire every 5s.
+    {
+        static DWORD _diag_last = 0;
+        DWORD _diag_now = GetTickCount();
+        if (_diag_now - _diag_last >= 5000) {
+            _diag_last = _diag_now;
+            long _diag_heap_kb = -1;
+            long _diag_heap_n = -1;
+#ifdef _DEBUG
+            // _NORMAL_BLOCK (index 1) is where malloc/new land in the debug CRT.
+            _CrtMemState _diag_ms;
+            _CrtMemCheckpoint(&_diag_ms);
+            _diag_heap_kb = (long) (_diag_ms.lSizes[1] / 1024);
+            _diag_heap_n = (long) _diag_ms.lCounts[1];
+#endif
+            DWORD _diag_gdi = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
+            DWORD _diag_user = GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS);
+            // MM-P9 diagnostic: process-wide commit/handles/threads — these catch
+            // leaks invisible to every other counter (DirectX-driver memory,
+            // kernel handles, thread stacks). commitKB is the ground truth that
+            // every line now self-correlates against.
+            unsigned long _diag_commit_kb = (unsigned long) (_diag_private_bytes() / 1024);
+            DWORD _diag_handles = _diag_handle_count();
+            long _diag_threads = _diag_thread_count();
+            // MM-P9 diagnostic: cumulative DirectMusic call counts (dmusic.cpp,
+            // compiled into both host and client) and DirectSound voice-ring
+            // counts (sound.cpp). sound.cpp is CLIENT/both-only — the host has no
+            // sound source — so reference g_snd_* only under CLIENT to keep the
+            // host link clean; the host never renders, so -1 sentinels are fine.
+            extern long g_midi_play_n;
+            extern long g_midi_load_n;
+#ifdef CLIENT
+            extern long g_snd_dup_n;
+            extern long g_snd_live;
+            long _diag_snd_dup = g_snd_dup_n;
+            long _diag_snd_live = g_snd_live;
+#else
+            long _diag_snd_dup = -1;
+            long _diag_snd_live = -1;
+#endif
+            char _diag[512];
+            wsprintfA(_diag,
+                      "U6O-DIAG presentMode=%d commitKB=%lu handles=%lu threads=%ld surf=%ld txt=%ld heapKB=%ld heapN=%ld gdi=%lu user=%lu midiPlay=%ld midiLoad=%ld sndDup=%ld sndLive=%ld bltFill=%ld bltCopy=%ld bltKey=%ld bltSkip=%d\n",
+                      g_diag_present_mode,
+                      _diag_commit_kb, _diag_handles, _diag_threads,
+                      g_surf_live, g_txt_live, _diag_heap_kb, _diag_heap_n, _diag_gdi, _diag_user,
+                      g_midi_play_n, g_midi_load_n, _diag_snd_dup, _diag_snd_live,
+                      g_blt_fill_n, g_blt_copy_n, g_blt_key_n, g_diag_blt_skip);
+            OutputDebugStringA(_diag);
+        }
+    }
+    // MM-P9 diagnostic (2026-06-26): mode >= 2 skips the per-string DirectDraw
+    // GetDC text draw (after the heartbeat above, so the log keeps flowing).
+    // Isolates whether the per-frame txtout() GetDC/ReleaseDC churn is the leak.
+    if (g_diag_present_mode >= 2) return;
+    // MM-P9.5: text DC path. New (g_text_dc_cache=1, default): acquire the
+    // on-surface DC once and keep it; the next DirectDraw method on this surface
+    // releases it (surf_text_dc_release). Legacy (oldtextdc): GetDC/ReleaseDC per
+    // string — kept byte-identical here so it is a faithful A/B baseline.
+    HDC pdc;
+    bool cached = (g_text_dc_cache != 0);
+    if (cached) pdc = surf_text_dc_acquire(s);
+    else s->s->GetDC(&pdc);
+    {
+        HGDIOBJ old_font = SelectObject(pdc, txtfnt);
+        if ((txtcol & 0xFF000000) == 0) SetBkMode(pdc, TRANSPARENT);
+        // MM-P9.5: the persistent cached DC carries bk-mode between draws, so
+        // restore the legacy fresh-DC default (OPAQUE) explicitly. The legacy
+        // path gets a brand-new DC each call (already OPAQUE), so this reset is
+        // applied only on the cached path — pixels stay identical either way.
+        else if (cached) SetBkMode(pdc, OPAQUE);
+        SetTextColor(pdc, fixcol(txtcol));
+        TextOut(pdc, x, y, t->d, t->l);
+        SelectObject(pdc, old_font);
+    }
+    if (!cached) s->s->ReleaseDC(pdc);
     return;
 }
 
 void txtouts(surf *s, long x, long y, txt *t) //creates a shadow behind the text (8,8,8)
 {
-    static HDC pdc;
-    static HGDIOBJ last_font;
-    s->s->GetDC(&pdc);
-    //last_font=SelectObject(pdc,txtfnt);
-    SelectObject(pdc, txtfnt);
-    if ((txtcol & 0xFF000000) == 0) SetBkMode(pdc, TRANSPARENT);
-    SetTextColor(pdc, 8 + 8 * 256 + 8 * 65536); //8,8,8
-    TextOut(pdc, x - 1, y, t->d, t->l);
-    TextOut(pdc, x + 1, y, t->d, t->l);
-    TextOut(pdc, x, y - 1, t->d, t->l);
-    TextOut(pdc, x, y + 1, t->d, t->l);
-    SetTextColor(pdc, fixcol(txtcol));
-    TextOut(pdc, x, y, t->d, t->l);
-
-    //clear_font(SelectObject(pdc, last_font));
-
-    //DeleteObject(SelectObject(pdc, last_font));
-    s->s->ReleaseDC(pdc);
+    // MM-P9 diagnostic (2026-06-26): mode >= 2 skips the per-string DirectDraw
+    // GetDC text draw (see txtout()). Default (0) is unchanged behavior.
+    if (g_diag_present_mode >= 2) return;
+    // MM-P9.5: same cached-vs-legacy text DC handling as txtout() (see there).
+    HDC pdc;
+    bool cached = (g_text_dc_cache != 0);
+    if (cached) pdc = surf_text_dc_acquire(s);
+    else s->s->GetDC(&pdc);
+    {
+        HGDIOBJ old_font = SelectObject(pdc, txtfnt);
+        if ((txtcol & 0xFF000000) == 0) SetBkMode(pdc, TRANSPARENT);
+        // MM-P9.5: restore the legacy fresh-DC default on the persistent cached
+        // DC (see txtout()); no-op on the legacy per-string path.
+        else if (cached) SetBkMode(pdc, OPAQUE);
+        SetTextColor(pdc, 8 + 8 * 256 + 8 * 65536); //8,8,8
+        TextOut(pdc, x - 1, y, t->d, t->l);
+        TextOut(pdc, x + 1, y, t->d, t->l);
+        TextOut(pdc, x, y - 1, t->d, t->l);
+        TextOut(pdc, x, y + 1, t->d, t->l);
+        SetTextColor(pdc, fixcol(txtcol));
+        TextOut(pdc, x, y, t->d, t->l);
+        SelectObject(pdc, old_font);
+    }
+    if (!cached) s->s->ReleaseDC(pdc);
     return;
 }
 
@@ -762,10 +1113,32 @@ void purgesurfaces() {
     static long i;
     for (i = 0; i < 16384; i++) {
         if (surflist[i] != NULL) {
-            surflist[i]->s->Release();
+            // Use the module's surf cleanup which releases the surface and
+            // frees the malloc'd surf struct (free(surf*) is defined below).
+            free(surflist[i]);
         }
     }
     return;
+}
+
+void ddrawshutdown() {
+    // MM-P2.2: release all tracked surfaces first, then the DirectDraw
+    // interfaces. This keeps COM teardown ordering explicit on client exit.
+    //
+    // MM-P8.1: RAII candidate — the DirectDraw device pair (dd/dd1) plus the
+    // surflist[] surface registry are a textbook RAII subsystem. A future
+    // "DDDevice" type (ctor = CreateDD/QueryInterface, dtor = this teardown)
+    // and a ComPtr-backed surf wrapper would make this explicit shutdown call
+    // unnecessary and remove the malloc/Release split in surfstruct()/free().
+    purgesurfaces();
+    if (dd) {
+        dd->Release();
+        dd = NULL;
+    }
+    if (dd1) {
+        dd1->Release();
+        dd1 = NULL;
+    }
 }
 
 /*
@@ -814,6 +1187,12 @@ return;
 */
 
 void img0(surf *d, surf *s) {
+    // MM-P9.5: keyed Blt touches both surfaces — release cached text DCs first.
+    surf_text_dc_release(d);
+    surf_text_dc_release(s);
+    // MM-P9.6: count + optional skip (keyed-copy category).
+    g_blt_key_n++;
+    if (g_diag_blt_skip == 3) return;
     d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT | DDBLT_KEYSRC, NULL);
 }
 
@@ -830,10 +1209,19 @@ surf *loadimage(LPCSTR name, long flags) {
     bmy = (DWORD) bm.bmHeight;
     s = newsurf(bmx, bmy, flags); //1=SURF_SYSMEM
     bdc = CreateCompatibleDC(NULL);
-    SelectObject(bdc, bmh);
+    // Select the loaded bitmap into the temporary DC, saving the previous object
+    // so we can restore it before deleting the bitmap. Deleting a GDI object
+    // while it's still selected into a DC is undefined and can leak resources.
+    HGDIOBJ _old_bmp = SelectObject(bdc, bmh);
+    // MM-P9.5: discipline — release any cached text DC before this surface's
+    // GetDC. `s` is freshly created here (no cached DC yet) so this is a no-op,
+    // but it keeps "release before every DirectDraw method call" exhaustive.
+    surf_text_dc_release(s);
     s->s->GetDC(&sdc);
     BitBlt(sdc, 0, 0, bmx, bmy, bdc, 0, 0, SRCCOPY);
     s->s->ReleaseDC(sdc);
+    // Restore the previous object into the DC before deleting the bitmap and DC.
+    SelectObject(bdc, _old_bmp);
     DeleteDC(bdc);
     DeleteObject(bmh);
     return s;
@@ -856,8 +1244,13 @@ void free(surf *s) {
     for (i = 0; i < 16384; i++) {
         if (surflist[i] == s) surflist[i] = NULL;
     }
+    // MM-P9.5: release any cached text DC before releasing the surface, so we
+    // never leak the DC and never ->Release() a surface with a live DC held.
+    // Covers recreateBackbuffers()'s free(ps)/free(ps3) and purgesurfaces().
+    surf_text_dc_release(s);
     s->s->Release();
     free((void *) s);
+    g_surf_live--; // MM-P9 diagnostic
     return;
 }
 
