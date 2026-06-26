@@ -444,12 +444,45 @@ DWORD point(surf *s, long x, long y) {
 
 void cls(surf *s, DWORD c) {
     static DDBLTFX b;
-    // MM-P9.5: release any cached text DC before the colour-fill Blt (DD forbids
-    // Blt while a DC is held on the surface).
+    // MM-P9.5: release any cached text DC before touching the surface.
     surf_text_dc_release(s);
     // MM-P9.6: count + optional skip (colour-fill category).
     g_blt_fill_n++;
     if (g_diag_blt_skip == 1) return;
+    // MM-P9.6 FIX (2026-06-26): fill via the locked system-memory pixel pointer
+    // instead of IDirectDrawSurface::Blt(DDBLT_COLORFILL). On NVIDIA's legacy-
+    // DirectDraw emulation each colour-fill Blt leaks ~7 KB of committed memory;
+    // cls() runs once per frame (the back-buffer clear), so that was the residual
+    // ~115 KB/s idle leak (confirmed: the bltFill count tracked commitKB 1:1). A
+    // raw memory fill calls NO DirectDraw method, so it cannot leak, and writes
+    // the IDENTICAL pixels: DDBLT_COLORFILL writes dwFillColor as a value already
+    // in the surface's pixel format, which is exactly what each store below does.
+    // s->o is the stable pointer from the surface's creation-time Lock (the asm
+    // blitters use it the same way); it is NULL only for video-memory surfaces
+    // (SURF_VIDMEM), for which we keep the legacy Blt.
+    if (s->o != NULL) {
+        const DWORD w = s->d.dwWidth;
+        const DWORD h = s->d.dwHeight;
+        const long pitch = s->d.lPitch;
+        unsigned char *row = (unsigned char *) s->o;
+        if (s->d.ddpfPixelFormat.dwRGBBitCount == 32) {
+            const unsigned long v32 = (unsigned long) c;
+            for (DWORD yy = 0; yy < h; yy++) {
+                unsigned long *px = (unsigned long *) row;
+                for (DWORD xx = 0; xx < w; xx++) px[xx] = v32;
+                row += pitch;
+            }
+        } else {
+            const unsigned short v16 = (unsigned short) c;
+            for (DWORD yy = 0; yy < h; yy++) {
+                unsigned short *px = (unsigned short *) row;
+                for (DWORD xx = 0; xx < w; xx++) px[xx] = v16;
+                row += pitch;
+            }
+        }
+        return;
+    }
+    // Fallback: video-memory / unlocked surface (s->o == NULL) — keep legacy Blt.
     b.dwSize = sizeof(DDBLTFX);
     b.dwFillColor = c;
     s->s->Blt(NULL, NULL, NULL, DDBLT_WAIT | DDBLT_COLORFILL, &b);

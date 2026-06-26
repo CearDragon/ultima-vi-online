@@ -410,13 +410,21 @@ mode 2). The only per-frame DD operations left are Blts (`cls` colour-fill,
   `bltKey`), plus an opt-in per-category skip toggle `g_diag_blt_skip`
   (cmd-line `diagbltskip1/2/3`) to confirm which category flattens `commitKB`.
   Behavior-preserving by default. `client`/`both`/`host` build clean.
-- ⬜ **MM-P9.6.2** Interactive: idle run on NVIDIA, read which `blt*` count's
-  Δ matches the `commitKB` Δ (bytes/Blt), and/or which `diagbltskip` mode flattens
-  the climb. Report back to scope the fix.
-- ⬜ **MM-P9.6.3** Fix the identified category (likely: route the leaky DD Blt
-  through the existing asm blitter — `imgt0` etc. — which writes raw memory and
-  never calls a DirectDraw method, so it can't leak on the driver). Pixel-exact;
-  verify via the heartbeat + visual check.
+- ✅ **MM-P9.6.2** Interactive read (2026-06-26): idle NVIDIA run with
+  `presentMode=0`. `bltCopy` froze at 213, `bltKey` stayed 0, but `bltFill`
+  climbed ~16/s in lockstep with `commitKB`. Steady-state: 7,816 KB over 1,105
+  fills ⇒ **~7.2 KB leaked per `cls()` colour-fill Blt** × ~16/s ≈ ~115 KB/s =
+  the residual. Culprit: `cls()` `DDBLT_COLORFILL` (per-frame back-buffer clear).
+- ✅ **MM-P9.6.3** Fix (2026-06-26): `cls()` now fills system-memory surfaces by
+  writing the locked pixel pointer `s->o` directly (16- or 32-bpp per
+  `dwRGBBitCount`, respecting `lPitch`) instead of `IDirectDrawSurface::Blt(
+  DDBLT_COLORFILL)`. No DirectDraw method → cannot leak; pixel-identical
+  (DDBLT_COLORFILL writes `dwFillColor` in the surface pixel format, exactly what
+  the stores write). Video-memory surfaces (`s->o == NULL`) keep the legacy Blt.
+  `client`/`both`/`host` build clean.
+- ⬜ **MM-P9.6.4** Interactive verify: idle NVIDIA run — `bltFill` still
+  increments but `commitKB` should now be FLAT, and the cleared screen/back-buffer
+  must look identical. Confirms the idle leak is fully closed.
 - **Exit:** Idle `commitKB` flat (±small caching) on NVIDIA; pixels unchanged.
 
 ---
