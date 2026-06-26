@@ -125,10 +125,19 @@ you generate or move a plan, put it in the folder that matches its state:
 Rules:
 
 1. A plan lives in exactly one status folder; moving it *is* the status change.
-2. Update any links to a plan when you move it (the README, the
+2. **Before picking up any plan** (moving it from `todo/` to `in-progress/` and
+   starting its first phase), check the current git branch. If you are not
+   already on a branch named `plan/<plan-name>`, create and switch to one:
+   ```powershell
+   git checkout -b plan/<plan-name>
+   ```
+   where `<plan-name>` is the plan's filename without the `.md` extension and
+   without the `plan-` prefix (e.g. `plan-memoryManagement.md` →
+   `plan/memoryManagement`). All commits for that plan's work go on that branch.
+3. Update any links to a plan when you move it (the README, the
    `docs/plans/.../modernization/README.md` master index, and any
    `RW-P*` / `DOB-P*` / `MSRV-P*` code-comment references).
-3. Keep the phase-ID tagging convention — the folder tracks lifecycle, the
+4. Keep the phase-ID tagging convention — the folder tracks lifecycle, the
    phase checkboxes inside the plan track granular progress.
 
 ## Resizable-window / dynamic-object plans
