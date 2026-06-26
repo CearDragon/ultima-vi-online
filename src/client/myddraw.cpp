@@ -125,8 +125,21 @@ static void blit_letterbox(HWND hWndDst, HDC srcdc, long srcW, long srcH) {
     if (dstW == srcW && dstH == srcH) {
         BitBlt(winhdc, dstX, dstY, srcW, srcH, srcdc, 0, 0, SRCCOPY);
     } else {
-        SetStretchBltMode(winhdc, HALFTONE);
-        SetBrushOrgEx(winhdc, 0, 0, NULL);
+        // MM-P9 fix (2026-06-25): use COLORONCOLOR, NOT HALFTONE, for the
+        // per-frame downscale present. SetStretchBltMode(HALFTONE) + StretchBlt
+        // leaks GDI/kernel-heap memory on every call (it allocates an internal
+        // halftone palette that is not reliably freed). Because that memory is
+        // committed by win32k on the process's behalf, it shows up as a steady
+        // private/commit climb (~0.4 MB/s at 16 fps here) while the GDI *object*
+        // count, USER handles, kernel handles, CRT heap and our surface/txt
+        // counters all stay flat — which is exactly the leak signature we saw.
+        // This path runs every frame whenever the window is not 1:1 with the
+        // back-buffer (the menu often presents 1:1 via the BitBlt branch above,
+        // which is why the leak was far faster in-game). COLORONCOLOR allocates
+        // nothing per call. Trade-off: downscaled present is point-sampled
+        // (sharper/aliased) instead of HALFTONE-smoothed; the back-buffer pixels
+        // themselves are unchanged and native (s==1.0) presents still BitBlt.
+        SetStretchBltMode(winhdc, COLORONCOLOR);
         StretchBlt(winhdc, dstX, dstY, dstW, dstH, srcdc, 0, 0, srcW, srcH, SRCCOPY);
     }
 
@@ -823,19 +836,28 @@ void txtout(surf *s, long x, long y, txt *t)
             unsigned long _diag_commit_kb = (unsigned long) (_diag_private_bytes() / 1024);
             DWORD _diag_handles = _diag_handle_count();
             long _diag_threads = _diag_thread_count();
-            // MM-P9 diagnostic: cumulative DirectMusic call counts (dmusic.cpp)
-            // and DirectSound voice-ring counts (sound.cpp) so the leak's firing
-            // rate is visible and the audio-leak fixes can be confirmed.
+            // MM-P9 diagnostic: cumulative DirectMusic call counts (dmusic.cpp,
+            // compiled into both host and client) and DirectSound voice-ring
+            // counts (sound.cpp). sound.cpp is CLIENT/both-only — the host has no
+            // sound source — so reference g_snd_* only under CLIENT to keep the
+            // host link clean; the host never renders, so -1 sentinels are fine.
             extern long g_midi_play_n;
             extern long g_midi_load_n;
+#ifdef CLIENT
             extern long g_snd_dup_n;
             extern long g_snd_live;
+            long _diag_snd_dup = g_snd_dup_n;
+            long _diag_snd_live = g_snd_live;
+#else
+            long _diag_snd_dup = -1;
+            long _diag_snd_live = -1;
+#endif
             char _diag[384];
             wsprintfA(_diag,
                       "U6O-DIAG commitKB=%lu handles=%lu threads=%ld surf=%ld txt=%ld heapKB=%ld heapN=%ld gdi=%lu user=%lu midiPlay=%ld midiLoad=%ld sndDup=%ld sndLive=%ld\n",
                       _diag_commit_kb, _diag_handles, _diag_threads,
                       g_surf_live, g_txt_live, _diag_heap_kb, _diag_heap_n, _diag_gdi, _diag_user,
-                      g_midi_play_n, g_midi_load_n, g_snd_dup_n, g_snd_live);
+                      g_midi_play_n, g_midi_load_n, _diag_snd_dup, _diag_snd_live);
             OutputDebugStringA(_diag);
         }
     }

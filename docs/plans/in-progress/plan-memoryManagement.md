@@ -345,6 +345,26 @@ sluggish past ~200–300 MB. Full discovery + root-cause write-up:
     `g_midi_play_n`/`g_midi_load_n` counters → heartbeat `midiPlay=`/`midiLoad=`
     to confirm the firing rate and that Commit growth stops. All three targets
     build clean. **Next interactive step:** rerun idle, confirm Commit is flat.
+  - **Third/fourth runs (2026-06-25) — DirectMusic & DirectSound DISPROVEN.**
+    Added `sndDup`/`sndLive` then `commitKB`/`handles`/`threads` to the
+    heartbeat. Idle logged-in run: Commit grew +140 MB in ~5 min with `sndDup=0`,
+    `midiPlay=2`, and **every** counter flat → audio is not the leak (the
+    DirectMusic fixes above are still valid bugs, just not this one).
+  - **ROOT CAUSE (fifth run, 2026-06-25) — HALFTONE StretchBlt.** Self-correlating
+    heartbeat showed `commitKB` rising linearly ~427 KB/s while `handles` flat and
+    `threads` *decreasing* → GDI/kernel-heap commit (invisible to
+    `GetGuiResources` object count and the CRT). The only per-frame GDI raster op
+    is `blit_letterbox` (`src/client/myddraw.cpp`, reached every frame from
+    `refresh()`): `SetStretchBltMode(winhdc, HALFTONE)` + `StretchBlt`. HALFTONE
+    StretchBlt leaks an internal halftone palette per call. It runs only on the
+    non-1:1 (downscale) branch — explaining **menu-slow / in-game-fast** (the
+    resizable back-buffer presents 1:1 BitBlt at the menu, downscales in-game).
+  - **Fix shipped (2026-06-25):** `blit_letterbox` now uses `COLORONCOLOR`
+    instead of `HALFTONE` (dropped `SetBrushOrgEx`). Allocates nothing per
+    present; native (s==1.0) windows still BitBlt unchanged. Trade-off:
+    downscaled present is point-sampled instead of smoothed (back-buffer pixels
+    unchanged). Client + both build clean. **Verify:** idle `commitKB` now flat
+    at any window size (instant check on the old binary: maximize → climb stops).
 - **Exit:** No per-message surface growth on portrait refreshes; chat/name lists
   freed on teardown; 10-minute idle profile flat (±small caching).
 

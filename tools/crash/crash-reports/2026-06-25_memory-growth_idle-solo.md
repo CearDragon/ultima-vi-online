@@ -323,8 +323,58 @@ Next-run reading:
 
 All three targets build clean.
 
+### Result of the fifth instrumented run (2026-06-25) — ROOT CAUSE FOUND: HALFTONE StretchBlt
 
+Self-correlating heartbeat, logged-in idle (commit in KB):
 
+```
+commitKB=135516 handles=671 threads=19  (10:25:00, just logged in)
+commitKB=164280 handles=672 threads=16  (10:26:00)
+commitKB=192   ... handles=668 threads=13
+commitKB=220196 handles=670 threads=13  (10:28:21)
+```
+
+- `commitKB` rises **near-perfectly linearly, ~427 KB/s** (~27 KB / 16 fps frame).
+- `handles` **flat** (~670, even dips) → not a kernel-handle/thread-handle leak.
+- `threads` **decreases** (19→13) → not a thread-stack leak.
+- everything else flat (surf/txt/heapKB/heapN/gdi/user/all audio). `heapN` shows
+  real values, so this is a debug build → CRT malloc/new is genuinely ruled out.
+
+That signature — commit up, **GDI object count flat**, handles flat, CRT heap
+flat — is the fingerprint of memory committed by **win32k on the process's
+behalf in the GDI/kernel heap**, which is NOT counted by `GetGuiResources`
+(handles) or the CRT. The only per-frame GDI raster op in the present path is in
+`blit_letterbox` (`src/client/myddraw.cpp`), reached every frame from
+`refresh()`:
+
+```c
+SetStretchBltMode(winhdc, HALFTONE);   // <-- per-frame
+SetBrushOrgEx(winhdc, 0, 0, NULL);
+StretchBlt(winhdc, dstX, dstY, dstW, dstH, srcdc, 0, 0, srcW, srcH, SRCCOPY);
+```
+
+`SetStretchBltMode(HALFTONE)` + `StretchBlt` is a long-documented GDI leak: each
+call allocates an internal halftone palette that is not reliably freed, growing
+GDI-heap commit without bumping the GDI *object* count. It runs every frame
+**only when the window is not 1:1 with the back-buffer** (the `else` branch); the
+1:1 case uses `BitBlt` (no leak). That is exactly why the **menu leaked slowly
+but in-game leaked fast** — with the resizable-window back-buffer the menu often
+presents 1:1 (BitBlt) while in-game downscales (StretchBlt/HALFTONE).
+
+### Fix shipped (2026-06-25)
+
+`src/client/myddraw.cpp` `blit_letterbox`: switched the downscale present from
+`HALFTONE` to **`COLORONCOLOR`** (removed the now-unneeded `SetBrushOrgEx`).
+COLORONCOLOR allocates nothing per call, eliminating the leak. Trade-off: the
+downscaled-to-window present is point-sampled (sharper/aliased) rather than
+HALFTONE-smoothed; the back-buffer game pixels are unchanged, and native-size
+(s==1.0) windows still take the `BitBlt` path (visually identical). Client +
+both build clean.
+
+**Instant confirmation (current binary, no rebuild):** maximize the window so the
+game presents ≥ native — that forces the `BitBlt` branch; `commitKB` should stop
+climbing. Shrink it again → climb resumes. After installing the fixed build,
+`commitKB` should stay flat at any window size.
 
 
 
