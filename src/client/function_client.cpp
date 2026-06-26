@@ -1745,6 +1745,10 @@ txtmakeu6ocompatible_loop:
 
 void STATUSMESSadd(txt *t) {
     static long i, i2;
+    // MM-P9.5: release any cached on-surface text DC on `ps` before this
+    // event-driven GetDC. The per-frame text path (txtout/txtouts) may leave a
+    // cached DC held on `ps`; DirectDraw would fail this GetDC while one is held.
+    surf_text_dc_release(ps);
     ps->s->GetDC(&taghdc);
     {
         HGDIOBJ _old_tag_font = SelectObject(taghdc, fnt1);
@@ -1771,6 +1775,9 @@ void STATUSMESSadd(txt *t) {
 void STATUSMESSadd(const char *t) {
     static long i, i2, i3;
     i3 = strlen(t);
+    // MM-P9.5: release any cached on-surface text DC on `ps` before this GetDC
+    // (see the txt* overload above for the rationale).
+    surf_text_dc_release(ps);
     ps->s->GetDC(&taghdc);
     {
         HGDIOBJ _old_tag_font = SelectObject(taghdc, fnt1);
@@ -1846,6 +1853,9 @@ int STATUSMESSwrapline(txt *src, long maxwidth, txt **out, int maxlines) {
         return 1;
     }
 
+    // MM-P9.5: release any cached on-surface text DC on `ps` before this GetDC
+    // (see STATUSMESSadd above for the rationale).
+    surf_text_dc_release(ps);
     ps->s->GetDC(&hdc);
     {
         HGDIOBJ _old_hdc_font = SelectObject(hdc, fnt1naa);

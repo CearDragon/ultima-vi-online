@@ -18,6 +18,17 @@ struct surf {
         unsigned short *o2;
     };
 
+    // MM-P9.5: cached on-surface GDI DC for the text path. NULL when none is
+    // held. txtout()/txtouts() acquire it lazily (one GetDC per text run) and
+    // do NOT ReleaseDC per string; it is released the next time any
+    // IDirectDrawSurface method (Blt/Flip/Lock/GetDC) runs on this surface (see
+    // surf_text_dc_release). This collapses the per-string GetDC/ReleaseDC churn
+    // that leaks kernel/GDI-heap memory under NVIDIA's legacy DirectDraw
+    // emulation. NOT serialized — `surf` is a client-only runtime DirectDraw
+    // wrapper, never byte-blitted to disk or the network — so appending this
+    // field changes nothing on the wire or in .sav files.
+    HDC cachedTextDC;
+
     //IDirect3DTexture2* t; //only valid if SURF_TEX flag is used *REDUNDANT
 };
 
@@ -52,6 +63,14 @@ void img(surf *d, long x, long y, surf *s);
 void txtout(surf *s, long x, long y, txt *t);
 
 void txtouts(surf *s, long x, long y, txt *t);
+
+// MM-P9.5: release any cached on-surface text DC held on `s` (see surf::
+// cachedTextDC). MUST be called before any IDirectDrawSurface method
+// (Blt/Flip/Lock/GetDC) on `s`, because DirectDraw forbids those while a DC is
+// held on the surface. No-op when no DC is held, so it is cheap and safe to
+// call from event-driven sites (e.g. the name-tag / status-message GetDC paths
+// in function_client.cpp) as well as from the per-frame Blt/present wrappers.
+void surf_text_dc_release(surf *s);
 
 DWORD fixcol(DWORD c);
 

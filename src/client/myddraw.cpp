@@ -184,6 +184,25 @@ long g_surf_live = 0;
 // Default 0 keeps shipped behavior identical; remove once the leak is found.
 int g_diag_present_mode = 0;
 
+// MM-P9.5 (2026-06-27): cached on-surface text-DC toggle (gating switch so the
+// fix can be A/B'd on real NVIDIA hardware before it ships as the only path).
+//   1 (default) = NEW cached-DC path: txtout()/txtouts() acquire the
+//                 IDirectDrawSurface DC ONCE (lazily) and reuse it across
+//                 consecutive text draws; it is released the next time a
+//                 DirectDraw method (Blt/Flip/Lock/GetDC) runs on that surface.
+//                 This collapses the per-string GetDC/ReleaseDC churn that
+//                 leaks under NVIDIA's legacy DirectDraw emulation.
+//   0 = LEGACY path: GetDC/ReleaseDC around every individual text string
+//       (exactly the pre-MM-P9.5 behavior). Selected with command-line
+//       substring "oldtextdc" (parsed in u6o7.cpp), mirroring how
+//       "diagpresent1/2" sets g_diag_present_mode.
+// Both paths issue the IDENTICAL GDI call sequence per TextOut (same surface,
+// same DC type, same font / text-colour / bk-mode state), so rendered pixels
+// are byte-for-byte identical; only the GetDC/ReleaseDC *count* per frame
+// differs. Watch the U6O-DIAG `commitKB` heartbeat: with the new path ON the
+// idle commit climb should drop sharply vs `oldtextdc`.
+int g_text_dc_cache = 1;
+
 struct surf {
     DDSURFACEDESC2 d;
     LPDIRECTDRAWSURFACE4 s;
@@ -193,6 +212,12 @@ struct surf {
         unsigned char *o1;
         unsigned short *o2;
     };
+
+    // MM-P9.5: cached on-surface GDI DC for the text path — keep this layout in
+    // lockstep with the mirror definition in myddraw.h. NULL when no DC is held.
+    // See myddraw.h for the full rationale (NVIDIA legacy-ddraw GetDC leak fix).
+    // Not serialized — surf is never byte-blitted to disk/wire.
+    HDC cachedTextDC;
 
     //IDirect3DTexture2* t; //only valid if SURF_TEX flag is used *REDUNDANT
 };
@@ -346,6 +371,37 @@ ns_sysmem:
     return ts;
 }
 
+// MM-P9.5 (2026-06-27): cached on-surface text-DC helpers. See surf::cachedTextDC
+// in myddraw.h and the g_text_dc_cache toggle above for the full rationale.
+//
+// surf_text_dc_acquire(): return the surface's cached GDI DC, lazily creating it
+// via a single IDirectDrawSurface::GetDC the first time. Mirrors the legacy
+// per-string GetDC exactly (same surface, same DC type) so TextOut output is
+// pixel-identical; only the number of GetDC calls per frame changes. On GetDC
+// failure cachedTextDC stays NULL and we return NULL — the same observable
+// outcome as the legacy code, which also ignored GetDC's return and operated on
+// whatever HDC came back.
+static HDC surf_text_dc_acquire(surf *s) {
+    if (s->cachedTextDC == NULL) {
+        HDC dc = NULL;
+        s->s->GetDC(&dc);
+        s->cachedTextDC = dc;
+    }
+    return s->cachedTextDC;
+}
+
+// surf_text_dc_release(): release the cached DC (if any) so the surface is legal
+// for the next DirectDraw method call. DirectDraw forbids Blt/Flip/Lock/GetDC
+// while a DC is held; every such call site in this module (and the event-driven
+// GetDC sites in function_client.cpp) calls this first. No-op when none is held.
+void surf_text_dc_release(surf *s) {
+    if (s == NULL) return;
+    if (s->cachedTextDC != NULL) {
+        s->s->ReleaseDC(s->cachedTextDC);
+        s->cachedTextDC = NULL;
+    }
+}
+
 void pset(surf *s, long x, long y, DWORD c) {
     if (x < 0) return;
     if (y < 0) return;
@@ -367,6 +423,9 @@ DWORD point(surf *s, long x, long y) {
 
 void cls(surf *s, DWORD c) {
     static DDBLTFX b;
+    // MM-P9.5: release any cached text DC before the colour-fill Blt (DD forbids
+    // Blt while a DC is held on the surface).
+    surf_text_dc_release(s);
     b.dwSize = sizeof(DDBLTFX);
     b.dwFillColor = c;
     s->s->Blt(NULL, NULL, NULL, DDBLT_WAIT | DDBLT_COLORFILL, &b);
@@ -384,6 +443,11 @@ void cls(surf *s, DWORD c) {
 // frame, and the WndProc mouse handler maps client coords back through
 // those globals.
 void refresh(surf *s) {
+    // MM-P9.5: release any cached text DC on this surface before the present's
+    // own IDirectDrawSurface::GetDC (DD forbids a second GetDC while one is
+    // held). Done before the diag early-return so the surface is always left in
+    // a DC-free state at end of frame regardless of g_diag_present_mode.
+    surf_text_dc_release(s);
     // MM-P9 diagnostic (2026-06-26): present-bisection toggle. Mode >= 1 skips
     // the entire per-frame present (window GetDC + BitBlt + the back-buffer
     // IDirectDrawSurface::GetDC) so a leak in this path can be confirmed by
@@ -654,6 +718,10 @@ return;
 void img(surf *d, surf *s) {
     if (s == NULL) return;
     if (d == NULL) return;
+    // MM-P9.5: a DirectDraw Blt touches BOTH surfaces, so release any cached
+    // text DC on the source and the destination before the Blt.
+    surf_text_dc_release(d);
+    surf_text_dc_release(s);
     d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT, NULL);
 }
 
@@ -661,6 +729,9 @@ void img(surf *d, surf *s) {
 // r999 img to handle resizing and positioning
 void img(surf *d, surf *s, int x, int y, int x2, int y2) {
     RECT drect;
+    // MM-P9.5: release cached text DCs on both surfaces before the Blt.
+    surf_text_dc_release(d);
+    surf_text_dc_release(s);
     drect.left = x;
     drect.right = x2;
     drect.top = y;
@@ -891,16 +962,27 @@ void txtout(surf *s, long x, long y, txt *t)
     // GetDC text draw (after the heartbeat above, so the log keeps flowing).
     // Isolates whether the per-frame txtout() GetDC/ReleaseDC churn is the leak.
     if (g_diag_present_mode >= 2) return;
+    // MM-P9.5: text DC path. New (g_text_dc_cache=1, default): acquire the
+    // on-surface DC once and keep it; the next DirectDraw method on this surface
+    // releases it (surf_text_dc_release). Legacy (oldtextdc): GetDC/ReleaseDC per
+    // string — kept byte-identical here so it is a faithful A/B baseline.
     HDC pdc;
-    s->s->GetDC(&pdc);
+    bool cached = (g_text_dc_cache != 0);
+    if (cached) pdc = surf_text_dc_acquire(s);
+    else s->s->GetDC(&pdc);
     {
         HGDIOBJ old_font = SelectObject(pdc, txtfnt);
         if ((txtcol & 0xFF000000) == 0) SetBkMode(pdc, TRANSPARENT);
+        // MM-P9.5: the persistent cached DC carries bk-mode between draws, so
+        // restore the legacy fresh-DC default (OPAQUE) explicitly. The legacy
+        // path gets a brand-new DC each call (already OPAQUE), so this reset is
+        // applied only on the cached path — pixels stay identical either way.
+        else if (cached) SetBkMode(pdc, OPAQUE);
         SetTextColor(pdc, fixcol(txtcol));
         TextOut(pdc, x, y, t->d, t->l);
         SelectObject(pdc, old_font);
     }
-    s->s->ReleaseDC(pdc);
+    if (!cached) s->s->ReleaseDC(pdc);
     return;
 }
 
@@ -909,11 +991,17 @@ void txtouts(surf *s, long x, long y, txt *t) //creates a shadow behind the text
     // MM-P9 diagnostic (2026-06-26): mode >= 2 skips the per-string DirectDraw
     // GetDC text draw (see txtout()). Default (0) is unchanged behavior.
     if (g_diag_present_mode >= 2) return;
+    // MM-P9.5: same cached-vs-legacy text DC handling as txtout() (see there).
     HDC pdc;
-    s->s->GetDC(&pdc);
+    bool cached = (g_text_dc_cache != 0);
+    if (cached) pdc = surf_text_dc_acquire(s);
+    else s->s->GetDC(&pdc);
     {
         HGDIOBJ old_font = SelectObject(pdc, txtfnt);
         if ((txtcol & 0xFF000000) == 0) SetBkMode(pdc, TRANSPARENT);
+        // MM-P9.5: restore the legacy fresh-DC default on the persistent cached
+        // DC (see txtout()); no-op on the legacy per-string path.
+        else if (cached) SetBkMode(pdc, OPAQUE);
         SetTextColor(pdc, 8 + 8 * 256 + 8 * 65536); //8,8,8
         TextOut(pdc, x - 1, y, t->d, t->l);
         TextOut(pdc, x + 1, y, t->d, t->l);
@@ -923,7 +1011,7 @@ void txtouts(surf *s, long x, long y, txt *t) //creates a shadow behind the text
         TextOut(pdc, x, y, t->d, t->l);
         SelectObject(pdc, old_font);
     }
-    s->s->ReleaseDC(pdc);
+    if (!cached) s->s->ReleaseDC(pdc);
     return;
 }
 
@@ -1024,6 +1112,9 @@ return;
 */
 
 void img0(surf *d, surf *s) {
+    // MM-P9.5: keyed Blt touches both surfaces — release cached text DCs first.
+    surf_text_dc_release(d);
+    surf_text_dc_release(s);
     d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT | DDBLT_KEYSRC, NULL);
 }
 
@@ -1044,6 +1135,10 @@ surf *loadimage(LPCSTR name, long flags) {
     // so we can restore it before deleting the bitmap. Deleting a GDI object
     // while it's still selected into a DC is undefined and can leak resources.
     HGDIOBJ _old_bmp = SelectObject(bdc, bmh);
+    // MM-P9.5: discipline — release any cached text DC before this surface's
+    // GetDC. `s` is freshly created here (no cached DC yet) so this is a no-op,
+    // but it keeps "release before every DirectDraw method call" exhaustive.
+    surf_text_dc_release(s);
     s->s->GetDC(&sdc);
     BitBlt(sdc, 0, 0, bmx, bmy, bdc, 0, 0, SRCCOPY);
     s->s->ReleaseDC(sdc);
@@ -1071,6 +1166,10 @@ void free(surf *s) {
     for (i = 0; i < 16384; i++) {
         if (surflist[i] == s) surflist[i] = NULL;
     }
+    // MM-P9.5: release any cached text DC before releasing the surface, so we
+    // never leak the DC and never ->Release() a surface with a live DC held.
+    // Covers recreateBackbuffers()'s free(ps)/free(ps3) and purgesurfaces().
+    surf_text_dc_release(s);
     s->s->Release();
     free((void *) s);
     g_surf_live--; // MM-P9 diagnostic

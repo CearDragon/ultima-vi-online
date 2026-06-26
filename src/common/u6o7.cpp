@@ -362,6 +362,16 @@ cmdline_length:
                 if (txtsearch(t, t2)) g_diag_present_mode = 1;
             }
         }
+        // MM-P9.5 (2026-06-27): cached on-surface text-DC gating switch.
+        //   "oldtextdc" -> g_text_dc_cache = 0 (legacy per-string GetDC path)
+        //   (absent)    -> g_text_dc_cache = 1 (new cached-DC path, default ON)
+        // Lets the user A/B the NVIDIA legacy-ddraw GetDC leak fix on real
+        // hardware. See g_text_dc_cache in myddraw.cpp.
+        {
+            extern int g_text_dc_cache;
+            txtset(t2, "oldtextdc");
+            if (txtsearch(t, t2)) g_text_dc_cache = 0;
+        }
 #endif
     }
 #ifdef CLIENT
