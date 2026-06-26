@@ -30,7 +30,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - name: host
-        image: u6o-host:latest
+        image: docker.io/cduncc/u6o-host:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 22
