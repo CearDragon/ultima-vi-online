@@ -447,6 +447,7 @@
                         get(tfh, &U6OK, 512);
                         get(tfh, &U6OK_FLAGS, 128);
                         close(tfh);
+                        u6o_ensure_control_defaults();
 
                         fs->offset_x = 1024;
                         fs->graphic = NULL;
@@ -639,6 +640,7 @@
                 get(tfh, &U6OK, 512);
                 get(tfh, &U6OK_FLAGS, 128);
                 close(tfh);
+                u6o_ensure_control_defaults();
 
                 fs->offset_x = 1024;
                 fs->graphic = NULL;

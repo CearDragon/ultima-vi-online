@@ -788,24 +788,28 @@ if
 
             static long tpx_legacy, tpy_legacy;
             getscreenoffset_legacy(x, y, &tpx_legacy, &tpy_legacy);
-            getscreenoffset(x, y, &tpx, &tpy);
-            // ROOMSYNC-P1: generic isolated-room follow camera override. For any
-            // (x, y) inside a registered room, force a centered-on-player camera
-            // -- bypassing the world-edge clamps that getscreenoffset() applies
-            // in known regions. tpx_legacy/tpy_legacy above stays in the legacy
-            // (host) reference frame because that's what the host's sobj/mover
-            // encoders use; ONLY the dynamic render camera (tpx/tpy) follows.
-            // See docs/rendering/global-room-sync.md.
-            if (getroom(x, y, NULL, NULL, NULL, NULL)) {
-                tpx = x - (viewTilesX() / 2 - 1);
-                tpy = y - (viewTilesY() / 2 - 1);
+            if (!camera_freeze) {
+                getscreenoffset(x, y, &tpx, &tpy);
+                // ROOMSYNC-P1: generic isolated-room follow camera override. For any
+                // (x, y) inside a registered room, force a centered-on-player camera
+                // -- bypassing the world-edge clamps that getscreenoffset() applies
+                // in known regions. tpx_legacy/tpy_legacy above stays in the legacy
+                // (host) reference frame because that's what the host's sobj/mover
+                // encoders use; ONLY the dynamic render camera (tpx/tpy) follows.
+                // See docs/rendering/global-room-sync.md.
+                if (getroom(x, y, NULL, NULL, NULL, NULL)) {
+                    tpx = x - (viewTilesX() / 2 - 1);
+                    tpy = y - (viewTilesY() / 2 - 1);
+                }
             }
 
 
             ctpx2 = tplayer->x;
             ctpy2 = tplayer->y;
-            ctpx = tpx;
-            ctpy = tpy;
+            if (!camera_freeze) {
+                ctpx = tpx;
+                ctpy = tpy;
+            }
 
             //screen+1 shift
             // RW sobj-fix: screen+1 grew from legacy 32x24 + 1 fence to

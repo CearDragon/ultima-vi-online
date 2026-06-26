@@ -1,4 +1,5 @@
 #include "function_client.h"
+#include "define_client.h"
 #include "viewport.h" // RW-P2: backbufferW/H, lightingStride, lightingTotalBytes
 //#include <windows.h>
 #pragma warning(disable: 4018 4244)
@@ -127,6 +128,16 @@ void u6okeysetoff(unsigned char i) {
         keyon[U6OK[i][0]] = 0;
         keyon[U6OK[i][1]] = 0;
     } //exists
+}
+
+void u6o_ensure_control_defaults() {
+    if (U6OK[U6OK_CAMERATOGGLE][0] == 0) {
+        U6OK[U6OK_CAMERATOGGLE][0] = VK_TAB;
+    }
+    if (U6OK[U6OK_RESPAWNFOLLOWERS][0] == 0) {
+        U6OK[U6OK_RESPAWNFOLLOWERS][0] = VK_SHIFT;
+        U6OK[U6OK_RESPAWNFOLLOWERS][1] = VK_F1;
+    }
 }
 
 void GETINPUT_update() {

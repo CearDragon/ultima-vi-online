@@ -87,16 +87,18 @@
     }
 
     //calculate tpx,tpy from current x,y
-    getscreenoffset(tplayer->x,tplayer->y,&tpx,&tpy);
-    // ROOMSYNC-P1: must match the scene-update camera override above. If the
-    // two camera assignment sites disagree (one centers in the room, the
-    // other applies world-edge clamps) the input/render mapping diverges
-    // and keypresses move the avatar to one tile while the camera renders
-    // at another -- the user-visible "ghost camera / stuck character"
-    // symptom we're eliminating. See docs/rendering/global-room-sync.md.
-    if (getroom(tplayer->x, tplayer->y, NULL, NULL, NULL, NULL)) {
-      tpx = tplayer->x - (viewTilesX()/2 - 1);
-      tpy = tplayer->y - (viewTilesY()/2 - 1);
+    if (!camera_freeze) {
+      getscreenoffset(tplayer->x,tplayer->y,&tpx,&tpy);
+      // ROOMSYNC-P1: must match the scene-update camera override above. If the
+      // two camera assignment sites disagree (one centers in the room, the
+      // other applies world-edge clamps) the input/render mapping diverges
+      // and keypresses move the avatar to one tile while the camera renders
+      // at another -- the user-visible "ghost camera / stuck character"
+      // symptom we're eliminating. See docs/rendering/global-room-sync.md.
+      if (getroom(tplayer->x, tplayer->y, NULL, NULL, NULL, NULL)) {
+        tpx = tplayer->x - (viewTilesX()/2 - 1);
+        tpy = tplayer->y - (viewTilesY()/2 - 1);
+      }
     }
 
 

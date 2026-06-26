@@ -98,6 +98,8 @@ void function_client_init(void);
 //for compatibility the client supports this function
 object *OBJnew_local();
 
+void u6o_ensure_control_defaults();
+
 void GETINPUT_setup(txt *input_pointer, void *enterpressed_pointer, unsigned long maxlength);
 
 txt *GETINPUT_current();

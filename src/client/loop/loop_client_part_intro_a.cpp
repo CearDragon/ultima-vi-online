@@ -762,6 +762,7 @@ if
             get(tfh, &U6OK, 512);
             get(tfh, &U6OK_FLAGS, 128);
             close(tfh);
+            u6o_ensure_control_defaults();
 
             u6o_createcharacter = 1; //ALLOW CREATION OF NEW PLAYER
 

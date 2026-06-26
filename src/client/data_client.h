@@ -105,6 +105,7 @@ extern unsigned short customportrait[3584];
 extern unsigned char customportrait_upload;
 
 extern unsigned char clientframe;
+extern unsigned char camera_freeze;
 
 extern long ctpx;
 extern long ctpy; //client: screen offset

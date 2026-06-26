@@ -71,6 +71,10 @@ maxminmini:
     RepositionAnchoredPanels(backbufferW(), backbufferH());
   }
 
+  if (u6okeyhit(U6OK_CAMERATOGGLE)){
+    camera_freeze = !camera_freeze;
+  }
+
   if (volcontrol->mouse_over){
     if (u6okeyhit(U6OK_SCROLLUP)){
       if (volcontrol->mouse_y<32){
@@ -1148,6 +1152,7 @@ u6okattackdone:
           if (directionalmove_mbheld) goto directionalmove_force;
           if (pathmove_mbheld) goto pathmove_force;
           if ((x3>48)||(y3>48)){ //path finding range
+            if (camera_freeze) goto directionalmove_force;
 pathmove_force:
             pathmove_mbheld=1;
             if (cur_type==1) SetCursor(cur8);
@@ -1177,10 +1182,18 @@ directionalmove_force:
           }
           if (x2<0) x=-x;
           if (y2<0) y=-y;
-          if (x==1) CLIENTplayer->key|=KEYright;
-          if (x==-1) CLIENTplayer->key|=KEYleft;
-          if (y==1) CLIENTplayer->key|=KEYdown;
-          if (y==-1) CLIENTplayer->key|=KEYup;
+          if (x==1) {
+            if (!camera_freeze || tplayer->x < tpx + viewTilesX() - 1) CLIENTplayer->key|=KEYright;
+          }
+          if (x==-1) {
+            if (!camera_freeze || tplayer->x > tpx) CLIENTplayer->key|=KEYleft;
+          }
+          if (y==1) {
+            if (!camera_freeze || tplayer->y < tpy + viewTilesY() - 1) CLIENTplayer->key|=KEYdown;
+          }
+          if (y==-1) {
+            if (!camera_freeze || tplayer->y > tpy) CLIENTplayer->key|=KEYup;
+          }
           if ((x==1)&&(y==0)) if (cur_type==1) SetCursor (cur_r);
           if ((x==1)&&(y==1)) if (cur_type==1) SetCursor (cur_rd);
           if ((x==0)&&(y==1)) if (cur_type==1) SetCursor (cur_d);
@@ -1198,36 +1211,32 @@ mousemove_finish:
 
 
 	if (u6okeyhit(U6OK_RIGHT)) {
-		CLIENTplayer->key |= KEYright2;
-		// r777 set drop location right
-		if (setdroplocation) {
-			setdroplocation = 0;
-			droplocation = 4;
-		}
-	}
-	else {
-		if (u6okeyon(U6OK_RIGHT)) {
-			CLIENTplayer->key |= KEYright;
+		if (!camera_freeze || tplayer->x < tpx + viewTilesX() - 1) {
+			CLIENTplayer->key |= KEYright2;
 			// r777 set drop location right
 			if (setdroplocation) {
 				setdroplocation = 0;
 				droplocation = 4;
 			}
 		}
+	}
+	else {
+		if (u6okeyon(U6OK_RIGHT)) {
+			if (!camera_freeze || tplayer->x < tpx + viewTilesX() - 1) {
+				CLIENTplayer->key |= KEYright;
+				// r777 set drop location right
+				if (setdroplocation) {
+					setdroplocation = 0;
+					droplocation = 4;
+				}
+			}
+		}
 
 	}
 
 	if (u6okeyhit(U6OK_LEFT)) {
-		CLIENTplayer->key |= KEYleft2;
-		// r777 set drop location left
-		if (setdroplocation) {
-			setdroplocation = 0;
-			droplocation = 3;
-		}
-	}
-	else {
-		if (u6okeyon(U6OK_LEFT)) {
-			CLIENTplayer->key |= KEYleft;
+		if (!camera_freeze || tplayer->x > tpx) {
+			CLIENTplayer->key |= KEYleft2;
 			// r777 set drop location left
 			if (setdroplocation) {
 				setdroplocation = 0;
@@ -1235,18 +1244,22 @@ mousemove_finish:
 			}
 		}
 	}
-
-	if (u6okeyhit(U6OK_UP)) {
-		CLIENTplayer->key |= KEYup2;
-		// r777 set drop location up
-		if (setdroplocation) {
-			setdroplocation = 0;
-			droplocation = 1;
+	else {
+		if (u6okeyon(U6OK_LEFT)) {
+			if (!camera_freeze || tplayer->x > tpx) {
+				CLIENTplayer->key |= KEYleft;
+				// r777 set drop location left
+				if (setdroplocation) {
+					setdroplocation = 0;
+					droplocation = 3;
+				}
+			}
 		}
 	}
-	else {
-		if (u6okeyon(U6OK_UP)) {
-			CLIENTplayer->key |= KEYup;
+
+	if (u6okeyhit(U6OK_UP)) {
+		if (!camera_freeze || tplayer->y > tpy) {
+			CLIENTplayer->key |= KEYup2;
 			// r777 set drop location up
 			if (setdroplocation) {
 				setdroplocation = 0;
@@ -1254,22 +1267,38 @@ mousemove_finish:
 			}
 		}
 	}
-
-	if (u6okeyhit(U6OK_DOWN)) {
-		CLIENTplayer->key |= KEYdown2;
-		// r777 set drop location down
-		if (setdroplocation) {
-			setdroplocation = 0;
-			droplocation = 2;
+	else {
+		if (u6okeyon(U6OK_UP)) {
+			if (!camera_freeze || tplayer->y > tpy) {
+				CLIENTplayer->key |= KEYup;
+				// r777 set drop location up
+				if (setdroplocation) {
+					setdroplocation = 0;
+					droplocation = 1;
+				}
+			}
 		}
 	}
-	else {
-		if (u6okeyon(U6OK_DOWN)) {
-			CLIENTplayer->key |= KEYdown;
+
+	if (u6okeyhit(U6OK_DOWN)) {
+		if (!camera_freeze || tplayer->y < tpy + viewTilesY() - 1) {
+			CLIENTplayer->key |= KEYdown2;
 			// r777 set drop location down
 			if (setdroplocation) {
 				setdroplocation = 0;
 				droplocation = 2;
+			}
+		}
+	}
+	else {
+		if (u6okeyon(U6OK_DOWN)) {
+			if (!camera_freeze || tplayer->y < tpy + viewTilesY() - 1) {
+				CLIENTplayer->key |= KEYdown;
+				// r777 set drop location down
+				if (setdroplocation) {
+					setdroplocation = 0;
+					droplocation = 2;
+				}
 			}
 		}
 	}

@@ -555,6 +555,7 @@ unsigned short customportrait[3584];
 unsigned char customportrait_upload;
 
 unsigned char clientframe;
+unsigned char camera_freeze = 0;
 
 long ctpx;
 long ctpy; //client: screen offset
