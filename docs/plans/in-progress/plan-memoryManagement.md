@@ -370,6 +370,57 @@ sluggish past ~200–300 MB. Full discovery + root-cause write-up:
 
 ---
 
+### MM-P9.5 — Cached on-surface text DC (NVIDIA legacy-ddraw GetDC leak) (High-impact, T1)
+
+Hardware-specific leak chased via the `diagpresent` bisection + dxdiag (good =
+Intel Iris Xe, bad = NVIDIA RTX 5090). Root cause: NVIDIA's legacy-DirectDraw
+emulation leaks a small fixed amount per `IDirectDrawSurface::GetDC`/`ReleaseDC`
+cycle, and the per-string text path churned one cycle per drawn string. Full
+write-up: `docs/modernization/MM-P9.5-cached-text-dc.md`.
+
+- ✅ **MM-P9.5.1** Diagnose via heartbeat + bisection. mode 1 (skip present) =
+  ~463 KB/s; mode 2 (also skip text GetDC) = ~120 KB/s ⇒ text path is ~343 KB/s
+  (74%). dxdiag confirmed Intel (no leak) vs NVIDIA (leak).
+- ✅ **MM-P9.5.2** Fix (cpp-modernizer): per-surface cached text DC, acquired
+  once and lazily released before any DirectDraw Blt/GetDC. Pixel-identical
+  (same TextOut/order/DC). Gated by `g_text_dc_cache` (default ON; `oldtextdc`
+  cmd-line restores legacy path for A/B). `client`/`both`/`host` build clean.
+- ✅ **MM-P9.5.3** Regression fix (2026-06-26): the first pass missed **33
+  foreign `ps->s->GetDC(&taghdc)` text-measurement sites** in the loop fragments
+  (`intro_b` 13, `intro_c` 6, `intro_d` 1, `panel_draw` 3, `world_render` 10).
+  With a cached DC held on `ps`, those `GetDC`s failed `DDERR_DCALREADYCREATED`,
+  so `GetTextExtentPoint32` returned a bad width and centered text mis-placed
+  (login menu left-aligned; MOTD mid-screen flash; chat-over-name). Fixed by
+  prepending `surf_text_dc_release(ps);` to every site. Audit now shows ALL
+  DD-surface `GetDC` are either the cache acquire or release-preceded.
+- **Exit:** Idle text-GetDC leak (~343 KB/s) eliminated, pixels + positioning
+  unchanged. Verified on NVIDIA: commit climb dropped ~74% vs `oldtextdc`.
+
+---
+
+### MM-P9.6 — Residual per-frame DirectDraw Blt leak (Medium-impact, T1)
+
+The ~120 KB/s that remains with every per-frame `GetDC` suppressed (diagpresent
+mode 2). The only per-frame DD operations left are Blts (`cls` colour-fill,
+`img` copy, `img0` keyed) — suspected NVIDIA per-Blt commit leak.
+
+- ✅ **MM-P9.6.1** Instrument (2026-06-26): added cumulative per-category Blt
+  counters `g_blt_fill_n`/`g_blt_copy_n`/`g_blt_key_n` (++ at the live Blt sites
+  in `cls`/`img`/`img0`) to the `U6O-DIAG` heartbeat (`bltFill`/`bltCopy`/
+  `bltKey`), plus an opt-in per-category skip toggle `g_diag_blt_skip`
+  (cmd-line `diagbltskip1/2/3`) to confirm which category flattens `commitKB`.
+  Behavior-preserving by default. `client`/`both`/`host` build clean.
+- ⬜ **MM-P9.6.2** Interactive: idle run on NVIDIA, read which `blt*` count's
+  Δ matches the `commitKB` Δ (bytes/Blt), and/or which `diagbltskip` mode flattens
+  the climb. Report back to scope the fix.
+- ⬜ **MM-P9.6.3** Fix the identified category (likely: route the leaky DD Blt
+  through the existing asm blitter — `imgt0` etc. — which writes raw memory and
+  never calls a DirectDraw method, so it can't leak on the driver). Pixel-exact;
+  verify via the heartbeat + visual check.
+- **Exit:** Idle `commitKB` flat (±small caching) on NVIDIA; pixels unchanged.
+
+---
+
 ## Background: Identified leak sites
 
 ### Critical leaks (MM-P2, MM-P3, MM-P4, MM-P5)

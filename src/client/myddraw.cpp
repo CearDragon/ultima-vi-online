@@ -203,6 +203,27 @@ int g_diag_present_mode = 0;
 // idle commit climb should drop sharply vs `oldtextdc`.
 int g_text_dc_cache = 1;
 
+// MM-P9.6 diagnostic (2026-06-26): localize the residual ~120 KB/s NVIDIA leak
+// that persists with every per-frame IDirectDrawSurface::GetDC suppressed
+// (diagpresent mode 2). The only per-frame DirectDraw operations left are Blts,
+// in three categories. These cumulative counters are emitted by the txtout()
+// heartbeat so a run can attribute the commit climb: for each category compute
+// Δcommit / Δcount between two heartbeats = bytes leaked per Blt of that kind.
+// Behavior-preserving (three longs ++'d at the existing Blt sites).
+long g_blt_fill_n = 0; // cls()            — DDBLT_COLORFILL
+long g_blt_copy_n = 0; // img(d,s) / img(d,s,rect) — plain DDBLT copy
+long g_blt_key_n = 0;  // img0(d,s)        — DDBLT_KEYSRC (colour-keyed) copy
+
+// MM-P9.6 bisection: skip ONE Blt category to confirm it is the leak — watch the
+// heartbeat commitKB go flat. Opt-in via command-line substring "diagbltskip1/2/3"
+// (parsed in u6o7.cpp, mirroring diagpresent). Default 0 = normal rendering.
+//   1 = skip cls() colour-fill   (screen may show stale pixels — cosmetic only)
+//   2 = skip img()/img() copy    (composited surfaces won't draw)
+//   3 = skip img0() keyed copy   (transparent sprites won't draw)
+// Skipping breaks that category's VISUALS only; the game keeps running so the
+// idle commit slope is still measurable.
+int g_diag_blt_skip = 0;
+
 struct surf {
     DDSURFACEDESC2 d;
     LPDIRECTDRAWSURFACE4 s;
@@ -426,6 +447,9 @@ void cls(surf *s, DWORD c) {
     // MM-P9.5: release any cached text DC before the colour-fill Blt (DD forbids
     // Blt while a DC is held on the surface).
     surf_text_dc_release(s);
+    // MM-P9.6: count + optional skip (colour-fill category).
+    g_blt_fill_n++;
+    if (g_diag_blt_skip == 1) return;
     b.dwSize = sizeof(DDBLTFX);
     b.dwFillColor = c;
     s->s->Blt(NULL, NULL, NULL, DDBLT_WAIT | DDBLT_COLORFILL, &b);
@@ -722,6 +746,9 @@ void img(surf *d, surf *s) {
     // text DC on the source and the destination before the Blt.
     surf_text_dc_release(d);
     surf_text_dc_release(s);
+    // MM-P9.6: count + optional skip (plain-copy category).
+    g_blt_copy_n++;
+    if (g_diag_blt_skip == 2) return;
     d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT, NULL);
 }
 
@@ -732,6 +759,9 @@ void img(surf *d, surf *s, int x, int y, int x2, int y2) {
     // MM-P9.5: release cached text DCs on both surfaces before the Blt.
     surf_text_dc_release(d);
     surf_text_dc_release(s);
+    // MM-P9.6: count + optional skip (plain-copy category).
+    g_blt_copy_n++;
+    if (g_diag_blt_skip == 2) return;
     drect.left = x;
     drect.right = x2;
     drect.top = y;
@@ -948,13 +978,14 @@ void txtout(surf *s, long x, long y, txt *t)
             long _diag_snd_dup = -1;
             long _diag_snd_live = -1;
 #endif
-            char _diag[384];
+            char _diag[512];
             wsprintfA(_diag,
-                      "U6O-DIAG presentMode=%d commitKB=%lu handles=%lu threads=%ld surf=%ld txt=%ld heapKB=%ld heapN=%ld gdi=%lu user=%lu midiPlay=%ld midiLoad=%ld sndDup=%ld sndLive=%ld\n",
+                      "U6O-DIAG presentMode=%d commitKB=%lu handles=%lu threads=%ld surf=%ld txt=%ld heapKB=%ld heapN=%ld gdi=%lu user=%lu midiPlay=%ld midiLoad=%ld sndDup=%ld sndLive=%ld bltFill=%ld bltCopy=%ld bltKey=%ld bltSkip=%d\n",
                       g_diag_present_mode,
                       _diag_commit_kb, _diag_handles, _diag_threads,
                       g_surf_live, g_txt_live, _diag_heap_kb, _diag_heap_n, _diag_gdi, _diag_user,
-                      g_midi_play_n, g_midi_load_n, _diag_snd_dup, _diag_snd_live);
+                      g_midi_play_n, g_midi_load_n, _diag_snd_dup, _diag_snd_live,
+                      g_blt_fill_n, g_blt_copy_n, g_blt_key_n, g_diag_blt_skip);
             OutputDebugStringA(_diag);
         }
     }
@@ -1115,6 +1146,9 @@ void img0(surf *d, surf *s) {
     // MM-P9.5: keyed Blt touches both surfaces — release cached text DCs first.
     surf_text_dc_release(d);
     surf_text_dc_release(s);
+    // MM-P9.6: count + optional skip (keyed-copy category).
+    g_blt_key_n++;
+    if (g_diag_blt_skip == 3) return;
     d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT | DDBLT_KEYSRC, NULL);
 }
 

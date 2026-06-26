@@ -372,6 +372,25 @@ cmdline_length:
             txtset(t2, "oldtextdc");
             if (txtsearch(t, t2)) g_text_dc_cache = 0;
         }
+        // MM-P9.6 (2026-06-26): per-category DirectDraw Blt skip, to localize the
+        // residual ~120 KB/s NVIDIA leak. "diagbltskip1/2/3" -> g_diag_blt_skip
+        // (1=cls colour-fill, 2=img copy, 3=img0 keyed). Default 0 = normal.
+        // See g_diag_blt_skip in myddraw.cpp.
+        {
+            extern int g_diag_blt_skip;
+            txtset(t2, "diagbltskip3");
+            if (txtsearch(t, t2)) {
+                g_diag_blt_skip = 3;
+            } else {
+                txtset(t2, "diagbltskip2");
+                if (txtsearch(t, t2)) {
+                    g_diag_blt_skip = 2;
+                } else {
+                    txtset(t2, "diagbltskip1");
+                    if (txtsearch(t, t2)) g_diag_blt_skip = 1;
+                }
+            }
+        }
 #endif
     }
 #ifdef CLIENT
