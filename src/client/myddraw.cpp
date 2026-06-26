@@ -444,8 +444,6 @@ DWORD point(surf *s, long x, long y) {
 
 void cls(surf *s, DWORD c) {
     static DDBLTFX b;
-    // MM-P9.5: release any cached text DC before touching the surface.
-    surf_text_dc_release(s);
     // MM-P9.6: count + optional skip (colour-fill category).
     g_blt_fill_n++;
     if (g_diag_blt_skip == 1) return;
@@ -483,6 +481,11 @@ void cls(surf *s, DWORD c) {
         return;
     }
     // Fallback: video-memory / unlocked surface (s->o == NULL) — keep legacy Blt.
+    // MM-P9.6: only THIS path calls a DirectDraw method, so release the cached
+    // text DC here. The raw-fill path above writes memory directly and must NOT
+    // release — releasing every frame would force the present/text DC to be
+    // re-acquired per frame, reintroducing the per-frame ddraw-GetDC leak.
+    surf_text_dc_release(s);
     b.dwSize = sizeof(DDBLTFX);
     b.dwFillColor = c;
     s->s->Blt(NULL, NULL, NULL, DDBLT_WAIT | DDBLT_COLORFILL, &b);
@@ -500,20 +503,28 @@ void cls(surf *s, DWORD c) {
 // frame, and the WndProc mouse handler maps client coords back through
 // those globals.
 void refresh(surf *s) {
-    // MM-P9.5: release any cached text DC on this surface before the present's
-    // own IDirectDrawSurface::GetDC (DD forbids a second GetDC while one is
-    // held). Done before the diag early-return so the surface is always left in
-    // a DC-free state at end of frame regardless of g_diag_present_mode.
-    surf_text_dc_release(s);
-    // MM-P9 diagnostic (2026-06-26): present-bisection toggle. Mode >= 1 skips
-    // the entire per-frame present (window GetDC + BitBlt + the back-buffer
-    // IDirectDrawSurface::GetDC) so a leak in this path can be confirmed by
-    // watching commit go flat. Default (0) is unchanged shipped behavior.
-    if (g_diag_present_mode >= 1) return;
+    // MM-P9.6 (2026-06-26): present via the cached on-surface text DC instead of
+    // a fresh IDirectDrawSurface::GetDC every frame. The present needs a GDI DC
+    // for `s` (= ps) to BitBlt to the window; doing GetDC/ReleaseDC per frame
+    // leaked ~6 KB/frame on NVIDIA's legacy-ddraw emulation (~94 KB/s at 16 fps) —
+    // the SAME per-call ddraw-GetDC leak fixed for text. ps is never a DirectDraw
+    // Blt destination (the world is composed by the asm/raw blitters into ps->o)
+    // and cls() now raw-fills it without releasing, so the cached DC persists for
+    // the whole session: one ddraw GetDC total instead of one per frame. The
+    // legacy `oldtextdc` path keeps the per-frame GetDC/ReleaseDC for A/B.
+    if (g_diag_present_mode >= 1) return; // diag: skip present entirely
     HDC ddhdc;
-    s->s->GetDC(&ddhdc);
-    blit_letterbox(hWnd, ddhdc, (long) s->d.dwWidth, (long) s->d.dwHeight);
-    s->s->ReleaseDC(ddhdc);
+    if (g_text_dc_cache != 0) {
+        ddhdc = surf_text_dc_acquire(s); // reuse the one cached DC; do NOT release
+        if (ddhdc != NULL)
+            blit_letterbox(hWnd, ddhdc, (long) s->d.dwWidth, (long) s->d.dwHeight);
+    } else {
+        // Legacy baseline: ensure DC-free, then per-frame GetDC/ReleaseDC.
+        surf_text_dc_release(s);
+        s->s->GetDC(&ddhdc);
+        blit_letterbox(hWnd, ddhdc, (long) s->d.dwWidth, (long) s->d.dwHeight);
+        s->s->ReleaseDC(ddhdc);
+    }
 } //refresh end
 
 

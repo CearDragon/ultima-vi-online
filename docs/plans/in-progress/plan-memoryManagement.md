@@ -425,6 +425,26 @@ mode 2). The only per-frame DD operations left are Blts (`cls` colour-fill,
 - ⬜ **MM-P9.6.4** Interactive verify: idle NVIDIA run — `bltFill` still
   increments but `commitKB` should now be FLAT, and the cleared screen/back-buffer
   must look identical. Confirms the idle leak is fully closed.
+- ✅ **MM-P9.6.5** Correction (2026-06-26): a follow-up idle run showed `commitKB`
+  STILL climbing ~94 KB/s and still tracking `bltFill` at **~6 KB/call** — nearly
+  identical to pre-fix. Root cause re-analysis: ~6 KB is the per-call cost of an
+  `IDirectDrawSurface::GetDC` on NVIDIA's legacy-ddraw emulation (the SAME leak
+  fixed for text). `cls()`'s raw-fill was correct but wasn't the dominant
+  residual — the **present path `refresh()` still did one ddraw `GetDC` per
+  frame** (to BitBlt `ps` to the window). 1 GetDC/frame × ~16 fps × ~6 KB ≈
+  94 KB/s — exactly the residual. (The same 6 KB/GetDC also reconciles the
+  original ~343 KB/s text leak at ~3-4 text GetDCs/frame.) `bltFill` correlated
+  only because it, too, is per-frame.
+- ✅ **MM-P9.6.6** Fix (2026-06-26): `refresh()` now presents via the cached
+  on-surface text DC (`surf_text_dc_acquire`) instead of a fresh per-frame
+  `GetDC`/`ReleaseDC`. `ps` is never a DirectDraw `Blt` destination (composed by
+  the asm/raw blitters into `ps->o`) and `cls()` now raw-fills it WITHOUT
+  releasing the cache, so the cached DC persists for the whole session: one ddraw
+  `GetDC` total instead of one per frame. `oldtextdc` keeps the per-frame
+  `GetDC` for A/B. `client`/`both`/`host` build clean.
+- ⬜ **MM-P9.6.7** Interactive verify: idle NVIDIA run — `commitKB` should now be
+  FLAT (vs `oldtextdc`, which should still climb ~94 KB/s). Present must look
+  identical (no flicker/teardown).
 - **Exit:** Idle `commitKB` flat (±small caching) on NVIDIA; pixels unchanged.
 
 ---
