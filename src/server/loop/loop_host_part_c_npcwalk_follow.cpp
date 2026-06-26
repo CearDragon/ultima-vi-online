@@ -936,6 +936,14 @@
                                     } //z&&z2
 
                                     //integrate player move and partymember->follow move
+                                    if (tplayer->camera_freeze) {
+                                        if (myobj->x + x2 < tplayer->frozen_tpx || myobj->x + x2 >= tplayer->frozen_tpx + tplayer->frozen_vtx ||
+                                            myobj->y + y2 < tplayer->frozen_tpy || myobj->y + y2 >= tplayer->frozen_tpy + tplayer->frozen_vty) {
+                                            x2 = 0;
+                                            y2 = 0;
+                                        }
+                                    }
+
                                 selected_partymember_move:
                                     x3 = 0;
 

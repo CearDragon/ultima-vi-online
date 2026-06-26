@@ -111,6 +111,9 @@ struct player {
     unsigned short mx, my; //offset of mouse over frame
     unsigned long key; //keys/mouse buttons being held down
     unsigned char action; //input: action
+    unsigned char camera_freeze;
+    short frozen_tpx, frozen_tpy;
+    unsigned short frozen_vtx, frozen_vty;
 
     unsigned long key2; //backup of previous keys/mouse buttons
     object *mobj; //mouse cursor object

@@ -1152,7 +1152,6 @@ u6okattackdone:
           if (directionalmove_mbheld) goto directionalmove_force;
           if (pathmove_mbheld) goto pathmove_force;
           if ((x3>48)||(y3>48)){ //path finding range
-            if (camera_freeze) goto directionalmove_force;
 pathmove_force:
             pathmove_mbheld=1;
             if (cur_type==1) SetCursor(cur8);
@@ -1580,8 +1579,20 @@ ktarcast:
 
     if (u6okeyon(U6OK_QUANTITY)) CLIENTplayer->key|=KEYquan;
 
+    // Sync frozen camera state to player struct for transmission
+    if (CLIENTplayer->camera_freeze != camera_freeze ||
+        CLIENTplayer->frozen_vtx != (unsigned short)viewTilesX() ||
+        CLIENTplayer->frozen_vty != (unsigned short)viewTilesY()) {
+        x = 1; // Force send if freeze state or viewport size changed
+    }
+    CLIENTplayer->camera_freeze = camera_freeze;
+    CLIENTplayer->frozen_tpx = (short)ctpx;
+    CLIENTplayer->frozen_tpy = (short)ctpy;
+    CLIENTplayer->frozen_vtx = (unsigned short)viewTilesX();
+    CLIENTplayer->frozen_vty = (unsigned short)viewTilesY();
+
     //check if message is different from previous message (ignore mx,my)
-    x=0; //send FALSE
+    if (x != 1) x=0; //send FALSE if not already forced
     if (CLIENTplayer->key!=CLIENTplayer->key2) x=1;
     //?action
     if (x==1){ //send INPUT update message to host

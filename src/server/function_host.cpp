@@ -3073,6 +3073,19 @@ void wpf_pathfind(unsigned char *d, long sourcex, long sourcey, long destx, long
             z2 = 0; //accumulative weight
             x2 = WPF_OFFSETX + x;
             y2 = WPF_OFFSETY + y;
+
+            if (type == 0) {
+                npc *wpf_npc_tmp = (npc *)WPF_OBJECT->more;
+                if (wpf_npc_tmp->player && wpf_npc_tmp->player->camera_freeze) {
+                    player *p = wpf_npc_tmp->player;
+                    if (x2 < p->frozen_tpx || x2 >= p->frozen_tpx + p->frozen_vtx ||
+                        y2 < p->frozen_tpy || y2 >= p->frozen_tpy + p->frozen_vty) {
+                        wpf_weight[x][y] = 0;
+                        goto wpf_blocked;
+                    }
+                }
+            }
+
             if (x2 >= 0) {
                 if (y2 >= 0) {
                     if (x2 < 2048) {
