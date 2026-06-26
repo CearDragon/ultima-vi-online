@@ -774,7 +774,7 @@ displayobj:
         if (tinp==inpf2){
           if (t->l>2){
             tagxy.cx=0; tagxy.cy=0;
-            ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
             SelectObject(taghdc,txtfnt);
             GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy);
             ps->s->ReleaseDC(taghdc);
@@ -783,7 +783,7 @@ inpf2crop:
               txtset(t2,t); txtset(t,"..."); txtadd(t,t2);
               if (t->l>=6){
                 tagxy.cx=0; tagxy.cy=0;
-                ps->s->GetDC(&taghdc);
+                surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
                 SelectObject(taghdc,txtfnt);
                 GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy);
                 ps->s->ReleaseDC(taghdc);
@@ -1105,7 +1105,7 @@ if
 (lookdisplay &&looktext) {
     static SIZE looksz;
     long lookw, lookh, lookbx, lookby, lookmaxx, lookmaxy;
-    ps->s->GetDC(&taghdc);
+    surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
     SelectObject(taghdc, fnt1naa);
     looksz.cx = 0;
     looksz.cy = 0;
