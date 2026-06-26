@@ -4,9 +4,9 @@
 > P4.4 still describes a monolithic `loop_host.cpp` (~30k lines) that no longer
 > exists (the host loop is now 35 ordered `#include` fragments under
 > `src/server/loop/`). The active, loop-split-aware successor is
-> [`modernization/plan-modernize-server.md`](todo/modernization/plan-modernize-server.md)
+> [`modernization/plan-modernize-server.md`](plan-modernize-server.md)
 > (phase prefix `MSRV-P*`), sequenced by
-> [`modernization/README.md`](todo/modernization/README.md). This file is kept for
+> [`modernization/README.md`](README.md). This file is kept for
 > historical reference; do **not** start new work from it.
 
 Status legend: ⬜ todo · 🟡 in-progress · ✅ done · ⏭ deferred · ❌ blocked

@@ -53,7 +53,7 @@ The game was originally written ~2005 and has **accumulated numerous resource le
 
 I've created a **comprehensive, phased modernization plan** at:
 
-### 📋 [`docs/plans/plan-memoryManagement.md`](../plans/plan-memoryManagement.md)
+### 📋 [`plan-memoryManagement.md`](plan-memoryManagement.md)
 
 This plan tracks the work in 8 phases:
 

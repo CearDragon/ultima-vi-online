@@ -62,9 +62,19 @@ The client becomes choppy because the leak is not just consuming memory; it is a
 
 ## Progress-tracked plan to resolve it
 
-The work is already tracked in `docs/plans/in-progress/plan-memoryManagement.md` under **MM-P9**. The remaining verification phase is:
+> **RESOLVED (2026-06-26).** The plan is closed and archived at
+> `docs/plans/done/memory-management/`. The dominant idle leak was ultimately
+> **not** the MM-P9.3 portrait reload theorized in the "Root cause" section above
+> (that attribution is withdrawn in the addendum below) — it was the NVIDIA
+> legacy-DirectDraw per-frame `GetDC` leak fixed in **MM-P9.5 / MM-P9.6**. Idle
+> `commitKB` is now flat on NVIDIA with the shipped fixes.
 
-- **MM-P9.4** — rebuild from the current source and rerun the 10-minute idle benchmark
+The work was tracked in
+`docs/plans/done/memory-management/plan-memoryManagement.md` under **MM-P9**. The
+final verification phase, now complete:
+
+- **MM-P9.4** — ✅ rebuilt from current source and reran the idle benchmark; the
+  climb is gone.
 
 ### Recommended next actions
 

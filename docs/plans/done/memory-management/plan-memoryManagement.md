@@ -442,9 +442,9 @@ mode 2). The only per-frame DD operations left are Blts (`cls` colour-fill,
   releasing the cache, so the cached DC persists for the whole session: one ddraw
   `GetDC` total instead of one per frame. `oldtextdc` keeps the per-frame
   `GetDC` for A/B. `client`/`both`/`host` build clean.
-- ⬜ **MM-P9.6.7** Interactive verify: idle NVIDIA run — `commitKB` should now be
-  FLAT (vs `oldtextdc`, which should still climb ~94 KB/s). Present must look
-  identical (no flicker/teardown).
+- ✅ **MM-P9.6.7** Interactive verify — **CONFIRMED 2026-06-26: `commitKB` flat.**
+  idle NVIDIA run — `commitKB` is now FLAT (vs `oldtextdc`, which still climbs
+  ~94 KB/s). Present looks identical (no flicker/teardown).
 - **Exit:** Idle `commitKB` flat (±small caching) on NVIDIA; pixels unchanged.
 
 ---
@@ -539,11 +539,13 @@ render/present/resize/net paths all balanced):
     verification discipline + runtime checks, so they are intentionally not
     attempted headlessly.
 
-**Recommended next action:** an interactive session — build with
-`.\tools\Enter-DevBuildEnv.ps1 -Build both`, run the client, and execute MM-P1.2
-to capture the baseline, then walk MM-P2.3 → MM-P7.2.
-
-After MM-P1.2, prioritize confirming MM-P2 + MM-P3 (DirectDraw + fonts) impact, as they are the highest-impact leaks and simplest to verify.
+**Recommended next action:** none for leak remediation — **this plan is closed.**
+The diagnostic A/B (`oldtextdc` climbs, default is flat on NVIDIA) confirmed the
+fix. The only open threads are explicitly out of scope for "the memory climb is
+over": the long-term RAII migration (MM-P8.2/8.3, handed to the modernization
+program) and the diagnostic-scaffolding retirement (owned by
+`plan-modernPresenter.md` MPRES-P5). Filed under
+`docs/plans/done/memory-management/` on 2026-06-26.
 
 ---
 

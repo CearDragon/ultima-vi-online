@@ -407,7 +407,6 @@ For Kubernetes, see [`k8s/deployment.yaml`](k8s/deployment.yaml) and
 | Gem "peer" / birds-eye minimap    | `src/client/loop_client.cpp` (`if (peer)` block, and `minimaptype` block)        |
 | Resizable window backbuffers      | `src/client/function_client.cpp` → `recreateBackbuffers()`                        |
 | World view / camera               | `src/client/viewport.cpp`, `viewTilesX()`, `viewTilesY()`                        |
-| Inventory                         | `docs/ExternInventory.md` plus the FRAME widgets in `frame.cpp`                  |
 | Spells                            | `src/common/spell_code/`                                                         |
 | "Use" interactions (`U` key)      | `src/common/use_code/`                                                           |
 | Random chest contents             | `src/server/function_host.cpp` (`chest[chestn++]= …` blocks)                     |
@@ -426,12 +425,10 @@ All developer-facing docs live under `docs/`.
   client UI: every on-screen element, the C++ globals that back it, the two
   parallel UI systems (`FRAME*` legacy panels and the newer `uipanel*`
   system), drag/persist/validate mechanics.
-- [`docs/resizable-window-hotspots.md`](docs/resizable-window-hotspots.md) —
+- [`docs/resizable-window-hotspots.md`](docs/ui/resizable-window-hotspots.md) —
   catalog of hard-coded `1024×768` literals throughout the codebase that
   interact with window resizing. Cross-referenced from the UI doc as
   "hotspots-§X".
-- [`docs/ExternInventory.md`](docs/ExternInventory.md) — design notes for the
-  external (always-on) inventory window.
 
 ### Multi-phase refactor plans (`docs/plans/`)
 
@@ -456,9 +453,11 @@ Representative plans:
   UI re-layout work. *(done)*
 - [`plan-dynamicObjectBuffer.md`](docs/plans/todo/plan-dynamicObjectBuffer.md) —
   replacing the fixed-size object pools with growable arenas. *(todo)*
-- [`plan-memoryManagement.md`](docs/plans/in-progress/plan-memoryManagement.md) —
-  memory-leak investigation and management work. *(in-progress)*
-- [`plan-serverRefactor.md`](docs/plans/plan-serverRefactor.md) — incremental
+- [`plan-memoryManagement.md`](docs/plans/done/memory-management/plan-memoryManagement.md) —
+  memory-leak investigation and remediation. *(done — see the folder
+  [`README.md`](docs/plans/done/memory-management/README.md) for root causes &
+  solutions)*
+- [`plan-serverRefactor.md`](docs/plans/todo/modernization/plan-serverRefactor.md) — incremental
   decomposition of the monolithic host loop.
 
 When adding new long-form work, create `plan-<feature>.md` in

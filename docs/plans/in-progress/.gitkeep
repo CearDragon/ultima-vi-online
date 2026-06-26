@@ -1,0 +1,5 @@
+# Lifecycle bucket for plans whose first phase is underway.
+# Kept in version control even when empty (see docs/plans/ and the README
+# "Plan lifecycle" section). Move a plan here from todo/ when work begins,
+# then on to done/ when all phases land.
+

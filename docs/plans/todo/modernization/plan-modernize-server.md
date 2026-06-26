@@ -9,7 +9,7 @@ Each phase has an **Exit criteria** that must be green before the next phase sta
 > comments with the phase ID (`MSRV-P5.2:`, etc.).
 > Read [`README.md`](README.md) first — Prime Directive, risk tiers (T0–T3),
 > the `MOD-P0` shared safety net, and the coordination rules.
-> **Supersedes** [`docs/plans/plan-serverRefactor.md`](../../plan-serverRefactor.md)
+> **Supersedes** [`docs/plans/plan-serverRefactor.md`](plan-serverRefactor.md)
 > (which predates the `LHS` loop split and is now loop-stale). That plan's `P*`
 > content is folded in below and made loop-split-aware.
 > Execute with the **`cpp-modernizer` agent**.
