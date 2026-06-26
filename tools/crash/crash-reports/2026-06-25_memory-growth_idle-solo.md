@@ -225,6 +225,54 @@ screen is enough) and confirm Commit is now flat. If a residual climb remains,
 than expected (the remaining suspect would then be the DirectMusic performance
 itself or its DirectSound output buffers).
 
+### Result of the third instrumented run (2026-06-25) — narrowed to DirectMusic playback
+
+Heartbeat (warmup → next → middle → hours):
+
+```
+surf=12  txt=288 heapKB=3853  heapN=601  gdi=18 user=24 midiPlay=0   midiLoad=0
+surf=818 txt=842 heapKB=17342 heapN=2853 gdi=62 user=54 midiPlay=1   midiLoad=2
+surf=818 txt=842 heapKB=17342 heapN=2853 gdi=62 user=54 midiPlay=199 midiLoad=2
+surf=818 txt=842 heapKB=17342 heapN=2853 gdi=62 user=54 midiPlay=200 midiLoad=2
+```
+
+- **All counted pools flat** post-warmup (surf/txt/heapKB/heapN/gdi/user identical
+  across samples) while Commit rises → DirectX-internal, confirmed a 3rd time.
+- **`midiLoad` ~flat (2)** → the `Download`/`Unload` path is NOT the active idle
+  leak (it still matters for in-game area/combat music swaps).
+- **`midiPlay` climbs then plateaus** (1→199→200) while Commit keeps rising →
+  the leak is in the **DirectMusic performance's playback**, not in our COM refs
+  (the `m_pSegmentState8` fix is in and segment-states are now bounded).
+- Ruled out this round: **notifications** (`AddNotificationType` /
+  `SetNotificationHandle` never called — only in the SDK header) and
+  **DirectSound sfx** (bounded `tempsound[256]` ring; duplicate buffers share
+  the source wave; the `sound`-struct `malloc` is counted by the flat `heapN`).
+- User observation: **slow climb at the login screen (music only), much faster
+  in-game** — consistent with DirectMusic playback being the constant baseline
+  leak and additional music activity in-game accelerating it.
+
+### Action — sound-ring counters + decisive isolation test
+
+Added `sndDup=` (cumulative `DuplicateSoundBuffer`) and `sndLive=` (live
+`tempsound[]` voices, must stay ≤256) to the heartbeat to empirically confirm
+the sfx ring is bounded. Heartbeat is now:
+
+```
+U6O-DIAG surf_live=.. txt_live=.. heapKB=.. heapN=.. gdi=.. user=.. midiPlay=.. midiLoad=.. sndDup=.. sndLive=..
+```
+
+**Decisive isolation test (no code change):** set the in-game **MIDI music
+volume to 0**. That makes `refresh_tail` skip the entire DirectMusic block
+(`if (u6omidivolume) {...}`), so `Play`/`IsPlaying`/`Load` stop firing
+(`midiPlay` freezes). If **Commit flattens** → DirectMusic playback is the leak,
+and the fix is to stop the per-track-loop re-`Play()` churn (e.g. background-only
+`SetRepeat(infinite)` so the synth loops once internally instead of being
+re-played each time the track ends). If Commit **still climbs** with `midiPlay`
+frozen → the leak is per-frame and elsewhere, and the audio theory is wrong.
+
+All three targets build clean.
+
+
 
 
 
