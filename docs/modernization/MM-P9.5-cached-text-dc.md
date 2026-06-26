@@ -79,9 +79,14 @@ unchanged and still fully working.
 ## Exhaustive `surf_text_dc_release()` insertion sites
 
 Found via `grep` of the whole `src/client` + `src/common` tree for
-`->(Blt|Flip|Lock|GetDC|ReleaseDC)(`. (No `Flip` anywhere; loop fragments call
-the wrappers below, not raw DD methods — confirmed by grep returning nothing in
-`src/client/loop/`.)
+`->(Blt|Flip|Lock|GetDC|ReleaseDC)(`. (No `Flip` anywhere.)
+
+> **Correction (2026-06-26) — see §Regression fix below.** The original pass
+> claimed the `src/client/loop/` fragments contained no raw DirectDraw calls.
+> That was WRONG: 33 raw `ps->s->GetDC(&taghdc)` *text-measurement* sites live in
+> the loop fragments and were missed, causing a text-positioning regression. They
+> are now fixed (release the cached DC first). Do not trust the "loop fragments
+> have no DD methods" assumption.
 
 **myddraw.cpp**
 - `cls()` — `Blt` colour-fill → release `s`.
@@ -134,4 +139,41 @@ Run the client with the `txtout()` heartbeat visible in DebugView and watch the
   confirmation is needed.
 - The ~120 KB/s mode-2 residual leak is a separate, non-GetDC source and is NOT
   addressed here.
+
+## Regression fix (2026-06-26) — foreign GetDC measurement sites in loop fragments
+
+**Symptom (reported after shipping the cached-DC path):** text positioning bugs —
+"Create a Character" left-aligned on the login menu (highlighted hover copy was
+fine); the MOTD and "1 in Britannia: <name>" announcements appeared mid-screen
+before snapping to the chat log; a typed chat message rendered on top of the
+player's name tag.
+
+**Root cause:** the loop fragments measure text width with their OWN
+`ps->s->GetDC(&taghdc)` → `GetTextExtentPoint32()` → `ReleaseDC()` blocks to
+compute centered X positions. When the new cached-text-DC path left a DC held on
+`ps` (from a prior `txtout`), those foreign `GetDC`s failed with
+`DDERR_DCALREADYCREATED`, so `tagxy.cx` came back wrong (0 / stale) and the
+centering math produced the wrong X. The original MM-P9.5 pass missed these
+because it wrongly assumed the loop fragments contained no raw DirectDraw calls.
+
+**Fix:** prepend `surf_text_dc_release(ps);` before every foreign
+`ps->s->GetDC(&taghdc);` site so the surface is DC-free for the measurement
+GetDC. After the measure/Release pair the next `txtout` re-acquires the cache, so
+the leak reduction is preserved (per-name: ~2 GetDC instead of ~10). Applied as a
+byte-faithful raw-text substitution (brace-seam-safe) to **33 sites**:
+
+| File | Sites |
+|------|-------|
+| `loop_client_part_intro_b.cpp` | 13 |
+| `loop_client_part_intro_c.cpp` | 6 |
+| `loop_client_part_intro_d.cpp` | 1 |
+| `loop_client_part_panel_draw.cpp` | 3 |
+| `loop_client_part_world_render.cpp` | 10 |
+
+**Completeness:** a fresh `grep` for `->GetDC(` over the whole `src/client` tree
+now shows every DirectDraw-surface `GetDC` is either the cache acquire itself,
+or preceded by `surf_text_dc_release()` (refresh/loadimage/the 3 STATUSMESS
+sites/the 33 fragment sites). `client`/`both`/`host` build clean. Pixels are
+unchanged (only the GDI sequencing changed); positioning is restored to the
+legacy fresh-DC behavior.
 

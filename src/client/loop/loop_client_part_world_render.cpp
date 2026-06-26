@@ -1968,7 +1968,7 @@ asm_lightshow2:
         txtcol=idlst_namecolour[osi[z]];
 osdisplay_ktar:
         tagxy.cx=0; tagxy.cy=0;
-        ps->s->GetDC(&taghdc);
+        surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
         {
             HGDIOBJ _old = SelectObject(taghdc, txtfnt);
             GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
@@ -2572,7 +2572,7 @@ pw_jmp:
             wraptext_firstline=1;
             //check if data exceeds 1 line inc port! 16 across
 wraptext_recheck:
-            ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
             {
                 HGDIOBJ _old = SelectObject(taghdc, fnt1); // not valid for garg text or runes!
                 tagxy.cx = 0; tagxy.cy = 0; GetTextExtentPoint32(taghdc, t4->d, t4->l, &tagxy); // get width of t4
@@ -2588,7 +2588,7 @@ wraptext_recheck:
 movet4intot7:
               txtaddchar(t7,t4->d2[0]); txtright(t4,t4->l-1);
 
-              ps->s->GetDC(&taghdc);
+              surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
               {
                   HGDIOBJ _old = SelectObject(taghdc, fnt1); // not valid for garg text or runes!
                   tagxy.cx = 0; tagxy.cy = 0; GetTextExtentPoint32(taghdc, t7->d, t7->l, &tagxy);
@@ -2768,7 +2768,7 @@ text_continue_con:
                 if (txtlog_pm) z3=rgb(255,64,128);//private message
                 if (txtlog_vm) z3=rgb(64,224,64);//voice message
                 tagxy.cx=0; tagxy.cy=0;
-                ps->s->GetDC(&taghdc);
+                surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
                 {
                     HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                     GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
@@ -2810,7 +2810,7 @@ text_continue_con:
                     txtcol=rgb(255,64,32); txtout(con_frm_img->graphic,x+1,y+1,t);
 
                     tagxy.cx=0; tagxy.cy=0;
-                    ps->s->GetDC(&taghdc);
+                    surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
                     {
                         HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                         GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
@@ -2889,7 +2889,7 @@ text_continue_con:
                     txtcol=z2; txtout(con_frm_img->graphic,x+1,y+1,t);
 
                     tagxy.cx=0; tagxy.cy=0;
-                    ps->s->GetDC(&taghdc);
+                    surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
                     {
                         HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                         GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
@@ -2984,7 +2984,7 @@ gargedit:
             }
             //get text dimentions (using t2)
             tagxy.cx=0; tagxy.cy=0;
-            ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t2->d, t2->l, &tagxy);
@@ -3051,7 +3051,7 @@ text_continue:
             if (txt_pm) z3=rgb(255,64,128);//private message
             if (txt_vm) z3=rgb(64,224,64);//voice message
             tagxy.cx=0; tagxy.cy=0;
-            ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
@@ -3095,7 +3095,7 @@ text_continue:
 
                 txtcol=rgb(255,64,32); txtout(ps,x+1,y+1,t);
                 tagxy.cx=0; tagxy.cy=0;
-                ps->s->GetDC(&taghdc);
+                surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
                 {
                     HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                     GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
@@ -3175,7 +3175,7 @@ text_continue:
 
                 txtcol=z2; txtout(ps,x+1,y+1,t);
                 tagxy.cx=0; tagxy.cy=0;
-                ps->s->GetDC(&taghdc);
+                surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
                 SelectObject(taghdc,txtfnt);
                 GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy);
                 ps->s->ReleaseDC(taghdc);
