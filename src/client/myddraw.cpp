@@ -11,6 +11,10 @@
 #ifdef _DEBUG
 #include <crtdbg.h>
 #endif
+// MM-P9 diagnostic (2026-06-25): toolhelp for a per-process thread count. All
+// of CreateToolhelp32Snapshot/Thread32First/Next live in kernel32 (already
+// linked), so this adds no new link dependency.
+#include <tlhelp32.h>
 // r999
 #include "define_both.h"
 #include "viewport.h" // RW-P2.4: backbufferW()/H() for blit_letterbox sanity check
@@ -702,6 +706,85 @@ DWORD fixcol(DWORD c) {
   }
 }*/
 
+// MM-P9 diagnostic (2026-06-25): process-wide probes for the heartbeat. These
+// catch leaks that bypass every other counter: thread stacks (threads), kernel
+// objects (handles), and driver/DirectX-internal commits (private bytes). All
+// are resolved dynamically or via kernel32/toolhelp, so no new link dependency.
+
+// Private (committed) bytes for this process. Resolves GetProcessMemoryInfo at
+// runtime (kernel32!K32GetProcessMemoryInfo first, then psapi.dll) so we never
+// link psapi.lib. Returns bytes, or 0 if unavailable.
+static SIZE_T _diag_private_bytes() {
+    // Local mirror of PROCESS_MEMORY_COUNTERS_EX (x86 layout) so we don't need
+    // psapi.h (which can drag in a #pragma comment(lib, "psapi.lib")).
+    struct _DIAG_PMCEX {
+        DWORD  cb;
+        DWORD  PageFaultCount;
+        SIZE_T PeakWorkingSetSize;
+        SIZE_T WorkingSetSize;
+        SIZE_T QuotaPeakPagedPoolUsage;
+        SIZE_T QuotaPagedPoolUsage;
+        SIZE_T QuotaPeakNonPagedPoolUsage;
+        SIZE_T QuotaNonPagedPoolUsage;
+        SIZE_T PagefileUsage;
+        SIZE_T PeakPagefileUsage;
+        SIZE_T PrivateUsage;
+    };
+    typedef BOOL(WINAPI *PGPMI)(HANDLE, void *, DWORD);
+    static PGPMI pfn = NULL;
+    static bool tried = false;
+    if (!tried) {
+        tried = true;
+        HMODULE hk = GetModuleHandleA("kernel32.dll");
+        if (hk) pfn = (PGPMI) GetProcAddress(hk, "K32GetProcessMemoryInfo");
+        if (!pfn) {
+            HMODULE hp = LoadLibraryA("psapi.dll");
+            if (hp) pfn = (PGPMI) GetProcAddress(hp, "GetProcessMemoryInfo");
+        }
+    }
+    if (!pfn) return 0;
+    _DIAG_PMCEX pmc;
+    ZeroMemory(&pmc, sizeof(pmc));
+    pmc.cb = sizeof(pmc);
+    if (pfn(GetCurrentProcess(), &pmc, sizeof(pmc))) return pmc.PrivateUsage;
+    return 0;
+}
+
+// Open kernel handle count for this process. Resolved dynamically because the
+// legacy SDK headers here may not declare GetProcessHandleCount.
+static DWORD _diag_handle_count() {
+    typedef BOOL(WINAPI *PGPHC)(HANDLE, PDWORD);
+    static PGPHC pfn = NULL;
+    static bool tried = false;
+    if (!tried) {
+        tried = true;
+        HMODULE hk = GetModuleHandleA("kernel32.dll");
+        if (hk) pfn = (PGPHC) GetProcAddress(hk, "GetProcessHandleCount");
+    }
+    if (!pfn) return 0;
+    DWORD n = 0;
+    if (pfn(GetCurrentProcess(), &n)) return n;
+    return 0;
+}
+
+// Live thread count for this process (toolhelp snapshot).
+static long _diag_thread_count() {
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    if (snap == INVALID_HANDLE_VALUE) return -1;
+    THREADENTRY32 te;
+    ZeroMemory(&te, sizeof(te));
+    te.dwSize = sizeof(te);
+    DWORD pid = GetCurrentProcessId();
+    long n = 0;
+    if (Thread32First(snap, &te)) {
+        do {
+            if (te.th32OwnerProcessID == pid) n++;
+        } while (Thread32Next(snap, &te));
+    }
+    CloseHandle(snap);
+    return n;
+}
+
 void txtout(surf *s, long x, long y, txt *t)
 {
     // MM-P9 diagnostic (2026-06-25): 5-second heartbeat. txtout() is called
@@ -733,6 +816,13 @@ void txtout(surf *s, long x, long y, txt *t)
 #endif
             DWORD _diag_gdi = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
             DWORD _diag_user = GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS);
+            // MM-P9 diagnostic: process-wide commit/handles/threads — these catch
+            // leaks invisible to every other counter (DirectX-driver memory,
+            // kernel handles, thread stacks). commitKB is the ground truth that
+            // every line now self-correlates against.
+            unsigned long _diag_commit_kb = (unsigned long) (_diag_private_bytes() / 1024);
+            DWORD _diag_handles = _diag_handle_count();
+            long _diag_threads = _diag_thread_count();
             // MM-P9 diagnostic: cumulative DirectMusic call counts (dmusic.cpp)
             // and DirectSound voice-ring counts (sound.cpp) so the leak's firing
             // rate is visible and the audio-leak fixes can be confirmed.
@@ -740,9 +830,10 @@ void txtout(surf *s, long x, long y, txt *t)
             extern long g_midi_load_n;
             extern long g_snd_dup_n;
             extern long g_snd_live;
-            char _diag[288];
+            char _diag[384];
             wsprintfA(_diag,
-                      "U6O-DIAG surf_live=%ld txt_live=%ld heapKB=%ld heapN=%ld gdi=%lu user=%lu midiPlay=%ld midiLoad=%ld sndDup=%ld sndLive=%ld\n",
+                      "U6O-DIAG commitKB=%lu handles=%lu threads=%ld surf=%ld txt=%ld heapKB=%ld heapN=%ld gdi=%lu user=%lu midiPlay=%ld midiLoad=%ld sndDup=%ld sndLive=%ld\n",
+                      _diag_commit_kb, _diag_handles, _diag_threads,
                       g_surf_live, g_txt_live, _diag_heap_kb, _diag_heap_n, _diag_gdi, _diag_user,
                       g_midi_play_n, g_midi_load_n, g_snd_dup_n, g_snd_live);
             OutputDebugStringA(_diag);

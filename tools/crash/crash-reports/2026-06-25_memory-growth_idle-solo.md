@@ -219,11 +219,8 @@ Heartbeat is now:
 U6O-DIAG surf_live=.. txt_live=.. heapKB=.. heapN=.. gdi=.. user=.. midiPlay=.. midiLoad=..
 ```
 
-All three targets build clean. **Next interactive step:** rerun idle (login
-screen is enough) and confirm Commit is now flat. If a residual climb remains,
-`midiPlay` / `midiLoad` reveal whether re-`Play()`/re-`Load()` is firing faster
-than expected (the remaining suspect would then be the DirectMusic performance
-itself or its DirectSound output buffers).
+All three targets build clean.
+
 
 ### Result of the third instrumented run (2026-06-25) — narrowed to DirectMusic playback
 
@@ -271,6 +268,61 @@ re-played each time the track ends). If Commit **still climbs** with `midiPlay`
 frozen → the leak is per-frame and elsewhere, and the audio theory is wrong.
 
 All three targets build clean.
+
+### Result of the fourth instrumented run (2026-06-25) — AUDIO THEORY DISPROVEN
+
+User muted audio, then turned music+sfx all the way up; logged-in Commit grew
+**134,356 K → 274,000 K (+~140 MB) in ~5 min**. Across the entire climb **every
+counter was flat**, including the new audio counters:
+
+```
+commit ~134MB: surf=12  txt=288 heapKB=3853  heapN=601  gdi=18 user=22 midiPlay=0 midiLoad=0 sndDup=0 sndLive=0
+... (logged in) surf=834 txt=862 heapKB=17346 heapN=2911 gdi=62 user=54 midiPlay=2 midiLoad=2 sndDup=0 sndLive=0
+commit ~274MB: surf=834 txt=862 heapKB=17346 heapN=2911 gdi=62 user=55 midiPlay=2 midiLoad=2 sndDup=0 sndLive=0
+```
+
+Decisive facts:
+- **`sndDup=0`, `sndLive=0` for the whole run** — zero sound effects ever fired,
+  so DirectSound is conclusively NOT the leak.
+- **`midiPlay=2`, `midiLoad=2`** — music barely touched; +140 MB cannot come from
+  two `Play()` calls. **The DirectMusic theory is disproven.** (The
+  `Play()`/`Unload` fixes are real bugs and stay, but they are not this leak.)
+- **`heapN` is process-wide** (debug CRT tracks every malloc/new in the whole
+  process incl. local-host code) and is **flat** → NO heap leak anywhere.
+- `gdi`/`user` flat → no GUI-handle leak. `surf`/`txt` flat → not ours.
+- Leak is **only when logged in** and **faster than at the menu** → tied to the
+  in-game-only work: the **world-render hot path** (far more DirectDraw Blts than
+  the menu) and/or the **network receive thread**. Receive thread audited: fixed
+  256-entry ring, `malloc`s only on grow (would show in flat `heapN`) → clean.
+
+Remaining uncounted suspects: **thread stacks**, **kernel handles**, or
+**DirectDraw-driver-internal commit** (per-Blt/Flip). No raw
+`HeapAlloc`/`VirtualAlloc`/`GlobalAlloc` exists anywhere in the tree; thread
+creation is one-time on the client.
+
+### Action — commit/handles/threads probes (self-correlating heartbeat)
+
+`src/client/myddraw.cpp` heartbeat now leads with process-wide ground-truth so
+each line self-correlates (no Task-Manager alignment needed):
+
+```
+U6O-DIAG commitKB=.. handles=.. threads=.. surf=.. txt=.. heapKB=.. heapN=.. gdi=.. user=.. midiPlay=.. midiLoad=.. sndDup=.. sndLive=..
+```
+
+- `commitKB` — process private bytes (`GetProcessMemoryInfo`, resolved
+  dynamically from kernel32!K32… then psapi.dll — no psapi.lib link).
+- `handles` — open kernel handle count (`GetProcessHandleCount`, dynamic).
+- `threads` — live thread count (toolhelp snapshot, kernel32).
+
+Next-run reading:
+| What climbs with `commitKB` | Leak is | Fix direction |
+|---|---|---|
+| `threads` | leaked thread stacks | find the repeated `CreateThread` without exit/join |
+| `handles` (threads flat) | leaked kernel handles | unmatched `CreateEvent`/`CreateThread` handle / no `CloseHandle` |
+| neither (both flat) | **DirectDraw-driver-internal** per-Blt/Flip | audit the world-render hot path's DirectDraw usage (clipper churn, Lock/GetDC, Blt flags) |
+
+All three targets build clean.
+
 
 
 
