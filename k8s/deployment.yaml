@@ -31,7 +31,7 @@ spec:
       containers:
       - name: host
         image: u6o-host:latest
-        imagePullPolicy: Always
+        imagePullPolicy: Never
         ports:
         - containerPort: 22
           protocol: TCP

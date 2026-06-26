@@ -347,6 +347,22 @@ cmdline_length:
         }
         // MM-P3.4 (2026-06-24): legacy "-l" per-frame font workaround parsing
         // is retired. Fonts are now startup-owned and released at shutdown only.
+#ifdef CLIENT
+        // MM-P9 diagnostic (2026-06-26): per-frame leak bisection toggle.
+        //   "diagpresent2" -> mode 2 (skip present + on-surface text GetDC)
+        //   "diagpresent1" -> mode 1 (skip present only)
+        // See g_diag_present_mode in myddraw.cpp. Default 0 = normal rendering.
+        {
+            extern int g_diag_present_mode;
+            txtset(t2, "diagpresent2");
+            if (txtsearch(t, t2)) {
+                g_diag_present_mode = 2;
+            } else {
+                txtset(t2, "diagpresent1");
+                if (txtsearch(t, t2)) g_diag_present_mode = 1;
+            }
+        }
+#endif
     }
 #ifdef CLIENT
     leak = 0; // legacy workaround mode is intentionally disabled.

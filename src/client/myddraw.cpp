@@ -164,6 +164,26 @@ HFONT txtfnt = NULL;
 // leaked surfaces. Behavior-preserving (a single long).
 long g_surf_live = 0;
 
+// MM-P9 diagnostic (2026-06-26): per-frame leak BISECTION toggle. Set from the
+// command line in WinMain (see u6o7.cpp): pass "diagpresent1" or "diagpresent2".
+//   0 (default) = normal rendering, no behavior change.
+//   1 = skip the per-frame present in refresh() (the window GetDC + BitBlt and
+//       the back-buffer IDirectDrawSurface::GetDC). Isolates whether the leak
+//       lives in the final present path.
+//   2 = also skip the per-string IDirectDrawSurface::GetDC text draw in
+//       txtout()/txtouts(). Isolates the on-surface text DC churn.
+// The "constant rate at all window sizes" symptom rules out blit-AREA scaling
+// and points at a fixed-cost-per-frame, driver-dependent allocation; the most
+// likely source is repeated IDirectDrawSurface::GetDC/ReleaseDC cycles, which
+// some WDDM ddraw7-emulation drivers leak per call regardless of surface size.
+// Read the result by watching Task Manager's commit / the U6O-DIAG commitKB:
+//   * mode 1 flattens commit       -> leak is the refresh() present.
+//   * mode 1 climbs, mode 2 flat   -> leak is the txtout()/txtouts() text DCs.
+//   * mode 2 still climbs          -> leak is elsewhere (world-render Blt/img,
+//                                     Lock/Unlock, or DirectX audio).
+// Default 0 keeps shipped behavior identical; remove once the leak is found.
+int g_diag_present_mode = 0;
+
 struct surf {
     DDSURFACEDESC2 d;
     LPDIRECTDRAWSURFACE4 s;
@@ -364,6 +384,11 @@ void cls(surf *s, DWORD c) {
 // frame, and the WndProc mouse handler maps client coords back through
 // those globals.
 void refresh(surf *s) {
+    // MM-P9 diagnostic (2026-06-26): present-bisection toggle. Mode >= 1 skips
+    // the entire per-frame present (window GetDC + BitBlt + the back-buffer
+    // IDirectDrawSurface::GetDC) so a leak in this path can be confirmed by
+    // watching commit go flat. Default (0) is unchanged shipped behavior.
+    if (g_diag_present_mode >= 1) return;
     HDC ddhdc;
     s->s->GetDC(&ddhdc);
     blit_letterbox(hWnd, ddhdc, (long) s->d.dwWidth, (long) s->d.dwHeight);
@@ -854,13 +879,18 @@ void txtout(surf *s, long x, long y, txt *t)
 #endif
             char _diag[384];
             wsprintfA(_diag,
-                      "U6O-DIAG commitKB=%lu handles=%lu threads=%ld surf=%ld txt=%ld heapKB=%ld heapN=%ld gdi=%lu user=%lu midiPlay=%ld midiLoad=%ld sndDup=%ld sndLive=%ld\n",
+                      "U6O-DIAG presentMode=%d commitKB=%lu handles=%lu threads=%ld surf=%ld txt=%ld heapKB=%ld heapN=%ld gdi=%lu user=%lu midiPlay=%ld midiLoad=%ld sndDup=%ld sndLive=%ld\n",
+                      g_diag_present_mode,
                       _diag_commit_kb, _diag_handles, _diag_threads,
                       g_surf_live, g_txt_live, _diag_heap_kb, _diag_heap_n, _diag_gdi, _diag_user,
                       g_midi_play_n, g_midi_load_n, _diag_snd_dup, _diag_snd_live);
             OutputDebugStringA(_diag);
         }
     }
+    // MM-P9 diagnostic (2026-06-26): mode >= 2 skips the per-string DirectDraw
+    // GetDC text draw (after the heartbeat above, so the log keeps flowing).
+    // Isolates whether the per-frame txtout() GetDC/ReleaseDC churn is the leak.
+    if (g_diag_present_mode >= 2) return;
     HDC pdc;
     s->s->GetDC(&pdc);
     {
@@ -876,6 +906,9 @@ void txtout(surf *s, long x, long y, txt *t)
 
 void txtouts(surf *s, long x, long y, txt *t) //creates a shadow behind the text (8,8,8)
 {
+    // MM-P9 diagnostic (2026-06-26): mode >= 2 skips the per-string DirectDraw
+    // GetDC text draw (see txtout()). Default (0) is unchanged behavior.
+    if (g_diag_present_mode >= 2) return;
     HDC pdc;
     s->s->GetDC(&pdc);
     {
