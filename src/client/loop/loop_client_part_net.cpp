@@ -781,6 +781,14 @@ if
                 //x,y change
                 tplayer->x = BITSget(t, &bitsi, 11);
                 tplayer->y = BITSget(t, &bitsi, 10);
+
+                // Auto-unfreeze if player moved outside the frozen viewport (e.g. teleport/ladder)
+                if (camera_freeze) {
+                    if (tplayer->x < tpx || tplayer->x >= tpx + (long) viewTilesX() ||
+                        tplayer->y < tpy || tplayer->y >= tpy + (long) viewTilesY()) {
+                        camera_freeze = 0;
+                    }
+                }
             }
 
             x = tplayer->x;
@@ -1081,13 +1089,16 @@ if
                     y = BITSget(t, &bitsi, SOBJ_TX_BITS);
                     x = y % SOBJ_TX_W;
                     y /= SOBJ_TX_W;
-                    i3 = tobjfixed_index[tpy_legacy - SOBJ_TX_OFFY + y][tpx_legacy - SOBJ_TX_OFFX + x];
+
+                    x2 = tpx_legacy + x - SOBJ_TX_OFFX;
+                    y2 = tpy_legacy + y - SOBJ_TX_OFFY;
+                    i3 = 0;
+                    if (x2 >= 0 && x2 < 2048 && y2 >= 0 && y2 < 1024)
+                        i3 = tobjfixed_index[y2][x2];
                     i4 = tobjfixed_type[i3];
                     z = BITSget(t, &bitsi, getnbits(i4));
                     i5 = 1 << z;
 
-                    x2 = tpx_legacy + x - SOBJ_TX_OFFX;
-                    y2 = tpy_legacy + y - SOBJ_TX_OFFY;
                     x3 = x2 - tplayer->sobj_bufoffx;
                     y3 = y2 - tplayer->sobj_bufoffy;
                     if (tplayer->sobj_tempfixed[x3][y3] & i5) tplayer->sobj_tempfixed[x3][y3] -= i5;

@@ -5199,6 +5199,7 @@ getequiph2hwepdamage_skip:
 //3. remove any prerecorded paths
 //all alive partymembers are assumed to be in a removed but existant state
 void partyadd(player *p, long x, long y) {
+    p->camera_freeze = 0; // Reset camera freeze on teleport
     static long x2, y2, x3, y3, z, z2, i;
     static object *obj;
     static npc *tnpc;

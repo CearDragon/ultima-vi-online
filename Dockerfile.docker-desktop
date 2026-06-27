@@ -7,10 +7,10 @@
 #                branch (see CMakeLists.txt / docs/plans/plan-linuxHost.md).
 #   2. runtime — slim image with only the 32-bit C/C++ runtime + game data.
 #
-# All host runtime data is expected to be provided via a local mount and
-# is NOT bundled in this image.
+# All host runtime data is expected to be provided via a local mount (C:\host
+# on Windows/Docker Desktop) and is NOT bundled in this image.
 #
-#   docker build -t u6o-host:latest .
+#   docker build -f Dockerfile.docker-desktop -t u6o-host:latest .
 
 # ---------------------------------------------------------------------------
 # Stage 1: build the headless host (i386)
@@ -52,17 +52,9 @@ WORKDIR /u6o-host
 # executable must live at the SAME level as those files/folders. Everything
 # below lands directly in /u6o-host beside the binary.
 
-# Host executable.
-COPY --from=build /src/bin/host/linux/u6o-host ./u6o-host
-
-# Bundled host game files. assets/game_files/host/ already contains the full
-# runtime tree the host expects next to the binary: ultima6/ (chunks, map, ...),
-# host/ (NPC + flag data), dr/, save/, and the top-level *.txt (ban/dns/motd/log).
-COPY assets/game_files/host/ ./
-
-# Map patches are compiled into the binary (house.cpp #includes them); ship them
-# too so the on-disk layout matches the Windows image.
-COPY assets/map_patches/ ./assets/map_patches/
+# Host executable. Copied to /usr/local/bin; the entrypoint will place it
+# alongside the mounted data in /u6o-host at startup.
+COPY --from=build /src/bin/host/linux/u6o-host /usr/local/bin/u6o-host
 
 # LH-P7.1: NO case-folding of the game data. Windows is case-insensitive, so the
 # host mixes path case freely: lowercase hard-coded strings (".\\host\\..."),
@@ -72,15 +64,11 @@ COPY assets/map_patches/ ./assets/map_patches/
 # segment at open() time (see src/common/myfile.cpp u6o_resolve_ci), so the data
 # is shipped verbatim in its original case.
 
-# Listen address/port (dns.txt: "<host>:<port>"). Must match the k8s Service /
-# containerPort. INADDR_ANY is used for bind, so the host part is informational.
-RUN echo "localhost:22" > dns.txt \
-    && mkdir -p save
-
 EXPOSE 22
 
-# The dedicated host assumes the "host" role; pass it explicitly for parity
-# with the Windows image. SIGTERM/SIGINT trigger a graceful save-and-exit
-# (see u6o_posix_term_handler in u6o7.cpp).
-CMD ["./u6o-host", "host"]
+# The dedicated host assumes the "host" role. At startup, we copy the binary
+# from /usr/local/bin to the working directory (mounted from the host machine)
+# to ensure it lives alongside the data files, then execute it.
+# LH-P7.5: check directory contents if files are missing to aid troubleshooting.
+CMD ["sh", "-c", "cp /usr/local/bin/u6o-host ./u6o-host && (ls ./dr >/dev/null 2>&1 || (echo '--- MOUNT DIAGNOSTICS ---'; pwd; ls -F; echo '--- END DIAGNOSTICS ---')) && exec ./u6o-host host"]
 

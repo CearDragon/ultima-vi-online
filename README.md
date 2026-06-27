@@ -338,15 +338,15 @@ so they survive `docker compose down` and image rebuilds.
 Prefer plain Docker? The equivalent without compose:
 
 ```bash
-docker build -f Dockerfile.linux -t u6o-host:latest .
+docker build -f Dockerfile.docker-desktop.linux -t u6o-host:latest .
 docker volume create u6o-save
 docker run -d --name u6o-host --restart unless-stopped \
     -p 22:22 -v u6o-save:/u6o-host/save u6o-host:latest
 docker stop -t 60 u6o-host        # graceful save-and-exit
 ```
 
-For Kubernetes, see [`k8s/deployment.yaml`](k8s/deployment.yaml) and
-[`k8s/README-k8s.md`](k8s/README-k8s.md).
+For Kubernetes, see [`k8s/deployment.yaml`](k8s/docker-desktop/deployment.yaml) and
+[`k8s/README-k8s.md`](k8s/docker-desktop/README.md).
 
 ---
 
