@@ -98,9 +98,56 @@ This error occurs when you try to run an image for a platform not supported by y
 ### Pod stays in "Pending"
 - Ensure your Kubernetes node (typically a Linux VM in Docker Desktop) has enough resources.
 
+### Pod starts, but the host logs "data mount … looks empty"
+The pod is running, yet the host can't find `dr/ host/ ultima6/ dns.txt` and the
+startup diagnostic says the mount looks empty — even though `C:\host` is full.
+
+This means the `hostPath` in `deployment.yaml` points to a location the
+**Kubernetes node** does *not* see your Windows folder, so an empty directory
+got mounted instead. The node-internal path for the Windows `C:` drive differs
+by Docker Desktop backend/version:
+
+- **WSL2 backend** (modern default): `/run/desktop/mnt/host/c/host`
+- **Legacy Hyper-V / Moby backend**: `/host_mnt/c/host`
+
+Find the exact path **your** node uses with the bundled probe (it bind-mounts the
+node root and reports which path actually holds your data):
+
+```powershell
+kubectl apply  -f k8s/docker-desktop/hostpath-probe.yaml
+kubectl logs   hostpath-probe
+kubectl delete -f k8s/docker-desktop/hostpath-probe.yaml
+```
+
+The probe prints a line like `^^^ FOUND DATA — set hostPath.path: /host_mnt/c/host ^^^`.
+Put that value in `deployment.yaml` under `hostPath.path`, then
+`kubectl apply -f k8s/docker-desktop/deployment.yaml` and
+`kubectl rollout restart deployment/u6o-host`.
+
+The manifest uses `type: Directory` (not `DirectoryOrCreate`) precisely so a
+wrong path **fails loudly** instead of silently mounting an empty folder again.
+If the probe finds nothing, your drive isn't shared into the node — for the
+Hyper-V backend, enable it under **Settings → Resources → File Sharing** and
+re-run the probe.
+
+### Error: "failed to fulfil mount request ... no such file or directory"
+The pod can't mount the `C:\host` volume even though the folder exists in Windows.
+
+This is a **hostPath translation** issue, not a missing folder. The kubelet
+evaluates `hostPath` *inside* the Kubernetes node (Docker Desktop's Linux VM),
+where Windows paths like `C:/host` are meaningless, and with `type: Directory` a
+path that doesn't exist on the node fails the mount. Use the probe above to find
+the node's real path for `C:\host`, then set `hostPath.path` to it. Common values:
+
+- **WSL2 backend (modern default)**: `/run/desktop/mnt/host/c/host`
+- **Legacy Hyper-V backend**: `/host_mnt/c/host` (and share the drive under
+  **Settings → Resources → File Sharing**)
+- **Different drive/folder**: mirror the pattern, e.g. `D:\u6o\host` →
+  `/run/desktop/mnt/host/d/u6o/host` (drive letter is lowercased).
+
 ### Files "not found" in logs
 If the logs show `File .\dr\objfloat.flg not found (errno 2: No such file or directory)`:
 1. **Check Directory Structure**: Ensure you didn't accidentally put a nested `assets` or `game_files` folder inside `C:\host`. The `dr/`, `host/`, and `ultima6/` folders must be in the root of `C:\host`.
-2. **Docker Shared Folders**: Ensure `C:\` (or the specific folder) is shared with Docker Desktop (Settings -> Resources -> File Sharing).
-3. **Internal Path**: In some Docker Desktop versions, you may need to edit `deployment.yaml` and change `path: C:/host` to `/run/desktop/mnt/host/c/host`.
+2. **Docker Shared Folders**: On the **legacy Hyper-V backend**, ensure `C:\` (or the specific folder) is shared with Docker Desktop (Settings -> Resources -> File Sharing). The WSL2 backend shares all drives automatically.
+3. **Internal Path**: The manifest mounts `/run/desktop/mnt/host/c/host` (the WSL2 node's view of `C:\host`). If your data still looks missing, your node likely exposes the drive elsewhere — run the probe (see *"Pod starts, but the host logs … looks empty"* above) and set `hostPath.path` to whatever path it reports.
 4. **Permissions**: Ensure the files are not marked as "hidden" or "system" in Windows. The host now automatically falls back to read-only mode if a file exists but cannot be opened for writing.

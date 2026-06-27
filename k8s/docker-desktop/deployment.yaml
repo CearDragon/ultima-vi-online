@@ -39,11 +39,26 @@ spec:
       volumes:
         - name: host-data
           hostPath:
-            # LH-P7.4: Docker Desktop on Windows handles `C:/host` or `/run/desktop/mnt/host/c/host`.
-            # Using forward slashes is more robust across different K8s-on-Windows engines.
-            # DirectoryOrCreate ensures the pod starts even if the user hasn't created the folder.
-            path: C:/host
-            type: DirectoryOrCreate
+            # LH-P7.4: hostPath is resolved by the kubelet INSIDE the Kubernetes
+            # node (Docker Desktop's Linux VM) — a Windows path like `C:/host`
+            # means nothing there. Docker Desktop re-exports the Windows drives
+            # into the node, but WHERE depends on the backend/version:
+            #   * WSL2 backend (modern default): /run/desktop/mnt/host/c/host
+            #   * older Hyper-V / Moby backend:  /host_mnt/c/host
+            # so C:\host maps to ONE of those. If the value below is wrong for your
+            # machine you get an EMPTY mount (the host logs "data mount ... looks
+            # empty"). Discover the correct path for YOUR node with the probe pod:
+            #   kubectl apply -f k8s/docker-desktop/hostpath-probe.yaml
+            #   kubectl logs hostpath-probe     # prints which path holds your data
+            #   kubectl delete -f k8s/docker-desktop/hostpath-probe.yaml
+            # then set `path:` below to that value (without the probe's /host prefix).
+            #
+            # type: Directory (NOT DirectoryOrCreate) on purpose: if the path is
+            # wrong we want the pod to FAIL LOUDLY rather than silently mount an
+            # empty auto-created folder. The host creates save/ as a subdir at
+            # runtime, so the mount root (C:\host) only needs to already exist.
+            path: /run/desktop/mnt/host/c/host
+            type: Directory
       nodeSelector:
         kubernetes.io/os: linux
 ---

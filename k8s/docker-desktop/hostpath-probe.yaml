@@ -1,0 +1,82 @@
+# LH-P7.4: hostPath discovery probe for Docker Desktop on Windows.
+#
+# Symptom this solves: the deployment mounts C:\host but the host logs
+#   "data mount at /u6o-host looks empty (expected dr/ host/ ultima6/ dns.txt)"
+# even though C:\host is populated. That means the hostPath value in
+# deployment.yaml points somewhere the Kubernetes node does NOT see your
+# Windows folder, so an empty dir gets mounted instead.
+#
+# This pod bind-mounts the NODE ROOT (/) and lists every location Docker
+# Desktop is known to re-export the Windows C: drive into the node. Whichever
+# path prints your data (dr/ host/ ultima6/ dns.txt) is the correct one — copy
+# it into deployment.yaml's `hostPath.path`, dropping the leading `/host`
+# prefix the probe adds.
+#
+# Usage:
+#   kubectl apply  -f k8s/docker-desktop/hostpath-probe.yaml
+#   kubectl logs   hostpath-probe
+#   kubectl delete -f k8s/docker-desktop/hostpath-probe.yaml
+#
+# Example: if the probe shows data under "/host/host_mnt/c/host", set
+#   hostPath.path: /host_mnt/c/host   in deployment.yaml.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hostpath-probe
+  labels:
+    app: hostpath-probe
+spec:
+  restartPolicy: Never
+  nodeSelector:
+    kubernetes.io/os: linux
+  containers:
+    - name: probe
+      image: busybox
+      command:
+        - sh
+        - -c
+        - |
+          echo "Scanning the node for your Windows C:\\host folder..."
+          echo "(looking for a path that contains: dr host ultima6 dns.txt)"
+          echo
+          found=""
+          for p in \
+            /host/run/desktop/mnt/host/c/host \
+            /host/host_mnt/c/host \
+            /host/mnt/host/c/host \
+            /host/c/host \
+            /host/mnt/c/host \
+            /host/run/desktop/mnt/host/wsl/c/host ; do
+            real="${p#/host}"
+            if [ -d "$p" ] && [ -n "$(ls -A "$p" 2>/dev/null)" ]; then
+              echo "== $real =="
+              ls -A "$p" 2>/dev/null | sed 's/^/    /'
+              echo "    ^^^ FOUND DATA — set hostPath.path: $real ^^^"
+              found="$real"
+            else
+              echo "-- $real (missing or empty)"
+            fi
+          done
+          echo
+          if [ -z "$found" ]; then
+            echo "No candidate held data. Your C: drive may not be shared into"
+            echo "the node. For Hyper-V backend, share the drive under Docker"
+            echo "Desktop > Settings > Resources > File Sharing, then re-run."
+            echo
+            echo "Contents of /host (node root) for reference:"
+            ls -A /host 2>/dev/null | sed 's/^/    /'
+          fi
+      volumeMounts:
+        - name: noderoot
+          mountPath: /host
+          readOnly: true
+          # rslave so the node's virtiofs/9p submounts (where the Windows drives
+          # live) propagate into this container; without it we'd only see the
+          # node's own root and miss the host-drive mounts.
+          mountPropagation: HostToContainer
+  volumes:
+    - name: noderoot
+      hostPath:
+        path: /
+        type: Directory
+
