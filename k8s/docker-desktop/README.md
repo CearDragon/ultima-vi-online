@@ -26,15 +26,22 @@ This directory contains the necessary files to run the Ultima VI Online Host in 
 
 ### 1. Build the Docker Image
 
-Run the following command from the project root:
+Build the **Docker Desktop / Kubernetes** image. Unlike the root `Dockerfile`,
+this variant (`Dockerfile.docker-desktop`) bakes in **only the compiled host
+binary** — no game data — so all host files are managed on disk via the `C:\host`
+mount and you never rebuild the image just to edit them.
+
+Run the following from the project root:
 
 ```bash
-docker build -t u6o-host:latest .
+docker build -f Dockerfile.docker-desktop -t u6o-host:latest .
 docker tag u6o-host:latest cduncc/u6o-host:latest
 docker push cduncc/u6o-host:latest
 ```
 
-*Note: The Dockerfile in the root is used by default.*
+*Note: For a purely local Docker Desktop cluster you can skip the tag/push and
+set `imagePullPolicy: IfNotPresent` in `deployment.yaml` to use the locally
+built image. The `push` step is for serving the image to a remote VM.*
 
 ### 2. Deploy to Kubernetes
 
@@ -62,12 +69,19 @@ kubectl get service u6o-host-service
 
 ## Configuration
 
--   **Local Data Mount**: The deployment is configured to mount `C:\host` from
-    the host machine to `/u6o-host/` in the container. This allows loading
-    game data from your local drive. The Linux host binary (`u6o-host`) is
-    built into the Docker image and copied into `/u6o-host/` at startup to
-    run alongside the data. Ensure `C:\host` exists and contains `ultima6/`,
-    `host/`, `dr/`, `dns.txt`, etc.
+-   **Local Data Mount**: The deployment mounts `C:\host` from the host machine
+    to `/u6o-host/` in the container, which is also the host process's
+    **working directory**. The host reads all of its data with paths relative to
+    that working directory, so every file lives on your local drive and can be
+    edited without rebuilding the image. The Linux host binary (`u6o-host`) is
+    baked into the image at `/usr/local/bin` (it is *not* written into the mount),
+    so the mount stays pure game data. Ensure `C:\host` exists and contains
+    `ultima6/`, `host/`, `dr/`, `dns.txt`, etc.
+-   **Managing host files**: Because the binary and the data are decoupled, you
+    manage the world on the machine/VM running the cluster — edit `motd.txt`,
+    drop in save files under `save/`, adjust `dns.txt` — and just restart the pod
+    (`kubectl rollout restart deployment/u6o-host`) to pick them up. No image
+    rebuild required.
 -   **Port**: The host is configured to listen on port `22` (must match `dns.txt`).
 -   **Persistence**: Player data and world state are preserved in the `save/` directory within the `C:\host` mount.
 -   **Logs**: You can view the server logs using:
