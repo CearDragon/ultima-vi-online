@@ -1,0 +1,60 @@
+# Ultima VI Online — dedicated host on Docker Desktop, with the game data
+# bind-mounted from your Windows C:\host folder.
+#
+# WHY THIS EXISTS (instead of the Kubernetes manifest in this folder):
+#   Docker Desktop's file sharing — the thing that maps a Windows path like
+#   C:\host into a container — only applies to Docker BIND MOUNTS (compose /
+#   `docker run -v`). Kubernetes `hostPath` volumes do NOT get that translation:
+#   the kubelet resolves the path inside the node's own filesystem, so a Windows
+#   folder is invisible/unsupported there (writes land in throwaway VM storage).
+#   Docker itself warns that hostPath-of-a-Windows-path works "only when the
+#   container runs on Docker Desktop", i.e. as a bind mount — which is this file.
+#
+#   So: use THIS to manage the host files live from Windows while serving
+#   clients. Use deployment.yaml only on a real cluster / Linux node where the
+#   data lives on the node itself.
+#
+# USAGE (from the repo root):
+#   docker compose -f k8s/docker-desktop/docker-compose.yml up -d --build
+#   docker compose -f k8s/docker-desktop/docker-compose.yml logs -f
+#   docker compose -f k8s/docker-desktop/docker-compose.yml stop   # graceful save
+#   docker compose -f k8s/docker-desktop/docker-compose.yml down
+#
+# REQUIREMENTS:
+#   * C:\host exists and contains the host game data (dr/, host/, ultima6/,
+#     dns.txt with "<host>:22", motd.txt, ...). Map patches are compiled into
+#     the binary, so they are NOT required on disk.
+#   * Edit DATA_DIR below if your data lives somewhere other than C:\host.
+
+services:
+  u6o-host:
+    build:
+      # Build context is the repo root (two levels up from this file) so the
+      # Dockerfile can COPY the whole source tree to compile the Linux host.
+      context: ../..
+      dockerfile: Dockerfile.docker-desktop
+    image: u6o-host:latest
+    container_name: u6o-host
+    # The host reads its data relative to the working directory; the bind mount
+    # below makes that directory be your Windows C:\host. (Also set as WORKDIR in
+    # the image; pinned here for clarity.)
+    working_dir: /u6o-host
+    ports:
+      # host:container. The host listens on 22 (from dns.txt). If port 22 is
+      # taken on Windows, change ONLY the left side (e.g. "2222:22") and point
+      # the client's dns.txt at <host>:2222.
+      - "22:22"
+    volumes:
+      # THE IMPORTANT PART: bind-mount the Windows game-data folder into the
+      # container. Docker Desktop translates this Windows path reliably (the
+      # exact thing Kubernetes hostPath cannot do). Forward slashes avoid the
+      # short-syntax ambiguity of the "C:" drive colon. Change the source if your
+      # data is elsewhere, e.g. D:/u6o/host.
+      - type: bind
+        source: C:/host
+        target: /u6o-host
+    # SIGTERM (sent by `compose stop`/`down`) triggers the host's save-and-exit;
+    # give it time to flush before SIGKILL (matches the k8s grace period).
+    stop_grace_period: 60s
+    restart: unless-stopped
+

@@ -3078,10 +3078,18 @@ void wpf_pathfind(unsigned char *d, long sourcex, long sourcey, long destx, long
                 npc *wpf_npc_tmp = (npc *)WPF_OBJECT->more;
                 if (wpf_npc_tmp->player && wpf_npc_tmp->player->camera_freeze) {
                     player *p = wpf_npc_tmp->player;
-                    if (x2 < p->frozen_tpx || x2 >= p->frozen_tpx + p->frozen_vtx ||
-                        y2 < p->frozen_tpy || y2 >= p->frozen_tpy + p->frozen_vty) {
-                        wpf_weight[x][y] = 0;
-                        goto wpf_blocked;
+                    // Frozen-camera pathfinding clamp, self-correcting: only confine
+                    // paths to the frozen on-screen window while the path SOURCE is
+                    // inside it. After a teleport the source jumps outside the now-stale
+                    // window; clamping then would zero every tile's weight and strand
+                    // the mover until the client relocks the camera. Skip in that case.
+                    if (sourcex >= p->frozen_tpx && sourcex < p->frozen_tpx + p->frozen_vtx &&
+                        sourcey >= p->frozen_tpy && sourcey < p->frozen_tpy + p->frozen_vty) {
+                        if (x2 < p->frozen_tpx || x2 >= p->frozen_tpx + p->frozen_vtx ||
+                            y2 < p->frozen_tpy || y2 >= p->frozen_tpy + p->frozen_vty) {
+                            wpf_weight[x][y] = 0;
+                            goto wpf_blocked;
+                        }
                     }
                 }
             }

@@ -87,6 +87,35 @@
     }
 
     //calculate tpx,tpy from current x,y
+    // Camera relock safety net (render-time guarantee). The per-player sobj /
+    // mover buffers and tpx_legacy always relocate to follow the LIVE player
+    // coordinate, regardless of camera_freeze. While the camera is frozen we
+    // intentionally leave the render origin tpx/tpy pinned so the player can
+    // walk around the screen. A teleport (ladder, moongate, red/blue gate,
+    // party regroup) jumps the player to a coordinate the frozen window no
+    // longer contains: the buffers relocate but a stale render origin would
+    // index them far out of range, blanking/garbling the frame -- the reported
+    // "black screen when using a ladder with the camera unlocked" (and the
+    // earlier crash). Relock the camera onto the player whenever it is no longer
+    // inside the frozen viewport, OR whenever its coordinate jumps further than a
+    // viewport in one update (a teleport detector that does not depend on the
+    // frozen anchor staying accurate). A normal in-window step trips neither test
+    // (the host clamps frozen movement to the window), so the freeze is preserved.
+    {
+      static long camera_relock_lastx = -1, camera_relock_lasty = -1;
+      if (camera_freeze) {
+        long camdx = (camera_relock_lastx < 0) ? 0 : (long)tplayer->x - camera_relock_lastx;
+        long camdy = (camera_relock_lasty < 0) ? 0 : (long)tplayer->y - camera_relock_lasty;
+        if (tplayer->x < tpx || tplayer->x >= tpx + (long)viewTilesX() ||
+            tplayer->y < tpy || tplayer->y >= tpy + (long)viewTilesY() ||
+            camdx > (long)viewTilesX() || camdx < -(long)viewTilesX() ||
+            camdy > (long)viewTilesY() || camdy < -(long)viewTilesY()) {
+          camera_freeze = 0;
+        }
+      }
+      camera_relock_lastx = (long)tplayer->x;
+      camera_relock_lasty = (long)tplayer->y;
+    }
     if (!camera_freeze) {
       getscreenoffset(tplayer->x,tplayer->y,&tpx,&tpy);
       // ROOMSYNC-P1: must match the scene-update camera override above. If the
