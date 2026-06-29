@@ -95,22 +95,24 @@ resort (no new deps, still removes `IDirectDrawSurface::GetDC`): GDI
 
 ### MPRES-P0 — Baseline, scaffolding, API decision (Foundational, T0/T3-prep)
 
-- ⬜ **MPRES-P0.1** Tri-target baseline build (`client`/`host`/`both`, Debug +
-  Release); record warning counts (note pre-existing `C4731`). Confirm
-  MM-P9.x is flat first (the leak this structurally cures must already be
-  point-fixed so deltas are attributable).
-- ⬜ **MPRES-P0.2** Golden present-capture harness: dump the **final on-screen
-  pixels** for a fixed `ps->o` across the present paths (fullscreen 1:1,
-  downscaled/letterboxed, and a non-16bpp display path) so P1+ can prove the
-  swap-chain present matches the legacy `BitBlt`/`StretchBlt` byte-for-byte
-  (point-sampled) — or document the *exact, intended* scaling-filter delta if
-  bit-exact at all window sizes is impractical (the present is the one spot
-  where the scaled result, not the source pixels, may differ by filter).
-- ⬜ **MPRES-P0.3** Present microbenchmark (frames/sec + per-present ms) on the
-  legacy path, to prove no regression in P1.
-- ⬜ **MPRES-P0.4** Decide **D3D11 vs D2D** (recommendation above); record in
-  `docs/modernization/MPRES-P1-presenter.md` with the equivalence-capture idiom.
-- **Exit:** baseline + golden capture + benchmark recorded; API chosen.
+- ✅ **MPRES-P0.1** Tri-target baseline build (`client`/`host`/`both`, **Debug**)
+  green against `cmake-build-debug/` (MSVC `amd64_x86`); only pre-existing
+  `C4731` (inline-asm `ebp`). Release deferred (committed tree is Debug-only;
+  use CLion/VS profiles on hardware). MM-P9.x present/text `GetDC` point-fixes
+  confirmed in place. Recorded in `docs/modernization/MPRES-P1-presenter.md`.
+- 🟡 **MPRES-P0.2** Golden present-capture harness — **design recorded** (the
+  three capture geometries 1:1 / letterboxed / maximized + the `blit_*` parity
+  check, in `MPRES-P1-presenter.md`). *Execution* needs a running client (real
+  window/driver) → user-hardware task, runs as part of P1.4.
+- 🟡 **MPRES-P0.3** Present microbenchmark — **design recorded** (per-present ms +
+  FPS of a fixed `ps->o`). *Execution* on hardware with P1.4.
+- ✅ **MPRES-P0.4** API decided: **D3D11 + DXGI** (dynamic
+  `DXGI_FORMAT_B5G6R5_UNORM` texture, point-sampled full-screen quad). **D2D
+  rejected** as primary — no native RGB565 bitmap format, would re-introduce the
+  CPU 16→32 conversion P2 deletes. Recorded with the equivalence-capture idiom in
+  `docs/modernization/MPRES-P1-presenter.md`.
+- **Exit:** baseline + API recorded ✅; golden-capture/benchmark *design* recorded,
+  *execution* folded into P1.4 (hardware).
 
 ---
 
@@ -119,21 +121,26 @@ resort (no new deps, still removes `IDirectDrawSurface::GetDC`): GDI
 Introduce the modern presenter without removing any DDraw yet, so it can be
 A/B'd on the NVIDIA box exactly like the MM-P9 toggles.
 
-- ⬜ **MPRES-P1.1** Add a `u6o::client` **`Presenter`** (RAII; `ComPtr` members)
+- ✅ **MPRES-P1.1** Add a `u6o::client` **`Presenter`** (RAII; `ComPtr` members)
   that owns the DXGI device + swap chain for `hWnd`, a dynamic RGB565 texture,
   and the scale state. Header in a new `src/client/present.{h,cpp}` (modern from
-  the start; Doxygen-documented).
-- ⬜ **MPRES-P1.2** Implement `Presenter::present(const surf* s)`: upload
+  the start; Doxygen-documented). _Done: file-static `Presenter` with ComPtr
+  device/context/swap-chain/`B5G6R5_UNORM` texture/shaders; lazy init + resize._
+- ✅ **MPRES-P1.2** Implement `Presenter::present(const surf* s)`: upload
   `s->o` (stride `s->d.lPitch`, `dwWidth`×`dwHeight`) into the texture, draw it
   letterboxed to the client rect, `Present`. Compute `dstX/dstY/scale` with the
   **same** formula as `blit_letterbox` and write `blit_offx/blit_offy/blit_scale`
-  so input mapping is unchanged.
-- ⬜ **MPRES-P1.3** Gate it: `refresh(surf*)` calls the presenter when a new
+  so input mapping is unchanged. _Done: per-row upload honoring `lPitch`;
+  letterbox math mirrored; publishes `blit_offx/offy/scale`._
+- ✅ **MPRES-P1.3** Gate it: `refresh(surf*)` calls the presenter when a new
   switch `g_present_modern` (default **0** initially) is set, else the existing
   cached-DC `BitBlt`. Parse a command-line `modernpresent` in `u6o7.cpp`
   (mirror `diagpresent`/`oldtextdc`). Wire `Presenter` create/resize/destroy
   into `setupddraw` success, `WM_SIZE`/`recreateBackbuffers`, and the WM_QUIT /
-  `ddrawshutdown` teardown.
+  `ddrawshutdown` teardown. _Done: `refresh(surf*)` gate with legacy fallthrough
+  on failure; `modernpresent` cmdline parse; lazy create/resize; shutdown wired
+  into `ddrawshutdown()`. Build-verified client/host/both Debug, zero new
+  warnings._
 - ⬜ **MPRES-P1.4** Verify (T3): golden present match (P0.2) at 1:1, letterboxed,
   and maximized; mouse-mapping parity (`blit_*` identical → click a known UI
   hotspot at several window sizes); benchmark vs P0.3 (no meaningful

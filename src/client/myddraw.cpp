@@ -18,6 +18,7 @@
 // r999
 #include "define_both.h"
 #include "viewport.h" // RW-P2.4: backbufferW()/H() for blit_letterbox sanity check
+#include "present.h"  // MPRES-P1: modern D3D11/DXGI present facade (default OFF)
 
 
 //darklight.cpp extern
@@ -202,6 +203,24 @@ int g_diag_present_mode = 0;
 // differs. Watch the U6O-DIAG `commitKB` heartbeat: with the new path ON the
 // idle commit climb should drop sharply vs `oldtextdc`.
 int g_text_dc_cache = 1;
+
+// MPRES-P1 (2026-06-29): modern swap-chain present gating switch (A/B-able on
+// real hardware before it becomes the only path, exactly like g_text_dc_cache).
+//   0 (default) = LEGACY path: refresh(surf*) presents via the cached
+//                 IDirectDrawSurface DC + blit_letterbox BitBlt/StretchBlt
+//                 (shipped behavior — byte-for-byte unchanged).
+//   1 = MODERN path: refresh(surf*) calls u6o::client::present_modern(), which
+//       uploads ps->o (RGB565) into a dynamic B5G6R5 D3D11 texture and presents
+//       it point-sampled + letterboxed through a DXGI swap chain. The letterbox
+//       dst rect/scale use the IDENTICAL blit_letterbox math and publish the same
+//       blit_offx/blit_offy/blit_scale, so mouse mapping is unchanged. If D3D11
+//       init/present fails, present_modern() returns false and refresh() falls
+//       through to the legacy present below — so enabling this can never break
+//       rendering. Selected with command-line substring "modernpresent" (parsed
+//       in u6o7.cpp), mirroring how "oldtextdc" sets g_text_dc_cache.
+// Default 0 keeps shipped behavior identical; flip to 1 only after MPRES-P1.5
+// hardware sign-off.
+int g_present_modern = 0;
 
 // MM-P9.6 diagnostic (2026-06-26): localize the residual ~120 KB/s NVIDIA leak
 // that persists with every per-frame IDirectDrawSurface::GetDC suppressed
@@ -513,6 +532,15 @@ void refresh(surf *s) {
     // the whole session: one ddraw GetDC total instead of one per frame. The
     // legacy `oldtextdc` path keeps the per-frame GetDC/ReleaseDC for A/B.
     if (g_diag_present_mode >= 1) return; // diag: skip present entirely
+#ifdef CLIENT
+    // MPRES-P1: modern swap-chain present (default OFF via g_present_modern).
+    // On success it fully handles the present; on failure (D3D11 unavailable)
+    // it returns false and we fall through to the unchanged legacy present.
+    if (g_present_modern) {
+        if (u6o::client::present_modern(s)) return; // modern path handled it
+        // else: modern unavailable — fall through to the legacy present below
+    }
+#endif
     HDC ddhdc;
     if (g_text_dc_cache != 0) {
         ddhdc = surf_text_dc_acquire(s); // reuse the one cached DC; do NOT release
@@ -1130,6 +1158,13 @@ void ddrawshutdown() {
     // "DDDevice" type (ctor = CreateDD/QueryInterface, dtor = this teardown)
     // and a ComPtr-backed surf wrapper would make this explicit shutdown call
     // unnecessary and remove the malloc/Release split in surfstruct()/free().
+#ifdef CLIENT
+    // MPRES-P1: tear down the modern present resources (swap chain/device/shaders)
+    // on the same client-exit path, before the DirectDraw interfaces go. Safe and
+    // a no-op if the modern present was never used. (CLIENT-only; the headless
+    // host never builds present.cpp.)
+    u6o::client::present_modern_shutdown();
+#endif
     purgesurfaces();
     if (dd) {
         dd->Release();

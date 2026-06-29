@@ -372,6 +372,16 @@ cmdline_length:
             txtset(t2, "oldtextdc");
             if (txtsearch(t, t2)) g_text_dc_cache = 0;
         }
+        // MPRES-P1 (2026-06-29): modern swap-chain present gating switch.
+        //   "modernpresent" -> g_present_modern = 1 (D3D11/DXGI present path)
+        //   (absent)        -> g_present_modern = 0 (legacy DirectDraw present)
+        // Lets the user A/B the modern presenter on real hardware before it
+        // becomes the default (MPRES-P1.5). See g_present_modern in myddraw.cpp.
+        {
+            extern int g_present_modern;
+            txtset(t2, "modernpresent");
+            if (txtsearch(t, t2)) g_present_modern = 1;
+        }
         // MM-P9.6 (2026-06-26): per-category DirectDraw Blt skip, to localize the
         // residual ~120 KB/s NVIDIA leak. "diagbltskip1/2/3" -> g_diag_blt_skip
         // (1=cls colour-fill, 2=img copy, 3=img0 keyed). Default 0 = normal.
