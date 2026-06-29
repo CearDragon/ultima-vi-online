@@ -537,6 +537,18 @@ void refresh(surf *s) {
     // On success it fully handles the present; on failure (D3D11 unavailable)
     // it returns false and we fall through to the unchanged legacy present.
     if (g_present_modern) {
+        // The modern presenter samples s->o (the surface's system memory) with a
+        // CPU memcpy, bypassing GDI entirely. The per-frame text path
+        // (txtout/txtouts, MM-P9.5) draws via a cached GDI DC that is left HELD on
+        // this DDSCAPS_SYSTEMMEMORY surface, and GDI *batches* its TextOut calls.
+        // The legacy present blits THROUGH that same DC (so GDI serializes text
+        // before the blit), but the modern path reads raw memory — so any text
+        // whose batch hasn't drained is missing and the black txtouts() shadow
+        // shows through. GdiFlush() drains the GDI batch into s->o (which aliases
+        // the DC's bits) before we sample it, WITHOUT releasing the DC — so the
+        // cached DC survives across frames and the MM-P9 per-frame ddraw-GetDC
+        // leak fix is preserved.
+        GdiFlush();
         if (u6o::client::present_modern(s)) return; // modern path handled it
         // else: modern unavailable — fall through to the legacy present below
     }
