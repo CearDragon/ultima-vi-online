@@ -185,14 +185,29 @@ delete the now-dead format-conversion + primary-surface paths.
   `refresh()` now collapses to the single live `refresh(ps)` arm (→ the modern
   presenter). Semantics-preserving: the only reachable arm pre-collapse was
   already `refresh(ps)`._
-- 🟡 **MPRES-P2.3** Delete `dxrefresh`, the primary surface `vs`, and the
-  intermediate present surfaces (`ps2`/`ps3`/`ps4`/`psnew1`/`psnew1b`) **once
-  proven unreferenced**; retire `DDRAW_display_pixelformat` usage in the present.
-  _Deferred: the dead PRESENT branches are gone, but `vs`/`ps2`/`ps3`/`ps4`/
-  `psnew1`/`psnew1b` are still allocated by `newsurf`, and `smallwindow`/
-  `windowsizecyclenum` are still read by layout/hit-test code (panel_hittest,
-  panel_draw, player_walk). Removing the declarations needs a full cross-file
-  cross-reference + RW/MCLI coordination — next P2 step._
+- 🟡 **MPRES-P2.3** Delete the dead present surfaces **once proven unreferenced**;
+  retire `DDRAW_display_pixelformat` usage in the present.
+  _Partly done (2026-06-29): cross-file audit corrected the plan's surface list.
+  **Deleted** (provably dead — declarations + any allocations):_
+  - _`vs` (the DD primary): never allocated, only the deleted dxrefresh
+    converters touched it. Removed from globals.inc / data_client.h / myddraw.cpp._
+  - _`psnew1`: declared but never allocated or used. Removed._
+  - _`ps2`, `ps4`: allocated in setup_client.inc but never read. Allocations +
+    declarations removed (purgesurfaces frees via surflist[], so no free() to drop)._
+
+  _**Kept / re-scoped** (the plan's original list was wrong):_
+  - _`psnew1b` is the **live** in-game UI/panel compose surface (heavily used in
+    loop_client_part_player_walk / panel_draw) — NOT dead._
+  - _`ps3` is now consumer-less (its only reader was the deleted p16to32
+    converter) but is still **managed** by recreateBackbuffers (RW-P2.2:
+    alloc/free/cls/had_ps3). Its removal touches resizable-window logic +
+    viewport.h docs, so it's a coordinated follow-up (P2.3b), not a trivial delete._
+  - _`dxrefresh` (always FALSE) is still **read** by the focus-skip guard in the
+    brace-seam fragment loop_client_part_refresh_tail.cpp; dropping it orphans the
+    `skiprefresh:` label, so defer to the same P2.3b follow-up._
+  - _`DDRAW_display_pixelformat` is still read (it gates the ps3 alloc) — retire
+    alongside ps3 in P2.3b._
+  _Built tri-target (client/host/both Debug), zero new warnings._
 - 🟡 **MPRES-P2.4** Verify (T3): golden capture across all former modes; this is
   the riskiest pixel step (it removes asm converters) — capture each former
   branch's output and diff. Benchmark. _Build-verified tri-target (client/host/
@@ -313,15 +328,17 @@ present-path exception, not a rasterizer change).
     the MM-P9 per-frame ddraw-GetDC leak fix is preserved.
   - **P1.5** ✅ default flipped to modern (`g_present_modern = 1`); legacy
     reachable for one cycle via `legacypresent` (`modernpresent` now a no-op).
-  - **NEXT → MPRES-P2.3 / P2.4** (gated on a hardware smoke test of this build).
-    P2.1/P2.2 ✅ collapsed `function_client.cpp::refresh()` to the single live
-    `refresh(ps)` arm — deleted four unreachable inline-asm converters
-    (`p16to32`/`p16to16`/`zp16to32`/`zp16to16`) + the `vs`-primary blits.
-    Remaining: **P2.3** delete the now-orphaned declarations/allocations
-    (`vs`/`ps2`/`ps3`/`ps4`/`psnew1`/`psnew1b`, and eventually `dxrefresh`) — but
-    ONLY after a full cross-file cross-reference, because `smallwindow`/
-    `windowsizecyclenum` are still read by layout/hit-test code
-    (loop_client_part_panel_hittest / panel_draw / player_walk) and some of those
-    surfaces may be allocated/used outside the present path. Coordinate with
-    RW-P*/MCLI-P*. **P2.4** golden capture/benchmark on the user's hardware.
+  - **NEXT → MPRES-P2.3b** (the ps3/dxrefresh cleanup) then **P2.4**.
+    P2.3 (partial) ✅ deleted the trivially-dead present surfaces `vs`, `psnew1`
+    (never allocated) and `ps2`/`ps4` (allocated-but-unread) — declarations +
+    setup allocations, built tri-target green. The cross-file audit corrected the
+    plan's surface list: `psnew1b` is the **live** in-game UI compose surface
+    (keep), and `ps3` is now consumer-less but still **managed** by
+    `recreateBackbuffers` (RW-P2.2). **P2.3b**: remove `ps3` (its setup alloc, the
+    recreateBackbuffers alloc/free/cls/had_ps3 block, the `cls(ps3,0)`, decls, and
+    the now-dead `DDRAW_display_pixelformat` gate) and `dxrefresh` (simplify the
+    focus-skip guard in the brace-seam `loop_client_part_refresh_tail.cpp` so the
+    `skiprefresh:` label isn't orphaned — edit with replace_string_in_file, never
+    insert_edit). Coordinate with RW-P*. **P2.4**: golden capture/benchmark on the
+    user's hardware.
 

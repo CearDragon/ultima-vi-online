@@ -635,7 +635,9 @@ MCI_PLAY_PARMS mciPlayParms;
 
 
 
-surf *vs;
+// MPRES-P2.3: `vs` (the DirectDraw primary surface) removed. Its only users were
+// the dxrefresh-branch p16to32/p16to16 present converters that MPRES-P2.1/P2.2
+// deleted; it was never allocated (no `vs=newsurf`) and is now unreferenced.
 
 unsigned char timelval; //0=full brightness, 15=total darkness
 
@@ -793,9 +795,10 @@ unsigned long keyframe31; //animation/palette index (0-7)
 unsigned long refreshcount; //incremented every refresh
 
 surf* ps;
-surf *ps2;
+// MPRES-P2.3: ps2/ps4 removed — allocated in setup_client.inc but never read
+// (their only consumer was the deleted dxrefresh present path). ps3 stays: it is
+// still managed by recreateBackbuffers (RW-P2.2) on non-16bpp displays.
 surf *ps3;
-surf *ps4;
 surf *ps5;
 surf *ps6;
 surf *ps7;
@@ -804,7 +807,8 @@ surf *ps640400;
 surf *ps320200;
 
 // rrr
-surf* psnew1;
+// MPRES-P2.3: psnew1 removed (declared but never allocated or used). psnew1b is
+// the live in-game UI/panel compose surface — keep it.
 surf* psnew1b;
 
 // r999

@@ -184,7 +184,7 @@ extern MCI_SAVE_PARMS mciSaveParms;
 extern MCI_PLAY_PARMS mciPlayParms;
 
 
-extern surf *vs;
+// MPRES-P2.3: `vs` (DirectDraw primary) removed — see globals.inc.
 
 extern unsigned char timelval; //0=full brightness, 15=total darkness
 
@@ -336,9 +336,8 @@ extern unsigned long keyframe31; //animation/palette index (0-7)
 extern unsigned long refreshcount; //incremented every refresh
 
 extern surf *ps;
-extern surf *ps2;
+// MPRES-P2.3: ps2/ps4 removed (allocated but unread). ps3 kept (RW-P2.2 manages it).
 extern surf *ps3;
-extern surf *ps4;
 extern surf *ps5;
 extern surf *ps6;
 extern surf *ps7;
@@ -347,7 +346,7 @@ extern surf *ps640400;
 extern surf *ps320200;
 
 // rrr
-extern surf *psnew1;
+// MPRES-P2.3: psnew1 removed (unused). psnew1b is the live UI compose surface.
 extern surf *psnew1b;
 //extern surf* party_surf[8];
 extern FRAME *party_frame_new[];

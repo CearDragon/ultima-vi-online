@@ -2108,11 +2108,16 @@ void refresh() {
     // (semantics-preserving — the GPU presenter already samples ps->o's RGB565
     // directly, so the 16→32 / 16→16 CPU converters are dead here).
     //
-    // Deferred to MPRES-P2.3 (pending a full cross-reference): the intermediate
-    // surfaces (ps2/ps3/ps4/psnew1/psnew1b/`vs`) are still ALLOCATED by newsurf,
-    // and the smallwindow / windowsizecyclenum globals are still read by layout &
-    // hit-test code elsewhere — so this change removes only the dead PRESENT
-    // branches here, not those declarations.
+    // MPRES-P2.3 (2026-06-29): the trivially-dead present surfaces have now been
+    // deleted — `vs` (never allocated) and `psnew1` (never allocated) are gone, and
+    // `ps2`/`ps4` (allocated in setup_client.inc but never read) no longer allocate.
+    // Still LIVE and intentionally kept: `psnew1b` (the in-game UI/panel compose
+    // surface) and `ps3` (the 32-bpp helper that recreateBackbuffers/RW-P2.2 still
+    // manages on non-16bpp displays — its last present consumer is gone, so it is a
+    // follow-up removal that must be coordinated with the resize logic). The
+    // always-FALSE `dxrefresh` bool also remains: it is read by the focus-skip guard
+    // in loop_client_part_refresh_tail.cpp, and dropping it would orphan the
+    // `skiprefresh:` label in that brace-seam loop fragment.
     refresh(ps); //16->? 1024x768
 } //refresh()
 

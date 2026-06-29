@@ -60,7 +60,7 @@ extern bool dirtyClientSize;
 // so mouse input maps back to source coordinates correctly.
 static void blit_letterbox(HWND hWndDst, HDC srcdc, long srcW, long srcH) {
     // RW-P2.4: defensive check — the only surfaces we currently letterbox are
-    // back-buffer-sized (ps/psnew1/psnew1b), so srcW/srcH should equal the
+    // back-buffer-sized (ps/psnew1b), so srcW/srcH should equal the
     // current viewport.h-published back-buffer size. If they ever diverge
     // (e.g. someone passes a half-res or minimap surface), we want a loud
     // warning in debug builds rather than silently producing the wrong
@@ -262,8 +262,6 @@ struct surf {
 
     //IDirect3DTexture2* t; //only valid if SURF_TEX flag is used *REDUNDANT
 };
-
-extern surf *vs;
 
 surf *surflist[16384];
 

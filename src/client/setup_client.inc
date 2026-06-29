@@ -63,12 +63,11 @@ if (ps) {
         exit(0);
     }
 }
+// MPRES-P2.3: ps2/ps4 allocations removed (allocated but never read; their only
+// consumer was the deleted dxrefresh present path). ps3 (the 32-bpp helper on
+// non-16bpp displays) is still allocated here and managed by recreateBackbuffers.
 if (DDRAW_display_pixelformat.dwRGBBitCount!=16){
-ps2=newsurf(resxo/2,resyo/2,SURF_SYSMEM);
 ps3=newsurf(resxo,resyo,SURF_SYSMEM);
-ps4=newsurf(resxo/2,resyo/2,SURF_SYSMEM16); //to temporarily convert to 16bit?
-}else{
-ps2=newsurf(resxo/2,resyo/2,SURF_SYSMEM16);
 }
 // ps5 MUST stay at 1024x768 regardless of the (possibly resized) backbuffer
 // size. It is a scratch surface for the minimap / Gem peer view: the world
