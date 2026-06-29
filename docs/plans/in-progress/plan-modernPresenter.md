@@ -313,13 +313,15 @@ present-path exception, not a rasterizer change).
     the MM-P9 per-frame ddraw-GetDC leak fix is preserved.
   - **P1.5** ✅ default flipped to modern (`g_present_modern = 1`); legacy
     reachable for one cycle via `legacypresent` (`modernpresent` now a no-op).
-  - **NEXT → MPRES-P2** (the riskiest pixel step): route the high-level
-    `function_client.cpp::refresh()` branches through the presenter and delete
-    the dead `p16to32`/`p16to16` asm converters + DD primary `vs` + intermediate
-    present surfaces. Needs a **legacy-vs-modern golden capture of every former
-    `refresh()` branch** (1:1 / letterboxed / maximized / each former
-    smallwindow+windowsizecyclenum mode) before deleting anything — capture on
-    the user's hardware. Start by inventorying the `dxrefresh` / `smallwindow` /
-    fullscreen branches in `function_client.cpp::refresh()` (~line 2091) and the
-    surfaces they present (`ps2`/`ps3`/`ps4`/`psnew1`/`psnew1b`/`vs`).
+  - **NEXT → MPRES-P2.3 / P2.4** (gated on a hardware smoke test of this build).
+    P2.1/P2.2 ✅ collapsed `function_client.cpp::refresh()` to the single live
+    `refresh(ps)` arm — deleted four unreachable inline-asm converters
+    (`p16to32`/`p16to16`/`zp16to32`/`zp16to16`) + the `vs`-primary blits.
+    Remaining: **P2.3** delete the now-orphaned declarations/allocations
+    (`vs`/`ps2`/`ps3`/`ps4`/`psnew1`/`psnew1b`, and eventually `dxrefresh`) — but
+    ONLY after a full cross-file cross-reference, because `smallwindow`/
+    `windowsizecyclenum` are still read by layout/hit-test code
+    (loop_client_part_panel_hittest / panel_draw / player_walk) and some of those
+    surfaces may be allocated/used outside the present path. Coordinate with
+    RW-P*/MCLI-P*. **P2.4** golden capture/benchmark on the user's hardware.
 
