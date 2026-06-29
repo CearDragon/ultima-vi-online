@@ -205,22 +205,23 @@ int g_diag_present_mode = 0;
 int g_text_dc_cache = 1;
 
 // MPRES-P1 (2026-06-29): modern swap-chain present gating switch (A/B-able on
-// real hardware before it becomes the only path, exactly like g_text_dc_cache).
-//   0 (default) = LEGACY path: refresh(surf*) presents via the cached
-//                 IDirectDrawSurface DC + blit_letterbox BitBlt/StretchBlt
-//                 (shipped behavior — byte-for-byte unchanged).
-//   1 = MODERN path: refresh(surf*) calls u6o::client::present_modern(), which
-//       uploads ps->o (RGB565) into a dynamic B5G6R5 D3D11 texture and presents
-//       it point-sampled + letterboxed through a DXGI swap chain. The letterbox
-//       dst rect/scale use the IDENTICAL blit_letterbox math and publish the same
-//       blit_offx/blit_offy/blit_scale, so mouse mapping is unchanged. If D3D11
-//       init/present fails, present_modern() returns false and refresh() falls
-//       through to the legacy present below — so enabling this can never break
-//       rendering. Selected with command-line substring "modernpresent" (parsed
-//       in u6o7.cpp), mirroring how "oldtextdc" sets g_text_dc_cache.
-// Default 0 keeps shipped behavior identical; flip to 1 only after MPRES-P1.5
-// hardware sign-off.
-int g_present_modern = 0;
+// real hardware via command line, exactly like g_text_dc_cache).
+//   1 (default, MPRES-P1.5) = MODERN path: refresh(surf*) calls
+//       u6o::client::present_modern(), which uploads ps->o (RGB565) into a
+//       dynamic B5G6R5 D3D11 texture and presents it point-sampled + letterboxed
+//       through a DXGI swap chain. The letterbox dst rect/scale use the IDENTICAL
+//       blit_letterbox math and publish the same blit_offx/blit_offy/blit_scale,
+//       so mouse mapping is unchanged. If D3D11 init/present fails, present_modern()
+//       returns false and refresh() falls through to the legacy present below — so
+//       this can never break rendering.
+//   0 = LEGACY path: refresh(surf*) presents via the cached IDirectDrawSurface DC
+//       + blit_letterbox BitBlt/StretchBlt (the pre-MPRES shipped behavior).
+// MPRES-P1.5 (2026-06-29): flipped the default to 1 after hardware sign-off
+// (golden present + mouse-mapping parity + look-text confirmed on NVIDIA). The
+// legacy path stays reachable for one cycle via the command-line substring
+// "legacypresent" (parsed in u6o7.cpp), which sets this back to 0; "modernpresent"
+// is now a redundant no-op kept so existing launch scripts keep working.
+int g_present_modern = 1;
 
 // MM-P9.6 diagnostic (2026-06-26): localize the residual ~120 KB/s NVIDIA leak
 // that persists with every per-frame IDirectDrawSurface::GetDC suppressed

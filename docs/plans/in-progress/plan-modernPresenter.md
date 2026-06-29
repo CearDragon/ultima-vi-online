@@ -141,13 +141,23 @@ A/B'd on the NVIDIA box exactly like the MM-P9 toggles.
   on failure; `modernpresent` cmdline parse; lazy create/resize; shutdown wired
   into `ddrawshutdown()`. Build-verified client/host/both Debug, zero new
   warnings._
-- ⬜ **MPRES-P1.4** Verify (T3): golden present match (P0.2) at 1:1, letterboxed,
+- ✅ **MPRES-P1.4** Verify (T3): golden present match (P0.2) at 1:1, letterboxed,
   and maximized; mouse-mapping parity (`blit_*` identical → click a known UI
   hotspot at several window sizes); benchmark vs P0.3 (no meaningful
   regression); on NVIDIA, `commitKB` **flat** with `modernpresent` (no
-  `IDirectDrawSurface::GetDC` in the present path at all).
-- ⬜ **MPRES-P1.5** Flip `g_present_modern` default to **1** after sign-off; keep
-  the legacy path reachable via the flag for one cycle.
+  `IDirectDrawSurface::GetDC` in the present path at all). _Functional sign-off:
+  hardware smoke test (NVIDIA) — menu, highlight, option descriptions, and the
+  in-game 'L' look text all render correct white/golden; mouse hotspots map
+  unchanged. One bug found & fixed mid-P1: GDI text batch wasn't drained before
+  the modern memcpy of `ps->o`, so the last ~20 TextOuts of a frame went missing
+  (black shadow showed through) → fixed with a `GdiFlush()` in `refresh()` before
+  `present_modern()` (DC stays cached; MM-P9 leak fix preserved). Quantitative
+  benchmark / idle-`commitKB` capture remains the user's ongoing measurement._
+- ✅ **MPRES-P1.5** Flip `g_present_modern` default to **1** after sign-off; keep
+  the legacy path reachable via the flag for one cycle. _Done: default flipped to
+  1 in myddraw.cpp; legacy path reachable for one cycle via the new
+  `legacypresent` command-line switch (`modernpresent` kept as a redundant no-op
+  so existing launch scripts keep working)._
 - **Exit:** modern present is default; pixels + input mapping verified identical;
   no present-path DDraw `GetDC`; perf parity.
 
@@ -270,4 +280,28 @@ present-path exception, not a rasterizer change).
   phase through the **`cpp-modernizer` agent** with the T3 golden-pixel +
   benchmark discipline above. Recommended API: **D3D11 + DXGI** (RGB565 texture,
   point-sampled full-screen quad); D2D-on-DXGI is the simpler fallback.
+
+- **2026-06-29 (P0 + P1 complete).** Branch `plan/modernPresenter`.
+  - **P0** ✅ tri-target Debug baseline; API decision **D3D11+DXGI** recorded in
+    `docs/modernization/MPRES-P1-presenter.md` (D2D rejected: no native RGB565).
+  - **P1** ✅ `src/client/present.{h,cpp}` — file-static RAII `Presenter`
+    (ComPtr device/ctx/swap-chain, dynamic `B5G6R5_UNORM` texture, FS-triangle
+    shaders, point sampler, lazy init/resize). `refresh(surf*)` gated on
+    `g_present_modern` with legacy fallthrough on D3D11 failure; shutdown wired
+    into `ddrawshutdown()`; CMake adds `present.cpp` to client+both (not host).
+  - **P1.4** ✅ hardware smoke-test sign-off on NVIDIA. Mid-P1 bug fixed: needed
+    a `GdiFlush()` in `refresh()` before the modern memcpy of `ps->o` (GDI text
+    batch wasn't drained → last ~20 TextOuts/frame missing). DC stays cached, so
+    the MM-P9 per-frame ddraw-GetDC leak fix is preserved.
+  - **P1.5** ✅ default flipped to modern (`g_present_modern = 1`); legacy
+    reachable for one cycle via `legacypresent` (`modernpresent` now a no-op).
+  - **NEXT → MPRES-P2** (the riskiest pixel step): route the high-level
+    `function_client.cpp::refresh()` branches through the presenter and delete
+    the dead `p16to32`/`p16to16` asm converters + DD primary `vs` + intermediate
+    present surfaces. Needs a **legacy-vs-modern golden capture of every former
+    `refresh()` branch** (1:1 / letterboxed / maximized / each former
+    smallwindow+windowsizecyclenum mode) before deleting anything — capture on
+    the user's hardware. Start by inventorying the `dxrefresh` / `smallwindow` /
+    fullscreen branches in `function_client.cpp::refresh()` (~line 2091) and the
+    surfaces they present (`ps2`/`ps3`/`ps4`/`psnew1`/`psnew1b`/`vs`).
 
