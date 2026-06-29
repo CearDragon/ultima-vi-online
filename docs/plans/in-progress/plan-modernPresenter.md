@@ -168,20 +168,38 @@ A/B'd on the NVIDIA box exactly like the MM-P9 toggles.
 Route every `function_client.cpp::refresh()` branch through the presenter and
 delete the now-dead format-conversion + primary-surface paths.
 
-- ⬜ **MPRES-P2.1** Replace the `dxrefresh` branches (`p16to32`/`p16to16` asm →
+- ✅ **MPRES-P2.1** Replace the `dxrefresh` branches (`p16to32`/`p16to16` asm →
   `img(vs,…)` to the DD primary) with `presenter.present(ps)`. The GPU samples
   RGB565, so the 16→32/16→16 converters and the `vs` primary become dead.
-- ⬜ **MPRES-P2.2** Replace the `smallwindow` / `windowsizecyclenum` 0/1 and
+  _Done: the `dxrefresh` arms were provably unreachable (`dxrefresh` is FALSE in
+  data_client.cpp and assigned nowhere else in the client), so collapsing
+  `function_client.cpp::refresh()` deleted all four inline-asm converters
+  (`p16to32`/`p16to16`/`zp16to32`/`zp16to16`) and the `img(vs,…)` primary blits._
+- ✅ **MPRES-P2.2** Replace the `smallwindow` / `windowsizecyclenum` 0/1 and
   fullscreen branches (`refresh(ps2/ps4/psnew1/psnew1b/ps)`) with a single
   `presenter.present(ps)`; the GPU viewport handles the scaling those
   intermediate surfaces did. (Coordinate with **RW-P\***: use `backbufferW/H`
   and the established scale math; do not change viewport sizing semantics.)
-- ⬜ **MPRES-P2.3** Delete `dxrefresh`, the primary surface `vs`, and the
+  _Done: `smallwindow` is FALSE and assigned nowhere else in the client (Option A
+  single-window cleanup, 2026-05-20), so both smallwindow modes were dead;
+  `refresh()` now collapses to the single live `refresh(ps)` arm (→ the modern
+  presenter). Semantics-preserving: the only reachable arm pre-collapse was
+  already `refresh(ps)`._
+- 🟡 **MPRES-P2.3** Delete `dxrefresh`, the primary surface `vs`, and the
   intermediate present surfaces (`ps2`/`ps3`/`ps4`/`psnew1`/`psnew1b`) **once
   proven unreferenced**; retire `DDRAW_display_pixelformat` usage in the present.
-- ⬜ **MPRES-P2.4** Verify (T3): golden capture across all former modes; this is
+  _Deferred: the dead PRESENT branches are gone, but `vs`/`ps2`/`ps3`/`ps4`/
+  `psnew1`/`psnew1b` are still allocated by `newsurf`, and `smallwindow`/
+  `windowsizecyclenum` are still read by layout/hit-test code (panel_hittest,
+  panel_draw, player_walk). Removing the declarations needs a full cross-file
+  cross-reference + RW/MCLI coordination — next P2 step._
+- 🟡 **MPRES-P2.4** Verify (T3): golden capture across all former modes; this is
   the riskiest pixel step (it removes asm converters) — capture each former
-  branch's output and diff. Benchmark.
+  branch's output and diff. Benchmark. _Build-verified tri-target (client/host/
+  both Debug, zero new warnings). Pixel risk is minimal because the deleted
+  branches were unreachable and the live `refresh(ps)` path is byte-unchanged —
+  but a hardware smoke test/golden capture is still wanted before P2.3 deletes
+  the surfaces._
 - **Exit:** one present path; no DD primary; format conversion is GPU-side;
   inline `_asm` present converters removed (T3 metric down).
 

@@ -2089,245 +2089,31 @@ void setsetting_int(const char *name, long value) {
 
 // rrr added new mode handling
 void refresh() {
-    //  if (smallwindow){
-    if (smallwindow &&windowsizecyclenum
-    
-    ==
-    0
-    )
-    {
-        // the original 512 resolution mode
-        if (dxrefresh) {
-            if (DDRAW_display_pixelformat.dwRGBBitCount != 16) {
-                static unsigned long pebx, pecx;
-                pebx = (unsigned long) ps->o;
-                pecx = (unsigned long) ps2->o; //ps2=newsurf(1024/2,768/2,SURF_SYSMEM);
-                _asm {
-                        mov ebx, pebx
-                        mov ecx, pecx
-                        mov esi, 196608
-                        p16to32b:
-                        mov ax, [ebx]
-                        mov dx, ax
-                        and edx, 01111100000000000b
-                        shl edx, 8
-                        mov dx, ax
-                        and dx, 011111100000b
-                        shl dx, 5
-                        mov dl, al
-                        and dl, 011111b
-                        shl dl, 3
-                        mov[ecx], edx
-                        add ebx, 4
-                        mov di, bx
-                        and di, 11111111111b
-                        jnz p16to32b2
-                        add ebx, 2048
-                        p16to32b2:
-                        add ecx, 4
-                        dec esi
-                        jnz p16to32b
-                        } //asm
-                if (NEThost) img(vs, 0, 0, ps2);
-                else img(vs, 512, 0, ps2);
-            } else {
-                //16->16 512x384 dx
-                static unsigned long pebx, pecx;
-                pebx = (unsigned long) ps->o;
-                pecx = (unsigned long) ps2->o; //img(ps2,ps);
-                _asm {
-                        mov ebx, pebx
-                        mov ecx, pecx
-                        mov si, 384
-                        mov di, 512
-                        p16to16c:
-                        mov ax, [ebx]
-                        mov[ecx], ax
-                        add ebx, 4
-                        add ecx, 2
-                        dec di
-                        jnz p16to16c
-                        mov di, 512
-                        add ebx, 2048
-                        dec si
-                        jnz p16to16c
-                        } //asm
-                if (NEThost) img(vs, 0, 0, ps2);
-                else img(vs, 512, 0, ps2);
-            }
-        } else {
-            //not dxrefresh
-            if (DDRAW_display_pixelformat.dwRGBBitCount != 16) {
-                img(ps4, ps); //ps4=newsurf(1024/2,768/2,SURF_SYSMEM16);
-                refresh(ps4);
-            } else {
-                img(ps2, ps);
-                refresh(ps2);
-            }
-        }
-    }
-    else
-    if (smallwindow &&windowsizecyclenum
-    
-    ==
-    1
-    )
-    {
-        // the new resolution mode
-        if (dxrefresh) {
-            if (DDRAW_display_pixelformat.dwRGBBitCount != 16) {
-                static unsigned long pebx, pecx;
-                pebx = (unsigned long) ps->o;
-                pecx = (unsigned long) psnew1->o; //ps2=newsurf(1024/2,768/2,SURF_SYSMEM);
-                _asm {
-                        mov ebx, pebx
-                        mov ecx, pecx
-                        mov esi, 1296000
-                        zp16to32b:
-                        mov ax, [ebx]
-                        mov dx, ax
-                        and edx, 01111100000000000b
-                        shl edx, 8
-                        mov dx, ax
-                        and dx, 011111100000b
-                        shl dx, 5
-                        mov dl, al
-                        and dl, 011111b
-                        shl dl, 3
-                        mov[ecx], edx
-                        add ebx, 4
-                        mov di, bx
-                        and di, 11111111111b
-                        jnz zp16to32b2
-                        add ebx, 2048
-                        zp16to32b2:
-                        add ecx, 4
-                        dec esi
-                        jnz zp16to32b
-                        } //asm
-                if (NEThost) img(vs, 0, 0, psnew1);
-                else img(vs, 512, 0, psnew1);
-            } else {
-                //16->16 512x384 dx
-                static unsigned long pebx, pecx;
-                pebx = (unsigned long) ps->o;
-                pecx = (unsigned long) psnew1->o; //img(ps2,ps);
-                _asm {
-                        mov ebx, pebx
-                        mov ecx, pecx
-                        mov si, 900
-                        mov di, 1440
-                        zp16to16c:
-                        mov ax, [ebx]
-                        mov[ecx], ax
-                        add ebx, 4
-                        add ecx, 2
-                        dec di
-                        jnz zp16to16c
-                        mov di, 512
-                        add ebx, 2048
-                        dec si
-                        jnz zp16to16c
-                        } //asm
-                if (NEThost) img(vs, 0, 0, psnew1);
-                else img(vs, 512, 0, psnew1);
-            }
-        } else {
-            //not dxrefresh
-            // i think the new mode only ever executes this condition; because the copy-pasted code in the other conditons are wrong.
-            if (DDRAW_display_pixelformat.dwRGBBitCount != 16) {
-                //img(ps4, ps);   //ps4=newsurf(1024/2,768/2,SURF_SYSMEM16);
-                //refresh(ps4);
-
-                //img(psnew1b, ps);
-                //refresh(psnew1b);
-
-                // r222 all the graphics are (originally and still is) done in the 1024 surface; copy whats on that surface and put it on the new surface.
-                // it is scaled to the area on the new/destination surface.
-                img(psnew1b, ps, 0, 0, resxn1m, resyn1m);
-
-                // s444 display worldmap on top of game playing area
-                /*
-				if (showworldmapn1 > 0) {
-					if (updateworldmapn1) {
-						updateworldmapn1 = 0;
-						img(uipanelsurf[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF], worldmapsurfn1[worldmapindexn1]);
-					}
-
-					imguip(psnew1b, uipanelworldmap);
-					imguip(psnew1b, uipanelworldmapbar);
-
-					// s444 worldmapbar buttons
-					if (worldmapindexn1 == 1)
-						imguiw(psnew1b, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6CLOTH, 1);
-					else if (worldmapindexn1 == 2)
-						imguiw(psnew1b, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6P, 1);
-					else if (worldmapindexn1 == 3)
-						imguiw(psnew1b, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6G, 1);
-					else if (worldmapindexn1 == 4)
-						imguiw(psnew1b, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6RUNE, 1);
-
-					if (uihover) {
-						if (hituipaneli == uipanelworldmapbar) {
-							if (hituiwidgeti < 0)
-								hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
-
-							if (hituiwidgeti > 0)
-								img0(psnew1b, uipanelx[hituipaneli][hituiwidgeti][UI_STATE_DEF], uipanely[hituipaneli][hituiwidgeti][UI_STATE_DEF], uiwidgetimgsurf[UI_IMGI_HOVER][1]);
-						}
-					}
-				}*/
-
-
-                refresh(psnew1b);
-            } else {
-                img(psnew1, ps);
-                refresh(psnew1);
-            }
-        }
-    }
-    else
-    {
-        //full screen
-        // the original full screen / 1024 resolution mode
-        if (dxrefresh) {
-            if (DDRAW_display_pixelformat.dwRGBBitCount != 16) {
-                //16->32 1024x768 dx
-                static unsigned long pebx, pecx;
-                pebx = (unsigned long) ps->o;
-                pecx = (unsigned long) ps3->o;
-                // RW-P2.3: route pixel count through viewport.h accessor.
-                unsigned long _pxCount = (unsigned long) lightingTotalBytes();
-                _asm{
-                        mov ebx,pebx
-                        mov ecx,pecx
-                        mov esi,_pxCount
-                        p16to32:
-                        mov ax,[ebx]
-                        mov dx,ax
-                        and edx,01111100000000000b
-                        shl edx,8
-                        mov dx,ax
-                        and dx,011111100000b
-                        shl dx,5
-                        mov dl,al
-                        and dl,011111b
-                        shl dl,3
-                        mov [ecx],edx
-                        add ebx,2
-                        add ecx,4
-                        dec esi
-                        jnz p16to32
-                        } //asm
-                img(vs, 0, 0, ps3);
-            } else {
-                img(vs, 0, 0, ps); //16->16 1024x768 dx
-            }
-        } else {
-            //no dxrefresh
-            refresh(ps); //16->? 1024x768
-        }
-    }
+    // MPRES-P2.1/P2.2 (2026-06-29): collapsed to the single live present path.
+    //
+    // This high-level refresh() historically fanned out across three window modes
+    // (smallwindow + windowsizecyclenum 0 / 1, else full-screen) and, within each,
+    // a `dxrefresh` DirectDraw-primary path — the p16to32 / p16to16 inline-asm
+    // RGB565→display-format converters blitting into the `vs` primary surface via
+    // the intermediate surfaces ps2/ps3/ps4/psnew1/psnew1b — versus a plain
+    // refresh(<surf>) present.
+    //
+    // The single-window cleanup (Option A, 2026-05-20) retired every alternate
+    // window. `smallwindow` and `dxrefresh` are initialized FALSE in
+    // data_client.cpp and assigned nowhere else in the client (verified by grep
+    // across src/), and `windowsizecyclenum` stays 0. So at runtime ONLY the
+    // `else` (full-screen) + non-dxrefresh arm was ever reachable, i.e.
+    // `refresh(ps)`. Collapsing to that arm deletes the now-unreachable inline-asm
+    // present converters and the `vs`-primary blits with zero observable change
+    // (semantics-preserving — the GPU presenter already samples ps->o's RGB565
+    // directly, so the 16→32 / 16→16 CPU converters are dead here).
+    //
+    // Deferred to MPRES-P2.3 (pending a full cross-reference): the intermediate
+    // surfaces (ps2/ps3/ps4/psnew1/psnew1b/`vs`) are still ALLOCATED by newsurf,
+    // and the smallwindow / windowsizecyclenum globals are still read by layout &
+    // hit-test code elsewhere — so this change removes only the dead PRESENT
+    // branches here, not those declarations.
+    refresh(ps); //16->? 1024x768
 } //refresh()
 
 //screen log
