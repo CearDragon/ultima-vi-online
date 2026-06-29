@@ -20,7 +20,7 @@ This directory contains the necessary files to run the Ultima VI Online Host in 
 
 Run the following command from the project root:
 
-```powershell
+```bash
 docker build -t u6o-host:latest .
 docker tag u6o-host:latest acrultimavionline.azurecr.io/u6o-host:latest
 az acr login --name acrultimavionline

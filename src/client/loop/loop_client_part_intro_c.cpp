@@ -108,6 +108,16 @@ if
             get(tfh, &U6OK_TEMP, 512);
             get(tfh, &U6OK_TEMP_FLAGS, 128);
             close(tfh);
+            // ensure defaults for the live U6OK array if needed, although this loads into _TEMP
+            // but the remapping menu will eventually copy _TEMP to live.
+            // Wait, I should ensure defaults in _TEMP too!
+            if (U6OK_TEMP[U6OK_CAMERATOGGLE][0] == 0) {
+                U6OK_TEMP[U6OK_CAMERATOGGLE][0] = VK_TAB;
+            }
+            if (U6OK_TEMP[U6OK_RESPAWNFOLLOWERS][0] == 0) {
+                U6OK_TEMP[U6OK_RESPAWNFOLLOWERS][0] = VK_SHIFT;
+                U6OK_TEMP[U6OK_RESPAWNFOLLOWERS][1] = VK_F1;
+            }
             key1 = 0;
             key2 = 0;
             nextkey = 0;

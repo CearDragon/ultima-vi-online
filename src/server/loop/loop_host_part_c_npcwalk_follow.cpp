@@ -936,6 +936,24 @@
                                     } //z&&z2
 
                                     //integrate player move and partymember->follow move
+                                    // Frozen-camera movement clamp, self-correcting: only pin the
+                                    // selected mover inside the frozen on-screen window while it is
+                                    // ALREADY inside that window (so it cannot walk off the frozen
+                                    // screen). After a teleport (ladder/moongate/gate/regroup) the
+                                    // avatar lands outside the now-stale window; clamping then would
+                                    // strand it in place until the client's camera relock round-trips.
+                                    // Treat "already outside the window" as a stale window and let the
+                                    // move proceed unclamped.
+                                    if (tplayer && tplayer->camera_freeze &&
+                                        myobj->x >= tplayer->frozen_tpx && myobj->x < tplayer->frozen_tpx + tplayer->frozen_vtx &&
+                                        myobj->y >= tplayer->frozen_tpy && myobj->y < tplayer->frozen_tpy + tplayer->frozen_vty) {
+                                        if (myobj->x + x2 < tplayer->frozen_tpx || myobj->x + x2 >= tplayer->frozen_tpx + tplayer->frozen_vtx ||
+                                            myobj->y + y2 < tplayer->frozen_tpy || myobj->y + y2 >= tplayer->frozen_tpy + tplayer->frozen_vty) {
+                                            x2 = 0;
+                                            y2 = 0;
+                                        }
+                                    }
+
                                 selected_partymember_move:
                                     x3 = 0;
 

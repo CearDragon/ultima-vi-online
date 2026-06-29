@@ -7,12 +7,10 @@
 #                branch (see CMakeLists.txt / docs/plans/plan-linuxHost.md).
 #   2. runtime — slim image with only the 32-bit C/C++ runtime + game data.
 #
-# All host runtime data is bundled in the repo under assets/game_files/host/
-# (ultima6/ map data, host/ NPC data, dr/, save/, and the top-level *.txt) and is
-# copied next to the binary below — nothing extra needs staging in the build
-# context.
+# All host runtime data is expected to be provided via a local mount and
+# is NOT bundled in this image.
 #
-#   docker build -f Dockerfile.linux -t u6o-host:latest .
+#   docker build -t u6o-host:latest .
 
 # ---------------------------------------------------------------------------
 # Stage 1: build the headless host (i386)

@@ -6,7 +6,7 @@
 // docs/plans/plan-clientMapDownload.md). Mixed-version binaries refuse to
 // connect (the host's version check rejects), which is the intended graceful
 // degradation -- a clean refusal beats silently misdecoding the new messages.
-#define U6O_VERSION 15
+#define U6O_VERSION 16
 #define U6O_DEBUG FALSE/* should probably put this on the compiler command line instead of here!! */
 #include "random/random.h"
 

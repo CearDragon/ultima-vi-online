@@ -3073,6 +3073,27 @@ void wpf_pathfind(unsigned char *d, long sourcex, long sourcey, long destx, long
             z2 = 0; //accumulative weight
             x2 = WPF_OFFSETX + x;
             y2 = WPF_OFFSETY + y;
+
+            if (type == 0) {
+                npc *wpf_npc_tmp = (npc *)WPF_OBJECT->more;
+                if (wpf_npc_tmp->player && wpf_npc_tmp->player->camera_freeze) {
+                    player *p = wpf_npc_tmp->player;
+                    // Frozen-camera pathfinding clamp, self-correcting: only confine
+                    // paths to the frozen on-screen window while the path SOURCE is
+                    // inside it. After a teleport the source jumps outside the now-stale
+                    // window; clamping then would zero every tile's weight and strand
+                    // the mover until the client relocks the camera. Skip in that case.
+                    if (sourcex >= p->frozen_tpx && sourcex < p->frozen_tpx + p->frozen_vtx &&
+                        sourcey >= p->frozen_tpy && sourcey < p->frozen_tpy + p->frozen_vty) {
+                        if (x2 < p->frozen_tpx || x2 >= p->frozen_tpx + p->frozen_vtx ||
+                            y2 < p->frozen_tpy || y2 >= p->frozen_tpy + p->frozen_vty) {
+                            wpf_weight[x][y] = 0;
+                            goto wpf_blocked;
+                        }
+                    }
+                }
+            }
+
             if (x2 >= 0) {
                 if (y2 >= 0) {
                     if (x2 < 2048) {
@@ -5186,6 +5207,7 @@ getequiph2hwepdamage_skip:
 //3. remove any prerecorded paths
 //all alive partymembers are assumed to be in a removed but existant state
 void partyadd(player *p, long x, long y) {
+    p->camera_freeze = 0; // Reset camera freeze on teleport
     static long x2, y2, x3, y3, z, z2, i;
     static object *obj;
     static npc *tnpc;

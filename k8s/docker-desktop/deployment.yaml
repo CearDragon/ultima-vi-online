@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: u6o-host
+  labels:
+    app: u6o-host
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: u6o-host
+  template:
+    metadata:
+      labels:
+        app: u6o-host
+    spec:
+      # LH-P7: graceful shutdown. SIGTERM (sent on pod delete) triggers the
+      # host's save-and-exit path; give it time to flush before SIGKILL.
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: host
+          image: docker.io/cduncc/u6o-host:latest
+          imagePullPolicy: Always
+          # The host reads its data with paths relative to the working
+          # directory (no chdir/argv[0] logic — see src/common/myfile.cpp).
+          # Point it at the mount so all opens land in the C:\host data.
+          # The image already sets this WORKDIR; pinned here too so the manifest
+          # is self-documenting.
+          workingDir: /u6o-host
+          ports:
+            - containerPort: 22
+              protocol: TCP
+          volumeMounts:
+            - name: host-data
+              # Mounted host game data (ultima6/, host/, dr/, save/, dns.txt,
+              # motd.txt, ...). This is the host's working directory; the binary
+              # lives in the image at /usr/local/bin and is NOT overlaid by it.
+              mountPath: /u6o-host
+      volumes:
+        - name: host-data
+          hostPath:
+            # LH-P7.4: hostPath is resolved by the kubelet INSIDE the Kubernetes
+            # node (Docker Desktop's Linux VM) — a Windows path like `C:/host`
+            # means nothing there. Docker Desktop re-exports the Windows drives
+            # into the node, but WHERE depends on the backend/version:
+            #   * WSL2 backend (modern default): /run/desktop/mnt/host/c/host
+            #   * older Hyper-V / Moby backend:  /host_mnt/c/host
+            # so C:\host maps to ONE of those. If the value below is wrong for your
+            # machine you get an EMPTY mount (the host logs "data mount ... looks
+            # empty"). Discover the correct path for YOUR node with the probe pod:
+            #   kubectl apply -f k8s/docker-desktop/hostpath-probe.yaml
+            #   kubectl logs hostpath-probe     # prints which path holds your data
+            #   kubectl delete -f k8s/docker-desktop/hostpath-probe.yaml
+            # then set `path:` below to that value (without the probe's /host prefix).
+            #
+            # type: Directory (NOT DirectoryOrCreate) on purpose: if the path is
+            # wrong we want the pod to FAIL LOUDLY rather than silently mount an
+            # empty auto-created folder. The host creates save/ as a subdir at
+            # runtime, so the mount root (C:\host) only needs to already exist.
+            path: /run/desktop/mnt/host/c/host
+            type: Directory
+      nodeSelector:
+        kubernetes.io/os: linux
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: u6o-host-service
+spec:
+  selector:
+    app: u6o-host
+  ports:
+    - protocol: TCP
+      port: 22
+      targetPort: 22
+  type: LoadBalancer

@@ -781,6 +781,14 @@ if
                 //x,y change
                 tplayer->x = BITSget(t, &bitsi, 11);
                 tplayer->y = BITSget(t, &bitsi, 10);
+
+                // Auto-unfreeze if player moved outside the frozen viewport (e.g. teleport/ladder)
+                if (camera_freeze) {
+                    if (tplayer->x < tpx || tplayer->x >= tpx + (long) viewTilesX() ||
+                        tplayer->y < tpy || tplayer->y >= tpy + (long) viewTilesY()) {
+                        camera_freeze = 0;
+                    }
+                }
             }
 
             x = tplayer->x;
@@ -788,24 +796,28 @@ if
 
             static long tpx_legacy, tpy_legacy;
             getscreenoffset_legacy(x, y, &tpx_legacy, &tpy_legacy);
-            getscreenoffset(x, y, &tpx, &tpy);
-            // ROOMSYNC-P1: generic isolated-room follow camera override. For any
-            // (x, y) inside a registered room, force a centered-on-player camera
-            // -- bypassing the world-edge clamps that getscreenoffset() applies
-            // in known regions. tpx_legacy/tpy_legacy above stays in the legacy
-            // (host) reference frame because that's what the host's sobj/mover
-            // encoders use; ONLY the dynamic render camera (tpx/tpy) follows.
-            // See docs/rendering/global-room-sync.md.
-            if (getroom(x, y, NULL, NULL, NULL, NULL)) {
-                tpx = x - (viewTilesX() / 2 - 1);
-                tpy = y - (viewTilesY() / 2 - 1);
+            if (!camera_freeze) {
+                getscreenoffset(x, y, &tpx, &tpy);
+                // ROOMSYNC-P1: generic isolated-room follow camera override. For any
+                // (x, y) inside a registered room, force a centered-on-player camera
+                // -- bypassing the world-edge clamps that getscreenoffset() applies
+                // in known regions. tpx_legacy/tpy_legacy above stays in the legacy
+                // (host) reference frame because that's what the host's sobj/mover
+                // encoders use; ONLY the dynamic render camera (tpx/tpy) follows.
+                // See docs/rendering/global-room-sync.md.
+                if (getroom(x, y, NULL, NULL, NULL, NULL)) {
+                    tpx = x - (viewTilesX() / 2 - 1);
+                    tpy = y - (viewTilesY() / 2 - 1);
+                }
             }
 
 
             ctpx2 = tplayer->x;
             ctpy2 = tplayer->y;
-            ctpx = tpx;
-            ctpy = tpy;
+            if (!camera_freeze) {
+                ctpx = tpx;
+                ctpy = tpy;
+            }
 
             //screen+1 shift
             // RW sobj-fix: screen+1 grew from legacy 32x24 + 1 fence to
@@ -1077,13 +1089,16 @@ if
                     y = BITSget(t, &bitsi, SOBJ_TX_BITS);
                     x = y % SOBJ_TX_W;
                     y /= SOBJ_TX_W;
-                    i3 = tobjfixed_index[tpy_legacy - SOBJ_TX_OFFY + y][tpx_legacy - SOBJ_TX_OFFX + x];
+
+                    x2 = tpx_legacy + x - SOBJ_TX_OFFX;
+                    y2 = tpy_legacy + y - SOBJ_TX_OFFY;
+                    i3 = 0;
+                    if (x2 >= 0 && x2 < 2048 && y2 >= 0 && y2 < 1024)
+                        i3 = tobjfixed_index[y2][x2];
                     i4 = tobjfixed_type[i3];
                     z = BITSget(t, &bitsi, getnbits(i4));
                     i5 = 1 << z;
 
-                    x2 = tpx_legacy + x - SOBJ_TX_OFFX;
-                    y2 = tpy_legacy + y - SOBJ_TX_OFFY;
                     x3 = x2 - tplayer->sobj_bufoffx;
                     y3 = y2 - tplayer->sobj_bufoffy;
                     if (tplayer->sobj_tempfixed[x3][y3] & i5) tplayer->sobj_tempfixed[x3][y3] -= i5;
