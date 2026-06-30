@@ -10,17 +10,11 @@ intro_refresh : refreshcount
 ++;
 
 
-if
-((gotfocus
-==
-FALSE
-)
-&&
-(dxrefresh)
-)
-goto
-skiprefresh;
-
+// MPRES-P2.3b: removed the dead `(gotfocus==FALSE && dxrefresh)` focus-skip
+// guard. dxrefresh was always FALSE, so the goto never fired and refresh()
+// always ran. The skiprefresh: label below stays — it is still the live jump
+// target for the nodisplay / !clientframe skips in
+// loop_client_part_player_walk.cpp.
 refresh();
 
 skiprefresh : mb

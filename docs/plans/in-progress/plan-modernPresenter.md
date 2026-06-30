@@ -185,36 +185,37 @@ delete the now-dead format-conversion + primary-surface paths.
   `refresh()` now collapses to the single live `refresh(ps)` arm (→ the modern
   presenter). Semantics-preserving: the only reachable arm pre-collapse was
   already `refresh(ps)`._
-- 🟡 **MPRES-P2.3** Delete the dead present surfaces **once proven unreferenced**;
-  retire `DDRAW_display_pixelformat` usage in the present.
-  _Partly done (2026-06-29): cross-file audit corrected the plan's surface list.
-  **Deleted** (provably dead — declarations + any allocations):_
-  - _`vs` (the DD primary): never allocated, only the deleted dxrefresh
-    converters touched it. Removed from globals.inc / data_client.h / myddraw.cpp._
-  - _`psnew1`: declared but never allocated or used. Removed._
-  - _`ps2`, `ps4`: allocated in setup_client.inc but never read. Allocations +
-    declarations removed (purgesurfaces frees via surflist[], so no free() to drop)._
-
-  _**Kept / re-scoped** (the plan's original list was wrong):_
-  - _`psnew1b` is the **live** in-game UI/panel compose surface (heavily used in
-    loop_client_part_player_walk / panel_draw) — NOT dead._
-  - _`ps3` is now consumer-less (its only reader was the deleted p16to32
-    converter) but is still **managed** by recreateBackbuffers (RW-P2.2:
-    alloc/free/cls/had_ps3). Its removal touches resizable-window logic +
-    viewport.h docs, so it's a coordinated follow-up (P2.3b), not a trivial delete._
-  - _`dxrefresh` (always FALSE) is still **read** by the focus-skip guard in the
-    brace-seam fragment loop_client_part_refresh_tail.cpp; dropping it orphans the
-    `skiprefresh:` label, so defer to the same P2.3b follow-up._
-  - _`DDRAW_display_pixelformat` is still read (it gates the ps3 alloc) — retire
-    alongside ps3 in P2.3b._
-  _Built tri-target (client/host/both Debug), zero new warnings._
+- ✅ **MPRES-P2.3** Delete the dead present surfaces (proven unreferenced) and
+  retire `DDRAW_display_pixelformat`'s present-path usage.
+  _Done in two passes. P2.3 (2026-06-29) deleted the trivially-dead `vs` (DD
+  primary, never allocated), `psnew1` (never allocated), and `ps2`/`ps4`
+  (allocated in setup_client.inc but never read). P2.3b (2026-06-30) finished the
+  job after the cross-file audit corrected the plan's list:_
+  - _`ps3` (the 32-bpp format-conversion helper) **removed** — its only reader was
+    the deleted p16to32 converter, so the modern presenter (sampling ps->o's
+    RGB565 directly) made it dead on every display. Dropped the setup_client.inc
+    alloc, the whole `recreateBackbuffers` had_ps3/free/alloc/`cls(ps3)` machinery,
+    the decls, and the `DDRAW_display_pixelformat.dwRGBBitCount!=16` gate that
+    conditionally allocated it. Updated the viewport.h memory-budget + resize docs._
+  - _`dxrefresh` (always FALSE) **removed** — its only use was the focus-skip
+    `goto skiprefresh` in the brace-seam `loop_client_part_refresh_tail.cpp`; that
+    dead guard is gone. The `skiprefresh:` label stays (still the live target for
+    the nodisplay / !clientframe skips in loop_client_part_player_walk.cpp).
+    Removed the def (globals.inc), extern (data_client.h), and init (data_client.cpp)._
+  - _`psnew1b` **kept** — it is the live in-game UI/panel compose surface._
+  - _`DDRAW_display_pixelformat` **kept** but no longer used in the present path —
+    it is still read to set the pixel format on newly created surfaces
+    (myddraw.cpp surfstruct), which is allocation, not present._
+  _Built tri-target (client/host/both Debug), zero new warnings. User smoke-tested
+  the P2.3 build (the ps2/ps4 alloc removal) on NVIDIA: pixel-identical._
 - 🟡 **MPRES-P2.4** Verify (T3): golden capture across all former modes; this is
   the riskiest pixel step (it removes asm converters) — capture each former
   branch's output and diff. Benchmark. _Build-verified tri-target (client/host/
   both Debug, zero new warnings). Pixel risk is minimal because the deleted
-  branches were unreachable and the live `refresh(ps)` path is byte-unchanged —
-  but a hardware smoke test/golden capture is still wanted before P2.3 deletes
-  the surfaces._
+  branches were unreachable and the live `refresh(ps)` path is byte-unchanged. The
+  user has smoke-tested each incremental build (P1.5, P2.1/P2.2, P2.3) on NVIDIA
+  hardware and reported pixel-identical results; the P2.3b build awaits the same
+  smoke test. A formal golden-pixel capture/benchmark remains a user hardware task._
 - **Exit:** one present path; no DD primary; format conversion is GPU-side;
   inline `_asm` present converters removed (T3 metric down).
 
@@ -328,17 +329,30 @@ present-path exception, not a rasterizer change).
     the MM-P9 per-frame ddraw-GetDC leak fix is preserved.
   - **P1.5** ✅ default flipped to modern (`g_present_modern = 1`); legacy
     reachable for one cycle via `legacypresent` (`modernpresent` now a no-op).
-  - **NEXT → MPRES-P2.3b** (the ps3/dxrefresh cleanup) then **P2.4**.
-    P2.3 (partial) ✅ deleted the trivially-dead present surfaces `vs`, `psnew1`
-    (never allocated) and `ps2`/`ps4` (allocated-but-unread) — declarations +
-    setup allocations, built tri-target green. The cross-file audit corrected the
-    plan's surface list: `psnew1b` is the **live** in-game UI compose surface
-    (keep), and `ps3` is now consumer-less but still **managed** by
-    `recreateBackbuffers` (RW-P2.2). **P2.3b**: remove `ps3` (its setup alloc, the
-    recreateBackbuffers alloc/free/cls/had_ps3 block, the `cls(ps3,0)`, decls, and
-    the now-dead `DDRAW_display_pixelformat` gate) and `dxrefresh` (simplify the
-    focus-skip guard in the brace-seam `loop_client_part_refresh_tail.cpp` so the
-    `skiprefresh:` label isn't orphaned — edit with replace_string_in_file, never
-    insert_edit). Coordinate with RW-P*. **P2.4**: golden capture/benchmark on the
-    user's hardware.
+  - **P2.1/P2.2** ✅ collapsed `function_client.cpp::refresh()` to the single live
+    `refresh(ps)` arm (smallwindow/dxrefresh branches were provably dead) — deleted
+    the four inline-asm present converters (`p16to32`/`p16to16`/`zp16to32`/
+    `zp16to16`) + the `vs`-primary blits. User smoke-tested: pixel-identical.
+  - **P2.3** ✅ (two passes, both smoke-tested) deleted every dead present surface:
+    `vs`, `psnew1` (never allocated), `ps2`/`ps4` (allocated-but-unread) in P2.3;
+    then `ps3` (the 32-bpp helper — only the deleted p16to32 converter read it;
+    dropped its setup alloc, the `recreateBackbuffers` had_ps3/free/alloc/cls
+    machinery, decls, and the `DDRAW_display_pixelformat` bit-count gate) and
+    `dxrefresh` (the always-FALSE focus-skip `goto skiprefresh` guard in the
+    brace-seam `loop_client_part_refresh_tail.cpp`; the live `skiprefresh:` label
+    stays) in P2.3b. `psnew1b` kept (live UI surface); `DDRAW_display_pixelformat`
+    kept (still sets the format on newly created surfaces — allocation, not present).
+    Built tri-target Debug green, zero new warnings.
+  - **NEXT → MPRES-P2.4 verify, then MPRES-P3** (owned RAII RGB565 framebuffers).
+    P2 is functionally complete: one present path, no DD primary, format conversion
+    is GPU-side, all inline-asm present converters gone. P2.4 (golden-pixel capture
+    + benchmark across the former modes) remains a user **hardware** task — the
+    incremental builds (P1.5 → P2.3b) have each been smoke-tested pixel-identical on
+    NVIDIA; the P2.3b build awaits its smoke test. **P3** introduces a `Surface`
+    type backed by an owned `std::unique_ptr<uint8_t[]>` for the SURF_SYSMEM/
+    SURF_SYSMEM16 surfaces (same `->o`/`d.lPitch`/`dwWidth`/`dwHeight` the blitters
+    use), routes `newsurf` sysmem allocs to it, and keeps DD vidmem/primary only
+    where still needed until P4. Match `lPitch` (incl. historical alignment) so the
+    RW-P2.3 lighting-stride invariant holds; verify with surface byte-dump equality
+    on a representative blit matrix.
 

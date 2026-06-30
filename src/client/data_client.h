@@ -241,7 +241,7 @@ extern long scry; //size of the window required by the program
 
 
 extern bool smallwindow; //use a 512x384 window
-extern bool dxrefresh;
+// MPRES-P2.3b: `dxrefresh` removed — see globals.inc.
 extern bool nodisplay;
 extern bool isit;
 extern bool host_minimize;
@@ -336,8 +336,8 @@ extern unsigned long keyframe31; //animation/palette index (0-7)
 extern unsigned long refreshcount; //incremented every refresh
 
 extern surf *ps;
-// MPRES-P2.3: ps2/ps4 removed (allocated but unread). ps3 kept (RW-P2.2 manages it).
-extern surf *ps3;
+// MPRES-P2.3/P2.3b: ps2/ps3/ps4 removed — all were present-path-only (consumed by
+// the deleted dxrefresh converters); the modern presenter samples ps->o directly.
 extern surf *ps5;
 extern surf *ps6;
 extern surf *ps7;

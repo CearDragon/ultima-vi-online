@@ -358,7 +358,7 @@ void LIGHTnew(unsigned short x, unsigned short y, unsigned long light_data_offse
 // =====================================================================
 // RW-P2.2: backbuffer recreation. Called from the dirtyClientSize
 // handler in loop_client.cpp when the user resizes the window. Releases
-// and re-creates the `ps`/`ps3`/`ps5`
+// and re-creates the `ps`/`ps5`
 // DirectDraw surfaces, re-allocates the lighting buffers, patches FRAME
 // pointers (vf, fs) that referenced the old `ps`, and clears the new
 // surface to black so unrendered regions don't show stale pixels.
@@ -388,11 +388,6 @@ namespace u6o {
             if (newW == backbufferW() && newH == backbufferH()) {
                 return true; // already at requested size
             }
-
-            // Whether the 32-bpp helper surface ps3 currently exists. It's
-            // only created on non-16bpp displays in setup_client.inc, so we
-            // re-create it only if it was there to begin with.
-            bool had_ps3 = (ps3 != NULL);
 
             // Capture the OLD ps pointer so we can patch only FRAMEs that
             // actually referenced it. fs (the full-screen intro/menu overlay)
@@ -425,20 +420,14 @@ namespace u6o {
                 free(ps);
                 ps = NULL;
             }
-            if (ps3) {
-                free(ps3);
-                ps3 = NULL;
-            }
 
             // Re-create at the new size. Match the original setup_client.inc
-            // flag choices: ps is 16bpp sysmem; ps3 is 32bpp sysmem
-            // (used as the format-conversion target on non-16bpp displays).
+            // flag choice: ps is 16bpp sysmem. (MPRES-P2.3b retired the 32-bpp
+            // ps3 conversion helper — the modern presenter samples ps->o's
+            // RGB565 directly, so no per-display-format helper surface is needed.)
             ps = newsurf(newW, newH, SURF_SYSMEM16);
-            if (had_ps3) {
-                ps3 = newsurf(newW, newH, SURF_SYSMEM);
-            }
 
-            if (!ps || (had_ps3 && !ps3)) {
+            if (!ps) {
                 return false; // allocation failure — leave dims at old values
             }
 
@@ -508,7 +497,6 @@ namespace u6o {
             // region is never written by the renderer, so without this you'd
             // see whatever heap/DD memory happened to be there.
             cls(ps, 0);
-            if (ps3) cls(ps3, 0);
 
             // Publish the new dims. Done last so any concurrent reader on the
             // same thread (we're single-threaded for graphics, but be careful
@@ -2108,16 +2096,20 @@ void refresh() {
     // (semantics-preserving — the GPU presenter already samples ps->o's RGB565
     // directly, so the 16→32 / 16→16 CPU converters are dead here).
     //
-    // MPRES-P2.3 (2026-06-29): the trivially-dead present surfaces have now been
-    // deleted — `vs` (never allocated) and `psnew1` (never allocated) are gone, and
-    // `ps2`/`ps4` (allocated in setup_client.inc but never read) no longer allocate.
+    // MPRES-P2.3 (2026-06-29): deleted the trivially-dead present surfaces —
+    // `vs` and `psnew1` (never allocated) and `ps2`/`ps4` (allocated but never read).
+    //
+    // MPRES-P2.3b (2026-06-30): deleted `ps3` (the 32-bpp format-conversion helper:
+    // its only reader was the removed p16to32 converter, so the modern presenter —
+    // which samples ps->o's RGB565 directly — made it dead on every display; the
+    // DDRAW_display_pixelformat bit-count gate that allocated it is gone) and the
+    // always-FALSE `dxrefresh` bool (its only use was the focus-skip goto in the
+    // brace-seam loop_client_part_refresh_tail.cpp, removed; the live skiprefresh:
+    // label there is still reached from the nodisplay / !clientframe skips).
     // Still LIVE and intentionally kept: `psnew1b` (the in-game UI/panel compose
-    // surface) and `ps3` (the 32-bpp helper that recreateBackbuffers/RW-P2.2 still
-    // manages on non-16bpp displays — its last present consumer is gone, so it is a
-    // follow-up removal that must be coordinated with the resize logic). The
-    // always-FALSE `dxrefresh` bool also remains: it is read by the focus-skip guard
-    // in loop_client_part_refresh_tail.cpp, and dropping it would orphan the
-    // `skiprefresh:` label in that brace-seam loop fragment.
+    // surface). `DDRAW_display_pixelformat` is retained — it is still used to set
+    // the pixel format on newly created surfaces (myddraw.cpp), just no longer in
+    // the present path.
     refresh(ps); //16->? 1024x768
 } //refresh()
 

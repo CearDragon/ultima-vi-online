@@ -122,7 +122,7 @@ void data_client_init(void) {
     scry = 384 * 2; //size of the window required by the program
 
     smallwindow = FALSE; //use a 512x384 window
-    dxrefresh = FALSE;
+    // MPRES-P2.3b: `dxrefresh` removed (was always FALSE; gated deleted DD present).
     nodisplay = FALSE;
     isit = FALSE;
     host_minimize = !U6O_DEBUG;

@@ -1292,7 +1292,7 @@ void free(surf *s) {
     }
     // MM-P9.5: release any cached text DC before releasing the surface, so we
     // never leak the DC and never ->Release() a surface with a live DC held.
-    // Covers recreateBackbuffers()'s free(ps)/free(ps3) and purgesurfaces().
+    // Covers recreateBackbuffers()'s free(ps) and purgesurfaces().
     surf_text_dc_release(s);
     s->s->Release();
     free((void *) s);

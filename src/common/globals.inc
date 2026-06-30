@@ -693,7 +693,9 @@ long scrx; long scry; //size of the window required by the program
 
 
 bool smallwindow; //use a 512x384 window
-bool dxrefresh;
+// MPRES-P2.3b: `dxrefresh` removed — it was always FALSE and gated only the
+// deleted DirectDraw-primary present path (the focus-skip goto in
+// loop_client_part_refresh_tail.cpp, now also removed).
 bool nodisplay;
 bool isit;
 bool host_minimize;
@@ -796,9 +798,10 @@ unsigned long refreshcount; //incremented every refresh
 
 surf* ps;
 // MPRES-P2.3: ps2/ps4 removed — allocated in setup_client.inc but never read
-// (their only consumer was the deleted dxrefresh present path). ps3 stays: it is
-// still managed by recreateBackbuffers (RW-P2.2) on non-16bpp displays.
-surf *ps3;
+// (their only consumer was the deleted dxrefresh present path).
+// MPRES-P2.3b: ps3 (the 32-bpp format-conversion helper) removed too — its only
+// reader was the deleted p16to32 converter, so the modern presenter (which samples
+// ps->o's RGB565 directly) made it dead on every display.
 surf *ps5;
 surf *ps6;
 surf *ps7;

@@ -64,11 +64,11 @@ if (ps) {
     }
 }
 // MPRES-P2.3: ps2/ps4 allocations removed (allocated but never read; their only
-// consumer was the deleted dxrefresh present path). ps3 (the 32-bpp helper on
-// non-16bpp displays) is still allocated here and managed by recreateBackbuffers.
-if (DDRAW_display_pixelformat.dwRGBBitCount!=16){
-ps3=newsurf(resxo,resyo,SURF_SYSMEM);
-}
+// consumer was the deleted dxrefresh present path).
+// MPRES-P2.3b: ps3 (the 32-bpp helper on non-16bpp displays) removed too — its
+// only reader was the deleted p16to32 converter, so the DDRAW_display_pixelformat
+// bit-count gate that conditionally allocated it is gone. The modern presenter
+// samples ps->o's RGB565 regardless of the desktop display format.
 // ps5 MUST stay at 1024x768 regardless of the (possibly resized) backbuffer
 // size. It is a scratch surface for the minimap / Gem peer view: the world
 // draw fills its top-left 768x768 (24 tiles * 32px) and then img()
