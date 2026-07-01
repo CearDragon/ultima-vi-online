@@ -1,17 +1,13 @@
 #ifndef _INC_MYDDRAW
 #define _INC_MYDDRAW
 #define rgb(r,g,b) (b+((g)<<8)+((r)<<16))
-//#define STRICT
-//#define INITGUID
-//#define D3D_OVERLOADS *REDUNDANT
-#include <ddraw.h>
 #include <memory>
-//#include <d3d.h> *REDUNDANT
-//#include <d3dutil.h>
-//#include <d3dmath.h>
+
+// MPRES-P4.2: lean surface descriptor — DirectDraw removed.
 struct surf {
-    DDSURFACEDESC2 d;
-    LPDIRECTDRAWSURFACE4 s;
+    DWORD dwWidth, dwHeight;
+    long lPitch;
+    int bpp;  // bytes per pixel (2 or 4)
 
     union {
         unsigned long *o;
@@ -19,27 +15,19 @@ struct surf {
         unsigned short *o2;
     };
 
-    // MM-P9.5: cached on-surface GDI DC for the text path. NULL when none is
-    // held. txtout()/txtouts() acquire it lazily (one GetDC per text run) and
-    // do NOT ReleaseDC per string; it is released the next time any
-    // IDirectDrawSurface method (Blt/Flip/Lock/GetDC) runs on this surface (see
-    // surf_text_dc_release). This collapses the per-string GetDC/ReleaseDC churn
-    // that leaks kernel/GDI-heap memory under NVIDIA's legacy DirectDraw
-    // emulation. NOT serialized — `surf` is a client-only runtime DirectDraw
-    // wrapper, never byte-blitted to disk or the network — so appending this
-    // field changes nothing on the wire or in .sav files.
-    HDC cachedTextDC;
-    // MPRES-P3.1: owned framebuffer storage for sysmem-backed surfaces. The
-    // blitter-facing fields (`o`, `d.lPitch`, `dwWidth`, `dwHeight`) remain the
-    // canonical access path; this only owns the bytes when DirectDraw is not
-    // the allocator.
+    // MPRES-P4.2: cached DIB-section DC for text rendering (replaces DD GetDC).
+    // NULL when none is held. txtout()/txtouts() acquire it lazily and keep it
+    // cached across text runs to avoid per-string DIB reallocation overhead.
+    HDC cachedDIBDC;
+    HBITMAP cachedDIBBitmap;
+
+    // MPRES-P3.1/P4.2: owned framebuffer storage for all non-PRIMARY surfaces.
     std::unique_ptr<unsigned char[]> ownedPixels;
 
-    //IDirect3DTexture2* t; //only valid if SURF_TEX flag is used *REDUNDANT
+    // Constructor: initialize all fields to zero.
+    surf() : dwWidth(0), dwHeight(0), lPitch(0), bpp(0), o(nullptr),
+             cachedDIBDC(nullptr), cachedDIBBitmap(nullptr), ownedPixels(nullptr) {}
 };
-
-extern IDirectDraw *dd1;
-extern IDirectDraw4 *dd;
 
 #define SURF_VIDMEM 0 //surface in video memory compatible with primary surface
 #define SURF_SYSMEM 1 //888 RGB surface in system memory (DirectAccess OK)

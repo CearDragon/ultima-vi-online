@@ -425,8 +425,7 @@ if (MSVC)
     )
 endif ()
 
-################################################################################
-# Dependencies
+# Dependencies (for both target)
 ################################################################################
 set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "dplay;"
@@ -450,7 +449,6 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "odbccp32;"
         "vfw32;"
         "dplayx;"
-        "ddraw;"
         "dsound;"
         "gdiplus"
 )
@@ -657,7 +655,6 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "odbccp32;"
         "vfw32;"
         "dplayx;"
-        "ddraw;"
         "dsound;"
         "gdiplus"
 )
@@ -868,7 +865,6 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "odbccp32;"
         "vfw32;"
         "dplayx;"
-        "ddraw;"
         "dsound"
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE "${ADDITIONAL_LIBRARY_DEPENDENCIES}")

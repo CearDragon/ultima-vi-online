@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "resource.h"
-#include <ddraw.h>
+#include <memory>
 //#include <d3d.h> *REDUNDANT
 #pragma warning(disable: 4018 4244 4731)
 #include "myfile.h"
@@ -155,8 +155,6 @@ static void blit_letterbox(HWND hWndDst, HDC srcdc, long srcW, long srcH) {
 
 
 //direct draw surface structures and functions
-IDirectDraw *dd1 = NULL;
-IDirectDraw4 *dd = NULL;
 DWORD txtcol = 0xFFFFFF;
 HFONT txtfnt = NULL;
 
@@ -245,9 +243,11 @@ long g_blt_key_n = 0;  // img0(d,s)        — DDBLT_KEYSRC (colour-keyed) copy
 // idle commit slope is still measurable.
 int g_diag_blt_skip = 0;
 
+// MPRES-P4.2: keep this layout identical to the mirror in myddraw.h.
 struct surf {
-    DDSURFACEDESC2 d;
-    LPDIRECTDRAWSURFACE4 s;
+    DWORD dwWidth, dwHeight;
+    long lPitch;
+    int bpp;
 
     union {
         unsigned long *o;
@@ -255,15 +255,12 @@ struct surf {
         unsigned short *o2;
     };
 
-    // MM-P9.5: cached on-surface GDI DC for the text path — keep this layout in
-    // lockstep with the mirror definition in myddraw.h. NULL when no DC is held.
-    // See myddraw.h for the full rationale (NVIDIA legacy-ddraw GetDC leak fix).
-    // Not serialized — surf is never byte-blitted to disk/wire.
-    HDC cachedTextDC;
-    // MPRES-P3.1: owned framebuffer storage for sysmem-backed surfaces.
+    HDC cachedDIBDC;
+    HBITMAP cachedDIBBitmap;
     std::unique_ptr<unsigned char[]> ownedPixels;
 
-    //IDirect3DTexture2* t; //only valid if SURF_TEX flag is used *REDUNDANT
+    surf() : dwWidth(0), dwHeight(0), lPitch(0), bpp(0), o(nullptr),
+             cachedDIBDC(nullptr), cachedDIBBitmap(nullptr), ownedPixels(nullptr) {}
 };
 
 surf *surflist[16384];
@@ -290,33 +287,16 @@ extern int uipanelsidebar, uipanelactionbar1, uipanelactionbar2, uipanelactionta
 
 
 bool setupddraw() {
-    DirectDrawCreate(NULL, &dd1, NULL);
-    if (FAILED(dd1->SetCooperativeLevel(hWnd, DDSCL_NORMAL))) return FALSE;
-    if (dd1 == NULL) return FALSE;
-    dd1->QueryInterface(IID_IDirectDraw4, (void **) &dd);
-    if (dd == NULL) return FALSE;
-    dd->Initialize(NULL);
-    if (FAILED(dd->SetCooperativeLevel(hWnd, DDSCL_NORMAL | DDSCL_NOWINDOWCHANGES))) return FALSE;
-    //if (FAILED(dd->SetCooperativeLevel(hWnd, DDSCL_EXCLUSIVE|DDSCL_NOWINDOWCHANGES|DDSCL_FULLSCREEN))) return FALSE;
-
-
-    static surf *ts;
-    ts = new surf();
-    ts->d.dwSize = sizeof(DDSURFACEDESC2);
-    ts->d.dwFlags = DDSD_CAPS;
-    ts->d.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
-    if (dd->CreateSurface(&ts->d, &ts->s, NULL) != DD_OK) {
-        MessageBox(NULL, "CreateSurface failed: primary", "Ultima 6 Online", MB_OK);
-        exit(1);
-    }
+    // MPRES-P4.2: DirectDraw removed. All surface allocation is now owned memory.
+    // Initialize pixel format globals (assumed 16-bit RGB565 for gameplay, 32-bit for UI).
     ZeroMemory(&DDRAW_display_pixelformat, sizeof(DDRAW_display_pixelformat));
     DDRAW_display_pixelformat.dwSize = sizeof(DDRAW_display_pixelformat);
-    ts->s->GetPixelFormat(&DDRAW_display_pixelformat);
-    //exit(DDRAW_display_pixelformat.dwGBitMask);
-    ts->s->Release();
-    // ts was allocated only to query the primary surface pixel format; free it.
-    delete ts;
-    //static long i;
+    DDRAW_display_pixelformat.dwFlags = DDPF_RGB;
+    DDRAW_display_pixelformat.dwRGBBitCount = 16;
+    DDRAW_display_pixelformat.dwRBitMask = 0xF800;
+    DDRAW_display_pixelformat.dwGBitMask = 0x07E0;
+    DDRAW_display_pixelformat.dwBBitMask = 0x001F;
+    
     ZeroMemory(&surflist[0], sizeof(surf *) * 16384);
     return TRUE;
 }
@@ -325,8 +305,8 @@ surf *surfstruct() {
     static surf *ts;
     static long i;
     ts = new surf();
-    ts->d.dwSize = sizeof(DDSURFACEDESC2);
-    g_surf_live++; // MM-P9 diagnostic: live DirectDraw-surface count
+    // MPRES-P4.2: no longer need DDSURFACEDESC2 initialization.
+    g_surf_live++; // MM-P9 diagnostic: live surface count
     for (i = 0; i < 16384; i++) {
         if (surflist[i] == NULL) {
             surflist[i] = ts;
@@ -338,94 +318,27 @@ surf *surfstruct() {
 
 surf *newsurf(long x, long y, long flags) {
     surf *ts = surfstruct();
-    if (flags & 32) {
-        ts->d.dwFlags = DDSD_CAPS;
-        ts->d.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
-        goto gotpixelformat;
-    }
-    ts->d.dwFlags = DDSD_HEIGHT | DDSD_WIDTH | DDSD_CAPS | DDSD_PIXELFORMAT;
-    ts->d.dwWidth = x;
-    ts->d.dwHeight = y;
-    ts->d.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY; //default
-    if ((flags & 1) || (flags & 64)) ts->d.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
-    if (flags & 16) ts->d.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
-    //if (flags&2) ts->d.ddsCaps.dwCaps+=DDSCAPS_3DDEVICE; 
-    if (flags & 64) {
-        ts->d.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
-        ts->d.ddpfPixelFormat.dwFlags = DDPF_RGB;
-        ts->d.ddpfPixelFormat.dwRGBBitCount = 16;
-        ts->d.ddpfPixelFormat.dwRBitMask = 63488;
-        ts->d.ddpfPixelFormat.dwGBitMask = 2016;
-        ts->d.ddpfPixelFormat.dwBBitMask = 31;
-        goto gotpixelformat;
-    }
-    if (flags & 1) {
-        ts->d.ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
-        ts->d.ddpfPixelFormat.dwFlags = DDPF_RGB;
-        ts->d.ddpfPixelFormat.dwRGBBitCount = 32;
-        ts->d.ddpfPixelFormat.dwRBitMask = 0xFF0000;
-        ts->d.ddpfPixelFormat.dwGBitMask = 0x00FF00;
-        ts->d.ddpfPixelFormat.dwBBitMask = 0x0000FF;
-        goto gotpixelformat;
-    }
-    ts->d.ddpfPixelFormat = DDRAW_display_pixelformat;
-gotpixelformat:
-    //if (flags&4) ts->d.ddsCaps.dwCaps=DDSCAPS_TEXTURE;
-    /*
-if (flags&8) {
-ts->d.ddsCaps.dwCaps=DDSCAPS_ZBUFFER;
-if (flags&1) ts->d.ddsCaps.dwCaps+=DDSCAPS_SYSTEMMEMORY;
-ts->d.ddpfPixelFormat.dwFlags=DDPF_ZBUFFER;
-ts->d.ddpfPixelFormat.dwRGBBitCount=32;
-ts->d.ddpfPixelFormat.dwRBitMask=0x0;
-ts->d.ddpfPixelFormat.dwGBitMask=0xFFFFFFFF;
-ts->d.ddpfPixelFormat.dwBBitMask=0x0;
-}
-*/
-    // MPRES-P3.2: for sysmem surfaces (SURF_SYSMEM / SURF_SYSMEM16), own the
-    // pixel allocation. DDSD_LPSURFACE + DDSD_PITCH hands our buffer to DirectDraw
-    // so that Blt, GetDC, SetColorKey, and cached-text-DC (MM-P9.5) all continue
-    // to work unchanged — DD wraps our pointer but does NOT allocate or free it.
-    // DWORD-aligned pitch preserves the lPitch/2 lighting-stride invariant
-    // (RW-P2.3) because DD stores our pitch as-is and returns it from Lock().
-    // On free(surf*), s->s->Release() drops the DD wrapper; ownedPixels.reset()
-    // then frees our allocation — DD never double-frees DDSD_LPSURFACE memory.
-    if ((flags & 1) || (flags & 64)) {
-        const long bpp   = (flags & 64) ? 2L : 4L;     // SYSMEM16 = RGB565, SYSMEM = XRGB8888
-        const long pitch = (x * bpp + 3L) & ~3L;       // DWORD-aligned row stride (bytes)
-        const size_t sz  = static_cast<size_t>(pitch) * static_cast<size_t>(y);
-        ts->ownedPixels = std::make_unique<unsigned char[]>(sz > 0 ? sz : 1);
-        ts->d.dwFlags  |= DDSD_LPSURFACE | DDSD_PITCH;
-        ts->d.lpSurface = ts->ownedPixels.get();
-        ts->d.lPitch    = pitch;
-        ts->o           = reinterpret_cast<unsigned long *>(ts->ownedPixels.get());
-    }
-    if (dd->CreateSurface(&ts->d, &ts->s, NULL) != DD_OK) {
-        if (ts->d.ddsCaps.dwCaps & DDSCAPS_VIDEOMEMORY) {
-            ts->d.ddsCaps.dwCaps ^= DDSCAPS_VIDEOMEMORY;
-            ts->d.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
-            MessageBox(NULL, "CreateSurface failed: VIDEOMEMORY", "Ultima 6 Online", MB_OK);
-            exit(1);
-            if (dd->CreateSurface(&ts->d, &ts->s, NULL) == DD_OK) goto ns_sysmem;
-        }
-        MessageBox(NULL, "CreateSurface failed", "Ultima 6 Online", MB_OK);
-        exit(1);
-    }
-ns_sysmem:
+    ts->dwWidth = x;
+    ts->dwHeight = y;
 
-    if ((flags & 1) || (flags & 64) || (flags & 32)) {
-    ddgetlock:
-        if (DD_OK != ts->s->Lock(NULL, &ts->d, DDLOCK_WAIT, NULL)) goto ddgetlock;
-        ts->o = (unsigned long *) ts->d.lpSurface;
-        ts->s->Unlock(NULL);
+    // MPRES-P4.2: determine pixel format (bpp = bytes per pixel).
+    int bpp = 2;
+    if (flags & 1) bpp = 4;      // SURF_SYSMEM = 32-bit
+    if (flags & 64) bpp = 2;     // SURF_SYSMEM16 = 16-bit
+    ts->bpp = bpp;
+
+    // DWORD-aligned pitch (bytes) to preserve lighting-stride invariant (RW-P2.3).
+    const long pitch = (x * bpp + 3L) & ~3L;
+    ts->lPitch = pitch;
+
+    // MPRES-P4.2: allocate owned memory for all non-PRIMARY surfaces.
+    if (!(flags & 32)) {
+        const size_t sz = static_cast<size_t>(pitch) * static_cast<size_t>(y);
+        ts->ownedPixels = std::make_unique<unsigned char[]>(sz > 0 ? sz : 1);
+        ts->o = reinterpret_cast<unsigned long *>(ts->ownedPixels.get());
     }
-    //if (flags&4) { *REDUNDANT
-    //ts->s->QueryInterface(IID_IDirect3DTexture2,(void**)&ts->t);
-    //}
-    static DDCOLORKEY cc;
-    cc.dwColorSpaceHighValue = 0;
-    cc.dwColorSpaceLowValue = 0;
-    ts->s->SetColorKey(DDCKEY_SRCBLT, &cc);
+    // PRIMARY surface (flags & 32): o remains nullptr (set elsewhere during init).
+
     return ts;
 }
 
@@ -440,93 +353,112 @@ ns_sysmem:
 // outcome as the legacy code, which also ignored GetDC's return and operated on
 // whatever HDC came back.
 static HDC surf_text_dc_acquire(surf *s) {
-    if (s->cachedTextDC == NULL) {
-        HDC dc = NULL;
-        s->s->GetDC(&dc);
-        s->cachedTextDC = dc;
+    // MPRES-P4.2: create a cached DIB-section DC for text rendering.
+    // DIBs allow GDI to draw directly into our pixel buffer.
+    if (s == NULL || s->o == NULL) return NULL;  // PRIMARY surface (no pixels)
+    if (s->cachedDIBDC != NULL) return s->cachedDIBDC;
+    
+    BITMAPINFOHEADER bih = {};
+    bih.biSize = sizeof(BITMAPINFOHEADER);
+    bih.biWidth = (LONG)s->dwWidth;
+    bih.biHeight = -(LONG)s->dwHeight;  // negative = top-down orientation
+    bih.biPlanes = 1;
+    bih.biBitCount = s->bpp * 8;  // 16 or 32 bpp
+    bih.biCompression = BI_RGB;
+    
+    // For 16-bpp RGB565, set color masks (DIB_BITFIELDS format).
+    BITMAPINFO bi = {};
+    bi.bmiHeader = bih;
+    if (s->bpp == 2) {  // RGB565
+        bi.bmiHeader.biCompression = BI_BITFIELDS;
+        unsigned int *pMasks = (unsigned int *)&bi.bmiColors[0];
+        pMasks[0] = 0xF800;  // R: 5 bits
+        pMasks[1] = 0x07E0;  // G: 6 bits
+        pMasks[2] = 0x001F;  // B: 5 bits
     }
-    return s->cachedTextDC;
+    
+    // Create a device-independent bitmap (DIB section).
+    // The returned pointer will reference our pixel buffer directly.
+    HDC hdc = CreateCompatibleDC(NULL);
+    if (hdc == NULL) return NULL;
+    
+    void *pBits = s->o;  // Start with our surface's pixel buffer
+    HBITMAP hbmp = CreateDIBSection(hdc, &bi, DIB_RGB_COLORS, &pBits, NULL, 0);
+    if (hbmp == NULL) {
+        DeleteDC(hdc);
+        return NULL;
+    }
+    
+    // Select the DIB into the DC so GDI operations draw into it.
+    SelectObject(hdc, hbmp);
+    
+    // Cache the DIB and DC for reuse across text calls.
+    s->cachedDIBBitmap = hbmp;
+    s->cachedDIBDC = hdc;
+    return hdc;
 }
 
-// surf_text_dc_release(): release the cached DC (if any) so the surface is legal
-// for the next DirectDraw method call. DirectDraw forbids Blt/Flip/Lock/GetDC
-// while a DC is held; every such call site in this module (and the event-driven
-// GetDC sites in function_client.cpp) calls this first. No-op when none is held.
+// surf_text_dc_release(): release the cached DIB DC (if any).
+// With DIB sections, we don't need to release before Blt/etc operations,
+// so this is mainly for cleanup on surface destruction.
 void surf_text_dc_release(surf *s) {
     if (s == NULL) return;
-    if (s->cachedTextDC != NULL) {
-        s->s->ReleaseDC(s->cachedTextDC);
-        s->cachedTextDC = NULL;
+    if (s->cachedDIBDC != NULL) {
+        DeleteDC(s->cachedDIBDC);
+        s->cachedDIBDC = NULL;
+    }
+    if (s->cachedDIBBitmap != NULL) {
+        DeleteObject(s->cachedDIBBitmap);
+        s->cachedDIBBitmap = NULL;
     }
 }
 
 void pset(surf *s, long x, long y, DWORD c) {
     if (x < 0) return;
     if (y < 0) return;
-    if (y >= s->d.dwHeight) return;
-    if (x >= s->d.dwWidth) return;
+    if (y >= s->dwHeight) return;
+    if (x >= s->dwWidth) return;
     if (s->o == NULL) return;
-    s->o[y * s->d.lPitch / 4 + x] = c;
+    s->o[y * s->lPitch / 4 + x] = c;
     return;
 }
 
 DWORD point(surf *s, long x, long y) {
     if (x < 0) return 0xFFFFFFFF;
     if (y < 0) return 0xFFFFFFFF;
-    if (y >= s->d.dwHeight) return 0xFFFFFFFF;
-    if (x >= s->d.dwWidth) return 0xFFFFFFFF;
+    if (y >= s->dwHeight) return 0xFFFFFFFF;
+    if (x >= s->dwWidth) return 0xFFFFFFFF;
     if (s->o == NULL) return 0;
-    return s->o[y * s->d.lPitch / 4 + x] & 0xFFFFFF;
+    return s->o[y * s->lPitch / 4 + x] & 0xFFFFFF;
 }
 
 void cls(surf *s, DWORD c) {
-    static DDBLTFX b;
     // MM-P9.6: count + optional skip (colour-fill category).
     g_blt_fill_n++;
     if (g_diag_blt_skip == 1) return;
-    // MM-P9.6 FIX (2026-06-26): fill via the locked system-memory pixel pointer
-    // instead of IDirectDrawSurface::Blt(DDBLT_COLORFILL). On NVIDIA's legacy-
-    // DirectDraw emulation each colour-fill Blt leaks ~7 KB of committed memory;
-    // cls() runs once per frame (the back-buffer clear), so that was the residual
-    // ~115 KB/s idle leak (confirmed: the bltFill count tracked commitKB 1:1). A
-    // raw memory fill calls NO DirectDraw method, so it cannot leak, and writes
-    // the IDENTICAL pixels: DDBLT_COLORFILL writes dwFillColor as a value already
-    // in the surface's pixel format, which is exactly what each store below does.
-    // s->o is the stable pointer from the surface's creation-time Lock (the asm
-    // blitters use it the same way); it is NULL only for video-memory surfaces
-    // (SURF_VIDMEM), for which we keep the legacy Blt.
-    if (s->o != NULL) {
-        const DWORD w = s->d.dwWidth;
-        const DWORD h = s->d.dwHeight;
-        const long pitch = s->d.lPitch;
-        unsigned char *row = (unsigned char *) s->o;
-        if (s->d.ddpfPixelFormat.dwRGBBitCount == 32) {
-            const unsigned long v32 = (unsigned long) c;
-            for (DWORD yy = 0; yy < h; yy++) {
-                unsigned long *px = (unsigned long *) row;
-                for (DWORD xx = 0; xx < w; xx++) px[xx] = v32;
-                row += pitch;
-            }
-        } else {
-            const unsigned short v16 = (unsigned short) c;
-            for (DWORD yy = 0; yy < h; yy++) {
-                unsigned short *px = (unsigned short *) row;
-                for (DWORD xx = 0; xx < w; xx++) px[xx] = v16;
-                row += pitch;
-            }
+    
+    // MPRES-P4.2: all non-PRIMARY surfaces have owned pixel buffers.
+    if (s->o == NULL) return;  // PRIMARY surface (no pixel buffer); no-op.
+    
+    const DWORD w = s->dwWidth;
+    const DWORD h = s->dwHeight;
+    const long pitch = s->lPitch;
+    unsigned char *row = (unsigned char *) s->o;
+    if (s->bpp == 4) {
+        const unsigned long v32 = (unsigned long) c;
+        for (DWORD yy = 0; yy < h; yy++) {
+            unsigned long *px = (unsigned long *) row;
+            for (DWORD xx = 0; xx < w; xx++) px[xx] = v32;
+            row += pitch;
         }
-        return;
+    } else {
+        const unsigned short v16 = (unsigned short) c;
+        for (DWORD yy = 0; yy < h; yy++) {
+            unsigned short *px = (unsigned short *) row;
+            for (DWORD xx = 0; xx < w; xx++) px[xx] = v16;
+            row += pitch;
+        }
     }
-    // Fallback: video-memory / unlocked surface (s->o == NULL) — keep legacy Blt.
-    // MM-P9.6: only THIS path calls a DirectDraw method, so release the cached
-    // text DC here. The raw-fill path above writes memory directly and must NOT
-    // release — releasing every frame would force the present/text DC to be
-    // re-acquired per frame, reintroducing the per-frame ddraw-GetDC leak.
-    surf_text_dc_release(s);
-    b.dwSize = sizeof(DDBLTFX);
-    b.dwFillColor = c;
-    s->s->Blt(NULL, NULL, NULL, DDBLT_WAIT | DDBLT_COLORFILL, &b);
-    return;
 }
 
 // rrr refresh(surf* s)
@@ -540,48 +472,21 @@ void cls(surf *s, DWORD c) {
 // frame, and the WndProc mouse handler maps client coords back through
 // those globals.
 void refresh(surf *s) {
-    // MM-P9.6 (2026-06-26): present via the cached on-surface text DC instead of
-    // a fresh IDirectDrawSurface::GetDC every frame. The present needs a GDI DC
-    // for `s` (= ps) to BitBlt to the window; doing GetDC/ReleaseDC per frame
-    // leaked ~6 KB/frame on NVIDIA's legacy-ddraw emulation (~94 KB/s at 16 fps) —
-    // the SAME per-call ddraw-GetDC leak fixed for text. ps is never a DirectDraw
-    // Blt destination (the world is composed by the asm/raw blitters into ps->o)
-    // and cls() now raw-fills it without releasing, so the cached DC persists for
-    // the whole session: one ddraw GetDC total instead of one per frame. The
-    // legacy `oldtextdc` path keeps the per-frame GetDC/ReleaseDC for A/B.
+    // MM-P9.6 + MPRES-P4.2: present via the cached text DC (now DIB-section based).
     if (g_diag_present_mode >= 1) return; // diag: skip present entirely
 #ifdef CLIENT
     // MPRES-P1: modern swap-chain present (default OFF via g_present_modern).
-    // On success it fully handles the present; on failure (D3D11 unavailable)
-    // it returns false and we fall through to the unchanged legacy present.
     if (g_present_modern) {
-        // The modern presenter samples s->o (the surface's system memory) with a
-        // CPU memcpy, bypassing GDI entirely. The per-frame text path
-        // (txtout/txtouts, MM-P9.5) draws via a cached GDI DC that is left HELD on
-        // this DDSCAPS_SYSTEMMEMORY surface, and GDI *batches* its TextOut calls.
-        // The legacy present blits THROUGH that same DC (so GDI serializes text
-        // before the blit), but the modern path reads raw memory — so any text
-        // whose batch hasn't drained is missing and the black txtouts() shadow
-        // shows through. GdiFlush() drains the GDI batch into s->o (which aliases
-        // the DC's bits) before we sample it, WITHOUT releasing the DC — so the
-        // cached DC survives across frames and the MM-P9 per-frame ddraw-GetDC
-        // leak fix is preserved.
+        // Modern presenter reads s->o directly; GdiFlush() ensures any pending
+        // text rendering is flushed into the pixels.
         GdiFlush();
         if (u6o::client::present_modern(s)) return; // modern path handled it
-        // else: modern unavailable — fall through to the legacy present below
     }
 #endif
-    HDC ddhdc;
-    if (g_text_dc_cache != 0) {
-        ddhdc = surf_text_dc_acquire(s); // reuse the one cached DC; do NOT release
-        if (ddhdc != NULL)
-            blit_letterbox(hWnd, ddhdc, (long) s->d.dwWidth, (long) s->d.dwHeight);
-    } else {
-        // Legacy baseline: ensure DC-free, then per-frame GetDC/ReleaseDC.
-        surf_text_dc_release(s);
-        s->s->GetDC(&ddhdc);
-        blit_letterbox(hWnd, ddhdc, (long) s->d.dwWidth, (long) s->d.dwHeight);
-        s->s->ReleaseDC(ddhdc);
+    // Legacy GDI present: acquire cached text DC and blit to window.
+    HDC ddhdc = surf_text_dc_acquire(s);
+    if (ddhdc != NULL) {
+        blit_letterbox(hWnd, ddhdc, (long) s->dwWidth, (long) s->dwHeight);
     }
 } //refresh end
 
@@ -602,13 +507,13 @@ void img(surf *d, long x, long y, surf *s) {
     if (s == NULL) return;
     if (d == NULL) return;
     //offscreen?
-    dx = d->d.dwWidth;
+    dx = d->dwWidth;
     if (x >= dx) return;
-    dy = d->d.dwHeight;
+    dy = d->dwHeight;
     if (y >= dy) return;
-    sx = s->d.dwWidth;
+    sx = s->dwWidth;
     if (-x >= sx) return;
-    sy = s->d.dwHeight;
+    sy = s->dwHeight;
     if (-y >= sy) return;
     x2 = x; //starting dest x offset
     x3 = 0; //starting source x offset
@@ -631,10 +536,10 @@ void img(surf *d, long x, long y, surf *s) {
     }
     if ((y + sy) > dy) y4 -= y + sy - dy;
     asm_copy_vc_bytesx = x4 * 2;
-    asm_copy_vc_sourceskip = (long) s->d.lPitch - asm_copy_vc_bytesx;
-    asm_copy_vc_destskip = (long) d->d.lPitch - asm_copy_vc_bytesx;
-    asm_copy_vc_sourceoffset = (unsigned long) s->o + x3 * 2 + y3 * (long) s->d.lPitch;
-    asm_copy_vc_destoffset = (unsigned long) d->o + x2 * 2 + y2 * (long) d->d.lPitch;
+    asm_copy_vc_sourceskip = (long) s->lPitch - asm_copy_vc_bytesx;
+    asm_copy_vc_destskip = (long) d->lPitch - asm_copy_vc_bytesx;
+    asm_copy_vc_sourceoffset = (unsigned long) s->o + x3 * 2 + y3 * (long) s->lPitch;
+    asm_copy_vc_destoffset = (unsigned long) d->o + x2 * 2 + y2 * (long) d->lPitch;
     asm_copy_vc_rows = y4;
     if (asm_copy_vc_bytesx & 2) {
         asm_copy_vc_bytesx -= 2;
@@ -691,7 +596,7 @@ void img(surf *d, long x, long y, surf *s) {
 void img0_0key(surf *s, unsigned short c) {
     static unsigned long i;
     static unsigned short c2;
-    for (i = 0; i < (s->d.lPitch / 2 * s->d.dwHeight); i++) {
+    for (i = 0; i < (s->lPitch / 2 * s->dwHeight); i++) {
         c2 = s->o2[i];
         if (c2 == c) {
             s->o2[i] = 0;
@@ -712,13 +617,13 @@ void img0(surf *d, long x, long y, surf *s) {
     if (s == NULL) return;
     if (d == NULL) return;
     //offscreen?
-    dx = d->d.dwWidth;
+    dx = d->dwWidth;
     if (x >= dx) return;
-    dy = d->d.dwHeight;
+    dy = d->dwHeight;
     if (y >= dy) return;
-    sx = s->d.dwWidth;
+    sx = s->dwWidth;
     if (-x >= sx) return;
-    sy = s->d.dwHeight;
+    sy = s->dwHeight;
     if (-y >= sy) return;
     x2 = x; //starting dest x offset
     x3 = 0; //starting source x offset
@@ -741,10 +646,10 @@ void img0(surf *d, long x, long y, surf *s) {
     }
     if ((y + sy) > dy) y4 -= y + sy - dy;
     asm_copy_vc_bytesx = x4 * 2;
-    asm_copy_vc_sourceskip = (long) s->d.lPitch - asm_copy_vc_bytesx;
-    asm_copy_vc_destskip = (long) d->d.lPitch - asm_copy_vc_bytesx;
-    asm_copy_vc_sourceoffset = (unsigned long) s->o + x3 * 2 + y3 * (long) s->d.lPitch;
-    asm_copy_vc_destoffset = (unsigned long) d->o + x2 * 2 + y2 * (long) d->d.lPitch;
+    asm_copy_vc_sourceskip = (long) s->lPitch - asm_copy_vc_bytesx;
+    asm_copy_vc_destskip = (long) d->lPitch - asm_copy_vc_bytesx;
+    asm_copy_vc_sourceoffset = (unsigned long) s->o + x3 * 2 + y3 * (long) s->lPitch;
+    asm_copy_vc_destoffset = (unsigned long) d->o + x2 * 2 + y2 * (long) d->lPitch;
     asm_copy_vc_rows = y4;
     if (asm_copy_vc_bytesx & 2) {
         asm_copy_vc_bytesx -= 2;
@@ -808,23 +713,23 @@ if (s==NULL) return;
 if (d==NULL) return;
 static RECT r1,r2;
 r1.top=y;
-r1.bottom=y+s->d.dwHeight;
+r1.bottom=y+s->dwHeight;
 r1.left=x;
-r1.right=x+s->d.dwWidth;
+r1.right=x+s->dwWidth;
 r2.left=0;
 r2.top=0;
-r2.bottom=s->d.dwHeight;
-r2.right=s->d.dwWidth;
+r2.bottom=s->dwHeight;
+r2.right=s->dwWidth;
 
-if (r1.right>d->d.dwWidth)
+if (r1.right>d->dwWidth)
 {
-r2.right-=r1.right-d->d.dwWidth;
-r1.right=d->d.dwWidth;
+r2.right-=r1.right-d->dwWidth;
+r1.right=d->dwWidth;
 }
-if (r1.bottom>d->d.dwHeight)
+if (r1.bottom>d->dwHeight)
 {
-r2.bottom-=r1.bottom-d->d.dwHeight;
-r1.bottom=d->d.dwHeight;
+r2.bottom-=r1.bottom-d->dwHeight;
+r1.bottom=d->dwHeight;
 }
 if (r1.left<0)
 {
@@ -852,15 +757,15 @@ void img(surf *d, surf *s) {
     if (g_diag_blt_skip == 2) return;
 
     // MPRES-P4.1: software copy via owned pixel buffer.
-    // Falls back to DD Blt only for surfaces without an owned buffer (e.g. PRIMARY).
+    // Both surfaces must have owned buffers for software blit.
     if (d->o == NULL || s->o == NULL) {
-        d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT, NULL);
+        // MPRES-P4.2: DirectDraw removed. Cannot blit if either surface lacks owned pixels.
         return;
     }
-    const DWORD sw = s->d.dwWidth, sh = s->d.dwHeight;
-    const DWORD dw = d->d.dwWidth, dh = d->d.dwHeight;
-    const int bpp = s->d.ddpfPixelFormat.dwRGBBitCount / 8;
-    const long sp = s->d.lPitch, dp = d->d.lPitch;
+    const DWORD sw = s->dwWidth, sh = s->dwHeight;
+    const DWORD dw = d->dwWidth, dh = d->dwHeight;
+    const int bpp = s->bpp;
+    const long sp = s->lPitch, dp = d->lPitch;
     const auto *src = reinterpret_cast<const unsigned char *>(s->o);
     auto *dst = reinterpret_cast<unsigned char *>(d->o);
 
@@ -895,14 +800,13 @@ void img(surf *d, surf *s, int x, int y, int x2, int y2) {
 
     // MPRES-P4.1: software copy into dest rect.
     if (d->o == NULL || s->o == NULL) {
-        RECT drect = { x, y, x2, y2 };
-        d->s->Blt(&drect, s->s, NULL, DDBLT_WAIT, NULL);
+        // MPRES-P4.2: DirectDraw removed. Cannot blit if either surface lacks owned pixels.
         return;
     }
-    const DWORD sw = s->d.dwWidth, sh = s->d.dwHeight;
-    const DWORD dw = d->d.dwWidth, dh = d->d.dwHeight;
-    const int bpp = s->d.ddpfPixelFormat.dwRGBBitCount / 8;
-    const long sp = s->d.lPitch, dp = d->d.lPitch;
+    const DWORD sw = s->dwWidth, sh = s->dwHeight;
+    const DWORD dw = d->dwWidth, dh = d->dwHeight;
+    const int bpp = s->bpp;
+    const long sp = s->lPitch, dp = d->lPitch;
     const auto *src = reinterpret_cast<const unsigned char *>(s->o);
     auto *dst = reinterpret_cast<unsigned char *>(d->o);
 
@@ -1161,27 +1065,17 @@ void txtout(surf *s, long x, long y, txt *t)
     // GetDC text draw (after the heartbeat above, so the log keeps flowing).
     // Isolates whether the per-frame txtout() GetDC/ReleaseDC churn is the leak.
     if (g_diag_present_mode >= 2) return;
-    // MM-P9.5: text DC path. New (g_text_dc_cache=1, default): acquire the
-    // on-surface DC once and keep it; the next DirectDraw method on this surface
-    // releases it (surf_text_dc_release). Legacy (oldtextdc): GetDC/ReleaseDC per
-    // string — kept byte-identical here so it is a faithful A/B baseline.
-    HDC pdc;
-    bool cached = (g_text_dc_cache != 0);
-    if (cached) pdc = surf_text_dc_acquire(s);
-    else s->s->GetDC(&pdc);
+    // MPRES-P4.2: DirectDraw removed; always use cached DIB-section DC for text rendering.
+    HDC pdc = surf_text_dc_acquire(s);
+    if (pdc == NULL) return;  // Surface has no pixels (PRIMARY or uninitialized)
     {
         HGDIOBJ old_font = SelectObject(pdc, txtfnt);
         if ((txtcol & 0xFF000000) == 0) SetBkMode(pdc, TRANSPARENT);
-        // MM-P9.5: the persistent cached DC carries bk-mode between draws, so
-        // restore the legacy fresh-DC default (OPAQUE) explicitly. The legacy
-        // path gets a brand-new DC each call (already OPAQUE), so this reset is
-        // applied only on the cached path — pixels stay identical either way.
-        else if (cached) SetBkMode(pdc, OPAQUE);
+        else SetBkMode(pdc, OPAQUE);
         SetTextColor(pdc, fixcol(txtcol));
         TextOut(pdc, x, y, t->d, t->l);
         SelectObject(pdc, old_font);
     }
-    if (!cached) s->s->ReleaseDC(pdc);
     return;
 }
 
@@ -1190,17 +1084,13 @@ void txtouts(surf *s, long x, long y, txt *t) //creates a shadow behind the text
     // MM-P9 diagnostic (2026-06-26): mode >= 2 skips the per-string DirectDraw
     // GetDC text draw (see txtout()). Default (0) is unchanged behavior.
     if (g_diag_present_mode >= 2) return;
-    // MM-P9.5: same cached-vs-legacy text DC handling as txtout() (see there).
-    HDC pdc;
-    bool cached = (g_text_dc_cache != 0);
-    if (cached) pdc = surf_text_dc_acquire(s);
-    else s->s->GetDC(&pdc);
+    // MPRES-P4.2: DirectDraw removed; always use cached DIB-section DC for text rendering.
+    HDC pdc = surf_text_dc_acquire(s);
+    if (pdc == NULL) return;  // Surface has no pixels (PRIMARY or uninitialized)
     {
         HGDIOBJ old_font = SelectObject(pdc, txtfnt);
         if ((txtcol & 0xFF000000) == 0) SetBkMode(pdc, TRANSPARENT);
-        // MM-P9.5: restore the legacy fresh-DC default on the persistent cached
-        // DC (see txtout()); no-op on the legacy per-string path.
-        else if (cached) SetBkMode(pdc, OPAQUE);
+        else SetBkMode(pdc, OPAQUE);
         SetTextColor(pdc, 8 + 8 * 256 + 8 * 65536); //8,8,8
         TextOut(pdc, x - 1, y, t->d, t->l);
         TextOut(pdc, x + 1, y, t->d, t->l);
@@ -1210,7 +1100,6 @@ void txtouts(surf *s, long x, long y, txt *t) //creates a shadow behind the text
         TextOut(pdc, x, y, t->d, t->l);
         SelectObject(pdc, old_font);
     }
-    if (!cached) s->s->ReleaseDC(pdc);
     return;
 }
 
@@ -1246,30 +1135,12 @@ void purgesurfaces() {
 }
 
 void ddrawshutdown() {
-    // MM-P2.2: release all tracked surfaces first, then the DirectDraw
-    // interfaces. This keeps COM teardown ordering explicit on client exit.
-    //
-    // MM-P8.1: RAII candidate — the DirectDraw device pair (dd/dd1) plus the
-    // surflist[] surface registry are a textbook RAII subsystem. A future
-    // "DDDevice" type (ctor = CreateDD/QueryInterface, dtor = this teardown)
-    // and a ComPtr-backed surf wrapper would make this explicit shutdown call
-    // unnecessary and remove the malloc/Release split in surfstruct()/free().
+    // MPRES-P4.2: DirectDraw removed. All surfaces are now RAII with owned buffers.
+    // Just tear down modern present resources (if used) and purge the surface list.
 #ifdef CLIENT
-    // MPRES-P1: tear down the modern present resources (swap chain/device/shaders)
-    // on the same client-exit path, before the DirectDraw interfaces go. Safe and
-    // a no-op if the modern present was never used. (CLIENT-only; the headless
-    // host never builds present.cpp.)
     u6o::client::present_modern_shutdown();
 #endif
     purgesurfaces();
-    if (dd) {
-        dd->Release();
-        dd = NULL;
-    }
-    if (dd1) {
-        dd1->Release();
-        dd1 = NULL;
-    }
 }
 
 /*
@@ -1277,23 +1148,23 @@ void img0(surf* d,long x,long y,surf* s)
 {
 static RECT r1,r2;
 r1.top=y;
-r1.bottom=y+s->d.dwHeight;
+r1.bottom=y+s->dwHeight;
 r1.left=x;
-r1.right=x+s->d.dwWidth;
+r1.right=x+s->dwWidth;
 r2.left=0;
 r2.top=0;
-r2.bottom=s->d.dwHeight;
-r2.right=s->d.dwWidth;
+r2.bottom=s->dwHeight;
+r2.right=s->dwWidth;
 
-if (r1.right>d->d.dwWidth)
+if (r1.right>d->dwWidth)
 {
-r2.right-=r1.right-d->d.dwWidth;
-r1.right=d->d.dwWidth;
+r2.right-=r1.right-d->dwWidth;
+r1.right=d->dwWidth;
 }
-if (r1.bottom>d->d.dwHeight)
+if (r1.bottom>d->dwHeight)
 {
-r2.bottom-=r1.bottom-d->d.dwHeight;
-r1.bottom=d->d.dwHeight;
+r2.bottom-=r1.bottom-d->dwHeight;
+r1.bottom=d->dwHeight;
 }
 if (r1.left<0)
 {
@@ -1330,17 +1201,17 @@ void img0(surf *d, surf *s) {
         d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT | DDBLT_KEYSRC, NULL);
         return;
     }
-    const DWORD w = s->d.dwWidth, h = s->d.dwHeight;
+    const DWORD w = s->dwWidth, h = s->dwHeight;
     // img0 only operates same-size surfaces; fall back to DD for any mismatch.
-    if (w != d->d.dwWidth || h != d->d.dwHeight) {
+    if (w != d->dwWidth || h != d->dwHeight) {
         d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT | DDBLT_KEYSRC, NULL);
         return;
     }
-    const long sp = s->d.lPitch, dp = d->d.lPitch;
+    const long sp = s->lPitch, dp = d->lPitch;
     const auto *src = reinterpret_cast<const unsigned char *>(s->o);
     auto *dst = reinterpret_cast<unsigned char *>(d->o);
 
-    if (s->d.ddpfPixelFormat.dwRGBBitCount == 16) {
+    if (s->bpp == 2) {
         for (DWORD y = 0; y < h; y++) {
             const auto *srow = reinterpret_cast<const unsigned short *>(src + y * sp);
             auto *drow = reinterpret_cast<unsigned short *>(dst + y * dp);
@@ -1362,26 +1233,28 @@ surf *loadimage(LPCSTR name, long flags) {
     static BITMAP bm; //bitmap info buffer
     static long bmx, bmy; //width, height
     static surf *s; //temp surf pointer, for new image
-    static HDC sdc, bdc; //surface device, bitmap device
+    static HDC bdc, didc; //bitmap device, DIB device
     bmh = (HBITMAP) LoadImage(hInst, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     if (bmh == NULL) return NULL;
     GetObject(bmh, sizeof(BITMAP), &bm);
     bmx = (DWORD) bm.bmWidth;
     bmy = (DWORD) bm.bmHeight;
     s = newsurf(bmx, bmy, flags); //1=SURF_SYSMEM
+    if (s == NULL || s->o == NULL) {
+        DeleteObject(bmh);
+        return NULL;
+    }
+    
+    // MPRES-P4.2: BitBlt BMP into surface via DIB section (DirectDraw removed).
     bdc = CreateCompatibleDC(NULL);
-    // Select the loaded bitmap into the temporary DC, saving the previous object
-    // so we can restore it before deleting the bitmap. Deleting a GDI object
-    // while it's still selected into a DC is undefined and can leak resources.
     HGDIOBJ _old_bmp = SelectObject(bdc, bmh);
-    // MM-P9.5: discipline — release any cached text DC before this surface's
-    // GetDC. `s` is freshly created here (no cached DC yet) so this is a no-op,
-    // but it keeps "release before every DirectDraw method call" exhaustive.
-    surf_text_dc_release(s);
-    s->s->GetDC(&sdc);
-    BitBlt(sdc, 0, 0, bmx, bmy, bdc, 0, 0, SRCCOPY);
-    s->s->ReleaseDC(sdc);
-    // Restore the previous object into the DC before deleting the bitmap and DC.
+    
+    // Get the cached DIB DC for the surface (or create one) and BitBlt into it.
+    didc = surf_text_dc_acquire(s);
+    if (didc != NULL) {
+        BitBlt(didc, 0, 0, bmx, bmy, bdc, 0, 0, SRCCOPY);
+    }
+    
     SelectObject(bdc, _old_bmp);
     DeleteDC(bdc);
     DeleteObject(bmh);
@@ -1406,14 +1279,9 @@ void free(surf *s) {
     for (i = 0; i < 16384; i++) {
         if (surflist[i] == s) surflist[i] = NULL;
     }
-    // MM-P9.5: release any cached text DC before releasing the surface, so we
-    // never leak the DC and never ->Release() a surface with a live DC held.
-    // Covers recreateBackbuffers()'s free(ps) and purgesurfaces().
+    // MPRES-P4.2: release any cached DIB DC before releasing the surface.
     surf_text_dc_release(s);
-    if (s->s != NULL) {
-        s->s->Release();
-        s->s = NULL;
-    }
+    // Release owned pixel buffer (DirectDraw removed; now just RAII cleanup).
     s->ownedPixels.reset();
     delete s;
     g_surf_live--; // MM-P9 diagnostic
@@ -1431,13 +1299,13 @@ void imgt0(surf *d, long x, long y, surf *s) {
     if (s == NULL) return;
     if (d == NULL) return;
     //offscreen?
-    dx = d->d.dwWidth;
+    dx = d->dwWidth;
     if (x >= dx) return;
-    dy = d->d.dwHeight;
+    dy = d->dwHeight;
     if (y >= dy) return;
-    sx = s->d.dwWidth;
+    sx = s->dwWidth;
     if (-x >= sx) return;
-    sy = s->d.dwHeight;
+    sy = s->dwHeight;
     if (-y >= sy) return;
     x2 = x; //starting dest x offset
     x3 = 0; //starting source x offset
@@ -1460,10 +1328,10 @@ void imgt0(surf *d, long x, long y, surf *s) {
     }
     if ((y + sy) > dy) y4 -= y + sy - dy;
     asm_copy_vc_bytesx = x4 * 2;
-    asm_copy_vc_sourceskip = (long) s->d.lPitch - asm_copy_vc_bytesx;
-    asm_copy_vc_destskip = (long) d->d.lPitch - asm_copy_vc_bytesx;
-    asm_copy_vc_sourceoffset = (unsigned long) s->o + x3 * 2 + y3 * (long) s->d.lPitch;
-    asm_copy_vc_destoffset = (unsigned long) d->o + x2 * 2 + y2 * (long) d->d.lPitch;
+    asm_copy_vc_sourceskip = (long) s->lPitch - asm_copy_vc_bytesx;
+    asm_copy_vc_destskip = (long) d->lPitch - asm_copy_vc_bytesx;
+    asm_copy_vc_sourceoffset = (unsigned long) s->o + x3 * 2 + y3 * (long) s->lPitch;
+    asm_copy_vc_destoffset = (unsigned long) d->o + x2 * 2 + y2 * (long) d->lPitch;
     asm_copy_vc_rows = y4;
     if (asm_copy_vc_bytesx & 2) {
         asm_copy_vc_bytesx -= 2;
@@ -1561,13 +1429,13 @@ void imgt(surf *d, long x, long y, surf *s) {
     if (s == NULL) return;
     if (d == NULL) return;
     //offscreen?
-    dx = d->d.dwWidth;
+    dx = d->dwWidth;
     if (x >= dx) return;
-    dy = d->d.dwHeight;
+    dy = d->dwHeight;
     if (y >= dy) return;
-    sx = s->d.dwWidth;
+    sx = s->dwWidth;
     if (-x >= sx) return;
-    sy = s->d.dwHeight;
+    sy = s->dwHeight;
     if (-y >= sy) return;
     x2 = x; //starting dest x offset
     x3 = 0; //starting source x offset
@@ -1590,10 +1458,10 @@ void imgt(surf *d, long x, long y, surf *s) {
     }
     if ((y + sy) > dy) y4 -= y + sy - dy;
     asm_copy_vc_bytesx = x4 * 2;
-    asm_copy_vc_sourceskip = (long) s->d.lPitch - asm_copy_vc_bytesx;
-    asm_copy_vc_destskip = (long) d->d.lPitch - asm_copy_vc_bytesx;
-    asm_copy_vc_sourceoffset = (unsigned long) s->o + x3 * 2 + y3 * (long) s->d.lPitch;
-    asm_copy_vc_destoffset = (unsigned long) d->o + x2 * 2 + y2 * (long) d->d.lPitch;
+    asm_copy_vc_sourceskip = (long) s->lPitch - asm_copy_vc_bytesx;
+    asm_copy_vc_destskip = (long) d->lPitch - asm_copy_vc_bytesx;
+    asm_copy_vc_sourceoffset = (unsigned long) s->o + x3 * 2 + y3 * (long) s->lPitch;
+    asm_copy_vc_destoffset = (unsigned long) d->o + x2 * 2 + y2 * (long) d->lPitch;
     asm_copy_vc_rows = y4;
     if (asm_copy_vc_bytesx & 2) {
         asm_copy_vc_bytesx -= 2;
@@ -1664,13 +1532,13 @@ void img75t0(surf *d, long x, long y, surf *s) {
     if (s == NULL) return;
     if (d == NULL) return;
     //offscreen?
-    dx = d->d.dwWidth;
+    dx = d->dwWidth;
     if (x >= dx) return;
-    dy = d->d.dwHeight;
+    dy = d->dwHeight;
     if (y >= dy) return;
-    sx = s->d.dwWidth;
+    sx = s->dwWidth;
     if (-x >= sx) return;
-    sy = s->d.dwHeight;
+    sy = s->dwHeight;
     if (-y >= sy) return;
     x2 = x; //starting dest x offset
     x3 = 0; //starting source x offset
@@ -1693,10 +1561,10 @@ void img75t0(surf *d, long x, long y, surf *s) {
     }
     if ((y + sy) > dy) y4 -= y + sy - dy;
     asm_copy_vc_bytesx = x4 * 2;
-    asm_copy_vc_sourceskip = (long) s->d.lPitch - asm_copy_vc_bytesx;
-    asm_copy_vc_destskip = (long) d->d.lPitch - asm_copy_vc_bytesx;
-    asm_copy_vc_sourceoffset = (unsigned long) s->o + x3 * 2 + y3 * (long) s->d.lPitch;
-    asm_copy_vc_destoffset = (unsigned long) d->o + x2 * 2 + y2 * (long) d->d.lPitch;
+    asm_copy_vc_sourceskip = (long) s->lPitch - asm_copy_vc_bytesx;
+    asm_copy_vc_destskip = (long) d->lPitch - asm_copy_vc_bytesx;
+    asm_copy_vc_sourceoffset = (unsigned long) s->o + x3 * 2 + y3 * (long) s->lPitch;
+    asm_copy_vc_destoffset = (unsigned long) d->o + x2 * 2 + y2 * (long) d->lPitch;
     asm_copy_vc_rows = y4;
     if (asm_copy_vc_bytesx & 2) {
         asm_copy_vc_bytesx -= 2;
@@ -1807,13 +1675,13 @@ void img75t(surf *d, long x, long y, surf *s) {
     if (s == NULL) return;
     if (d == NULL) return;
     //offscreen?
-    dx = d->d.dwWidth;
+    dx = d->dwWidth;
     if (x >= dx) return;
-    dy = d->d.dwHeight;
+    dy = d->dwHeight;
     if (y >= dy) return;
-    sx = s->d.dwWidth;
+    sx = s->dwWidth;
     if (-x >= sx) return;
-    sy = s->d.dwHeight;
+    sy = s->dwHeight;
     if (-y >= sy) return;
     x2 = x; //starting dest x offset
     x3 = 0; //starting source x offset
@@ -1836,10 +1704,10 @@ void img75t(surf *d, long x, long y, surf *s) {
     }
     if ((y + sy) > dy) y4 -= y + sy - dy;
     asm_copy_vc_bytesx = x4 * 2;
-    asm_copy_vc_sourceskip = (long) s->d.lPitch - asm_copy_vc_bytesx;
-    asm_copy_vc_destskip = (long) d->d.lPitch - asm_copy_vc_bytesx;
-    asm_copy_vc_sourceoffset = (unsigned long) s->o + x3 * 2 + y3 * (long) s->d.lPitch;
-    asm_copy_vc_destoffset = (unsigned long) d->o + x2 * 2 + y2 * (long) d->d.lPitch;
+    asm_copy_vc_sourceskip = (long) s->lPitch - asm_copy_vc_bytesx;
+    asm_copy_vc_destskip = (long) d->lPitch - asm_copy_vc_bytesx;
+    asm_copy_vc_sourceoffset = (unsigned long) s->o + x3 * 2 + y3 * (long) s->lPitch;
+    asm_copy_vc_destoffset = (unsigned long) d->o + x2 * 2 + y2 * (long) d->lPitch;
     asm_copy_vc_rows = y4;
     if (asm_copy_vc_bytesx & 2) {
         asm_copy_vc_bytesx -= 2;
@@ -1906,3 +1774,4 @@ void img75t(surf *d, long x, long y, surf *s) {
             pop esi
             }
 } //img(...)
+
