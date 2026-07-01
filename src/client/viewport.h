@@ -167,7 +167,7 @@ namespace u6o {
 
         // Row stride (in pixels) of the `ls`/`ls_moon*` lighting buffers, kept
         // equal to the active `ps` DirectDraw back-buffer's actual pixel pitch
-        // (`ps->d.lPitch / 2`). DirectDraw may pad the surface row stride ABOVE
+        // (`ps->lPitch / 2`). DirectDraw may pad the surface row stride ABOVE
         // `backbufferW() * 2` bytes at widths that aren't aligned to its
         // internal granularity, so this can be larger than `backbufferW()`.
         // The lighting-compose passes walk `ls` and `ps->o` in lockstep, so they
@@ -207,7 +207,7 @@ namespace u6o {
         void set_active_backbuffer_dims(int w, int h);
 
         // RW-P2.3 internal: publish the active `ps` surface's pixel pitch
-        // (ps->d.lPitch / 2) so lightingStride()/lightingTotalBytes() and the
+        // (ps->lPitch / 2) so lightingStride()/lightingTotalBytes() and the
         // next lighting_alloc() use the surface's real row stride. Call BEFORE
         // lighting_alloc() in recreateBackbuffers()/setup_client.inc.
         void set_lighting_stride(int pixelStride);

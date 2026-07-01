@@ -265,8 +265,6 @@ struct surf {
 
 surf *surflist[16384];
 
-DDPIXELFORMAT DDRAW_display_pixelformat;
-
 
 // r999
 extern surf *uipanelsurf[UI_PANEL_MAX][UI_PANELWIDGET_MAX][UI_WIDGETSTATE_MAX];
@@ -287,16 +285,8 @@ extern int uipanelsidebar, uipanelactionbar1, uipanelactionbar2, uipanelactionta
 
 
 bool setupddraw() {
-    // MPRES-P4.2: DirectDraw removed. All surface allocation is now owned memory.
-    // Initialize pixel format globals (assumed 16-bit RGB565 for gameplay, 32-bit for UI).
-    ZeroMemory(&DDRAW_display_pixelformat, sizeof(DDRAW_display_pixelformat));
-    DDRAW_display_pixelformat.dwSize = sizeof(DDRAW_display_pixelformat);
-    DDRAW_display_pixelformat.dwFlags = DDPF_RGB;
-    DDRAW_display_pixelformat.dwRGBBitCount = 16;
-    DDRAW_display_pixelformat.dwRBitMask = 0xF800;
-    DDRAW_display_pixelformat.dwGBitMask = 0x07E0;
-    DDRAW_display_pixelformat.dwBBitMask = 0x001F;
-    
+    // MPRES-P4.2: DirectDraw removed. All surface allocation is now owned memory
+    // in a fixed RGB565 (16-bit) / RGB888 (32-bit) layout; no device to init.
     ZeroMemory(&surflist[0], sizeof(surf *) * 16384);
     return TRUE;
 }
@@ -352,7 +342,7 @@ surf *newsurf(long x, long y, long flags) {
 // failure cachedTextDC stays NULL and we return NULL — the same observable
 // outcome as the legacy code, which also ignored GetDC's return and operated on
 // whatever HDC came back.
-static HDC surf_text_dc_acquire(surf *s) {
+HDC surf_text_dc_acquire(surf *s) {
     // MPRES-P4.2: create a cached DIB-section DC for text rendering.
     // DIBs allow GDI to draw directly into our pixel buffer.
     if (s == NULL || s->o == NULL) return NULL;  // PRIMARY surface (no pixels)
@@ -1197,14 +1187,14 @@ void img0(surf *d, surf *s) {
     if (g_diag_blt_skip == 3) return;
 
     // MPRES-P4.1: software keyed copy — skip pixels equal to 0 (color key).
+    // MPRES-P4.2: DirectDraw removed; a missing owned buffer means no-op.
     if (d->o == NULL || s->o == NULL) {
-        d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT | DDBLT_KEYSRC, NULL);
         return;
     }
     const DWORD w = s->dwWidth, h = s->dwHeight;
-    // img0 only operates same-size surfaces; fall back to DD for any mismatch.
+    // img0 only operates on same-size surfaces; any mismatch is a no-op now
+    // that the DD Blt fallback is gone (no caller relies on it).
     if (w != d->dwWidth || h != d->dwHeight) {
-        d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT | DDBLT_KEYSRC, NULL);
         return;
     }
     const long sp = s->lPitch, dp = d->lPitch;

@@ -41,8 +41,8 @@ namespace u6o {
                 int w = panel->size_x;
                 int h = panel->size_y;
                 if (panel->graphic && w == 0 && h == 0) {
-                    w = panel->graphic->d.dwWidth;
-                    h = panel->graphic->d.dwHeight;
+                    w = panel->graphic->dwWidth;
+                    h = panel->graphic->dwHeight;
                 }
                 if (w <= 0) w = 1;
                 if (h <= 0) h = 1;
@@ -73,8 +73,8 @@ namespace u6o {
                 int w = 1;
                 int h = 1;
                 if (panel->graphic) {
-                    w = panel->graphic->d.dwWidth;
-                    h = panel->graphic->d.dwHeight;
+                    w = panel->graphic->dwWidth;
+                    h = panel->graphic->dwHeight;
                     if (w <= 0) w = 1;
                     if (h <= 0) h = 1;
                 }
@@ -99,8 +99,8 @@ namespace u6o {
                 int w = panel->size_x;
                 int h = panel->size_y;
                 if (panel->graphic && w == 0 && h == 0) {
-                    w = panel->graphic->d.dwWidth;
-                    h = panel->graphic->d.dwHeight;
+                    w = panel->graphic->dwWidth;
+                    h = panel->graphic->dwHeight;
                 }
                 if (w <= 0) w = 1;
                 if (h <= 0) h = 1;

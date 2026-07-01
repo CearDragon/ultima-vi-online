@@ -22,13 +22,13 @@ if
         txtfnt = fnt7;
         tagxy.cx = 0;
         tagxy.cy = 0;
-        surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+        surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
         {
             HGDIOBJ _old = SelectObject(taghdc, txtfnt);
             GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
             SelectObject(taghdc, _old);
         }
-        ps->s->ReleaseDC(taghdc);
+        
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 5 + 22;
         txtcol = rgb(0, 0, 0);
@@ -131,13 +131,13 @@ if
         txtfnt = fnt7;
         tagxy.cx = 0;
         tagxy.cy = 0;
-        surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+        surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
         {
             HGDIOBJ _old = SelectObject(taghdc, txtfnt);
             GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
             SelectObject(taghdc, _old);
         }
-        ps->s->ReleaseDC(taghdc);
+        
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 5 + 22;
         txtcol = rgb(0, 0, 0);
@@ -358,13 +358,13 @@ if
 
         tagxy.cx = 0;
         tagxy.cy = 0;
-        surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+        surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
         {
             HGDIOBJ _old = SelectObject(taghdc, txtfnt);
             GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
             SelectObject(taghdc, _old);
         }
-        ps->s->ReleaseDC(taghdc);
+        
         x2 = tagxy.cx / 2;
         txtcol = rgb(255, 255, 255);
         txtouts(ps, 512 + 64 - x2, 128 + 64 + 64 + 64 + 22, t);
@@ -378,13 +378,13 @@ if
             }
             tagxy.cx = 0;
             tagxy.cy = 0;
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                 SelectObject(taghdc, _old);
             }
-            ps->s->ReleaseDC(taghdc);
+            
             x2 = tagxy.cx / 2;
             txtcol = rgb(255, 255, 255);
             txtouts(ps, 512 + 64 - x2, 128 + 64 + 64 + 64 + 22 + 32, t);
@@ -494,13 +494,13 @@ if
         txtfnt = fnt7;
         tagxy.cx = 0;
         tagxy.cy = 0;
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                 SelectObject(taghdc, _old);
             }
-            ps->s->ReleaseDC(taghdc);
+            
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 6 + 22;
         txtcol = rgb(0, 0, 0);
@@ -593,11 +593,11 @@ if
                     MessageBox(NULL, t->d, "Ultima 6 Online", MB_OK);
                     goto intro_done;
                 }
-                if (customport->d.dwWidth != 56) {
+                if (customport->dwWidth != 56) {
                     MessageBox(NULL, "BMP must be 56 pixels wide", "Ultima 6 Online", MB_OK);
                     goto intro_done;
                 }
-                if (customport->d.dwHeight != 64) {
+                if (customport->dwHeight != 64) {
                     MessageBox(NULL, "BMP must be 64 pixels high", "Ultima 6 Online", MB_OK);
                     goto intro_done;
                 }
@@ -632,13 +632,13 @@ if
         txtfnt = fnt7;
         tagxy.cx = 0;
         tagxy.cy = 0;
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                 SelectObject(taghdc, _old);
             }
-            ps->s->ReleaseDC(taghdc);
+            
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 6 + 22;
         txtcol = rgb(0, 0, 0);

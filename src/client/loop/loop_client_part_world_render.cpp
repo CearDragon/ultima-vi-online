@@ -1702,7 +1702,7 @@ flash_skip:;
       if (i==1) cloudimg[i][1]=loadimage(".\\dr\\cld5.bmp",SURF_SYSMEM16);
       if (i==2) cloudimg[i][1]=loadimage(".\\dr\\cld6.bmp",SURF_SYSMEM16);
       if (i==3) cloudimg[i][1]=loadimage(".\\dr\\cld7.bmp",SURF_SYSMEM16);
-      x=cloudimg[i][1]->d.dwWidth; y=cloudimg[i][1]->d.dwHeight;
+      x=cloudimg[i][1]->dwWidth; y=cloudimg[i][1]->dwHeight;
       cloudimg[i][0]=newsurf(x,y,SURF_SYSMEM16);
       cloudimg[i][2]=newsurf(x,y,SURF_SYSMEM16);
       cloudimg[i][3]=newsurf(x,y,SURF_SYSMEM16);
@@ -1722,7 +1722,7 @@ flash_skip:;
     i2=1024;//max distance before removal
     x=tpx*32+512; y=tpy*32+384;//screen centre
     for (i=0;i<=31;i++){ if (cloudactive[i]){
-      x2=cloudx[i]+cloudimg[cloudtype[i]][0]->d.dwWidth/2; y2=cloudy[i]+cloudimg[cloudtype[i]][0]->d.dwHeight/2-cloudheight[i]/2;//approx. centre of cloud
+      x2=cloudx[i]+cloudimg[cloudtype[i]][0]->dwWidth/2; y2=cloudy[i]+cloudimg[cloudtype[i]][0]->dwHeight/2-cloudheight[i]/2;//approx. centre of cloud
       if ((abs(x2-x)>=i2)||(abs(y2-y)>=i2)){
         cloudactive[i]=FALSE;//remove cloud
       }//range>i2
@@ -1763,25 +1763,25 @@ cloudadded:
 
         i3=rnd*4;
         if (i3==0){
-          cloudx[i]=long(x+rnd*(1024+cloudimg[cloudtype[i]][0]->d.dwWidth)-cloudimg[cloudtype[i]][0]->d.dwWidth-512);
-          cloudy[i]=y-384-cloudimg[cloudtype[i]][0]->d.dwHeight;
+          cloudx[i]=long(x+rnd*(1024+cloudimg[cloudtype[i]][0]->dwWidth)-cloudimg[cloudtype[i]][0]->dwWidth-512);
+          cloudy[i]=y-384-cloudimg[cloudtype[i]][0]->dwHeight;
         }
         if (i3==1){
-          cloudx[i]=long(x+rnd*(1024+cloudimg[cloudtype[i]][0]->d.dwWidth)-cloudimg[cloudtype[i]][0]->d.dwWidth-512);
+          cloudx[i]=long(x+rnd*(1024+cloudimg[cloudtype[i]][0]->dwWidth)-cloudimg[cloudtype[i]][0]->dwWidth-512);
           cloudy[i]=y+384+cloudheight[i];
         }
         if (i3==2){
-          cloudx[i]=x-512-cloudimg[cloudtype[i]][0]->d.dwWidth;
-          cloudy[i]=long(y+rnd*(768+cloudimg[cloudtype[i]][0]->d.dwHeight+cloudheight[i])-384-cloudimg[cloudtype[i]][0]->d.dwHeight);
+          cloudx[i]=x-512-cloudimg[cloudtype[i]][0]->dwWidth;
+          cloudy[i]=long(y+rnd*(768+cloudimg[cloudtype[i]][0]->dwHeight+cloudheight[i])-384-cloudimg[cloudtype[i]][0]->dwHeight);
         }
         if (i3==3){
           cloudx[i]=x+512;
-          cloudy[i]=long(y+rnd*(768+cloudimg[cloudtype[i]][0]->d.dwHeight+cloudheight[i])-384-cloudimg[cloudtype[i]][0]->d.dwHeight);
+          cloudy[i]=long(y+rnd*(768+cloudimg[cloudtype[i]][0]->dwHeight+cloudheight[i])-384-cloudimg[cloudtype[i]][0]->dwHeight);
         }
 
         if (firstclouds){
-          cloudx[i]=long(x+rnd*(1024+cloudimg[cloudtype[i]][0]->d.dwWidth)-cloudimg[cloudtype[i]][0]->d.dwWidth-512);
-          cloudy[i]=long(y+rnd*(768+cloudimg[cloudtype[i]][0]->d.dwHeight+cloudheight[i])-384-cloudimg[cloudtype[i]][0]->d.dwHeight);
+          cloudx[i]=long(x+rnd*(1024+cloudimg[cloudtype[i]][0]->dwWidth)-cloudimg[cloudtype[i]][0]->dwWidth-512);
+          cloudy[i]=long(y+rnd*(768+cloudimg[cloudtype[i]][0]->dwHeight+cloudheight[i])-384-cloudimg[cloudtype[i]][0]->dwHeight);
         }
 
 
@@ -1999,13 +1999,13 @@ asm_lightshow2:
         txtcol=idlst_namecolour[osi[z]];
 osdisplay_ktar:
         tagxy.cx=0; tagxy.cy=0;
-        surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+        surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
         {
             HGDIOBJ _old = SelectObject(taghdc, txtfnt);
             GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
             SelectObject(taghdc, _old);
         }
-        ps->s->ReleaseDC(taghdc);
+        
         x-=tagxy.cx/2;
         x2=txtcol;
         txtcol=rgb(0,0,0);
@@ -2603,13 +2603,13 @@ pw_jmp:
             wraptext_firstline=1;
             //check if data exceeds 1 line inc port! 16 across
 wraptext_recheck:
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             {
                 HGDIOBJ _old = SelectObject(taghdc, fnt1); // not valid for garg text or runes!
                 tagxy.cx = 0; tagxy.cy = 0; GetTextExtentPoint32(taghdc, t4->d, t4->l, &tagxy); // get width of t4
                 SelectObject(taghdc, _old);
             }
-            ps->s->ReleaseDC(taghdc);
+            
             if (t6->l&&wraptext_firstline) tagxy.cx-=64;
             if ((64+tagxy.cx)>=1024){//original string is more than 1024 chars
               txtset(t7,"");//clear t7
@@ -2619,13 +2619,13 @@ wraptext_recheck:
 movet4intot7:
               txtaddchar(t7,t4->d2[0]); txtright(t4,t4->l-1);
 
-              surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+              surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
               {
                   HGDIOBJ _old = SelectObject(taghdc, fnt1); // not valid for garg text or runes!
                   tagxy.cx = 0; tagxy.cy = 0; GetTextExtentPoint32(taghdc, t7->d, t7->l, &tagxy);
                   SelectObject(taghdc, _old);
               }
-              ps->s->ReleaseDC(taghdc);
+              
               if (t6->l&&wraptext_firstline) tagxy.cx-=64;
               if ((64+tagxy.cx)<1024) goto movet4intot7;
 
@@ -2799,13 +2799,13 @@ text_continue_con:
                 if (txtlog_pm) z3=rgb(255,64,128);//private message
                 if (txtlog_vm) z3=rgb(64,224,64);//voice message
                 tagxy.cx=0; tagxy.cy=0;
-                surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+                surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
                 {
                     HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                     GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                     SelectObject(taghdc, _old);
                 }
-                ps->s->ReleaseDC(taghdc);
+                
 
 
                 lastfont=txtfnt; if (lastfont==fnt1) txtfnt=fnt1naa;
@@ -2841,13 +2841,13 @@ text_continue_con:
                     txtcol=rgb(255,64,32); txtout(con_frm_img->graphic,x+1,y+1,t);
 
                     tagxy.cx=0; tagxy.cy=0;
-                    surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+                    surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
                     {
                         HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                         GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                         SelectObject(taghdc, _old);
                     }
-                    ps->s->ReleaseDC(taghdc);
+                    
                     x+=tagxy.cx;
                     if (z){ txtright(t3,t3->l-z+1); txtset(t,t3); goto text_continue_con; }
                     goto txtconlog_done;
@@ -2920,13 +2920,13 @@ text_continue_con:
                     txtcol=z2; txtout(con_frm_img->graphic,x+1,y+1,t);
 
                     tagxy.cx=0; tagxy.cy=0;
-                    surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+                    surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
                     {
                         HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                         GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                         SelectObject(taghdc, _old);
                     }
-                    ps->s->ReleaseDC(taghdc);
+                    
                     x+=tagxy.cx;
 
 
@@ -3015,13 +3015,13 @@ gargedit:
             }
             //get text dimentions (using t2)
             tagxy.cx=0; tagxy.cy=0;
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t2->d, t2->l, &tagxy);
                 SelectObject(taghdc, _old);
             }
-            ps->s->ReleaseDC(taghdc);
+            
             x=(sfx[i3].x-tpx)*32-16;
             y=(sfx[i3].y-tpy)*32-8;
             if ((sfx[i3].x==2047)&&(sfx[i3].y==1023)){
@@ -3082,13 +3082,13 @@ text_continue:
             if (txt_pm) z3=rgb(255,64,128);//private message
             if (txt_vm) z3=rgb(64,224,64);//voice message
             tagxy.cx=0; tagxy.cy=0;
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                 SelectObject(taghdc, _old);
             }
-            ps->s->ReleaseDC(taghdc);
+            
 
 
 
@@ -3126,13 +3126,13 @@ text_continue:
 
                 txtcol=rgb(255,64,32); txtout(ps,x+1,y+1,t);
                 tagxy.cx=0; tagxy.cy=0;
-                surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+                surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
                 {
                     HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                     GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                     SelectObject(taghdc, _old);
                 }
-                ps->s->ReleaseDC(taghdc);
+                
                 x+=tagxy.cx;
                 if (z){ txtright(t3,t3->l-z+1); txtset(t,t3); goto text_continue; }
                 goto txtsf_done;
@@ -3206,10 +3206,10 @@ text_continue:
 
                 txtcol=z2; txtout(ps,x+1,y+1,t);
                 tagxy.cx=0; tagxy.cy=0;
-                surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+                surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
                 SelectObject(taghdc,txtfnt);
                 GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy);
-                ps->s->ReleaseDC(taghdc);
+                
                 x+=tagxy.cx;
 
 

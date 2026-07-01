@@ -72,7 +72,10 @@ DWORD getcol(DWORD c);
 
 extern DWORD txtcol;
 extern HFONT txtfnt;
-extern DDPIXELFORMAT DDRAW_display_pixelformat;
+// MPRES-P4.2: acquire the surface's cached DIB-section DC (over `->o`) for GDI
+// text/measurement. Lazily created; owned by the surface until
+// surf_text_dc_release(). Returns NULL for pixel-less surfaces (`->o == NULL`).
+HDC surf_text_dc_acquire(surf *s);
 
 void purgesurfaces();
 

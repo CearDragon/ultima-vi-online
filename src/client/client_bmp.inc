@@ -270,7 +270,7 @@ intro_gypsy=loadimage(".\\dr\\gypsy.bmp",SURF_SYSMEM16);
 intro_gypsy2=loadimage(".\\dr\\gypsy2.bmp",SURF_SYSMEM16);
 
 intro_vial=loadimage(".\\dr\\vial.bmp",SURF_SYSMEM16);
-intro_svial=newsurf(intro_vial->d.dwWidth,intro_vial->d.dwHeight,SURF_SYSMEM16);
+intro_svial=newsurf(intro_vial->dwWidth,intro_vial->dwHeight,SURF_SYSMEM16);
 
 intro_bigvial=loadimage(".\\dr\\bigvial.bmp",SURF_SYSMEM16);
 
@@ -278,9 +278,9 @@ intro_hpl0=loadimage(".\\dr\\hpl0.bmp",SURF_SYSMEM16);
 intro_hpl2=loadimage(".\\dr\\hpl2.bmp",SURF_SYSMEM16);
 intro_hpl3=loadimage(".\\dr\\hpl3.bmp",SURF_SYSMEM16);
 
-intro_hps0=newsurf(intro_hpl0->d.dwWidth,intro_hpl0->d.dwHeight,SURF_SYSMEM16);
-intro_hps2=newsurf(intro_hpl2->d.dwWidth,intro_hpl2->d.dwHeight,SURF_SYSMEM16);
-intro_hps3=newsurf(intro_hpl3->d.dwWidth,intro_hpl3->d.dwHeight,SURF_SYSMEM16);
+intro_hps0=newsurf(intro_hpl0->dwWidth,intro_hpl0->dwHeight,SURF_SYSMEM16);
+intro_hps2=newsurf(intro_hpl2->dwWidth,intro_hpl2->dwHeight,SURF_SYSMEM16);
+intro_hps3=newsurf(intro_hpl3->dwWidth,intro_hpl3->dwHeight,SURF_SYSMEM16);
 
 intro_hpr0=loadimage(".\\dr\\hpr0.bmp",SURF_SYSMEM16);
 intro_hpr2=loadimage(".\\dr\\hpr2.bmp",SURF_SYSMEM16);
@@ -415,5 +415,5 @@ volcontrol_tab3=loadimage(".\\dr\\voltab3.bmp",SURF_SYSMEM16);
 
 viewnpc=loadimage(".\\dr\\viewnpc.bmp",SURF_SYSMEM16);
 viewnpc2=loadimage(".\\dr\\viewnpc2.bmp",SURF_SYSMEM16);
-viewnpc_temp=newsurf(viewnpc->d.dwWidth,viewnpc->d.dwHeight,SURF_SYSMEM16);
-viewnpc2_temp=newsurf(viewnpc2->d.dwWidth,viewnpc2->d.dwHeight,SURF_SYSMEM16);
+viewnpc_temp=newsurf(viewnpc->dwWidth,viewnpc->dwHeight,SURF_SYSMEM16);
+viewnpc2_temp=newsurf(viewnpc2->dwWidth,viewnpc2->dwHeight,SURF_SYSMEM16);

@@ -47,14 +47,14 @@ namespace u6o {
 
             // RW-P2.3: row stride (in PIXELS) of the ls/ls_moon* buffers and the
             // composited `ps` surface. This is the surface's actual pixel pitch
-            // (ps->d.lPitch / 2), which DirectDraw may pad ABOVE the world width
+            // (ps->lPitch / 2), which DirectDraw may pad ABOVE the world width
             // (backbufferW()) at widths that aren't aligned to its internal
             // granularity. Keeping the lighting buffers and the linear-walk
             // compose passes on the surface's real pitch — rather than newW — is
             // what stops the lit overlay from skewing diagonally (top-right →
             // bottom-left) at intermediate window sizes. Seeded to the legacy
             // 1024 floor; recreateBackbuffers()/setup overwrite it via
-            // set_lighting_stride(ps->d.lPitch / 2) before lighting_alloc().
+            // set_lighting_stride(ps->lPitch / 2) before lighting_alloc().
             int g_lighting_stride = kBackbufferLegacyW;
 
             // RW-P2.2: active back-buffer dimensions. Initialized to the legacy
@@ -158,7 +158,7 @@ namespace u6o {
         // buffers and every linear-walk compose pass (lightshow0 asm, moon
         // memcpy, stormcloak, ps_fakebuffer) advance in lockstep with `ps->o`.
         // Called from recreateBackbuffers() and setup_client.inc with
-        // ps->d.lPitch / 2 BEFORE lighting_alloc(). Must be > 0; ignored
+        // ps->lPitch / 2 BEFORE lighting_alloc(). Must be > 0; ignored
         // otherwise so a bad surface report can't zero the stride.
         void set_lighting_stride(int pixelStride) {
             if (pixelStride > 0) g_lighting_stride = pixelStride;
@@ -187,7 +187,7 @@ namespace u6o {
             // ls_moon* used `w` as their stride while the compose passes walk
             // ps at lPitch, the lit overlay drifts one (lPitch - w*2) per row →
             // the diagonal skew. set_lighting_stride() seeds g_lighting_stride
-            // from ps->d.lPitch/2 before we get here. `w` is still validated
+            // from ps->lPitch/2 before we get here. `w` is still validated
             // above but no longer drives the row stride.
             const int stride = (g_lighting_stride > 0) ? g_lighting_stride : w;
             if (g_lighting_w == stride && g_lighting_h == h && ls && ls_moon1 && ls_moon2 && ls_moon3 && ls_moon4) {

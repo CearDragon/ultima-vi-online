@@ -17,7 +17,7 @@ if
             x++; //count party members
         }
     }
-    if (qkstf->graphic->d.dwHeight != (x * 64 + 32)) {
+    if (qkstf->graphic->dwHeight != (x * 64 + 32)) {
         free(qkstf->graphic);
         qkstf->graphic = newsurf(128, x * 64 + 32, SURF_SYSMEM16); //adjust frame size
     }
@@ -559,7 +559,7 @@ i
     x=pmf->offset_x; y=pmf->offset_y;
     //get dimentions of frame as x2,y2
     if (pmf->graphic&&(pmf->size_x==0)&&(pmf->size_y==0)){
-      x2=pmf->graphic->d.dwWidth; y2=pmf->graphic->d.dwHeight;
+      x2=pmf->graphic->dwWidth; y2=pmf->graphic->dwHeight;
     }else{
       x2=pmf->size_x; y2=pmf->size_y;
     }
@@ -774,19 +774,19 @@ displayobj:
         if (tinp==inpf2){
           if (t->l>2){
             tagxy.cx=0; tagxy.cy=0;
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             SelectObject(taghdc,txtfnt);
             GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy);
-            ps->s->ReleaseDC(taghdc);
+            
             if (pn->offset_x+tinp->offset_x+tagxy.cx>=1024){
 inpf2crop:
               txtset(t2,t); txtset(t,"..."); txtadd(t,t2);
               if (t->l>=6){
                 tagxy.cx=0; tagxy.cy=0;
-                surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+                surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
                 SelectObject(taghdc,txtfnt);
                 GetTextExtentPoint32(taghdc,t->d,t->l,&tagxy);
-                ps->s->ReleaseDC(taghdc);
+                
                 if (pn->offset_x+tinp->offset_x+tagxy.cx>=1024){
                   txtright(t,t->l-4);
                   goto inpf2crop;
@@ -1105,12 +1105,12 @@ if
 (lookdisplay &&looktext) {
     static SIZE looksz;
     long lookw, lookh, lookbx, lookby, lookmaxx, lookmaxy;
-    surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+    surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
     SelectObject(taghdc, fnt1naa);
     looksz.cx = 0;
     looksz.cy = 0;
     GetTextExtentPoint32(taghdc, looktext->d, looktext->l, &looksz);
-    ps->s->ReleaseDC(taghdc);
+    
     lookw = looksz.cx;
     lookh = (looksz.cy > 0) ? looksz.cy : 24;
     // Clamp so the whole string plus its 2px outline stays inside the live

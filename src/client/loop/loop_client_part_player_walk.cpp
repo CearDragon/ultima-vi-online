@@ -373,8 +373,8 @@ skiplevnext:
           txtcol=rgb(255,255,255);
 
           //spellcircle
-          x=(32-spellcircle[i3]->d.dwHeight)>>1;
-          img0(party_spellbook_frame[i]->graphic,115-spellcircle[i3]->d.dwWidth,x,spellcircle[i3]);
+          x=(32-spellcircle[i3]->dwHeight)>>1;
+          img0(party_spellbook_frame[i]->graphic,115-spellcircle[i3]->dwWidth,x,spellcircle[i3]);
 
           txtset(t,"LEV ?");
           t->d2[4]=49+i3;
@@ -429,8 +429,8 @@ skiplevnext:
             if (spell[i][(i3<<4)+i2]){ //valid
 
               if (spellicon[(i3<<4)+i2]){
-                if (i5==0) img0(party_spellbook_frame[i]->graphic,112-20-spellicon[(i3<<4)+i2]->d.dwWidth,28+i4*24+24-spellicon[(i3<<4)+i2]->d.dwHeight+5,spellicon[(i3<<4)+i2]);
-                if (i5) img0(party_spellbook_frame[i]->graphic,225-20-spellicon[(i3<<4)+i2]->d.dwWidth,28+i4*24+24-spellicon[(i3<<4)+i2]->d.dwHeight+5,spellicon[(i3<<4)+i2]);
+                if (i5==0) img0(party_spellbook_frame[i]->graphic,112-20-spellicon[(i3<<4)+i2]->dwWidth,28+i4*24+24-spellicon[(i3<<4)+i2]->dwHeight+5,spellicon[(i3<<4)+i2]);
+                if (i5) img0(party_spellbook_frame[i]->graphic,225-20-spellicon[(i3<<4)+i2]->dwWidth,28+i4*24+24-spellicon[(i3<<4)+i2]->dwHeight+5,spellicon[(i3<<4)+i2]);
               }//icon
 
               txtfnt=fnt4;

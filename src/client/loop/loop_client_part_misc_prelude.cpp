@@ -52,8 +52,8 @@ if
 			//		if ((omx3 >= resxn1m + 3) && (omy3 <= 256))
 
 			// not true anymore --> omx3 and omy3 does not need to be scaled because the (new) top-right inventory window is not scaled at all (it is always the 1024 res scaled-size; i.e. not scaled)
-			//if ((panelmx[0] >= party_frame_new[i]->offset_x) && (panelmx[0] <= party_frame_new[i]->offset_x + pmf->graphic->d.dwWidth)
-				//&& (panelmy[0] >= party_frame_new[i]->offset_y) && (panelmy[0] <= party_frame_new[i]->offset_y + pmf->graphic->d.dwHeight))
+			//if ((panelmx[0] >= party_frame_new[i]->offset_x) && (panelmx[0] <= party_frame_new[i]->offset_x + pmf->graphic->dwWidth)
+				//&& (panelmy[0] >= party_frame_new[i]->offset_y) && (panelmy[0] <= party_frame_new[i]->offset_y + pmf->graphic->dwHeight))
 			if (hituipaneli == uipanelpartymember0)
 				party_frame_new[i]->mouse_over = TRUE;
 			//party_frame[0] = TRUE;

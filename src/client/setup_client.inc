@@ -57,7 +57,7 @@ ps=newsurf(resxo,resyo,SURF_SYSMEM16);
 // 1024x768 this is a no-op (pitch == 2048); it only matters if the startup
 // surface is padded or larger. Must precede the moon-buffer populate below.
 if (ps) {
-    set_lighting_stride((int)(ps->d.lPitch / 2));
+    set_lighting_stride((int)(ps->lPitch / 2));
     if (!lighting_alloc(backbufferW(), backbufferH())) {
         MessageBox(NULL,"Failed to allocate lighting buffers","Ultima 6 Online",MB_OK);
         exit(0);
@@ -201,7 +201,7 @@ send(u6osocket2,(char*)&U6O_SIGNATURE,4,0);
 scrlog("U6O network signature sent to host");
 
 intro_ultimavi=loadimage(".\\dr\\ultimavi.bmp",SURF_SYSMEM16);
-intro_ultimavi2=newsurf(intro_ultimavi->d.dwWidth,intro_ultimavi->d.dwHeight,SURF_SYSMEM16);
+intro_ultimavi2=newsurf(intro_ultimavi->dwWidth,intro_ultimavi->dwHeight,SURF_SYSMEM16);
 cls(intro_ultimavi2,(2<<11)+(27<<5)+18);
 scrlog("Ultima6 logo loaded");
 

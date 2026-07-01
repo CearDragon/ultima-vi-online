@@ -107,26 +107,26 @@ txt *GETINPUT_current();
 void GETINPUT_stop();
 
 // RW-P2.3-asm: All five sprite-blit inline functions have been rewritten
-// as C++ loops that read the destination row stride from d->d.lPitch at
+// as C++ loops that read the destination row stride from d->lPitch at
 // runtime.  The old implementations used `y*2048` and the included
 // fast*.asm bodies hard-coded `+2048` between destination rows, which
-// assumed ps->d.lPitch == 2048 (i.e. a 1024-pixel-wide back-buffer).
+// assumed ps->lPitch == 2048 (i.e. a 1024-pixel-wide back-buffer).
 // The new C++ versions work for any back-buffer width.
 //
 // Source sprite layouts (unchanged from the original asm bodies):
-//   g32 / g32z : bt8 sprite sheet, HIRES mode, source pitch = s->d.lPitch
+//   g32 / g32z : bt8 sprite sheet, HIRES mode, source pitch = s->lPitch
 //                (512 bytes = 256 px wide), 32 source rows → 32 dest rows 1:1.
-//   sf32 / sf32z: sfx8 sprite sheet, source pitch = s->d.lPitch
+//   sf32 / sf32z: sfx8 sprite sheet, source pitch = s->lPitch
 //                (4096 bytes = 2048 px wide), 16 source rows → 32 dest rows
 //                (2× vertical pixel-doubling).
 //   im32z      : spr8/spr84 sequential sprites, source stride = 64 bytes
 //                (32 px wide at 2 bpp), 32 source rows → 32 dest rows 1:1.
 
-// g32 — opaque basetile blit (OPTION_HIRES: source stride = s->d.lPitch,
+// g32 — opaque basetile blit (OPTION_HIRES: source stride = s->lPitch,
 //        32 source rows → 32 dest rows, 1:1, no transparency).
 inline void g32(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
-    const unsigned long srcPitch = (unsigned long) s->d.lPitch;
-    const unsigned long dstPitch = (unsigned long) d->d.lPitch;
+    const unsigned long srcPitch = (unsigned long) s->lPitch;
+    const unsigned long dstPitch = (unsigned long) d->lPitch;
     const unsigned char *src = (const unsigned char *) s->o
                                + ((i / 8) * srcPitch * 32) + ((i & 7) * 64);
     unsigned char *dst = (unsigned char *) d->o + x * 2 + y * dstPitch;
@@ -142,8 +142,8 @@ inline void g32(surf *d, unsigned long x, unsigned long y, surf *s, unsigned lon
 // g32z — transparent dirt-overlay blit (same source layout as g32,
 //         skips pixels where colour == 0).
 inline void g32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
-    const unsigned long srcPitch = (unsigned long) s->d.lPitch;
-    const unsigned long dstPitch = (unsigned long) d->d.lPitch;
+    const unsigned long srcPitch = (unsigned long) s->lPitch;
+    const unsigned long dstPitch = (unsigned long) d->lPitch;
     const unsigned char *src = (const unsigned char *) s->o
                                + ((i / 8) * srcPitch * 32) + ((i & 7) * 64);
     unsigned char *dst = (unsigned char *) d->o + x * 2 + y * dstPitch;
@@ -163,8 +163,8 @@ inline void g32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned lo
 //         Source: 16 rows at 2*srcPitch intervals → 32 dest rows (each source
 //         row written to two consecutive dest rows).
 inline void sf32(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
-    const unsigned long srcPitch = (unsigned long) s->d.lPitch;
-    const unsigned long dstPitch = (unsigned long) d->d.lPitch;
+    const unsigned long srcPitch = (unsigned long) s->lPitch;
+    const unsigned long dstPitch = (unsigned long) d->lPitch;
     const unsigned char *src = (const unsigned char *) s->o
                                + ((i / 32) * srcPitch * 32) + ((i & 31) * 64);
     unsigned char *dst = (unsigned char *) d->o + x * 2 + y * dstPitch;
@@ -185,8 +185,8 @@ inline void sf32(surf *d, unsigned long x, unsigned long y, surf *s, unsigned lo
 // sf32z — transparent sprite blit from sfx8 with 2× vertical pixel-doubling.
 //          Same layout as sf32; skips pixels where colour == 0.
 inline void sf32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
-    const unsigned long srcPitch = (unsigned long) s->d.lPitch;
-    const unsigned long dstPitch = (unsigned long) d->d.lPitch;
+    const unsigned long srcPitch = (unsigned long) s->lPitch;
+    const unsigned long dstPitch = (unsigned long) d->lPitch;
     const unsigned char *src = (const unsigned char *) s->o
                                + ((i / 32) * srcPitch * 32) + ((i & 31) * 64);
     unsigned char *dst = (unsigned char *) d->o + x * 2 + y * dstPitch;
@@ -210,7 +210,7 @@ inline void sf32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned l
 //          Source: sprite i at byte offset i*2048, stride 64 bytes (32 px × 2 bpp),
 //          32 source rows → 32 dest rows 1:1.  Skips pixels where colour == 0.
 inline void im32z(surf *d, unsigned long x, unsigned long y, surf *s, unsigned long i) {
-    const unsigned long dstPitch = (unsigned long) d->d.lPitch;
+    const unsigned long dstPitch = (unsigned long) d->lPitch;
     const unsigned char *src = (const unsigned char *) s->o + i * 64 * 32;
     unsigned char *dst = (unsigned char *) d->o + x * 2 + y * dstPitch;
     for (int row = 0; row < 32; row++) {

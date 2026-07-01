@@ -26,7 +26,7 @@ namespace client {
 ///
 /// Lazily creates the D3D11 device + DXGI swap chain on first call (for the
 /// global `hWnd`), (re)creates a dynamic `DXGI_FORMAT_B5G6R5_UNORM` texture sized
-/// to the source surface, uploads `s->o` honoring `s->d.lPitch` per row, draws it
+/// to the source surface, uploads `s->o` honoring `s->lPitch` per row, draws it
 /// point-sampled and letterboxed (aspect-preserving, never-upscale, centered with
 /// black bars), and Presents with vsync. Publishes `blit_offx`/`blit_offy`/
 /// `blit_scale` (and `clientW`/`clientH`) identically to `blit_letterbox`, so

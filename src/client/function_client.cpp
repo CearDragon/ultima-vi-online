@@ -365,7 +365,7 @@ void LIGHTnew(unsigned short x, unsigned short y, unsigned long light_data_offse
 //
 // RW-P2.3-asm (2026-05-21) — HORIZONTAL GROWTH UNBLOCKED
 // sf32, sf32z, im32z (and g32, g32z) have been rewritten in function_client.h
-// as C++ loops that read d->d.lPitch at runtime, replacing the hard-rolled
+// as C++ loops that read d->lPitch at runtime, replacing the hard-rolled
 // inline-ASM bodies (fast3/4/5.asm etc.) that hard-coded +2048 between dest
 // rows. The newW > kBackbufferLegacyW clamp is now removed; the back-buffer
 // can grow horizontally up to kBackbufferMaxW.
@@ -439,11 +439,11 @@ namespace u6o {
 #ifdef _DEBUG
             {
                 long expectedPitch = (long) newW * 2;
-                if ((long) ps->d.lPitch != expectedPitch) {
+                if ((long) ps->lPitch != expectedPitch) {
                     char dbg[160];
                     wsprintfA(dbg,
                               "[u6o] recreateBackbuffers: dwWidth=%lu lPitch=%ld (expected %ld)\n",
-                              (unsigned long) ps->d.dwWidth, (long) ps->d.lPitch, expectedPitch);
+                              (unsigned long) ps->dwWidth, (long) ps->lPitch, expectedPitch);
                     OutputDebugStringA(dbg);
                 }
             }
@@ -451,7 +451,7 @@ namespace u6o {
 
             // RW-P2.3: adopt the surface's ACTUAL pixel pitch as the lighting
             // stride before (re)allocating the lighting buffers. DirectDraw pads
-            // `ps->d.lPitch` above `newW * 2` at widths that aren't aligned to
+            // `ps->lPitch` above `newW * 2` at widths that aren't aligned to
             // its granularity (i.e. most intermediate window sizes between the
             // legacy 1024 and a maximized/aligned width). The lighting-compose
             // passes (lightshow0 asm, moon memcpy, stormcloak, ps_fakebuffer)
@@ -461,7 +461,7 @@ namespace u6o {
             // made lPitch/2 the canonical *world* width broke the tile/wire
             // frame; decoupling the lighting stride from backbufferW() is the
             // fix. Set BEFORE lighting_alloc() so it sizes/strides to match.
-            set_lighting_stride((int) (ps->d.lPitch / 2));
+            set_lighting_stride((int) (ps->lPitch / 2));
 
             // Re-allocate the lighting buffers at the surface pitch so the
             // linear-walk inline asm in the lighting compose pass at
@@ -1748,7 +1748,7 @@ void STATUSMESSadd(txt *t) {
     // event-driven GetDC. The per-frame text path (txtout/txtouts) may leave a
     // cached DC held on `ps`; DirectDraw would fail this GetDC while one is held.
     surf_text_dc_release(ps);
-    ps->s->GetDC(&taghdc);
+    taghdc = surf_text_dc_acquire(ps);
     {
         HGDIOBJ _old_tag_font = SelectObject(taghdc, fnt1);
     if (STATUSMESSpending->l) txtaddchar(STATUSMESSpending, 13);
@@ -1768,7 +1768,7 @@ void STATUSMESSadd(txt *t) {
     } //i
         SelectObject(taghdc, _old_tag_font);
     }
-    ps->s->ReleaseDC(taghdc);
+    
 }
 
 void STATUSMESSadd(const char *t) {
@@ -1777,7 +1777,7 @@ void STATUSMESSadd(const char *t) {
     // MM-P9.5: release any cached on-surface text DC on `ps` before this GetDC
     // (see the txt* overload above for the rationale).
     surf_text_dc_release(ps);
-    ps->s->GetDC(&taghdc);
+    taghdc = surf_text_dc_acquire(ps);
     {
         HGDIOBJ _old_tag_font = SelectObject(taghdc, fnt1);
     if (STATUSMESSpending->l) txtaddchar(STATUSMESSpending, 13);
@@ -1797,7 +1797,7 @@ void STATUSMESSadd(const char *t) {
     } //i
         SelectObject(taghdc, _old_tag_font);
     }
-    ps->s->ReleaseDC(taghdc);
+    
 }
 
 
@@ -1855,7 +1855,7 @@ int STATUSMESSwrapline(txt *src, long maxwidth, txt **out, int maxlines) {
     // MM-P9.5: release any cached on-surface text DC on `ps` before this GetDC
     // (see STATUSMESSadd above for the rationale).
     surf_text_dc_release(ps);
-    ps->s->GetDC(&hdc);
+    hdc = surf_text_dc_acquire(ps);
     {
         HGDIOBJ _old_hdc_font = SelectObject(hdc, fnt1naa);
 
@@ -1890,7 +1890,7 @@ int STATUSMESSwrapline(txt *src, long maxwidth, txt **out, int maxlines) {
 
         SelectObject(hdc, _old_hdc_font);
     }
-    ps->s->ReleaseDC(hdc);
+    
 
     if (n == 0) { txtset(out[0], ""); n = 1; }
     return n;
@@ -2148,8 +2148,8 @@ void placeFloatingPanelFirstShow(FRAME *f, int homeX, int homeY, int shown) {
     if (f == NULL || f->graphic == NULL) return;
     const int bw = backbufferW();
     const int bh = backbufferH();
-    const int w = (int) f->graphic->d.dwWidth;
-    const int h = (int) f->graphic->d.dwHeight;
+    const int w = (int) f->graphic->dwWidth;
+    const int h = (int) f->graphic->dwHeight;
     // Clamp the home position so the whole panel fits inside the current back
     // buffer (a position restored from cltset2 may have been saved while the
     // window was larger). Keep the top-left corner on screen.

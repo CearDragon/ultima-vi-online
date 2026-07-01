@@ -122,8 +122,8 @@ public:
         }
 
         // (3) Letterbox math — MUST match blit_letterbox exactly.
-        const long srcW = static_cast<long>(s->d.dwWidth);
-        const long srcH = static_cast<long>(s->d.dwHeight);
+        const long srcW = static_cast<long>(s->dwWidth);
+        const long srcH = static_cast<long>(s->dwHeight);
         long cW = cWraw < 1 ? 1 : cWraw;
         long cH = cHraw < 1 ? 1 : cHraw;
         double sx = static_cast<double>(cW) / static_cast<double>(srcW);
@@ -155,7 +155,7 @@ public:
             const uint8_t* srcRow = reinterpret_cast<const uint8_t*>(s->o);
             uint8_t* dstRow = static_cast<uint8_t*>(mapped.pData);
             const size_t rowBytes = static_cast<size_t>(srcW) * 2u; // RGB565
-            const long srcPitch = static_cast<long>(s->d.lPitch);
+            const long srcPitch = static_cast<long>(s->lPitch);
             for (long y = 0; y < srcH; ++y) {
                 memcpy(dstRow, srcRow, rowBytes);
                 srcRow += srcPitch;
