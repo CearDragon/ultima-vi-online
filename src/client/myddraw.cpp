@@ -382,6 +382,24 @@ ts->d.ddpfPixelFormat.dwGBitMask=0xFFFFFFFF;
 ts->d.ddpfPixelFormat.dwBBitMask=0x0;
 }
 */
+    // MPRES-P3.2: for sysmem surfaces (SURF_SYSMEM / SURF_SYSMEM16), own the
+    // pixel allocation. DDSD_LPSURFACE + DDSD_PITCH hands our buffer to DirectDraw
+    // so that Blt, GetDC, SetColorKey, and cached-text-DC (MM-P9.5) all continue
+    // to work unchanged — DD wraps our pointer but does NOT allocate or free it.
+    // DWORD-aligned pitch preserves the lPitch/2 lighting-stride invariant
+    // (RW-P2.3) because DD stores our pitch as-is and returns it from Lock().
+    // On free(surf*), s->s->Release() drops the DD wrapper; ownedPixels.reset()
+    // then frees our allocation — DD never double-frees DDSD_LPSURFACE memory.
+    if ((flags & 1) || (flags & 64)) {
+        const long bpp   = (flags & 64) ? 2L : 4L;     // SYSMEM16 = RGB565, SYSMEM = XRGB8888
+        const long pitch = (x * bpp + 3L) & ~3L;       // DWORD-aligned row stride (bytes)
+        const size_t sz  = static_cast<size_t>(pitch) * static_cast<size_t>(y);
+        ts->ownedPixels = std::make_unique<unsigned char[]>(sz > 0 ? sz : 1);
+        ts->d.dwFlags  |= DDSD_LPSURFACE | DDSD_PITCH;
+        ts->d.lpSurface = ts->ownedPixels.get();
+        ts->d.lPitch    = pitch;
+        ts->o           = reinterpret_cast<unsigned long *>(ts->ownedPixels.get());
+    }
     if (dd->CreateSurface(&ts->d, &ts->s, NULL) != DD_OK) {
         if (ts->d.ddsCaps.dwCaps & DDSCAPS_VIDEOMEMORY) {
             ts->d.ddsCaps.dwCaps ^= DDSCAPS_VIDEOMEMORY;
