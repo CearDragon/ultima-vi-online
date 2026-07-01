@@ -842,33 +842,99 @@ return;
 */
 
 void img(surf *d, surf *s) {
-    if (s == NULL) return;
-    if (d == NULL) return;
-    // MM-P9.5: a DirectDraw Blt touches BOTH surfaces, so release any cached
-    // text DC on the source and the destination before the Blt.
+    if (s == NULL || d == NULL) return;
+    // MPRES-P4.1: text DCs are no longer needed for software copies, but we
+    // still release them for surfaces that might still use DD (PRIMARY, etc.).
     surf_text_dc_release(d);
     surf_text_dc_release(s);
     // MM-P9.6: count + optional skip (plain-copy category).
     g_blt_copy_n++;
     if (g_diag_blt_skip == 2) return;
-    d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT, NULL);
+
+    // MPRES-P4.1: software copy via owned pixel buffer.
+    // Falls back to DD Blt only for surfaces without an owned buffer (e.g. PRIMARY).
+    if (d->o == NULL || s->o == NULL) {
+        d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT, NULL);
+        return;
+    }
+    const DWORD sw = s->d.dwWidth, sh = s->d.dwHeight;
+    const DWORD dw = d->d.dwWidth, dh = d->d.dwHeight;
+    const int bpp = s->d.ddpfPixelFormat.dwRGBBitCount / 8;
+    const long sp = s->d.lPitch, dp = d->d.lPitch;
+    const auto *src = reinterpret_cast<const unsigned char *>(s->o);
+    auto *dst = reinterpret_cast<unsigned char *>(d->o);
+
+    if (sw == dw && sh == dh) {
+        // Same dimensions: fast row-by-row memcpy.
+        const DWORD row_bytes = dw * static_cast<DWORD>(bpp);
+        for (DWORD y = 0; y < dh; y++)
+            memcpy(dst + y * dp, src + y * sp, row_bytes);
+    } else {
+        // Different dimensions: nearest-neighbour scale (up or down).
+        for (DWORD dy = 0; dy < dh; dy++) {
+            const DWORD sy = dy * sh / dh;
+            const unsigned char *srow = src + sy * sp;
+            unsigned char *drow = dst + dy * dp;
+            for (DWORD dx = 0; dx < dw; dx++) {
+                const DWORD sx = dx * sw / dw;
+                memcpy(drow + dx * bpp, srow + sx * bpp, bpp);
+            }
+        }
+    }
 }
 
 
-// r999 img to handle resizing and positioning
+// r999 img to handle resizing and positioning — copies full source into dest rect.
 void img(surf *d, surf *s, int x, int y, int x2, int y2) {
-    RECT drect;
-    // MM-P9.5: release cached text DCs on both surfaces before the Blt.
+    // MM-P9.5: release cached text DCs on both surfaces.
     surf_text_dc_release(d);
     surf_text_dc_release(s);
     // MM-P9.6: count + optional skip (plain-copy category).
     g_blt_copy_n++;
     if (g_diag_blt_skip == 2) return;
-    drect.left = x;
-    drect.right = x2;
-    drect.top = y;
-    drect.bottom = y2;
-    d->s->Blt(&drect, s->s, NULL, DDBLT_WAIT, NULL);
+
+    // MPRES-P4.1: software copy into dest rect.
+    if (d->o == NULL || s->o == NULL) {
+        RECT drect = { x, y, x2, y2 };
+        d->s->Blt(&drect, s->s, NULL, DDBLT_WAIT, NULL);
+        return;
+    }
+    const DWORD sw = s->d.dwWidth, sh = s->d.dwHeight;
+    const DWORD dw = d->d.dwWidth, dh = d->d.dwHeight;
+    const int bpp = s->d.ddpfPixelFormat.dwRGBBitCount / 8;
+    const long sp = s->d.lPitch, dp = d->d.lPitch;
+    const auto *src = reinterpret_cast<const unsigned char *>(s->o);
+    auto *dst = reinterpret_cast<unsigned char *>(d->o);
+
+    // Clip dest rect to dest surface bounds.
+    const int cx1 = max(x, 0), cy1 = max(y, 0);
+    const int cx2 = min(x2, static_cast<int>(dw));
+    const int cy2 = min(y2, static_cast<int>(dh));
+    if (cx1 >= cx2 || cy1 >= cy2) return;
+
+    const int dest_rw = x2 - x, dest_rh = y2 - y;
+    if (dest_rw == static_cast<int>(sw) && dest_rh == static_cast<int>(sh)) {
+        // Same size: row-by-row memcpy with dest-rect clipping.
+        const int src_ox = cx1 - x, src_oy = cy1 - y;
+        const DWORD row_bytes = static_cast<DWORD>(cx2 - cx1) * static_cast<DWORD>(bpp);
+        for (int ry = 0; ry < cy2 - cy1; ry++)
+            memcpy(dst + (cy1 + ry) * dp + cx1 * bpp,
+                   src + (src_oy + ry) * sp + src_ox * bpp,
+                   row_bytes);
+    } else {
+        // Different size: nearest-neighbour scale into dest rect.
+        for (int dy = cy1; dy < cy2; dy++) {
+            const int sy = static_cast<int>((dy - y) * static_cast<long long>(sh) / dest_rh);
+            if (sy < 0 || sy >= static_cast<int>(sh)) continue;
+            unsigned char *drow = dst + dy * dp;
+            const unsigned char *srow = src + sy * sp;
+            for (int dx = cx1; dx < cx2; dx++) {
+                const int sx = static_cast<int>((dx - x) * static_cast<long long>(sw) / dest_rw);
+                if (sx < 0 || sx >= static_cast<int>(sw)) continue;
+                memcpy(drow + dx * bpp, srow + sx * bpp, bpp);
+            }
+        }
+    }
 }
 
 // r999
@@ -1252,13 +1318,43 @@ return;
 */
 
 void img0(surf *d, surf *s) {
-    // MM-P9.5: keyed Blt touches both surfaces — release cached text DCs first.
+    // MM-P9.5: release cached text DCs before any surface operation.
     surf_text_dc_release(d);
     surf_text_dc_release(s);
     // MM-P9.6: count + optional skip (keyed-copy category).
     g_blt_key_n++;
     if (g_diag_blt_skip == 3) return;
-    d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT | DDBLT_KEYSRC, NULL);
+
+    // MPRES-P4.1: software keyed copy — skip pixels equal to 0 (color key).
+    if (d->o == NULL || s->o == NULL) {
+        d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT | DDBLT_KEYSRC, NULL);
+        return;
+    }
+    const DWORD w = s->d.dwWidth, h = s->d.dwHeight;
+    // img0 only operates same-size surfaces; fall back to DD for any mismatch.
+    if (w != d->d.dwWidth || h != d->d.dwHeight) {
+        d->s->Blt(NULL, s->s, NULL, DDBLT_WAIT | DDBLT_KEYSRC, NULL);
+        return;
+    }
+    const long sp = s->d.lPitch, dp = d->d.lPitch;
+    const auto *src = reinterpret_cast<const unsigned char *>(s->o);
+    auto *dst = reinterpret_cast<unsigned char *>(d->o);
+
+    if (s->d.ddpfPixelFormat.dwRGBBitCount == 16) {
+        for (DWORD y = 0; y < h; y++) {
+            const auto *srow = reinterpret_cast<const unsigned short *>(src + y * sp);
+            auto *drow = reinterpret_cast<unsigned short *>(dst + y * dp);
+            for (DWORD x = 0; x < w; x++)
+                if (srow[x]) drow[x] = srow[x];
+        }
+    } else {
+        for (DWORD y = 0; y < h; y++) {
+            const auto *srow = reinterpret_cast<const unsigned long *>(src + y * sp);
+            auto *drow = reinterpret_cast<unsigned long *>(dst + y * dp);
+            for (DWORD x = 0; x < w; x++)
+                if (srow[x]) drow[x] = srow[x];
+        }
+    }
 }
 
 surf *loadimage(LPCSTR name, long flags) {

@@ -243,18 +243,24 @@ DirectDraw.
   is the only release. Pitch is DWORD-aligned (`(x * bpp + 3) & ~3`), matching
   DD's own sysmem alignment so the lPitch/2 lighting-stride invariant (RW-P2.3)
   holds. Tri-target Debug green, zero new warnings._
-- 🟡 **MPRES-P3.3** Verify: surface byte-dump equality for a representative blit
-  matrix; lighting/stormcloak overlay unchanged; tri-target build.
+- ✅ **MPRES-P3.3** Verify: surface byte-dump equality for a representative blit
+  matrix; lighting/stormcloak overlay unchanged; tri-target build. _User hardware
+  smoke-test sign-off: pixel-identical._
 - **Exit:** sysmem surfaces are owned memory; no DDraw needed to allocate them.
 
 ---
 
 ### MPRES-P4 — Remove the remaining DirectDraw `Blt`s and the device (T3)
 
-- ⬜ **MPRES-P4.1** Convert the 2-/6-arg `img(d,s[,rect])` and `img0(d,s)` DD
-  `Blt`s (and the `cls` videomem fallback) to software/asm copies over `->o`
-  (the keyed/colour-key path mirrors `imgt0`). These are the `bltCopy`/`bltKey`
-  categories from MM-P9.6 — low per-frame frequency, but they keep DDraw alive.
+- ✅ **MPRES-P4.1** Convert the 2-/6-arg `img(d,s[,rect])` and `img0(d,s)` DD
+  `Blt`s to software copies over `->o`. _Done: `img(d,s)` uses row-by-row
+  `memcpy` for same-size and a nearest-neighbour scale loop for resize (handles
+  all call sites including ps320200→ps640400, portrait→portrait_doublesize, ps5→ps6/
+  minimaptilesurf, bt32→bt16, etc.). `img(d,s,rect)` routes the full source into
+  a dest rect with optional NN scale. `img0(d,s)` skips pixels equal to 0 (color
+  key). All three keep a DD Blt fallback for `->o==NULL` surfaces (PRIMARY, any
+  remaining SURF_VIDMEM). `cls` vidmem fallback left in place (reached only when
+  `s->o==NULL`). Tri-target Debug green, zero new warnings._
 - ⬜ **MPRES-P4.2** Delete `IDirectDraw*` entirely: `dd`/`dd1`, `setupddraw`'s
   DDraw bits, `ddrawshutdown`'s DDraw bits, `ddraw.h`/`ddraw.lib` from the
   client build. `surf` loses its `LPDIRECTDRAWSURFACE4`.
@@ -352,12 +358,13 @@ present-path exception, not a rasterizer change).
     stays) in P2.3b. `psnew1b` kept (live UI surface); `DDRAW_display_pixelformat`
     kept (still sets the format on newly created surfaces — allocation, not present).
     Built tri-target Debug green, zero new warnings.
-  - **NEXT → MPRES-P3.3 verify** (surface byte-dump equality + lighting parity on
-    hardware). P3.1 ✅: `surf` carries `ownedPixels` + `new`/`delete` lifecycle.
-    P3.2 ✅: `newsurf` uses `DDSD_LPSURFACE | DDSD_PITCH` to give DD our allocation
-    for every SURF_SYSMEM / SURF_SYSMEM16 surface — no DD heap alloc for sysmem
-    surfaces any more. Tri-target Debug green, zero new warnings. P3.3 is a user
-    hardware task: smoke-test in-game (world render, lighting, stormcloak overlay,
-    UI text, image loading) and confirm pixel-identical to P3.2 pre-patch; benchmark
-    parity. After sign-off, proceed to MPRES-P4 (convert DD Blt calls to software
-    and delete IDirectDraw* from the client entirely).
+  - **NEXT → MPRES-P4.2**: delete `IDirectDraw*` entirely. P3.3 ✅ (user HW
+    sign-off). P4.1 ✅: `img(d,s)` (2-arg, full blit), `img(d,s,x,y,x2,y2)` (6-arg
+    rect blit), and `img0(d,s)` all converted to software `->o` copies with NN
+    scaling; DD Blt fallback kept only for `->o==NULL` surfaces. Tri-target Debug
+    green, zero new warnings. P4.2 requires: convert `loadimage()` from GetDC/BitBlt
+    to a GDI DIB section approach writing directly into `->o`; migrate
+    `surf_text_dc_acquire/release` + `txtout/txtouts` text path from GetDC-on-DD to a
+    DIB-section DC over `->o`; remove `LPDIRECTDRAWSURFACE4 s` and `DDSURFACEDESC2 d`
+    from `struct surf` (replace with lean struct); gut `setupddraw()`/`ddrawshutdown()`
+    DDraw init; remove `ddraw.h`/`ddraw.lib` from client build.
