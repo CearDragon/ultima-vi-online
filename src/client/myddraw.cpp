@@ -15,6 +15,7 @@
 // of CreateToolhelp32Snapshot/Thread32First/Next live in kernel32 (already
 // linked), so this adds no new link dependency.
 #include <tlhelp32.h>
+#include <memory>
 // r999
 #include "define_both.h"
 #include "viewport.h" // RW-P2.4: backbufferW()/H() for blit_letterbox sanity check
@@ -259,6 +260,8 @@ struct surf {
     // See myddraw.h for the full rationale (NVIDIA legacy-ddraw GetDC leak fix).
     // Not serialized — surf is never byte-blitted to disk/wire.
     HDC cachedTextDC;
+    // MPRES-P3.1: owned framebuffer storage for sysmem-backed surfaces.
+    std::unique_ptr<unsigned char[]> ownedPixels;
 
     //IDirect3DTexture2* t; //only valid if SURF_TEX flag is used *REDUNDANT
 };
@@ -298,8 +301,7 @@ bool setupddraw() {
 
 
     static surf *ts;
-    ts = (surf *) malloc(sizeof(surf));
-    ZeroMemory(ts, sizeof(surf));
+    ts = new surf();
     ts->d.dwSize = sizeof(DDSURFACEDESC2);
     ts->d.dwFlags = DDSD_CAPS;
     ts->d.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
@@ -313,7 +315,7 @@ bool setupddraw() {
     //exit(DDRAW_display_pixelformat.dwGBitMask);
     ts->s->Release();
     // ts was allocated only to query the primary surface pixel format; free it.
-    free((void *) ts);
+    delete ts;
     //static long i;
     ZeroMemory(&surflist[0], sizeof(surf *) * 16384);
     return TRUE;
@@ -322,8 +324,7 @@ bool setupddraw() {
 surf *surfstruct() {
     static surf *ts;
     static long i;
-    ts = (surf *) malloc(sizeof(surf));
-    ZeroMemory(ts, sizeof(surf));
+    ts = new surf();
     ts->d.dwSize = sizeof(DDSURFACEDESC2);
     g_surf_live++; // MM-P9 diagnostic: live DirectDraw-surface count
     for (i = 0; i < 16384; i++) {
@@ -1287,6 +1288,7 @@ surf *loadimage(txt *name, long flags) {
 
 void free(surf *s) {
     static long i;
+    if (s == NULL) return;
     for (i = 0; i < 16384; i++) {
         if (surflist[i] == s) surflist[i] = NULL;
     }
@@ -1294,8 +1296,12 @@ void free(surf *s) {
     // never leak the DC and never ->Release() a surface with a live DC held.
     // Covers recreateBackbuffers()'s free(ps) and purgesurfaces().
     surf_text_dc_release(s);
-    s->s->Release();
-    free((void *) s);
+    if (s->s != NULL) {
+        s->s->Release();
+        s->s = NULL;
+    }
+    s->ownedPixels.reset();
+    delete s;
     g_surf_live--; // MM-P9 diagnostic
     return;
 }

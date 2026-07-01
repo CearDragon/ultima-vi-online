@@ -5,6 +5,7 @@
 //#define INITGUID
 //#define D3D_OVERLOADS *REDUNDANT
 #include <ddraw.h>
+#include <memory>
 //#include <d3d.h> *REDUNDANT
 //#include <d3dutil.h>
 //#include <d3dmath.h>
@@ -28,6 +29,11 @@ struct surf {
     // wrapper, never byte-blitted to disk or the network — so appending this
     // field changes nothing on the wire or in .sav files.
     HDC cachedTextDC;
+    // MPRES-P3.1: owned framebuffer storage for sysmem-backed surfaces. The
+    // blitter-facing fields (`o`, `d.lPitch`, `dwWidth`, `dwHeight`) remain the
+    // canonical access path; this only owns the bytes when DirectDraw is not
+    // the allocator.
+    std::unique_ptr<unsigned char[]> ownedPixels;
 
     //IDirect3DTexture2* t; //only valid if SURF_TEX flag is used *REDUNDANT
 };

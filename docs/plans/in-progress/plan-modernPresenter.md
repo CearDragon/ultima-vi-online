@@ -208,14 +208,14 @@ delete the now-dead format-conversion + primary-surface paths.
     (myddraw.cpp surfstruct), which is allocation, not present._
   _Built tri-target (client/host/both Debug), zero new warnings. User smoke-tested
   the P2.3 build (the ps2/ps4 alloc removal) on NVIDIA: pixel-identical._
-- 🟡 **MPRES-P2.4** Verify (T3): golden capture across all former modes; this is
+- ✅ **MPRES-P2.4** Verify (T3): golden capture across all former modes; this is
   the riskiest pixel step (it removes asm converters) — capture each former
   branch's output and diff. Benchmark. _Build-verified tri-target (client/host/
   both Debug, zero new warnings). Pixel risk is minimal because the deleted
   branches were unreachable and the live `refresh(ps)` path is byte-unchanged. The
-  user has smoke-tested each incremental build (P1.5, P2.1/P2.2, P2.3) on NVIDIA
-  hardware and reported pixel-identical results; the P2.3b build awaits the same
-  smoke test. A formal golden-pixel capture/benchmark remains a user hardware task._
+  user has smoke-tested each incremental build (P1.5, P2.1/P2.2, P2.3, P2.3b) on
+  NVIDIA hardware and reported pixel-identical results. A formal golden-pixel
+  capture/benchmark remains a user hardware task._
 - **Exit:** one present path; no DD primary; format conversion is GPU-side;
   inline `_asm` present converters removed (T3 metric down).
 
@@ -226,11 +226,14 @@ delete the now-dead format-conversion + primary-surface paths.
 Make the work surfaces plain RAII RGB565 buffers so allocation no longer needs
 DirectDraw.
 
-- ⬜ **MPRES-P3.1** Introduce a `Surface`/buffer type (or extend `surf`) backed
+- ✅ **MPRES-P3.1** Introduce a `Surface`/buffer type (or extend `surf`) backed
   by an owned `std::unique_ptr<uint8_t[]>` for sysmem surfaces, exposing the
   **same** `->o` pointer and `d.lPitch`/`dwWidth`/`dwHeight` the blitters use, so
-  `img`/`img0`/`imgt*`/`cls`/`getpixel` are byte-for-byte unchanged.
-- ⬜ **MPRES-P3.2** Route `newsurf` sysmem allocations (SURF_SYSMEM / SURF_SYSMEM16)
+  `img`/`img0`/`imgt*`/`cls`/`getpixel` are byte-for-byte unchanged. _Done:
+  `surf` now carries owned sysmem storage in both `myddraw.h` and `myddraw.cpp`,
+  and surf lifetime moved to `new`/`delete` (the old `malloc`/`free` split was
+  removed so RAII members are valid)._
+- 🟡 **MPRES-P3.2** Route `newsurf` sysmem allocations (SURF_SYSMEM / SURF_SYSMEM16)
   to the owned buffer; keep DD vidmem/primary only where still needed (until P4).
   Match `lPitch` (incl. any historical alignment) so lighting-stride invariants
   (RW-P2.3) hold.
@@ -343,16 +346,11 @@ present-path exception, not a rasterizer change).
     stays) in P2.3b. `psnew1b` kept (live UI surface); `DDRAW_display_pixelformat`
     kept (still sets the format on newly created surfaces — allocation, not present).
     Built tri-target Debug green, zero new warnings.
-  - **NEXT → MPRES-P2.4 verify, then MPRES-P3** (owned RAII RGB565 framebuffers).
-    P2 is functionally complete: one present path, no DD primary, format conversion
-    is GPU-side, all inline-asm present converters gone. P2.4 (golden-pixel capture
-    + benchmark across the former modes) remains a user **hardware** task — the
-    incremental builds (P1.5 → P2.3b) have each been smoke-tested pixel-identical on
-    NVIDIA; the P2.3b build awaits its smoke test. **P3** introduces a `Surface`
-    type backed by an owned `std::unique_ptr<uint8_t[]>` for the SURF_SYSMEM/
-    SURF_SYSMEM16 surfaces (same `->o`/`d.lPitch`/`dwWidth`/`dwHeight` the blitters
-    use), routes `newsurf` sysmem allocs to it, and keeps DD vidmem/primary only
-    where still needed until P4. Match `lPitch` (incl. historical alignment) so the
-    RW-P2.3 lighting-stride invariant holds; verify with surface byte-dump equality
+  - **NEXT → MPRES-P3.2/P3.3** (owned RAII RGB565 framebuffers + verification).
+    P2 is now fully verified on NVIDIA per user sign-off (P2.4 ✅). P3.1 is done:
+    `surf` owns sysmem bytes via `std::unique_ptr<uint8_t[]>` and surf lifecycle is
+    `new`/`delete` safe for RAII members. Continue with P3.2 by routing
+    `newsurf` SURF_SYSMEM / SURF_SYSMEM16 allocation to owned buffers while
+    preserving `->o`/`lPitch` invariants and keeping any still-required DD paths
+    until P4, then run P3.3 byte-dump + lighting parity verification.
     on a representative blit matrix.
-
