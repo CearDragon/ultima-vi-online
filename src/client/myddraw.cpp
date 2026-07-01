@@ -257,11 +257,14 @@ struct surf {
 
     HDC cachedDIBDC;
     HBITMAP cachedDIBBitmap;
+    unsigned char *cachedDIBBits;
     std::unique_ptr<unsigned char[]> ownedPixels;
 
     surf() : dwWidth(0), dwHeight(0), lPitch(0), bpp(0), o(nullptr),
-             cachedDIBDC(nullptr), cachedDIBBitmap(nullptr), ownedPixels(nullptr) {}
+             cachedDIBDC(nullptr), cachedDIBBitmap(nullptr), cachedDIBBits(nullptr), ownedPixels(nullptr) {}
 };
+
+void surf_text_dc_release(surf *s);
 
 surf *surflist[16384];
 
@@ -343,57 +346,61 @@ surf *newsurf(long x, long y, long flags) {
 // outcome as the legacy code, which also ignored GetDC's return and operated on
 // whatever HDC came back.
 HDC surf_text_dc_acquire(surf *s) {
-    // MPRES-P4.2: create a cached DIB-section DC for text rendering.
-    // DIBs allow GDI to draw directly into our pixel buffer.
+    // MPRES-P4.2 + 2026-07-01 crash fix: the DIB header must include storage
+    // for the RGB565 masks. Keep reusing the cached DIB when present; callers
+    // that need `s->o` coherence already flush via surf_text_dc_release()
+    // before software blits / present / teardown.
     if (s == NULL || s->o == NULL) return NULL;  // PRIMARY surface (no pixels)
     if (s->cachedDIBDC != NULL) return s->cachedDIBDC;
-    
-    BITMAPINFOHEADER bih = {};
-    bih.biSize = sizeof(BITMAPINFOHEADER);
-    bih.biWidth = (LONG)s->dwWidth;
-    bih.biHeight = -(LONG)s->dwHeight;  // negative = top-down orientation
-    bih.biPlanes = 1;
-    bih.biBitCount = s->bpp * 8;  // 16 or 32 bpp
-    bih.biCompression = BI_RGB;
-    
-    // For 16-bpp RGB565, set color masks (DIB_BITFIELDS format).
-    BITMAPINFO bi = {};
-    bi.bmiHeader = bih;
+
+    struct BitmapInfoWithMasks {
+        BITMAPINFOHEADER header;
+        DWORD masks[3];
+    } bi = {};
+    bi.header.biSize = sizeof(BITMAPINFOHEADER);
+    bi.header.biWidth = (LONG) s->dwWidth;
+    bi.header.biHeight = -(LONG) s->dwHeight;  // negative = top-down orientation
+    bi.header.biPlanes = 1;
+    bi.header.biBitCount = static_cast<WORD>(s->bpp * 8);  // 16 or 32 bpp
+    bi.header.biCompression = BI_RGB;
+
     if (s->bpp == 2) {  // RGB565
-        bi.bmiHeader.biCompression = BI_BITFIELDS;
-        unsigned int *pMasks = (unsigned int *)&bi.bmiColors[0];
-        pMasks[0] = 0xF800;  // R: 5 bits
-        pMasks[1] = 0x07E0;  // G: 6 bits
-        pMasks[2] = 0x001F;  // B: 5 bits
+        bi.header.biCompression = BI_BITFIELDS;
+        bi.masks[0] = 0xF800;
+        bi.masks[1] = 0x07E0;
+        bi.masks[2] = 0x001F;
     }
-    
-    // Create a device-independent bitmap (DIB section).
-    // The returned pointer will reference our pixel buffer directly.
+
     HDC hdc = CreateCompatibleDC(NULL);
     if (hdc == NULL) return NULL;
-    
-    void *pBits = s->o;  // Start with our surface's pixel buffer
-    HBITMAP hbmp = CreateDIBSection(hdc, &bi, DIB_RGB_COLORS, &pBits, NULL, 0);
-    if (hbmp == NULL) {
+
+    void *pBits = NULL;
+    HBITMAP hbmp = CreateDIBSection(hdc, reinterpret_cast<const BITMAPINFO *>(&bi), DIB_RGB_COLORS, &pBits, NULL, 0);
+    if (hbmp == NULL || pBits == NULL) {
+        if (hbmp != NULL) DeleteObject(hbmp);
         DeleteDC(hdc);
         return NULL;
     }
-    
-    // Select the DIB into the DC so GDI operations draw into it.
+
+    memcpy(pBits, s->o, static_cast<size_t>(s->lPitch) * static_cast<size_t>(s->dwHeight));
     SelectObject(hdc, hbmp);
-    
-    // Cache the DIB and DC for reuse across text calls.
+
+    s->cachedDIBBits = reinterpret_cast<unsigned char *>(pBits);
     s->cachedDIBBitmap = hbmp;
     s->cachedDIBDC = hdc;
     return hdc;
 }
 
 // surf_text_dc_release(): release the cached DIB DC (if any).
-// With DIB sections, we don't need to release before Blt/etc operations,
-// so this is mainly for cleanup on surface destruction.
+// With DIB sections, copy the flushed pixels back into `s->o` before teardown so
+// software blits/present see the latest GDI output.
 void surf_text_dc_release(surf *s) {
     if (s == NULL) return;
     if (s->cachedDIBDC != NULL) {
+        GdiFlush();
+        if (s->cachedDIBBits != NULL && s->o != NULL) {
+            memcpy(s->o, s->cachedDIBBits, static_cast<size_t>(s->lPitch) * static_cast<size_t>(s->dwHeight));
+        }
         DeleteDC(s->cachedDIBDC);
         s->cachedDIBDC = NULL;
     }
@@ -401,6 +408,7 @@ void surf_text_dc_release(surf *s) {
         DeleteObject(s->cachedDIBBitmap);
         s->cachedDIBBitmap = NULL;
     }
+    s->cachedDIBBits = NULL;
 }
 
 void pset(surf *s, long x, long y, DWORD c) {
@@ -465,15 +473,14 @@ void refresh(surf *s) {
     // MM-P9.6 + MPRES-P4.2: present via the cached text DC (now DIB-section based).
     if (g_diag_present_mode >= 1) return; // diag: skip present entirely
 #ifdef CLIENT
-    // MPRES-P1: modern swap-chain present (default OFF via g_present_modern).
     if (g_present_modern) {
-        // Modern presenter reads s->o directly; GdiFlush() ensures any pending
-        // text rendering is flushed into the pixels.
-        GdiFlush();
+        // MPRES-P4.2: flush any GDI text/image work from the temporary DIB back
+        // into `s->o` before the modern presenter reads the surface pixels.
+        surf_text_dc_release(s);
         if (u6o::client::present_modern(s)) return; // modern path handled it
     }
 #endif
-    // Legacy GDI present: acquire cached text DC and blit to window.
+    // Legacy GDI present: rebuild a DC from the current surface pixels, then blit.
     HDC ddhdc = surf_text_dc_acquire(s);
     if (ddhdc != NULL) {
         blit_letterbox(hWnd, ddhdc, (long) s->dwWidth, (long) s->dwHeight);
@@ -539,6 +546,7 @@ void img(surf *d, long x, long y, surf *s) {
             push esi
             push edi
             push ebx
+            push ebp
             mov ecx,asm_copy_vc_rows
             mov edx,asm_copy_vc_bytesx
             mov esi,asm_copy_vc_sourceoffset
@@ -550,32 +558,63 @@ void img(surf *d, long x, long y, surf *s) {
             jz asm_copy7
             asm_copy0:
             mov eax,[esi]
+            mov ebp,[edi]
             add esi,4
 
-            //and eax,4158584798
-            //shr eax,1
-            //and DWORD PTR [edi],4158584798
-            //shr DWORD PTR [edi],1
-            //add [edi],eax
+            and ax,ax
+            jz asm_copy_imgt0_1
+            and bp,63454
+            and ax,63454
+            shr bp,1
+            shr ax,1
+            add ax,bp
+            mov [edi],ax
+            asm_copy_imgt0_1:
 
-            mov [edi],eax
+            shr ebp,16
+            shr eax,16
+            add edi,2
 
+            and ax,ax
+            jz asm_copy_imgt0_2
+            and bp,63454
+            and ax,63454
+            shr bp,1
+            shr ax,1
+            add ax,bp
+            mov [edi],ax
+            asm_copy_imgt0_2:
 
-            add edi,4
+            add edi,2
+
             cmp esi,ebx
             jne asm_copy0
             cmp asm_copy_vc_extra2bytes,0
             je asm_copy3
             asm_copy7:
+
+
             mov ax,[esi]
+            mov bp,[edi]
             add esi,2
+
+            and ax,ax
+            jz asm_copy_imgt0_3
+            and bp,63454
+            and ax,63454
+            shr bp,1
+            shr ax,1
+            add ax,bp
             mov [edi],ax
+            asm_copy_imgt0_3:
+
             add edi,2
             asm_copy3:
             add esi,asm_copy_vc_sourceskip
             add edi,asm_copy_vc_destskip
             dec ecx
             jnz asm_copy1
+            pop ebp
             pop ebx
             pop edi
             pop esi
@@ -649,6 +688,7 @@ void img0(surf *d, long x, long y, surf *s) {
             push esi
             push edi
             push ebx
+            push ebp
             mov ecx,asm_copy_vc_rows
             mov edx,asm_copy_vc_bytesx
             mov esi,asm_copy_vc_sourceoffset
@@ -660,35 +700,65 @@ void img0(surf *d, long x, long y, surf *s) {
             jz asm_copy7
             asm_copy0:
             mov eax,[esi]
-            and ax,ax
-            jz asm_copy3
-            mov [edi],ax
-            asm_copy3:
+            mov ebp,[edi]
             add esi,4
+
+            and ax,ax
+            jz asm_copy_imgt0_1
+            and bp,63454
+            and ax,63454
+            shr bp,1
+            shr ax,1
+            add ax,bp
+            mov [edi],ax
+            asm_copy_imgt0_1:
+
+            shr ebp,16
             shr eax,16
             add edi,2
+
             and ax,ax
-            jz asm_copy4
+            jz asm_copy_imgt0_2
+
+            and bp,63454
+            and ax,63454
+            shr bp,1
+            shr ax,1
+            add ax,bp
             mov [edi],ax
-            asm_copy4:
+            asm_copy_imgt0_2:
+
             add edi,2
+
             cmp esi,ebx
             jne asm_copy0
             cmp asm_copy_vc_extra2bytes,0
-            je asm_copy5
+            je asm_copy3
             asm_copy7:
+
+
             mov ax,[esi]
-            and ax,ax
-            jz asm_copy6
-            mov [edi],ax
-            asm_copy6:
+            mov bp,[edi]
             add esi,2
+
+            and ax,ax
+            jz asm_copy_imgt0_3
+
+            and bp,63454
+            and ax,63454
+            shr bp,1
+            shr ax,1
+            add ax,bp
+            mov [edi],ax
+            asm_copy_imgt0_3:
+
             add edi,2
-            asm_copy5:
+            asm_copy3:
             add esi,asm_copy_vc_sourceskip
             add edi,asm_copy_vc_destskip
             dec ecx
             jnz asm_copy1
+            pop ebp
             pop ebx
             pop edi
             pop esi
@@ -1134,7 +1204,7 @@ void ddrawshutdown() {
 }
 
 /*
-void img0(surf* d,long x,long y,surf* s)
+void img(surf* d,long x,long y,surf* s)
 {
 static RECT r1,r2;
 r1.top=y;
@@ -1234,17 +1304,18 @@ surf *loadimage(LPCSTR name, long flags) {
         DeleteObject(bmh);
         return NULL;
     }
-    
-    // MPRES-P4.2: BitBlt BMP into surface via DIB section (DirectDraw removed).
+
+    // MPRES-P4.2: BitBlt BMP into a temporary DIB DC, then flush it back into
+    // the surface pixels before returning so later software blits read `s->o`.
     bdc = CreateCompatibleDC(NULL);
     HGDIOBJ _old_bmp = SelectObject(bdc, bmh);
-    
-    // Get the cached DIB DC for the surface (or create one) and BitBlt into it.
+
     didc = surf_text_dc_acquire(s);
     if (didc != NULL) {
         BitBlt(didc, 0, 0, bmx, bmy, bdc, 0, 0, SRCCOPY);
+        surf_text_dc_release(s);
     }
-    
+
     SelectObject(bdc, _old_bmp);
     DeleteDC(bdc);
     DeleteObject(bmh);
@@ -1475,27 +1546,56 @@ void imgt(surf *d, long x, long y, surf *s) {
             mov eax,[esi]
             mov ebp,[edi]
             add esi,4
-            and eax,4158584798
-            and ebp,4158584798
-            shr eax,1
-            shr ebp,1
-            add eax,ebp
-            mov [edi],eax
-            add edi,4
+
+            and ax,ax
+            jz asm_copy_imgt0_1
+            and bp,63454
+            and ax,63454
+            shr bp,1
+            shr ax,1
+            add ax,bp
+            mov [edi],ax
+            asm_copy_imgt0_1:
+
+            shr ebp,16
+            shr eax,16
+            add edi,2
+
+            and ax,ax
+            jz asm_copy_imgt0_2
+
+            and bp,63454
+            and ax,63454
+            shr bp,1
+            shr ax,1
+            add ax,bp
+            mov [edi],ax
+            asm_copy_imgt0_2:
+
+            add edi,2
+
             cmp esi,ebx
             jne asm_copy0
             cmp asm_copy_vc_extra2bytes,0
             je asm_copy3
             asm_copy7:
+
+
             mov ax,[esi]
             mov bp,[edi]
             add esi,2
-            and ax,63454
+
+            and ax,ax
+            jz asm_copy_imgt0_3
+
             and bp,63454
-            shr ax,1
+            and ax,63454
             shr bp,1
+            shr ax,1
             add ax,bp
             mov [edi],ax
+            asm_copy_imgt0_3:
+
             add edi,2
             asm_copy3:
             add esi,asm_copy_vc_sourceskip
@@ -1718,30 +1818,30 @@ void img75t(surf *d, long x, long y, surf *s) {
             and edx,edx
             jz asm_copy7
             asm_copy0:
-
             mov eax,[esi]
             mov ebp,[edi]
-            and eax,4158584798 //11110111110111101111011111011110
-            and ebp,3885819804 //11100111100111001110011110011100
-            shr eax,1 //eax=50% of source
-            shr ebp,2 //ebp=25% of dest
             add esi,4
-            add ebp,eax //ebp=25%(ebp)+50%(eax)=75%
-            and eax,4158584798 //11110111110111101111011111011110
-            shr eax,1 //eax=25% of source
-            add ebp,eax //bp=75%(bp)+25%(ax)=100%
-            mov [edi],ebp
-            add edi,4
 
-            cmp esi,ebx
-            jne asm_copy0
-            cmp asm_copy_vc_extra2bytes,0
-            je asm_copy3
-            asm_copy7:
+            and ax,ax
+            jz asm_copy_imgt0_1
+            and bp,59292
+            and ax,63454
+            shr bp,2 //bp=25% of dest
+            shr ax,1 //ax=50% of source
+            add bp,ax //bp=25%(bp)+50%(ax)=75%
+            and ax,63454
+            shr ax,1 //ax=25% of source
+            add bp,ax //bp=75%(bp)+25%(ax)=100%
+            mov [edi],bp
+            asm_copy_imgt0_1:
 
-            mov ax,[esi]
-            mov bp,[edi]
-            add esi,2
+            shr ebp,16
+            shr eax,16
+            add edi,2
+
+            and ax,ax
+            jz asm_copy_imgt0_2
+
             and bp,59292
             and ax,63454
             shr bp,2 //25%
@@ -1751,8 +1851,38 @@ void img75t(surf *d, long x, long y, surf *s) {
             shr ax,1 //50%
             add bp,ax
             mov [edi],bp
+
+            asm_copy_imgt0_2:
+
             add edi,2
 
+            cmp esi,ebx
+            jne asm_copy0
+            cmp asm_copy_vc_extra2bytes,0
+            je asm_copy3
+            asm_copy7:
+
+
+            mov ax,[esi]
+            mov bp,[edi]
+            add esi,2
+
+            and ax,ax
+            jz asm_copy_imgt0_3
+
+            and bp,59292
+            and ax,63454
+            shr bp,2 //25%
+            shr ax,1 //50%
+            add bp,ax
+            and ax,63454
+            shr ax,1 //50%
+            add bp,ax
+            mov [edi],bp
+
+            asm_copy_imgt0_3:
+
+            add edi,2
             asm_copy3:
             add esi,asm_copy_vc_sourceskip
             add edi,asm_copy_vc_destskip

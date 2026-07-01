@@ -368,3 +368,20 @@ present-path exception, not a rasterizer change).
     DIB-section DC over `->o`; remove `LPDIRECTDRAWSURFACE4 s` and `DDSURFACEDESC2 d`
     from `struct surf` (replace with lean struct); gut `setupddraw()`/`ddrawshutdown()`
     DDraw init; remove `ddraw.h`/`ddraw.lib` from client build.
+
+- **2026-07-01 (MPRES-P4.2 startup crash fixed).** Opening the client after the
+  P4.2 DirectDraw removal crashed immediately with **Run-Time Check Failure #2** /
+  `0x80000003` from `_RTC_StackFailure`; dump `tools/crash/crash-reports/crash_20260701_165748.dmp`
+  symbolicated to `src/client/myddraw.cpp:389` inside `surf_text_dc_acquire()`.
+  Root cause: the new DIB-section path built a plain `BITMAPINFO` on the stack
+  and then wrote three RGB565 channel masks through `bi.bmiColors[0]`, overrunning
+  the local `BITMAPINFOHEADER bih`/`BITMAPINFO bi` storage and tripping the MSVC
+  debug stack guard. Fix shipped in `myddraw.{h,cpp}`: replace the undersized
+  stack object with a `BITMAPINFOHEADER + DWORD[3]` wrapper (`BitmapInfoWithMasks`),
+  track `cachedDIBBits`, and flush DIB pixels back into `surf::o` in
+  `surf_text_dc_release()` so the GDI text / `loadimage()` path stays coherent
+  with the software blitters and modern presenter. Verified by rebuilding
+  `client` through `tools/Enter-DevBuildEnv.ps1` (EXE/PDB 2026-07-01 17:06:52).
+  NEXT: user runtime-smoke the startup path and continue the remaining
+  `MPRES-P4.2` DirectDraw-call-site cleanup.
+

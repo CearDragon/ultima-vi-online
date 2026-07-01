@@ -16,17 +16,18 @@ struct surf {
     };
 
     // MPRES-P4.2: cached DIB-section DC for text rendering (replaces DD GetDC).
-    // NULL when none is held. txtout()/txtouts() acquire it lazily and keep it
-    // cached across text runs to avoid per-string DIB reallocation overhead.
+    // The DIB owns its own temporary pixel store; cachedDIBBits points at it so
+    // surf_text_dc_release() can flush GDI output back into `o` before destroy.
     HDC cachedDIBDC;
     HBITMAP cachedDIBBitmap;
+    unsigned char *cachedDIBBits;
 
     // MPRES-P3.1/P4.2: owned framebuffer storage for all non-PRIMARY surfaces.
     std::unique_ptr<unsigned char[]> ownedPixels;
 
     // Constructor: initialize all fields to zero.
     surf() : dwWidth(0), dwHeight(0), lPitch(0), bpp(0), o(nullptr),
-             cachedDIBDC(nullptr), cachedDIBBitmap(nullptr), ownedPixels(nullptr) {}
+             cachedDIBDC(nullptr), cachedDIBBitmap(nullptr), cachedDIBBits(nullptr), ownedPixels(nullptr) {}
 };
 
 #define SURF_VIDMEM 0 //surface in video memory compatible with primary surface
@@ -72,9 +73,9 @@ DWORD getcol(DWORD c);
 
 extern DWORD txtcol;
 extern HFONT txtfnt;
-// MPRES-P4.2: acquire the surface's cached DIB-section DC (over `->o`) for GDI
-// text/measurement. Lazily created; owned by the surface until
-// surf_text_dc_release(). Returns NULL for pixel-less surfaces (`->o == NULL`).
+// MPRES-P4.2: acquire the surface's cached DIB-section DC for GDI text/measurement.
+// The DIB is recreated from the current `->o` pixels on each acquire so CPU
+// blits and GDI text stay coherent without DirectDraw.
 HDC surf_text_dc_acquire(surf *s);
 
 void purgesurfaces();
