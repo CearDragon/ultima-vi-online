@@ -1768,7 +1768,15 @@ void STATUSMESSadd(txt *t) {
     } //i
         SelectObject(taghdc, _old_tag_font);
     }
-    
+    // MPRES-P4.2 (look-flicker fix): this acquire was for text *measurement*
+    // only (GetTextExtentPoint32) — nothing is drawn to the surface. Release the
+    // cached DIB snapshot immediately so it can't be flushed back over a
+    // later-composited frame. STATUSMESSadd runs event-driven mid-frame (e.g. a
+    // "Thou dost see" look reply arriving via net before world_render), so a
+    // lingering snapshot of an incomplete/black ps->o would otherwise be
+    // memcpy'd back at refresh(), causing a one-frame black flicker. The
+    // release's memcpy-back is a pixel no-op here (we only read for metrics).
+    surf_text_dc_release(ps);
 }
 
 void STATUSMESSadd(const char *t) {
@@ -1797,10 +1805,11 @@ void STATUSMESSadd(const char *t) {
     } //i
         SelectObject(taghdc, _old_tag_font);
     }
-    
+    // MPRES-P4.2 (look-flicker fix): measurement-only acquire; release the
+    // cached DIB snapshot now so it isn't flushed back over a later frame. See
+    // the txt* overload above for the full rationale.
+    surf_text_dc_release(ps);
 }
-
-
 // s555
 void STATUSMESSadd(txt *t, int skippable) {
     static txt *t2 = txtnew();
@@ -1890,7 +1899,10 @@ int STATUSMESSwrapline(txt *src, long maxwidth, txt **out, int maxlines) {
 
         SelectObject(hdc, _old_hdc_font);
     }
-    
+    // MPRES-P4.2 (look-flicker fix): measurement-only acquire (GetTextExtentExPoint);
+    // release the cached DIB snapshot now so it isn't flushed back over a
+    // later-composited frame. See STATUSMESSadd above for the full rationale.
+    surf_text_dc_release(ps);
 
     if (n == 0) { txtset(out[0], ""); n = 1; }
     return n;
