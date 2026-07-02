@@ -503,6 +503,13 @@ void img(surf *d, long x, long y, surf *s) {
     //surfaces valid?
     if (s == NULL) return;
     if (d == NULL) return;
+    // MPRES-P4.2: flush any GDI text DIB cached on d/s before this software blit.
+    // The per-frame text path leaves a DIB held on `ps` (a snapshot of ->o taken
+    // at acquire time); without this flush, writes made here would be clobbered
+    // when refresh() memcpys that stale snapshot back into ->o at present time.
+    // Matches the guard already used by the memcpy-style blitters.
+    surf_text_dc_release(d);
+    surf_text_dc_release(s);
     //offscreen?
     dx = d->dwWidth;
     if (x >= dx) return;
@@ -613,6 +620,11 @@ void img0(surf *d, long x, long y, surf *s) {
     //surfaces valid?
     if (s == NULL) return;
     if (d == NULL) return;
+    // MPRES-P4.2: flush any GDI text DIB cached on d/s before this software blit
+    // (see img() for rationale); keeps UI/cursor writes from being clobbered by
+    // the stale text snapshot restored at present time.
+    surf_text_dc_release(d);
+    surf_text_dc_release(s);
     //offscreen?
     dx = d->dwWidth;
     if (x >= dx) return;
@@ -1296,6 +1308,10 @@ void imgt0(surf *d, long x, long y, surf *s) {
     //surfaces valid?
     if (s == NULL) return;
     if (d == NULL) return;
+    // MPRES-P4.2: flush any GDI text DIB cached on d/s before this software blit
+    // (see img() for rationale).
+    surf_text_dc_release(d);
+    surf_text_dc_release(s);
     //offscreen?
     dx = d->dwWidth;
     if (x >= dx) return;
@@ -1426,6 +1442,10 @@ void imgt(surf *d, long x, long y, surf *s) {
     //surfaces valid?
     if (s == NULL) return;
     if (d == NULL) return;
+    // MPRES-P4.2: flush any GDI text DIB cached on d/s before this software blit
+    // (see img() for rationale).
+    surf_text_dc_release(d);
+    surf_text_dc_release(s);
     //offscreen?
     dx = d->dwWidth;
     if (x >= dx) return;
@@ -1529,6 +1549,10 @@ void img75t0(surf *d, long x, long y, surf *s) {
     //surfaces valid?
     if (s == NULL) return;
     if (d == NULL) return;
+    // MPRES-P4.2: flush any GDI text DIB cached on d/s before this software blit
+    // (see img() for rationale).
+    surf_text_dc_release(d);
+    surf_text_dc_release(s);
     //offscreen?
     dx = d->dwWidth;
     if (x >= dx) return;
@@ -1672,6 +1696,10 @@ void img75t(surf *d, long x, long y, surf *s) {
     //surfaces valid?
     if (s == NULL) return;
     if (d == NULL) return;
+    // MPRES-P4.2: flush any GDI text DIB cached on d/s before this software blit
+    // (see img() for rationale).
+    surf_text_dc_release(d);
+    surf_text_dc_release(s);
     //offscreen?
     dx = d->dwWidth;
     if (x >= dx) return;
