@@ -261,9 +261,23 @@ DirectDraw.
   key). All three keep a DD Blt fallback for `->o==NULL` surfaces (PRIMARY, any
   remaining SURF_VIDMEM). `cls` vidmem fallback left in place (reached only when
   `s->o==NULL`). Tri-target Debug green, zero new warnings._
-- ⬜ **MPRES-P4.2** Delete `IDirectDraw*` entirely: `dd`/`dd1`, `setupddraw`'s
+- ✅ **MPRES-P4.2** Delete `IDirectDraw*` entirely: `dd`/`dd1`, `setupddraw`'s
   DDraw bits, `ddrawshutdown`'s DDraw bits, `ddraw.h`/`ddraw.lib` from the
-  client build. `surf` loses its `LPDIRECTDRAWSURFACE4`.
+  client build. `surf` loses its `LPDIRECTDRAWSURFACE4`. _Done: `struct surf`
+  is now a lean owned-pixel descriptor (`o`/`ownedPixels` + cached DIB-section
+  text DC; no `LPDIRECTDRAWSURFACE4 s` / `DDSURFACEDESC2 d`). `setupddraw()`
+  just zeroes `surflist` and returns; `ddrawshutdown()` tears down the modern
+  presenter + `purgesurfaces()`. No `#include <ddraw.h>` anywhere; no `ddraw`
+  in the CMake link libs (only `dxguid`/`dsound`/`dplay*` for DirectSound/
+  DirectPlay remain, out of scope). Residual dead DirectDraw legacy removed
+  this pass: the two commented `img(d,x,y,s)` DD-`Blt` blocks in `myddraw.cpp`
+  and the commented `DDRAW_display_pixelformat`-gated ps/ps2/ps3/ps4 alloc
+  block in `setup_client.inc`. The DD `Blt` `->o==NULL` fallbacks from P4.1 are
+  gone — every surface owns pixels. Tri-target Release green (client/both/host),
+  zero new warnings (only pre-existing C4731 inline-asm / C4996 CRT / D9025 /GL).
+  Startup crash (stack-guard in the DIB path) + the render regressions it
+  introduced (shadow sprite-stacking, invisible UI/held-item cursor, "L" look
+  black flicker) were all fixed and user-smoke-tested before closing._
 - ⬜ **MPRES-P4.3** Verify (T3): full golden pixel matrix + benchmark; confirm
   `host`/`both` unaffected; zero new warnings.
 - **Exit:** **no DirectDraw in the client.** Inline-asm/blit pixel output
@@ -385,3 +399,37 @@ present-path exception, not a rasterizer change).
   NEXT: user runtime-smoke the startup path and continue the remaining
   `MPRES-P4.2` DirectDraw-call-site cleanup.
 
+- **2026-07-02 (MPRES-P4.1 render regressions fixed + MPRES-P4.2 CLOSED).**
+  Finished stabilizing the P4.2 DirectDraw removal after the crash fix.
+  - **P4.1 render regressions (all user-smoke-tested OK):**
+    1. _Shadow tiles stacked many overlapping item sprites_ — the crash-report
+       agent commit (f655e4e) had pasted keyed-50%-blend (`imgt0`) logic into the
+       opaque/keyed blitters `img`/`img0`/`imgt`/`img75t`, turning opaque copies
+       into transparent blends. Fixed by reverse-applying only the 8 corrupted
+       blitter hunks (restoring d2cd7de opaque/keyed/blend semantics) while
+       keeping the legit crash fixes.
+    2. _No UI / no held-item cursor_ — the DIB text mechanism is a snapshot-and-
+       restore of `ps->o`; the per-frame world-text path left a stale DIB held,
+       and `refresh()`'s release memcpy'd it back over the UI/cursor. Fixed by
+       adding `surf_text_dc_release(d); surf_text_dc_release(s);` (after the NULL
+       checks) to all 6 positional `img*` blitters so any held DIB is flushed
+       before positional draws.
+    3. _"L" look black flicker_ — `STATUSMESSadd` (both overloads) and
+       `STATUSMESSwrapline` acquire a DIB on `ps` purely to *measure* text
+       (`GetTextExtentPoint32`/`GetTextExtentExPoint`) but never released it. The
+       "Thou dost see" reply arrives via net mid-frame, snapshotting an
+       incomplete/black `ps->o`, which was later flushed over the composited
+       frame. Fixed by releasing the cached DIB at the end of those three
+       measurement-only functions (a pixel no-op — nothing is drawn into it).
+  - **P4.2 closeout:** verified the whole DirectDraw device/header/lib footprint
+    is already gone (lean `struct surf`, gutted `setupddraw`/`ddrawshutdown`, no
+    `ddraw.h` include, no `ddraw` link lib), then removed the last dead
+    DirectDraw legacy: two commented `img(d,x,y,s)` DD-`Blt` blocks in
+    `myddraw.cpp` and the commented `DDRAW_display_pixelformat` ps/ps2/ps3/ps4
+    block in `setup_client.inc`. Tri-target Release green (client/both/host),
+    zero new warnings.
+  - **NEXT → MPRES-P4.3:** verification (T3) — full golden-pixel matrix +
+    per-present benchmark on NVIDIA hardware; confirm `host`/`both` unaffected.
+    Then MPRES-P5 (decommission the MM-P9 `U6O-DIAG` diagnostic scaffolding and
+    file this plan to `docs/plans/done/`). Note: a stale `buildlog.txt` sits at
+    the repo root (old failing-build capture) — safe to delete.

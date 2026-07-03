@@ -30,21 +30,11 @@ MessageBox(NULL,"InitInstance failed","Ultima 6 Online",MB_OK); exit(0);
 if (NEThost==NULL) setupddraw();
 
 
-/*
-ps=newsurf(1024,768,SURF_SYSMEM16);
-if (DDRAW_display_pixelformat.dwRGBBitCount!=16){
-ps2=newsurf(1024/2,768/2,SURF_SYSMEM);
-ps3=newsurf(1024,768,SURF_SYSMEM);
-ps4=newsurf(1024/2,768/2,SURF_SYSMEM16); //to temporarily convert to 16bit?
-}else{
-ps2=newsurf(1024/2,768/2,SURF_SYSMEM16);
-}
-ps5=newsurf(1024,768,SURF_SYSMEM16); //unconverted mimimap
-ps6=newsurf(80,60,SURF_SYSMEM16); //convert to minimap size
-ps7=newsurf(120,120,SURF_SYSMEM16); //unconverted treasuremap
-ps8=newsurf(240,240,SURF_SYSMEM16); //convert to treasuremap size
-tmap_marker=newsurf(8,8,SURF_SYSMEM16); //surface for treasure map markers
-*/
+// MPRES-P4.2: the legacy DirectDraw surface-allocation block that stood here
+// (ps/ps2/ps3/ps4 gated on DDRAW_display_pixelformat.dwRGBBitCount) was removed
+// with DirectDraw. `ps` is now allocated below as a plain owned RGB565 surface;
+// the deleted 32-bpp helpers (ps2/ps3/ps4) were only read by the removed
+// dxrefresh present converters (see MPRES-P2.3/P2.3b).
 
 // r222 nothing changed here: just some constants which can't be changed
 

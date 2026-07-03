@@ -714,46 +714,9 @@ void img0(surf *d, long x, long y, surf *s) {
             }
 } //img0(...)
 
-
-/*
-void img(surf* d,long x,long y,surf* s)
-{
-if (s==NULL) return;
-if (d==NULL) return;
-static RECT r1,r2;
-r1.top=y;
-r1.bottom=y+s->dwHeight;
-r1.left=x;
-r1.right=x+s->dwWidth;
-r2.left=0;
-r2.top=0;
-r2.bottom=s->dwHeight;
-r2.right=s->dwWidth;
-
-if (r1.right>d->dwWidth)
-{
-r2.right-=r1.right-d->dwWidth;
-r1.right=d->dwWidth;
-}
-if (r1.bottom>d->dwHeight)
-{
-r2.bottom-=r1.bottom-d->dwHeight;
-r1.bottom=d->dwHeight;
-}
-if (r1.left<0)
-{
-r2.left-=r1.left;
-r1.left=0;
-}
-if (r1.top<0)
-{
-r2.top-=r1.top;
-r1.top=0;
-}
-d->s->Blt(&r1,s->s,&r2,DDBLT_WAIT,NULL);
-return;
-}
-*/
+// MPRES-P4.2: the legacy DirectDraw `img(d,x,y,s)` Blt implementation that
+// stood here was removed with the rest of DirectDraw. Its software replacement
+// is the positional img() below.
 
 void img(surf *d, surf *s) {
     if (s == NULL || d == NULL) return;
@@ -1152,50 +1115,9 @@ void ddrawshutdown() {
     purgesurfaces();
 }
 
-/*
-void img(surf* d,long x,long y,surf* s)
-{
-static RECT r1,r2;
-r1.top=y;
-r1.bottom=y+s->dwHeight;
-r1.left=x;
-r1.right=x+s->dwWidth;
-r2.left=0;
-r2.top=0;
-r2.bottom=s->dwHeight;
-r2.right=s->dwWidth;
-
-if (r1.right>d->dwWidth)
-{
-r2.right-=r1.right-d->dwWidth;
-r1.right=d->dwWidth;
-}
-if (r1.bottom>d->dwHeight)
-{
-r2.bottom-=r1.bottom-d->dwHeight;
-r1.bottom=d->dwHeight;
-}
-if (r1.left<0)
-{
-r2.left-=r1.left;
-r1.left=0;
-}
-if (r1.top<0)
-{
-r2.top-=r1.top;
-r1.top=0;
-}
-r1.right--;
-r2.right--;
-d->s->Blt(&r1,s->s,&r2,DDBLT_WAIT|DDBLT_KEYSRC,NULL);
-r1.right++;
-r2.right++;
-r1.left=r1.right-1;
-r2.left=r2.right-1;
-d->s->Blt(&r1,s->s,&r2,DDBLT_WAIT|DDBLT_KEYSRC,NULL);
-return;
-}
-*/
+// MPRES-P4.2: the legacy DirectDraw keyed `img(d,x,y,s)` Blt implementation
+// that stood here (a colour-keyed edge-fixup double blit) was removed with the
+// rest of DirectDraw. Its software replacement is the positional img0() below.
 
 void img0(surf *d, surf *s) {
     // MM-P9.5: release cached text DCs before any surface operation.
