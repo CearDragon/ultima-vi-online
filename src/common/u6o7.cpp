@@ -1270,10 +1270,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                     u6o::client::g_volcontrol_user_positioned = false;
                     u6o::client::g_volcontrol_user_x = 0;
                     u6o::client::g_volcontrol_user_y = 0;
+                    u6o::client::g_statusprev_user_positioned = false;
+                    u6o::client::g_statusprev_user_x = 0;
+                    u6o::client::g_statusprev_user_y = 0;
                     cltset.qkstf_offset_x = 32767;
                     cltset.qkstf_offset_y = 32767;
                     cltset.volcontrol_offset_x = 32767;
                     cltset.volcontrol_offset_y = 32767;
+                    cltset.statusprev_offset_x = 32767;
+                    cltset.statusprev_offset_y = 32767;
                     ResetUiPanelsIntoView(backbufferW(), backbufferH());
                     InvalidateRect(hWnd, NULL, FALSE);
                     return 0;

@@ -637,6 +637,10 @@ i
     }
   }//i (frame)
 clientsettingsvalid=TRUE;
+// Mirror the "keep status text log visible" pin into cltset every frame, the
+// same way panel positions are mirrored above, so the shutdown writer in
+// u6o7.cpp always persists the live pin state rather than a startup-loaded copy.
+cltset.statusprev_logpinned = statusmessage_logpinned;
 
 
 // r333 no changes are made here
