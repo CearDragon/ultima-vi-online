@@ -106,6 +106,7 @@ extern unsigned char customportrait_upload;
 
 extern unsigned char clientframe;
 extern unsigned char camera_freeze;
+extern unsigned char menu_say_kallor;
 
 extern long ctpx;
 extern long ctpy; //client: screen offset

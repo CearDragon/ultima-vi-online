@@ -556,6 +556,10 @@ unsigned char customportrait_upload;
 
 unsigned char clientframe;
 unsigned char camera_freeze = 0;
+// Set to 1 by the "Say KAL LOR" Actions menu item (after the user confirms the
+// XP-loss warning). The client game loop consumes it on the next frame, feeding
+// "KAL LOR" through the normal speech path so the host teleports the player home.
+unsigned char menu_say_kallor = 0;
 
 long ctpx;
 long ctpy; //client: screen offset

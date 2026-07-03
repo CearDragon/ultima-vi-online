@@ -1,5 +1,7 @@
 #include "function_client.h"
 #include "define_client.h"
+#include "Resource.h" // IDM_ACTIONS_CAMERA_LOCK etc. for RefreshMenuChecks
+#include <string.h>   // strcmp for the Options settings table
 #include "viewport.h" // RW-P2: backbufferW/H, lightingStride, lightingTotalBytes
 //#include <windows.h>
 #pragma warning(disable: 4018 4244)
@@ -2085,6 +2087,227 @@ void setsetting_int(const char *name, long value) {
         put(tfh, out->d, out->l);
     }
     close(tfh);
+}
+
+// Rewrites settings.txt in place, changing the [value] token of a CHOICE line.
+// A CHOICE line looks like:
+//     Some descriptive text is [50%] transparent.{NAME,CHOICE,not,50%,25%}
+// The `{NAME,` marker identifies the line; the first `[...]` token in it is the
+// current value. `value` must be one of the choice tokens (e.g. "25%"). Every
+// other line is preserved byte-for-byte. Silent on failure, like setsetting_int.
+void setsetting_choice(const char *name, const char *value) {
+    static file *tfh;
+    static txt *line = txtnew();
+    static txt *out = txtnew();
+    static txt *needle = txtnew();
+    static txt *lowerline = txtnew();
+    static txt *rebuilt = txtnew();
+    static long i, sz;
+
+    txtNEWLEN(out, 0);
+
+    // "{NAME," marker (lowercased) uniquely identifies the setting's line.
+    txtset(needle, "{");
+    txtadd(needle, name);
+    txtadd(needle, ",");
+    txtlcase(needle);
+
+    tfh = open2("settings.txt", OF_READ | OF_SHARE_COMPAT);
+    if (tfh->h == HFILE_ERROR) { close(tfh); return; } // nothing to rewrite
+
+    for (;;) {
+        i = seek(tfh);
+        sz = lof(tfh);
+        if (i >= sz) break;
+        txtfilein(line, tfh);
+        if (line->l == 0) continue;
+
+        txtset(lowerline, line);
+        txtlcase(lowerline);
+        if (txtsearch(lowerline, needle) != 0) {
+            // Replace the first [..] token in the line with [value].
+            long lb = -1, rb = -1;
+            for (long j = 0; j < line->l; j++) { if (line->d[j] == '[') { lb = j; break; } }
+            if (lb >= 0)
+                for (long j = lb + 1; j < line->l; j++) { if (line->d[j] == ']') { rb = j; break; } }
+            if (lb >= 0 && rb > lb) {
+                txtNEWLEN(rebuilt, 0);
+                for (long j = 0; j <= lb; j++) txtaddchar(rebuilt, line->d[j]); // up to and incl '['
+                txtadd(rebuilt, value);
+                for (long j = rb; j < line->l; j++) txtaddchar(rebuilt, line->d[j]); // from ']' on
+                txtset(line, rebuilt);
+            }
+        }
+
+        if (out->l) txtadd(out, "\r\n");
+        txtadd(out, line);
+    }
+    close(tfh);
+
+    if (out->l) txtadd(out, "\r\n");
+    tfh = open2("settings.txt", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+    if (tfh->h != HFILE_ERROR) {
+        put(tfh, out->d, out->l);
+    }
+    close(tfh);
+}
+
+// Push the current music-volume global to the DirectMusic + low-level MIDI
+// outputs. This is a behavior-preserving extraction of the inline block that
+// used to live only at the `u6omidivolume_changed:` label in the volume-panel
+// loop (loop_client_part_game_open.cpp); the Options menu reuses it.
+void applyMidiVolume() {
+    if (U6O_DISABLEMUSIC) return;
+    float f = u6omidi_volume[midi_loaded];
+    f = f * (float) u6omidivolume / 255.0f;
+    f = 255 - f;
+    f = f * 0.25f;
+    f *= f;
+    // DMUS_VOLUME_MAX 2000 (+20 dB) .. DMUS_VOLUME_MIN -20000 (-200 dB)
+    u6omidi->SetMasterVolume(-f);
+    if (u6omidivolume == 0) u6omidi->Stop();
+
+    if (midiout_setup) {
+        int x = u6omidivolume / 2; // 0-255 -> 0-127
+        midiOutShortMsg(midiout_handle, 0x000007B0 + x * 65536);
+        midiOutShortMsg(midiout_handle, 0x000007B1 + x * 65536);
+        midiOutShortMsg(midiout_handle, 0x000007B2 + x * 65536);
+        midiOutShortMsg(midiout_handle, 0x000007B3 + x * 65536);
+        midiOutShortMsg(midiout_handle, 0x000007B4 + x * 65536);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Options menu — data-driven definition
+// ---------------------------------------------------------------------------
+// One entry per user-configurable setting that persists to a config file.
+// MS_CHOICE settings live in settings.txt (read via getsetting, written via
+// setsetting_choice); their optLabel[] tokens must match the settings.txt
+// choice tokens exactly. MS_VOLUME settings are the settings.bin-backed audio
+// levels (persisted from the live globals at shutdown in u6o7.cpp).
+//
+// The array index is the settingIndex used to derive WM_COMMAND ids
+// (see IDM_OPTIONS_* in function_client.h) — DO NOT reorder without care.
+enum { MS_CHOICE = 0, MS_VOLUME = 1 };
+
+struct MenuSetting {
+    const char *category;     // "Graphics" / "Audio" / "Input" (grouping)
+    const char *label;        // submenu label
+    int kind;                 // MS_CHOICE / MS_VOLUME
+    const char *settingName;  // MS_CHOICE: settings.txt key; else nullptr
+    unsigned char *volTarget; // MS_VOLUME: global to read/write; else nullptr
+    int isMusic;              // MS_VOLUME: also push to MIDI on change
+    int optionCount;
+    const char *optLabel[8];  // choice tokens (MS_CHOICE) / display (MS_VOLUME)
+    unsigned char optVol[8];  // MS_VOLUME values
+};
+
+static const MenuSetting g_menuSettings[] = {
+    // ---- Graphics ----
+    {"Graphics", "Clouds",                   MS_CHOICE, "CLOUDS",        0, 0, 2, {"Yes", "No"}, {0}},
+    {"Graphics", "Allow window resize",      MS_CHOICE, "WINDOW_RESIZE", 0, 0, 2, {"Yes", "No"}, {0}},
+    {"Graphics", "Transparency: party list", MS_CHOICE, "PARTYLISTWINDOW_TRANSPARENCYLEVEL",              0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: inventory",  MS_CHOICE, "INVENTORYWINDOW_TRANSPARENCYLEVEL",              0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: spellbook",  MS_CHOICE, "SPELLBOOKWINDOW_TRANSPARENCYLEVEL",              0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: text input", MS_CHOICE, "TEXTINPUTPORTRAIT_TRANSPARENCYLEVEL",            0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: volume box", MS_CHOICE, "VOLUMECONTROL_TRANSPARENCYLEVEL",                0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: convo arrows", MS_CHOICE, "CONVERSATIONLOG_SCROLLARROWS_TRANSPARENCYLEVEL", 0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: status box", MS_CHOICE, "STATUSMESSAGE_VIEWPREVIOUSBOX_TRANSPARENCYLEVEL", 0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: piano keys", MS_CHOICE, "PLAYINSTRUMENTPIANOKEYS_TRANSPARENCYLEVEL",      0, 0, 3, {"not", "50%", "25%"}, {0}},
+    // ---- Audio ----
+    {"Audio", "Load MIDI drivers",           MS_CHOICE, "ALLOWMIDI",     0, 0, 2, {"Do", "Don't"}, {0}},
+    {"Audio", "Music volume",                MS_VOLUME, 0, &u6omidivolume, 1, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    {"Audio", "Sound volume",                MS_VOLUME, 0, &u6ovolume,     0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    {"Audio", "Voice volume",                MS_VOLUME, 0, &u6ovoicevolume, 0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    // ---- Input ----
+    {"Input", "Read joystick",               MS_CHOICE, "ALLOWJOYSTICK", 0, 0, 2, {"Do", "Don't"}, {0}},
+};
+static const int g_menuSettingCount = (int) (sizeof(g_menuSettings) / sizeof(g_menuSettings[0]));
+
+// Fixed category order for building the Options submenus.
+static const char *g_menuCategories[] = {"Graphics", "Audio", "Input"};
+static const int g_menuCategoryCount = (int) (sizeof(g_menuCategories) / sizeof(g_menuCategories[0]));
+
+// Current 0-based option index for a setting, or -1 if unknown.
+static int optionsCurrentIndex(const MenuSetting &ms) {
+    if (ms.kind == MS_CHOICE) {
+        long v = getsetting(ms.settingName); // 1-based, 0/FALSE if missing
+        return v > 0 ? (int) v - 1 : -1;
+    }
+    // MS_VOLUME: pick the preset nearest the live global value.
+    int cur = ms.volTarget ? *ms.volTarget : 0;
+    int best = 0, bestd = 1 << 30;
+    for (int o = 0; o < ms.optionCount; o++) {
+        int d = cur - (int) ms.optVol[o];
+        if (d < 0) d = -d;
+        if (d < bestd) { bestd = d; best = o; }
+    }
+    return best;
+}
+
+void BuildOptionsMenu(HMENU menubar) {
+    if (!menubar) return;
+    HMENU options = CreatePopupMenu();
+
+    for (int c = 0; c < g_menuCategoryCount; c++) {
+        HMENU catMenu = CreatePopupMenu();
+        for (int s = 0; s < g_menuSettingCount; s++) {
+            const MenuSetting &ms = g_menuSettings[s];
+            if (strcmp(ms.category, g_menuCategories[c]) != 0) continue;
+            int base = IDM_OPTIONS_BASE + s * IDM_OPTIONS_STRIDE;
+            HMENU sub = CreatePopupMenu();
+            for (int o = 0; o < ms.optionCount; o++)
+                AppendMenu(sub, MF_STRING, (UINT_PTR) (base + o), ms.optLabel[o]);
+            AppendMenu(catMenu, MF_POPUP, (UINT_PTR) sub, ms.label);
+        }
+        AppendMenu(options, MF_POPUP, (UINT_PTR) catMenu, g_menuCategories[c]);
+    }
+
+    // Insert "Options" just before the trailing Help popup.
+    int pos = GetMenuItemCount(menubar);
+    if (pos > 0) pos -= 1; // before Help
+    InsertMenu(menubar, pos, MF_BYPOSITION | MF_POPUP, (UINT_PTR) options, "&Options");
+}
+
+void RefreshMenuChecks(HMENU menubar) {
+    if (!menubar) return;
+    // Actions -> Toggle Camera Lock reflects the live camera_freeze state.
+    CheckMenuItem(menubar, IDM_ACTIONS_CAMERA_LOCK,
+                  MF_BYCOMMAND | (camera_freeze ? MF_CHECKED : MF_UNCHECKED));
+    // Options radio groups reflect the current stored/live value.
+    for (int s = 0; s < g_menuSettingCount; s++) {
+        const MenuSetting &ms = g_menuSettings[s];
+        int base = IDM_OPTIONS_BASE + s * IDM_OPTIONS_STRIDE;
+        int cur = optionsCurrentIndex(ms);
+        if (cur < 0 || cur >= ms.optionCount) cur = 0;
+        CheckMenuRadioItem(menubar, base, base + ms.optionCount - 1,
+                           base + cur, MF_BYCOMMAND);
+    }
+}
+
+bool HandleOptionsCommand(int cmdId) {
+    if (cmdId < IDM_OPTIONS_BASE || cmdId >= IDM_OPTIONS_BASE + IDM_OPTIONS_RANGE)
+        return false;
+    int rel = cmdId - IDM_OPTIONS_BASE;
+    int s = rel / IDM_OPTIONS_STRIDE;
+    int opt = rel % IDM_OPTIONS_STRIDE;
+    if (s < 0 || s >= g_menuSettingCount) return false;
+    const MenuSetting &ms = g_menuSettings[s];
+    if (opt < 0 || opt >= ms.optionCount) return false;
+
+    if (ms.kind == MS_CHOICE) {
+        setsetting_choice(ms.settingName, ms.optLabel[opt]);
+        // CLOUDS has a safe in-memory mirror (a pure render gate), so apply it
+        // live. The remaining choice settings are read once at startup and take
+        // effect on next launch — matching their existing behavior — but they
+        // persist immediately via setsetting_choice above.
+        if (strcmp(ms.settingName, "CLOUDS") == 0)
+            noclouds = (opt == 1) ? TRUE : FALSE; // opt 0 = "Yes", opt 1 = "No"
+    } else {
+        if (ms.volTarget) *ms.volTarget = ms.optVol[opt];
+        if (ms.isMusic) applyMidiVolume();
+    }
+    return true;
 }
 
 // rrr added new mode handling

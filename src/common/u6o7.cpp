@@ -865,10 +865,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
     hWnd2 = CreateWindow(szWindowClass, window_name, WS_OVERLAPPEDWINDOW,
                          0, 0, clrect.right - clrect.left, clrect.bottom - clrect.top, NULL, NULL, hInstance, NULL);
 
-    // Attach the resource-defined menu (Actions/Help) to the client window.
+    // Attach the resource-defined menu (Actions/Help) to the client window,
+    // then build & insert the data-driven Options popup between them.
     {
         HMENU appMenu = LoadMenu(hInstance, MAKEINTRESOURCE(IDC_U6O7));
         if (appMenu) {
+            BuildOptionsMenu(appMenu);
             SetMenu(hWnd2, appMenu);
             DrawMenuBar(hWnd2);
         }
@@ -1270,9 +1272,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             wheel_move += delta;
             break;
 
+        case WM_INITMENUPOPUP:
+#ifdef CLIENT
+            // Refresh dynamic check/radio marks (camera-lock toggle + every
+            // Options radio group) so they match live state whenever a menu
+            // popup is about to be shown.
+            RefreshMenuChecks(GetMenu(hWnd));
+#endif
+            return DefWindowProc(hWnd, message, wParam, lParam);
+
         case WM_COMMAND:
 #ifdef CLIENT
+            if (HandleOptionsCommand(LOWORD(wParam))) {
+                // Persisted (settings.txt) / applied live (volumes) inside the
+                // handler. Nothing else to do.
+                return 0;
+            }
             switch (LOWORD(wParam)) {
+                case IDM_ACTIONS_CAMERA_LOCK:
+                    // Same toggle as the Tab key (U6OK_CAMERATOGGLE); the
+                    // checkmark is refreshed on WM_INITMENUPOPUP.
+                    camera_freeze = !camera_freeze;
+                    return 0;
+
+                case IDM_ACTIONS_KAL_LOR:
+                    // Confirm via the existing menu modal (MessageBox, as About
+                    // uses) before speaking the mantra — it costs XP.
+                    if (MessageBox(hWnd,
+                                   "You will be teleported back to Britain for a 16th of your experience points.",
+                                   "Say \"KAL LOR\"?",
+                                   MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
+                        // Consumed next frame by the client loop, which routes
+                        // "KAL LOR" through the normal speech path.
+                        menu_say_kallor = 1;
+                    }
+                    return 0;
+
                 case IDM_ACTIONS_RESET_UI:
                     // Clear user overrides and force key panels back on-screen.
                     u6o::client::g_qkstf_user_positioned = false;

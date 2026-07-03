@@ -115,28 +115,9 @@ maxminmini:
     if ((volcontrol->mouse_y>=32)&&(volcontrol->mouse_y<=56)){
       u6omidivolume=(volcontrol->mouse_x-46)*72/20;
 u6omidivolume_changed:
-
-
-      if (U6O_DISABLEMUSIC==FALSE){
-        f=u6omidi_volume[midi_loaded];
-        f=f*(float)u6omidivolume/255.0f;
-        f=255-f; f=f*0.25f; f*=f;
-        //DMUS_VOLUME_MAX     2000        /* +20 dB */
-        //DMUS_VOLUME_MIN   -20000        /* -200 dB */
-        u6omidi->SetMasterVolume(-f);
-        if (u6omidivolume==0) u6omidi->Stop();
-
-        if (midiout_setup){
-          x=u6omidivolume/2;//change 0-255 to 0-127
-          midiOutShortMsg(midiout_handle,0x000007B0+x*65536); //set volume
-          midiOutShortMsg(midiout_handle,0x000007B1+x*65536); //set volume
-          midiOutShortMsg(midiout_handle,0x000007B2+x*65536); //set volume
-          midiOutShortMsg(midiout_handle,0x000007B3+x*65536); //set volume
-          midiOutShortMsg(midiout_handle,0x000007B4+x*65536); //set volume
-        }
-
-      }
-
+      // Behavior-preserving extraction — see applyMidiVolume() in
+      // function_client.cpp (also reused by the Options > Audio menu).
+      applyMidiVolume();
     }
     if (volcontrol->mouse_y>56){
       u6ovoicevolume=(volcontrol->mouse_x-46)*72/20;
@@ -648,6 +629,11 @@ voicechat_permissionrequestfinished:
   }//tplay->party[0]==NULL
 deadglobalmessage_return:
 
+  if (menu_say_kallor){ //Actions menu "Say KAL LOR" (post-confirmation) -> speak it
+    menu_say_kallor=0;
+    talkprev=0; inprec_global=0;
+    txtset(inpmess,"KAL LOR");
+  }
   if (inpmess->l){ //send input message to the host
     txtset(t2,"?"); t2->d2[0]=6;
     if (inprec_global){t2->d2[0]=12; client_globalwait=0;}//global message

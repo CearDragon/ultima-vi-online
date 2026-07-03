@@ -298,6 +298,44 @@ long getsetting(const char *d);
 // as WINDOW_MAXIMIZED / WINDOW_W / WINDOW_H / WINDOW_X / WINDOW_Y.
 void setsetting_int(const char *name, long value);
 
+// Rewrite settings.txt in place, changing the [value] token of an existing
+// CHOICE line `<text [old]>{NAME,CHOICE,opt1,...}` to `[value]`. `value` must
+// be one of the choice tokens. Silent on failure (missing file / missing key),
+// mirroring setsetting_int. Used by the Options menu.
+void setsetting_choice(const char *name, const char *value);
+
+// ---------------------------------------------------------------------------
+// Client window menu (Actions / Options) — see u6o7.rc.in for the static
+// Actions/Help layout; the Options popup is built at runtime because it is
+// data-driven (one entry per persistent user setting).
+//
+// Options command-id scheme: an option item's WM_COMMAND id is
+//   IDM_OPTIONS_BASE + settingIndex * IDM_OPTIONS_STRIDE + optionIndex
+// where settingIndex indexes the internal settings table and optionIndex is
+// the 0-based choice. The whole range [IDM_OPTIONS_BASE, +IDM_OPTIONS_RANGE)
+// is reserved for the Options menu and must not collide with Resource.h ids.
+#define IDM_OPTIONS_BASE   40000
+#define IDM_OPTIONS_STRIDE 16
+#define IDM_OPTIONS_RANGE  2000
+
+// Push the current music-volume global (u6omidivolume) to the DirectMusic and
+// low-level MIDI outputs. Extracted from the volume-panel loop so the Options
+// menu can apply music-volume changes with identical behavior.
+void applyMidiVolume();
+
+// Build and insert the "Options" popup into the given menu bar (between the
+// Actions and Help popups). Call once, right after SetMenu().
+void BuildOptionsMenu(HMENU menubar);
+
+// Refresh the check/radio marks of the dynamic menu items (camera-lock toggle
+// and every Options radio group) to match live state. Call from
+// WM_INITMENUPOPUP so marks are always current when a popup opens.
+void RefreshMenuChecks(HMENU menubar);
+
+// Handle a WM_COMMAND id that belongs to the Options menu. Returns true if the
+// id was an Options command (and was applied), false otherwise.
+bool HandleOptionsCommand(int cmdId);
+
 void refresh(); // FIXME Inline assembly alert!
 
 void scrlog(const char *d); //screen log
