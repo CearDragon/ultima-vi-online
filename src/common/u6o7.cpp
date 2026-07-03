@@ -966,9 +966,56 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
     return TRUE;
 }
 #endif
+
+#ifdef CLIENT
+// --- Menu-modal keepalive pump -------------------------------------------
+// When the user opens the native menu bar, Windows enters a MODAL message loop
+// inside DefWindowProc that does NOT return to WinMain until the menu closes.
+// That starves the per-frame game loop, which is the only place the client
+// normally emits its ~4s type-251 keepalive (loop_client_part_misc_prelude.cpp)
+// and the only place it drains the socket receive ring. The host drops a client
+// after just 16s of silence (idle_connect, loop_host_part_a_save.cpp), so a user
+// lingering in a menu got disconnected and the client became unresponsive.
+//
+// Fix: while inside the menu modal loop, run a WM_TIMER that re-sends the exact
+// same keepalive on the main thread (NET_send only queues onto socketclient_si,
+// same producer/consumer pattern the frame already uses). This keeps the host
+// connection alive; the frame resumes and processes the buffered world updates
+// as soon as the menu closes. The 3D view is intentionally paused while a menu
+// is held open — only the connection is kept warm.
+#define IDT_MENU_KEEPALIVE 0xB0B0
+#define MENU_KEEPALIVE_MS  2000 // well under the host's 16s idle_connect cutoff
+
+static void menuKeepalivePump() {
+    if (intro != 0) return;        // only in-game (0 == in-game); before login there is no live host link
+    static txt *ka = txtnew();
+    txtset(ka, "?");
+    ka->d2[0] = 251;               // type 251: host-side pure keepalive (resets idle_connect)
+    NET_send(NETplayer, NULL, ka);
+}
+#endif
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     //int wmId, wmEvent;
     switch (message) {
+#ifdef CLIENT
+        case WM_ENTERMENULOOP:
+            // Menu opened: start pumping keepalives so the host doesn't drop us
+            // while its modal loop starves the game frame.
+            SetTimer(hWnd, IDT_MENU_KEEPALIVE, MENU_KEEPALIVE_MS, NULL);
+            return DefWindowProc(hWnd, message, wParam, lParam);
+
+        case WM_EXITMENULOOP:
+            KillTimer(hWnd, IDT_MENU_KEEPALIVE);
+            return DefWindowProc(hWnd, message, wParam, lParam);
+
+        case WM_TIMER:
+            if (wParam == IDT_MENU_KEEPALIVE) {
+                menuKeepalivePump();
+                return 0;
+            }
+            return DefWindowProc(hWnd, message, wParam, lParam);
+#endif
         case WM_KILLFOCUS:
             break;
         case WM_SETFOCUS:

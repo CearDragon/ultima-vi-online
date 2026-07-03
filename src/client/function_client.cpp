@@ -2228,6 +2228,37 @@ static const int g_menuSettingCount = (int) (sizeof(g_menuSettings) / sizeof(g_m
 static const char *g_menuCategories[] = {"Graphics", "Audio", "Input"};
 static const int g_menuCategoryCount = (int) (sizeof(g_menuCategories) / sizeof(g_menuCategories[0]));
 
+// Leaf submenu (the popup holding one setting's radio options) captured at
+// build time, indexed by settingIndex. CheckMenuRadioItem does NOT recurse
+// into nested submenus the way CheckMenuItem does, so RefreshMenuChecks must
+// operate on the exact popup that contains the option items — not the menubar.
+static HMENU g_optionSubmenus[64] = {0};
+
+// Apply a transparency CHOICE setting to its live frame object(s) so the change
+// is visible immediately, mirroring the startup apply in setup_client.inc.
+// `level` is the 0-based option index (0=not, 1=50%, 2=25%), i.e. the same
+// (getsetting()-1) value the startup code stores in mouse_over_transparent.
+static void applyTransparencyLive(const char *name, int level) {
+    unsigned char v = (unsigned char) level;
+    if (strcmp(name, "PARTYLISTWINDOW_TRANSPARENCYLEVEL") == 0) {
+        if (qkstf) qkstf->mouse_over_transparent = v;
+    } else if (strcmp(name, "INVENTORYWINDOW_TRANSPARENCYLEVEL") == 0) {
+        for (int i = 0; i < 8; i++) if (party_frame[i]) party_frame[i]->mouse_over_transparent = v;
+    } else if (strcmp(name, "SPELLBOOKWINDOW_TRANSPARENCYLEVEL") == 0) {
+        for (int i = 0; i < 8; i++) if (party_spellbook_frame[i]) party_spellbook_frame[i]->mouse_over_transparent = v;
+    } else if (strcmp(name, "TEXTINPUTPORTRAIT_TRANSPARENCYLEVEL") == 0) {
+        if (inpf) inpf->mouse_over_transparent = v;
+    } else if (strcmp(name, "VOLUMECONTROL_TRANSPARENCYLEVEL") == 0) {
+        if (volcontrol) volcontrol->mouse_over_transparent = v;
+    } else if (strcmp(name, "CONVERSATIONLOG_SCROLLARROWS_TRANSPARENCYLEVEL") == 0) {
+        if (con_frm) con_frm->mouse_over_transparent = v;
+    } else if (strcmp(name, "STATUSMESSAGE_VIEWPREVIOUSBOX_TRANSPARENCYLEVEL") == 0) {
+        if (statusmessage_viewprev) statusmessage_viewprev->mouse_over_transparent = v;
+    } else if (strcmp(name, "PLAYINSTRUMENTPIANOKEYS_TRANSPARENCYLEVEL") == 0) {
+        if (musickeyboard) musickeyboard->mouse_over_transparent = v;
+    }
+}
+
 // Current 0-based option index for a setting, or -1 if unknown.
 static int optionsCurrentIndex(const MenuSetting &ms) {
     if (ms.kind == MS_CHOICE) {
@@ -2258,6 +2289,8 @@ void BuildOptionsMenu(HMENU menubar) {
             HMENU sub = CreatePopupMenu();
             for (int o = 0; o < ms.optionCount; o++)
                 AppendMenu(sub, MF_STRING, (UINT_PTR) (base + o), ms.optLabel[o]);
+            if (s >= 0 && s < (int) (sizeof(g_optionSubmenus) / sizeof(g_optionSubmenus[0])))
+                g_optionSubmenus[s] = sub; // remembered so RefreshMenuChecks can radio-check it
             AppendMenu(catMenu, MF_POPUP, (UINT_PTR) sub, ms.label);
         }
         AppendMenu(options, MF_POPUP, (UINT_PTR) catMenu, g_menuCategories[c]);
@@ -2274,14 +2307,18 @@ void RefreshMenuChecks(HMENU menubar) {
     // Actions -> Toggle Camera Lock reflects the live camera_freeze state.
     CheckMenuItem(menubar, IDM_ACTIONS_CAMERA_LOCK,
                   MF_BYCOMMAND | (camera_freeze ? MF_CHECKED : MF_UNCHECKED));
-    // Options radio groups reflect the current stored/live value.
+    // Options radio groups reflect the current stored/live value. The option
+    // items live in per-setting leaf submenus captured at build time;
+    // CheckMenuRadioItem must target that submenu directly (it does not recurse
+    // into nested popups the way CheckMenuItem does). Positions in the leaf
+    // submenu are exactly 0..optionCount-1, so check by position.
     for (int s = 0; s < g_menuSettingCount; s++) {
         const MenuSetting &ms = g_menuSettings[s];
-        int base = IDM_OPTIONS_BASE + s * IDM_OPTIONS_STRIDE;
+        HMENU sub = (s < (int) (sizeof(g_optionSubmenus) / sizeof(g_optionSubmenus[0]))) ? g_optionSubmenus[s] : 0;
+        if (!sub) continue;
         int cur = optionsCurrentIndex(ms);
         if (cur < 0 || cur >= ms.optionCount) cur = 0;
-        CheckMenuRadioItem(menubar, base, base + ms.optionCount - 1,
-                           base + cur, MF_BYCOMMAND);
+        CheckMenuRadioItem(sub, 0, ms.optionCount - 1, cur, MF_BYPOSITION);
     }
 }
 
@@ -2297,12 +2334,18 @@ bool HandleOptionsCommand(int cmdId) {
 
     if (ms.kind == MS_CHOICE) {
         setsetting_choice(ms.settingName, ms.optLabel[opt]);
-        // CLOUDS has a safe in-memory mirror (a pure render gate), so apply it
-        // live. The remaining choice settings are read once at startup and take
-        // effect on next launch — matching their existing behavior — but they
-        // persist immediately via setsetting_choice above.
+        // Apply live where a safe in-memory mirror exists so the change is
+        // visible immediately (and the persisted value is what took effect):
+        //  - CLOUDS: `noclouds` is a pure render gate.
+        //  - *_TRANSPARENCYLEVEL: the frame objects' mouse_over_transparent.
+        // The remaining choice settings (WINDOW_RESIZE, ALLOWMIDI,
+        // ALLOWJOYSTICK) are read once at startup and take effect on next
+        // launch, matching their existing behavior; they still persist
+        // immediately via setsetting_choice above.
         if (strcmp(ms.settingName, "CLOUDS") == 0)
             noclouds = (opt == 1) ? TRUE : FALSE; // opt 0 = "Yes", opt 1 = "No"
+        else
+            applyTransparencyLive(ms.settingName, opt);
     } else {
         if (ms.volTarget) *ms.volTarget = ms.optVol[opt];
         if (ms.isMusic) applyMidiVolume();
