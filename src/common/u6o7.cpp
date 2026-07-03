@@ -453,13 +453,24 @@ PM_NOREMOVE
                 DeleteObject(fnt7);
                 DeleteObject(systemfont);
                 RemoveFontResource(".\\dr\\u6o.ttf");
-                SendMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
                 RemoveFontResource(".\\dr\\gargish.ttf");
-                SendMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
                 RemoveFontResource(".\\dr\\runes.ttf");
-                SendMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
                 RemoveFontResource(".\\dr\\u6o2.ttf");
-                SendMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
+                // Shutdown-hang fix: the WM_FONTCHANGE broadcast MUST be
+                // non-blocking. The previous code called the SYNCHRONOUS
+                // SendMessage(HWND_BROADCAST, ...) once per font (4x). A
+                // synchronous HWND_BROADCAST send waits for *every* top-level
+                // window in the system to process the message; if any one is
+                // unresponsive it blocks indefinitely. Because this runs in the
+                // WM_QUIT shutdown block BEFORE settings.bin is written and
+                // before ExitProcess(0), a hung recipient left client.exe alive
+                // as a background process forever and the save routines
+                // (settings.bin, etc.) never ran. Use SendNotifyMessage — the
+                // same asynchronous broadcast the startup path uses right after
+                // AddFontResource in setup_client.inc — so shutdown never blocks
+                // on foreign windows. A single notify after all removals is
+                // sufficient.
+                SendNotifyMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
             }
 #endif
 
