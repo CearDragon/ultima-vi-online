@@ -1913,14 +1913,115 @@ int STATUSMESSwrapline(txt *src, long maxwidth, txt **out, int maxlines) {
 
 //X returned directly! unsigned long GETSETTING_OPTION;//a number from 0-? indicating the option chosen
 //if getsetting returns non-zero it succeeded
-long getsetting(const char *d) {
+
+// ---------------------------------------------------------------------------
+// settings.txt path anchoring + diagnostics.
+//
+// settings.txt is the CHOICE/int settings file that lives in the process
+// working directory (the .run configs launch with cwd = test/client). The
+// reader (getsetting) and writers (setsetting_choice / setsetting_int)
+// historically opened the *bare relative* name "settings.txt". If anything
+// changes the process cwd after startup (a common dialog, a shell action, an
+// OS quirk) the reader and a writer can silently resolve to different files —
+// producing the exact reported symptoms: the Options menu radios always show
+// the first ("none") option and selections never persist across restart, even
+// though the live apply (which touches frame objects directly, not the file)
+// still works.
+//
+// settingsFilePath() captures the working directory ONCE, on first use — which
+// happens during startup (setup_client.inc reads several settings before any
+// dialog can run), when cwd is guaranteed correct — and returns a stable
+// absolute path for every subsequent open. Read and write therefore always
+// hit the same file for the life of the process, regardless of later cwd
+// changes.
+static void settingsLog(const char *fmt, ...); // fwd decl (defined below)
+
+static bool fileExists(const char *p) {
+    DWORD a = GetFileAttributesA(p);
+    return a != INVALID_FILE_ATTRIBUTES && !(a & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+// Resolve the one settings.txt this process reads and writes for its whole life.
+// Captured ONCE, on first use (startup, before any dialog can change cwd).
+//
+// Resolution order:
+//   1. <cwd>\settings.txt      -- the normal case (IDE run sets cwd=test/client;
+//                                  double-clicking the deployed exe lands here too).
+//   2. <exeDir>\settings.txt   -- fallback for when the process was launched with
+//                                  a cwd that has no settings.txt (e.g. a shortcut
+//                                  with a different "Start in"). Per the deploy
+//                                  model the exe is dropped INTO test/client, so it
+//                                  sits right next to settings.txt.
+//   3. <cwd>\settings.txt      -- last resort if neither exists (a genuinely
+//                                  missing file); read/write will log & fail.
+// setsetting_choice cannot create settings.txt from scratch (it rewrites the
+// shipped {NAME,CHOICE,...} definition lines it can't reconstruct), so pointing
+// at the real file is what makes CHOICE settings persist at all.
+static const char *settingsFilePath() {
+    static char path[MAX_PATH] = {0};
+    if (path[0] == 0) {
+        char cwdPath[MAX_PATH] = {0};
+        char exePath[MAX_PATH] = {0};
+        char dir[MAX_PATH];
+
+        DWORD n = GetCurrentDirectoryA(sizeof(dir), dir);
+        if (n > 0 && n < sizeof(dir)) {
+            _snprintf(cwdPath, sizeof(cwdPath), "%s\\settings.txt", dir);
+            cwdPath[sizeof(cwdPath) - 1] = 0;
+        }
+
+        char exeDir[MAX_PATH];
+        DWORD m = GetModuleFileNameA(NULL, exeDir, sizeof(exeDir));
+        if (m > 0 && m < sizeof(exeDir)) {
+            char *slash = strrchr(exeDir, '\\');
+            if (slash) {
+                *slash = 0;
+                _snprintf(exePath, sizeof(exePath), "%s\\settings.txt", exeDir);
+                exePath[sizeof(exePath) - 1] = 0;
+            }
+        }
+
+        if (cwdPath[0] && fileExists(cwdPath)) {
+            strcpy(path, cwdPath);
+        } else if (exePath[0] && fileExists(exePath)) {
+            strcpy(path, exePath);
+        } else if (cwdPath[0]) {
+            strcpy(path, cwdPath); // neither exists; keep cwd (legacy behavior)
+        } else {
+            strcpy(path, "settings.txt"); // total fallback
+        }
+        settingsLog("PATH cwd=[%s] exe=[%s] chosen=[%s]", cwdPath, exePath, path);
+    }
+    return path;
+}
+
+// Append a diagnostic line to dr\settings_debug.log. Isolated, best-effort
+// (its own FILE* — independent of the legacy OpenFile helpers) so it can never
+// perturb the settings I/O it observes. Cheap: only settings reads/writes call
+// it, which are startup + user menu actions, never per-frame.
+static void settingsLog(const char *fmt, ...) {
+    FILE *f = fopen(".\\dr\\settings_debug.log", "a");
+    if (!f) f = fopen("settings_debug.log", "a");
+    if (!f) return;
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(f, fmt, ap);
+    va_end(ap);
+    fputc('\n', f);
+    fclose(f);
+}
+
+static long getsetting_impl(const char *d) {
     static file *tfh;
     static txt *t = txtnew();
     static txt *t2 = txtnew();
     static txt *t3 = txtnew();
     static long i, i2, i3, i4, i5;
     txtset(t3, d);
-    tfh = open("settings.txt");
+    tfh = open2(settingsFilePath(), OF_READWRITE | OF_SHARE_COMPAT);
+    if (tfh->h == HFILE_ERROR) {
+        settingsLog("GET %-45s OPEN FAILED path=%s", d, settingsFilePath());
+    }
     if (tfh->h != HFILE_ERROR) {
     getsetting_readnextline:
         i3 = seek(tfh);
@@ -2003,6 +2104,18 @@ long getsetting(const char *d) {
     return FALSE;
 }
 
+// Public entry point: clears GETSETTING_RAW (so absence is detectable, matching
+// the documented read-back idiom) then delegates to getsetting_impl, logging
+// the resolved value/return for diagnostics. Behavior-preserving: the return
+// value and GETSETTING_RAW contents are exactly what getsetting_impl produces.
+long getsetting(const char *d) {
+    txtset(GETSETTING_RAW, "");
+    long r = getsetting_impl(d);
+    settingsLog("GET %-45s raw=[%s] ret=%ld", d,
+                (GETSETTING_RAW && GETSETTING_RAW->d) ? GETSETTING_RAW->d : "", r);
+    return r;
+}
+
 // Rewrites settings.txt in place, replacing (or appending) a single
 // `{NAME, [VALUE]}` integer entry. Preserves every other line.
 //
@@ -2041,7 +2154,7 @@ void setsetting_int(const char *name, long value) {
     txtlcase(needle);
 
     // -- Phase 1: read every line, drop any matching the key --
-    tfh = open2("settings.txt", OF_READ | OF_SHARE_COMPAT);
+    tfh = open2(settingsFilePath(), OF_READ | OF_SHARE_COMPAT);
     if (tfh->h != HFILE_ERROR) {
         for (;;) {
             i = seek(tfh);
@@ -2082,7 +2195,7 @@ void setsetting_int(const char *name, long value) {
     // -- Phase 3: truncate-write. OF_CREATE truncates on open per the
     //    OpenFile() contract used throughout the project (see
     //    e.g. loop_client.cpp:1986 userinfo.txt rewrite). --
-    tfh = open2("settings.txt", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+    tfh = open2(settingsFilePath(), OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
     if (tfh->h != HFILE_ERROR) {
         put(tfh, out->d, out->l);
     }
@@ -2112,8 +2225,12 @@ void setsetting_choice(const char *name, const char *value) {
     txtadd(needle, ",");
     txtlcase(needle);
 
-    tfh = open2("settings.txt", OF_READ | OF_SHARE_COMPAT);
-    if (tfh->h == HFILE_ERROR) { close(tfh); return; } // nothing to rewrite
+    tfh = open2(settingsFilePath(), OF_READ | OF_SHARE_COMPAT);
+    if (tfh->h == HFILE_ERROR) {
+        settingsLog("SET %-45s -> [%s] READ-OPEN FAILED path=%s", name, value, settingsFilePath());
+        close(tfh);
+        return;
+    } // nothing to rewrite
 
     for (;;) {
         i = seek(tfh);
@@ -2145,11 +2262,14 @@ void setsetting_choice(const char *name, const char *value) {
     close(tfh);
 
     if (out->l) txtadd(out, "\r\n");
-    tfh = open2("settings.txt", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
-    if (tfh->h != HFILE_ERROR) {
+    tfh = open2(settingsFilePath(), OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+    bool wrote = (tfh->h != HFILE_ERROR);
+    if (wrote) {
         put(tfh, out->d, out->l);
     }
     close(tfh);
+    settingsLog("SET %-45s -> [%s] wrote=%d bytes=%ld path=%s",
+                name, value, wrote ? 1 : 0, out->l, settingsFilePath());
 }
 
 // Push the current music-volume global to the DirectMusic + low-level MIDI
@@ -2205,7 +2325,6 @@ struct MenuSetting {
 static const MenuSetting g_menuSettings[] = {
     // ---- Graphics ----
     {"Graphics", "Clouds",                   MS_CHOICE, "CLOUDS",        0, 0, 2, {"Yes", "No"}, {0}},
-    {"Graphics", "Allow window resize",      MS_CHOICE, "WINDOW_RESIZE", 0, 0, 2, {"Yes", "No"}, {0}},
     {"Graphics", "Transparency: party list", MS_CHOICE, "PARTYLISTWINDOW_TRANSPARENCYLEVEL",              0, 0, 3, {"not", "50%", "25%"}, {0}},
     {"Graphics", "Transparency: inventory",  MS_CHOICE, "INVENTORYWINDOW_TRANSPARENCYLEVEL",              0, 0, 3, {"not", "50%", "25%"}, {0}},
     {"Graphics", "Transparency: spellbook",  MS_CHOICE, "SPELLBOOKWINDOW_TRANSPARENCYLEVEL",              0, 0, 3, {"not", "50%", "25%"}, {0}},
@@ -2338,8 +2457,8 @@ bool HandleOptionsCommand(int cmdId) {
         // visible immediately (and the persisted value is what took effect):
         //  - CLOUDS: `noclouds` is a pure render gate.
         //  - *_TRANSPARENCYLEVEL: the frame objects' mouse_over_transparent.
-        // The remaining choice settings (WINDOW_RESIZE, ALLOWMIDI,
-        // ALLOWJOYSTICK) are read once at startup and take effect on next
+        // The remaining choice settings (ALLOWMIDI, ALLOWJOYSTICK) are
+        // read once at startup and take effect on next
         // launch, matching their existing behavior; they still persist
         // immediately via setsetting_choice above.
         if (strcmp(ms.settingName, "CLOUDS") == 0)
