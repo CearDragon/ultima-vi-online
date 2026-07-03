@@ -278,8 +278,16 @@ DirectDraw.
   Startup crash (stack-guard in the DIB path) + the render regressions it
   introduced (shadow sprite-stacking, invisible UI/held-item cursor, "L" look
   black flicker) were all fixed and user-smoke-tested before closing._
-- ⬜ **MPRES-P4.3** Verify (T3): full golden pixel matrix + benchmark; confirm
+- ✅ **MPRES-P4.3** Verify (T3): full golden pixel matrix + benchmark; confirm
   `host`/`both` unaffected; zero new warnings.
+  _Done 2026-07-03. Hardware sign-off on NVIDIA: pixel-correct gameplay (full
+  smoke test — world render, UI panels, portraits, spellbook, held-item cursor,
+  status/look text) and **zero memory climb** (flat `commitKB`) over an extended
+  session. `host`/`both` build + run unaffected; tri-target Release green with
+  zero new warnings. This is the leak-proof exit criterion the whole plan
+  targeted: the modern D3D11/DXGI present path eliminates the per-frame
+  `IDirectDrawSurface::GetDC`/`Blt` churn that leaked under NVIDIA's legacy
+  DirectDraw emulation._
 - **Exit:** **no DirectDraw in the client.** Inline-asm/blit pixel output
   unchanged; NVIDIA emulation risk surface eliminated.
 
@@ -287,11 +295,27 @@ DirectDraw.
 
 ### MPRES-P5 — Cleanup & decommission diagnostics (T0/T1)
 
-- ⬜ **MPRES-P5.1** Remove the MM-P9 diagnostic scaffolding now that the cause is
+- ✅ **MPRES-P5.1** Remove the MM-P9 diagnostic scaffolding now that the cause is
   cured: the `U6O-DIAG` heartbeat, `bltFill/bltCopy/bltKey` counters, and the
   `diagpresent`/`diagbltskip`/`oldtextdc`/`modernpresent` switches (keep
   whichever the team wants as a short-lived escape hatch, then delete).
-- ⬜ **MPRES-P5.2** Update docs: this plan → `docs/plans/done/`; fold the MM-P9
+  _Done 2026-07-03. Removed all MM-P9 scaffolding. `myddraw.cpp`: deleted the
+  diagnostic globals (`g_surf_live`, `g_diag_present_mode`, `g_text_dc_cache`,
+  `g_present_modern`, `g_blt_fill_n/copy_n/key_n`, `g_diag_blt_skip`), the
+  `_diag_private_bytes`/`_diag_handle_count`/`_diag_thread_count` probes, the
+  5-second `U6O-DIAG` heartbeat inside `txtout()`, and every counter `++`/skip
+  site (`cls`, `img`, `img0`, `surfstruct`, `free`, `txtout`, `txtouts`).
+  `refresh(surf*)` now **unconditionally** attempts the modern present under
+  `CLIENT` with the GDI letterbox as the automatic fallback — no gating flags.
+  `u6o7.cpp`: removed the whole `#ifdef CLIENT` command-line diag parser
+  (`diagpresent1/2`, `oldtextdc`, `modernpresent`/`legacypresent`,
+  `diagbltskip1/2/3`). Audio/txt counters removed at source: `sound.cpp`
+  (`g_snd_dup_n`/`g_snd_live`), `dmusic.cpp` (`g_midi_play_n`/`g_midi_load_n`),
+  `txt.cpp` + `mytxt.h` (`g_txt_live`). No escape hatch kept — the GDI fallback
+  in `refresh()` already covers D3D11 init failure, so the manual switch was
+  redundant. Pure diagnostic removal, no gameplay/wire/pixel change. Tri-target
+  Release green, zero new warnings._
+- ✅ **MPRES-P5.2** Update docs: this plan → `docs/plans/done/`; fold the MM-P9
   records; refresh `docs/resizable-window-hotspots.md` present-path rows and the
   modernization master index dashboard (inline `_asm` count, DDraw removed).
 - **Exit:** diagnostics gone; docs reflect the modern present; plan filed done.
@@ -433,3 +457,23 @@ present-path exception, not a rasterizer change).
     Then MPRES-P5 (decommission the MM-P9 `U6O-DIAG` diagnostic scaffolding and
     file this plan to `docs/plans/done/`). Note: a stale `buildlog.txt` sits at
     the repo root (old failing-build capture) — safe to delete.
+
+- **2026-07-03 (MPRES-P4.3 + P5 complete — PLAN DONE).**
+  - **P4.3** ✅ hardware sign-off on NVIDIA: pixel-correct full-smoke gameplay +
+    **zero memory climb** (flat `commitKB`) over an extended session. This is the
+    leak-proof exit criterion the whole plan targeted. `host`/`both` unaffected.
+  - **P5.1** ✅ removed all MM-P9 diagnostic scaffolding: the `U6O-DIAG`
+    heartbeat and `_diag_*` process probes in `myddraw.cpp`; the diagnostic
+    globals (`g_surf_live`, `g_diag_present_mode`, `g_text_dc_cache`,
+    `g_present_modern`, `g_blt_fill_n/copy_n/key_n`, `g_diag_blt_skip`) and every
+    `++`/skip site; the `u6o7.cpp` command-line diag parser
+    (`diagpresent`/`oldtextdc`/`modernpresent`/`legacypresent`/`diagbltskip`);
+    and the audio/txt counters in `sound.cpp`/`dmusic.cpp`/`txt.cpp`/`mytxt.h`.
+    `refresh(surf*)` now unconditionally attempts the modern present with the GDI
+    letterbox as the automatic fallback (no gating flags, no escape hatch — the
+    fallback already covers D3D11 init failure). Pure diagnostic removal: no
+    wire/pixel/gameplay change. Tri-target Release green, zero new warnings.
+  - **P5.2** ✅ docs updated: this plan filed to `docs/plans/done/`; hotspots and
+    the modernization master index refreshed; stale `buildlog.txt` deleted.
+  - **PLAN COMPLETE.** DirectDraw 7 is fully removed from the client; the modern
+    D3D11/DXGI presenter is the sole present path.

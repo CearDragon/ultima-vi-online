@@ -9,7 +9,7 @@
 // mouse mapping — are unchanged). No wire/.sav/RNG impact; client render only.
 //
 // See docs/modernization/MPRES-P1-presenter.md and
-// docs/plans/in-progress/plan-modernPresenter.md (phase MPRES-P1).
+// docs/plans/done/plan-modernPresenter.md (phase MPRES-P1).
 #ifndef U6O_CLIENT_PRESENT_H
 #define U6O_CLIENT_PRESENT_H
 

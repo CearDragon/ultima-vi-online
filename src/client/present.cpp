@@ -15,12 +15,12 @@
 //     (s==1.0) is a straight copy like the legacy BitBlt branch.
 //   * No wire/.sav/RNG impact; client render only. U6O_VERSION unchanged.
 //
-// Default OFF: only reached when g_present_modern != 0 (set by the "modernpresent"
-// command-line switch). On ANY failure this returns false and the caller uses the
-// legacy DirectDraw present, so enabling the flag can never break rendering.
+// Always active: refresh(surf*) calls this unconditionally under CLIENT. On ANY
+// failure this returns false and the caller falls back to the GDI letterbox
+// present, so the modern path can never break rendering.
 //
 // See docs/modernization/MPRES-P1-presenter.md (letterbox math + API decision)
-// and docs/plans/in-progress/plan-modernPresenter.md (phase MPRES-P1).
+// and docs/plans/done/plan-modernPresenter.md (phase MPRES-P1).
 
 #ifdef CLIENT
 

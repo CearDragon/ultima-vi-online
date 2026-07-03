@@ -158,90 +158,10 @@ static void blit_letterbox(HWND hWndDst, HDC srcdc, long srcW, long srcH) {
 DWORD txtcol = 0xFFFFFF;
 HFONT txtfnt = NULL;
 
-// MM-P9 diagnostic (2026-06-25): live DirectDraw-surface count. ++ in
-// surfstruct() (every newsurf), -- in free(surf*). Logged by the 5-second
-// heartbeat in txtout() so a memory climb can be attributed to (or cleared of)
-// leaked surfaces. Behavior-preserving (a single long).
-long g_surf_live = 0;
-
-// MM-P9 diagnostic (2026-06-26): per-frame leak BISECTION toggle. Set from the
-// command line in WinMain (see u6o7.cpp): pass "diagpresent1" or "diagpresent2".
-//   0 (default) = normal rendering, no behavior change.
-//   1 = skip the per-frame present in refresh() (the window GetDC + BitBlt and
-//       the back-buffer IDirectDrawSurface::GetDC). Isolates whether the leak
-//       lives in the final present path.
-//   2 = also skip the per-string IDirectDrawSurface::GetDC text draw in
-//       txtout()/txtouts(). Isolates the on-surface text DC churn.
-// The "constant rate at all window sizes" symptom rules out blit-AREA scaling
-// and points at a fixed-cost-per-frame, driver-dependent allocation; the most
-// likely source is repeated IDirectDrawSurface::GetDC/ReleaseDC cycles, which
-// some WDDM ddraw7-emulation drivers leak per call regardless of surface size.
-// Read the result by watching Task Manager's commit / the U6O-DIAG commitKB:
-//   * mode 1 flattens commit       -> leak is the refresh() present.
-//   * mode 1 climbs, mode 2 flat   -> leak is the txtout()/txtouts() text DCs.
-//   * mode 2 still climbs          -> leak is elsewhere (world-render Blt/img,
-//                                     Lock/Unlock, or DirectX audio).
-// Default 0 keeps shipped behavior identical; remove once the leak is found.
-int g_diag_present_mode = 0;
-
-// MM-P9.5 (2026-06-27): cached on-surface text-DC toggle (gating switch so the
-// fix can be A/B'd on real NVIDIA hardware before it ships as the only path).
-//   1 (default) = NEW cached-DC path: txtout()/txtouts() acquire the
-//                 IDirectDrawSurface DC ONCE (lazily) and reuse it across
-//                 consecutive text draws; it is released the next time a
-//                 DirectDraw method (Blt/Flip/Lock/GetDC) runs on that surface.
-//                 This collapses the per-string GetDC/ReleaseDC churn that
-//                 leaks under NVIDIA's legacy DirectDraw emulation.
-//   0 = LEGACY path: GetDC/ReleaseDC around every individual text string
-//       (exactly the pre-MM-P9.5 behavior). Selected with command-line
-//       substring "oldtextdc" (parsed in u6o7.cpp), mirroring how
-//       "diagpresent1/2" sets g_diag_present_mode.
-// Both paths issue the IDENTICAL GDI call sequence per TextOut (same surface,
-// same DC type, same font / text-colour / bk-mode state), so rendered pixels
-// are byte-for-byte identical; only the GetDC/ReleaseDC *count* per frame
-// differs. Watch the U6O-DIAG `commitKB` heartbeat: with the new path ON the
-// idle commit climb should drop sharply vs `oldtextdc`.
-int g_text_dc_cache = 1;
-
-// MPRES-P1 (2026-06-29): modern swap-chain present gating switch (A/B-able on
-// real hardware via command line, exactly like g_text_dc_cache).
-//   1 (default, MPRES-P1.5) = MODERN path: refresh(surf*) calls
-//       u6o::client::present_modern(), which uploads ps->o (RGB565) into a
-//       dynamic B5G6R5 D3D11 texture and presents it point-sampled + letterboxed
-//       through a DXGI swap chain. The letterbox dst rect/scale use the IDENTICAL
-//       blit_letterbox math and publish the same blit_offx/blit_offy/blit_scale,
-//       so mouse mapping is unchanged. If D3D11 init/present fails, present_modern()
-//       returns false and refresh() falls through to the legacy present below — so
-//       this can never break rendering.
-//   0 = LEGACY path: refresh(surf*) presents via the cached IDirectDrawSurface DC
-//       + blit_letterbox BitBlt/StretchBlt (the pre-MPRES shipped behavior).
-// MPRES-P1.5 (2026-06-29): flipped the default to 1 after hardware sign-off
-// (golden present + mouse-mapping parity + look-text confirmed on NVIDIA). The
-// legacy path stays reachable for one cycle via the command-line substring
-// "legacypresent" (parsed in u6o7.cpp), which sets this back to 0; "modernpresent"
-// is now a redundant no-op kept so existing launch scripts keep working.
-int g_present_modern = 1;
-
-// MM-P9.6 diagnostic (2026-06-26): localize the residual ~120 KB/s NVIDIA leak
-// that persists with every per-frame IDirectDrawSurface::GetDC suppressed
-// (diagpresent mode 2). The only per-frame DirectDraw operations left are Blts,
-// in three categories. These cumulative counters are emitted by the txtout()
-// heartbeat so a run can attribute the commit climb: for each category compute
-// Δcommit / Δcount between two heartbeats = bytes leaked per Blt of that kind.
-// Behavior-preserving (three longs ++'d at the existing Blt sites).
-long g_blt_fill_n = 0; // cls()            — DDBLT_COLORFILL
-long g_blt_copy_n = 0; // img(d,s) / img(d,s,rect) — plain DDBLT copy
-long g_blt_key_n = 0;  // img0(d,s)        — DDBLT_KEYSRC (colour-keyed) copy
-
-// MM-P9.6 bisection: skip ONE Blt category to confirm it is the leak — watch the
-// heartbeat commitKB go flat. Opt-in via command-line substring "diagbltskip1/2/3"
-// (parsed in u6o7.cpp, mirroring diagpresent). Default 0 = normal rendering.
-//   1 = skip cls() colour-fill   (screen may show stale pixels — cosmetic only)
-//   2 = skip img()/img() copy    (composited surfaces won't draw)
-//   3 = skip img0() keyed copy   (transparent sprites won't draw)
-// Skipping breaks that category's VISUALS only; the game keeps running so the
-// idle commit slope is still measurable.
-int g_diag_blt_skip = 0;
+// MPRES-P4.2: modern D3D11/DXGI swap-chain present. refresh(surf*) uploads
+// ps->o (RGB565) into a dynamic B5G6R5 texture and presents it point-sampled +
+// letterboxed via u6o::client::present_modern(); on D3D11 failure it falls back
+// to the GDI blit_letterbox path below, so rendering can never break.
 
 // MPRES-P4.2: keep this layout identical to the mirror in myddraw.h.
 struct surf {
@@ -299,7 +219,6 @@ surf *surfstruct() {
     static long i;
     ts = new surf();
     // MPRES-P4.2: no longer need DDSURFACEDESC2 initialization.
-    g_surf_live++; // MM-P9 diagnostic: live surface count
     for (i = 0; i < 16384; i++) {
         if (surflist[i] == NULL) {
             surflist[i] = ts;
@@ -335,16 +254,13 @@ surf *newsurf(long x, long y, long flags) {
     return ts;
 }
 
-// MM-P9.5 (2026-06-27): cached on-surface text-DC helpers. See surf::cachedTextDC
-// in myddraw.h and the g_text_dc_cache toggle above for the full rationale.
+// MPRES-P4.2: cached per-surface text-DC helpers. See surf::cachedTextDC in
+// myddraw.h for the full rationale.
 //
-// surf_text_dc_acquire(): return the surface's cached GDI DC, lazily creating it
-// via a single IDirectDrawSurface::GetDC the first time. Mirrors the legacy
-// per-string GetDC exactly (same surface, same DC type) so TextOut output is
-// pixel-identical; only the number of GetDC calls per frame changes. On GetDC
-// failure cachedTextDC stays NULL and we return NULL — the same observable
-// outcome as the legacy code, which also ignored GetDC's return and operated on
-// whatever HDC came back.
+// surf_text_dc_acquire(): return the surface's cached GDI DC, lazily creating a
+// private DIB section over the surface's owned RGB565 pixels the first time.
+// GDI TextOut/BitBlt land directly in surf::o via this DC. On failure
+// cachedTextDC stays NULL and we return NULL.
 HDC surf_text_dc_acquire(surf *s) {
     // MPRES-P4.2 + 2026-07-01 crash fix: the DIB header must include storage
     // for the RGB565 masks. Keep reusing the cached DIB when present; callers
@@ -431,10 +347,6 @@ DWORD point(surf *s, long x, long y) {
 }
 
 void cls(surf *s, DWORD c) {
-    // MM-P9.6: count + optional skip (colour-fill category).
-    g_blt_fill_n++;
-    if (g_diag_blt_skip == 1) return;
-    
     // MPRES-P4.2: all non-PRIMARY surfaces have owned pixel buffers.
     if (s->o == NULL) return;  // PRIMARY surface (no pixel buffer); no-op.
     
@@ -470,17 +382,15 @@ void cls(surf *s, DWORD c) {
 // frame, and the WndProc mouse handler maps client coords back through
 // those globals.
 void refresh(surf *s) {
-    // MM-P9.6 + MPRES-P4.2: present via the cached text DC (now DIB-section based).
-    if (g_diag_present_mode >= 1) return; // diag: skip present entirely
+    // MPRES-P4.2: present via the modern D3D11/DXGI swap chain.
 #ifdef CLIENT
-    if (g_present_modern) {
-        // MPRES-P4.2: flush any GDI text/image work from the temporary DIB back
-        // into `s->o` before the modern presenter reads the surface pixels.
-        surf_text_dc_release(s);
-        if (u6o::client::present_modern(s)) return; // modern path handled it
-    }
+    // Flush any GDI text/image work from the temporary DIB back into `s->o`
+    // before the modern presenter reads the surface pixels.
+    surf_text_dc_release(s);
+    if (u6o::client::present_modern(s)) return; // modern path handled it
 #endif
-    // Legacy GDI present: rebuild a DC from the current surface pixels, then blit.
+    // Fallback GDI present (modern present failed to init, or non-CLIENT build):
+    // rebuild a DC from the current surface pixels, then blit.
     HDC ddhdc = surf_text_dc_acquire(s);
     if (ddhdc != NULL) {
         blit_letterbox(hWnd, ddhdc, (long) s->dwWidth, (long) s->dwHeight);
@@ -724,9 +634,6 @@ void img(surf *d, surf *s) {
     // still release them for surfaces that might still use DD (PRIMARY, etc.).
     surf_text_dc_release(d);
     surf_text_dc_release(s);
-    // MM-P9.6: count + optional skip (plain-copy category).
-    g_blt_copy_n++;
-    if (g_diag_blt_skip == 2) return;
 
     // MPRES-P4.1: software copy via owned pixel buffer.
     // Both surfaces must have owned buffers for software blit.
@@ -766,9 +673,6 @@ void img(surf *d, surf *s, int x, int y, int x2, int y2) {
     // MM-P9.5: release cached text DCs on both surfaces.
     surf_text_dc_release(d);
     surf_text_dc_release(s);
-    // MM-P9.6: count + optional skip (plain-copy category).
-    g_blt_copy_n++;
-    if (g_diag_blt_skip == 2) return;
 
     // MPRES-P4.1: software copy into dest rect.
     if (d->o == NULL || s->o == NULL) {
@@ -889,154 +793,8 @@ DWORD fixcol(DWORD c) {
   }
 }*/
 
-// MM-P9 diagnostic (2026-06-25): process-wide probes for the heartbeat. These
-// catch leaks that bypass every other counter: thread stacks (threads), kernel
-// objects (handles), and driver/DirectX-internal commits (private bytes). All
-// are resolved dynamically or via kernel32/toolhelp, so no new link dependency.
-
-// Private (committed) bytes for this process. Resolves GetProcessMemoryInfo at
-// runtime (kernel32!K32GetProcessMemoryInfo first, then psapi.dll) so we never
-// link psapi.lib. Returns bytes, or 0 if unavailable.
-static SIZE_T _diag_private_bytes() {
-    // Local mirror of PROCESS_MEMORY_COUNTERS_EX (x86 layout) so we don't need
-    // psapi.h (which can drag in a #pragma comment(lib, "psapi.lib")).
-    struct _DIAG_PMCEX {
-        DWORD  cb;
-        DWORD  PageFaultCount;
-        SIZE_T PeakWorkingSetSize;
-        SIZE_T WorkingSetSize;
-        SIZE_T QuotaPeakPagedPoolUsage;
-        SIZE_T QuotaPagedPoolUsage;
-        SIZE_T QuotaPeakNonPagedPoolUsage;
-        SIZE_T QuotaNonPagedPoolUsage;
-        SIZE_T PagefileUsage;
-        SIZE_T PeakPagefileUsage;
-        SIZE_T PrivateUsage;
-    };
-    typedef BOOL(WINAPI *PGPMI)(HANDLE, void *, DWORD);
-    static PGPMI pfn = NULL;
-    static bool tried = false;
-    if (!tried) {
-        tried = true;
-        HMODULE hk = GetModuleHandleA("kernel32.dll");
-        if (hk) pfn = (PGPMI) GetProcAddress(hk, "K32GetProcessMemoryInfo");
-        if (!pfn) {
-            HMODULE hp = LoadLibraryA("psapi.dll");
-            if (hp) pfn = (PGPMI) GetProcAddress(hp, "GetProcessMemoryInfo");
-        }
-    }
-    if (!pfn) return 0;
-    _DIAG_PMCEX pmc;
-    ZeroMemory(&pmc, sizeof(pmc));
-    pmc.cb = sizeof(pmc);
-    if (pfn(GetCurrentProcess(), &pmc, sizeof(pmc))) return pmc.PrivateUsage;
-    return 0;
-}
-
-// Open kernel handle count for this process. Resolved dynamically because the
-// legacy SDK headers here may not declare GetProcessHandleCount.
-static DWORD _diag_handle_count() {
-    typedef BOOL(WINAPI *PGPHC)(HANDLE, PDWORD);
-    static PGPHC pfn = NULL;
-    static bool tried = false;
-    if (!tried) {
-        tried = true;
-        HMODULE hk = GetModuleHandleA("kernel32.dll");
-        if (hk) pfn = (PGPHC) GetProcAddress(hk, "GetProcessHandleCount");
-    }
-    if (!pfn) return 0;
-    DWORD n = 0;
-    if (pfn(GetCurrentProcess(), &n)) return n;
-    return 0;
-}
-
-// Live thread count for this process (toolhelp snapshot).
-static long _diag_thread_count() {
-    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
-    if (snap == INVALID_HANDLE_VALUE) return -1;
-    THREADENTRY32 te;
-    ZeroMemory(&te, sizeof(te));
-    te.dwSize = sizeof(te);
-    DWORD pid = GetCurrentProcessId();
-    long n = 0;
-    if (Thread32First(snap, &te)) {
-        do {
-            if (te.th32OwnerProcessID == pid) n++;
-        } while (Thread32Next(snap, &te));
-    }
-    CloseHandle(snap);
-    return n;
-}
-
 void txtout(surf *s, long x, long y, txt *t)
 {
-    // MM-P9 diagnostic (2026-06-25): 5-second heartbeat. txtout() is called
-    // many times per frame, so this is a convenient always-available hook to
-    // sample the resource pools without touching the brace-seam loop fragments.
-    // It emits one OutputDebugString line every ~5s reporting the live
-    // DirectDraw-surface and txt-object counts PLUS the outstanding debug-CRT
-    // heap (malloc/new) bytes/blocks and the process GDI+USER handle counts.
-    // Watch it in DebugView / the debugger alongside Task Manager's commit:
-    //   * surf_live / txt_live climb  -> DirectDraw-surface / txt leak
-    //   * heapKB / heapN climb        -> raw malloc/new leak (find via _CrtSetBreakAlloc)
-    //   * gdi / user climb            -> GDI / USER handle leak
-    //   * NONE climb but commit does  -> DirectX-internal (dsound/dmusic/ddraw) leak
-    // Remove once the leak is identified. Cheap: a GetTickCount compare; the
-    // sampling + log only fire every 5s.
-    {
-        static DWORD _diag_last = 0;
-        DWORD _diag_now = GetTickCount();
-        if (_diag_now - _diag_last >= 5000) {
-            _diag_last = _diag_now;
-            long _diag_heap_kb = -1;
-            long _diag_heap_n = -1;
-#ifdef _DEBUG
-            // _NORMAL_BLOCK (index 1) is where malloc/new land in the debug CRT.
-            _CrtMemState _diag_ms;
-            _CrtMemCheckpoint(&_diag_ms);
-            _diag_heap_kb = (long) (_diag_ms.lSizes[1] / 1024);
-            _diag_heap_n = (long) _diag_ms.lCounts[1];
-#endif
-            DWORD _diag_gdi = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
-            DWORD _diag_user = GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS);
-            // MM-P9 diagnostic: process-wide commit/handles/threads — these catch
-            // leaks invisible to every other counter (DirectX-driver memory,
-            // kernel handles, thread stacks). commitKB is the ground truth that
-            // every line now self-correlates against.
-            unsigned long _diag_commit_kb = (unsigned long) (_diag_private_bytes() / 1024);
-            DWORD _diag_handles = _diag_handle_count();
-            long _diag_threads = _diag_thread_count();
-            // MM-P9 diagnostic: cumulative DirectMusic call counts (dmusic.cpp,
-            // compiled into both host and client) and DirectSound voice-ring
-            // counts (sound.cpp). sound.cpp is CLIENT/both-only — the host has no
-            // sound source — so reference g_snd_* only under CLIENT to keep the
-            // host link clean; the host never renders, so -1 sentinels are fine.
-            extern long g_midi_play_n;
-            extern long g_midi_load_n;
-#ifdef CLIENT
-            extern long g_snd_dup_n;
-            extern long g_snd_live;
-            long _diag_snd_dup = g_snd_dup_n;
-            long _diag_snd_live = g_snd_live;
-#else
-            long _diag_snd_dup = -1;
-            long _diag_snd_live = -1;
-#endif
-            char _diag[512];
-            wsprintfA(_diag,
-                      "U6O-DIAG presentMode=%d commitKB=%lu handles=%lu threads=%ld surf=%ld txt=%ld heapKB=%ld heapN=%ld gdi=%lu user=%lu midiPlay=%ld midiLoad=%ld sndDup=%ld sndLive=%ld bltFill=%ld bltCopy=%ld bltKey=%ld bltSkip=%d\n",
-                      g_diag_present_mode,
-                      _diag_commit_kb, _diag_handles, _diag_threads,
-                      g_surf_live, g_txt_live, _diag_heap_kb, _diag_heap_n, _diag_gdi, _diag_user,
-                      g_midi_play_n, g_midi_load_n, _diag_snd_dup, _diag_snd_live,
-                      g_blt_fill_n, g_blt_copy_n, g_blt_key_n, g_diag_blt_skip);
-            OutputDebugStringA(_diag);
-        }
-    }
-    // MM-P9 diagnostic (2026-06-26): mode >= 2 skips the per-string DirectDraw
-    // GetDC text draw (after the heartbeat above, so the log keeps flowing).
-    // Isolates whether the per-frame txtout() GetDC/ReleaseDC churn is the leak.
-    if (g_diag_present_mode >= 2) return;
     // MPRES-P4.2: DirectDraw removed; always use cached DIB-section DC for text rendering.
     HDC pdc = surf_text_dc_acquire(s);
     if (pdc == NULL) return;  // Surface has no pixels (PRIMARY or uninitialized)
@@ -1053,9 +811,6 @@ void txtout(surf *s, long x, long y, txt *t)
 
 void txtouts(surf *s, long x, long y, txt *t) //creates a shadow behind the text (8,8,8)
 {
-    // MM-P9 diagnostic (2026-06-26): mode >= 2 skips the per-string DirectDraw
-    // GetDC text draw (see txtout()). Default (0) is unchanged behavior.
-    if (g_diag_present_mode >= 2) return;
     // MPRES-P4.2: DirectDraw removed; always use cached DIB-section DC for text rendering.
     HDC pdc = surf_text_dc_acquire(s);
     if (pdc == NULL) return;  // Surface has no pixels (PRIMARY or uninitialized)
@@ -1123,9 +878,6 @@ void img0(surf *d, surf *s) {
     // MM-P9.5: release cached text DCs before any surface operation.
     surf_text_dc_release(d);
     surf_text_dc_release(s);
-    // MM-P9.6: count + optional skip (keyed-copy category).
-    g_blt_key_n++;
-    if (g_diag_blt_skip == 3) return;
 
     // MPRES-P4.1: software keyed copy — skip pixels equal to 0 (color key).
     // MPRES-P4.2: DirectDraw removed; a missing owned buffer means no-op.
@@ -1216,7 +968,6 @@ void free(surf *s) {
     // Release owned pixel buffer (DirectDraw removed; now just RAII cleanup).
     s->ownedPixels.reset();
     delete s;
-    g_surf_live--; // MM-P9 diagnostic
     return;
 }
 

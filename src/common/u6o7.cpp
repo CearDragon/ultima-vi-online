@@ -347,65 +347,6 @@ cmdline_length:
         }
         // MM-P3.4 (2026-06-24): legacy "-l" per-frame font workaround parsing
         // is retired. Fonts are now startup-owned and released at shutdown only.
-#ifdef CLIENT
-        // MM-P9 diagnostic (2026-06-26): per-frame leak bisection toggle.
-        //   "diagpresent2" -> mode 2 (skip present + on-surface text GetDC)
-        //   "diagpresent1" -> mode 1 (skip present only)
-        // See g_diag_present_mode in myddraw.cpp. Default 0 = normal rendering.
-        {
-            extern int g_diag_present_mode;
-            txtset(t2, "diagpresent2");
-            if (txtsearch(t, t2)) {
-                g_diag_present_mode = 2;
-            } else {
-                txtset(t2, "diagpresent1");
-                if (txtsearch(t, t2)) g_diag_present_mode = 1;
-            }
-        }
-        // MM-P9.5 (2026-06-27): cached on-surface text-DC gating switch.
-        //   "oldtextdc" -> g_text_dc_cache = 0 (legacy per-string GetDC path)
-        //   (absent)    -> g_text_dc_cache = 1 (new cached-DC path, default ON)
-        // Lets the user A/B the NVIDIA legacy-ddraw GetDC leak fix on real
-        // hardware. See g_text_dc_cache in myddraw.cpp.
-        {
-            extern int g_text_dc_cache;
-            txtset(t2, "oldtextdc");
-            if (txtsearch(t, t2)) g_text_dc_cache = 0;
-        }
-        // MPRES-P1.5 (2026-06-29): modern swap-chain present is now the default
-        // (g_present_modern = 1, set in myddraw.cpp after hardware sign-off).
-        //   "legacypresent" -> g_present_modern = 0 (pre-MPRES DirectDraw present)
-        //   "modernpresent" -> g_present_modern = 1 (redundant no-op; kept so
-        //                      existing launch scripts keep working for one cycle)
-        // Lets the user opt back into the legacy present for one cycle. See
-        // g_present_modern in myddraw.cpp.
-        {
-            extern int g_present_modern;
-            txtset(t2, "modernpresent");
-            if (txtsearch(t, t2)) g_present_modern = 1;
-            txtset(t2, "legacypresent");
-            if (txtsearch(t, t2)) g_present_modern = 0;
-        }
-        // MM-P9.6 (2026-06-26): per-category DirectDraw Blt skip, to localize the
-        // residual ~120 KB/s NVIDIA leak. "diagbltskip1/2/3" -> g_diag_blt_skip
-        // (1=cls colour-fill, 2=img copy, 3=img0 keyed). Default 0 = normal.
-        // See g_diag_blt_skip in myddraw.cpp.
-        {
-            extern int g_diag_blt_skip;
-            txtset(t2, "diagbltskip3");
-            if (txtsearch(t, t2)) {
-                g_diag_blt_skip = 3;
-            } else {
-                txtset(t2, "diagbltskip2");
-                if (txtsearch(t, t2)) {
-                    g_diag_blt_skip = 2;
-                } else {
-                    txtset(t2, "diagbltskip1");
-                    if (txtsearch(t, t2)) g_diag_blt_skip = 1;
-                }
-            }
-        }
-#endif
     }
 #ifdef CLIENT
     leak = 0; // legacy workaround mode is intentionally disabled.
