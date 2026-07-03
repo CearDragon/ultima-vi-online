@@ -145,10 +145,15 @@ LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo
     sprintf(stamp, "%04u%02u%02u_%02u%02u%02u",
             st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
 
-    char txtName[64];
-    char dmpName[64];
-    sprintf(txtName, "crash_%s.txt", stamp);
-    sprintf(dmpName, "crash_%s.dmp", stamp);
+    // Write crash artifacts into a dedicated "crash" directory (created on
+    // demand) so they don't litter the working directory. CreateDirectory is a
+    // no-op if it already exists.
+    CreateDirectoryA("crash", NULL);
+
+    char txtName[80];
+    char dmpName[80];
+    sprintf(txtName, "crash\\crash_%s.txt", stamp);
+    sprintf(dmpName, "crash\\crash_%s.dmp", stamp);
 
     // Open with "w": each crash gets its own timestamped file, so there's no
     // need to append to a shared log anymore.
@@ -194,6 +199,7 @@ LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo
 #include <csignal>
 #include <execinfo.h> // backtrace (glibc); link with -rdynamic for symbol names
 #include <ctime>
+#include <sys/stat.h> // mkdir
 
 // Best-effort crash dump to a timestamped file + stderr, then re-raise the
 // default handler. Not strictly async-signal-safe, but mirrors the Win32
@@ -204,8 +210,11 @@ static void u6o_posix_crash_handler(int sig) {
     localtime_r(&tt, &tmv);
     char stamp[32];
     strftime(stamp, sizeof(stamp), "%Y%m%d_%H%M%S", &tmv);
-    char fname[64];
-    snprintf(fname, sizeof(fname), "crash_%s.txt", stamp);
+    // Write crash logs into a dedicated "crash" directory (created on demand)
+    // so they don't litter the working directory.
+    mkdir("crash", 0755);
+    char fname[80];
+    snprintf(fname, sizeof(fname), "crash/crash_%s.txt", stamp);
     void *bt[100];
     int n = backtrace(bt, 100);
     FILE *f = fopen(fname, "w");

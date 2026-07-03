@@ -40,3 +40,7 @@ src/common/u6o7.rc
 # Memory/crash dumps � too large for GitHub (>100 MB)
 tools/crash/crash-reports/*.DMP
 tools/crash/crash-reports/*.dmp
+
+# Runtime crash artifacts written next to the binary by the unhandled-exception
+# / POSIX signal handlers in src/common/u6o7.cpp.
+crash/
