@@ -92,7 +92,7 @@ kubectl rollout status deployment/u6o-host -n ultima-dev
 ## Configuration
 
 -   **Port**: The host listens on port `22` (defined in `deployment.yaml` and `dns.txt` in the runtime image).
--   **Working Directory**: The container's working directory is `/host`, which is mounted to a PersistentVolumeClaim. Game data, saves, and configuration must be provisioned at this path.
+-   **Working Directory**: The container's working directory is `/host`, which is mounted to a PersistentVolumeClaim. Game data and configuration must be provisioned at this path. The host creates its `save/` subdirectory automatically at startup if it is missing, so player saves succeed on a freshly-mounted (empty-of-`save/`) volume.
 -   **Graceful Shutdown**: The deployment specifies `terminationGracePeriodSeconds: 60` to allow the host time to save world state before forceful termination (SIGTERM → graceful exit, then SIGKILL if needed).
 -   **Image Pull Policy**: Set to `Always` to ensure the latest image is used on each deployment update.
 

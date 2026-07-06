@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <strings.h>
 #include <cstdlib>
 #include <cstdio>
@@ -183,6 +184,14 @@ void waitforfile(LPCSTR name) {
 
 void deletefile(LPCSTR name) {
     DeleteFileA(name);
+}
+
+// Create `name` as a directory if it does not already exist. CreateDirectoryA
+// simply fails with ERROR_ALREADY_EXISTS when it does, which we ignore — the
+// host calls this at startup so writes under .\save\ succeed even when the
+// working directory is a freshly-mounted volume that lacks the folder.
+void ensuredir(LPCSTR name) {
+    CreateDirectoryA(name, NULL);
 }
 
 #else // ===================== POSIX (Linux) backend =========================
@@ -426,6 +435,14 @@ void waitforfile(LPCSTR name) {
 void deletefile(LPCSTR name) {
     char nb[1024];
     ::remove(u6o_realpath(name, nb, sizeof nb));
+}
+
+// See the Win32 twin above. Normalize '\'->'/' and resolve case, then mkdir.
+// If a directory with the requested name (in any case) already exists,
+// u6o_realpath resolves to it and mkdir fails with EEXIST, which we ignore.
+void ensuredir(LPCSTR name) {
+    char nb[1024];
+    ::mkdir(u6o_realpath(name, nb, sizeof nb), 0777);
 }
 
 #endif // _WIN32

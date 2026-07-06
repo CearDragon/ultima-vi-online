@@ -86,4 +86,9 @@ void *loadfile(LPCSTR name);
 void waitforfile(LPCSTR name);
 
 void deletefile(LPCSTR name);
+
+// Ensure a directory exists (create it when missing; harmless no-op otherwise).
+// The host writes its player saves under .\save\, which must exist before any
+// OF_CREATE open — a freshly-mounted working directory may not provide it.
+void ensuredir(LPCSTR name);
 #endif
