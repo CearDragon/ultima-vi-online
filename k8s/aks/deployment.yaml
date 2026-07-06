@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: u6o-host
+  namespace: ultima-dev
   labels:
     app: u6o-host
 spec:
@@ -22,22 +23,21 @@ spec:
         image: acrultimavionline.azurecr.io/u6o-host:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 22
-          protocol: TCP
+          - containerPort: 22
+            protocol: TCP
         volumeMounts:
-        - name: save-data
-          mountPath: /u6o-host/save
+          - name: host-volume
+            mountPath: /host
       volumes:
-      - name: save-data
-        persistentVolumeClaim:
-          claimName: u6o-host-save-pvc
-      nodeSelector:
-        kubernetes.io/os: linux
+        - name: host-volume
+          persistentVolumeClaim:
+            claimName: azure-file-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: u6o-host-service
+  namespace: ultima-dev
 spec:
   selector:
     app: u6o-host

@@ -1,2 +1,9 @@
-Date: 2026/06/07 Time: 19:13
-000:00:01:00 [In_Britania:][Framerate:32][vlnkb_last(MAX=65536):-1][objb_last(MAX=524228):45464]
+Date: 2026/07/06 Time: 13:53
+000:00:00:00 MDD: map-file manifest built [len=4194304 sum=DE5D0002] [len=4325376 sum=7071E1B8] [len=4325376 sum=B111B44A]
+000:00:00:00 GUARDIANGUILD: load house=200 shelfslots=14
+000:00:01:00 [In_Britania:][Framerate:32][vlnkb_last(MAX=65536):-1][objb_last(MAX=524228):45245]
+000:00:02:00 [In_Britania:0 in Britannia: ][Framerate:34][vlnkb_last(MAX=65536):-1][objb_last(MAX=524228):45245]
+000:00:03:00 [In_Britania:0 in Britannia: ][Framerate:32][vlnkb_last(MAX=65536):-1][objb_last(MAX=524228):45246]
+000:00:04:00 [In_Britania:0 in Britannia: ][Framerate:34][vlnkb_last(MAX=65536):-1][objb_last(MAX=524228):45246]
+000:00:04:28 GUARDIANGUILD: save house=200 shelfslots=14 top-level-items=0 bytes=64
+000:00:04:28 GUARDIANGUILD: save house=200 shelfslots=14 top-level-items=0 bytes=64

@@ -1,0 +1,92 @@
+﻿apiVersion: v1
+kind: Namespace
+metadata:
+  name: ultima-prod
+---
+# hostPath below is resolved on the KUBERNETES NODE, not on Windows.
+# This only works with Docker Desktop's "kubeadm" cluster provisioning
+# (Settings > Kubernetes > Cluster provisioning method), where the node is
+# the Docker Desktop VM and Windows drives are shared at
+# /run/desktop/mnt/host/<drive>/. The newer "kind" provisioning
+# (node "desktop-control-plane") has NO view of the Windows filesystem.
+# C:\host must also be listed under Settings > Resources > File sharing.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: host-data-pv
+spec:
+  storageClassName: ""
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/run/desktop/mnt/host/c/host"
+    type: Directory   # fail loudly if the path doesn't exist on the node
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: host-data-pvc
+  namespace: ultima-prod
+spec:
+  storageClassName: ""
+  volumeName: host-data-pv   # bind to the hostPath PV above, never dynamic-provision
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: u6o-host
+  namespace: ultima-prod
+  labels:
+    app: u6o-host
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: u6o-host
+  template:
+    metadata:
+      labels:
+        app: u6o-host
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: host
+          # Data-less image (Dockerfile.docker-desktop): the binary lives at
+          # /usr/local/bin/u6o-host and its WORKDIR is /u6o-host, so mounting
+          # C:\host over /u6o-host gives the game the whole Windows tree as
+          # its working directory (./save, ./host, ./ultima6, dns.txt, ...).
+          # Always: the docker-desktop (kubeadm) node shares the local
+          # Docker image store, so a locally built image is used directly.
+          image: docker.io/cduncc/u6o-host:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 22
+              protocol: TCP
+          volumeMounts:
+            - name: host-data
+              mountPath: /u6o-host
+      volumes:
+        - name: host-data
+          persistentVolumeClaim:
+            claimName: host-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: u6o-host-service
+  namespace: ultima-prod
+spec:
+  selector:
+    app: u6o-host
+  ports:
+    - protocol: TCP
+      port: 22
+      targetPort: 22
+  type: LoadBalancer
