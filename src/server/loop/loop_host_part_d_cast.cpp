@@ -56,6 +56,16 @@
                                         } //ktar
                                     } //wait
                                 } //x
+                                // qkstf portrait target encoding from client:
+                                // mx = 32768 + 100 + partyIndex (0..7)
+                                if ((x >= 100) && (x <= 107)) {
+                                    myobj3 = tplayer->party[x - 100];
+                                    if (myobj3) {
+                                        y = myobj3->y - tpy;
+                                        x = myobj3->x - tpx;
+                                        goto ktarcast2;
+                                    }
+                                }
                                 goto castfailed;
                             }
                         ktarcast2:

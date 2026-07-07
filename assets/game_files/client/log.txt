@@ -41,4 +41,4 @@
 000:00:00:00 Loading client settings [settings.bin]
 000:00:00:00 Setting up low level MIDI driver
 000:00:00:00 Beginning main loop!
-000:00:00:00 MDD: map data sync complete
+000:00:00:06 MDD: map data sync complete

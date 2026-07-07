@@ -10,6 +10,7 @@ docker build \
   "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../.."
 
 echo "Pushing acrultimavionline.azurecr.io/u6o-host:latest..."
+az acr login --name acrultimavionline
 docker push acrultimavionline.azurecr.io/u6o-host:latest
 
 echo "Restarting deployment u6o-host in namespace ultima-dev..."

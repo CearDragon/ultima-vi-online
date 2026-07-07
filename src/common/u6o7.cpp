@@ -1381,8 +1381,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                     _snprintf(aboutMsg, sizeof(aboutMsg),
                               "Ultima VI Online\n"
                               "Client Version: %d\n\n"
-                              "Discord: https://discord.gg/FRURSGaWBU\n"
-                              "Website: https://ultima-vi-online.com",
+                              "Created By: Galleon Dragon\n"
+                              "Producer: Cear Dragon\n"
+                              "Developers: Mose, Scette, Dassina,\nXenkan, Drewski, Cocoa Dragon, Luteijn\n"
+                              "Special Thanks: Lord British and Origin Systems",
                               U6O_VERSION);
                     MessageBox(hWnd,
                                aboutMsg,

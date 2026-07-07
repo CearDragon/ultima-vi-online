@@ -41,3 +41,6 @@ src/common/u6o7.rc
 tools/crash/crash-reports/*.DMP
 tools/crash/crash-reports/*.dmp# Kubernetes secrets — never commit actual credentials
 k8s/aks/secrets.yaml
+
+/assets/game_files/client/
+/assets/game_files/host/

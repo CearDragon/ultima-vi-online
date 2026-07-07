@@ -1415,6 +1415,33 @@ gotspell:;
         goto ktarcast;
       }
 
+      if (qkstf->mouse_click){
+        i2=(qkstf->mouse_y-32)/64;
+        x=qkstf->mouse_x;
+        for (i=0;i<=7;i++){
+          if (CLIENTplayer->party[i]!=NULL){
+            if (i2==0){
+              if (x<(56+4)){
+                // Casting onto a qkstf portrait: encode the target as party member index i
+                // using the 32768 flag + offset 100..107 (outside ktar slots 0..9).
+                // The server resolves party[i]->x/y directly — client-side party[i]->x is
+                // stale (only mv_x[]/mv_y[] mover arrays track current world positions).
+                CLIENTplayer->mx = (unsigned short)(32768 + 100 + i);
+                CLIENTplayer->my = (unsigned short)(userspell << 8); // spell index in high byte
+                CLIENTplayer->mf = 8 + userspellbook;
+                CLIENTplayer->key |= KEYmbclick;
+                userkey = 0;
+              }
+              goto qkstf_spell_target_done;
+            }
+            i2--;
+          }
+        }
+qkstf_spell_target_done:
+        // Consume the click in cast mode so qkstf doesn't also toggle inventory.
+        qkstf->mouse_click=FALSE;
+      }
+
       if (vf->mouse_click){
         CLIENTplayer->mx=vf->mouse_x/32;
 ktarcast:
