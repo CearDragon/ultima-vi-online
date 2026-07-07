@@ -552,6 +552,28 @@ host_gotmessage:
             }
         } else {
             //!tcreatecharacter
+
+            //A player who just logged off still lingers in playerlist until
+            //their ~16s idle-connect timeout saves and removes them (see
+            //loop_host_part_a_save.cpp, connect_failed:). A freshly created
+            //character has NO save file until that first save fires, so the
+            //save-file existence check below would spuriously reject an
+            //immediate re-login with "Username or Password Incorrect"
+            //(d2[1]=5) and only succeed once the old session finally times
+            //out. Match the still-online player first: check_username_password_ok
+            //re-establishes the existing session via goto doneclmess ("player
+            //never left") and never touches journeyonward_i or the save file.
+            for (i = 0; i <= playerlist_last; i++) {
+                if (playerlist[i]) {
+                    if (txtsame(tusername, playerlist[i]->name)) {
+                        if (txtsame(tuserpassword, playerlist[i]->password)) {
+                            journeyonward_i = -1;
+                            goto check_username_password_ok;
+                        }
+                    }
+                }
+            }
+
             //username and password must exist
             for (i = 0; i <= SAVESLOTLAST; i++) {
                 if (save_buffer[i]) {
