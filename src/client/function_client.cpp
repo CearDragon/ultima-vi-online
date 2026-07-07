@@ -2205,7 +2205,6 @@ struct MenuSetting {
 static const MenuSetting g_menuSettings[] = {
     // ---- Graphics ----
     {"Graphics", "Clouds",                   MS_CHOICE, "CLOUDS",        0, 0, 2, {"Yes", "No"}, {0}},
-    {"Graphics", "Allow window resize",      MS_CHOICE, "WINDOW_RESIZE", 0, 0, 2, {"Yes", "No"}, {0}},
     {"Graphics", "Transparency: party list", MS_CHOICE, "PARTYLISTWINDOW_TRANSPARENCYLEVEL",              0, 0, 3, {"not", "50%", "25%"}, {0}},
     {"Graphics", "Transparency: inventory",  MS_CHOICE, "INVENTORYWINDOW_TRANSPARENCYLEVEL",              0, 0, 3, {"not", "50%", "25%"}, {0}},
     {"Graphics", "Transparency: spellbook",  MS_CHOICE, "SPELLBOOKWINDOW_TRANSPARENCYLEVEL",              0, 0, 3, {"not", "50%", "25%"}, {0}},
@@ -2338,7 +2337,7 @@ bool HandleOptionsCommand(int cmdId) {
         // visible immediately (and the persisted value is what took effect):
         //  - CLOUDS: `noclouds` is a pure render gate.
         //  - *_TRANSPARENCYLEVEL: the frame objects' mouse_over_transparent.
-        // The remaining choice settings (WINDOW_RESIZE, ALLOWMIDI,
+        // The remaining choice settings (ALLOWMIDI,
         // ALLOWJOYSTICK) are read once at startup and take effect on next
         // launch, matching their existing behavior; they still persist
         // immediately via setsetting_choice above.

@@ -78,6 +78,15 @@ than mirror the legacy style — and new code should be modern from the start.
   `ddraw.h`, etc.). If `cmake-build-debug/` is missing or stale, prefer the IDE
   (CLion/VS) run configurations in `.run/` over hand-configuring — see the
   README's *Shared run configurations* section.
+- For **agentic/terminal builds**, initialize the VS developer environment in
+  the current shell first so `cl.exe` can resolve Win32/SDK headers and libs:
+
+  ```powershell
+  . .\tools\Enter-DevBuildEnv.ps1
+  cmake.exe --build cmake-build-debug --target <target> -j 18
+  ```
+
+  You can also do both in one command: `./tools/Enter-DevBuildEnv.ps1 -Build <target>`.
 - Prefer the **shared IDE run configurations** (`.run/{client,host,both,
   generate_icons}.run.xml`) and the **shared CMake profiles** (`.idea/cmake.xml`,
   Debug + Release) when working in CLion — they encode the correct target,
