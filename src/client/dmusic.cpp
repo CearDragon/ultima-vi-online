@@ -19,14 +19,6 @@ All rights reserved.
 
 extern unsigned char u6omidisetup;
 
-// MM-P9 diagnostic (2026-06-25): cumulative DirectMusic call counters, surfaced
-// by the txtout() U6O-DIAG heartbeat. They let the next run quantify how often
-// Play()/LoadMidiFrom*() actually fire (rate sanity-check) and confirm the
-// segment-state / instrument-download leak fixes below. Remove with the rest of
-// the MM-P9 instrumentation once the idle-leak is confirmed fixed.
-long g_midi_play_n = 0;
-long g_midi_load_n = 0;
-
 // The constructor, member variables initialisation
 
 CMidiMusic::CMidiMusic() {
@@ -180,8 +172,6 @@ HRESULT CMidiMusic::LoadMidiFromFile(LPCSTR szMidi, BOOL bMidiFile) {
     WCHAR wstrMidi[256];
     HRESULT hr;
 
-    g_midi_load_n++; // MM-P9 diagnostic: count LoadMidiFromFile() invocations.
-
     // If exists a segment before, then release it
     if (m_pSegment) {
         // MM-P9 fix (2026-06-25): Unload the DLS instruments/bands this segment
@@ -233,7 +223,6 @@ HRESULT CMidiMusic::LoadMidiFromResource(TCHAR *strResource, TCHAR *strResourceT
     // MM-P9 fix (2026-06-25): Unload before release so the prior segment's
     // downloaded instruments don't stay resident in the synth (see
     // LoadMidiFromFile for the rationale). Guard for the first-load NULL case.
-    g_midi_load_n++;
     if (m_pSegment) {
         m_pSegment->Unload(m_pPerformance);
         SAFE_RELEASE(m_pSegment);
@@ -289,7 +278,6 @@ HRESULT CMidiMusic::LoadMidiFromMemory(void *offset, unsigned long bytes, BOOL b
     HRESULT hr;
     DMUS_OBJECTDESC objdesc;
     // MM-P9 fix (2026-06-25): Unload before release (see LoadMidiFromFile).
-    g_midi_load_n++;
     if (m_pSegment) {
         m_pSegment->Unload(m_pPerformance);
         SAFE_RELEASE(m_pSegment);
@@ -330,8 +318,6 @@ HRESULT CMidiMusic::Play() {
     if (u6omidisetup == 0) return S_FALSE;
 
     HRESULT hr;
-
-    g_midi_play_n++; // MM-P9 diagnostic: count Play() invocations.
 
     // Plays a segment and stores the segment state
     if (FAILED(hr = m_pPerformance->PlaySegmentEx(

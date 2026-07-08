@@ -89,27 +89,28 @@ trying to "free" memory the game never owned.
 The structural cure (replace emulated DirectDraw 7 presentation with a modern
 Direct3D 11 / DXGI swap chain, eliminating the legacy-emulation surface
 entirely) is planned separately as
-[`plan-modernPresenter.md`](../../todo/plan-modernPresenter.md) (MPRES-P*).
+[`plan-modernPresenter.md`](../../done/plan-modernPresenter.md) (MPRES-P*).
 
 ---
 
-## Diagnostic scaffolding — intentionally still in the source
+## Diagnostic scaffolding — removed (MPRES-P5.1, 2026-07-03)
 
-The investigation added behavior-preserving instrumentation that is **still in
-the tree on purpose**:
+The investigation added behavior-preserving instrumentation that lived in the
+tree during the leak hunt:
 
 - the `U6O-DIAG` 5-second heartbeat in `txtout()`
   (`commitKB`/`handles`/`threads`/`surf`/`txt`/`heapKB`/`heapN`/`gdi`/`user`/
   `midiPlay`/`midiLoad`/`sndDup`/`sndLive`/`bltFill`/`bltCopy`/`bltKey`),
 - the `g_surf_live` / `g_txt_live` / `g_blt_*` / `g_midi_*` counters,
-- the A/B switches `oldtextdc`, `diagpresent`, `diagbltskip`.
+- the A/B switches `oldtextdc`, `diagpresent`, `diagbltskip`, `modernpresent`/
+  `legacypresent`.
 
-These are **not** to be removed as part of this cleanup. Their retirement is
-explicitly owned by **MPRES-P5.1** in
-[`plan-modernPresenter.md`](../../todo/plan-modernPresenter.md), which keeps the
-relevant switches as short-lived escape hatches until the modern presenter lands
-and the NVIDIA emulation leak class is structurally cured. Removing them now
-would delete the A/B baseline that plan depends on.
+All of this was **removed by MPRES-P5.1** once the modern D3D11/DXGI presenter
+shipped and the NVIDIA emulation leak class was structurally cured (idle
+`commitKB` flat on hardware). See
+[`plan-modernPresenter.md`](../../done/plan-modernPresenter.md) (phase
+MPRES-P5.1). No escape hatch was retained — the presenter's automatic GDI
+fallback already covers D3D11 init failure.
 
 ---
 
@@ -123,9 +124,9 @@ elsewhere and were never part of closing out the memory climb:
   behavior-sensitive polish, owned by the modernization program
   (`docs/plans/todo/modernization/` → `MCLI-P*` / `MCOM-P*`) and driven through
   the `cpp-modernizer` agent. The code tags remain in place for that pickup.
-- **MPRES-P\* — modern presenter.** Structurally removes the emulated DirectDraw
-  present path that caused MM-P9.5/9.6, after which MPRES-P5 retires the
-  diagnostic scaffolding above.
+- **MPRES-P\* — modern presenter (✅ complete 2026-07-03).** Structurally removed
+  the emulated DirectDraw present path that caused MM-P9.5/9.6; MPRES-P5 then
+  retired the diagnostic scaffolding above.
 
 ---
 

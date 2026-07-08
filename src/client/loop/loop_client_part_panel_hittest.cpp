@@ -961,7 +961,7 @@ NULL
 { //frame available
   if ((pn->graphic!=NULL)&&(pn->size_x==0)&&(pn->size_y==0)){
     x3=pn->offset_x; y3=pn->offset_y;
-    x4=x3+pn->graphic->d.dwWidth; y4=y3+pn->graphic->d.dwHeight;
+    x4=x3+pn->graphic->dwWidth; y4=y3+pn->graphic->dwHeight;
   }else{
     x3=pn->offset_x; y3=pn->offset_y;
     x4=x3+pn->size_x; y4=y3+pn->size_y;
@@ -991,11 +991,11 @@ checkobj:
         tonoff=(FRM_ONOFF*)FRM_type;
         if (tonoff->value==0){ //rectangle of current button icon
           x3=pn->offset_x+tonoff->offset_x; y3=pn->offset_y+tonoff->offset_y;
-          x4=x3+tonoff->graphic_off->d.dwWidth; y4=y3+tonoff->graphic_off->d.dwHeight;
+          x4=x3+tonoff->graphic_off->dwWidth; y4=y3+tonoff->graphic_off->dwHeight;
         }
         else{
           x3=pn->offset_x+tonoff->offset_x+tonoff->offset2_x; y3=pn->offset_y+tonoff->offset_y+tonoff->offset2_y;
-          x4=x3+tonoff->graphic_on->d.dwWidth; y4=y3+tonoff->graphic_on->d.dwHeight;
+          x4=x3+tonoff->graphic_on->dwWidth; y4=y3+tonoff->graphic_on->dwHeight;
         }
         if (mx>=x3){ if (my>=y3){ if (mx<x4){ if (my<y4){ //mouse in within rectangle
           if (tonoff->hold==FALSE){ //button does not need to be held
@@ -1020,7 +1020,7 @@ checkobj:
       if (x==4){ //process: FRM_INPUT type
         tinp=(FRM_INPUT*)FRM_type;
         x3=pn->offset_x+tinp->offset_x; y3=pn->offset_y+tinp->offset_y;
-        x4=x3+tinp->graphic->d.dwWidth; y4=y3+tinp->graphic->d.dwHeight;
+        x4=x3+tinp->graphic->dwWidth; y4=y3+tinp->graphic->dwHeight;
         if (mx>=x3){ if (my>=y3){ if (mx<x4){ if (my<y4){ //mouse in within rectangle
           if ((omb&1)==0&&(mb&1)==1){ //button has just been pressed
             tinp->enterpressed=FALSE;

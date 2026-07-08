@@ -28,6 +28,9 @@ BEGIN
     BEGIN
         MENUITEM "&Reset UI",            IDM_ACTIONS_RESET_UI
         MENUITEM SEPARATOR
+        MENUITEM "Toggle Camera &Lock\tTab", IDM_ACTIONS_CAMERA_LOCK
+        MENUITEM "Say ""KAL LOR""...",   IDM_ACTIONS_KAL_LOR
+        MENUITEM SEPARATOR
         MENUITEM "E&xit",                IDM_EXIT
     END
     POPUP "&Help"

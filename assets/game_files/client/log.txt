@@ -1,0 +1,44 @@
+000:00:00:00 Welcome to the U6O Slim-Client
+000:00:00:00 U6O DirectDraw engine setup has been completed
+000:00:00:00 System-memory screen back-buffers created
+000:00:00:00 System font [System] loaded
+000:00:00:00 Client socket created
+000:00:00:00 Port: 22 Name: 20.246.146.166
+000:00:00:00 DNS translated to IP address successfully
+000:00:00:00 Connected to U6O server successfully!
+000:00:00:00 Send and Receive network data threads started
+000:00:00:00 U6O network signature sent to host
+000:00:00:00 Ultima6 logo loaded
+000:00:00:00 Clearing/Preparing/Loading following static arrays for use:
+000:00:00:00 >cloudactive
+000:00:00:00 >STATUSMESSprev
+000:00:00:00 >intro_star(arrays)
+000:00:00:00 >portrait(arrays)
+000:00:00:00 >inpmess
+000:00:00:00 >u6osound
+000:00:00:00 >U6OK_(arrays)
+000:00:00:00 >client_spellwait
+000:00:00:00 >spellrecall_partymember
+000:00:00:00 >midikeystack
+000:00:00:00 >user name/password/etc.
+000:00:00:00 >hybrid tile indexes
+000:00:00:00 >qkdir
+000:00:00:00 >con_txt
+000:00:00:00 >sprpi [objsprpi.u6o]
+000:00:00:00 >visalways [vis.bin]
+000:00:00:00 Init. surfaces, loading .BMP images:
+000:00:00:00 Mouse Cursors loaded
+000:00:00:00 Fonts loaded
+000:00:00:00 Spellbook data setup
+000:00:00:00 Setting up frames(windows)
+000:00:00:00 Setting up client player data structures
+000:00:00:00 Setting up lighting data
+000:00:00:00 Opening message log [talk.txt]
+000:00:00:00 Initializing MIDI driver
+000:00:00:00 Loading music keyboard state [midikeyb.bin]
+000:00:00:00 Loading walkthrough position [walkthru.pos]
+000:00:00:00 Loading walkthrough messages [walkthru.txt]
+000:00:00:00 Loading client settings [settings.bin]
+000:00:00:00 Setting up low level MIDI driver
+000:00:00:00 Beginning main loop!
+000:00:00:06 MDD: map data sync complete

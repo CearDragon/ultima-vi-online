@@ -1,9 +1,11 @@
 // LH-P6: minimal stubs for the few graphics types/functions that leak into
 // host-compiled code. globals.inc instantiates client UI-panel / surface
 // globals (shared file), and loop_host.cpp's custom-portrait loader calls
-// loadimage(). The headless host never renders, so these are opaque/no-op:
-// panel pointers stay null and loadimage() returns null (server-side custom
-// portraits are simply not loaded — the call site already null-checks).
+// loadimage(). The headless host never renders, so the UI-panel pointers stay
+// null. loadimage() is NOT a no-op, however: the host must read the custom
+// portrait BMPs it stores under .\save\port\ to serve them to clients, so
+// plat_stubs.cpp implements a GDI-free 24/32-bit BMP -> RGB565 decoder that
+// reproduces the Windows loadimage(...,SURF_SYSMEM16) pixel format exactly.
 #ifndef U6O_PLAT_GFX_STUBS_H
 #define U6O_PLAT_GFX_STUBS_H
 
@@ -31,8 +33,9 @@ struct FRM_LIST_ITEM;
 #define SURF_SYSMEM16 0
 #endif
 
-// Severed image loader — returns null on the headless host (definition in
-// plat_stubs.cpp).
+// Custom-portrait BMP decoder for the headless host (definition in
+// plat_stubs.cpp). Reads a 24/32-bit BI_RGB BMP into a top-down RGB565 buffer;
+// returns null if the file is missing or an unsupported format.
 surf *loadimage(const char *name, int memflags);
 
 #endif // !_WIN32

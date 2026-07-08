@@ -347,51 +347,6 @@ cmdline_length:
         }
         // MM-P3.4 (2026-06-24): legacy "-l" per-frame font workaround parsing
         // is retired. Fonts are now startup-owned and released at shutdown only.
-#ifdef CLIENT
-        // MM-P9 diagnostic (2026-06-26): per-frame leak bisection toggle.
-        //   "diagpresent2" -> mode 2 (skip present + on-surface text GetDC)
-        //   "diagpresent1" -> mode 1 (skip present only)
-        // See g_diag_present_mode in myddraw.cpp. Default 0 = normal rendering.
-        {
-            extern int g_diag_present_mode;
-            txtset(t2, "diagpresent2");
-            if (txtsearch(t, t2)) {
-                g_diag_present_mode = 2;
-            } else {
-                txtset(t2, "diagpresent1");
-                if (txtsearch(t, t2)) g_diag_present_mode = 1;
-            }
-        }
-        // MM-P9.5 (2026-06-27): cached on-surface text-DC gating switch.
-        //   "oldtextdc" -> g_text_dc_cache = 0 (legacy per-string GetDC path)
-        //   (absent)    -> g_text_dc_cache = 1 (new cached-DC path, default ON)
-        // Lets the user A/B the NVIDIA legacy-ddraw GetDC leak fix on real
-        // hardware. See g_text_dc_cache in myddraw.cpp.
-        {
-            extern int g_text_dc_cache;
-            txtset(t2, "oldtextdc");
-            if (txtsearch(t, t2)) g_text_dc_cache = 0;
-        }
-        // MM-P9.6 (2026-06-26): per-category DirectDraw Blt skip, to localize the
-        // residual ~120 KB/s NVIDIA leak. "diagbltskip1/2/3" -> g_diag_blt_skip
-        // (1=cls colour-fill, 2=img copy, 3=img0 keyed). Default 0 = normal.
-        // See g_diag_blt_skip in myddraw.cpp.
-        {
-            extern int g_diag_blt_skip;
-            txtset(t2, "diagbltskip3");
-            if (txtsearch(t, t2)) {
-                g_diag_blt_skip = 3;
-            } else {
-                txtset(t2, "diagbltskip2");
-                if (txtsearch(t, t2)) {
-                    g_diag_blt_skip = 2;
-                } else {
-                    txtset(t2, "diagbltskip1");
-                    if (txtsearch(t, t2)) g_diag_blt_skip = 1;
-                }
-            }
-        }
-#endif
     }
 #ifdef CLIENT
     leak = 0; // legacy workaround mode is intentionally disabled.
@@ -498,13 +453,24 @@ PM_NOREMOVE
                 DeleteObject(fnt7);
                 DeleteObject(systemfont);
                 RemoveFontResource(".\\dr\\u6o.ttf");
-                SendMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
                 RemoveFontResource(".\\dr\\gargish.ttf");
-                SendMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
                 RemoveFontResource(".\\dr\\runes.ttf");
-                SendMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
                 RemoveFontResource(".\\dr\\u6o2.ttf");
-                SendMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
+                // Shutdown-hang fix: the WM_FONTCHANGE broadcast MUST be
+                // non-blocking. The previous code called the SYNCHRONOUS
+                // SendMessage(HWND_BROADCAST, ...) once per font (4x). A
+                // synchronous HWND_BROADCAST send waits for *every* top-level
+                // window in the system to process the message; if any one is
+                // unresponsive it blocks indefinitely. Because this runs in the
+                // WM_QUIT shutdown block BEFORE settings.bin is written and
+                // before ExitProcess(0), a hung recipient left client.exe alive
+                // as a background process forever and the save routines
+                // (settings.bin, etc.) never ran. Use SendNotifyMessage — the
+                // same asynchronous broadcast the startup path uses right after
+                // AddFontResource in setup_client.inc — so shutdown never blocks
+                // on foreign windows. A single notify after all removals is
+                // sufficient.
+                SendNotifyMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
             }
 #endif
 
@@ -899,10 +865,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
     hWnd2 = CreateWindow(szWindowClass, window_name, WS_OVERLAPPEDWINDOW,
                          0, 0, clrect.right - clrect.left, clrect.bottom - clrect.top, NULL, NULL, hInstance, NULL);
 
-    // Attach the resource-defined menu (Actions/Help) to the client window.
+    // Attach the resource-defined menu (Actions/Help) to the client window,
+    // then build & insert the data-driven Options popup between them.
     {
         HMENU appMenu = LoadMenu(hInstance, MAKEINTRESOURCE(IDC_U6O7));
         if (appMenu) {
+            BuildOptionsMenu(appMenu);
             SetMenu(hWnd2, appMenu);
             DrawMenuBar(hWnd2);
         }
@@ -998,9 +966,56 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
     return TRUE;
 }
 #endif
+
+#ifdef CLIENT
+// --- Menu-modal keepalive pump -------------------------------------------
+// When the user opens the native menu bar, Windows enters a MODAL message loop
+// inside DefWindowProc that does NOT return to WinMain until the menu closes.
+// That starves the per-frame game loop, which is the only place the client
+// normally emits its ~4s type-251 keepalive (loop_client_part_misc_prelude.cpp)
+// and the only place it drains the socket receive ring. The host drops a client
+// after just 16s of silence (idle_connect, loop_host_part_a_save.cpp), so a user
+// lingering in a menu got disconnected and the client became unresponsive.
+//
+// Fix: while inside the menu modal loop, run a WM_TIMER that re-sends the exact
+// same keepalive on the main thread (NET_send only queues onto socketclient_si,
+// same producer/consumer pattern the frame already uses). This keeps the host
+// connection alive; the frame resumes and processes the buffered world updates
+// as soon as the menu closes. The 3D view is intentionally paused while a menu
+// is held open — only the connection is kept warm.
+#define IDT_MENU_KEEPALIVE 0xB0B0
+#define MENU_KEEPALIVE_MS  2000 // well under the host's 16s idle_connect cutoff
+
+static void menuKeepalivePump() {
+    if (intro != 0) return;        // only in-game (0 == in-game); before login there is no live host link
+    static txt *ka = txtnew();
+    txtset(ka, "?");
+    ka->d2[0] = 251;               // type 251: host-side pure keepalive (resets idle_connect)
+    NET_send(NETplayer, NULL, ka);
+}
+#endif
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     //int wmId, wmEvent;
     switch (message) {
+#ifdef CLIENT
+        case WM_ENTERMENULOOP:
+            // Menu opened: start pumping keepalives so the host doesn't drop us
+            // while its modal loop starves the game frame.
+            SetTimer(hWnd, IDT_MENU_KEEPALIVE, MENU_KEEPALIVE_MS, NULL);
+            return DefWindowProc(hWnd, message, wParam, lParam);
+
+        case WM_EXITMENULOOP:
+            KillTimer(hWnd, IDT_MENU_KEEPALIVE);
+            return DefWindowProc(hWnd, message, wParam, lParam);
+
+        case WM_TIMER:
+            if (wParam == IDT_MENU_KEEPALIVE) {
+                menuKeepalivePump();
+                return 0;
+            }
+            return DefWindowProc(hWnd, message, wParam, lParam);
+#endif
         case WM_KILLFOCUS:
             break;
         case WM_SETFOCUS:
@@ -1304,9 +1319,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             wheel_move += delta;
             break;
 
+        case WM_INITMENUPOPUP:
+#ifdef CLIENT
+            // Refresh dynamic check/radio marks (camera-lock toggle + every
+            // Options radio group) so they match live state whenever a menu
+            // popup is about to be shown.
+            RefreshMenuChecks(GetMenu(hWnd));
+#endif
+            return DefWindowProc(hWnd, message, wParam, lParam);
+
         case WM_COMMAND:
 #ifdef CLIENT
+            if (HandleOptionsCommand(LOWORD(wParam))) {
+                // Persisted (settings.txt) / applied live (volumes) inside the
+                // handler. Nothing else to do.
+                return 0;
+            }
             switch (LOWORD(wParam)) {
+                case IDM_ACTIONS_CAMERA_LOCK:
+                    // Same toggle as the Tab key (U6OK_CAMERATOGGLE); the
+                    // checkmark is refreshed on WM_INITMENUPOPUP.
+                    camera_freeze = !camera_freeze;
+                    return 0;
+
+                case IDM_ACTIONS_KAL_LOR:
+                    // Confirm via the existing menu modal (MessageBox, as About
+                    // uses) before speaking the mantra — it costs XP.
+                    if (MessageBox(hWnd,
+                                   "You will be teleported back to Britain for a 16th of your experience points.",
+                                   "Say \"KAL LOR\"?",
+                                   MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
+                        // Consumed next frame by the client loop, which routes
+                        // "KAL LOR" through the normal speech path.
+                        menu_say_kallor = 1;
+                    }
+                    return 0;
+
                 case IDM_ACTIONS_RESET_UI:
                     // Clear user overrides and force key panels back on-screen.
                     u6o::client::g_qkstf_user_positioned = false;
@@ -1315,10 +1363,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                     u6o::client::g_volcontrol_user_positioned = false;
                     u6o::client::g_volcontrol_user_x = 0;
                     u6o::client::g_volcontrol_user_y = 0;
+                    u6o::client::g_statusprev_user_positioned = false;
+                    u6o::client::g_statusprev_user_x = 0;
+                    u6o::client::g_statusprev_user_y = 0;
                     cltset.qkstf_offset_x = 32767;
                     cltset.qkstf_offset_y = 32767;
                     cltset.volcontrol_offset_x = 32767;
                     cltset.volcontrol_offset_y = 32767;
+                    cltset.statusprev_offset_x = 32767;
+                    cltset.statusprev_offset_y = 32767;
                     ResetUiPanelsIntoView(backbufferW(), backbufferH());
                     InvalidateRect(hWnd, NULL, FALSE);
                     return 0;
@@ -1328,8 +1381,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                     _snprintf(aboutMsg, sizeof(aboutMsg),
                               "Ultima VI Online\n"
                               "Client Version: %d\n\n"
-                              "Discord: https://discord.gg/FRURSGaWBU\n"
-                              "Website: https://ultima-vi-online.com",
+                              "Created By: Galleon Dragon\n"
+                              "Producer: Cear Dragon\n"
+                              "Developers: Mose, Scette, Dassina,\nXenkan, Drewski, Cocoa Dragon, Luteijn\n"
+                              "Special Thanks: Lord British and Origin Systems",
                               U6O_VERSION);
                     MessageBox(hWnd,
                                aboutMsg,

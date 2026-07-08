@@ -135,7 +135,7 @@ flowchart TD
     LH[plan-linuxHost LH-P*<br/>in progress] -. coordinate platform/ .-> CM
     DOB[plan-dynamicObjectBuffer DOB-P*<br/>not started, WIRE] -. owns sobj_*/mv_* .-> CM
     RW[plan-resizableWindow RW-P*<br/>mostly done] -. owns viewport/lighting .-> CL
-    MPRES[plan-modernPresenter MPRES-P*<br/>not started, T3 present] -. consumes RW blit_* .-> CL
+    MPRES[plan-modernPresenter MPRES-P*<br/>✅ done, DDraw removed] -. consumes RW blit_* .-> CL
     LCS[loopClientSplit ✅] --> CL
     LHS[loopHostSplit ✅] --> SV
 ```
@@ -158,7 +158,8 @@ Hard coordination rules:
   raw material for `MCLI`/`MSRV` hot-path modernization, edited only with
   `replace_string_in_file` (tight context) or the `tools/loop_split_*` tools.
 - **`MPRES-P*` owns the client present path** — see
-  [`../plan-modernPresenter.md`](../plan-modernPresenter.md). It replaces the
+  [`../../done/plan-modernPresenter.md`](../../done/plan-modernPresenter.md).
+  **✅ Complete:** it replaced the
   emulated-DirectDraw 7 present (`setupddraw`/`refresh`/`blit_letterbox`/
   `newsurf`, the `p16to32*`/`p16to16*` asm converters, and the `img`/`img0` DD
   `Blt`s) with a Direct3D 11 / DXGI swap chain, structurally curing the NVIDIA

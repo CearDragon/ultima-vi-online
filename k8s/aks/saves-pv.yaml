@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: azure-saves-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: azurefile-csi
+  csi:
+    driver: file.csi.azure.com
+    volumeHandle: stultimasixonline#saves
+    volumeAttributes:
+      server: stultimasixonline.file.core.windows.net
+      shareName: saves
+    nodeStageSecretRef:
+      name: azure-file-secret
+      namespace: ultima-dev
+

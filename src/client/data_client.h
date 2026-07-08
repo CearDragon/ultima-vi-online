@@ -106,6 +106,7 @@ extern unsigned char customportrait_upload;
 
 extern unsigned char clientframe;
 extern unsigned char camera_freeze;
+extern unsigned char menu_say_kallor;
 
 extern long ctpx;
 extern long ctpy; //client: screen offset
@@ -184,7 +185,7 @@ extern MCI_SAVE_PARMS mciSaveParms;
 extern MCI_PLAY_PARMS mciPlayParms;
 
 
-extern surf *vs;
+// MPRES-P2.3: `vs` (DirectDraw primary) removed — see globals.inc.
 
 extern unsigned char timelval; //0=full brightness, 15=total darkness
 
@@ -241,7 +242,7 @@ extern long scry; //size of the window required by the program
 
 
 extern bool smallwindow; //use a 512x384 window
-extern bool dxrefresh;
+// MPRES-P2.3b: `dxrefresh` removed — see globals.inc.
 extern bool nodisplay;
 extern bool isit;
 extern bool host_minimize;
@@ -336,9 +337,8 @@ extern unsigned long keyframe31; //animation/palette index (0-7)
 extern unsigned long refreshcount; //incremented every refresh
 
 extern surf *ps;
-extern surf *ps2;
-extern surf *ps3;
-extern surf *ps4;
+// MPRES-P2.3/P2.3b: ps2/ps3/ps4 removed — all were present-path-only (consumed by
+// the deleted dxrefresh converters); the modern presenter samples ps->o directly.
 extern surf *ps5;
 extern surf *ps6;
 extern surf *ps7;
@@ -347,7 +347,7 @@ extern surf *ps640400;
 extern surf *ps320200;
 
 // rrr
-extern surf *psnew1;
+// MPRES-P2.3: psnew1 removed (unused). psnew1b is the live UI compose surface.
 extern surf *psnew1b;
 //extern surf* party_surf[8];
 extern FRAME *party_frame_new[];

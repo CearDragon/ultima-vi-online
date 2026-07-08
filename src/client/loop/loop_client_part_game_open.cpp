@@ -115,28 +115,9 @@ maxminmini:
     if ((volcontrol->mouse_y>=32)&&(volcontrol->mouse_y<=56)){
       u6omidivolume=(volcontrol->mouse_x-46)*72/20;
 u6omidivolume_changed:
-
-
-      if (U6O_DISABLEMUSIC==FALSE){
-        f=u6omidi_volume[midi_loaded];
-        f=f*(float)u6omidivolume/255.0f;
-        f=255-f; f=f*0.25f; f*=f;
-        //DMUS_VOLUME_MAX     2000        /* +20 dB */
-        //DMUS_VOLUME_MIN   -20000        /* -200 dB */
-        u6omidi->SetMasterVolume(-f);
-        if (u6omidivolume==0) u6omidi->Stop();
-
-        if (midiout_setup){
-          x=u6omidivolume/2;//change 0-255 to 0-127
-          midiOutShortMsg(midiout_handle,0x000007B0+x*65536); //set volume
-          midiOutShortMsg(midiout_handle,0x000007B1+x*65536); //set volume
-          midiOutShortMsg(midiout_handle,0x000007B2+x*65536); //set volume
-          midiOutShortMsg(midiout_handle,0x000007B3+x*65536); //set volume
-          midiOutShortMsg(midiout_handle,0x000007B4+x*65536); //set volume
-        }
-
-      }
-
+      // Behavior-preserving extraction — see applyMidiVolume() in
+      // function_client.cpp (also reused by the Options > Audio menu).
+      applyMidiVolume();
     }
     if (volcontrol->mouse_y>56){
       u6ovoicevolume=(volcontrol->mouse_x-46)*72/20;
@@ -648,6 +629,11 @@ voicechat_permissionrequestfinished:
   }//tplay->party[0]==NULL
 deadglobalmessage_return:
 
+  if (menu_say_kallor){ //Actions menu "Say KAL LOR" (post-confirmation) -> speak it
+    menu_say_kallor=0;
+    talkprev=0; inprec_global=0;
+    txtset(inpmess,"KAL LOR");
+  }
   if (inpmess->l){ //send input message to the host
     txtset(t2,"?"); t2->d2[0]=6;
     if (inprec_global){t2->d2[0]=12; client_globalwait=0;}//global message
@@ -1427,6 +1413,33 @@ gotspell:;
         CLIENTplayer->mx=32768+x;
         CLIENTplayer->key|=KEYmbclick;
         goto ktarcast;
+      }
+
+      if (qkstf->mouse_click){
+        i2=(qkstf->mouse_y-32)/64;
+        x=qkstf->mouse_x;
+        for (i=0;i<=7;i++){
+          if (CLIENTplayer->party[i]!=NULL){
+            if (i2==0){
+              if (x<(56+4)){
+                // Casting onto a qkstf portrait: encode the target as party member index i
+                // using the 32768 flag + offset 100..107 (outside ktar slots 0..9).
+                // The server resolves party[i]->x/y directly — client-side party[i]->x is
+                // stale (only mv_x[]/mv_y[] mover arrays track current world positions).
+                CLIENTplayer->mx = (unsigned short)(32768 + 100 + i);
+                CLIENTplayer->my = (unsigned short)(userspell << 8); // spell index in high byte
+                CLIENTplayer->mf = 8 + userspellbook;
+                CLIENTplayer->key |= KEYmbclick;
+                userkey = 0;
+              }
+              goto qkstf_spell_target_done;
+            }
+            i2--;
+          }
+        }
+qkstf_spell_target_done:
+        // Consume the click in cast mode so qkstf doesn't also toggle inventory.
+        qkstf->mouse_click=FALSE;
       }
 
       if (vf->mouse_click){

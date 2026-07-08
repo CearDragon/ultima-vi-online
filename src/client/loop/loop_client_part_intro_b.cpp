@@ -33,13 +33,13 @@
         txtfnt = fnt7;
         tagxy.cx = 0;
         tagxy.cy = 0;
-        surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+        surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
         {
             HGDIOBJ _old = SelectObject(taghdc, txtfnt);
             GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
             SelectObject(taghdc, _old);
         }
-        ps->s->ReleaseDC(taghdc);
+        
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 2 + 22;
         txtcol = rgb(0, 0, 0);
@@ -59,13 +59,13 @@
         txtfnt = fnt7;
         tagxy.cx = 0;
         tagxy.cy = 0;
-        surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+        surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
         {
             HGDIOBJ _old = SelectObject(taghdc, txtfnt);
             GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
             SelectObject(taghdc, _old);
         }
-        ps->s->ReleaseDC(taghdc);
+        
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 3 + 22;
         txtcol = rgb(0, 0, 0);
@@ -85,13 +85,13 @@
         txtfnt = fnt7;
         tagxy.cx = 0;
         tagxy.cy = 0;
-        surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+        surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
         {
             HGDIOBJ _old = SelectObject(taghdc, txtfnt);
             GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
             SelectObject(taghdc, _old);
         }
-        ps->s->ReleaseDC(taghdc);
+        
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 4 + 22;
         txtcol = rgb(0, 0, 0);
@@ -111,13 +111,13 @@
         txtfnt = fnt7;
         tagxy.cx = 0;
         tagxy.cy = 0;
-        surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+        surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
         {
             HGDIOBJ _old = SelectObject(taghdc, txtfnt);
             GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
             SelectObject(taghdc, _old);
         }
-        ps->s->ReleaseDC(taghdc);
+        
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 5 + 22;
         txtcol = rgb(0, 0, 0);
@@ -137,13 +137,13 @@
         txtfnt = fnt7;
         tagxy.cx = 0;
         tagxy.cy = 0;
-        surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+        surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
         {
             HGDIOBJ _old = SelectObject(taghdc, txtfnt);
             GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
             SelectObject(taghdc, _old);
         }
-        ps->s->ReleaseDC(taghdc);
+        
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 6 + 22;
         txtcol = rgb(0, 0, 0);
@@ -163,13 +163,13 @@
         txtfnt = fnt7;
         tagxy.cx = 0;
         tagxy.cy = 0;
-        surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+        surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
         {
             HGDIOBJ _old = SelectObject(taghdc, txtfnt);
             GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
             SelectObject(taghdc, _old);
         }
-        ps->s->ReleaseDC(taghdc);
+        
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 7 + 22;
         txtcol = rgb(0, 0, 0);
@@ -199,13 +199,13 @@
             txtfnt = fnt7;
             tagxy.cx = 0;
             tagxy.cy = 0;
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                 SelectObject(taghdc, _old);
             }
-            ps->s->ReleaseDC(taghdc);
+            
             x5 = 160 - tagxy.cx / 2;
             y5 = 64 * 2 + 22;
             txtcol = rgb(0, 0, 0);
@@ -227,13 +227,13 @@
             txtfnt = fnt7;
             tagxy.cx = 0;
             tagxy.cy = 0;
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                 SelectObject(taghdc, _old);
             }
-            ps->s->ReleaseDC(taghdc);
+            
             x5 = 160 - tagxy.cx / 2;
             y5 = 64 * 3 + 22;
             txtcol = rgb(0, 0, 0);
@@ -261,13 +261,13 @@
             txtfnt = fnt7;
             tagxy.cx = 0;
             tagxy.cy = 0;
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                 SelectObject(taghdc, _old);
             }
-            ps->s->ReleaseDC(taghdc);
+            
             x5 = 160 - tagxy.cx / 2;
             y5 = 64 * 4 + 22;
             txtcol = rgb(0, 0, 0);
@@ -292,13 +292,13 @@
             txtfnt = fnt7;
             tagxy.cx = 0;
             tagxy.cy = 0;
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                 SelectObject(taghdc, _old);
             }
-            ps->s->ReleaseDC(taghdc);
+            
             x5 = 160 - tagxy.cx / 2;
             y5 = 64 * 5 + 22;
             txtcol = rgb(0, 0, 0);
@@ -323,13 +323,13 @@
             txtfnt = fnt7;
             tagxy.cx = 0;
             tagxy.cy = 0;
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                 SelectObject(taghdc, _old);
             }
-            ps->s->ReleaseDC(taghdc);
+            
             x5 = 160 - tagxy.cx / 2;
             y5 = 64 * 6 + 22;
             txtcol = rgb(0, 0, 0);
@@ -355,13 +355,13 @@
             txtfnt = fnt7;
             tagxy.cx = 0;
             tagxy.cy = 0;
-            surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+            surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
             {
                 HGDIOBJ _old = SelectObject(taghdc, txtfnt);
                 GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
                 SelectObject(taghdc, _old);
             }
-            ps->s->ReleaseDC(taghdc);
+            
             x5 = 160 - tagxy.cx / 2;
             y5 = 64 * 7 + 22;
             txtcol = rgb(0, 0, 0);
@@ -491,13 +491,13 @@
         txtfnt = fnt7;
         tagxy.cx = 0;
         tagxy.cy = 0;
-        surf_text_dc_release(ps); ps->s->GetDC(&taghdc);
+        surf_text_dc_release(ps); taghdc = surf_text_dc_acquire(ps);
         {
             HGDIOBJ _old = SelectObject(taghdc, txtfnt);
             GetTextExtentPoint32(taghdc, t->d, t->l, &tagxy);
             SelectObject(taghdc, _old);
         }
-        ps->s->ReleaseDC(taghdc);
+        
         x5 = 160 - tagxy.cx / 2;
         y5 = 64 * 4 + 22;
         txtcol = rgb(0, 0, 0);

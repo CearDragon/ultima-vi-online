@@ -30,21 +30,11 @@ MessageBox(NULL,"InitInstance failed","Ultima 6 Online",MB_OK); exit(0);
 if (NEThost==NULL) setupddraw();
 
 
-/*
-ps=newsurf(1024,768,SURF_SYSMEM16);
-if (DDRAW_display_pixelformat.dwRGBBitCount!=16){
-ps2=newsurf(1024/2,768/2,SURF_SYSMEM);
-ps3=newsurf(1024,768,SURF_SYSMEM);
-ps4=newsurf(1024/2,768/2,SURF_SYSMEM16); //to temporarily convert to 16bit?
-}else{
-ps2=newsurf(1024/2,768/2,SURF_SYSMEM16);
-}
-ps5=newsurf(1024,768,SURF_SYSMEM16); //unconverted mimimap
-ps6=newsurf(80,60,SURF_SYSMEM16); //convert to minimap size
-ps7=newsurf(120,120,SURF_SYSMEM16); //unconverted treasuremap
-ps8=newsurf(240,240,SURF_SYSMEM16); //convert to treasuremap size
-tmap_marker=newsurf(8,8,SURF_SYSMEM16); //surface for treasure map markers
-*/
+// MPRES-P4.2: the legacy DirectDraw surface-allocation block that stood here
+// (ps/ps2/ps3/ps4 gated on DDRAW_display_pixelformat.dwRGBBitCount) was removed
+// with DirectDraw. `ps` is now allocated below as a plain owned RGB565 surface;
+// the deleted 32-bpp helpers (ps2/ps3/ps4) were only read by the removed
+// dxrefresh present converters (see MPRES-P2.3/P2.3b).
 
 // r222 nothing changed here: just some constants which can't be changed
 
@@ -57,19 +47,18 @@ ps=newsurf(resxo,resyo,SURF_SYSMEM16);
 // 1024x768 this is a no-op (pitch == 2048); it only matters if the startup
 // surface is padded or larger. Must precede the moon-buffer populate below.
 if (ps) {
-    set_lighting_stride((int)(ps->d.lPitch / 2));
+    set_lighting_stride((int)(ps->lPitch / 2));
     if (!lighting_alloc(backbufferW(), backbufferH())) {
         MessageBox(NULL,"Failed to allocate lighting buffers","Ultima 6 Online",MB_OK);
         exit(0);
     }
 }
-if (DDRAW_display_pixelformat.dwRGBBitCount!=16){
-ps2=newsurf(resxo/2,resyo/2,SURF_SYSMEM);
-ps3=newsurf(resxo,resyo,SURF_SYSMEM);
-ps4=newsurf(resxo/2,resyo/2,SURF_SYSMEM16); //to temporarily convert to 16bit?
-}else{
-ps2=newsurf(resxo/2,resyo/2,SURF_SYSMEM16);
-}
+// MPRES-P2.3: ps2/ps4 allocations removed (allocated but never read; their only
+// consumer was the deleted dxrefresh present path).
+// MPRES-P2.3b: ps3 (the 32-bpp helper on non-16bpp displays) removed too — its
+// only reader was the deleted p16to32 converter, so the DDRAW_display_pixelformat
+// bit-count gate that conditionally allocated it is gone. The modern presenter
+// samples ps->o's RGB565 regardless of the desktop display format.
 // ps5 MUST stay at 1024x768 regardless of the (possibly resized) backbuffer
 // size. It is a scratch surface for the minimap / Gem peer view: the world
 // draw fills its top-left 768x768 (24 tiles * 32px) and then img()
@@ -202,7 +191,7 @@ send(u6osocket2,(char*)&U6O_SIGNATURE,4,0);
 scrlog("U6O network signature sent to host");
 
 intro_ultimavi=loadimage(".\\dr\\ultimavi.bmp",SURF_SYSMEM16);
-intro_ultimavi2=newsurf(intro_ultimavi->d.dwWidth,intro_ultimavi->d.dwHeight,SURF_SYSMEM16);
+intro_ultimavi2=newsurf(intro_ultimavi->dwWidth,intro_ultimavi->dwHeight,SURF_SYSMEM16);
 cls(intro_ultimavi2,(2<<11)+(27<<5)+18);
 scrlog("Ultima6 logo loaded");
 

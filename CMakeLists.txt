@@ -299,6 +299,7 @@ set(Source_Files
         "src/common/inline_asm/fast5.asm"
         "src/common/inline_asm/fasthi.asm"
         "src/client/myddraw.cpp"
+        "src/client/present.cpp"
         "src/common/myfile.cpp"
         "src/common/random/randi.cpp"
         "src/common/random/random.cpp"
@@ -424,8 +425,7 @@ if (MSVC)
     )
 endif ()
 
-################################################################################
-# Dependencies
+# Dependencies (for both target)
 ################################################################################
 set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "dplay;"
@@ -449,7 +449,6 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "odbccp32;"
         "vfw32;"
         "dplayx;"
-        "ddraw;"
         "dsound;"
         "gdiplus"
 )
@@ -656,7 +655,6 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "odbccp32;"
         "vfw32;"
         "dplayx;"
-        "ddraw;"
         "dsound;"
         "gdiplus"
 )
@@ -714,6 +712,7 @@ set(Source_Files
         "src/common/function_both.cpp"
         "src/client/function_client.cpp"
         "src/client/myddraw.cpp"
+        "src/client/present.cpp"
         "src/common/myfile.cpp"
         "src/common/random/randi.cpp"
         "src/common/random/random.cpp"
@@ -866,7 +865,6 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "odbccp32;"
         "vfw32;"
         "dplayx;"
-        "ddraw;"
         "dsound"
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE "${ADDITIONAL_LIBRARY_DEPENDENCIES}")

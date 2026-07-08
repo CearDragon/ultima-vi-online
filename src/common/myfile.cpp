@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <strings.h>
 #include <cstdlib>
 #include <cstdio>
@@ -29,15 +30,31 @@ txt *file_error;
 txt *file_error_name;
 
 #ifdef _WIN32
-// ======================= Windows (legacy Win32) backend ====================
+// ======================= Windows (modern Win32 backend) ====================
+// Replaced legacy OpenFile() with CreateFileA() to respect the current working
+// directory. Also updated file I/O to use modern ReadFile/WriteFile/SetFilePointer.
+
+// Convert OF_* flags to CreateFileA parameters
+static DWORD u6o_desired_access(unsigned long flags) {
+    switch (flags & 0x3) { // OF_READ=0, OF_WRITE=1, OF_READWRITE=2
+        case OF_WRITE:     return GENERIC_WRITE;
+        case OF_READWRITE: return GENERIC_READ | GENERIC_WRITE;
+        default:           return GENERIC_READ;
+    }
+}
+
+static DWORD u6o_creation_disposition(unsigned long flags) {
+    if (flags & OF_CREATE) return CREATE_ALWAYS;  // create or truncate
+    return OPEN_EXISTING;
+}
 
 file *open(LPCSTR name) {
-    static file *tf;
-    static OFSTRUCT fs;
-    tf = (file *) malloc(sizeof(file));
-    tf->h = HFILE_ERROR;
-    tf->h = OpenFile(name, &fs, OF_READWRITE | OF_SHARE_COMPAT);
-    if (tf->h == HFILE_ERROR) {
+    file *tf = (file *) malloc(sizeof(file));
+    HANDLE h = CreateFileA(name, GENERIC_READ | GENERIC_WRITE,
+                           FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+                           OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    tf->h = (HFILE)(intptr_t)h;
+    if (h == INVALID_HANDLE_VALUE) {
         file_error_name = txtnew();
         txtset(file_error_name, name);
         file_error = txtnew();
@@ -45,26 +62,24 @@ file *open(LPCSTR name) {
         txtadd(file_error, file_error_name);
         txtadd(file_error, " not found");
         MessageBox(NULL, file_error->d, "Ultima 6 Online", MB_OK);
+        tf->h = HFILE_ERROR;
     }
     return tf;
 }
 
 file *open2(LPCSTR name, unsigned long flags) {
-    static file *tf;
-    static OFSTRUCT fs;
-    tf = (file *) malloc(sizeof(file));
-    tf->h = HFILE_ERROR;
-    tf->h = OpenFile(name, &fs, flags);
+    file *tf = (file *) malloc(sizeof(file));
+    DWORD desiredAccess = u6o_desired_access(flags);
+    DWORD creationDisp = u6o_creation_disposition(flags);
+    HANDLE h = CreateFileA(name, desiredAccess,
+                           FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+                           creationDisp, FILE_ATTRIBUTE_NORMAL, NULL);
+    tf->h = (h == INVALID_HANDLE_VALUE) ? HFILE_ERROR : (HFILE)(intptr_t)h;
     return tf;
 }
 
 file *open2(txt *t, unsigned long flags) {
-    static file *tf;
-    static OFSTRUCT fs;
-    tf = (file *) malloc(sizeof(file));
-    tf->h = HFILE_ERROR;
-    tf->h = OpenFile(t->d, &fs, flags);
-    return tf;
+    return open2((LPCSTR) t->d, flags);
 }
 
 /*
@@ -77,54 +92,66 @@ long bl; //length of current buffer
 */
 
 file *open(txt *t) {
-    static file *tf;
-    static OFSTRUCT fs;
-    tf = (file *) malloc(sizeof(file));
-    tf->h = HFILE_ERROR;
-    tf->h = OpenFile(t->d, &fs, OF_READWRITE | OF_SHARE_COMPAT);
-    if (tf->h == HFILE_ERROR) {
+    file *tf = (file *) malloc(sizeof(file));
+    HANDLE h = CreateFileA(t->d, GENERIC_READ | GENERIC_WRITE,
+                           FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+                           OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    tf->h = (HFILE)(intptr_t)h;
+    if (h == INVALID_HANDLE_VALUE) {
         txtset(file_error_name, t);
         file_error = txtnew();
         txtset(file_error, "File ");
         txtadd(file_error, file_error_name);
         txtadd(file_error, " not found");
         MessageBox(NULL, file_error->d, "Ultima 6 Online", MB_OK);
+        tf->h = HFILE_ERROR;
     }
     return tf;
 }
 
 void get(file *filepointer, void *destoffset, long bytes) {
-    if (filepointer->h != HFILE_ERROR) _hread(filepointer->h, destoffset, bytes);
-    return;
+    if (filepointer->h != HFILE_ERROR) {
+        HANDLE h = (HANDLE)(intptr_t)filepointer->h;
+        DWORD bytesRead;
+        ReadFile(h, destoffset, (DWORD)bytes, &bytesRead, NULL);
+    }
 }
 
 void put(file *filepointer, void *sourceoffset, long bytes) {
-    if (filepointer->h != HFILE_ERROR) _hwrite(filepointer->h, (LPCSTR) sourceoffset, bytes);
-    return;
+    if (filepointer->h != HFILE_ERROR) {
+        HANDLE h = (HANDLE)(intptr_t)filepointer->h;
+        DWORD bytesWritten;
+        WriteFile(h, sourceoffset, (DWORD)bytes, &bytesWritten, NULL);
+    }
 }
 
 void seek(file *filepointer, long fileoffset) {
-    if (filepointer->h != HFILE_ERROR) _llseek(filepointer->h, fileoffset, FILE_BEGIN);
-    return;
+    if (filepointer->h != HFILE_ERROR) {
+        HANDLE h = (HANDLE)(intptr_t)filepointer->h;
+        SetFilePointer(h, fileoffset, NULL, FILE_BEGIN);
+    }
 }
 
 void close(file *filepointer) {
-    if (filepointer->h != HFILE_ERROR) _lclose(filepointer->h);
+    if (filepointer->h != HFILE_ERROR) {
+        HANDLE h = (HANDLE)(intptr_t)filepointer->h;
+        CloseHandle(h);
+    }
     free((void *) filepointer);
-    return;
 }
 
 long seek(file *filepointer) {
     if (filepointer->h == HFILE_ERROR) return 0;
-    return _llseek(filepointer->h, 0, FILE_CURRENT);
+    HANDLE h = (HANDLE)(intptr_t)filepointer->h;
+    return (long)SetFilePointer(h, 0, NULL, FILE_CURRENT);
 }
 
 long lof(file *filepointer) {
     if (filepointer->h == HFILE_ERROR) return 0;
-    static long i, i2;
-    i = _llseek(filepointer->h, 0, FILE_CURRENT);
-    i2 = _llseek(filepointer->h, 0, FILE_END);
-    _llseek(filepointer->h, i, FILE_BEGIN);
+    HANDLE h = (HANDLE)(intptr_t)filepointer->h;
+    long i = (long)SetFilePointer(h, 0, NULL, FILE_CURRENT);
+    long i2 = (long)SetFilePointer(h, 0, NULL, FILE_END);
+    SetFilePointer(h, i, NULL, FILE_BEGIN);
     return i2;
 }
 
@@ -143,18 +170,28 @@ void *loadfile(LPCSTR name) {
 }
 
 void waitforfile(LPCSTR name) {
-    static OFSTRUCT fs;
-    static HFILE hfile;
-waitforfile_retry:
-    hfile = OpenFile(name, &fs, OF_SHARE_EXCLUSIVE | OF_READWRITE);
-    if (hfile == HFILE_ERROR) goto waitforfile_retry;
-    _lclose(hfile);
+    // Wait until the file can be opened for reading
+    for (;;) {
+        HANDLE h = CreateFileA(name, GENERIC_READ, 0, NULL, OPEN_EXISTING,
+                               FILE_ATTRIBUTE_NORMAL, NULL);
+        if (h != INVALID_HANDLE_VALUE) {
+            CloseHandle(h);
+            return;
+        }
+        Sleep(10);  // yield briefly before retrying
+    }
 }
 
 void deletefile(LPCSTR name) {
-    static OFSTRUCT fs;
-    OpenFile(name, &fs, OF_DELETE);
-    return;
+    DeleteFileA(name);
+}
+
+// Create `name` as a directory if it does not already exist. CreateDirectoryA
+// simply fails with ERROR_ALREADY_EXISTS when it does, which we ignore — the
+// host calls this at startup so writes under .\save\ succeed even when the
+// working directory is a freshly-mounted volume that lacks the folder.
+void ensuredir(LPCSTR name) {
+    CreateDirectoryA(name, NULL);
 }
 
 #else // ===================== POSIX (Linux) backend =========================
@@ -398,6 +435,14 @@ void waitforfile(LPCSTR name) {
 void deletefile(LPCSTR name) {
     char nb[1024];
     ::remove(u6o_realpath(name, nb, sizeof nb));
+}
+
+// See the Win32 twin above. Normalize '\'->'/' and resolve case, then mkdir.
+// If a directory with the requested name (in any case) already exists,
+// u6o_realpath resolves to it and mkdir fails with EEXIST, which we ignore.
+void ensuredir(LPCSTR name) {
+    char nb[1024];
+    ::mkdir(u6o_realpath(name, nb, sizeof nb), 0777);
 }
 
 #endif // _WIN32

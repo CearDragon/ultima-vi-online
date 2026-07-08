@@ -1,0 +1,479 @@
+# Modern Presenter — retire DirectDraw 7 from the client present path (Trackable)
+
+Status legend: ⬜ todo · 🟡 in-progress · ✅ done · ⏭ deferred · ❌ blocked
+Phase prefix: **`MPRES-P*`** (tag code comments / commits / PR titles with the phase ID).
+
+> Executed by the **`cpp-modernizer` agent** under the Prime Directive in
+> `docs/plans/todo/modernization/README.md` (§1) and the rules in
+> `.github/copilot-instructions.md`. This is a **behavior-preserving** rendering
+> modernization, **not** a feature change. No wire/`.sav`/RNG impact (client
+> render only); **do not** bump `U6O_VERSION`.
+
+---
+
+## Overview
+
+The client is a **software rasterizer**: every tile/sprite/text pixel is written
+by the inline-asm/raw blitters straight into `ps->o`, a 16-bpp **RGB565
+system-memory** framebuffer. DirectDraw 7 is used for almost nothing but
+(1) allocating that buffer, (2) clearing it (`cls`, already a raw memory fill —
+MM-P9.6), and (3) **presenting** it to the window.
+
+On Windows 10/11 + WDDM there is no DirectDraw hardware path. `ddraw.dll` is a
+thin shim re-expressed over GDI + Direct3D/DXGI, and each vendor's user-mode
+driver re-implements it differently. NVIDIA's `IDirectDrawSurface::GetDC`
+emulation **leaks ~6 KB per call**; Intel's does not. The whole MM-P9 saga
+(text `GetDC`, `cls` colour-fill, present `GetDC`) was a series of point-fixes
+for *one root cause*: **we present through emulated DirectDraw 7.**
+
+This plan removes that root cause by presenting through a **modern swap chain**
+(Direct3D 11 / DXGI, with Direct2D-on-DXGI as the simpler alternative), leaving
+the rasterizer and the `ps->o` RGB565 format **completely untouched**. The GPU
+does the RGB565→display-format conversion and the aspect-preserving scale that
+the inline-asm `p16to32*`/`p16to16*` converters and `blit_letterbox`'s
+`StretchBlt` do today.
+
+End state: **no `IDirectDraw*` interface anywhere in the client**, so the entire
+NVIDIA legacy-emulation risk surface (per-`GetDC`, per-`Blt`, present-path
+quirks) is gone — not just the three leaks MM-P9 patched.
+
+---
+
+## What this plan touches (and what it must NOT)
+
+**Replaces (client-only, `src/client/myddraw.cpp` + `function_client.cpp`):**
+
+| Symbol | File:line (approx) | Role today | After |
+|---|---|---|---|
+| `setupddraw()` | `myddraw.cpp:271` | `DirectDrawCreate`, primary surface `vs`, `DDRAW_display_pixelformat` | create DXGI device + swap chain for `hWnd` |
+| `refresh(surf *s)` | `myddraw.cpp:505` | low-level present (cached-DC `BitBlt` to window) | upload `s->o` → present via swap chain |
+| `blit_letterbox()` | `myddraw.cpp:60` | aspect scale + publishes `blit_offx/offy/blit_scale` | same math → swap-chain viewport; **publish identical globals** |
+| `refresh()` | `function_client.cpp:2080` | per-mode compose + `p16to32`/`p16to16` asm convert + `img(vs,…)` / `refresh(psX)` | one path: present `ps->o`; GPU does convert + scale |
+| `ddrawshutdown()` | `myddraw.cpp:1124` | release `dd`/`dd1`/surfaces | release swap-chain/device |
+| `newsurf()` (later phases) | `myddraw.cpp:320` | DD sysmem/vidmem/primary surface alloc | plain owned RGB565 buffers (`->o`/`lPitch` preserved) |
+| `img`/`img0` 2-/6-arg DD `Blt`s (later) | `myddraw.cpp` | `IDirectDrawSurface::Blt` (`bltCopy`/`bltKey`) | software/asm blits |
+
+**Must NOT change (behavior preservation):**
+
+- The rasterizer and `ps->o` **RGB565 byte layout** — every blitter keeps
+  writing the same bytes in the same order. (T3 pixel-exact.)
+- `blit_offx` / `blit_offy` / `blit_scale` semantics — `WndProc` mouse mapping
+  and `loop_client_part_panel_hittest.cpp` read these every frame; the mapped
+  client→source coordinates must be **identical**.
+- Wire format, `struct player`, `.sav`, RNG order, `U6O_VERSION`.
+- The **headless Linux host** — it never renders; the presenter is
+  `#ifdef CLIENT` + Win32-only and sits behind the existing
+  `src/common/platform/` seam. `host` and `both` must keep building.
+- 32-bit / `/MACHINE:X86` — D3D11/DXGI are fully available in x86.
+
+---
+
+## API choice (decide in MPRES-P0, recommendation baked in)
+
+Recommended: **Direct3D 11 + DXGI swap chain (flip model where available)**.
+
+- `DXGI_FORMAT_B5G6R5_UNORM` is a native texture format → upload `ps->o`
+  **directly, no CPU conversion** (deletes the `p16to32*`/`p16to16*` asm).
+- A single dynamic texture (`Map`/`memcpy` the RGB565 rows, respecting
+  `lPitch`) drawn as a full-screen quad; GPU samples + scales.
+- **Point-sampling** (`D3D11_FILTER_MIN_MAG_MIP_POINT`) reproduces the current
+  `COLORONCOLOR` `StretchBlt` exactly; linear is an optional later toggle.
+- Letterbox = a viewport (or quad rect) inset to preserve aspect, computed by
+  the **same math** as `blit_letterbox`, feeding the same `blit_*` globals.
+- Native vsync via `IDXGISwapChain::Present(1, …)`; no GDI present, no DDraw.
+
+Alternative (simpler, fewer shader bits): **Direct2D on a DXGI swap chain** —
+`ID2D1Bitmap` from the RGB565 buffer, `DrawBitmap` with the letterbox dest rect
+and `D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR`. Equivalent result; pick in
+P0 based on which the agent can verify pixel-exactly fastest. Fallback of last
+resort (no new deps, still removes `IDirectDrawSurface::GetDC`): GDI
+`StretchDIBits` from an app-owned DIB.
+
+---
+
+## Phases
+
+### MPRES-P0 — Baseline, scaffolding, API decision (Foundational, T0/T3-prep)
+
+- ✅ **MPRES-P0.1** Tri-target baseline build (`client`/`host`/`both`, **Debug**)
+  green against `cmake-build-debug/` (MSVC `amd64_x86`); only pre-existing
+  `C4731` (inline-asm `ebp`). Release deferred (committed tree is Debug-only;
+  use CLion/VS profiles on hardware). MM-P9.x present/text `GetDC` point-fixes
+  confirmed in place. Recorded in `docs/modernization/MPRES-P1-presenter.md`.
+- 🟡 **MPRES-P0.2** Golden present-capture harness — **design recorded** (the
+  three capture geometries 1:1 / letterboxed / maximized + the `blit_*` parity
+  check, in `MPRES-P1-presenter.md`). *Execution* needs a running client (real
+  window/driver) → user-hardware task, runs as part of P1.4.
+- 🟡 **MPRES-P0.3** Present microbenchmark — **design recorded** (per-present ms +
+  FPS of a fixed `ps->o`). *Execution* on hardware with P1.4.
+- ✅ **MPRES-P0.4** API decided: **D3D11 + DXGI** (dynamic
+  `DXGI_FORMAT_B5G6R5_UNORM` texture, point-sampled full-screen quad). **D2D
+  rejected** as primary — no native RGB565 bitmap format, would re-introduce the
+  CPU 16→32 conversion P2 deletes. Recorded with the equivalence-capture idiom in
+  `docs/modernization/MPRES-P1-presenter.md`.
+- **Exit:** baseline + API recorded ✅; golden-capture/benchmark *design* recorded,
+  *execution* folded into P1.4 (hardware).
+
+---
+
+### MPRES-P1 — Swap-chain presenter behind `refresh(surf*)`, flag-gated (High-impact, T3)
+
+Introduce the modern presenter without removing any DDraw yet, so it can be
+A/B'd on the NVIDIA box exactly like the MM-P9 toggles.
+
+- ✅ **MPRES-P1.1** Add a `u6o::client` **`Presenter`** (RAII; `ComPtr` members)
+  that owns the DXGI device + swap chain for `hWnd`, a dynamic RGB565 texture,
+  and the scale state. Header in a new `src/client/present.{h,cpp}` (modern from
+  the start; Doxygen-documented). _Done: file-static `Presenter` with ComPtr
+  device/context/swap-chain/`B5G6R5_UNORM` texture/shaders; lazy init + resize._
+- ✅ **MPRES-P1.2** Implement `Presenter::present(const surf* s)`: upload
+  `s->o` (stride `s->d.lPitch`, `dwWidth`×`dwHeight`) into the texture, draw it
+  letterboxed to the client rect, `Present`. Compute `dstX/dstY/scale` with the
+  **same** formula as `blit_letterbox` and write `blit_offx/blit_offy/blit_scale`
+  so input mapping is unchanged. _Done: per-row upload honoring `lPitch`;
+  letterbox math mirrored; publishes `blit_offx/offy/scale`._
+- ✅ **MPRES-P1.3** Gate it: `refresh(surf*)` calls the presenter when a new
+  switch `g_present_modern` (default **0** initially) is set, else the existing
+  cached-DC `BitBlt`. Parse a command-line `modernpresent` in `u6o7.cpp`
+  (mirror `diagpresent`/`oldtextdc`). Wire `Presenter` create/resize/destroy
+  into `setupddraw` success, `WM_SIZE`/`recreateBackbuffers`, and the WM_QUIT /
+  `ddrawshutdown` teardown. _Done: `refresh(surf*)` gate with legacy fallthrough
+  on failure; `modernpresent` cmdline parse; lazy create/resize; shutdown wired
+  into `ddrawshutdown()`. Build-verified client/host/both Debug, zero new
+  warnings._
+- ✅ **MPRES-P1.4** Verify (T3): golden present match (P0.2) at 1:1, letterboxed,
+  and maximized; mouse-mapping parity (`blit_*` identical → click a known UI
+  hotspot at several window sizes); benchmark vs P0.3 (no meaningful
+  regression); on NVIDIA, `commitKB` **flat** with `modernpresent` (no
+  `IDirectDrawSurface::GetDC` in the present path at all). _Functional sign-off:
+  hardware smoke test (NVIDIA) — menu, highlight, option descriptions, and the
+  in-game 'L' look text all render correct white/golden; mouse hotspots map
+  unchanged. One bug found & fixed mid-P1: GDI text batch wasn't drained before
+  the modern memcpy of `ps->o`, so the last ~20 TextOuts of a frame went missing
+  (black shadow showed through) → fixed with a `GdiFlush()` in `refresh()` before
+  `present_modern()` (DC stays cached; MM-P9 leak fix preserved). Quantitative
+  benchmark / idle-`commitKB` capture remains the user's ongoing measurement._
+- ✅ **MPRES-P1.5** Flip `g_present_modern` default to **1** after sign-off; keep
+  the legacy path reachable via the flag for one cycle. _Done: default flipped to
+  1 in myddraw.cpp; legacy path reachable for one cycle via the new
+  `legacypresent` command-line switch (`modernpresent` kept as a redundant no-op
+  so existing launch scripts keep working)._
+- **Exit:** modern present is default; pixels + input mapping verified identical;
+  no present-path DDraw `GetDC`; perf parity.
+
+---
+
+### MPRES-P2 — Collapse the high-level `refresh()` compose/convert branches (T3)
+
+Route every `function_client.cpp::refresh()` branch through the presenter and
+delete the now-dead format-conversion + primary-surface paths.
+
+- ✅ **MPRES-P2.1** Replace the `dxrefresh` branches (`p16to32`/`p16to16` asm →
+  `img(vs,…)` to the DD primary) with `presenter.present(ps)`. The GPU samples
+  RGB565, so the 16→32/16→16 converters and the `vs` primary become dead.
+  _Done: the `dxrefresh` arms were provably unreachable (`dxrefresh` is FALSE in
+  data_client.cpp and assigned nowhere else in the client), so collapsing
+  `function_client.cpp::refresh()` deleted all four inline-asm converters
+  (`p16to32`/`p16to16`/`zp16to32`/`zp16to16`) and the `img(vs,…)` primary blits._
+- ✅ **MPRES-P2.2** Replace the `smallwindow` / `windowsizecyclenum` 0/1 and
+  fullscreen branches (`refresh(ps2/ps4/psnew1/psnew1b/ps)`) with a single
+  `presenter.present(ps)`; the GPU viewport handles the scaling those
+  intermediate surfaces did. (Coordinate with **RW-P\***: use `backbufferW/H`
+  and the established scale math; do not change viewport sizing semantics.)
+  _Done: `smallwindow` is FALSE and assigned nowhere else in the client (Option A
+  single-window cleanup, 2026-05-20), so both smallwindow modes were dead;
+  `refresh()` now collapses to the single live `refresh(ps)` arm (→ the modern
+  presenter). Semantics-preserving: the only reachable arm pre-collapse was
+  already `refresh(ps)`._
+- ✅ **MPRES-P2.3** Delete the dead present surfaces (proven unreferenced) and
+  retire `DDRAW_display_pixelformat`'s present-path usage.
+  _Done in two passes. P2.3 (2026-06-29) deleted the trivially-dead `vs` (DD
+  primary, never allocated), `psnew1` (never allocated), and `ps2`/`ps4`
+  (allocated in setup_client.inc but never read). P2.3b (2026-06-30) finished the
+  job after the cross-file audit corrected the plan's list:_
+  - _`ps3` (the 32-bpp format-conversion helper) **removed** — its only reader was
+    the deleted p16to32 converter, so the modern presenter (sampling ps->o's
+    RGB565 directly) made it dead on every display. Dropped the setup_client.inc
+    alloc, the whole `recreateBackbuffers` had_ps3/free/alloc/`cls(ps3)` machinery,
+    the decls, and the `DDRAW_display_pixelformat.dwRGBBitCount!=16` gate that
+    conditionally allocated it. Updated the viewport.h memory-budget + resize docs._
+  - _`dxrefresh` (always FALSE) **removed** — its only use was the focus-skip
+    `goto skiprefresh` in the brace-seam `loop_client_part_refresh_tail.cpp`; that
+    dead guard is gone. The `skiprefresh:` label stays (still the live target for
+    the nodisplay / !clientframe skips in loop_client_part_player_walk.cpp).
+    Removed the def (globals.inc), extern (data_client.h), and init (data_client.cpp)._
+  - _`psnew1b` **kept** — it is the live in-game UI/panel compose surface._
+  - _`DDRAW_display_pixelformat` **kept** but no longer used in the present path —
+    it is still read to set the pixel format on newly created surfaces
+    (myddraw.cpp surfstruct), which is allocation, not present._
+  _Built tri-target (client/host/both Debug), zero new warnings. User smoke-tested
+  the P2.3 build (the ps2/ps4 alloc removal) on NVIDIA: pixel-identical._
+- ✅ **MPRES-P2.4** Verify (T3): golden capture across all former modes; this is
+  the riskiest pixel step (it removes asm converters) — capture each former
+  branch's output and diff. Benchmark. _Build-verified tri-target (client/host/
+  both Debug, zero new warnings). Pixel risk is minimal because the deleted
+  branches were unreachable and the live `refresh(ps)` path is byte-unchanged. The
+  user has smoke-tested each incremental build (P1.5, P2.1/P2.2, P2.3, P2.3b) on
+  NVIDIA hardware and reported pixel-identical results. A formal golden-pixel
+  capture/benchmark remains a user hardware task._
+- **Exit:** one present path; no DD primary; format conversion is GPU-side;
+  inline `_asm` present converters removed (T3 metric down).
+
+---
+
+### MPRES-P3 — Owned framebuffers (replace `newsurf` sysmem alloc) (T1/T3)
+
+Make the work surfaces plain RAII RGB565 buffers so allocation no longer needs
+DirectDraw.
+
+- ✅ **MPRES-P3.1** Introduce a `Surface`/buffer type (or extend `surf`) backed
+  by an owned `std::unique_ptr<uint8_t[]>` for sysmem surfaces, exposing the
+  **same** `->o` pointer and `d.lPitch`/`dwWidth`/`dwHeight` the blitters use, so
+  `img`/`img0`/`imgt*`/`cls`/`getpixel` are byte-for-byte unchanged. _Done:
+  `surf` now carries owned sysmem storage in both `myddraw.h` and `myddraw.cpp`,
+  and surf lifetime moved to `new`/`delete` (the old `malloc`/`free` split was
+  removed so RAII members are valid)._
+- ✅ **MPRES-P3.2** Route `newsurf` sysmem allocations (SURF_SYSMEM / SURF_SYSMEM16)
+  to the owned buffer; keep DD vidmem/primary only where still needed (until P4).
+  Match `lPitch` (incl. any historical alignment) so lighting-stride invariants
+  (RW-P2.3) hold. _Done: `newsurf` now uses `DDSD_LPSURFACE | DDSD_PITCH` to
+  hand our `ownedPixels` allocation to DirectDraw for SURF_SYSMEM and SURF_SYSMEM16.
+  DD wraps our pointer (so Blt/GetDC/SetColorKey/cached-text-DC remain backward-
+  compatible) but does NOT own or free it — `ownedPixels.reset()` in `free(surf*)`
+  is the only release. Pitch is DWORD-aligned (`(x * bpp + 3) & ~3`), matching
+  DD's own sysmem alignment so the lPitch/2 lighting-stride invariant (RW-P2.3)
+  holds. Tri-target Debug green, zero new warnings._
+- ✅ **MPRES-P3.3** Verify: surface byte-dump equality for a representative blit
+  matrix; lighting/stormcloak overlay unchanged; tri-target build. _User hardware
+  smoke-test sign-off: pixel-identical._
+- **Exit:** sysmem surfaces are owned memory; no DDraw needed to allocate them.
+
+---
+
+### MPRES-P4 — Remove the remaining DirectDraw `Blt`s and the device (T3)
+
+- ✅ **MPRES-P4.1** Convert the 2-/6-arg `img(d,s[,rect])` and `img0(d,s)` DD
+  `Blt`s to software copies over `->o`. _Done: `img(d,s)` uses row-by-row
+  `memcpy` for same-size and a nearest-neighbour scale loop for resize (handles
+  all call sites including ps320200→ps640400, portrait→portrait_doublesize, ps5→ps6/
+  minimaptilesurf, bt32→bt16, etc.). `img(d,s,rect)` routes the full source into
+  a dest rect with optional NN scale. `img0(d,s)` skips pixels equal to 0 (color
+  key). All three keep a DD Blt fallback for `->o==NULL` surfaces (PRIMARY, any
+  remaining SURF_VIDMEM). `cls` vidmem fallback left in place (reached only when
+  `s->o==NULL`). Tri-target Debug green, zero new warnings._
+- ✅ **MPRES-P4.2** Delete `IDirectDraw*` entirely: `dd`/`dd1`, `setupddraw`'s
+  DDraw bits, `ddrawshutdown`'s DDraw bits, `ddraw.h`/`ddraw.lib` from the
+  client build. `surf` loses its `LPDIRECTDRAWSURFACE4`. _Done: `struct surf`
+  is now a lean owned-pixel descriptor (`o`/`ownedPixels` + cached DIB-section
+  text DC; no `LPDIRECTDRAWSURFACE4 s` / `DDSURFACEDESC2 d`). `setupddraw()`
+  just zeroes `surflist` and returns; `ddrawshutdown()` tears down the modern
+  presenter + `purgesurfaces()`. No `#include <ddraw.h>` anywhere; no `ddraw`
+  in the CMake link libs (only `dxguid`/`dsound`/`dplay*` for DirectSound/
+  DirectPlay remain, out of scope). Residual dead DirectDraw legacy removed
+  this pass: the two commented `img(d,x,y,s)` DD-`Blt` blocks in `myddraw.cpp`
+  and the commented `DDRAW_display_pixelformat`-gated ps/ps2/ps3/ps4 alloc
+  block in `setup_client.inc`. The DD `Blt` `->o==NULL` fallbacks from P4.1 are
+  gone — every surface owns pixels. Tri-target Release green (client/both/host),
+  zero new warnings (only pre-existing C4731 inline-asm / C4996 CRT / D9025 /GL).
+  Startup crash (stack-guard in the DIB path) + the render regressions it
+  introduced (shadow sprite-stacking, invisible UI/held-item cursor, "L" look
+  black flicker) were all fixed and user-smoke-tested before closing._
+- ✅ **MPRES-P4.3** Verify (T3): full golden pixel matrix + benchmark; confirm
+  `host`/`both` unaffected; zero new warnings.
+  _Done 2026-07-03. Hardware sign-off on NVIDIA: pixel-correct gameplay (full
+  smoke test — world render, UI panels, portraits, spellbook, held-item cursor,
+  status/look text) and **zero memory climb** (flat `commitKB`) over an extended
+  session. `host`/`both` build + run unaffected; tri-target Release green with
+  zero new warnings. This is the leak-proof exit criterion the whole plan
+  targeted: the modern D3D11/DXGI present path eliminates the per-frame
+  `IDirectDrawSurface::GetDC`/`Blt` churn that leaked under NVIDIA's legacy
+  DirectDraw emulation._
+- **Exit:** **no DirectDraw in the client.** Inline-asm/blit pixel output
+  unchanged; NVIDIA emulation risk surface eliminated.
+
+---
+
+### MPRES-P5 — Cleanup & decommission diagnostics (T0/T1)
+
+- ✅ **MPRES-P5.1** Remove the MM-P9 diagnostic scaffolding now that the cause is
+  cured: the `U6O-DIAG` heartbeat, `bltFill/bltCopy/bltKey` counters, and the
+  `diagpresent`/`diagbltskip`/`oldtextdc`/`modernpresent` switches (keep
+  whichever the team wants as a short-lived escape hatch, then delete).
+  _Done 2026-07-03. Removed all MM-P9 scaffolding. `myddraw.cpp`: deleted the
+  diagnostic globals (`g_surf_live`, `g_diag_present_mode`, `g_text_dc_cache`,
+  `g_present_modern`, `g_blt_fill_n/copy_n/key_n`, `g_diag_blt_skip`), the
+  `_diag_private_bytes`/`_diag_handle_count`/`_diag_thread_count` probes, the
+  5-second `U6O-DIAG` heartbeat inside `txtout()`, and every counter `++`/skip
+  site (`cls`, `img`, `img0`, `surfstruct`, `free`, `txtout`, `txtouts`).
+  `refresh(surf*)` now **unconditionally** attempts the modern present under
+  `CLIENT` with the GDI letterbox as the automatic fallback — no gating flags.
+  `u6o7.cpp`: removed the whole `#ifdef CLIENT` command-line diag parser
+  (`diagpresent1/2`, `oldtextdc`, `modernpresent`/`legacypresent`,
+  `diagbltskip1/2/3`). Audio/txt counters removed at source: `sound.cpp`
+  (`g_snd_dup_n`/`g_snd_live`), `dmusic.cpp` (`g_midi_play_n`/`g_midi_load_n`),
+  `txt.cpp` + `mytxt.h` (`g_txt_live`). No escape hatch kept — the GDI fallback
+  in `refresh()` already covers D3D11 init failure, so the manual switch was
+  redundant. Pure diagnostic removal, no gameplay/wire/pixel change. Tri-target
+  Release green, zero new warnings._
+- ✅ **MPRES-P5.2** Update docs: this plan → `docs/plans/done/`; fold the MM-P9
+  records; refresh `docs/resizable-window-hotspots.md` present-path rows and the
+  modernization master index dashboard (inline `_asm` count, DDraw removed).
+- **Exit:** diagnostics gone; docs reflect the modern present; plan filed done.
+
+---
+
+## Verification strategy (per `cpp-modernizer` §Verification, T3)
+
+1. **Golden present capture** (MPRES-P0.2): on-screen pixel dump for a fixed
+   `ps->o`, compared legacy-vs-modern at 1:1, letterboxed, and maximized — for
+   each former `refresh()` branch.
+2. **Mouse-mapping parity:** `blit_offx/offy/blit_scale` identical at multiple
+   window sizes; a scripted click maps to the same source tile/UI widget.
+3. **Benchmark:** per-present ms + FPS, legacy vs modern; no meaningful
+   regression (the GPU present should match or beat the CPU `StretchBlt`).
+4. **Leak proof (the point):** on NVIDIA, idle `commitKB` flat with the modern
+   present; **zero** `IDirectDrawSurface::GetDC`/`Blt` per frame.
+5. **Tri-target build**, zero new warnings, after every phase.
+
+The one negotiable: the *scaling filter* of the on-screen result. Source
+(`ps->o`) pixels stay bit-exact; point-sampling reproduces the current
+`COLORONCOLOR` present. If a chosen API can't be made bit-exact at every window
+size, document the exact intended delta and get sign-off (this is explicitly the
+present-path exception, not a rasterizer change).
+
+---
+
+## Coordination (per modernization README §5)
+
+- **RW-P\*** owns viewport sizing / lighting (`backbufferW/H`, `lighting_*`,
+  `blit_*` scale math). The presenter must **consume** those, not redefine them;
+  reuse the letterbox math in `blit_letterbox` verbatim.
+- **MCLI-P\*** owns `myddraw.cpp` + inline asm generally. This plan is the
+  present-path slice; sequence the asm-converter removal (P2) and blit
+  conversion (P4) with MCLI so they don't collide.
+- **MM-P9** (in `docs/plans/done/memory-management/plan-memoryManagement.md`) is
+  the point-fix series this plan structurally supersedes; P5 retires its
+  diagnostics. MM-P9 verification is complete (idle `commitKB` flat on NVIDIA).
+- **DOB-P\*** / **LH-P\*** untouched (no wire buffers, no platform shim changes;
+  host doesn't render).
+
+---
+
+## Session handoff
+
+- **2026-06-26 (drafted).** New plan; no code yet. Start at **MPRES-P0.1**.
+  Prereq: confirm MM-P9.6 idle `commitKB` is flat on NVIDIA (the present-`GetDC`
+  cache fix) so the modern present's win is cleanly attributable. Drive every
+  phase through the **`cpp-modernizer` agent** with the T3 golden-pixel +
+  benchmark discipline above. Recommended API: **D3D11 + DXGI** (RGB565 texture,
+  point-sampled full-screen quad); D2D-on-DXGI is the simpler fallback.
+
+- **2026-06-29 (P0 + P1 complete).** Branch `plan/modernPresenter`.
+  - **P0** ✅ tri-target Debug baseline; API decision **D3D11+DXGI** recorded in
+    `docs/modernization/MPRES-P1-presenter.md` (D2D rejected: no native RGB565).
+  - **P1** ✅ `src/client/present.{h,cpp}` — file-static RAII `Presenter`
+    (ComPtr device/ctx/swap-chain, dynamic `B5G6R5_UNORM` texture, FS-triangle
+    shaders, point sampler, lazy init/resize). `refresh(surf*)` gated on
+    `g_present_modern` with legacy fallthrough on D3D11 failure; shutdown wired
+    into `ddrawshutdown()`; CMake adds `present.cpp` to client+both (not host).
+  - **P1.4** ✅ hardware smoke-test sign-off on NVIDIA. Mid-P1 bug fixed: needed
+    a `GdiFlush()` in `refresh()` before the modern memcpy of `ps->o` (GDI text
+    batch wasn't drained → last ~20 TextOuts/frame missing). DC stays cached, so
+    the MM-P9 per-frame ddraw-GetDC leak fix is preserved.
+  - **P1.5** ✅ default flipped to modern (`g_present_modern = 1`); legacy
+    reachable for one cycle via `legacypresent` (`modernpresent` now a no-op).
+  - **P2.1/P2.2** ✅ collapsed `function_client.cpp::refresh()` to the single live
+    `refresh(ps)` arm (smallwindow/dxrefresh branches were provably dead) — deleted
+    the four inline-asm present converters (`p16to32`/`p16to16`/`zp16to32`/
+    `zp16to16`) + the `vs`-primary blits. User smoke-tested: pixel-identical.
+  - **P2.3** ✅ (two passes, both smoke-tested) deleted every dead present surface:
+    `vs`, `psnew1` (never allocated), `ps2`/`ps4` (allocated-but-unread) in P2.3;
+    then `ps3` (the 32-bpp helper — only the deleted p16to32 converter read it;
+    dropped its setup alloc, the `recreateBackbuffers` had_ps3/free/alloc/cls
+    machinery, decls, and the `DDRAW_display_pixelformat` bit-count gate) and
+    `dxrefresh` (the always-FALSE focus-skip `goto skiprefresh` guard in the
+    brace-seam `loop_client_part_refresh_tail.cpp`; the live `skiprefresh:` label
+    stays) in P2.3b. `psnew1b` kept (live UI surface); `DDRAW_display_pixelformat`
+    kept (still sets the format on newly created surfaces — allocation, not present).
+    Built tri-target Debug green, zero new warnings.
+  - **NEXT → MPRES-P4.2**: delete `IDirectDraw*` entirely. P3.3 ✅ (user HW
+    sign-off). P4.1 ✅: `img(d,s)` (2-arg, full blit), `img(d,s,x,y,x2,y2)` (6-arg
+    rect blit), and `img0(d,s)` all converted to software `->o` copies with NN
+    scaling; DD Blt fallback kept only for `->o==NULL` surfaces. Tri-target Debug
+    green, zero new warnings. P4.2 requires: convert `loadimage()` from GetDC/BitBlt
+    to a GDI DIB section approach writing directly into `->o`; migrate
+    `surf_text_dc_acquire/release` + `txtout/txtouts` text path from GetDC-on-DD to a
+    DIB-section DC over `->o`; remove `LPDIRECTDRAWSURFACE4 s` and `DDSURFACEDESC2 d`
+    from `struct surf` (replace with lean struct); gut `setupddraw()`/`ddrawshutdown()`
+    DDraw init; remove `ddraw.h`/`ddraw.lib` from client build.
+
+- **2026-07-01 (MPRES-P4.2 startup crash fixed).** Opening the client after the
+  P4.2 DirectDraw removal crashed immediately with **Run-Time Check Failure #2** /
+  `0x80000003` from `_RTC_StackFailure`; dump `tools/crash/crash-reports/crash_20260701_165748.dmp`
+  symbolicated to `src/client/myddraw.cpp:389` inside `surf_text_dc_acquire()`.
+  Root cause: the new DIB-section path built a plain `BITMAPINFO` on the stack
+  and then wrote three RGB565 channel masks through `bi.bmiColors[0]`, overrunning
+  the local `BITMAPINFOHEADER bih`/`BITMAPINFO bi` storage and tripping the MSVC
+  debug stack guard. Fix shipped in `myddraw.{h,cpp}`: replace the undersized
+  stack object with a `BITMAPINFOHEADER + DWORD[3]` wrapper (`BitmapInfoWithMasks`),
+  track `cachedDIBBits`, and flush DIB pixels back into `surf::o` in
+  `surf_text_dc_release()` so the GDI text / `loadimage()` path stays coherent
+  with the software blitters and modern presenter. Verified by rebuilding
+  `client` through `tools/Enter-DevBuildEnv.ps1` (EXE/PDB 2026-07-01 17:06:52).
+  NEXT: user runtime-smoke the startup path and continue the remaining
+  `MPRES-P4.2` DirectDraw-call-site cleanup.
+
+- **2026-07-02 (MPRES-P4.1 render regressions fixed + MPRES-P4.2 CLOSED).**
+  Finished stabilizing the P4.2 DirectDraw removal after the crash fix.
+  - **P4.1 render regressions (all user-smoke-tested OK):**
+    1. _Shadow tiles stacked many overlapping item sprites_ — the crash-report
+       agent commit (f655e4e) had pasted keyed-50%-blend (`imgt0`) logic into the
+       opaque/keyed blitters `img`/`img0`/`imgt`/`img75t`, turning opaque copies
+       into transparent blends. Fixed by reverse-applying only the 8 corrupted
+       blitter hunks (restoring d2cd7de opaque/keyed/blend semantics) while
+       keeping the legit crash fixes.
+    2. _No UI / no held-item cursor_ — the DIB text mechanism is a snapshot-and-
+       restore of `ps->o`; the per-frame world-text path left a stale DIB held,
+       and `refresh()`'s release memcpy'd it back over the UI/cursor. Fixed by
+       adding `surf_text_dc_release(d); surf_text_dc_release(s);` (after the NULL
+       checks) to all 6 positional `img*` blitters so any held DIB is flushed
+       before positional draws.
+    3. _"L" look black flicker_ — `STATUSMESSadd` (both overloads) and
+       `STATUSMESSwrapline` acquire a DIB on `ps` purely to *measure* text
+       (`GetTextExtentPoint32`/`GetTextExtentExPoint`) but never released it. The
+       "Thou dost see" reply arrives via net mid-frame, snapshotting an
+       incomplete/black `ps->o`, which was later flushed over the composited
+       frame. Fixed by releasing the cached DIB at the end of those three
+       measurement-only functions (a pixel no-op — nothing is drawn into it).
+  - **P4.2 closeout:** verified the whole DirectDraw device/header/lib footprint
+    is already gone (lean `struct surf`, gutted `setupddraw`/`ddrawshutdown`, no
+    `ddraw.h` include, no `ddraw` link lib), then removed the last dead
+    DirectDraw legacy: two commented `img(d,x,y,s)` DD-`Blt` blocks in
+    `myddraw.cpp` and the commented `DDRAW_display_pixelformat` ps/ps2/ps3/ps4
+    block in `setup_client.inc`. Tri-target Release green (client/both/host),
+    zero new warnings.
+  - **NEXT → MPRES-P4.3:** verification (T3) — full golden-pixel matrix +
+    per-present benchmark on NVIDIA hardware; confirm `host`/`both` unaffected.
+    Then MPRES-P5 (decommission the MM-P9 `U6O-DIAG` diagnostic scaffolding and
+    file this plan to `docs/plans/done/`). Note: a stale `buildlog.txt` sits at
+    the repo root (old failing-build capture) — safe to delete.
+
+- **2026-07-03 (MPRES-P4.3 + P5 complete — PLAN DONE).**
+  - **P4.3** ✅ hardware sign-off on NVIDIA: pixel-correct full-smoke gameplay +
+    **zero memory climb** (flat `commitKB`) over an extended session. This is the
+    leak-proof exit criterion the whole plan targeted. `host`/`both` unaffected.
+  - **P5.1** ✅ removed all MM-P9 diagnostic scaffolding: the `U6O-DIAG`
+    heartbeat and `_diag_*` process probes in `myddraw.cpp`; the diagnostic
+    globals (`g_surf_live`, `g_diag_present_mode`, `g_text_dc_cache`,
+    `g_present_modern`, `g_blt_fill_n/copy_n/key_n`, `g_diag_blt_skip`) and every
+    `++`/skip site; the `u6o7.cpp` command-line diag parser
+    (`diagpresent`/`oldtextdc`/`modernpresent`/`legacypresent`/`diagbltskip`);
+    and the audio/txt counters in `sound.cpp`/`dmusic.cpp`/`txt.cpp`/`mytxt.h`.
+    `refresh(surf*)` now unconditionally attempts the modern present with the GDI
+    letterbox as the automatic fallback (no gating flags, no escape hatch — the
+    fallback already covers D3D11 init failure). Pure diagnostic removal: no
+    wire/pixel/gameplay change. Tri-target Release green, zero new warnings.
+  - **P5.2** ✅ docs updated: this plan filed to `docs/plans/done/`; hotspots and
+    the modernization master index refreshed; stale `buildlog.txt` deleted.
+  - **PLAN COMPLETE.** DirectDraw 7 is fully removed from the client; the modern
+    D3D11/DXGI presenter is the sole present path.

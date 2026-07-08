@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: u6o-host-save-backup
+  namespace: ultima-dev
+spec:
+  # Run daily at 03:00 UTC.
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: backup
+            image: busybox:latest
+            command:
+              - sh
+              - -c
+              - |
+                DEST="/saves/$(date +%Y-%m-%d)"
+                echo "Backing up /host/save -> ${DEST}"
+                cp -r /host/save "${DEST}"
+                echo "Done."
+            volumeMounts:
+              # Host fileshare: read-only source.
+              - name: host-volume
+                mountPath: /host
+                readOnly: true
+              # Saves fileshare: backup destination.
+              - name: saves-volume
+                mountPath: /saves
+          volumes:
+            - name: host-volume
+              persistentVolumeClaim:
+                claimName: azure-file-pvc
+            - name: saves-volume
+              persistentVolumeClaim:
+                claimName: azure-saves-pvc
+# kubectl create job --from=cronjob/u6o-host-save-backup u6o-backup-test -n ultima-dev

@@ -2,6 +2,22 @@
 
 Randomc(timeGetTime());
 
+// The host writes all player saves under .\save\ (save.txt, N.sav, house.sav,
+// guardianobjs.sav, adminlog.txt, the .QRT quarantine files, ...). When the
+// working directory is a freshly-mounted volume (e.g. the Azure File PVC in
+// k8s/aks/deployment.yaml, where the AKS image does not bundle a save/ folder)
+// that directory may not exist. open2(...,OF_CREATE) cannot create a file
+// inside a missing parent, so every save silently fails and new accounts are
+// lost. Ensure the directory exists before any save I/O. Non-wire change.
+ensuredir(".\\save");
+// Custom player portraits live in a SEPARATE subtree, .\save\port\ (index.txt
+// mapping N=PLAYERNAME plus one N.BMP per portrait), written by the char-create
+// upload path in loop_host_part_b_charcreate.cpp. open2(...,OF_CREATE) cannot
+// create index.txt / N.BMP inside a missing parent, so on a freshly-mounted
+// volume the upload would silently fail (and the loader finds nothing on entry).
+// ensuredir(".\\save") above does NOT create nested children, so create it too.
+ensuredir(".\\save\\port");
+
 
 tfh=open2("ban.txt",OF_READWRITE|OF_SHARE_COMPAT);
 if (tfh->h==HFILE_ERROR){

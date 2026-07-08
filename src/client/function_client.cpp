@@ -1,5 +1,7 @@
 #include "function_client.h"
 #include "define_client.h"
+#include "Resource.h" // IDM_ACTIONS_CAMERA_LOCK etc. for RefreshMenuChecks
+#include <string.h>   // strcmp for the Options settings table
 #include "viewport.h" // RW-P2: backbufferW/H, lightingStride, lightingTotalBytes
 //#include <windows.h>
 #pragma warning(disable: 4018 4244)
@@ -358,14 +360,14 @@ void LIGHTnew(unsigned short x, unsigned short y, unsigned long light_data_offse
 // =====================================================================
 // RW-P2.2: backbuffer recreation. Called from the dirtyClientSize
 // handler in loop_client.cpp when the user resizes the window. Releases
-// and re-creates the `ps`/`ps3`/`ps5`
+// and re-creates the `ps`/`ps5`
 // DirectDraw surfaces, re-allocates the lighting buffers, patches FRAME
 // pointers (vf, fs) that referenced the old `ps`, and clears the new
 // surface to black so unrendered regions don't show stale pixels.
 //
 // RW-P2.3-asm (2026-05-21) — HORIZONTAL GROWTH UNBLOCKED
 // sf32, sf32z, im32z (and g32, g32z) have been rewritten in function_client.h
-// as C++ loops that read d->d.lPitch at runtime, replacing the hard-rolled
+// as C++ loops that read d->lPitch at runtime, replacing the hard-rolled
 // inline-ASM bodies (fast3/4/5.asm etc.) that hard-coded +2048 between dest
 // rows. The newW > kBackbufferLegacyW clamp is now removed; the back-buffer
 // can grow horizontally up to kBackbufferMaxW.
@@ -388,11 +390,6 @@ namespace u6o {
             if (newW == backbufferW() && newH == backbufferH()) {
                 return true; // already at requested size
             }
-
-            // Whether the 32-bpp helper surface ps3 currently exists. It's
-            // only created on non-16bpp displays in setup_client.inc, so we
-            // re-create it only if it was there to begin with.
-            bool had_ps3 = (ps3 != NULL);
 
             // Capture the OLD ps pointer so we can patch only FRAMEs that
             // actually referenced it. fs (the full-screen intro/menu overlay)
@@ -425,20 +422,14 @@ namespace u6o {
                 free(ps);
                 ps = NULL;
             }
-            if (ps3) {
-                free(ps3);
-                ps3 = NULL;
-            }
 
             // Re-create at the new size. Match the original setup_client.inc
-            // flag choices: ps is 16bpp sysmem; ps3 is 32bpp sysmem
-            // (used as the format-conversion target on non-16bpp displays).
+            // flag choice: ps is 16bpp sysmem. (MPRES-P2.3b retired the 32-bpp
+            // ps3 conversion helper — the modern presenter samples ps->o's
+            // RGB565 directly, so no per-display-format helper surface is needed.)
             ps = newsurf(newW, newH, SURF_SYSMEM16);
-            if (had_ps3) {
-                ps3 = newsurf(newW, newH, SURF_SYSMEM);
-            }
 
-            if (!ps || (had_ps3 && !ps3)) {
+            if (!ps) {
                 return false; // allocation failure — leave dims at old values
             }
 
@@ -450,11 +441,11 @@ namespace u6o {
 #ifdef _DEBUG
             {
                 long expectedPitch = (long) newW * 2;
-                if ((long) ps->d.lPitch != expectedPitch) {
+                if ((long) ps->lPitch != expectedPitch) {
                     char dbg[160];
                     wsprintfA(dbg,
                               "[u6o] recreateBackbuffers: dwWidth=%lu lPitch=%ld (expected %ld)\n",
-                              (unsigned long) ps->d.dwWidth, (long) ps->d.lPitch, expectedPitch);
+                              (unsigned long) ps->dwWidth, (long) ps->lPitch, expectedPitch);
                     OutputDebugStringA(dbg);
                 }
             }
@@ -462,7 +453,7 @@ namespace u6o {
 
             // RW-P2.3: adopt the surface's ACTUAL pixel pitch as the lighting
             // stride before (re)allocating the lighting buffers. DirectDraw pads
-            // `ps->d.lPitch` above `newW * 2` at widths that aren't aligned to
+            // `ps->lPitch` above `newW * 2` at widths that aren't aligned to
             // its granularity (i.e. most intermediate window sizes between the
             // legacy 1024 and a maximized/aligned width). The lighting-compose
             // passes (lightshow0 asm, moon memcpy, stormcloak, ps_fakebuffer)
@@ -472,7 +463,7 @@ namespace u6o {
             // made lPitch/2 the canonical *world* width broke the tile/wire
             // frame; decoupling the lighting stride from backbufferW() is the
             // fix. Set BEFORE lighting_alloc() so it sizes/strides to match.
-            set_lighting_stride((int) (ps->d.lPitch / 2));
+            set_lighting_stride((int) (ps->lPitch / 2));
 
             // Re-allocate the lighting buffers at the surface pitch so the
             // linear-walk inline asm in the lighting compose pass at
@@ -508,7 +499,6 @@ namespace u6o {
             // region is never written by the renderer, so without this you'd
             // see whatever heap/DD memory happened to be there.
             cls(ps, 0);
-            if (ps3) cls(ps3, 0);
 
             // Publish the new dims. Done last so any concurrent reader on the
             // same thread (we're single-threaded for graphics, but be careful
@@ -1760,7 +1750,7 @@ void STATUSMESSadd(txt *t) {
     // event-driven GetDC. The per-frame text path (txtout/txtouts) may leave a
     // cached DC held on `ps`; DirectDraw would fail this GetDC while one is held.
     surf_text_dc_release(ps);
-    ps->s->GetDC(&taghdc);
+    taghdc = surf_text_dc_acquire(ps);
     {
         HGDIOBJ _old_tag_font = SelectObject(taghdc, fnt1);
     if (STATUSMESSpending->l) txtaddchar(STATUSMESSpending, 13);
@@ -1780,7 +1770,15 @@ void STATUSMESSadd(txt *t) {
     } //i
         SelectObject(taghdc, _old_tag_font);
     }
-    ps->s->ReleaseDC(taghdc);
+    // MPRES-P4.2 (look-flicker fix): this acquire was for text *measurement*
+    // only (GetTextExtentPoint32) — nothing is drawn to the surface. Release the
+    // cached DIB snapshot immediately so it can't be flushed back over a
+    // later-composited frame. STATUSMESSadd runs event-driven mid-frame (e.g. a
+    // "Thou dost see" look reply arriving via net before world_render), so a
+    // lingering snapshot of an incomplete/black ps->o would otherwise be
+    // memcpy'd back at refresh(), causing a one-frame black flicker. The
+    // release's memcpy-back is a pixel no-op here (we only read for metrics).
+    surf_text_dc_release(ps);
 }
 
 void STATUSMESSadd(const char *t) {
@@ -1789,7 +1787,7 @@ void STATUSMESSadd(const char *t) {
     // MM-P9.5: release any cached on-surface text DC on `ps` before this GetDC
     // (see the txt* overload above for the rationale).
     surf_text_dc_release(ps);
-    ps->s->GetDC(&taghdc);
+    taghdc = surf_text_dc_acquire(ps);
     {
         HGDIOBJ _old_tag_font = SelectObject(taghdc, fnt1);
     if (STATUSMESSpending->l) txtaddchar(STATUSMESSpending, 13);
@@ -1809,10 +1807,11 @@ void STATUSMESSadd(const char *t) {
     } //i
         SelectObject(taghdc, _old_tag_font);
     }
-    ps->s->ReleaseDC(taghdc);
+    // MPRES-P4.2 (look-flicker fix): measurement-only acquire; release the
+    // cached DIB snapshot now so it isn't flushed back over a later frame. See
+    // the txt* overload above for the full rationale.
+    surf_text_dc_release(ps);
 }
-
-
 // s555
 void STATUSMESSadd(txt *t, int skippable) {
     static txt *t2 = txtnew();
@@ -1867,7 +1866,7 @@ int STATUSMESSwrapline(txt *src, long maxwidth, txt **out, int maxlines) {
     // MM-P9.5: release any cached on-surface text DC on `ps` before this GetDC
     // (see STATUSMESSadd above for the rationale).
     surf_text_dc_release(ps);
-    ps->s->GetDC(&hdc);
+    hdc = surf_text_dc_acquire(ps);
     {
         HGDIOBJ _old_hdc_font = SelectObject(hdc, fnt1naa);
 
@@ -1902,7 +1901,10 @@ int STATUSMESSwrapline(txt *src, long maxwidth, txt **out, int maxlines) {
 
         SelectObject(hdc, _old_hdc_font);
     }
-    ps->s->ReleaseDC(hdc);
+    // MPRES-P4.2 (look-flicker fix): measurement-only acquire (GetTextExtentExPoint);
+    // release the cached DIB snapshot now so it isn't flushed back over a
+    // later-composited frame. See STATUSMESSadd above for the full rationale.
+    surf_text_dc_release(ps);
 
     if (n == 0) { txtset(out[0], ""); n = 1; }
     return n;
@@ -2087,247 +2089,305 @@ void setsetting_int(const char *name, long value) {
     close(tfh);
 }
 
+// Rewrites settings.txt in place, changing the [value] token of a CHOICE line.
+// A CHOICE line looks like:
+//     Some descriptive text is [50%] transparent.{NAME,CHOICE,not,50%,25%}
+// The `{NAME,` marker identifies the line; the first `[...]` token in it is the
+// current value. `value` must be one of the choice tokens (e.g. "25%"). Every
+// other line is preserved byte-for-byte. Silent on failure, like setsetting_int.
+void setsetting_choice(const char *name, const char *value) {
+    static file *tfh;
+    static txt *line = txtnew();
+    static txt *out = txtnew();
+    static txt *needle = txtnew();
+    static txt *lowerline = txtnew();
+    static txt *rebuilt = txtnew();
+    static long i, sz;
+
+    txtNEWLEN(out, 0);
+
+    // "{NAME," marker (lowercased) uniquely identifies the setting's line.
+    txtset(needle, "{");
+    txtadd(needle, name);
+    txtadd(needle, ",");
+    txtlcase(needle);
+
+    tfh = open2("settings.txt", OF_READ | OF_SHARE_COMPAT);
+    if (tfh->h == HFILE_ERROR) { close(tfh); return; } // nothing to rewrite
+
+    for (;;) {
+        i = seek(tfh);
+        sz = lof(tfh);
+        if (i >= sz) break;
+        txtfilein(line, tfh);
+        if (line->l == 0) continue;
+
+        txtset(lowerline, line);
+        txtlcase(lowerline);
+        if (txtsearch(lowerline, needle) != 0) {
+            // Replace the first [..] token in the line with [value].
+            long lb = -1, rb = -1;
+            for (long j = 0; j < line->l; j++) { if (line->d[j] == '[') { lb = j; break; } }
+            if (lb >= 0)
+                for (long j = lb + 1; j < line->l; j++) { if (line->d[j] == ']') { rb = j; break; } }
+            if (lb >= 0 && rb > lb) {
+                txtNEWLEN(rebuilt, 0);
+                for (long j = 0; j <= lb; j++) txtaddchar(rebuilt, line->d[j]); // up to and incl '['
+                txtadd(rebuilt, value);
+                for (long j = rb; j < line->l; j++) txtaddchar(rebuilt, line->d[j]); // from ']' on
+                txtset(line, rebuilt);
+            }
+        }
+
+        if (out->l) txtadd(out, "\r\n");
+        txtadd(out, line);
+    }
+    close(tfh);
+
+    if (out->l) txtadd(out, "\r\n");
+    tfh = open2("settings.txt", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
+    if (tfh->h != HFILE_ERROR) {
+        put(tfh, out->d, out->l);
+    }
+    close(tfh);
+}
+
+// Push the current music-volume global to the DirectMusic + low-level MIDI
+// outputs. This is a behavior-preserving extraction of the inline block that
+// used to live only at the `u6omidivolume_changed:` label in the volume-panel
+// loop (loop_client_part_game_open.cpp); the Options menu reuses it.
+void applyMidiVolume() {
+    if (U6O_DISABLEMUSIC) return;
+    float f = u6omidi_volume[midi_loaded];
+    f = f * (float) u6omidivolume / 255.0f;
+    f = 255 - f;
+    f = f * 0.25f;
+    f *= f;
+    // DMUS_VOLUME_MAX 2000 (+20 dB) .. DMUS_VOLUME_MIN -20000 (-200 dB)
+    u6omidi->SetMasterVolume(-f);
+    if (u6omidivolume == 0) u6omidi->Stop();
+
+    if (midiout_setup) {
+        int x = u6omidivolume / 2; // 0-255 -> 0-127
+        midiOutShortMsg(midiout_handle, 0x000007B0 + x * 65536);
+        midiOutShortMsg(midiout_handle, 0x000007B1 + x * 65536);
+        midiOutShortMsg(midiout_handle, 0x000007B2 + x * 65536);
+        midiOutShortMsg(midiout_handle, 0x000007B3 + x * 65536);
+        midiOutShortMsg(midiout_handle, 0x000007B4 + x * 65536);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Options menu — data-driven definition
+// ---------------------------------------------------------------------------
+// One entry per user-configurable setting that persists to a config file.
+// MS_CHOICE settings live in settings.txt (read via getsetting, written via
+// setsetting_choice); their optLabel[] tokens must match the settings.txt
+// choice tokens exactly. MS_VOLUME settings are the settings.bin-backed audio
+// levels (persisted from the live globals at shutdown in u6o7.cpp).
+//
+// The array index is the settingIndex used to derive WM_COMMAND ids
+// (see IDM_OPTIONS_* in function_client.h) — DO NOT reorder without care.
+enum { MS_CHOICE = 0, MS_VOLUME = 1 };
+
+struct MenuSetting {
+    const char *category;     // "Graphics" / "Audio" / "Input" (grouping)
+    const char *label;        // submenu label
+    int kind;                 // MS_CHOICE / MS_VOLUME
+    const char *settingName;  // MS_CHOICE: settings.txt key; else nullptr
+    unsigned char *volTarget; // MS_VOLUME: global to read/write; else nullptr
+    int isMusic;              // MS_VOLUME: also push to MIDI on change
+    int optionCount;
+    const char *optLabel[8];  // choice tokens (MS_CHOICE) / display (MS_VOLUME)
+    unsigned char optVol[8];  // MS_VOLUME values
+};
+
+static const MenuSetting g_menuSettings[] = {
+    // ---- Graphics ----
+    {"Graphics", "Clouds",                   MS_CHOICE, "CLOUDS",        0, 0, 2, {"Yes", "No"}, {0}},
+    {"Graphics", "Transparency: party list", MS_CHOICE, "PARTYLISTWINDOW_TRANSPARENCYLEVEL",              0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: inventory",  MS_CHOICE, "INVENTORYWINDOW_TRANSPARENCYLEVEL",              0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: spellbook",  MS_CHOICE, "SPELLBOOKWINDOW_TRANSPARENCYLEVEL",              0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: text input", MS_CHOICE, "TEXTINPUTPORTRAIT_TRANSPARENCYLEVEL",            0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: volume box", MS_CHOICE, "VOLUMECONTROL_TRANSPARENCYLEVEL",                0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: convo arrows", MS_CHOICE, "CONVERSATIONLOG_SCROLLARROWS_TRANSPARENCYLEVEL", 0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: status box", MS_CHOICE, "STATUSMESSAGE_VIEWPREVIOUSBOX_TRANSPARENCYLEVEL", 0, 0, 3, {"not", "50%", "25%"}, {0}},
+    {"Graphics", "Transparency: piano keys", MS_CHOICE, "PLAYINSTRUMENTPIANOKEYS_TRANSPARENCYLEVEL",      0, 0, 3, {"not", "50%", "25%"}, {0}},
+    // ---- Audio ----
+    {"Audio", "Load MIDI drivers",           MS_CHOICE, "ALLOWMIDI",     0, 0, 2, {"Do", "Don't"}, {0}},
+    {"Audio", "Music volume",                MS_VOLUME, 0, &u6omidivolume, 1, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    {"Audio", "Sound volume",                MS_VOLUME, 0, &u6ovolume,     0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    {"Audio", "Voice volume",                MS_VOLUME, 0, &u6ovoicevolume, 0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    // ---- Input ----
+    {"Input", "Read joystick",               MS_CHOICE, "ALLOWJOYSTICK", 0, 0, 2, {"Do", "Don't"}, {0}},
+};
+static const int g_menuSettingCount = (int) (sizeof(g_menuSettings) / sizeof(g_menuSettings[0]));
+
+// Fixed category order for building the Options submenus.
+static const char *g_menuCategories[] = {"Graphics", "Audio", "Input"};
+static const int g_menuCategoryCount = (int) (sizeof(g_menuCategories) / sizeof(g_menuCategories[0]));
+
+// Leaf submenu (the popup holding one setting's radio options) captured at
+// build time, indexed by settingIndex. CheckMenuRadioItem does NOT recurse
+// into nested submenus the way CheckMenuItem does, so RefreshMenuChecks must
+// operate on the exact popup that contains the option items — not the menubar.
+static HMENU g_optionSubmenus[64] = {0};
+
+// Apply a transparency CHOICE setting to its live frame object(s) so the change
+// is visible immediately, mirroring the startup apply in setup_client.inc.
+// `level` is the 0-based option index (0=not, 1=50%, 2=25%), i.e. the same
+// (getsetting()-1) value the startup code stores in mouse_over_transparent.
+static void applyTransparencyLive(const char *name, int level) {
+    unsigned char v = (unsigned char) level;
+    if (strcmp(name, "PARTYLISTWINDOW_TRANSPARENCYLEVEL") == 0) {
+        if (qkstf) qkstf->mouse_over_transparent = v;
+    } else if (strcmp(name, "INVENTORYWINDOW_TRANSPARENCYLEVEL") == 0) {
+        for (int i = 0; i < 8; i++) if (party_frame[i]) party_frame[i]->mouse_over_transparent = v;
+    } else if (strcmp(name, "SPELLBOOKWINDOW_TRANSPARENCYLEVEL") == 0) {
+        for (int i = 0; i < 8; i++) if (party_spellbook_frame[i]) party_spellbook_frame[i]->mouse_over_transparent = v;
+    } else if (strcmp(name, "TEXTINPUTPORTRAIT_TRANSPARENCYLEVEL") == 0) {
+        if (inpf) inpf->mouse_over_transparent = v;
+    } else if (strcmp(name, "VOLUMECONTROL_TRANSPARENCYLEVEL") == 0) {
+        if (volcontrol) volcontrol->mouse_over_transparent = v;
+    } else if (strcmp(name, "CONVERSATIONLOG_SCROLLARROWS_TRANSPARENCYLEVEL") == 0) {
+        if (con_frm) con_frm->mouse_over_transparent = v;
+    } else if (strcmp(name, "STATUSMESSAGE_VIEWPREVIOUSBOX_TRANSPARENCYLEVEL") == 0) {
+        if (statusmessage_viewprev) statusmessage_viewprev->mouse_over_transparent = v;
+    } else if (strcmp(name, "PLAYINSTRUMENTPIANOKEYS_TRANSPARENCYLEVEL") == 0) {
+        if (musickeyboard) musickeyboard->mouse_over_transparent = v;
+    }
+}
+
+// Current 0-based option index for a setting, or -1 if unknown.
+static int optionsCurrentIndex(const MenuSetting &ms) {
+    if (ms.kind == MS_CHOICE) {
+        long v = getsetting(ms.settingName); // 1-based, 0/FALSE if missing
+        return v > 0 ? (int) v - 1 : -1;
+    }
+    // MS_VOLUME: pick the preset nearest the live global value.
+    int cur = ms.volTarget ? *ms.volTarget : 0;
+    int best = 0, bestd = 1 << 30;
+    for (int o = 0; o < ms.optionCount; o++) {
+        int d = cur - (int) ms.optVol[o];
+        if (d < 0) d = -d;
+        if (d < bestd) { bestd = d; best = o; }
+    }
+    return best;
+}
+
+void BuildOptionsMenu(HMENU menubar) {
+    if (!menubar) return;
+    HMENU options = CreatePopupMenu();
+
+    for (int c = 0; c < g_menuCategoryCount; c++) {
+        HMENU catMenu = CreatePopupMenu();
+        for (int s = 0; s < g_menuSettingCount; s++) {
+            const MenuSetting &ms = g_menuSettings[s];
+            if (strcmp(ms.category, g_menuCategories[c]) != 0) continue;
+            int base = IDM_OPTIONS_BASE + s * IDM_OPTIONS_STRIDE;
+            HMENU sub = CreatePopupMenu();
+            for (int o = 0; o < ms.optionCount; o++)
+                AppendMenu(sub, MF_STRING, (UINT_PTR) (base + o), ms.optLabel[o]);
+            if (s >= 0 && s < (int) (sizeof(g_optionSubmenus) / sizeof(g_optionSubmenus[0])))
+                g_optionSubmenus[s] = sub; // remembered so RefreshMenuChecks can radio-check it
+            AppendMenu(catMenu, MF_POPUP, (UINT_PTR) sub, ms.label);
+        }
+        AppendMenu(options, MF_POPUP, (UINT_PTR) catMenu, g_menuCategories[c]);
+    }
+
+    // Insert "Options" just before the trailing Help popup.
+    int pos = GetMenuItemCount(menubar);
+    if (pos > 0) pos -= 1; // before Help
+    InsertMenu(menubar, pos, MF_BYPOSITION | MF_POPUP, (UINT_PTR) options, "&Options");
+}
+
+void RefreshMenuChecks(HMENU menubar) {
+    if (!menubar) return;
+    // Actions -> Toggle Camera Lock reflects the live camera_freeze state.
+    CheckMenuItem(menubar, IDM_ACTIONS_CAMERA_LOCK,
+                  MF_BYCOMMAND | (camera_freeze ? MF_CHECKED : MF_UNCHECKED));
+    // Options radio groups reflect the current stored/live value. The option
+    // items live in per-setting leaf submenus captured at build time;
+    // CheckMenuRadioItem must target that submenu directly (it does not recurse
+    // into nested popups the way CheckMenuItem does). Positions in the leaf
+    // submenu are exactly 0..optionCount-1, so check by position.
+    for (int s = 0; s < g_menuSettingCount; s++) {
+        const MenuSetting &ms = g_menuSettings[s];
+        HMENU sub = (s < (int) (sizeof(g_optionSubmenus) / sizeof(g_optionSubmenus[0]))) ? g_optionSubmenus[s] : 0;
+        if (!sub) continue;
+        int cur = optionsCurrentIndex(ms);
+        if (cur < 0 || cur >= ms.optionCount) cur = 0;
+        CheckMenuRadioItem(sub, 0, ms.optionCount - 1, cur, MF_BYPOSITION);
+    }
+}
+
+bool HandleOptionsCommand(int cmdId) {
+    if (cmdId < IDM_OPTIONS_BASE || cmdId >= IDM_OPTIONS_BASE + IDM_OPTIONS_RANGE)
+        return false;
+    int rel = cmdId - IDM_OPTIONS_BASE;
+    int s = rel / IDM_OPTIONS_STRIDE;
+    int opt = rel % IDM_OPTIONS_STRIDE;
+    if (s < 0 || s >= g_menuSettingCount) return false;
+    const MenuSetting &ms = g_menuSettings[s];
+    if (opt < 0 || opt >= ms.optionCount) return false;
+
+    if (ms.kind == MS_CHOICE) {
+        setsetting_choice(ms.settingName, ms.optLabel[opt]);
+        // Apply live where a safe in-memory mirror exists so the change is
+        // visible immediately (and the persisted value is what took effect):
+        //  - CLOUDS: `noclouds` is a pure render gate.
+        //  - *_TRANSPARENCYLEVEL: the frame objects' mouse_over_transparent.
+        // The remaining choice settings (ALLOWMIDI,
+        // ALLOWJOYSTICK) are read once at startup and take effect on next
+        // launch, matching their existing behavior; they still persist
+        // immediately via setsetting_choice above.
+        if (strcmp(ms.settingName, "CLOUDS") == 0)
+            noclouds = (opt == 1) ? TRUE : FALSE; // opt 0 = "Yes", opt 1 = "No"
+        else
+            applyTransparencyLive(ms.settingName, opt);
+    } else {
+        if (ms.volTarget) *ms.volTarget = ms.optVol[opt];
+        if (ms.isMusic) applyMidiVolume();
+    }
+    return true;
+}
+
 // rrr added new mode handling
 void refresh() {
-    //  if (smallwindow){
-    if (smallwindow &&windowsizecyclenum
-    
-    ==
-    0
-    )
-    {
-        // the original 512 resolution mode
-        if (dxrefresh) {
-            if (DDRAW_display_pixelformat.dwRGBBitCount != 16) {
-                static unsigned long pebx, pecx;
-                pebx = (unsigned long) ps->o;
-                pecx = (unsigned long) ps2->o; //ps2=newsurf(1024/2,768/2,SURF_SYSMEM);
-                _asm {
-                        mov ebx, pebx
-                        mov ecx, pecx
-                        mov esi, 196608
-                        p16to32b:
-                        mov ax, [ebx]
-                        mov dx, ax
-                        and edx, 01111100000000000b
-                        shl edx, 8
-                        mov dx, ax
-                        and dx, 011111100000b
-                        shl dx, 5
-                        mov dl, al
-                        and dl, 011111b
-                        shl dl, 3
-                        mov[ecx], edx
-                        add ebx, 4
-                        mov di, bx
-                        and di, 11111111111b
-                        jnz p16to32b2
-                        add ebx, 2048
-                        p16to32b2:
-                        add ecx, 4
-                        dec esi
-                        jnz p16to32b
-                        } //asm
-                if (NEThost) img(vs, 0, 0, ps2);
-                else img(vs, 512, 0, ps2);
-            } else {
-                //16->16 512x384 dx
-                static unsigned long pebx, pecx;
-                pebx = (unsigned long) ps->o;
-                pecx = (unsigned long) ps2->o; //img(ps2,ps);
-                _asm {
-                        mov ebx, pebx
-                        mov ecx, pecx
-                        mov si, 384
-                        mov di, 512
-                        p16to16c:
-                        mov ax, [ebx]
-                        mov[ecx], ax
-                        add ebx, 4
-                        add ecx, 2
-                        dec di
-                        jnz p16to16c
-                        mov di, 512
-                        add ebx, 2048
-                        dec si
-                        jnz p16to16c
-                        } //asm
-                if (NEThost) img(vs, 0, 0, ps2);
-                else img(vs, 512, 0, ps2);
-            }
-        } else {
-            //not dxrefresh
-            if (DDRAW_display_pixelformat.dwRGBBitCount != 16) {
-                img(ps4, ps); //ps4=newsurf(1024/2,768/2,SURF_SYSMEM16);
-                refresh(ps4);
-            } else {
-                img(ps2, ps);
-                refresh(ps2);
-            }
-        }
-    }
-    else
-    if (smallwindow &&windowsizecyclenum
-    
-    ==
-    1
-    )
-    {
-        // the new resolution mode
-        if (dxrefresh) {
-            if (DDRAW_display_pixelformat.dwRGBBitCount != 16) {
-                static unsigned long pebx, pecx;
-                pebx = (unsigned long) ps->o;
-                pecx = (unsigned long) psnew1->o; //ps2=newsurf(1024/2,768/2,SURF_SYSMEM);
-                _asm {
-                        mov ebx, pebx
-                        mov ecx, pecx
-                        mov esi, 1296000
-                        zp16to32b:
-                        mov ax, [ebx]
-                        mov dx, ax
-                        and edx, 01111100000000000b
-                        shl edx, 8
-                        mov dx, ax
-                        and dx, 011111100000b
-                        shl dx, 5
-                        mov dl, al
-                        and dl, 011111b
-                        shl dl, 3
-                        mov[ecx], edx
-                        add ebx, 4
-                        mov di, bx
-                        and di, 11111111111b
-                        jnz zp16to32b2
-                        add ebx, 2048
-                        zp16to32b2:
-                        add ecx, 4
-                        dec esi
-                        jnz zp16to32b
-                        } //asm
-                if (NEThost) img(vs, 0, 0, psnew1);
-                else img(vs, 512, 0, psnew1);
-            } else {
-                //16->16 512x384 dx
-                static unsigned long pebx, pecx;
-                pebx = (unsigned long) ps->o;
-                pecx = (unsigned long) psnew1->o; //img(ps2,ps);
-                _asm {
-                        mov ebx, pebx
-                        mov ecx, pecx
-                        mov si, 900
-                        mov di, 1440
-                        zp16to16c:
-                        mov ax, [ebx]
-                        mov[ecx], ax
-                        add ebx, 4
-                        add ecx, 2
-                        dec di
-                        jnz zp16to16c
-                        mov di, 512
-                        add ebx, 2048
-                        dec si
-                        jnz zp16to16c
-                        } //asm
-                if (NEThost) img(vs, 0, 0, psnew1);
-                else img(vs, 512, 0, psnew1);
-            }
-        } else {
-            //not dxrefresh
-            // i think the new mode only ever executes this condition; because the copy-pasted code in the other conditons are wrong.
-            if (DDRAW_display_pixelformat.dwRGBBitCount != 16) {
-                //img(ps4, ps);   //ps4=newsurf(1024/2,768/2,SURF_SYSMEM16);
-                //refresh(ps4);
-
-                //img(psnew1b, ps);
-                //refresh(psnew1b);
-
-                // r222 all the graphics are (originally and still is) done in the 1024 surface; copy whats on that surface and put it on the new surface.
-                // it is scaled to the area on the new/destination surface.
-                img(psnew1b, ps, 0, 0, resxn1m, resyn1m);
-
-                // s444 display worldmap on top of game playing area
-                /*
-				if (showworldmapn1 > 0) {
-					if (updateworldmapn1) {
-						updateworldmapn1 = 0;
-						img(uipanelsurf[uipanelworldmap][UI_WIDGET_DEF][UI_STATE_DEF], worldmapsurfn1[worldmapindexn1]);
-					}
-
-					imguip(psnew1b, uipanelworldmap);
-					imguip(psnew1b, uipanelworldmapbar);
-
-					// s444 worldmapbar buttons
-					if (worldmapindexn1 == 1)
-						imguiw(psnew1b, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6CLOTH, 1);
-					else if (worldmapindexn1 == 2)
-						imguiw(psnew1b, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6P, 1);
-					else if (worldmapindexn1 == 3)
-						imguiw(psnew1b, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6G, 1);
-					else if (worldmapindexn1 == 4)
-						imguiw(psnew1b, uipanelworldmapbar, UI_WIDGET_MAPBUTTON_U6RUNE, 1);
-
-					if (uihover) {
-						if (hituipaneli == uipanelworldmapbar) {
-							if (hituiwidgeti < 0)
-								hituiwidgeti = gethituipanelwidgeti(omx3, omy3, hituipaneli);
-
-							if (hituiwidgeti > 0)
-								img0(psnew1b, uipanelx[hituipaneli][hituiwidgeti][UI_STATE_DEF], uipanely[hituipaneli][hituiwidgeti][UI_STATE_DEF], uiwidgetimgsurf[UI_IMGI_HOVER][1]);
-						}
-					}
-				}*/
-
-
-                refresh(psnew1b);
-            } else {
-                img(psnew1, ps);
-                refresh(psnew1);
-            }
-        }
-    }
-    else
-    {
-        //full screen
-        // the original full screen / 1024 resolution mode
-        if (dxrefresh) {
-            if (DDRAW_display_pixelformat.dwRGBBitCount != 16) {
-                //16->32 1024x768 dx
-                static unsigned long pebx, pecx;
-                pebx = (unsigned long) ps->o;
-                pecx = (unsigned long) ps3->o;
-                // RW-P2.3: route pixel count through viewport.h accessor.
-                unsigned long _pxCount = (unsigned long) lightingTotalBytes();
-                _asm{
-                        mov ebx,pebx
-                        mov ecx,pecx
-                        mov esi,_pxCount
-                        p16to32:
-                        mov ax,[ebx]
-                        mov dx,ax
-                        and edx,01111100000000000b
-                        shl edx,8
-                        mov dx,ax
-                        and dx,011111100000b
-                        shl dx,5
-                        mov dl,al
-                        and dl,011111b
-                        shl dl,3
-                        mov [ecx],edx
-                        add ebx,2
-                        add ecx,4
-                        dec esi
-                        jnz p16to32
-                        } //asm
-                img(vs, 0, 0, ps3);
-            } else {
-                img(vs, 0, 0, ps); //16->16 1024x768 dx
-            }
-        } else {
-            //no dxrefresh
-            refresh(ps); //16->? 1024x768
-        }
-    }
+    // MPRES-P2.1/P2.2 (2026-06-29): collapsed to the single live present path.
+    //
+    // This high-level refresh() historically fanned out across three window modes
+    // (smallwindow + windowsizecyclenum 0 / 1, else full-screen) and, within each,
+    // a `dxrefresh` DirectDraw-primary path — the p16to32 / p16to16 inline-asm
+    // RGB565→display-format converters blitting into the `vs` primary surface via
+    // the intermediate surfaces ps2/ps3/ps4/psnew1/psnew1b — versus a plain
+    // refresh(<surf>) present.
+    //
+    // The single-window cleanup (Option A, 2026-05-20) retired every alternate
+    // window. `smallwindow` and `dxrefresh` are initialized FALSE in
+    // data_client.cpp and assigned nowhere else in the client (verified by grep
+    // across src/), and `windowsizecyclenum` stays 0. So at runtime ONLY the
+    // `else` (full-screen) + non-dxrefresh arm was ever reachable, i.e.
+    // `refresh(ps)`. Collapsing to that arm deletes the now-unreachable inline-asm
+    // present converters and the `vs`-primary blits with zero observable change
+    // (semantics-preserving — the GPU presenter already samples ps->o's RGB565
+    // directly, so the 16→32 / 16→16 CPU converters are dead here).
+    //
+    // MPRES-P2.3 (2026-06-29): deleted the trivially-dead present surfaces —
+    // `vs` and `psnew1` (never allocated) and `ps2`/`ps4` (allocated but never read).
+    //
+    // MPRES-P2.3b (2026-06-30): deleted `ps3` (the 32-bpp format-conversion helper:
+    // its only reader was the removed p16to32 converter, so the modern presenter —
+    // which samples ps->o's RGB565 directly — made it dead on every display; the
+    // DDRAW_display_pixelformat bit-count gate that allocated it is gone) and the
+    // always-FALSE `dxrefresh` bool (its only use was the focus-skip goto in the
+    // brace-seam loop_client_part_refresh_tail.cpp, removed; the live skiprefresh:
+    // label there is still reached from the nodisplay / !clientframe skips).
+    // Still LIVE and intentionally kept: `psnew1b` (the in-game UI/panel compose
+    // surface). `DDRAW_display_pixelformat` is retained — it is still used to set
+    // the pixel format on newly created surfaces (myddraw.cpp), just no longer in
+    // the present path.
+    refresh(ps); //16->? 1024x768
 } //refresh()
 
 //screen log
@@ -2365,8 +2425,8 @@ void placeFloatingPanelFirstShow(FRAME *f, int homeX, int homeY, int shown) {
     if (f == NULL || f->graphic == NULL) return;
     const int bw = backbufferW();
     const int bh = backbufferH();
-    const int w = (int) f->graphic->d.dwWidth;
-    const int h = (int) f->graphic->d.dwHeight;
+    const int w = (int) f->graphic->dwWidth;
+    const int h = (int) f->graphic->dwHeight;
     // Clamp the home position so the whole panel fits inside the current back
     // buffer (a position restored from cltset2 may have been saved while the
     // window was larger). Keep the top-left corner on screen.

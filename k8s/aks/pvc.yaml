@@ -1,10 +1,12 @@
 ﻿apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: u6o-host-save-pvc
+  name: azure-file-pvc
+  namespace: ultima-dev
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
+  storageClassName: azurefile-csi
   resources:
     requests:
-      storage: 1Gi
+      storage: 100Gi

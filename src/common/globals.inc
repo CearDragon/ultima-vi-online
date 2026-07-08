@@ -556,6 +556,10 @@ unsigned char customportrait_upload;
 
 unsigned char clientframe;
 unsigned char camera_freeze = 0;
+// Set to 1 by the "Say KAL LOR" Actions menu item (after the user confirms the
+// XP-loss warning). The client game loop consumes it on the next frame, feeding
+// "KAL LOR" through the normal speech path so the host teleports the player home.
+unsigned char menu_say_kallor = 0;
 
 long ctpx;
 long ctpy; //client: screen offset
@@ -635,7 +639,9 @@ MCI_PLAY_PARMS mciPlayParms;
 
 
 
-surf *vs;
+// MPRES-P2.3: `vs` (the DirectDraw primary surface) removed. Its only users were
+// the dxrefresh-branch p16to32/p16to16 present converters that MPRES-P2.1/P2.2
+// deleted; it was never allocated (no `vs=newsurf`) and is now unreferenced.
 
 unsigned char timelval; //0=full brightness, 15=total darkness
 
@@ -691,7 +697,9 @@ long scrx; long scry; //size of the window required by the program
 
 
 bool smallwindow; //use a 512x384 window
-bool dxrefresh;
+// MPRES-P2.3b: `dxrefresh` removed — it was always FALSE and gated only the
+// deleted DirectDraw-primary present path (the focus-skip goto in
+// loop_client_part_refresh_tail.cpp, now also removed).
 bool nodisplay;
 bool isit;
 bool host_minimize;
@@ -793,9 +801,11 @@ unsigned long keyframe31; //animation/palette index (0-7)
 unsigned long refreshcount; //incremented every refresh
 
 surf* ps;
-surf *ps2;
-surf *ps3;
-surf *ps4;
+// MPRES-P2.3: ps2/ps4 removed — allocated in setup_client.inc but never read
+// (their only consumer was the deleted dxrefresh present path).
+// MPRES-P2.3b: ps3 (the 32-bpp format-conversion helper) removed too — its only
+// reader was the deleted p16to32 converter, so the modern presenter (which samples
+// ps->o's RGB565 directly) made it dead on every display.
 surf *ps5;
 surf *ps6;
 surf *ps7;
@@ -804,7 +814,8 @@ surf *ps640400;
 surf *ps320200;
 
 // rrr
-surf* psnew1;
+// MPRES-P2.3: psnew1 removed (declared but never allocated or used). psnew1b is
+// the live in-game UI/panel compose surface — keep it.
 surf* psnew1b;
 
 // r999

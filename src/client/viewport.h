@@ -40,8 +40,8 @@ struct Dynamic2DArray {
 //     legacy 1024x768 floor and grow up to (kBackbufferMaxW,
 //     kBackbufferMaxH) when `recreateBackbuffers(newW, newH)` is
 //     called from the dirtyClientSize handler.
-//   * `recreateBackbuffers` releases and re-creates `ps` (and `ps3`/
-//     `ps5` when present), re-allocates `ls`/`ls_moon1..4` via
+//   * `recreateBackbuffers` releases and re-creates `ps` (and `ps5`
+//     when present), re-allocates `ls`/`ls_moon1..4` via
 //     `lighting_alloc`, and patches the FRAME pointers (`vf`, `fs`)
 //     whose `graphic` field referenced the old `ps`. Implementation
 //     lives in function_client.cpp where the FRAME globals are
@@ -78,8 +78,7 @@ namespace u6o {
         // the back buffer is sufficient to let users park UI panels in what
         // used to be the letterbox bars (outside the legacy 1024x768 game
         // view). Memory cost at the new cap: ~16 MB per 16bpp surface
-        // (ps, ps5), ~33 MB for the 32bpp helper (ps3, only on non-16bpp
-        // displays), and ~46 MB across the five lighting buffers. Total ~110
+        // (ps, ps5), and ~46 MB across the five lighting buffers. Total ~62
         // MB worst case, which is a non-issue on any machine that can drive
         // a 4K display.
         enum : int {
@@ -168,7 +167,7 @@ namespace u6o {
 
         // Row stride (in pixels) of the `ls`/`ls_moon*` lighting buffers, kept
         // equal to the active `ps` DirectDraw back-buffer's actual pixel pitch
-        // (`ps->d.lPitch / 2`). DirectDraw may pad the surface row stride ABOVE
+        // (`ps->lPitch / 2`). DirectDraw may pad the surface row stride ABOVE
         // `backbufferW() * 2` bytes at widths that aren't aligned to its
         // internal granularity, so this can be larger than `backbufferW()`.
         // The lighting-compose passes walk `ls` and `ps->o` in lockstep, so they
@@ -185,7 +184,7 @@ namespace u6o {
 
         // Resize the back-buffer family to (newW, newH) clamped to
         // [kBackbufferLegacy*, kBackbufferMax*]. Releases and re-creates the
-        // `ps`/`ps3`/`ps5` DirectDraw surfaces, re-allocates the lighting
+        // `ps`/`ps5` DirectDraw surfaces, re-allocates the lighting
         // buffers, patches FRAME pointers (vf, fs) that referenced the old
         // `ps`, and clears the new surface to black so unrendered regions
         // don't show stale pixels. Idempotent: returns immediately if the
@@ -208,7 +207,7 @@ namespace u6o {
         void set_active_backbuffer_dims(int w, int h);
 
         // RW-P2.3 internal: publish the active `ps` surface's pixel pitch
-        // (ps->d.lPitch / 2) so lightingStride()/lightingTotalBytes() and the
+        // (ps->lPitch / 2) so lightingStride()/lightingTotalBytes() and the
         // next lighting_alloc() use the surface's real row stride. Call BEFORE
         // lighting_alloc() in recreateBackbuffers()/setup_client.inc.
         void set_lighting_stride(int pixelStride);
