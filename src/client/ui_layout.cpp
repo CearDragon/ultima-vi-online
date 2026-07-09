@@ -1,4 +1,4 @@
-// ui_layout.cpp — RW-P3.1 implementation of ResolveRect.
+ï»¿// ui_layout.cpp ï¿½ RW-P3.1 implementation of ResolveRect.
 //
 // Pure math, no globals. Used by the future P3.3 panel-draw rerouting to
 // turn a UiPlacement into absolute client-area pixel coordinates given
@@ -44,7 +44,7 @@ namespace u6o {
             }
 
             // Offset is always measured with +x right, +y down regardless of
-            // which anchor is in use. This keeps the table in P3.2 readable —
+            // which anchor is in use. This keeps the table in P3.2 readable ï¿½
             // a sidebar with TopRight anchor and offsetX = -256 means "256 px
             // in from the right edge" rather than requiring the table to know
             // the sign convention per anchor.
@@ -67,7 +67,7 @@ namespace u6o {
         // from the bottom/right edges. Re-expressing them as anchors makes
         // that intent first-class.
         //
-        // sizeX/sizeY are 0 here — see header comment. Panels that draw via
+        // sizeX/sizeY are 0 here ï¿½ see header comment. Panels that draw via
         // the FRM_* system know their surface dimensions; placements only
         // describe position.
         // ---------------------------------------------------------------------
@@ -156,5 +156,13 @@ namespace u6o {
         bool g_statusprev_user_positioned = false;
         int g_statusprev_user_x = 0;
         int g_statusprev_user_y = 0;
+
+        bool g_confrm_user_positioned = false;
+        int g_confrm_user_x = 0;
+        int g_confrm_user_y = 0;
+
+        bool g_confrmimg_user_positioned = false;
+        int g_confrmimg_user_x = 0;
+        int g_confrmimg_user_y = 0;
     }
 } // namespace u6o::client

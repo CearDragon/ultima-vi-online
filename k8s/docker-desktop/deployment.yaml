@@ -37,13 +37,11 @@ spec:
               protocol: TCP
           volumeMounts:
             - name: save-data
-              mountPath: C:\u6o7-host\save
+              mountPath: /u6o-host/save
       volumes:
         - name: save-data
           persistentVolumeClaim:
-            claimName: u6o7-host-save-pvc
-      nodeSelector:
-        kubernetes.io/os: windows
+            claimName: u6o-host-save-pvc
 ---
 apiVersion: v1
 kind: Service

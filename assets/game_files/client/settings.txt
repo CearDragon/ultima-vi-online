@@ -9,6 +9,7 @@ The piano keys displayed when playing a musical instrument are [50%] transparent
 [Do] read joystick information.{ALLOWJOYSTICK,CHOICE,Do,Don't}
 [Do] load (DirectMusic) MIDI drivers.(Disabling allows U6O to function under WINE in Linux.){ALLOWMIDI,CHOICE,Do,Don't}
 [Yes] clouds?.{CLOUDS,CHOICE,Yes,No}
+Music format is [MIDI].{MUSICFORMAT,CHOICE,MIDI,MP3}
 {WINDOW_MAXIMIZED, [1]}
 {WINDOW_X, [1003]}
 {WINDOW_Y, [502]}

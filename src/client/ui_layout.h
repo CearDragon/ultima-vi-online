@@ -16,7 +16,7 @@
 // Phase RW-P3.2 builds a static table of UiPlacements that reproduce
 // the legacy 1024x768 positions exactly. Phase RW-P3.3 reroutes every
 // panel's draw call through ResolveRect(...). Until then this module
-// is unused — adding it has no behavioral effect.
+// is unused ï¿½ adding it has no behavioral effect.
 
 namespace u6o {
     namespace client {
@@ -70,13 +70,13 @@ namespace u6o {
         // Identifies every UI element with a *static* default position in the
         // legacy 1024x768 layout. Panels that are positioned dynamically at
         // runtime (party inventory windows, spellbook overlays, the input
-        // portrait when the chat box pops open) are NOT in this table — those
+        // portrait when the chat box pops open) are NOT in this table ï¿½ those
         // stay off-screen until activated and are placed by the same code that
         // activates them. The table covers the "always-visible" / "comes back
         // to a known spot" panels that need to follow the window edges as it
         // resizes.
         //
-        // A `sizeX`/`sizeY` of 0 means "use the panel's surface dimensions" —
+        // A `sizeX`/`sizeY` of 0 means "use the panel's surface dimensions" ï¿½
         // the panel's `graphic` surface knows its own size and is the source
         // of truth. The table is concerned with position only. ResolveRect()
         // will still produce a valid rect; consumers that need accurate
@@ -88,9 +88,9 @@ namespace u6o {
             ConvoArrows = 0,
             // Conversation log history image overlay (`con_frm_img`).
             ConvoHistory,
-            // Party-list quick-stats panel (`qkstf`) — top-right corner block.
+            // Party-list quick-stats panel (`qkstf`) ï¿½ top-right corner block.
             PartyList,
-            // Volume control sliders (`volcontrol`) — bottom-right.
+            // Volume control sliders (`volcontrol`) ï¿½ bottom-right.
             VolumeControl,
             // "View previous status message" up-arrow (`statusmessage_viewprev`)
             // anchored to the bottom-left.
@@ -180,6 +180,16 @@ namespace u6o {
         extern bool g_statusprev_user_positioned;
         extern int g_statusprev_user_x;
         extern int g_statusprev_user_y;
+
+        // Conversation arrows follow the same user-positioned override pattern.
+        extern bool g_confrm_user_positioned;
+        extern int g_confrm_user_x;
+        extern int g_confrm_user_y;
+
+        // Conversation history overlay position (scroll state).
+        extern bool g_confrmimg_user_positioned;
+        extern int g_confrmimg_user_x;
+        extern int g_confrmimg_user_y;
     }
 } // namespace u6o::client
 

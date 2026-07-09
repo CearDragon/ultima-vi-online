@@ -598,7 +598,30 @@ i
       cltset.party_spellbook_frame_offset_x[i-8]=pmf->offset_x; cltset.party_spellbook_frame_offset_y[i-8]=pmf->offset_y;
       if (cltset.party_spellbook_frame_offset_x[i-8]>kPanelHideThresholdX) cltset.party_spellbook_frame_offset_x[i-8]-=kPanelHideDeltaX;
     }
-    if (i==18){cltset.con_frm_offset_x=pmf->offset_x; cltset.con_frm_offset_y=pmf->offset_y;}
+    if (i==18){
+      if (u6o::client::g_confrm_user_positioned){
+        cltset.con_frm_offset_x=u6o::client::g_confrm_user_x;
+        cltset.con_frm_offset_y=u6o::client::g_confrm_user_y;
+      } else {
+        cltset.con_frm_offset_x=32767;
+      }
+      if (con_frm_img) {
+        // RW-P4.11: If the history overlay has been scrolled (offset_y != -256),
+        // we mark it as user-positioned so it survives window resizes.
+        if (con_frm_img->offset_y != -256 || con_frm_img->offset_x != 0) {
+           u6o::client::g_confrmimg_user_positioned = true;
+           u6o::client::g_confrmimg_user_x = con_frm_img->offset_x;
+           u6o::client::g_confrmimg_user_y = con_frm_img->offset_y;
+        }
+
+        if (u6o::client::g_confrmimg_user_positioned) {
+          cltset.con_frm_img_offset_x = u6o::client::g_confrmimg_user_x;
+          cltset.con_frm_img_offset_y = u6o::client::g_confrmimg_user_y;
+        } else {
+          cltset.con_frm_img_offset_x = 32767;
+        }
+      }
+    }
     // RW: mirror qkstf/volcontrol to cltset from the user-positioned
     // cache, NOT from pmf->offset_x — when volcontrol is hidden the
     // live offset is parked in the off-screen sentinel range and would

@@ -1,0 +1,14 @@
+P187/Welcome to Ultima VI Online!
+P196/ENM4DAN: "HAHAH"
+P196/ENM4DAN: "HAQIL"
+P196/ENM4DAN: "how are you"
+P187/Your STR, DEX and INT stats were determined by the Gypsy's A or B questions.
+P187/If you didn't select a moving/flashing A or B button your stats may be unplayably low!
+P187/If any stat is below 12 or the total is under 44, consider remaking your character now!
+P187/This is the pub. Talk to NPCs here by pressing T, typing, then clicking on them.
+P187/@Red @words are @keywords. These are topics you can ask them about.
+P187/Don't bother talking to walkthrough's WALK HERE icon, those red words are just for emphasis!
+P187/Most NPCs understand the keywords @NAME, @JOB, @BYE, @BUY or @SELL.
+P187/Your @inventory @window displays your stats, inventory and equipped items.
+P187/All windows can be moved around by draging them with the @right @mouse @button.
+P187/In your inventory there is a club, torch and necklace. These need to be @readied to use them.

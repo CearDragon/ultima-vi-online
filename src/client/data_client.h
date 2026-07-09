@@ -42,6 +42,8 @@ struct client_settings {
     // 0 = off (default). Also appended at the end for the same reason.
     unsigned char statusprev_logpinned;
     unsigned char music_format;
+    // Persisted position of the conversation history overlay (relative to con_frm)
+    short con_frm_img_offset_x, con_frm_img_offset_y;
 };
 
 struct inpmess_index {
