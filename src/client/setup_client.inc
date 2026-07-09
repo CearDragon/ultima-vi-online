@@ -821,6 +821,12 @@ cltset.music_format=0;
 }
 FRAME_mbl[0]=FALSE; FRAME_mbl[1]=FALSE; lpn=NULL; //used by frame.h
 
+// Seed/repair the new MUSICFORMAT CHOICE entry in settings.txt so menu radio
+// state reflects persisted choice even on older settings.txt files that predate
+// this option.
+if (music_format == 1) setsetting_choice("MUSICFORMAT","MP3");
+else setsetting_choice("MUSICFORMAT","MIDI");
+
 scrlog("Initializing music driver");
 if (getsetting("ALLOWMIDI")==2) U6O_DISABLEMUSIC=TRUE;
 if (U6O_DISABLEMUSIC) goto u6omusicsetup_failed;

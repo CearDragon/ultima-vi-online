@@ -2103,8 +2103,10 @@ void setsetting_choice(const char *name, const char *value) {
     static txt *lowerline = txtnew();
     static txt *rebuilt = txtnew();
     static long i, sz;
+    static bool found;
 
     txtNEWLEN(out, 0);
+    found = false;
 
     // "{NAME," marker (lowercased) uniquely identifies the setting's line.
     txtset(needle, "{");
@@ -2113,36 +2115,46 @@ void setsetting_choice(const char *name, const char *value) {
     txtlcase(needle);
 
     tfh = open2("settings.txt", OF_READ | OF_SHARE_COMPAT);
-    if (tfh->h == HFILE_ERROR) { close(tfh); return; } // nothing to rewrite
+    if (tfh->h != HFILE_ERROR) {
+        for (;;) {
+            i = seek(tfh);
+            sz = lof(tfh);
+            if (i >= sz) break;
+            txtfilein(line, tfh);
+            if (line->l == 0) continue;
 
-    for (;;) {
-        i = seek(tfh);
-        sz = lof(tfh);
-        if (i >= sz) break;
-        txtfilein(line, tfh);
-        if (line->l == 0) continue;
-
-        txtset(lowerline, line);
-        txtlcase(lowerline);
-        if (txtsearch(lowerline, needle) != 0) {
-            // Replace the first [..] token in the line with [value].
-            long lb = -1, rb = -1;
-            for (long j = 0; j < line->l; j++) { if (line->d[j] == '[') { lb = j; break; } }
-            if (lb >= 0)
-                for (long j = lb + 1; j < line->l; j++) { if (line->d[j] == ']') { rb = j; break; } }
-            if (lb >= 0 && rb > lb) {
-                txtNEWLEN(rebuilt, 0);
-                for (long j = 0; j <= lb; j++) txtaddchar(rebuilt, line->d[j]); // up to and incl '['
-                txtadd(rebuilt, value);
-                for (long j = rb; j < line->l; j++) txtaddchar(rebuilt, line->d[j]); // from ']' on
-                txtset(line, rebuilt);
+            txtset(lowerline, line);
+            txtlcase(lowerline);
+            if (txtsearch(lowerline, needle) != 0) {
+                found = true;
+                // Replace the first [..] token in the line with [value].
+                long lb = -1, rb = -1;
+                for (long j = 0; j < line->l; j++) { if (line->d[j] == '[') { lb = j; break; } }
+                if (lb >= 0)
+                    for (long j = lb + 1; j < line->l; j++) { if (line->d[j] == ']') { rb = j; break; } }
+                if (lb >= 0 && rb > lb) {
+                    txtNEWLEN(rebuilt, 0);
+                    for (long j = 0; j <= lb; j++) txtaddchar(rebuilt, line->d[j]); // up to and incl '['
+                    txtadd(rebuilt, value);
+                    for (long j = rb; j < line->l; j++) txtaddchar(rebuilt, line->d[j]); // from ']' on
+                    txtset(line, rebuilt);
+                }
             }
-        }
 
-        if (out->l) txtadd(out, "\r\n");
-        txtadd(out, line);
+            if (out->l) txtadd(out, "\r\n");
+            txtadd(out, line);
+        }
     }
     close(tfh);
+
+    // Seed missing CHOICE settings in existing/older settings.txt files.
+    if (!found) {
+        if (_stricmp(name, "MUSICFORMAT") != 0) return;
+        if (out->l) txtadd(out, "\r\n");
+        txtadd(out, "Music format is [");
+        txtadd(out, value);
+        txtadd(out, "].{MUSICFORMAT,CHOICE,MIDI,MP3}");
+    }
 
     if (out->l) txtadd(out, "\r\n");
     tfh = open2("settings.txt", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
@@ -2262,6 +2274,10 @@ static void applyTransparencyLive(const char *name, int level) {
 // Current 0-based option index for a setting, or -1 if unknown.
 static int optionsCurrentIndex(const MenuSetting &ms) {
     if (ms.kind == MS_CHOICE) {
+        if (strcmp(ms.settingName, "MUSICFORMAT") == 0) {
+            if (music_format < ms.optionCount) return (int) music_format;
+            return 0;
+        }
         long v = getsetting(ms.settingName); // 1-based, 0/FALSE if missing
         return v > 0 ? (int) v - 1 : -1;
     }
@@ -2357,6 +2373,23 @@ bool HandleOptionsCommand(int cmdId) {
                 u6omusicsetup = 0;
             } else {
                 u6omusicsetup = 1;
+                if (music_format == 0) {
+                    // Match setup_client.inc MIDI init path: bind to a software synth port.
+                    int portIndex = 0;
+                    int portFound = 0;
+                    while (u6omusic->PortEnumeration(portIndex, &u6omusic_infoport) == S_OK) {
+                        if (u6omusic_infoport.dwClass == DMUS_PC_OUTPUTCLASS) {
+                            if (portFound == 0) {
+                                if (u6omusic_infoport.dwFlags & DMUS_PC_SOFTWARESYNTH) {
+                                    u6omusic->SelectPort(&u6omusic_infoport);
+                                    portFound = 1;
+                                }
+                            }
+                        }
+                        portIndex++;
+                    }
+                    if (portFound == 0) u6omusicsetup = 0;
+                }
             }
             midiinfo_loaded = FALSE; // Force reload paths for new format
             midi_loaded = -1;
@@ -2890,5 +2923,3 @@ void cleanup_player_namelist(void) {
     }
     idlstn = -1;  // Reset the player list counter
 }
-
-
