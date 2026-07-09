@@ -6,6 +6,7 @@
 #include <math.h>
 
 #include "myfile.h"
+#include "voiceover.h"
 LPDIRECTSOUND dsnd;
 extern HWND hWnd;
 extern bool u6o_sound;
@@ -36,6 +37,11 @@ bool soundsetup() {
         tempsound[i] = NULL;
     }
     soundsetupf = TRUE;
+
+    // NPC-VO: Load voiceover map from the runtime asset bundle (or repo fallbacks
+    // during local development).
+    voiceover_load_map("audio_map.json");
+
     return TRUE;
 }
 
@@ -121,10 +127,13 @@ busysound:
     return ts;
 }
 
-sound *soundplay2(sound *s, long v) {
+sound *soundplay2(sound *s, long v, long global_v) {
     if (DirectSoundCreate_fail) return NULL;
     if (soundsetupf == FALSE) return NULL;
-    if (u6ovolume == 0) return NULL;
+
+    long actual_global_v = (global_v == -1) ? u6ovolume : global_v;
+    if (actual_global_v == 0) return NULL;
+
     if (v > 255) v = 255;
     if (v <= 0) return NULL;
     static long i;
@@ -147,7 +156,7 @@ busysound2:
     tempsound[i] = ts;
     tempsound[i]->ss = s;
     f = v;
-    f = f * (float) u6ovolume / 255.0f;
+    f = f * (float) actual_global_v / 255.0f;
     f = 255 - f;
     f = f * 0.25f;
     f *= f;
@@ -189,6 +198,7 @@ void free(sound *s) {
 // Stop/Release/free triad.
 void soundshutdown() {
     if (soundsetupf == FALSE) return;
+    voiceover_shutdown();
     for (long i = 0; i < 256; i++) {
         if (tempsound[i] != NULL) {
             if (tempsound[i]->s) {

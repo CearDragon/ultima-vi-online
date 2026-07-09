@@ -107,6 +107,7 @@ void data_client_init(void) {
     u6omusicvolume = 128;
     u6omusicsetup = 0;
     u6ovoicevolume = 128;
+    u6ovoiceovervolume = 128;
 
     //wav
     wavinfo_loaded = FALSE;

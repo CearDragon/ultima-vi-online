@@ -102,6 +102,12 @@ if
                             memcpy(&dbgt5->d2[0], &mess_SF->d2[i4], sfx[i3].x2);
                             i4 += sfx[i3].x2;
                             sfx[i3].p = dbgt5;
+
+                            // NPC-VO: speech-triggered voiceovers are keyed by
+                            // speaker id + text match and run once per incoming
+                            // conversation message, not on UI redraw.
+                            voiceover_play_for_message(sfx[i3].more, (const char *) dbgt5->d2, u6ovoiceovervolume);
+
                             txtset(t, (txt *) sfx[i3].p);
                             txtset(t2, "?");
                             t2->d2[0] = 92;
@@ -1578,10 +1584,7 @@ if
                 static sound *voicein;
                 voicein = soundload(".\\voice\\voicein.wav");
                 //4. play sound
-                x4 = u6ovolume;
-                u6ovolume = u6ovoicevolume;
-                soundplay2(voicein, 255); //should reflect voice volume controls!!
-                u6ovolume = x4;
+                soundplay2(voicein, 255, u6ovoicevolume);
                 //5. delete (primary) sound
                 voicein->s->Release();
                 free((void *) voicein);

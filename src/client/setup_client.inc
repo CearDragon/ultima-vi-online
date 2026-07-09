@@ -782,6 +782,7 @@ close(tfh);
 u6ovolume=cltset2.u6ovolume;
 u6omusicvolume=cltset2.u6omusicvolume;
 u6ovoicevolume=cltset2.u6ovoicevolume;
+u6ovoiceovervolume=cltset2.u6ovoiceovervolume;
 statusmessage_logpinned=cltset2.statusprev_logpinned; // restore "keep text log visible" toggle
 music_format=cltset2.music_format;
 memcpy(&spellrecall_partymember,&cltset2.spellrecall_partymember,8);

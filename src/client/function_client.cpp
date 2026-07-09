@@ -2229,6 +2229,7 @@ static const MenuSetting g_menuSettings[] = {
     {"Audio", "Load MIDI drivers",           MS_CHOICE, "ALLOWMIDI",     0, 0, 2, {"Do", "Don't"}, {0}},
     {"Audio", "Music volume",                MS_VOLUME, 0, &u6omusicvolume, 1, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
     {"Audio", "Sound volume",                MS_VOLUME, 0, &u6ovolume,     0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    {"Audio", "Voiceover volume",            MS_VOLUME, 0, &u6ovoiceovervolume,     0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
     {"Audio", "Voice volume",                MS_VOLUME, 0, &u6ovoicevolume, 0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
     {"Audio", "Music format",                MS_CHOICE, "MUSICFORMAT",   0, 0, 2, {"MIDI", "MP3"}, {0}},
     // ---- Input ----

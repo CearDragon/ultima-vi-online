@@ -1,0 +1,124 @@
+{
+  "npc_port_mappings": [
+    {
+      "npc_port": 9,
+      "npc_name": "Chuckles",
+      "npc_portrait": 9,
+      "lines": [
+        {
+          "text_prefix": "Ho eyo he hum",
+          "audio_file": "ogg\\Chuckles.0.ogg",
+          "description": "Chuckles greeting: 'Ho eyo he hum, I've got a clue! It's important, and just for you!'"
+        }
+      ]
+    },
+    {
+      "npc_port": 4,
+      "npc_name": "Lord British",
+      "npc_portrait": 4,
+      "lines": [
+        {
+          "text_prefix": "Avatar 'tis good to",
+          "audio_file": "ogg\\LordBritish.0.ogg",
+          "description": "Lord British initial greeting: Avatar! 'Tis good to see thee again."
+        },
+        {
+          "text_prefix": "But I must make",
+          "audio_file": "ogg\\LordBritish.1.ogg",
+          "description": "Lord British verifying the Avatar's identity."
+        },
+        {
+          "text_prefix": "Only the true Avatar",
+          "audio_file": "ogg\\LordBritish.2.ogg",
+          "description": "Lord British asks about the Compendium as proof of identity."
+        },
+        {
+          "text_prefix": "Ah 'tis thee indeed",
+          "audio_file": "ogg\\LordBritish.3.ogg",
+          "description": "Lord British confirms the Avatar and gives the key."
+        },
+        {
+          "text_prefix": "The same key will",
+          "audio_file": "ogg\\LordBritish.4.ogg",
+          "description": "Lord British explains that the same key opens the sewers under the castle."
+        },
+        {
+          "text_prefix": "Now let me tell",
+          "audio_file": "ogg\\LordBritish.5.ogg",
+          "description": "Lord British begins explaining what has transpired since the Avatar's last visit."
+        },
+        {
+          "text_prefix": "The vast underworld from",
+          "audio_file": "ogg\\LordBritish.6.ogg",
+          "description": "Lord British begins recounting the collapse of the vast underworld from which the Avatar rescued him."
+        },
+        {
+          "text_prefix": "Yet still there are",
+          "audio_file": "ogg\\LordBritish.7.ogg",
+          "description": "Lord British says there are still forces of evil abroad in the land."
+        },
+        {
+          "text_prefix": "Britannia is under attack",
+          "audio_file": "ogg\\LordBritish.8.ogg",
+          "description": "Lord British explains that Britannia is under attack by gargoyles."
+        },
+        {
+          "text_prefix": "They have been coming",
+          "audio_file": "ogg\\LordBritish.9.ogg",
+          "description": "Lord British says the gargoyles have been coming up through the dungeons."
+        },
+        {
+          "text_prefix": "Thus far they have",
+          "audio_file": "ogg\\LordBritish.10.ogg",
+          "description": "Lord British explains that the gargoyles have mainly attacked the shrines."
+        },
+        {
+          "text_prefix": "When the Shrine of",
+          "audio_file": "ogg\\LordBritish.11.ogg",
+          "description": "Lord British mentions the Shrine of Compassion falling."
+        },
+        {
+          "text_prefix": "Do thou ask him",
+          "audio_file": "ogg\\LordBritish.12.ogg",
+          "description": "Lord British tells the Avatar to ask Sir Geoffrey about the mission."
+        },
+        {
+          "text_prefix": "Whilst thou art here",
+          "audio_file": "ogg\\LordBritish.13.ogg",
+          "description": "Lord British says a room has been set aside for the Avatar."
+        },
+        {
+          "text_prefix": "'Tis in the west",
+          "audio_file": "ogg\\LordBritish.14.ogg",
+          "description": "Lord British describes the Avatar's room in the west wing of the castle."
+        },
+        {
+          "text_prefix": "I have had my",
+          "audio_file": "ogg\\LordBritish.15.ogg",
+          "description": "Lord British says his servants placed equipment there for the Avatar."
+        },
+        {
+          "text_prefix": "Of course thou mayst",
+          "audio_file": "ogg\\LordBritish.16.ogg",
+          "description": "Lord British says the Avatar may borrow anything in the castle if needed."
+        },
+        {
+          "text_prefix": "Lastly any time thou",
+          "audio_file": "ogg\\LordBritish.17.ogg",
+          "description": "Lord British offers healing whenever the Avatar needs it."
+        },
+        {
+          "text_prefix": "If thou doth wish",
+          "audio_file": "ogg\\LordBritish.18.ogg",
+          "description": "Lord British explains that asking him to repeat will replay the explanation."
+        },
+        {
+          "text_prefix": "I see thou hath",
+          "audio_file": "ogg\\LordBritish.19.ogg",
+          "description": "Lord British notices the Avatar has misplaced the castle key."
+        }
+      ]
+    }
+  ]
+}
+

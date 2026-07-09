@@ -666,6 +666,7 @@ unsigned char u6ovolume;
 unsigned char u6omusicvolume;
 unsigned char u6omusicsetup;
 unsigned char u6ovoicevolume;
+unsigned char u6ovoiceovervolume;
 
 //wav
 unsigned char u6osoundtype_volume[255];

@@ -129,6 +129,8 @@
 ### Initial State
 - Plan created; Chuckles voiceover audio file (`Chuckles.0.ogg`) already in `assets/game_files/client/oog/`
 - Audio mapping strategy chosen: port + text prefix (asset JSON)
+- Chuckles portrait number confirmed: `9`
+- Runtime speech message speaker id observed as `9` (`sfx[i3].more`)
 - Ready for Phase 1 (asset file creation) and Phase 2 (infrastructure)
 
 ### Next Steps
@@ -139,7 +141,6 @@
 5. Build and test with Chuckles conversation
 
 ### Blockers / Open Questions
-- Chuckles port number — need to extract from NPC.BIN or clarify if known
 - Exact text of Chuckles greeting line — verify against voiceover timing
 - Volume level for voiceovers — default SFX volume or separate control?
 

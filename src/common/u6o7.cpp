@@ -480,6 +480,7 @@ PM_NOREMOVE
                 cltset.u6omusicvolume = u6omusicvolume;
                 cltset.u6ovolume = u6ovolume;
                 cltset.u6ovoicevolume = u6ovoicevolume;
+                cltset.u6ovoiceovervolume = u6ovoiceovervolume;
                 cltset.statusprev_logpinned = statusmessage_logpinned; // persist "keep text log visible" toggle
                 memcpy(&cltset.spellrecall_partymember, &spellrecall_partymember, 8);
                 memcpy(&cltset.spellrecall_i, &spellrecall_i, 8);

@@ -2,6 +2,7 @@
 #define _INC_SOUND
 #include <mmsystem.h>
 #include <dsound.h>
+#include "voiceover.h"
 extern LPDIRECTSOUND dsnd;
 
 struct sound {
@@ -18,7 +19,7 @@ sound *soundload(LPCSTR fn);
 
 sound *soundplay(sound *s);
 
-sound *soundplay2(sound *s, long v);
+sound *soundplay2(sound *s, long v, long global_v = -1);
 
 bool soundsetup();
 
