@@ -1,70 +1,93 @@
 #include "stdafx.h"
 #include <mmsystem.h>
 #include "mp3_player.h"
-#define MINIMP3_IMPLEMENTATION
-#include "minimp3.h"
-#include <dsound.h>
-#include <vector>
+#include <cmath>
+#include <stdio.h>
 
-extern LPDIRECTSOUND dsnd;
+namespace {
+    constexpr const char* kMp3Alias = "u6omp3";
+}
 
 struct CMp3Music::Impl {
-    LPDIRECTSOUNDBUFFER m_pBuffer = nullptr;
+    bool isOpen = false;
     long m_volume = 0;
 };
 
 CMp3Music::CMp3Music() : pImpl(new Impl()) {}
-CMp3Music::~CMp3Music() { Stop(); if (pImpl->m_pBuffer) pImpl->m_pBuffer->Release(); delete pImpl; }
+CMp3Music::~CMp3Music() {
+    Stop();
+    mciSendStringA("close " "u6omp3", NULL, 0, NULL);
+    pImpl->isOpen = false;
+    delete pImpl;
+}
 
-HRESULT CMp3Music::Initialize() { return S_OK; } // dsnd already init by soundsetup()
+HRESULT CMp3Music::Initialize() {
+    mciSendStringA("close " "u6omp3", NULL, 0, NULL);
+    pImpl->isOpen = false;
+    return S_OK;
+}
 
 HRESULT CMp3Music::LoadMidiFromFile(const char* path, BOOL bMidiFile) {
+    (void)bMidiFile;
+    if (path == NULL || path[0] == 0) return E_INVALIDARG;
+
     Stop();
-    if (pImpl->m_pBuffer) { pImpl->m_pBuffer->Release(); pImpl->m_pBuffer = nullptr; }
-
-    mp3dec_t mp3d;
-    mp3dec_file_info_t info;
-    memset(&info, 0, sizeof(info));
-    if (mp3dec_load(&mp3d, path, &info, NULL, NULL) != 0) return E_FAIL;
-
-    WAVEFORMATEX wf = { WAVE_FORMAT_PCM, (WORD)info.channels, (DWORD)info.hz, 
-                       (DWORD)info.hz * info.channels * 2, (WORD)(info.channels * 2), 16, 0 };
-    DSBUFFERDESC d = { sizeof(DSBUFFERDESC), DSBCAPS_GLOBALFOCUS | DSBCAPS_CTRLVOLUME, 
-                      (DWORD)(info.samples * sizeof(mp3d_sample_t)), 0, &wf };
-
-    if (dsnd->CreateSoundBuffer(&d, &pImpl->m_pBuffer, NULL) == DS_OK) {
-        void* ptr; DWORD bytes;
-        pImpl->m_pBuffer->Lock(0, 0, &ptr, &bytes, NULL, NULL, DSBLOCK_ENTIREBUFFER);
-        memcpy(ptr, info.buffer, bytes);
-        pImpl->m_pBuffer->Unlock(ptr, bytes, NULL, NULL);
+    if (pImpl->isOpen) {
+        mciSendStringA("close " "u6omp3", NULL, 0, NULL);
+        pImpl->isOpen = false;
     }
-    free(info.buffer);
-    if (pImpl->m_pBuffer) pImpl->m_pBuffer->SetVolume(pImpl->m_volume);
-    return pImpl->m_pBuffer ? S_OK : E_FAIL;
+
+    char command[1024];
+    sprintf_s(command, sizeof(command), "open \"%s\" type mpegvideo alias %s", path, kMp3Alias);
+    if (mciSendStringA(command, NULL, 0, NULL) != 0) {
+        return E_FAIL;
+    }
+
+    pImpl->isOpen = true;
+    SetMasterVolume(pImpl->m_volume);
+    return S_OK;
 }
 
-HRESULT CMp3Music::Play() { 
-    if (!pImpl->m_pBuffer) return E_FAIL;
-    pImpl->m_pBuffer->SetCurrentPosition(0);
-    return pImpl->m_pBuffer->Play(0, 0, DSBPLAY_LOOPING);
+HRESULT CMp3Music::Play() {
+    if (!pImpl->isOpen) return E_FAIL;
+    if (mciSendStringA("play " "u6omp3" " repeat", NULL, 0, NULL) != 0) return E_FAIL;
+    return S_OK;
 }
 
-HRESULT CMp3Music::Stop() { if (pImpl->m_pBuffer) pImpl->m_pBuffer->Stop(); return S_OK; }
+HRESULT CMp3Music::Stop() {
+    if (pImpl->isOpen) {
+        mciSendStringA("stop " "u6omp3", NULL, 0, NULL);
+    }
+    return S_OK;
+}
 
 HRESULT CMp3Music::IsPlaying() {
-    static unsigned char safety_toggle = 0;
-    safety_toggle = 1 - safety_toggle;
+    static unsigned char fallbackToggle = 0;
+    fallbackToggle = 1 - fallbackToggle;
     extern unsigned char u6omusicsetup;
-    if (u6omusicsetup == 0) return (HRESULT)safety_toggle;
+    if (u6omusicsetup == 0) return (HRESULT) fallbackToggle;
 
-    if (!pImpl->m_pBuffer) return (HRESULT)safety_toggle;
+    if (!pImpl->isOpen) return (HRESULT) fallbackToggle;
 
-    DWORD status;
-    if (FAILED(pImpl->m_pBuffer->GetStatus(&status))) return (HRESULT)safety_toggle;
-    return (status & DSBSTATUS_PLAYING) ? S_OK : S_FALSE;
+    char status[64] = {0};
+    if (mciSendStringA("status " "u6omp3" " mode", status, (UINT) sizeof(status), NULL) != 0) {
+        return (HRESULT) fallbackToggle;
+    }
+    if (_stricmp(status, "playing") == 0) return S_OK;
+    return S_FALSE;
 }
 
 void CMp3Music::SetMasterVolume(long volume) {
     pImpl->m_volume = volume;
-    if (pImpl->m_pBuffer) pImpl->m_pBuffer->SetVolume(pImpl->m_volume);
+    if (!pImpl->isOpen) return;
+
+    // MCI volume range is [0, 1000]. Input is hundredths of dB (typically <= 0).
+    const double amplitude = pow(10.0, (double) pImpl->m_volume / 2000.0);
+    long mciVolume = (long) (amplitude * 1000.0 + 0.5);
+    if (mciVolume < 0) mciVolume = 0;
+    if (mciVolume > 1000) mciVolume = 1000;
+
+    char command[128];
+    sprintf_s(command, sizeof(command), "setaudio %s volume to %ld", kMp3Alias, mciVolume);
+    mciSendStringA(command, NULL, 0, NULL);
 }
