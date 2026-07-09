@@ -254,6 +254,51 @@ namespace u6o {
                 statusmessage_viewprev->offset_y = y;
             }
 
+            // RW-P4.11: Minimap and T-Map frames follow the user-positioned
+            // pattern, defaulting to centered in the viewport if no saved
+            // position exists.
+            if (minimap_frame && minimap_frame->graphic) {
+                int homeX, homeY;
+                if (g_minimap_user_positioned) {
+                    homeX = g_minimap_user_x;
+                    homeY = g_minimap_user_y;
+                } else {
+                    homeX = (clientW - (int)minimap_frame->graphic->dwWidth) / 2;
+                    homeY = (clientH - (int)minimap_frame->graphic->dwHeight) / 2;
+                }
+                int w = (int)minimap_frame->graphic->dwWidth;
+                int h = (int)minimap_frame->graphic->dwHeight;
+                if (homeX + w > clientW) homeX = clientW - w;
+                if (homeY + h > clientH) homeY = clientH - h;
+                if (homeX < 0) homeX = 0;
+                if (homeY < 0) homeY = 0;
+
+                minimap_frame->offset_y = (short)homeY;
+                minimap_frame->offset_x = (short)(peer ? homeX : homeX + kPanelHideDeltaX);
+                minimap_frame->positioned = true;
+            }
+
+            if (tmap_frame && tmap_frame->graphic) {
+                int homeX, homeY;
+                if (g_tmap_user_positioned) {
+                    homeX = g_tmap_user_x;
+                    homeY = g_tmap_user_y;
+                } else {
+                    homeX = (clientW - (int)tmap_frame->graphic->dwWidth) / 2;
+                    homeY = (clientH - (int)tmap_frame->graphic->dwHeight) / 2;
+                }
+                int w = (int)tmap_frame->graphic->dwWidth;
+                int h = (int)tmap_frame->graphic->dwHeight;
+                if (homeX + w > clientW) homeX = clientW - w;
+                if (homeY + h > clientH) homeY = clientH - h;
+                if (homeX < 0) homeX = 0;
+                if (homeY < 0) homeY = 0;
+
+                tmap_frame->offset_y = (short)homeY;
+                tmap_frame->offset_x = (short)(tmap ? homeX : homeX + kPanelHideDeltaX);
+                tmap_frame->positioned = true;
+            }
+
             ValidateUiMetrics();
         }
 

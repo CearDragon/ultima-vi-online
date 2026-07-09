@@ -644,8 +644,22 @@ i
         cltset.volcontrol_offset_x=32767;
       }
     }
-    if (i==21){cltset.minimap_offset_x=pmf->offset_x; cltset.minimap_offset_y=pmf->offset_y;}
-    if (i==22){cltset.tmap_offset_x=pmf->offset_x; cltset.tmap_offset_y=pmf->offset_y;}
+    if (i==21){
+      if (u6o::client::g_minimap_user_positioned){
+        cltset.minimap_offset_x=u6o::client::g_minimap_user_x;
+        cltset.minimap_offset_y=u6o::client::g_minimap_user_y;
+      } else {
+        cltset.minimap_offset_x=32767;
+      }
+    }
+    if (i==22){
+      if (u6o::client::g_tmap_user_positioned){
+        cltset.tmap_offset_x=u6o::client::g_tmap_user_x;
+        cltset.tmap_offset_y=u6o::client::g_tmap_user_y;
+      } else {
+        cltset.tmap_offset_x=32767;
+      }
+    }
     // RW: mirror statusmessage_viewprev from the user-positioned cache (same
     // rule as qkstf/volcontrol). The live offset is auto-clamped above to the
     // current back-buffer, so reading the cache preserves a far-right/maximized

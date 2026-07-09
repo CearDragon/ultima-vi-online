@@ -164,5 +164,13 @@ namespace u6o {
         bool g_confrmimg_user_positioned = false;
         int g_confrmimg_user_x = 0;
         int g_confrmimg_user_y = 0;
+
+        bool g_minimap_user_positioned = false;
+        int g_minimap_user_x = 0;
+        int g_minimap_user_y = 0;
+
+        bool g_tmap_user_positioned = false;
+        int g_tmap_user_x = 0;
+        int g_tmap_user_y = 0;
     }
 } // namespace u6o::client

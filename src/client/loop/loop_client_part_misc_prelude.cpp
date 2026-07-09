@@ -204,6 +204,16 @@ NULL
         u6o::client::g_confrm_user_x = drg->offset_x;
         u6o::client::g_confrm_user_y = drg->offset_y;
       }
+      if (drg == minimap_frame) {
+        u6o::client::g_minimap_user_positioned = true;
+        u6o::client::g_minimap_user_x = drg->offset_x;
+        u6o::client::g_minimap_user_y = drg->offset_y;
+      }
+      if (drg == tmap_frame) {
+        u6o::client::g_tmap_user_positioned = true;
+        u6o::client::g_tmap_user_x = drg->offset_x;
+        u6o::client::g_tmap_user_y = drg->offset_y;
+      }
     }
   }
 }

@@ -775,6 +775,8 @@ cltset2.statusprev_offset_x=32767; cltset2.statusprev_offset_y=32767;
 cltset2.statusprev_logpinned=0; // default: log not pinned (old/short files keep this)
 cltset2.music_format=0; // default: MIDI
 cltset2.con_frm_img_offset_x=32767; cltset2.con_frm_img_offset_y=32767;
+cltset2.minimap_offset_x=32767; cltset2.minimap_offset_y=32767;
+cltset2.tmap_offset_x=32767; cltset2.tmap_offset_y=32767;
 get(tfh,&cltset2,sizeof(client_settings));
 close(tfh);
 u6ovolume=cltset2.u6ovolume;
@@ -812,6 +814,16 @@ if (cltset2.statusprev_offset_x!=32767){statusmessage_viewprev->offset_x=cltset2
   u6o::client::g_statusprev_user_positioned = true;
   u6o::client::g_statusprev_user_x = cltset2.statusprev_offset_x;
   u6o::client::g_statusprev_user_y = cltset2.statusprev_offset_y;
+}
+if (cltset2.minimap_offset_x!=32767){
+  u6o::client::g_minimap_user_positioned = true;
+  u6o::client::g_minimap_user_x = cltset2.minimap_offset_x;
+  u6o::client::g_minimap_user_y = cltset2.minimap_offset_y;
+}
+if (cltset2.tmap_offset_x!=32767){
+  u6o::client::g_tmap_user_positioned = true;
+  u6o::client::g_tmap_user_x = cltset2.tmap_offset_x;
+  u6o::client::g_tmap_user_y = cltset2.tmap_offset_y;
 }
 memcpy(&cltset,&cltset2,sizeof(client_settings));
 }else{

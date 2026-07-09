@@ -190,6 +190,16 @@ namespace u6o {
         extern bool g_confrmimg_user_positioned;
         extern int g_confrmimg_user_x;
         extern int g_confrmimg_user_y;
+
+        // Minimap frame persistence
+        extern bool g_minimap_user_positioned;
+        extern int g_minimap_user_x;
+        extern int g_minimap_user_y;
+
+        // Treasure map frame persistence
+        extern bool g_tmap_user_positioned;
+        extern int g_tmap_user_x;
+        extern int g_tmap_user_y;
     }
 } // namespace u6o::client
 
