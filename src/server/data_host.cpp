@@ -50,7 +50,7 @@ void data_host_init(void) {
 
 #ifndef CLIENT
     //STUBS TO SUPPORT EXTERNAL LINKING (DATA NOT ACTUALLY USED!)
-    u6omidisetup = NULL;
+    u6omusicsetup = NULL;
     hWnd = NULL;
     hWnd2 = NULL;
     hWnd3 = NULL;

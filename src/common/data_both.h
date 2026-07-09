@@ -3,6 +3,7 @@
 
 #include "define_both.h"
 #include "mytxt.h"
+#include "myfile.h"
 #ifdef _WIN32
 #include <windows.h>
 #else

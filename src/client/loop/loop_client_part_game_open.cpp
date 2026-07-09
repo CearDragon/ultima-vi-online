@@ -81,8 +81,8 @@ maxminmini:
         if ((u6ovolume+8)>255) u6ovolume=255; else u6ovolume+=8;
       }
       if ((volcontrol->mouse_y>=32)&&(volcontrol->mouse_y<=56)){
-        if ((u6omidivolume+8)>255) u6omidivolume=255; else u6omidivolume+=8;
-        goto u6omidivolume_changed;
+        if ((u6omusicvolume+8)>255) u6omusicvolume=255; else u6omusicvolume+=8;
+        goto u6omusicvolume_changed;
       }
       if (volcontrol->mouse_y>56){
         if ((u6ovoicevolume+8)>255) u6ovoicevolume=255; else u6ovoicevolume+=8;
@@ -93,8 +93,8 @@ maxminmini:
         if ((u6ovolume-8)>0) u6ovolume-=8; else u6ovolume=0;
       }
       if ((volcontrol->mouse_y>=32)&&(volcontrol->mouse_y<=56)){
-        if ((u6omidivolume-8)>0) u6omidivolume-=8; else u6omidivolume=0;
-        goto u6omidivolume_changed;
+        if ((u6omusicvolume-8)>0) u6omusicvolume-=8; else u6omusicvolume=0;
+        goto u6omusicvolume_changed;
       }
       if (volcontrol->mouse_y>56){
         if ((u6ovoicevolume-8)>0) u6ovoicevolume-=8; else u6ovoicevolume=0;
@@ -113,8 +113,8 @@ maxminmini:
       u6ovolume=(volcontrol->mouse_x-46)*72/20;
     }
     if ((volcontrol->mouse_y>=32)&&(volcontrol->mouse_y<=56)){
-      u6omidivolume=(volcontrol->mouse_x-46)*72/20;
-u6omidivolume_changed:
+      u6omusicvolume=(volcontrol->mouse_x-46)*72/20;
+u6omusicvolume_changed:
       // Behavior-preserving extraction — see applyMidiVolume() in
       // function_client.cpp (also reused by the Options > Audio menu).
       applyMidiVolume();

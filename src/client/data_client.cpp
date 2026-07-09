@@ -104,16 +104,17 @@ void data_client_init(void) {
 
     //master volume controls
     u6ovolume = 128;
-    u6omidivolume = 128;
-    u6omidisetup = 0;
+    u6omusicvolume = 128;
+    u6omusicsetup = 0;
     u6ovoicevolume = 128;
 
     //wav
     wavinfo_loaded = FALSE;
 
     //midi
-    u6omidi = NULL;
+    u6omusic = NULL;
     midiinfo_loaded = FALSE;
+    music_format = 0;
 
     windowchange = FALSE;
 

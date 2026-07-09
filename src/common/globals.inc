@@ -663,8 +663,8 @@ bool U6O_WALKTHRU;
 
 //master volume controls
 unsigned char u6ovolume;
-unsigned char u6omidivolume;
-unsigned char u6omidisetup;
+unsigned char u6omusicvolume;
+unsigned char u6omusicsetup;
 unsigned char u6ovoicevolume;
 
 //wav
@@ -676,11 +676,12 @@ unsigned char u6osound_volume[255]; //0 to 255
 bool wavinfo_loaded;
 
 //midi
-INFOPORT u6omidi_infoport;
-CMidiMusic *u6omidi;
-txt *u6omidi_filename[256];
-unsigned char u6omidi_volume[255];
+INFOPORT u6omusic_infoport;
+IMusicPlayer *u6omusic;
+txt *u6omusic_filename[256];
+unsigned char u6omusic_volume[255];
 bool midiinfo_loaded;
+unsigned char music_format;
 
 //System information and advance function declarations
 HWND hWnd;
@@ -1429,7 +1430,7 @@ unsigned char MOVERNEW_ERROR;//valid when movernew(...) returns 0
 
 #ifndef CLIENT
 //STUBS TO SUPPORT EXTERNAL LINKING (DATA NOT ACTUALLY USED!)
-unsigned char u6omidisetup;
+unsigned char u6omusicsetup;
 HWND hWnd;
 HWND hWnd2;
 HWND hWnd3;

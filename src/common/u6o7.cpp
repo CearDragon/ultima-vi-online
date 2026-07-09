@@ -16,6 +16,7 @@
 #include <dbghelp.h>
 #pragma comment(lib, "dbghelp.lib")
 #include "dmusic.h"
+#include "mp3_player.h"
 #endif
 #include "myfile.h"
 #ifdef _WIN32
@@ -476,7 +477,7 @@ PM_NOREMOVE
 
 #ifdef CLIENT
 			if (clientsettingsvalid){
-                cltset.u6omidivolume = u6omidivolume;
+                cltset.u6omusicvolume = u6omusicvolume;
                 cltset.u6ovolume = u6ovolume;
                 cltset.u6ovoicevolume = u6ovoicevolume;
                 cltset.statusprev_logpinned = statusmessage_logpinned; // persist "keep text log visible" toggle
@@ -555,14 +556,14 @@ PM_NOREMOVE
 			//      "give the peer time to ACK the FIN" buffer that's
 			//      overkill on the client (one socket; the OS-level
 			//      linger handles it). 50ms is plenty.
-			if (u6omidisetup &&u6omidi) {
+			if (u6omusicsetup &&u6omusic) {
 				#ifdef _DEBUG
 				mm_p7_log_shutdown("MM-P7.2: client stop/release DirectMusic");
 				#endif
-                u6omidi->Stop();
-                delete u6omidi;
-                u6omidi = NULL;
-                u6omidisetup = 0;
+                u6omusic->Stop();
+                delete u6omusic;
+                u6omusic = NULL;
+                u6omusicsetup = 0;
             }
 			// Stop+release all live DirectSound voices and the dsnd device.
 			// Implementation lives in src/client/sound.cpp where the static

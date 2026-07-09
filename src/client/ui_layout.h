@@ -1,4 +1,4 @@
-ï»¿#ifndef UI_LAYOUT_H
+#ifndef UI_LAYOUT_H
 #define UI_LAYOUT_H
 
 // RW-P3.1: anchored UI placement types.
@@ -16,7 +16,7 @@
 // Phase RW-P3.2 builds a static table of UiPlacements that reproduce
 // the legacy 1024x768 positions exactly. Phase RW-P3.3 reroutes every
 // panel's draw call through ResolveRect(...). Until then this module
-// is unused â€” adding it has no behavioral effect.
+// is unused — adding it has no behavioral effect.
 
 namespace u6o {
     namespace client {
@@ -70,13 +70,13 @@ namespace u6o {
         // Identifies every UI element with a *static* default position in the
         // legacy 1024x768 layout. Panels that are positioned dynamically at
         // runtime (party inventory windows, spellbook overlays, the input
-        // portrait when the chat box pops open) are NOT in this table â€” those
+        // portrait when the chat box pops open) are NOT in this table — those
         // stay off-screen until activated and are placed by the same code that
         // activates them. The table covers the "always-visible" / "comes back
         // to a known spot" panels that need to follow the window edges as it
         // resizes.
         //
-        // A `sizeX`/`sizeY` of 0 means "use the panel's surface dimensions" â€”
+        // A `sizeX`/`sizeY` of 0 means "use the panel's surface dimensions" —
         // the panel's `graphic` surface knows its own size and is the source
         // of truth. The table is concerned with position only. ResolveRect()
         // will still produce a valid rect; consumers that need accurate
@@ -88,9 +88,9 @@ namespace u6o {
             ConvoArrows = 0,
             // Conversation log history image overlay (`con_frm_img`).
             ConvoHistory,
-            // Party-list quick-stats panel (`qkstf`) â€” top-right corner block.
+            // Party-list quick-stats panel (`qkstf`) — top-right corner block.
             PartyList,
-            // Volume control sliders (`volcontrol`) â€” bottom-right.
+            // Volume control sliders (`volcontrol`) — bottom-right.
             VolumeControl,
             // "View previous status message" up-arrow (`statusmessage_viewprev`)
             // anchored to the bottom-left.

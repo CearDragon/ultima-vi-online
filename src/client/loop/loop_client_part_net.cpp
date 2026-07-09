@@ -640,9 +640,9 @@ if
             if (U6O_DISABLEMUSIC) goto CLIENT_donemess;
             if (midi_background == 0) {
                 //stop playing intro immediately
-                u6omidi->Stop(); //stop playing background midi
+                u6omusic->Stop(); //stop playing background midi
             isplayingwait3:
-                if (u6omidi->IsPlaying() == S_OK) goto isplayingwait3;
+                if (u6omusic->IsPlaying() == S_OK) goto isplayingwait3;
             }
 
             midi_background = t->d2[1];

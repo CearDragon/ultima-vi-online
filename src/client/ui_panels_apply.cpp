@@ -1,4 +1,4 @@
-ï»¿// ui_panels_apply.cpp â€” RW-P3.3 implementation of RepositionAnchoredPanels.
+// ui_panels_apply.cpp — RW-P3.3 implementation of RepositionAnchoredPanels.
 //
 // This is the seam between the pure ui_layout module and the live game
 // panel globals. ui_layout.{h,cpp} stays free of any game-data
@@ -129,7 +129,7 @@ namespace u6o {
             resxn1w = clientW;
             resyn1w = clientH;
             // RW-P4.8 (2026-05-22): sidebar is no longer anchored to the right
-            // edge of the window â€” it stays at its legacy 1024-relative
+            // edge of the window — it stays at its legacy 1024-relative
             // position. `resxn1m` is the X coordinate just to the LEFT of the
             // sidebar; with the sidebar pinned to the legacy layout this is the
             // legacy 1024 - sidebarW (matches what setup_client.inc produced
@@ -173,7 +173,7 @@ namespace u6o {
             // to the anchored top-right default. Clamp the *live* offset to
             // the current client area so a shrunken window doesn't strand the
             // panel off-screen, but do NOT write the clamp back into the
-            // cache â€” a maximized window may have saved a coordinate that's
+            // cache — a maximized window may have saved a coordinate that's
             // perfectly valid for the larger size and would be permanently
             // lost if the user briefly opened at the default size. The cache
             // is only ever mutated by an actual user drag (loop_client.cpp).
@@ -219,7 +219,7 @@ namespace u6o {
             apply_to(statusmessage_viewprev, UiPanelId::StatusViewPrev, clientW, clientH);
 
             // RW: honor a user-dragged position for the StatusViewPrev arrow,
-            // same rule as qkstf/volcontrol â€” clamp the live offset to the
+            // same rule as qkstf/volcontrol — clamp the live offset to the
             // current client area for display but never write the clamp back
             // to the cache (the cache is only mutated by an actual drag).
             if (statusmessage_viewprev && g_statusprev_user_positioned) {

@@ -366,7 +366,7 @@ underground : img(qkstf->graphic, 0, 0, tmini_1); //moon and sun on qk stat
 
 img(volcontrol_surf, 0, 0, volcontrol_background);
 img(volcontrol_surf, 46 + u6ovolume * 20 / 72 - 4, 8 + 3, volcontrol_tab1);
-img(volcontrol_surf, 46 + u6omidivolume * 20 / 72 - 4, 32 + 8 - 5, volcontrol_tab3);
+img(volcontrol_surf, 46 + u6omusicvolume * 20 / 72 - 4, 32 + 8 - 5, volcontrol_tab3);
 img(volcontrol_surf, 46 + u6ovoicevolume * 20 / 72 - 4, 32 + 8 - 5 + 24, volcontrol_tab2);
 if
 (u6ovoicevolume

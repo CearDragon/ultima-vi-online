@@ -34,11 +34,11 @@
 000:00:00:00 Setting up client player data structures
 000:00:00:00 Setting up lighting data
 000:00:00:00 Opening message log [talk.txt]
-000:00:00:00 Initializing MIDI driver
 000:00:00:00 Loading music keyboard state [midikeyb.bin]
 000:00:00:00 Loading walkthrough position [walkthru.pos]
 000:00:00:00 Loading walkthrough messages [walkthru.txt]
 000:00:00:00 Loading client settings [settings.bin]
+000:00:00:00 Initializing music driver
 000:00:00:00 Setting up low level MIDI driver
 000:00:00:00 Beginning main loop!
-000:00:00:06 MDD: map data sync complete
+000:00:00:01 MDD: map data sync complete

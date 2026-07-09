@@ -265,7 +265,7 @@ extern unsigned char MOVERNEW_ERROR; //valid when movernew(...) returns 0
 
 #ifndef CLIENT
 //STUBS TO SUPPORT EXTERNAL LINKING (DATA NOT ACTUALLY USED!)
-extern unsigned char u6omidisetup;
+extern unsigned char u6omusicsetup;
 extern HWND hWnd;
 extern HWND hWnd2;
 extern HWND hWnd3;

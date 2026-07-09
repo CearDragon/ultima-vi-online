@@ -264,7 +264,7 @@ void mididown(unsigned char instrument, unsigned char key) {
     if (midipause == 0) {
         midipause = 1;
         if (U6O_DISABLEMUSIC == FALSE) {
-            u6omidi->Stop();
+            u6omusic->Stop();
         }
     }
 
@@ -2154,21 +2154,21 @@ void setsetting_choice(const char *name, const char *value) {
 
 // Push the current music-volume global to the DirectMusic + low-level MIDI
 // outputs. This is a behavior-preserving extraction of the inline block that
-// used to live only at the `u6omidivolume_changed:` label in the volume-panel
+// used to live only at the `u6omusicvolume_changed:` label in the volume-panel
 // loop (loop_client_part_game_open.cpp); the Options menu reuses it.
 void applyMidiVolume() {
     if (U6O_DISABLEMUSIC) return;
-    float f = u6omidi_volume[midi_loaded];
-    f = f * (float) u6omidivolume / 255.0f;
+    float f = u6omusic_volume[midi_loaded];
+    f = f * (float) u6omusicvolume / 255.0f;
     f = 255 - f;
     f = f * 0.25f;
     f *= f;
     // DMUS_VOLUME_MAX 2000 (+20 dB) .. DMUS_VOLUME_MIN -20000 (-200 dB)
-    u6omidi->SetMasterVolume(-f);
-    if (u6omidivolume == 0) u6omidi->Stop();
+    u6omusic->SetMasterVolume(-f);
+    if (u6omusicvolume == 0) u6omusic->Stop();
 
     if (midiout_setup) {
-        int x = u6omidivolume / 2; // 0-255 -> 0-127
+        int x = u6omusicvolume / 2; // 0-255 -> 0-127
         midiOutShortMsg(midiout_handle, 0x000007B0 + x * 65536);
         midiOutShortMsg(midiout_handle, 0x000007B1 + x * 65536);
         midiOutShortMsg(midiout_handle, 0x000007B2 + x * 65536);
@@ -2215,9 +2215,10 @@ static const MenuSetting g_menuSettings[] = {
     {"Graphics", "Transparency: piano keys", MS_CHOICE, "PLAYINSTRUMENTPIANOKEYS_TRANSPARENCYLEVEL",      0, 0, 3, {"not", "50%", "25%"}, {0}},
     // ---- Audio ----
     {"Audio", "Load MIDI drivers",           MS_CHOICE, "ALLOWMIDI",     0, 0, 2, {"Do", "Don't"}, {0}},
-    {"Audio", "Music volume",                MS_VOLUME, 0, &u6omidivolume, 1, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    {"Audio", "Music volume",                MS_VOLUME, 0, &u6omusicvolume, 1, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
     {"Audio", "Sound volume",                MS_VOLUME, 0, &u6ovolume,     0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
     {"Audio", "Voice volume",                MS_VOLUME, 0, &u6ovoicevolume, 0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    {"Audio", "Music format",                MS_CHOICE, "MUSICFORMAT",   0, 0, 2, {"MIDI", "MP3"}, {0}},
     // ---- Input ----
     {"Input", "Read joystick",               MS_CHOICE, "ALLOWJOYSTICK", 0, 0, 2, {"Do", "Don't"}, {0}},
 };
@@ -2343,7 +2344,23 @@ bool HandleOptionsCommand(int cmdId) {
         // immediately via setsetting_choice above.
         if (strcmp(ms.settingName, "CLOUDS") == 0)
             noclouds = (opt == 1) ? TRUE : FALSE; // opt 0 = "Yes", opt 1 = "No"
-        else
+        else if (strcmp(ms.settingName, "MUSICFORMAT") == 0) {
+            cltset.music_format = (unsigned char) opt;
+            music_format = cltset.music_format;
+            if (u6omusic) {
+                u6omusic->Stop();
+                delete u6omusic;
+            }
+            if (music_format == 1) u6omusic = new CMp3Music();
+            else u6omusic = new CMidiMusic();
+            if (FAILED(u6omusic->Initialize())) {
+                u6omusicsetup = 0;
+            } else {
+                u6omusicsetup = 1;
+            }
+            midiinfo_loaded = FALSE; // Force reload paths for new format
+            midi_loaded = -1;
+        } else
             applyTransparencyLive(ms.settingName, opt);
     } else {
         if (ms.volTarget) *ms.volTarget = ms.optVol[opt];

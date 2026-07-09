@@ -777,7 +777,7 @@ midipause
     midipause=0;
 
     if (U6O_DISABLEMUSIC==FALSE){
-      if (u6omidivolume) u6omidi->Play();
+      if (u6omusicvolume) u6omusic->Play();
     }
 
   }

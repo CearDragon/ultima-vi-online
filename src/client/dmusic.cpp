@@ -17,7 +17,7 @@ All rights reserved.
 #include "stdafx.h"
 #include "dmusic.h"
 
-extern unsigned char u6omidisetup;
+extern unsigned char u6omusicsetup;
 
 // The constructor, member variables initialisation
 
@@ -167,7 +167,7 @@ HRESULT CMidiMusic::SelectPort(LPINFOPORT InfoPort) {
 // Function to load a midi, segment or wave file into a segment
 
 HRESULT CMidiMusic::LoadMidiFromFile(LPCSTR szMidi, BOOL bMidiFile) {
-    if (u6omidisetup == 0) return S_FALSE;
+    if (u6omusicsetup == 0) return S_FALSE;
 
     WCHAR wstrMidi[256];
     HRESULT hr;
@@ -211,7 +211,7 @@ HRESULT CMidiMusic::LoadMidiFromFile(LPCSTR szMidi, BOOL bMidiFile) {
 
 // Function to load MIDI or WAVE file from a resource
 HRESULT CMidiMusic::LoadMidiFromResource(TCHAR *strResource, TCHAR *strResourceType, BOOL bMidiFile) {
-    if (u6omidisetup == 0) return S_FALSE;
+    if (u6omusicsetup == 0) return S_FALSE;
 
     HRESULT hr;
     HRSRC hres = NULL;
@@ -273,7 +273,7 @@ HRESULT CMidiMusic::LoadMidiFromResource(TCHAR *strResource, TCHAR *strResourceT
 
 // Function to load MIDI or WAVE file from memory
 HRESULT CMidiMusic::LoadMidiFromMemory(void *offset, unsigned long bytes, BOOL bMidiFile) {
-    if (u6omidisetup == 0) return S_FALSE;
+    if (u6omusicsetup == 0) return S_FALSE;
 
     HRESULT hr;
     DMUS_OBJECTDESC objdesc;
@@ -315,7 +315,7 @@ HRESULT CMidiMusic::LoadMidiFromMemory(void *offset, unsigned long bytes, BOOL b
 // Function to play a segment
 
 HRESULT CMidiMusic::Play() {
-    if (u6omidisetup == 0) return S_FALSE;
+    if (u6omusicsetup == 0) return S_FALSE;
 
     HRESULT hr;
 
@@ -358,7 +358,7 @@ HRESULT CMidiMusic::Play() {
 // Functions to pause a segment 
 
 HRESULT CMidiMusic::Pause() {
-    if (u6omidisetup == 0) return S_FALSE;
+    if (u6omusicsetup == 0) return S_FALSE;
 
     MUSIC_TIME mtNow;
     HRESULT hr;
@@ -383,7 +383,7 @@ HRESULT CMidiMusic::Pause() {
 // Function to resume after the pause, any sound must be listened
 
 HRESULT CMidiMusic::Resume() {
-    if (u6omidisetup == 0) return S_FALSE;
+    if (u6omusicsetup == 0) return S_FALSE;
 
     HRESULT hr;
 
@@ -398,10 +398,10 @@ HRESULT CMidiMusic::Resume() {
 // Funtion to find out when the music is actually played
 
 HRESULT CMidiMusic::IsPlaying() {
-    static unsigned char u6omidisetup_togglereturn = 0;
-    if (u6omidisetup_togglereturn) u6omidisetup_togglereturn = 0;
-    else u6omidisetup_togglereturn = 1;
-    if (u6omidisetup == 0) return u6omidisetup_togglereturn;
+    static unsigned char u6omusicsetup_togglereturn = 0;
+    if (u6omusicsetup_togglereturn) u6omusicsetup_togglereturn = 0;
+    else u6omusicsetup_togglereturn = 1;
+    if (u6omusicsetup == 0) return u6omusicsetup_togglereturn;
 
     HRESULT hr;
 
@@ -428,7 +428,7 @@ HRESULT CMidiMusic::SetRepeat(BOOL bRepeat) {
 // Function to stop a segment
 
 HRESULT CMidiMusic::Stop() {
-    if (u6omidisetup == 0) return S_FALSE;
+    if (u6omusicsetup == 0) return S_FALSE;
 
     HRESULT hr;
 
@@ -647,8 +647,8 @@ HRESULT CMidiMusic::SetMasterTempo(float fTempo) {
 
 
 // Function to set the audio master volume (only in software synth. mode)
-HRESULT CMidiMusic::SetMasterVolume(long nVolume) {
-    if (u6omidisetup == 0) return S_FALSE;
+HRESULT CMidiMusic::SetMasterVolume_internal(long nVolume) {
+    if (u6omusicsetup == 0) return S_FALSE;
 
     HRESULT hr;
 

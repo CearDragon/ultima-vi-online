@@ -29,18 +29,18 @@ x=
 0; //set volume
 if
 (midiinfo_loaded) {
-    if (u6omidivolume) {
+    if (u6omusicvolume) {
         //midi cannot be processed if volume==NULL
 
         if (midi_foreground != -1) {
             //set midi_foreground as loaded midi
             if (midi_foreground != midi_loaded) {
                 midi_loaded = midi_foreground;
-                u6omidi->LoadMidiFromFile(u6omidi_filename[midi_loaded]->d, TRUE);
+                u6omusic->LoadMidiFromFile(u6omusic_filename[midi_loaded]->d, TRUE);
                 if (midipause == 0) {
-                    u6omidi->Play();
+                    u6omusic->Play();
                 isplayingwait0:
-                    if (u6omidi->IsPlaying() == S_FALSE) goto isplayingwait0;
+                    if (u6omusic->IsPlaying() == S_FALSE) goto isplayingwait0;
                 } //midipause==0
                 x = 1;
             } //midi_foreground!=midi_loaded
@@ -50,11 +50,11 @@ if
         if (midi_foreground_wait) {
             midi_foreground_wait -= et;
             if (midi_foreground_wait < 0.0f) midi_foreground_wait = 0.0f;
-            if (u6omidi->IsPlaying() == S_FALSE) midi_foreground_wait = 0.0f; //midi finished playing
+            if (u6omusic->IsPlaying() == S_FALSE) midi_foreground_wait = 0.0f; //midi finished playing
             if (midi_foreground_wait == 0.0f) {
-                u6omidi->Stop(); //stop playing foreground midi
+                u6omusic->Stop(); //stop playing foreground midi
             isplayingwait2:
-                if (u6omidi->IsPlaying() == S_OK) goto isplayingwait2;
+                if (u6omusic->IsPlaying() == S_OK) goto isplayingwait2;
             }
         }
 
@@ -62,35 +62,35 @@ if
             //no foreground midi is playing
             if (midi_loaded != midi_background) {
                 //load correct midi
-                if (u6omidi->IsPlaying() == S_FALSE) {
+                if (u6omusic->IsPlaying() == S_FALSE) {
                     //midi is not playing
                     midi_loaded = midi_background;
-                    u6omidi->LoadMidiFromFile(u6omidi_filename[midi_loaded]->d, TRUE);
+                    u6omusic->LoadMidiFromFile(u6omusic_filename[midi_loaded]->d, TRUE);
                 }
             } //midi_loaded!=midi_background
 
-            if (u6omidi->IsPlaying() == S_FALSE) {
+            if (u6omusic->IsPlaying() == S_FALSE) {
                 //midi is not playing
                 if (midipause == 0) {
-                    u6omidi->Play();
+                    u6omusic->Play();
                 isplayingwait1:
-                    if (u6omidi->IsPlaying() == S_FALSE) goto isplayingwait1;
+                    if (u6omusic->IsPlaying() == S_FALSE) goto isplayingwait1;
                 } //midipause==0
                 x = 1;
             } //==S_FALSE
         } //midi_foreground_wait==0.0f
 
         if (x) {
-            f = u6omidi_volume[midi_loaded];
-            f = f * (float) u6omidivolume / 255.0f;
+            f = u6omusic_volume[midi_loaded];
+            f = f * (float) u6omusicvolume / 255.0f;
             f = 255 - f;
             f = f * 0.25f;
             f *= f;
             //DMUS_VOLUME_MAX     2000         +20 dB
             //DMUS_VOLUME_MIN   -20000        -200 dB
-            u6omidi->SetMasterVolume(-f);
+            u6omusic->SetMasterVolume(-f);
         }
-    } //u6omidivolume
+    } //u6omusicvolume
 } //midiinfo_loaded
 
 
@@ -172,9 +172,13 @@ midiinfo_next:
       if (x=txtsearch(t,t3)){txtset(t2,t); txtleft(t2,x-1); txtright(t,t->l-x);}else{txtset(t2,t); txtset(t,"");}
       i=txtnum(t2);
       if (x=txtsearch(t,t3)){txtset(t2,t); txtleft(t2,x-1); txtright(t,t->l-x);}else{txtset(t2,t); txtset(t,"");}
-      txtset(t4,".\\midi\\"); txtadd(t4,t2); txtadd(t4,".mid");
-      if (u6omidi_filename[i]==NULL) u6omidi_filename[i]=txtnew();
-      txtset(u6omidi_filename[i],t4);
+      if (music_format == 1) {
+          txtset(t4, ".\\mp3\\"); txtadd(t4, t2); txtadd(t4, ".mp3");
+      } else {
+          txtset(t4, ".\\midi\\"); txtadd(t4, t2); txtadd(t4, ".mid");
+      }
+      if (u6omusic_filename[i]==NULL) u6omusic_filename[i]=txtnew();
+      txtset(u6omusic_filename[i],t4);
 
       x2=100; //volume
       if (x=txtsearch(t,t3)){txtset(t2,t); txtleft(t2,x-1); txtright(t,t->l-x);}else{txtset(t2,t); txtset(t,"");}
@@ -184,13 +188,13 @@ midiinfo_next:
         if (x2>100) x=100;
       }
       x2=(float)x2*2.55f;
-      u6omidi_volume[i]=x2;
+      u6omusic_volume[i]=x2;
 
 
       goto midiinfo_next;
     }
     close(tfh);
-    u6omidi->LoadMidiFromFile(u6omidi_filename[0]->d,TRUE);
+    u6omusic->LoadMidiFromFile(u6omusic_filename[0]->d,TRUE);
   }//midiinfo_loaded
 }
 

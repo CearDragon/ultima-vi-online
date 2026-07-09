@@ -1,4 +1,4 @@
-﻿// splash.cpp — implementation of the pre-game splash window.
+// splash.cpp � implementation of the pre-game splash window.
 //
 // Uses GDI+ to load any common image format (PNG, JPG, BMP, GIF) so the
 // product team can drop a `splash.png` next to the EXE (or under
