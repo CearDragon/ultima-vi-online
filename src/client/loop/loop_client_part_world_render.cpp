@@ -2661,6 +2661,14 @@ movet4intot7:
 
               txtset(t4,"?"); t4->d2[0]=92;
               z=txtsearch(t3,t4);
+
+              // NPC-VO: trigger for the next segment of a multi-part message
+              txtset(t5, t3);
+              if (z) {
+                  txtleft(t5, z - 1);
+              }
+              voiceover_play_for_message(sfx[i3].more, (const char *) t5->d2, u6ovoiceovervolume);
+
               if (z==0) z=t->l; else z--;
               f=(float)z/10.0f;
               if (f<1)f=1;

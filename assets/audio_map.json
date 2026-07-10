@@ -9,6 +9,106 @@
           "text_prefix": "Ho eyo he hum",
           "audio_file": "ogg\\Chuckles.0.ogg",
           "description": "Chuckles greeting: 'Ho eyo he hum, I've got a clue! It's important, and just for you!'"
+        },
+        {
+          "text_prefix": "Why I'm Chuckles the",
+          "audio_file": "ogg\\Chuckles.1.ogg",
+          "description": "Chuckles identifies himself as the jester."
+        },
+        {
+          "text_prefix": "You've heard a word",
+          "audio_file": "ogg\\Chuckles.2.ogg",
+          "description": "Chuckles responds to hearing a word."
+        },
+        {
+          "text_prefix": "To jape to jeer",
+          "audio_file": "ogg\\Chuckles.3.ogg",
+          "description": "Chuckles describes his job: to jape, jeer, prance, and frolic."
+        },
+        {
+          "text_prefix": "I practice tomfoolery for",
+          "audio_file": "ogg\\Chuckles.4.ogg",
+          "description": "Chuckles says he practices tomfoolery for Lord British."
+        },
+        {
+          "text_prefix": "And jeer",
+          "audio_file": "ogg\\Chuckles.5.ogg",
+          "description": "Chuckles replies: And jeer."
+        },
+        {
+          "text_prefix": "And prance To dance",
+          "audio_file": "ogg\\Chuckles.6.ogg",
+          "description": "Chuckles continues with prancing and dancing."
+        },
+        {
+          "text_prefix": "Jeer and prance Prance",
+          "audio_file": "ogg\\Chuckles.7.ogg",
+          "description": "Chuckles repeats jeer, prance, and frolic."
+        },
+        {
+          "text_prefix": "I lurch 'round like",
+          "audio_file": "ogg\\Chuckles.8.ogg",
+          "description": "Chuckles says he lurches around like an alcoholic."
+        },
+        {
+          "text_prefix": "'Cause Dick and Harry",
+          "audio_file": "ogg\\Chuckles.9.ogg",
+          "description": "Chuckles explains that Dick and Harry called in sick."
+        },
+        {
+          "text_prefix": "Call him Mr Nose",
+          "audio_file": "ogg\\Chuckles.10.ogg",
+          "description": "Chuckles says to call Lord British Mr. Nose."
+        },
+        {
+          "text_prefix": "Shhh Don't let him",
+          "audio_file": "ogg\\Chuckles.11.ogg",
+          "description": "Chuckles warns not to let Lord British know he told you."
+        },
+        {
+          "text_prefix": "Yes it's crucial to",
+          "audio_file": "ogg\\Chuckles.12.ogg",
+          "description": "Chuckles says the clue is crucial to the quest."
+        },
+        {
+          "text_prefix": "Perhaps I don't want",
+          "audio_file": "ogg\\Chuckles.13.ogg",
+          "description": "Chuckles says perhaps he does not want to tell you."
+        },
+        {
+          "text_prefix": "Perhaps I'll tell you",
+          "audio_file": "ogg\\Chuckles.14.ogg",
+          "description": "Chuckles says perhaps he will tell you anyway."
+        },
+        {
+          "text_prefix": "Do you think I",
+          "audio_file": "ogg\\Chuckles.15.ogg",
+          "description": "Chuckles asks if you think he will."
+        },
+        {
+          "text_prefix": "How foolish of you",
+          "audio_file": "ogg\\Chuckles.16.ogg",
+          "description": "Chuckles says it was foolish to think so."
+        },
+        {
+          "text_prefix": "Congratulations You're exactly right",
+          "audio_file": "ogg\\Chuckles.17.ogg",
+          "description": "Chuckles says congratulations, you are exactly right."
+        },
+        {
+          "text_prefix": "I won't tell you",
+          "audio_file": "ogg\\Chuckles.18.ogg",
+          "description": "Chuckles says he will not tell you the clue."
+        },
+        {
+          "text_prefix": "But I will give",
+          "audio_file": "ogg\\Chuckles.19.ogg",
+          "description": "Chuckles says he will give a hint that may lead to it."
+        },
+        {
+          "text_prefix": "Search the chest in",
+          "audio_file": "ogg\\Chuckles.20.ogg",
+          "description": "Chuckles gives the hint to search the chest in Nystul's room."
         }
       ]
     },
@@ -116,6 +216,111 @@
           "text_prefix": "I see thou hath",
           "audio_file": "ogg\\LordBritish.19.ogg",
           "description": "Lord British notices the Avatar has misplaced the castle key."
+        },
+        {
+          "text_prefix": "Here is another",
+          "audio_file": "ogg\\LordBritish.20.ogg",
+          "description": "Lord British gives another castle key."
+        },
+        {
+          "text_prefix": "Good Avatar what wouldst",
+          "audio_file": "ogg\\LordBritish.21.ogg",
+          "description": "Lord British asks what the Avatar would speak of."
+        },
+        {
+          "text_prefix": "I am Lord British",
+          "audio_file": "ogg\\LordBritish.22.ogg",
+          "description": "Lord British identifies himself."
+        },
+        {
+          "text_prefix": "Thanks to thee I",
+          "audio_file": "ogg\\LordBritish.23.ogg",
+          "description": "Lord British says he sits once more upon the throne of Britannia."
+        },
+        {
+          "text_prefix": "Though 'tis a heavy",
+          "audio_file": "ogg\\LordBritish.24.ogg",
+          "description": "Lord British describes the burden of ruling in troubled times."
+        },
+        {
+          "text_prefix": "The gargoyles art indeed",
+          "audio_file": "ogg\\LordBritish.25.ogg",
+          "description": "Lord British says the gargoyles are the greatest threat the realm has ever known."
+        },
+        {
+          "text_prefix": "We are fortunate indeed",
+          "audio_file": "ogg\\LordBritish.26.ogg",
+          "description": "Lord British says fate has brought the Avatar in Britannia's hour of need."
+        },
+        {
+          "text_prefix": "Perhaps thou canst drive",
+          "audio_file": "ogg\\LordBritish.27.ogg",
+          "description": "Lord British hopes the Avatar can drive the gargoyles back."
+        },
+        {
+          "text_prefix": "All our efforts thus",
+          "audio_file": "ogg\\LordBritish.28.ogg",
+          "description": "Lord British says all efforts so far have failed."
+        },
+        {
+          "text_prefix": "By now the gargoyles",
+          "audio_file": "ogg\\LordBritish.29.ogg",
+          "description": "Lord British warns the gargoyles may have captured all the shrines."
+        },
+        {
+          "text_prefix": "Thou must hurry if",
+          "audio_file": "ogg\\LordBritish.30.ogg",
+          "description": "Lord British urges the Avatar to hurry and foil the gargoyles' schemes."
+        },
+        {
+          "text_prefix": "Stay strong in thy",
+          "audio_file": "ogg\\LordBritish.31.ogg",
+          "description": "Lord British urges commitment to the eight virtues."
+        },
+        {
+          "text_prefix": "It is our belief",
+          "audio_file": "ogg\\LordBritish.32.ogg",
+          "description": "Lord British says belief in the virtues separates Britannians from the invaders."
+        },
+        {
+          "text_prefix": "He is the Captain",
+          "audio_file": "ogg\\LordBritish.33.ogg",
+          "description": "Lord British identifies Geoffrey as Captain of the Guard."
+        },
+        {
+          "text_prefix": "Hmmmm I have such",
+          "audio_file": "ogg\\LordBritish.34.ogg",
+          "description": "Lord British recognizes the black stone."
+        },
+        {
+          "text_prefix": "I did not know",
+          "audio_file": "ogg\\LordBritish.35.ogg",
+          "description": "Lord British says he did not know there were more such orbs."
+        },
+        {
+          "text_prefix": "'Twill serve thee well",
+          "audio_file": "ogg\\LordBritish.36.ogg",
+          "description": "Lord British says the stone will serve the Avatar well if mastered."
+        },
+        {
+          "text_prefix": "To open a gate",
+          "audio_file": "ogg\\LordBritish.37.ogg",
+          "description": "Lord British explains how to use the stone to open a gate."
+        },
+        {
+          "text_prefix": "Thou wilt discover that",
+          "audio_file": "ogg\\LordBritish.38.ogg",
+          "description": "Lord British says the stone's placement is the key."
+        },
+        {
+          "text_prefix": "In the proper positions",
+          "audio_file": "ogg\\LordBritish.39.ogg",
+          "description": "Lord British explains that proper placement conjures gates to many destinations."
+        },
+        {
+          "text_prefix": "Ask the leaders of",
+          "audio_file": "ogg\\LordBritish.40.ogg",
+          "description": "Lord British tells the Avatar to ask the leaders of each town."
         }
       ]
     }

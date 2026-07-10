@@ -102,16 +102,23 @@ if
                             memcpy(&dbgt5->d2[0], &mess_SF->d2[i4], sfx[i3].x2);
                             i4 += sfx[i3].x2;
                             sfx[i3].p = dbgt5;
-
-                            // NPC-VO: speech-triggered voiceovers are keyed by
-                            // speaker id + text match and run once per incoming
-                            // conversation message, not on UI redraw.
-                            voiceover_play_for_message(sfx[i3].more, (const char *) dbgt5->d2, u6ovoiceovervolume);
-
+                            
                             txtset(t, (txt *) sfx[i3].p);
                             txtset(t2, "?");
                             t2->d2[0] = 92;
                             z = txtsearch(t, t2);
+
+                            // NPC-VO: speech-triggered voiceovers are keyed by
+                            // speaker id + text match and run once per incoming
+                            // conversation message, not on UI redraw.
+                            if (z) {
+                                txtset(t4, t);
+                                txtleft(t4, z - 1);
+                                voiceover_play_for_message(sfx[i3].more, (const char *) t4->d2, u6ovoiceovervolume);
+                            } else {
+                                voiceover_play_for_message(sfx[i3].more, (const char *) dbgt5->d2, u6ovoiceovervolume);
+                            }
+
                             if (z == 0) z = t->l;
                             else z--;
                             f = (float) z / 10.0f;

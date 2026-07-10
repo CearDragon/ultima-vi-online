@@ -75,6 +75,24 @@ bool startsWith(const char* text, const char* prefix) {
     return strncmp(text, prefix, strlen(prefix)) == 0;
 }
 
+bool startsWithCaseInsensitive(const char* text, const char* prefix) {
+    if (!text || !prefix) return false;
+
+    // Skip leading double quotes and whitespace in the text
+    while (*text && (*text == ' ' || *text == '\"' || *text == '\t' || *text == '\r' || *text == '\n')) {
+        text++;
+    }
+
+    // Also skip them in prefix to be safe and consistent
+    while (*prefix && (*prefix == ' ' || *prefix == '\"' || *prefix == '\t' || *prefix == '\r' || *prefix == '\n')) {
+        prefix++;
+    }
+
+    if (!*prefix) return false;
+
+    return _strnicmp(text, prefix, strlen(prefix)) == 0;
+}
+
 bool containsCaseInsensitive(const char* text, const char* needle) {
     if (!text || !needle || !needle[0]) return false;
     const size_t needle_len = strlen(needle);
@@ -458,7 +476,7 @@ VoiceoverLine* findVoiceoverLine(int npc_port, const char* text) {
         for (int line_index = 0; line_index < g_voiceover_map[npc_index].line_count; line_index++) {
             VoiceoverLine* line = &g_voiceover_map[npc_index].lines[line_index];
             const size_t prefix_length = strlen(line->text_prefix);
-            if (prefix_length && containsCaseInsensitive(text, line->text_prefix)) {
+            if (prefix_length && startsWithCaseInsensitive(text, line->text_prefix)) {
                 return line;
             }
         }
