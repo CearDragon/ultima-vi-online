@@ -662,11 +662,11 @@ bool U6O_WALKTHRU_REC;
 bool U6O_WALKTHRU;
 
 //master volume controls
-unsigned char u6ovolume;
-unsigned char u6omusicvolume;
+int u6ovolume;
+int u6omusicvolume;
 unsigned char u6omusicsetup;
-unsigned char u6ovoicevolume;
-unsigned char u6ovoiceovervolume;
+int u6ovoicevolume;
+int u6ovoiceovervolume;
 
 //wav
 unsigned char u6osoundtype_volume[255];
@@ -1438,7 +1438,8 @@ HWND hWnd3;
 HWND hWnd4;
 RECT desktop_rect;
 bool smallwindow;
-unsigned char u6ovolume;
+int u6ovolume;
+int u6ovoiceovervolume;
 #endif /* !CLIENT */
 
 unsigned long revive_infiniteloopexit_i;

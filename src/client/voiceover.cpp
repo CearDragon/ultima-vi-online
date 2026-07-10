@@ -7,10 +7,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 namespace {
 constexpr int kVoiceoverMaxNpcs = 256;
-constexpr int kVoiceoverMaxLinesPerNpc = 16;
+constexpr int kVoiceoverMaxLinesPerNpc = 64;
 constexpr int kVoiceoverMaxPrefixLen = 96;
 constexpr int kVoiceoverMaxFilenameLen = MAX_PATH;
 constexpr const char* kVoiceoverAlias = "u6ovoice";
@@ -78,19 +79,40 @@ bool startsWith(const char* text, const char* prefix) {
 bool startsWithCaseInsensitive(const char* text, const char* prefix) {
     if (!text || !prefix) return false;
 
-    // Skip leading double quotes and whitespace in the text
-    while (*text && (*text == ' ' || *text == '\"' || *text == '\t' || *text == '\r' || *text == '\n')) {
+    // Skip leading double quotes, whitespace and @ in the text
+    while (*text && (*text == ' ' || *text == '\"' || *text == '@' || *text == '\t' || *text == '\r' || *text == '\n')) {
         text++;
     }
 
     // Also skip them in prefix to be safe and consistent
-    while (*prefix && (*prefix == ' ' || *prefix == '\"' || *prefix == '\t' || *prefix == '\r' || *prefix == '\n')) {
+    while (*prefix && (*prefix == ' ' || *prefix == '\"' || *prefix == '@' || *prefix == '\t' || *prefix == '\r' || *prefix == '\n')) {
         prefix++;
     }
 
     if (!*prefix) return false;
 
-    return _strnicmp(text, prefix, strlen(prefix)) == 0;
+    // Compare strings, ignoring '@' in both
+    while (*prefix) {
+        if (*prefix == '@') {
+            prefix++;
+            continue;
+        }
+        if (*text == '@') {
+            text++;
+            continue;
+        }
+
+        if (tolower((unsigned char)*text) != tolower((unsigned char)*prefix)) {
+            return false;
+        }
+
+        if (*text == '\0') break;
+
+        text++;
+        prefix++;
+    }
+
+    return true;
 }
 
 bool containsCaseInsensitive(const char* text, const char* needle) {
@@ -293,7 +315,7 @@ bool tryMciOpen(const char* path, const char* open_template, const char* stage) 
     return true;
 }
 
-bool playStreamingVoiceover(const char* path, unsigned char volume) {
+bool playStreamingVoiceover(const char* path, int volume) {
     closeMciVoiceover();
 
     char full_path[MAX_PATH];
@@ -427,20 +449,20 @@ bool decodeOggToWavExternal(const char* input_path, const char* output_path) {
     return false;
 }
 
-bool playWaveVoiceover(VoiceoverLine* line, unsigned char volume) {
+bool playWaveVoiceover(VoiceoverLine* line, int volume) {
     if (!resolveAudioPath(line)) return false;
 
     if (!line->pcm_load_attempted) {
         line->pcm_load_attempted = true;
-        line->cached_sound = soundload(line->resolved_audio_path);
+        line->cached_sound = soundload(line->resolved_audio_path, 3.0f);
     }
 
     if (!line->cached_sound) return false;
 
-    return soundplay2(line->cached_sound, 255, volume) != NULL;
+    return soundplay2(line->cached_sound, 255, volume, true) != NULL;
 }
 
-bool playOggVoiceover(VoiceoverLine* line, unsigned char volume) {
+bool playOggVoiceover(VoiceoverLine* line, int volume) {
     if (!resolveAudioPath(line)) return false;
 
     if (!line->pcm_load_attempted) {
@@ -456,7 +478,7 @@ bool playOggVoiceover(VoiceoverLine* line, unsigned char volume) {
             logVoiceoverMessage("[VO] OGG decode failed (oggdec/ffmpeg unavailable or decode error)");
             return false;
         }
-        line->cached_sound = soundload(line->decoded_wav_path);
+        line->cached_sound = soundload(line->decoded_wav_path, 3.0f);
         if (!line->cached_sound) {
             logVoiceoverMessage("[VO] Failed to load decoded OGG WAV cache file");
             return false;
@@ -464,7 +486,7 @@ bool playOggVoiceover(VoiceoverLine* line, unsigned char volume) {
     }
 
     if (!line->cached_sound) return false;
-    return soundplay2(line->cached_sound, 255, volume) != NULL;
+    return soundplay2(line->cached_sound, 255, volume, true) != NULL;
 }
 
 VoiceoverLine* findVoiceoverLine(int npc_port, const char* text) {
@@ -610,7 +632,7 @@ const char* voiceover_lookup_by_port_and_prefix(int npc_port, const char* text) 
     return line ? line->audio_file : NULL;
 }
 
-void voiceover_play_for_message(int npc_port, const char* text, unsigned char volume) {
+void voiceover_play_for_message(int npc_port, const char* text, int volume) {
     VoiceoverLine* line = findVoiceoverLine(npc_port, text);
     if (!line) return;
     if (!resolveAudioPath(line)) {

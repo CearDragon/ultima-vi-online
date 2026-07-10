@@ -272,8 +272,8 @@ extern HWND hWnd3;
 extern HWND hWnd4;
 extern RECT desktop_rect;
 extern bool smallwindow;
-extern unsigned char u6ovolume;
-extern unsigned char u6ovoiceovervolume;
+extern int u6ovolume;
+extern int u6ovoiceovervolume;
 #endif
 
 extern unsigned long revive_infiniteloopexit_i;

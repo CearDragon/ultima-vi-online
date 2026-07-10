@@ -31,7 +31,7 @@ spec:
       volumes:
         - name: host-volume
           persistentVolumeClaim:
-            claimName: azure-file-pvc
+            claimName: azure-file-pvc-cheap
 ---
 apiVersion: v1
 kind: Service

@@ -15,11 +15,11 @@ struct sound {
 
 sound *soundnew(long freq, long bit, long stereo, long bytes);
 
-sound *soundload(LPCSTR fn);
+sound *soundload(LPCSTR fn, float gain = 1.0f);
 
 sound *soundplay(sound *s);
 
-sound *soundplay2(sound *s, long v, long global_v = -1);
+sound *soundplay2(sound *s, long v, long global_v = -1, bool allow_boost = false);
 
 bool soundsetup();
 

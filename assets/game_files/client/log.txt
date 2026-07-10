@@ -3,7 +3,7 @@
 000:00:00:00 System-memory screen back-buffers created
 000:00:00:00 System font [System] loaded
 000:00:00:00 Client socket created
-000:00:00:00 Port: 22 Name: localhost
+000:00:00:00 Port: 22 Name: 20.246.146.166
 000:00:00:00 DNS translated to IP address successfully
 000:00:00:00 Connected to U6O server successfully!
 000:00:00:00 Send and Receive network data threads started
@@ -41,7 +41,11 @@
 000:00:00:00 Initializing music driver
 000:00:00:00 Setting up low level MIDI driver
 000:00:00:00 Beginning main loop!
-000:00:00:00 [VO] Loaded NPC port 9 with 16 line(s)
-000:00:00:00 [VO] Loaded NPC port 4 with 16 line(s)
-000:00:00:00 [VO] Loaded voiceover map: 2 NPC(s)
-000:00:00:03 MDD: map data sync complete
+000:00:00:00 [VO] Loaded NPC port 9 with 46 line(s)
+000:00:00:00 [VO] Loaded NPC port 4 with 49 line(s)
+000:00:00:00 [VO] Loaded NPC port 1 with 18 line(s)
+000:00:00:00 [VO] Loaded NPC port 192 with 14 line(s)
+000:00:00:00 [VO] Loaded NPC port 2 with 23 line(s)
+000:00:00:00 [VO] Loaded NPC port 5 with 21 line(s)
+000:00:00:00 [VO] Loaded voiceover map: 6 NPC(s)
+000:00:00:01 MDD: map data sync complete

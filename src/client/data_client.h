@@ -44,7 +44,7 @@ struct client_settings {
     unsigned char music_format;
     // Persisted position of the conversation history overlay (relative to con_frm)
     short con_frm_img_offset_x, con_frm_img_offset_y;
-    unsigned char u6ovoiceovervolume;
+    short u6ovoiceovervolume;
 };
 
 struct inpmess_index {
@@ -214,11 +214,11 @@ extern bool U6O_WALKTHRU_REC;
 extern bool U6O_WALKTHRU;
 
 //master volume controls
-extern unsigned char u6ovolume;
-extern unsigned char u6omusicvolume;
+extern int u6ovolume;
+extern int u6omusicvolume;
 extern unsigned char u6omusicsetup;
-extern unsigned char u6ovoicevolume;
-extern unsigned char u6ovoiceovervolume;
+extern int u6ovoicevolume;
+extern int u6ovoiceovervolume;
 
 //wav
 extern unsigned char u6osoundtype_volume[255];

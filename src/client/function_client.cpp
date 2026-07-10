@@ -2172,7 +2172,8 @@ void applyMidiVolume() {
     if (U6O_DISABLEMUSIC) return;
     float f = u6omusic_volume[midi_loaded];
     f = f * (float) u6omusicvolume / 255.0f;
-    f = 255 - f;
+    if (f > 255.0f) f = 255.0f;
+    f = 255.0f - f;
     f = f * 0.25f;
     f *= f;
     // DMUS_VOLUME_MAX 2000 (+20 dB) .. DMUS_VOLUME_MIN -20000 (-200 dB)
@@ -2207,11 +2208,11 @@ struct MenuSetting {
     const char *label;        // submenu label
     int kind;                 // MS_CHOICE / MS_VOLUME
     const char *settingName;  // MS_CHOICE: settings.txt key; else nullptr
-    unsigned char *volTarget; // MS_VOLUME: global to read/write; else nullptr
+    int *volTarget;           // MS_VOLUME: global to read/write; else nullptr
     int isMusic;              // MS_VOLUME: also push to MIDI on change
     int optionCount;
     const char *optLabel[8];  // choice tokens (MS_CHOICE) / display (MS_VOLUME)
-    unsigned char optVol[8];  // MS_VOLUME values
+    int optVol[8];            // MS_VOLUME values
 };
 
 static const MenuSetting g_menuSettings[] = {
@@ -2229,7 +2230,7 @@ static const MenuSetting g_menuSettings[] = {
     {"Audio", "Load MIDI drivers",           MS_CHOICE, "ALLOWMIDI",     0, 0, 2, {"Do", "Don't"}, {0}},
     {"Audio", "Music volume",                MS_VOLUME, 0, &u6omusicvolume, 1, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
     {"Audio", "Sound volume",                MS_VOLUME, 0, &u6ovolume,     0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
-    {"Audio", "Voiceover volume",            MS_VOLUME, 0, &u6ovoiceovervolume,     0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    {"Audio", "Voiceover volume",            MS_VOLUME, 0, &u6ovoiceovervolume, 0, 7, {"0%", "25%", "50%", "75%", "100%", "150%", "200%"}, {0, 64, 128, 191, 255, 384, 512}},
     {"Audio", "Voice volume",                MS_VOLUME, 0, &u6ovoicevolume, 0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
     {"Audio", "Music format",                MS_CHOICE, "MUSICFORMAT",   0, 0, 2, {"MIDI", "MP3"}, {0}},
     // ---- Input ----

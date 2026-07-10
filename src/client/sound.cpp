@@ -10,7 +10,7 @@
 LPDIRECTSOUND dsnd;
 extern HWND hWnd;
 extern bool u6o_sound;
-extern unsigned char u6ovolume;
+extern int u6ovolume;
 bool DirectSoundCreate_fail = FALSE;
 
 struct sound {
@@ -74,7 +74,7 @@ sound *soundnew(long freq, long bit, long stereo, long bytes) {
     return ts;
 }
 
-sound *soundload(LPCSTR fn) {
+sound *soundload(LPCSTR fn, float gain) {
     if (DirectSoundCreate_fail) return NULL;
     if (soundsetupf == FALSE) soundsetup();
     if (DirectSoundCreate_fail) return NULL;
@@ -95,10 +95,34 @@ sound *soundload(LPCSTR fn) {
     stereo = 0;
     get(fh, &stereo, 2);
     if (stereo == (bits / 8)) { stereo = 1; } else { stereo = 2; }
-    ts = soundnew(freq, bits, stereo, lof(fh) - 58 - 16 - 16 - 32 - 32);
+    long bytes = lof(fh) - 58 - 16 - 16 - 32 - 32;
+    ts = soundnew(freq, bits, stereo, bytes);
     seek(fh, 58);
-    get(fh, ts->o, lof(fh) - 58 - 16 - 16 - 32 - 32);
+    get(fh, ts->o, bytes);
     close(fh);
+
+    if (gain != 1.0f && ts && ts->o) {
+        if (bits == 8) {
+            for (long i = 0; i < bytes; i++) {
+                int val = ts->o[i];
+                val = (int)((val - 128) * gain) + 128;
+                if (val > 255) val = 255;
+                if (val < 0) val = 0;
+                ts->o[i] = (unsigned char)val;
+            }
+        } else if (bits == 16) {
+            short *data = (short *)ts->o;
+            long samples = bytes / 2;
+            for (long i = 0; i < samples; i++) {
+                int val = data[i];
+                val = (int)(val * gain);
+                if (val > 32767) val = 32767;
+                if (val < -32768) val = -32768;
+                data[i] = (short)val;
+            }
+        }
+    }
+
     return ts;
 }
 
@@ -127,7 +151,7 @@ busysound:
     return ts;
 }
 
-sound *soundplay2(sound *s, long v, long global_v) {
+sound *soundplay2(sound *s, long v, long global_v, bool allow_boost) {
     if (DirectSoundCreate_fail) return NULL;
     if (soundsetupf == FALSE) return NULL;
 
@@ -157,10 +181,14 @@ busysound2:
     tempsound[i]->ss = s;
     f = v;
     f = f * (float) actual_global_v / 255.0f;
-    f = 255 - f;
+    if (allow_boost) {
+        f = f * 1.0f;
+    }
+    if (f > 255.0f) f = 255.0f;
+    f = 255.0f - f;
     f = f * 0.25f;
     f *= f;
-    ts->s->SetVolume(-f);
+    ts->s->SetVolume((long)-f);
     ts->s->Play(NULL, NULL, NULL);
     return ts;
 }

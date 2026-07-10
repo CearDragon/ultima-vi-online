@@ -52,9 +52,9 @@ const char* voiceover_lookup_by_port_and_prefix(int npc_port, const char* text);
  *
  * @param npc_port NPC port number from the incoming speech message.
  * @param text NPC speech text from the incoming message.
- * @param volume Current client master volume in the legacy 0..255 range.
+ * @param volume Current client master volume (typically 0..255, supports up to 512).
  */
-void voiceover_play_for_message(int npc_port, const char* text, unsigned char volume);
+void voiceover_play_for_message(int npc_port, const char* text, int volume);
 
 /**
  * Shutdown and free all voiceover map resources.

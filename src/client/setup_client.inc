@@ -777,6 +777,7 @@ cltset2.music_format=0; // default: MIDI
 cltset2.con_frm_img_offset_x=32767; cltset2.con_frm_img_offset_y=32767;
 cltset2.minimap_offset_x=32767; cltset2.minimap_offset_y=32767;
 cltset2.tmap_offset_x=32767; cltset2.tmap_offset_y=32767;
+cltset2.u6ovoiceovervolume = 128;
 get(tfh,&cltset2,sizeof(client_settings));
 close(tfh);
 u6ovolume=cltset2.u6ovolume;

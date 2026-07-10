@@ -1,0 +1,12 @@
+﻿apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: azure-file-pvc-cheap
+  namespace: ultima-dev
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile-csi-cheap
+  resources:
+    requests:
+      storage: 100Gi

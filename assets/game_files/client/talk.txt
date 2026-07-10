@@ -1,1 +1,12 @@
-P187/Welcome to Ultima VI Online!
+P187/Welcome to Ultima VI Online! Join our Discord today!
+P192/You see a muscular, well armored guard.
+P192/"Hello."
+P192/"Can I help you with something?"
+P192/"Few of us are left to @patrol the cities, and those may be sent to the shrines soon."
+P192/"I fear we may @lose this war."
+P192/"I'm not allowed to give out that information."
+P192/You see a muscular, well armored guard.
+P192/"Hello."
+P192/"Can I help you with something?"
+P192/"Well, what can I help you with?"
+P192/"Perhaps you should ask somebody else."

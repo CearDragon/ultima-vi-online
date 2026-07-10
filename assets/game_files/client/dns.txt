@@ -1,3 +1,4 @@
-localhost:22
 20.246.146.166:22
+localhost:22
+
 
