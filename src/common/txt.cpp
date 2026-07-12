@@ -54,6 +54,15 @@ void txtNEWLEN(txt *t, long l) //*externally available
     if (i > 131072) i = 131072;
     i = l + i + 1; //apply the doubles rule
     cp = (char *) malloc(i); //GPF???
+    if (!cp) {
+        // OOM: log to stderr then abort so the crash handler fires and writes
+        // crash.txt before the process exits.  Continuing with a NULL pointer
+        // would SIGSEGV inside the malloc path, leaving the crash handler unable
+        // to reliably write diagnostics.  fprintf is fine here — txtNEWLEN is
+        // not a signal handler, so async-signal-safety is not required.
+        fprintf(stderr, "u6o: txtNEWLEN: malloc(%ld) returned NULL (OOM), aborting\n", i);
+        abort();
+    }
     if (keepmem == TRUE) memcpy(cp, t->d, t->l);
     free(t->d);
     t->l = l;

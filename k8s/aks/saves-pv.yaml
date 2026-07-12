@@ -8,14 +8,14 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: azurefile-csi
+  storageClassName: azurefile-csi-cheap
   csi:
     driver: file.csi.azure.com
-    volumeHandle: stultimasixonline#saves
+    volumeHandle: stultimasixonlinecheap#saves
     volumeAttributes:
-      server: stultimasixonline.file.core.windows.net
+      server: stultimasixonlinecheap.file.core.windows.net
       shareName: saves
     nodeStageSecretRef:
-      name: azure-file-secret
+      name: azure-file-secret-cheap
       namespace: ultima-dev
 

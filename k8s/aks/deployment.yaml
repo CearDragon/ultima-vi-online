@@ -22,9 +22,31 @@ spec:
       - name: host
         image: acrultimavionline.azurecr.io/u6o-host:latest
         imagePullPolicy: Always
+        # Resource requests/limits move this pod from BestEffort to Burstable
+        # QoS, which dramatically reduces its priority as an OOM-kill target.
+        # The 32-bit process cannot exceed ~3 GB VA regardless; 512 Mi is a
+        # generous ceiling for normal operation. Raise if memory grows over time.
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
         ports:
           - containerPort: 22
             protocol: TCP
+        # Liveness probe: if the game port stops accepting connections the
+        # process has either crashed-but-not-exited or deadlocked.  k8s will
+        # kill the container and restart it.  Give the host 60 s to start
+        # before the first check (it loads map + save data at startup).
+        livenessProbe:
+          tcpSocket:
+            port: 22
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          failureThreshold: 3
+          timeoutSeconds: 5
         volumeMounts:
           - name: host-volume
             mountPath: /host

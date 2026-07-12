@@ -77,10 +77,20 @@ COPY assets/map_patches/ ./assets/map_patches/
 RUN echo "localhost:22" > dns.txt \
     && mkdir -p save
 
+# Entrypoint wrapper: raise the core-dump size limit so the kernel writes a
+# core file when the process crashes (default ulimit -c is 0 in containers).
+# The core lands in the working directory (/u6o-host) which is the same place
+# crash_*.txt is written.  On AKS / Docker Desktop the host kernel's
+# /proc/sys/kernel/core_pattern controls the final destination; set it to
+# "core" on the node (or via a DaemonSet initContainer) to get plain files.
+RUN printf '#!/bin/sh\nulimit -c unlimited\nexec "$@"\n' > /entrypoint.sh \
+    && chmod +x /entrypoint.sh
+
 EXPOSE 22
 
 # The dedicated host assumes the "host" role; pass it explicitly for parity
 # with the Windows image. SIGTERM/SIGINT trigger a graceful save-and-exit
 # (see u6o_posix_term_handler in u6o7.cpp).
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./u6o-host", "host"]
 

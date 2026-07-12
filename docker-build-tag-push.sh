@@ -13,6 +13,8 @@ docker tag u6o-host:latest cduncc/u6o-host:latest
 echo "Pushing..."
 docker push cduncc/u6o-host:latest
 
+kubectl config use-context docker-desktop
+
 echo "Restarting deployment..."
 kubectl rollout restart deployment/u6o-host
 

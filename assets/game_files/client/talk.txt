@@ -1,12 +1,11 @@
 P187/Welcome to Ultima VI Online! Join our Discord today!
-P192/You see a muscular, well armored guard.
-P192/"Hello."
-P192/"Can I help you with something?"
-P192/"Few of us are left to @patrol the cities, and those may be sent to the shrines soon."
-P192/"I fear we may @lose this war."
-P192/"I'm not allowed to give out that information."
-P192/You see a muscular, well armored guard.
-P192/"Hello."
-P192/"Can I help you with something?"
-P192/"Well, what can I help you with?"
-P192/"Perhaps you should ask somebody else."
+P9/You see a carefree fellow in a ludicrous costume.
+P9/"Ho eyo he hum, I've got a @clue! It's important, and just for you!"
+P9/"Yes, it's crucial to your @quest. Do you want to know what it is?"
+P9/"Perhaps I don't want to tell you!"
+P9/"Perhaps I'll tell you anyway!"
+P9/"Do you think I will?"
+P9/"Congratulations! You're exactly right!"
+P9/"I won't tell you the clue..."
+P9/"But I will give you this @hint that may lead you to it..."
+P9/"Search the @chest in @Nystul's room."
