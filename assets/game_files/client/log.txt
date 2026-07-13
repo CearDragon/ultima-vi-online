@@ -48,5 +48,7 @@
 000:00:00:00 [VO] Loaded NPC port 2 with 23 line(s)
 000:00:00:00 [VO] Loaded NPC port 5 with 21 line(s)
 000:00:00:00 [VO] Loaded NPC port 6 with 14 line(s)
-000:00:00:00 [VO] Loaded voiceover map: 7 NPC(s)
+000:00:00:00 [VO] Loaded NPC port 31 with 32 line(s)
+000:00:00:00 [VO] Loaded NPC port 8 with 24 line(s)
+000:00:00:00 [VO] Loaded voiceover map: 9 NPC(s)
 000:00:00:16 MDD: map data sync complete

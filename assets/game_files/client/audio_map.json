@@ -1,0 +1,1338 @@
+{
+  "npc_port_mappings": [
+    {
+      "npc_port": 9,
+      "npc_name": "Chuckles",
+      "npc_portrait": 9,
+      "lines": [
+        {
+          "text_prefix": "Ho eyo he hum",
+          "audio_file": "ogg\\Chuckles.0.ogg",
+          "description": "Chuckles greeting: 'Ho eyo he hum, I've got a clue! It's important, and just for you!'"
+        },
+        {
+          "text_prefix": "Why, I'm Chuckles the",
+          "audio_file": "ogg\\Chuckles.1.ogg",
+          "description": "Chuckles says: \"Why, I'm Chuckles the jester, of course! You've heard of me haven't you? Sure you have!\""
+        },
+        {
+          "text_prefix": "You've heard a word?",
+          "audio_file": "ogg\\Chuckles.2.ogg",
+          "description": "Chuckles says: \"You've heard a word? Why that's absurd!\""
+        },
+        {
+          "text_prefix": "To jape, to jeer,",
+          "audio_file": "ogg\\Chuckles.3.ogg",
+          "description": "Chuckles describes his job: \"To jape, to jeer, to prance, to frolic! To keep this place unmelancholic!\""
+        },
+        {
+          "text_prefix": "I practice tomfoolery for",
+          "audio_file": "ogg\\Chuckles.4.ogg",
+          "description": "Chuckles says: \"I practice tomfoolery for Lord British - or anyone else who passes too close.\""
+        },
+        {
+          "text_prefix": "And jeer!",
+          "audio_file": "ogg\\Chuckles.5.ogg",
+          "description": "Chuckles says: \"And jeer!\""
+        },
+        {
+          "text_prefix": "And prance! To dance",
+          "audio_file": "ogg\\Chuckles.6.ogg",
+          "description": "Chuckles says: \"And prance! To dance a Corybantic dance!\""
+        },
+        {
+          "text_prefix": "Jeer and prance! Prance",
+          "audio_file": "ogg\\Chuckles.7.ogg",
+          "description": "Chuckles says: \"Jeer and prance! Prance and frolic!\""
+        },
+        {
+          "text_prefix": "I lurch 'round like",
+          "audio_file": "ogg\\Chuckles.8.ogg",
+          "description": "Chuckles says: \"I lurch 'round like an alcoholic!\""
+        },
+        {
+          "text_prefix": "'Cause Dick and Harry",
+          "audio_file": "ogg\\Chuckles.9.ogg",
+          "description": "Chuckles says: \"'Cause Dick and Harry both called in sick.\""
+        },
+        {
+          "text_prefix": "Call him Mr. Nose...",
+          "audio_file": "ogg\\Chuckles.10.ogg",
+          "description": "Chuckles says: \"Call him Mr. Nose... But don't tell him I said so!\""
+        },
+        {
+          "text_prefix": "Shhh! Don't let him",
+          "audio_file": "ogg\\Chuckles.11.ogg",
+          "description": "Chuckles says: \"Shhh! Don't let him know I told you!\""
+        },
+        {
+          "text_prefix": "If hints were mints",
+          "audio_file": "ogg\\Chuckles.12.ogg",
+          "description": "Chuckles says: \"If hints were mints and mints were hints, think what a world it would be!\""
+        },
+        {
+          "text_prefix": "A quest, a chest,",
+          "audio_file": "ogg\\Chuckles.13.ogg",
+          "description": "Chuckles says: \"A quest, a chest, oh what a jest!\""
+        },
+        {
+          "text_prefix": "To teach, to preach,",
+          "audio_file": "ogg\\Chuckles.14.ogg",
+          "description": "Chuckles says: \"To teach, to preach, what waste of speech!\""
+        },
+        {
+          "text_prefix": "I just said that!",
+          "audio_file": "ogg\\Chuckles.15.ogg",
+          "description": "Chuckles says: \"I just said that!\""
+        },
+        {
+          "text_prefix": "You just said 'that!'",
+          "audio_file": "ogg\\Chuckles.16.ogg",
+          "description": "Chuckles says: \"You just said 'that!'\""
+        },
+        {
+          "text_prefix": "Oh, he's no fun.",
+          "audio_file": "ogg\\Chuckles.17.ogg",
+          "description": "Chuckles says: \"Oh, he's no fun.\""
+        },
+        {
+          "text_prefix": "I'll show you fun",
+          "audio_file": "ogg\\Chuckles.18.ogg",
+          "description": "Chuckles says: \"I'll show you fun before I'm done!\""
+        },
+        {
+          "text_prefix": "Ho ho, hee hee,",
+          "audio_file": "ogg\\Chuckles.19.ogg",
+          "description": "Chuckles fallback response: \"Ho ho, hee hee, thou art funnier than me! To ask a jester of <Last Input>!\""
+        },
+        {
+          "text_prefix": "Yes, it's crucial to",
+          "audio_file": "ogg\\Chuckles.20.ogg",
+          "description": "Chuckles says: \"Yes, it's crucial to your quest. Do you want to know what it is?\""
+        },
+        {
+          "text_prefix": "Perhaps I don't want",
+          "audio_file": "ogg\\Chuckles.21.ogg",
+          "description": "Chuckles says: \"Perhaps I don't want to tell you!\""
+        },
+        {
+          "text_prefix": "Perhaps I'll tell you",
+          "audio_file": "ogg\\Chuckles.22.ogg",
+          "description": "Chuckles says: \"Perhaps I'll tell you anyway!\""
+        },
+        {
+          "text_prefix": "Do you think I",
+          "audio_file": "ogg\\Chuckles.23.ogg",
+          "description": "Chuckles asks: \"Do you think I will?\""
+        },
+        {
+          "text_prefix": "How foolish of you",
+          "audio_file": "ogg\\Chuckles.24.ogg",
+          "description": "Chuckles says: \"How foolish of you to think so!\""
+        },
+        {
+          "text_prefix": "Congratulations! You're exactly right!",
+          "audio_file": "ogg\\Chuckles.25.ogg",
+          "description": "Chuckles says: \"Congratulations! You're exactly right!\""
+        },
+        {
+          "text_prefix": "I won't tell you",
+          "audio_file": "ogg\\Chuckles.26.ogg",
+          "description": "Chuckles says he will not tell the clue."
+        },
+        {
+          "text_prefix": "But I will give",
+          "audio_file": "ogg\\Chuckles.27.ogg",
+          "description": "Chuckles offers a hint that may lead to the clue."
+        },
+        {
+          "text_prefix": "Search the chest in",
+          "audio_file": "ogg\\Chuckles.28.ogg",
+          "description": "Chuckles says: \"Search the chest in Nystul's room.\""
+        },
+        {
+          "text_prefix": "Have you heard the",
+          "audio_file": "ogg\\Chuckles.29.ogg",
+          "description": "Chuckles asks about the nun, the dragon, and the drunken penguin joke."
+        },
+        {
+          "text_prefix": "That's too bad... Neither",
+          "audio_file": "ogg\\Chuckles.30.ogg",
+          "description": "Chuckles gives the no-response to the penguin joke."
+        },
+        {
+          "text_prefix": "Good! Maybe you can",
+          "audio_file": "ogg\\Chuckles.31.ogg",
+          "description": "Chuckles says maybe you can teach him the joke someday."
+        },
+        {
+          "text_prefix": "I did my best,",
+          "audio_file": "ogg\\Chuckles.32.ogg",
+          "description": "Chuckles says he tried to amuse or confuse you."
+        },
+        {
+          "text_prefix": "Did you enjoy my",
+          "audio_file": "ogg\\Chuckles.33.ogg",
+          "description": "Chuckles asks whether you enjoyed his jokes."
+        },
+        {
+          "text_prefix": "Really? I'll just have",
+          "audio_file": "ogg\\Chuckles.34.ogg",
+          "description": "Chuckles says he will have to try harder."
+        },
+        {
+          "text_prefix": "Why is Dupre like",
+          "audio_file": "ogg\\Chuckles.35.ogg",
+          "description": "Chuckles asks why Dupre is like a horseshoe."
+        },
+        {
+          "text_prefix": "It's because they both",
+          "audio_file": "ogg\\Chuckles.36.ogg",
+          "description": "Chuckles gives the horseshoe punchline."
+        },
+        {
+          "text_prefix": "You did? Then I'll",
+          "audio_file": "ogg\\Chuckles.37.ogg",
+          "description": "Chuckles says he will tell another joke."
+        },
+        {
+          "text_prefix": "Riddle me this: Do",
+          "audio_file": "ogg\\Chuckles.38.ogg",
+          "description": "Chuckles asks the goose/avatar riddle."
+        },
+        {
+          "text_prefix": "No, no, no, that's",
+          "audio_file": "ogg\\Chuckles.39.ogg",
+          "description": "Chuckles explains that the riddle answer flow was wrong."
+        },
+        {
+          "text_prefix": "Let's try it again.",
+          "audio_file": "ogg\\Chuckles.40.ogg",
+          "description": "Chuckles restarts the goose riddle."
+        },
+        {
+          "text_prefix": "It said 'ankh ankh!'",
+          "audio_file": "ogg\\Chuckles.41.ogg",
+          "description": "Chuckles gives the goose punchline."
+        },
+        {
+          "text_prefix": "What did you think",
+          "audio_file": "ogg\\Chuckles.42.ogg",
+          "description": "Chuckles asks what you thought of that joke."
+        },
+        {
+          "text_prefix": "Well, who asked you,",
+          "audio_file": "ogg\\Chuckles.43.ogg",
+          "description": "Chuckles responds defensively to the joke reaction."
+        },
+        {
+          "text_prefix": "Oh, that's right, I",
+          "audio_file": "ogg\\Chuckles.44.ogg",
+          "description": "Chuckles admits he was the one who asked."
+        },
+        {
+          "text_prefix": "Hee hee, ho ho,",
+          "audio_file": "ogg\\Chuckles.45.ogg",
+          "description": "Chuckles gives his good-cheer closing rhyme."
+        }
+      ]
+    },
+    {
+      "npc_port": 4,
+      "npc_name": "Lord British",
+      "npc_portrait": 4,
+      "lines": [
+        {
+          "text_prefix": "Avatar 'tis good to",
+          "audio_file": "ogg\\LordBritish.0.ogg",
+          "description": "Lord British initial greeting: Avatar! 'Tis good to see thee again."
+        },
+        {
+          "text_prefix": "But I must make",
+          "audio_file": "ogg\\LordBritish.1.ogg",
+          "description": "Lord British verifying the Avatar's identity."
+        },
+        {
+          "text_prefix": "Only the true Avatar",
+          "audio_file": "ogg\\LordBritish.2.ogg",
+          "description": "Lord British asks about the Compendium as proof of identity."
+        },
+        {
+          "text_prefix": "Ah 'tis thee indeed",
+          "audio_file": "ogg\\LordBritish.3.ogg",
+          "description": "Lord British confirms the Avatar and gives the key."
+        },
+        {
+          "text_prefix": "The same key will",
+          "audio_file": "ogg\\LordBritish.4.ogg",
+          "description": "Lord British explains that the same key opens the sewers under the castle."
+        },
+        {
+          "text_prefix": "Now let me tell",
+          "audio_file": "ogg\\LordBritish.5.ogg",
+          "description": "Lord British begins explaining what has transpired since the Avatar's last visit."
+        },
+        {
+          "text_prefix": "The vast underworld from",
+          "audio_file": "ogg\\LordBritish.6.ogg",
+          "description": "Lord British begins recounting the collapse of the vast underworld from which the Avatar rescued him."
+        },
+        {
+          "text_prefix": "Yet still there are",
+          "audio_file": "ogg\\LordBritish.7.ogg",
+          "description": "Lord British says there are still forces of evil abroad in the land."
+        },
+        {
+          "text_prefix": "Britannia is under attack",
+          "audio_file": "ogg\\LordBritish.8.ogg",
+          "description": "Lord British explains that Britannia is under attack by gargoyles."
+        },
+        {
+          "text_prefix": "They have been coming",
+          "audio_file": "ogg\\LordBritish.9.ogg",
+          "description": "Lord British says the gargoyles have been coming up through the dungeons."
+        },
+        {
+          "text_prefix": "Thus far they have",
+          "audio_file": "ogg\\LordBritish.10.ogg",
+          "description": "Lord British explains that the gargoyles have mainly attacked the shrines."
+        },
+        {
+          "text_prefix": "When the Shrine of",
+          "audio_file": "ogg\\LordBritish.11.ogg",
+          "description": "Lord British mentions the Shrine of Compassion falling."
+        },
+        {
+          "text_prefix": "Do thou ask him",
+          "audio_file": "ogg\\LordBritish.12.ogg",
+          "description": "Lord British tells the Avatar to ask Sir Geoffrey about the mission."
+        },
+        {
+          "text_prefix": "Whilst thou art here",
+          "audio_file": "ogg\\LordBritish.13.ogg",
+          "description": "Lord British says a room has been set aside for the Avatar."
+        },
+        {
+          "text_prefix": "'Tis in the west",
+          "audio_file": "ogg\\LordBritish.14.ogg",
+          "description": "Lord British describes the Avatar's room in the west wing of the castle."
+        },
+        {
+          "text_prefix": "I have had my",
+          "audio_file": "ogg\\LordBritish.15.ogg",
+          "description": "Lord British says his servants placed equipment there for the Avatar."
+        },
+        {
+          "text_prefix": "Of course thou mayst",
+          "audio_file": "ogg\\LordBritish.16.ogg",
+          "description": "Lord British says the Avatar may borrow anything in the castle if needed."
+        },
+        {
+          "text_prefix": "Lastly any time thou",
+          "audio_file": "ogg\\LordBritish.17.ogg",
+          "description": "Lord British offers healing whenever the Avatar needs it."
+        },
+        {
+          "text_prefix": "If thou doth wish",
+          "audio_file": "ogg\\LordBritish.18.ogg",
+          "description": "Lord British explains that asking him to repeat will replay the explanation."
+        },
+        {
+          "text_prefix": "I see thou hath",
+          "audio_file": "ogg\\LordBritish.19.ogg",
+          "description": "Lord British notices the Avatar has misplaced the castle key."
+        },
+        {
+          "text_prefix": "Here is another",
+          "audio_file": "ogg\\LordBritish.20.ogg",
+          "description": "Lord British gives another castle key."
+        },
+        {
+          "text_prefix": "Good Avatar what wouldst",
+          "audio_file": "ogg\\LordBritish.21.ogg",
+          "description": "Lord British asks what the Avatar would speak of."
+        },
+        {
+          "text_prefix": "I am Lord British",
+          "audio_file": "ogg\\LordBritish.22.ogg",
+          "description": "Lord British identifies himself."
+        },
+        {
+          "text_prefix": "Thanks to thee I",
+          "audio_file": "ogg\\LordBritish.23.ogg",
+          "description": "Lord British says he sits once more upon the throne of Britannia."
+        },
+        {
+          "text_prefix": "Though 'tis a heavy",
+          "audio_file": "ogg\\LordBritish.24.ogg",
+          "description": "Lord British describes the burden of ruling in troubled times."
+        },
+        {
+          "text_prefix": "The gargoyles art indeed",
+          "audio_file": "ogg\\LordBritish.25.ogg",
+          "description": "Lord British says the gargoyles are the greatest threat the realm has ever known."
+        },
+        {
+          "text_prefix": "We are fortunate indeed",
+          "audio_file": "ogg\\LordBritish.26.ogg",
+          "description": "Lord British says fate has brought the Avatar in Britannia's hour of need."
+        },
+        {
+          "text_prefix": "Perhaps thou canst drive",
+          "audio_file": "ogg\\LordBritish.27.ogg",
+          "description": "Lord British hopes the Avatar can drive the gargoyles back."
+        },
+        {
+          "text_prefix": "All our efforts thus",
+          "audio_file": "ogg\\LordBritish.28.ogg",
+          "description": "Lord British says all efforts so far have failed."
+        },
+        {
+          "text_prefix": "By now the gargoyles",
+          "audio_file": "ogg\\LordBritish.29.ogg",
+          "description": "Lord British warns the gargoyles may have captured all the shrines."
+        },
+        {
+          "text_prefix": "Thou must hurry if",
+          "audio_file": "ogg\\LordBritish.30.ogg",
+          "description": "Lord British urges the Avatar to hurry and foil the gargoyles' schemes."
+        },
+        {
+          "text_prefix": "Stay strong in thy",
+          "audio_file": "ogg\\LordBritish.31.ogg",
+          "description": "Lord British urges commitment to the eight virtues."
+        },
+        {
+          "text_prefix": "It is our belief",
+          "audio_file": "ogg\\LordBritish.32.ogg",
+          "description": "Lord British says belief in the virtues separates Britannians from the invaders."
+        },
+        {
+          "text_prefix": "He is the Captain",
+          "audio_file": "ogg\\LordBritish.33.ogg",
+          "description": "Lord British identifies Geoffrey as Captain of the Guard."
+        },
+        {
+          "text_prefix": "Hmmmm I have such",
+          "audio_file": "ogg\\LordBritish.34.ogg",
+          "description": "Lord British recognizes the black stone."
+        },
+        {
+          "text_prefix": "I did not know",
+          "audio_file": "ogg\\LordBritish.35.ogg",
+          "description": "Lord British says he did not know there were more such orbs."
+        },
+        {
+          "text_prefix": "'Twill serve thee well",
+          "audio_file": "ogg\\LordBritish.36.ogg",
+          "description": "Lord British says the stone will serve the Avatar well if mastered."
+        },
+        {
+          "text_prefix": "To open a gate",
+          "audio_file": "ogg\\LordBritish.37.ogg",
+          "description": "Lord British explains how to use the stone to open a gate."
+        },
+        {
+          "text_prefix": "Thou wilt discover that",
+          "audio_file": "ogg\\LordBritish.38.ogg",
+          "description": "Lord British says the stone's placement is the key."
+        },
+        {
+          "text_prefix": "In the proper positions",
+          "audio_file": "ogg\\LordBritish.39.ogg",
+          "description": "Lord British explains that proper placement conjures gates to many destinations."
+        },
+        {
+          "text_prefix": "Ask the leaders of",
+          "audio_file": "ogg\\LordBritish.40.ogg",
+          "description": "Lord British tells the Avatar to ask the leaders of each town."
+        },
+        {
+          "text_prefix": "I collect rare books.",
+          "audio_file": "ogg\\LordBritish.50.ogg",
+          "description": "Lord British says: \"I collect rare books.\""
+        },
+        {
+          "text_prefix": "There's one in particular",
+          "audio_file": "ogg\\LordBritish.51.ogg",
+          "description": "Lord British says: \"There's one in particular I've been hunting for many years.\""
+        },
+        {
+          "text_prefix": "It's called 'The Wizard",
+          "audio_file": "ogg\\LordBritish.52.ogg",
+          "description": "Lord British says: \"It's called 'The Wizard of Oz.' Ever heard of it?\""
+        },
+        {
+          "text_prefix": "Well, if thou dost",
+          "audio_file": "ogg\\LordBritish.53.ogg",
+          "description": "First part of Lord British's request to bring him The Wizard of Oz if found."
+        },
+        {
+          "text_prefix": "I would greatly appreciate",
+          "audio_file": "ogg\\LordBritish.54.ogg",
+          "description": "Second part of Lord British's request: he would appreciate the Avatar bringing the book to him."
+        },
+        {
+          "text_prefix": "I hath promised a",
+          "audio_file": "ogg\\LordBritish.55.ogg",
+          "description": "Lord British says he has promised a great reward to whoever brings him a copy."
+        },
+        {
+          "text_prefix": "Thou art carrying too",
+          "audio_file": "ogg\\LordBritish.56.ogg",
+          "description": "Lord British says the Avatar is carrying too much for him to reward properly."
+        },
+        {
+          "text_prefix": "Bring the book back",
+          "audio_file": "ogg\\LordBritish.57.ogg",
+          "description": "Lord British tells the Avatar to bring the book back later, when less burdened."
+        }
+      ]
+    },
+    {
+      "npc_port": 1,
+      "npc_name": "Dupre",
+      "npc_portrait": 1,
+      "lines": [
+        {
+          "text_prefix": "Yes, Avatar?",
+          "audio_file": "ogg\\Dupre.0.ogg",
+          "description": "Dupre greeting: \"Yes, <Avatar Name>?\""
+        },
+        {
+          "text_prefix": "It's Dupre - sounds like",
+          "audio_file": "ogg\\Dupre.1.ogg",
+          "description": "Dupre says: \"It's Dupre - sounds like dew pray, remember?\""
+        },
+        {
+          "text_prefix": "Why, questing, of course!",
+          "audio_file": "ogg\\Dupre.2.ogg",
+          "description": "Dupre says: \"Why, questing, of course! We've been on many a quest together, you and I.\""
+        },
+        {
+          "text_prefix": "Yes, you've gone on",
+          "audio_file": "ogg\\Dupre.3.ogg",
+          "description": "Dupre says: \"Yes, you've gone on some really fine ones.\""
+        },
+        {
+          "text_prefix": "When you're not around",
+          "audio_file": "ogg\\Dupre.4.ogg",
+          "description": "Dupre says: \"When you're not around I have to settle for rescuing damsels, finding grails, and the like.\""
+        },
+        {
+          "text_prefix": "It could be worse.",
+          "audio_file": "ogg\\Dupre.5.ogg",
+          "description": "Dupre says: \"It could be worse.\""
+        },
+        {
+          "text_prefix": "Some of them are",
+          "audio_file": "ogg\\Dupre.6.ogg",
+          "description": "Dupre says: \"Some of them are pretty eager to show their gratitude, if you know what I mean...\""
+        },
+        {
+          "text_prefix": "Wink wink, nudge nudge,",
+          "audio_file": "ogg\\Dupre.7.ogg",
+          "description": "Dupre says: \"Wink wink, nudge nudge, say no more...\""
+        },
+        {
+          "text_prefix": "That's right.",
+          "audio_file": "ogg\\Dupre.8.ogg",
+          "description": "Dupre says: \"That's right.\""
+        },
+        {
+          "text_prefix": "Lord British likes to",
+          "audio_file": "ogg\\Dupre.9.ogg",
+          "description": "Dupre says Lord British likes to keep grails around for banquets."
+        },
+        {
+          "text_prefix": "He'll throw us a",
+          "audio_file": "ogg\\Dupre.10.ogg",
+          "description": "Dupre says Lord British will throw a feast if the gargoyle invasion is dealt with."
+        },
+        {
+          "text_prefix": "They may be the",
+          "audio_file": "ogg\\Dupre.11.ogg",
+          "description": "Dupre says: \"They may be the toughest threat we've ever faced.\""
+        },
+        {
+          "text_prefix": "I've been with you",
+          "audio_file": "ogg\\Dupre.12.ogg",
+          "description": "Dupre says: \"I've been with you since the start of this quest, haven't I?\""
+        },
+        {
+          "text_prefix": "Lord British gave me",
+          "audio_file": "ogg\\Dupre.13.ogg",
+          "description": "Dupre says Lord British ordered him not to leave your side until the quest is complete."
+        },
+        {
+          "text_prefix": "Besides, you know how",
+          "audio_file": "ogg\\Dupre.14.ogg",
+          "description": "Dupre says: \"Besides, you know how I hate to miss a good quest.\""
+        },
+        {
+          "text_prefix": "Please, let's not talk",
+          "audio_file": "ogg\\Dupre.15.ogg",
+          "description": "Dupre says: \"Please, let's not talk about ducks...\""
+        },
+        {
+          "text_prefix": "Yes, enough chit chat.",
+          "audio_file": "ogg\\Dupre.16.ogg",
+          "description": "Dupre says: \"Yes, enough chit chat. Let's go find some action!\""
+        },
+        {
+          "text_prefix": "Ask Iolo about that.",
+          "audio_file": "ogg\\Dupre.17.ogg",
+          "description": "Dupre says: \"Ask Iolo about that.\""
+        }
+      ]
+    },
+    {
+      "npc_port": 192,
+      "npc_name": "Guard",
+      "npc_portrait": 192,
+      "lines": [
+        {
+          "text_prefix": "Hello.",
+          "audio_file": "ogg\\Guard.0.ogg",
+          "description": "Guard introduction: \"Hello. Can I help you with something?\""
+        },
+        {
+          "text_prefix": "Well, what can I",
+          "audio_file": "ogg\\Guard.1.ogg",
+          "description": "Guard says: \"Well, what can I help you with?\""
+        },
+        {
+          "text_prefix": "I'm not allowed to",
+          "audio_file": "ogg\\Guard.2.ogg",
+          "description": "Guard refuses to give out his name."
+        },
+        {
+          "text_prefix": "I am one of",
+          "audio_file": "ogg\\Guard.3.ogg",
+          "description": "Guard says he is one of Lord British's elite guards."
+        },
+        {
+          "text_prefix": "Hail Lord British!",
+          "audio_file": "ogg\\Guard.4.ogg",
+          "description": "Guard hails Lord British, Britannia, and the Avatar."
+        },
+        {
+          "text_prefix": "Lately our ranks have",
+          "audio_file": "ogg\\Guard.5.ogg",
+          "description": "Guard says their ranks have thinned in the war against the gargoyles."
+        },
+        {
+          "text_prefix": "Few of us are",
+          "audio_file": "ogg\\Guard.6.ogg",
+          "description": "Guard says few are left to patrol the cities."
+        },
+        {
+          "text_prefix": "I fear we may",
+          "audio_file": "ogg\\Guard.7.ogg",
+          "description": "Guard says: \"I fear we may lose this war.\""
+        },
+        {
+          "text_prefix": "Not a single shrine",
+          "audio_file": "ogg\\Guard.8.ogg",
+          "description": "Guard says not a single shrine has been liberated."
+        },
+        {
+          "text_prefix": "I have noticed a",
+          "audio_file": "ogg\\Guard.9.ogg",
+          "description": "Guard says he has noticed a resemblance between gargoyles and daemons."
+        },
+        {
+          "text_prefix": "That is our only",
+          "audio_file": "ogg\\Guard.10.ogg",
+          "description": "Guard says patrolling cities is their only job in times of peace."
+        },
+        {
+          "text_prefix": "May we see such",
+          "audio_file": "ogg\\Guard.11.ogg",
+          "description": "Guard says: \"May we see such times again!\""
+        },
+        {
+          "text_prefix": "If that is all,",
+          "audio_file": "ogg\\Guard.12.ogg",
+          "description": "Guard says he will return to his duties."
+        },
+        {
+          "text_prefix": "Perhaps you should ask",
+          "audio_file": "ogg\\Guard.13.ogg",
+          "description": "Guard says: \"Perhaps you should ask somebody else.\""
+        }
+      ]
+    },
+    {
+      "npc_port": 2,
+      "npc_name": "Shamino",
+      "npc_portrait": 2,
+      "lines": [
+        {
+          "text_prefix": "Yes, my friend?",
+          "audio_file": "ogg\\Shamino.0.ogg",
+          "description": "Shamino greeting: \"Yes, my friend?\""
+        },
+        {
+          "text_prefix": "Shamino Salle' Dacil.",
+          "audio_file": "ogg\\Shamino.1.ogg",
+          "description": "Shamino gives his full name."
+        },
+        {
+          "text_prefix": "I help my friends",
+          "audio_file": "ogg\\Shamino.2.ogg",
+          "description": "Shamino says: \"I help my friends when they need it.\""
+        },
+        {
+          "text_prefix": "The rest of my",
+          "audio_file": "ogg\\Shamino.3.ogg",
+          "description": "Shamino says he prefers to spend the rest of his time exploring the woods."
+        },
+        {
+          "text_prefix": "Though we have spent",
+          "audio_file": "ogg\\Shamino.4.ogg",
+          "description": "Shamino says he still considers the Avatar one of his closest friends."
+        },
+        {
+          "text_prefix": "I prefer the Deep",
+          "audio_file": "ogg\\Shamino.5.ogg",
+          "description": "Shamino says: \"I prefer the Deep Forest.\""
+        },
+        {
+          "text_prefix": "Spiritwood isn't as dense,",
+          "audio_file": "ogg\\Shamino.6.ogg",
+          "description": "Shamino says Spiritwood is not as dense and has strange wisps everywhere."
+        },
+        {
+          "text_prefix": "It is home to",
+          "audio_file": "ogg\\Shamino.7.ogg",
+          "description": "Shamino says: \"It is home to me.\""
+        },
+        {
+          "text_prefix": "I love walking in",
+          "audio_file": "ogg\\Shamino.8.ogg",
+          "description": "Shamino says he loves walking in the dark shadows of the trees and studying forest creatures."
+        },
+        {
+          "text_prefix": "A home needs not",
+          "audio_file": "ogg\\Shamino.9.ogg",
+          "description": "Shamino says: \"A home needs not walls to make it so.\""
+        },
+        {
+          "text_prefix": "When folk ask why",
+          "audio_file": "ogg\\Shamino.10.ogg",
+          "description": "Shamino says that when folk ask why he has no walls, he asks where the trees are in theirs."
+        },
+        {
+          "text_prefix": "In many ways they",
+          "audio_file": "ogg\\Shamino.11.ogg",
+          "description": "Shamino says trees are the lifesblood of the realm."
+        },
+        {
+          "text_prefix": "Those that dwell in",
+          "audio_file": "ogg\\Shamino.12.ogg",
+          "description": "Shamino says woodland creatures have lives of their own, more interesting to him than townfolk."
+        },
+        {
+          "text_prefix": "There is much to",
+          "audio_file": "ogg\\Shamino.13.ogg",
+          "description": "Shamino says there is much to be learned from animals, if you will but listen."
+        },
+        {
+          "text_prefix": "I know little of",
+          "audio_file": "ogg\\Shamino.14.ogg",
+          "description": "Shamino says he knows little of wisps' nature, but some mages have investigated them."
+        },
+        {
+          "text_prefix": "Perhaps one of the",
+          "audio_file": "ogg\\Shamino.15.ogg",
+          "description": "Shamino suggests asking one of the members of the council."
+        },
+        {
+          "text_prefix": "I feel that Lord",
+          "audio_file": "ogg\\Shamino.16.ogg",
+          "description": "Shamino says he feels Lord British does not understand the gargoyles' true nature."
+        },
+        {
+          "text_prefix": "I know him better",
+          "audio_file": "ogg\\Shamino.17.ogg",
+          "description": "Shamino says he knows Lord British better than you might think."
+        },
+        {
+          "text_prefix": "I'll follow you wherever",
+          "audio_file": "ogg\\Shamino.18.ogg",
+          "description": "Shamino says he will follow wherever the Avatar chooses to lead."
+        },
+        {
+          "text_prefix": "I feel you need",
+          "audio_file": "ogg\\Shamino.19.ogg",
+          "description": "Shamino says the Avatar needs his guidance through the wild parts of Britannia."
+        },
+        {
+          "text_prefix": "A pleasure.",
+          "audio_file": "ogg\\Shamino.20.ogg",
+          "description": "Shamino says it is a pleasure to assist the Avatar."
+        },
+        {
+          "text_prefix": "Ask Dupre about that.",
+          "audio_file": "ogg\\Shamino.21.ogg",
+          "description": "Shamino says the Avatar should ask Dupre about that."
+        },
+        {
+          "text_prefix": "Now Shamino's going on",
+          "audio_file": "ogg\\Shamino.22.ogg",
+          "description": "If Dupre in party : Dupre says \"Now Shamino's going on about talking to animals... The whole world's going batty!\""
+        }
+      ]
+    },
+    {
+      "npc_port": 5,
+      "npc_name": "Nystul",
+      "npc_portrait": 5,
+      "lines": [
+        {
+          "text_prefix": "Hail to thee",
+          "audio_file": "ogg\\Nystul.0.ogg",
+          "description": "Nystul introduction: \"Hail to thee <Gender>, and well met.\""
+        },
+        {
+          "text_prefix": "'Twas I who learned",
+          "audio_file": "ogg\\Nystul.1.ogg",
+          "description": "Nystul says he learned of the Avatar's peril through his mystic arts."
+        },
+        {
+          "text_prefix": "Iolo, I saw that",
+          "audio_file": "ogg\\Nystul.2.ogg",
+          "description": "Nystul tells Iolo he saw that he found a book."
+        },
+        {
+          "text_prefix": "Might I examine it?",
+          "audio_file": "ogg\\Nystul.3.ogg",
+          "description": "Nystul asks to examine the book."
+        },
+        {
+          "text_prefix": "That is too bad.",
+          "audio_file": "ogg\\Nystul.4.ogg",
+          "description": "Nystul says he had hoped Iolo might take the book to Mariah for translation."
+        },
+        {
+          "text_prefix": "Strange...",
+          "audio_file": "ogg\\Nystul.5.ogg",
+          "description": "Nystul reacts to examining the book."
+        },
+        {
+          "text_prefix": "This has a picture",
+          "audio_file": "ogg\\Nystul.6.ogg",
+          "description": "Nystul describes the book cover showing a gargoyle standing over a slain human."
+        },
+        {
+          "text_prefix": "This is interesting.",
+          "audio_file": "ogg\\Nystul.7.ogg",
+          "description": "Nystul says the book is interesting."
+        },
+        {
+          "text_prefix": "It's written in a",
+          "audio_file": "ogg\\Nystul.8.ogg",
+          "description": "Nystul says the book is written in a language he does not know."
+        },
+        {
+          "text_prefix": "Take it to Mariah",
+          "audio_file": "ogg\\Nystul.9.ogg",
+          "description": "Nystul tells the Avatar to take the book to Mariah at the Lycaeum."
+        },
+        {
+          "text_prefix": "She has studied many",
+          "audio_file": "ogg\\Nystul.10.ogg",
+          "description": "Nystul says Mariah has studied many languages and may decipher the book."
+        },
+        {
+          "text_prefix": "One more thing, Avatar...",
+          "audio_file": "ogg\\Nystul.11.ogg",
+          "description": "Nystul introduces one more topic for the Avatar."
+        },
+        {
+          "text_prefix": "I noticed that thou",
+          "audio_file": "ogg\\Nystul.12.ogg",
+          "description": "Nystul says he noticed the Avatar arrived through a red gateway."
+        },
+        {
+          "text_prefix": "Dost thou have the",
+          "audio_file": "ogg\\Nystul.13.ogg",
+          "description": "Nystul asks whether the Avatar has the stone that opened the gate."
+        },
+        {
+          "text_prefix": "From whence could it",
+          "audio_file": "ogg\\Nystul.14.ogg",
+          "description": "Nystul wonders where the stone could have come from, perhaps the gargoyles."
+        },
+        {
+          "text_prefix": "Best ask Lord British",
+          "audio_file": "ogg\\Nystul.15.ogg",
+          "description": "Nystul tells the Avatar to ask Lord British about the stone."
+        },
+        {
+          "text_prefix": "I believe he has",
+          "audio_file": "ogg\\Nystul.16.ogg",
+          "description": "Nystul says Lord British has some knowledge of such items."
+        },
+        {
+          "text_prefix": "Such items are quite",
+          "audio_file": "ogg\\Nystul.17.ogg",
+          "description": "Nystul says such items are quite rare."
+        },
+        {
+          "text_prefix": "Indeed, the only one",
+          "audio_file": "ogg\\Nystul.18.ogg",
+          "description": "Nystul says the only such item he has seen is the one Lord British possesses."
+        },
+        {
+          "text_prefix": "Hast thou gone to",
+          "audio_file": "ogg\\Nystul.19.ogg",
+          "description": "Nystul asks whether the Avatar has gone to the Lycaeum and shown Mariah the book."
+        },
+        {
+          "text_prefix": "There is naught else",
+          "audio_file": "ogg\\Nystul.20.ogg",
+          "description": "There is naught else I can help thee with at this time."
+        }
+      ]
+    },
+    {
+      "npc_port": 6,
+      "npc_name": "Geoffrey",
+      "npc_portrait": 6,
+      "lines": [
+        {
+          "text_prefix": "Thou hadst best speak",
+          "audio_file": "ogg\\Geoffrey.0.ogg",
+          "description": "Geoffrey says: \"Thou hadst best speak to Lord British before aught else.\""
+        },
+        {
+          "text_prefix": "I'm glad to see",
+          "audio_file": "ogg\\Geoffrey.1.ogg",
+          "description": "Geoffrey says: \"I'm glad to see thee, <Avatar Name>. Perhaps thou canst prevail where others could not.\""
+        },
+        {
+          "text_prefix": "I sent a party",
+          "audio_file": "ogg\\Geoffrey.2.ogg",
+          "description": "Geoffrey says he sent a party of ten to recapture the Shrine of Compassion from the gargoyles."
+        },
+        {
+          "text_prefix": "Alas, they failed dismally.",
+          "audio_file": "ogg\\Geoffrey.3.ogg",
+          "description": "Geoffrey says: \"Alas, they failed dismally.\""
+        },
+        {
+          "text_prefix": "The survivors are recuperating",
+          "audio_file": "ogg\\Geoffrey.4.ogg",
+          "description": "Geoffrey says the survivors are recuperating in the town of Cove."
+        },
+        {
+          "text_prefix": "Thou wouldst do well",
+          "audio_file": "ogg\\Geoffrey.5.ogg",
+          "description": "Geoffrey says: \"Thou wouldst do well to speak with them first.\""
+        },
+        {
+          "text_prefix": "Mayhap they learned something",
+          "audio_file": "ogg\\Geoffrey.6.ogg",
+          "description": "Geoffrey says: \"Mayhap they learned something which might aid thee.\""
+        },
+        {
+          "text_prefix": "I must confess I",
+          "audio_file": "ogg\\Geoffrey.7.ogg",
+          "description": "Geoffrey says: \"I must confess I fear the worst.\""
+        },
+        {
+          "text_prefix": "The gargoyles are such",
+          "audio_file": "ogg\\Geoffrey.8.ogg",
+          "description": "Geoffrey says: \"The gargoyles are such powerful foes, and they are spreading so fast...\""
+        },
+        {
+          "text_prefix": "Perhaps the end of",
+          "audio_file": "ogg\\Geoffrey.9.ogg",
+          "description": "Geoffrey says: \"Perhaps the end of the realm is nigh.\""
+        },
+        {
+          "text_prefix": "Good luck, and my",
+          "audio_file": "ogg\\Geoffrey.10.ogg",
+          "description": "Geoffrey says: \"Good luck, and my prayers go with thee.\""
+        },
+        {
+          "text_prefix": "Best not waste time",
+          "audio_file": "ogg\\Geoffrey.11.ogg",
+          "description": "Geoffrey says: \"Best not waste time talking...\""
+        },
+        {
+          "text_prefix": "Who knows what acts",
+          "audio_file": "ogg\\Geoffrey.12.ogg",
+          "description": "Geoffrey says: \"Who knows what acts of villainy the gargoyles are comitting even as we speak?\""
+        },
+        {
+          "text_prefix": "I hope you've had",
+          "audio_file": "ogg\\Geoffrey.13.ogg",
+          "description": "Geoffrey says: \"I hope you've had a chance to visit Cove and speak with Gertan.\""
+        }
+      ]
+    },
+    {
+      "npc_port": 31,
+      "npc_name": "Maldric",
+      "npc_portrait": 31,
+      "lines": [
+        {
+          "text_prefix": "Excuse me a moment.",
+          "audio_file": "ogg\\Maldric.0.ogg",
+          "description": "Maldric initial greeting: \"Excuse me a moment.\""
+        },
+        {
+          "text_prefix": "Now, what were you",
+          "audio_file": "ogg\\Maldric.1.ogg",
+          "description": "Maldric asks: \"Now, what were you saying?\""
+        },
+        {
+          "text_prefix": "Wait a minute,",
+          "audio_file": "ogg\\Maldric.2.ogg",
+          "description": "Maldric interrupts: \"Wait a minute,\""
+        },
+        {
+          "text_prefix": "I recognize you... You're",
+          "audio_file": "ogg\\Maldric.3.ogg",
+          "description": "Maldric recognizes the Avatar."
+        },
+        {
+          "text_prefix": "From the day I",
+          "audio_file": "ogg\\Maldric.4.ogg",
+          "description": "Female Avatar line: Maldric says he knew she must be the most beautiful woman in Britannia."
+        },
+        {
+          "text_prefix": "You're the greatest hero",
+          "audio_file": "ogg\\Maldric.5.ogg",
+          "description": "Male Avatar line: Maldric says the Avatar is the greatest hero in the land."
+        },
+        {
+          "text_prefix": "Oh, <Gender> Avatar, 'tis",
+          "audio_file": "ogg\\Maldric.5.ogg",
+          "description": "Female subsequent visit greeting."
+        },
+        {
+          "text_prefix": "Hey, my old buddy",
+          "audio_file": "ogg\\Maldric.6.ogg",
+          "description": "Male subsequent visit greeting."
+        },
+        {
+          "text_prefix": "Maldric, I am.",
+          "audio_file": "ogg\\Maldric.7.ogg",
+          "description": "Maldric gives his name and says he was once Maldric the boar hunter."
+        },
+        {
+          "text_prefix": "Aye, I used to",
+          "audio_file": "ogg\\Maldric.8.ogg",
+          "description": "Maldric says he used to live in the forest and hunt wild boars."
+        },
+        {
+            "text_prefix": "But one day I",
+            "audio_file": "ogg\\Maldric.9.ogg",
+            "description": "Maldric tells of how he was hired"
+        },
+        {
+          "text_prefix": "Yes, Lord British himself.",
+          "audio_file": "ogg\\Maldric.10.ogg",
+          "description": "Maldric clarifies he means Lord British himself."
+        },
+        {
+          "text_prefix": "Those were good times.",
+          "audio_file": "ogg\\Maldric.11.ogg",
+          "description": "Maldric says those were good times, but he is happy in the castle."
+        },
+        {
+          "text_prefix": "The secret is in",
+          "audio_file": "ogg\\Maldric.12.ogg",
+          "description": "Maldric says the secret is in the spices."
+        },
+        {
+          "text_prefix": "I'll never tell.",
+          "audio_file": "ogg\\Maldric.13.ogg",
+          "description": "Maldric refuses to reveal the family recipe."
+        },
+        {
+          "text_prefix": "Though for one so",
+          "audio_file": "ogg\\Maldric.14.ogg",
+          "description": "Female Avatar line: Maldric says he is tempted to tell."
+        },
+        {
+          "text_prefix": "I cook for all",
+          "audio_file": "ogg\\Maldric.15.ogg",
+          "description": "Maldric explains that he cooks for those who live in the castle and Lord British's guests."
+        },
+        {
+          "text_prefix": "'Tis sastisfying work, yet",
+          "audio_file": "ogg\\Maldric.16.ogg",
+          "description": "Maldric says the work is satisfying, but at times he wishes he could travel with one such as the Avatar."
+        },
+        {
+          "text_prefix": "Lord British has many",
+          "audio_file": "ogg\\Maldric.17.ogg",
+          "description": "Maldric says Lord British has many friends."
+        },
+        {
+          "text_prefix": "A fancier home than",
+          "audio_file": "ogg\\Maldric.18.ogg",
+          "description": "Maldric describes the castle as a fancier home than any his family lived in."
+        },
+        {
+          "text_prefix": "I wish it were",
+          "audio_file": "ogg\\Maldric.19.ogg",
+          "description": "Female Avatar line: Maldric wishes his old hut were still there so he could invite her to spend an evening by the fireplace."
+        },
+        {
+          "text_prefix": "There's fire enough in",
+          "audio_file": "ogg\\Maldric.20.ogg",
+          "description": "Maldric says: \"There's fire enough in my kitchen, but 'tis no place for romance.\""
+        },
+        {
+          "text_prefix": "I shouldn't even speak",
+          "audio_file": "ogg\\Maldric.21.ogg",
+          "description": "Maldric says: \"I shouldn't even speak of such things.\""
+        },
+        {
+          "text_prefix": "After all, you are",
+          "audio_file": "ogg\\Maldric.22.ogg",
+          "description": "Maldric says: \"After all, you are the Avatar, and I but a lowly cook. Please forgive me.\""
+        },
+        {
+          "text_prefix": "He's a good man.",
+          "audio_file": "ogg\\Maldric.23.ogg",
+          "description": "Maldric says: \"He's a good man. Likes plenty of pepper in his stew.\""
+        },
+        {
+          "text_prefix": "Spice puts some variety",
+          "audio_file": "ogg\\Maldric.24.ogg",
+          "description": "Maldric says: \"Spice puts some variety in life, is what I always say.\""
+        },
+        {
+          "text_prefix": "You're a pretty spicy",
+          "audio_file": "ogg\\Maldric.25.ogg",
+          "description": "Female Avatar line: \"You're a pretty spicy little number yourself!\""
+        },
+        {
+          "text_prefix": "Yes indeed.",
+          "audio_file": "ogg\\Maldric.26.ogg",
+          "description": "Maldric says: \"Yes indeed.\""
+        },
+        {
+          "text_prefix": "I've heard about all",
+          "audio_file": "ogg\\Maldric.27.ogg",
+          "description": "Maldric says: \"I've heard about all of your adventures. I wish I were a warrior too, and not just a cook!\""
+        },
+        {
+          "text_prefix": "I like having a",
+          "audio_file": "ogg\\Maldric.28.ogg",
+          "description": "Maldric says: \"I like having a job where I can make people happy.\""
+        },
+        {
+          "text_prefix": "See you later. And",
+          "audio_file": "ogg\\Maldric.29.ogg",
+          "description": "Maldric says: \"See you later. And next time you dine with his majesty, I'll cook you something special.\""
+        },
+        {
+          "text_prefix": "Funny you should mention",
+          "audio_file": "ogg\\Maldric.30.ogg",
+          "description": "Maldric says: \"Funny you should mention that... It reminds me of my secret recipe for roast boar.\""
+        }
+      ]
+    },
+    {
+      "npc_port": 8,
+      "npc_name": "Sherry",
+      "npc_portrait": 8,
+      "lines": [
+        {
+          "text_prefix": "Squeak, squeak, squeak!",
+          "audio_file": "ogg\\Sherry.0.ogg",
+          "description": "Sherry initial visit squeaking."
+        },
+        {
+          "text_prefix": "Squeak squirk?",
+          "audio_file": "ogg\\Sherry.1.ogg",
+          "description": "Sherry response to squeak."
+        },
+        {
+          "text_prefix": "Squeeeeek!",
+          "audio_file": "ogg\\Sherry.2.ogg",
+          "description": "Sherry response to squi/nitt/fibl."
+        },
+        {
+          "text_prefix": "Eeeek!",
+          "audio_file": "ogg\\Sherry.3.ogg",
+          "description": "Sherry frightened response."
+        },
+        {
+          "text_prefix": "I am Lord British's",
+          "audio_file": "ogg\\Sherry.4.ogg",
+          "description": "Sherry says: \"I am Lord British's friend, Sherry.\""
+        },
+        {
+          "text_prefix": "He reads me bedtime",
+          "audio_file": "ogg\\Sherry.5.ogg",
+          "description": "Sherry says Lord British reads her bedtime stories every night."
+        },
+        {
+          "text_prefix": "He knows the one",
+          "audio_file": "ogg\\Sherry.6.ogg",
+          "description": "Sherry says Lord British knows the one about Hubert the Lion by Heart."
+        },
+        {
+          "text_prefix": "That's my favorite story.",
+          "audio_file": "ogg\\Sherry.7.ogg",
+          "description": "Sherry says: \"That's my favorite story.\""
+        },
+        {
+          "text_prefix": "Pleased to meet you!",
+          "audio_file": "ogg\\Sherry.8.ogg",
+          "description": "Sherry says: \"Pleased to meet you!\""
+        },
+        {
+          "text_prefix": "Give me some cheese",
+          "audio_file": "ogg\\Sherry.9.ogg",
+          "description": "Sherry says: \"Give me some cheese and ask me again.\""
+        },
+        {
+          "text_prefix": "I can slip through",
+          "audio_file": "ogg\\Sherry.10.ogg",
+          "description": "Sherry says: \"I can slip through openings that are too small for you to fit through!\""
+        },
+        {
+          "text_prefix": "The mouse wiggles its",
+          "audio_file": "ogg\\Sherry.11.ogg",
+          "description": "Narration: \"The mouse wiggles its whiskers at you.\""
+        },
+        {
+          "text_prefix": "You're funny!",
+          "audio_file": "ogg\\Sherry.12.ogg",
+          "description": "Sherry says: \"You're funny!\""
+        },
+        {
+          "text_prefix": "Do you have any",
+          "audio_file": "ogg\\Sherry.13.ogg",
+          "description": "Sherry asks: \"Do you have any cheese?\""
+        },
+        {
+          "text_prefix": "Oh, that's too bad.",
+          "audio_file": "ogg\\Sherry.14.ogg",
+          "description": "Sherry says: \"Oh, that's too bad.\""
+        },
+        {
+          "text_prefix": "I don't smell any",
+          "audio_file": "ogg\\Sherry.15.ogg",
+          "description": "Sherry says: \"I don't smell any cheese!\""
+        },
+        {
+          "text_prefix": "Can I have some?",
+          "audio_file": "ogg\\Sherry.16.ogg",
+          "description": "Sherry asks: \"Can I have some?\""
+        },
+        {
+          "text_prefix": "Well, you're no fun.",
+          "audio_file": "ogg\\Sherry.17.ogg",
+          "description": "Sherry says: \"Well, you're no fun.\""
+        },
+        {
+          "text_prefix": "Nitters fiblik.",
+          "audio_file": "ogg\\Sherry.18.ogg",
+          "description": "Sherry goodbye line before she has properly talked."
+        },
+        {
+          "text_prefix": "Come visit me again",
+          "audio_file": "ogg\\Sherry.19.ogg",
+          "description": "Sherry says: \"Come visit me again soon!\""
+        },
+        {
+          "text_prefix": "Thank you very much!",
+          "audio_file": "ogg\\Sherry.20.ogg",
+          "description": "Sherry says: \"Thank you very much!\""
+        },
+        {
+          "text_prefix": "I can help you!",
+          "audio_file": "ogg\\Sherry.21.ogg",
+          "description": "Sherry says: \"I can help you! Do you want me to come with you?\""
+        },
+        {
+          "text_prefix": "Ok.",
+          "audio_file": "ogg\\Sherry.22.ogg",
+          "description": "Sherry says: \"Ok.\""
+        },
+        {
+          "text_prefix": "Great!",
+          "audio_file": "ogg\\Sherry.23.ogg",
+          "description": "Sherry says: \"Great!\""
+        },
+        {
+          "text_prefix": "Boats make me seasick.",
+          "audio_file": "ogg\\Sherry.24.ogg",
+          "description": "Sherry says: \"Boats make me seasick.\""
+        },
+        {
+          "text_prefix": "With that many people",
+          "audio_file": "ogg\\Sherry.25.ogg",
+          "description": "Sherry says: \"With that many people I'd get trampled!\""
+        },
+        {
+          "text_prefix": "Travelling with you is",
+          "audio_file": "ogg\\Sherry.26.ogg",
+          "description": "Sherry says: \"Travelling with you is fun! I hope we find some more cheese soon.\""
+        },
+        {
+          "text_prefix": "Oh, goodbye. Does this",
+          "audio_file": "ogg\\Sherry.27.ogg",
+          "description": "Sherry asks whether the Avatar wants her to go home now."
+        },
+        {
+          "text_prefix": "I'm not leaving until",
+          "audio_file": "ogg\\Sherry.28.ogg",
+          "description": "Sherry says: \"I'm not leaving until we get out of this thing!\""
+        },
+        {
+          "text_prefix": "Okay.",
+          "audio_file": "ogg\\Sherry.29.ogg",
+          "description": "Sherry says: \"Okay.\""
+        },
+        {
+          "text_prefix": "All right. Now I",
+          "audio_file": "ogg\\Sherry.30.ogg",
+          "description": "Sherry says: \"All right. Now I can hear my bedtime stories again!\""
+        },
+        {
+          "text_prefix": "Kerchew!",
+          "audio_file": "ogg\\Sherry.31.ogg",
+          "description": "Sherry sneezes: \"Kerchew!\""
+        },
+        {
+          "text_prefix": "I'll leave my stuff",
+          "audio_file": "ogg\\Sherry.32.ogg",
+          "description": "Sherry says: \"I'll leave my stuff with you in case you need it.\""
+        },
+        {
+          "text_prefix": "I wish people would",
+          "audio_file": "ogg\\Sherry.33.ogg",
+          "description": "Sherry says: \"I wish people would clean up under their beds and cabinets...\""
+        },
+        {
+          "text_prefix": "Dust mice are no",
+          "audio_file": "ogg\\Sherry.34.ogg",
+          "description": "Sherry says: \"Dust mice are no friends of mine!\""
+        },
+        {
+          "text_prefix": "Eeeeek!",
+          "audio_file": "ogg\\Sherry.35.ogg",
+          "description": "Sherry reacts at Dr. Cat's line about feeding her to his pets."
+        },
+        {
+          "text_prefix": "Eeeeek!",
+          "audio_file": "ogg\\Sherry.36.ogg",
+          "description": "Sherry reacts when Phoenix throws a dagger at a little mouse."
+        }
+      ]
+    }
+  ]
+}
+

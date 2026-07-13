@@ -40,7 +40,7 @@ src/common/u6o7.rc
 # Memory/crash dumps too large for GitHub (>100 MB)
 tools/crash/crash-reports/*.DMP
 tools/crash/crash-reports/*.dmp# Kubernetes secrets — never commit actual credentials
-k8s/aks/secrets.yaml
+k8s/aks/storage/secrets.yaml
 
-/assets/game_files/client/
+/assets/game_files/client/userinfo.txt
 /assets/game_files/host/

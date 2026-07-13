@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: azure-saves-pvc-cheap
+  namespace: ultima-dev
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile-csi-cheap
+  volumeName: azure-saves-pv   # static binding — prevents dynamic provisioning fallback
+  resources:
+    requests:
+      storage: 100Gi
+
