@@ -511,6 +511,7 @@
                     free(playerlist[tpl]);
                     playerlist[tpl] = NULL;
                     inbritanniacheck();
+                    LOG_host_report();
 
                     goto idle_skip;
                 }

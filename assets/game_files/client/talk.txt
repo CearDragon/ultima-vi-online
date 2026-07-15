@@ -1,38 +1,5 @@
 P187/Welcome to Ultima VI Online! Join our Discord today!
-P205/You see an experienced adventurer.
-P31/You see a bare chested, muscular man, his body gleaming with sweat.
-P205/"How can I help thee milord?"
-P31/"Excuse me a moment." He pulls a napkin from his belt and mops at his brow. "Now, what were you saying?"
-P31/"Hey, my old buddy Cear! Good to see you again."
-P31/"I @cook for all those who live in the @castle, and for any @guests who dine with Lord British as well."
-P31/"'Tis sastisfying work, yet at times I wish I could @travel with one such as you..."
-P31/"Maldric, I am."
-P31/"Once Maldric the @boar hunter, now Maldric the cook."
-P31/"I like having a job where I can make people happy."
-P31/"A fancier home than any of my family ever lived in. Yet I still miss my simple hut in the forest."
-P31/"Yes, Lord @British himself."
-P31/"He's a good man. Likes plenty of @pepper in his stew."
-P31/"Lord British has many friends."
-P31/"Yes indeed."
-P31/"Aye, I used to live in the @forest and hunt wild boars."
-P31/"But one day I presented a @roast boar as a gift to his @majesty, and he liked it so much he hired me as his @cook."
-P6/"I am Geoffrey, as thou knowest well."
-P5/You see a concerned looking mage.
-P10/You see a lively bard with laughter in his eyes.
-P5/"Hail to thee milord, and well met."
-P10/"Welcome, milord! I am Sir Kenneth, and I'd gladly play a @song for thee."
-P5/"'Twas I who learned of thy peril through my mystic arts, so that aid might be sent unto thee."
-P5/"I saw in the battle that Iolo didst find a @book."
-P5/"I should like to see it."
-P10/"@Kenneth's my name - don't wear it out."
-P8/"I am Lord @British's friend, @Sherry."
-P8/"Pleased to meet you!"
-P8/"He reads me bedtime @stories every night."
-P8/"He knows the one about @Hubert the Lion by Heart!"
-P8/"That's my favorite story."
-P8/"I can slip through openings that are too small for you to fit through!"
-P8/"Kerchew!"
-P8/The mouse wiggles its whiskers at you.
-P8/"Do you have any cheese?"
-P8/"Oh, that's too bad."
-P8/"Give me some @cheese and ask me again."
+P29/You see a sharply dressed, very voluptuous woman.
+P29/"Oh, you've come back to visit me again!"
+P29/"It's Terri..."
+P29/"Don't you think that would be a good name for an Avatar's wife?"

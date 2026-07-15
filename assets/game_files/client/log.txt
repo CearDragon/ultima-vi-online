@@ -42,13 +42,15 @@
 000:00:00:00 Setting up low level MIDI driver
 000:00:00:00 Beginning main loop!
 000:00:00:00 [VO] Loaded NPC port 9 with 46 line(s)
-000:00:00:00 [VO] Loaded NPC port 4 with 49 line(s)
+000:00:00:00 [VO] Loaded NPC port 4 with 62 line(s)
 000:00:00:00 [VO] Loaded NPC port 1 with 18 line(s)
 000:00:00:00 [VO] Loaded NPC port 192 with 14 line(s)
 000:00:00:00 [VO] Loaded NPC port 2 with 23 line(s)
 000:00:00:00 [VO] Loaded NPC port 5 with 21 line(s)
 000:00:00:00 [VO] Loaded NPC port 6 with 14 line(s)
 000:00:00:00 [VO] Loaded NPC port 31 with 32 line(s)
-000:00:00:00 [VO] Loaded NPC port 8 with 24 line(s)
-000:00:00:00 [VO] Loaded voiceover map: 9 NPC(s)
-000:00:00:16 MDD: map data sync complete
+000:00:00:00 [VO] Loaded NPC port 8 with 37 line(s)
+000:00:00:00 [VO] Loaded NPC port 3 with 44 line(s)
+000:00:00:00 [VO] Loaded NPC port 29 with 36 line(s)
+000:00:00:00 [VO] Loaded voiceover map: 11 NPC(s)
+000:00:00:13 MDD: map data sync complete

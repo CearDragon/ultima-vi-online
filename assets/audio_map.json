@@ -486,6 +486,66 @@
           "text_prefix": "Bring the book back",
           "audio_file": "ogg\\LordBritish.57.ogg",
           "description": "Lord British tells the Avatar to bring the book back later, when less burdened."
+        },
+        {
+          "text_prefix": "May fortune favor thee.",
+          "audio_file": "ogg\\LordBritish.58.ogg",
+          "description": "Lord British farewell: \"May fortune favor thee.\""
+        },
+        {
+          "text_prefix": "I cannot help thee",
+          "audio_file": "ogg\\LordBritish.59.ogg",
+          "description": "Lord British says: \"I cannot help thee with that.\""
+        },
+        {
+          "text_prefix": "Nay, 'tis not the",
+          "audio_file": "ogg\\LordBritish.60.ogg",
+          "description": "Lord British incorrect-answer response: \"Nay, 'tis not the correct answer. Consult thy Compendium.\""
+        },
+        {
+          "text_prefix": "My favorite story is",
+          "audio_file": "ogg\\LordBritish.61.ogg",
+          "description": "Lord British says: \"My favorite story is 'Hubert the Lion.'\""
+        },
+        {
+          "text_prefix": "What creature art wisps",
+          "audio_file": "ogg\\LordBritish.62.ogg",
+          "description": "Copy-protection question: \"What creature art wisps oft mistaken for?\""
+        },
+        {
+          "text_prefix": "How canst one fend",
+          "audio_file": "ogg\\LordBritish.63.ogg",
+          "description": "Copy-protection question: \"How canst one fend off rotworms?\""
+        },
+        {
+          "text_prefix": "Thou hath found a",
+          "audio_file": "ogg\\LordBritish.64.ogg",
+          "description": "Lord British says: \"Thou hath found a copy!\""
+        },
+        {
+          "text_prefix": "Long hath I anticipated",
+          "audio_file": "ogg\\LordBritish.65.ogg",
+          "description": "Lord British says: \"Long hath I anticipated this moment...\""
+        },
+        {
+          "text_prefix": "Not since my childhood",
+          "audio_file": "ogg\\LordBritish.66.ogg",
+          "description": "Lord British says: \"Not since my childhood have I read this wondrous story.\""
+        },
+        {
+          "text_prefix": "Here is your reward.",
+          "audio_file": "ogg\\LordBritish.67.ogg",
+          "description": "Lord British says: \"Here is your reward.\""
+        },
+        {
+          "text_prefix": "Who told thee of",
+          "audio_file": "ogg\\LordBritish.68.ogg",
+          "description": "Lord British asks: \"Who told thee of that nickname!?\""
+        },
+        {
+          "text_prefix": "Well, I'd rather thou",
+          "audio_file": "ogg\\LordBritish.69.ogg",
+          "description": "Lord British says: \"Well, I'd rather thou didst not call me that.\""
         }
       ]
     },

@@ -581,6 +581,7 @@
             }
         }
         inbritanniacheck();
+        LOG_host_report();
         txtset(t, "?");
         t->d2[0] = 8;
         txtadd(t, inbritannia);

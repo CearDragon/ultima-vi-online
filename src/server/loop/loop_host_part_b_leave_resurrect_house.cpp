@@ -887,29 +887,6 @@ if
 
     u6opi = 41;
 
-    //host log report
-    f = 60.0f;
-    if (int((ett / f)) != int((ett / f) - (et / f))) {
-        //every minute
-        txtset(t, "[In_Britania:");
-        txtadd(t, inbritannia);
-        txtadd(t, "]");
-        txtnumint(t2, framerate);
-        txtadd(t, "[Framerate:");
-        txtadd(t, t2);
-        txtadd(t, "]");
-        txtnumint(t2, vlnkb_last);
-        txtadd(t, "[vlnkb_last(MAX=65536):");
-        txtadd(t, t2);
-        txtadd(t, "]");
-        txtnumint(t2, objb_last);
-        txtadd(t, "[objb_last(MAX=524228):");
-        txtadd(t, t2);
-        txtadd(t, "]");
-        LOGadd(t);
-    }
-
-
     //if (ett>=86400){
 
     /*

@@ -486,6 +486,71 @@
           "text_prefix": "Bring the book back",
           "audio_file": "ogg\\LordBritish.57.ogg",
           "description": "Lord British tells the Avatar to bring the book back later, when less burdened."
+        },
+        {
+          "text_prefix": "May fortune favor thee.",
+          "audio_file": "ogg\\LordBritish.58.ogg",
+          "description": "Lord British farewell: \"May fortune favor thee.\""
+        },
+        {
+          "text_prefix": "I cannot help thee",
+          "audio_file": "ogg\\LordBritish.59.ogg",
+          "description": "Lord British says: \"I cannot help thee with that.\""
+        },
+        {
+          "text_prefix": "Well, if thou dost",
+          "audio_file": "ogg\\LordBritish.60.ogg",
+          "description": "Lord British asks the Avatar to bring him The Wizard of Oz if it is found during the Avatar's travels."
+        },
+        {
+          "text_prefix": "I hath promised a",
+          "audio_file": "ogg\\LordBritish.61.ogg",
+          "description": "Lord British says he has promised a great reward to whoever brings him a copy."
+        },
+        {
+          "text_prefix": "Thou art carrying too",
+          "audio_file": "ogg\\LordBritish.62.ogg",
+          "description": "Lord British says the Avatar is carrying too much to receive the reward properly."
+        },
+        {
+          "text_prefix": "Bring the book back",
+          "audio_file": "ogg\\LordBritish.63.ogg",
+          "description": "Lord British tells the Avatar to bring the book back later when less burdened."
+        },
+        {
+          "text_prefix": "Thou hath found a",
+          "audio_file": "ogg\\LordBritish.64.ogg",
+          "description": "Lord British says: \"Thou hath found a copy!\""
+        },
+        {
+          "text_prefix": "Long hath I anticipated",
+          "audio_file": "ogg\\LordBritish.65.ogg",
+          "description": "Lord British says: \"Long hath I anticipated this moment...\""
+        },
+        {
+          "text_prefix": "Not since my childhood",
+          "audio_file": "ogg\\LordBritish.66.ogg",
+          "description": "Lord British says: \"Not since my childhood have I read this wondrous story.\""
+        },
+        {
+          "text_prefix": "Here is your reward.",
+          "audio_file": "ogg\\LordBritish.67.ogg",
+          "description": "Lord British says: \"Here is your reward.\""
+        },
+        {
+          "text_prefix": "Who told thee of",
+          "audio_file": "ogg\\LordBritish.68.ogg",
+          "description": "Lord British asks: \"Who told thee of that nickname!?\""
+        },
+        {
+          "text_prefix": "Well, I'd rather thou",
+          "audio_file": "ogg\\LordBritish.69.ogg",
+          "description": "Lord British says: \"Well, I'd rather thou didst not call me that.\""
+        },
+        {
+          "text_prefix": "Do thou ask Tholden.",
+          "audio_file": "ogg\\LordBritish.70.ogg",
+          "description": "Lord British directs the Avatar to ask Tholden about Compassion."
         }
       ]
     },
@@ -1330,6 +1395,420 @@
           "text_prefix": "Eeeeek!",
           "audio_file": "ogg\\Sherry.36.ogg",
           "description": "Sherry reacts when Phoenix throws a dagger at a little mouse."
+        }
+      ]
+    },
+    {
+      "npc_port": 3,
+      "npc_name": "Iolo",
+      "npc_portrait": 3,
+      "lines": [
+        {
+          "text_prefix": "She's had more time",
+          "audio_file": "ogg\\Iolo.13.ogg",
+          "description": "She's had more time to develop her musical talents than I all these years."
+        },
+        {
+          "text_prefix": "But after this quest",
+          "audio_file": "ogg\\Iolo.14.ogg",
+          "description": "But after this quest, I hope to join her in Minoc and enter the Artisan's Guild."
+        },
+        {
+          "text_prefix": "There always seems to",
+          "audio_file": "ogg\\Iolo.15.ogg",
+          "description": "There always seems to be a quest when you come to visit us, doesn't there?"
+        },
+        {
+          "text_prefix": "Iolo's the only name",
+          "audio_file": "ogg\\Iolo.1.ogg",
+          "description": "Iolo's the only name I remember having."
+        },
+        {
+          "text_prefix": "Yes it's always been",
+          "audio_file": "ogg\\Iolo.11.ogg",
+          "description": "Yes, it's always been a hobby of mine."
+        },
+        {
+          "text_prefix": "Sometime you should just",
+          "audio_file": "ogg\\Iolo.16.ogg",
+          "description": "Sometime you should just drop by for tea."
+        },
+        {
+          "text_prefix": "All right make it",
+          "audio_file": "ogg\\Iolo.17.ogg",
+          "description": "All right, make it Frazier's Folly, then."
+        },
+        {
+          "text_prefix": "A drink worthy enough",
+          "audio_file": "ogg\\Iolo.18.ogg",
+          "description": "A drink worthy enough to greet an old friend."
+        },
+        {
+          "text_prefix": "Not as big as",
+          "audio_file": "ogg\\Iolo.19.ogg",
+          "description": "Not as big as Britain, but it's a peaceful town."
+        },
+        {
+          "text_prefix": "I've been a crossbow",
+          "audio_file": "ogg\\Iolo.6.ogg",
+          "description": "I've been a crossbow maker for so long I've gotten weary of it."
+        },
+        {
+          "text_prefix": "Well do you need",
+          "audio_file": "ogg\\Iolo.0.ogg",
+          "description": "Well, do you need help with something, or maybe you've got time for a story, eh?"
+        },
+        {
+          "text_prefix": "If you want me",
+          "audio_file": "ogg\\Iolo.2.ogg",
+          "description": "If you want me to gather all our gold together so you can carry it, just say so."
+        },
+        {
+          "text_prefix": "Or I could split",
+          "audio_file": "ogg\\Iolo.3.ogg",
+          "description": "Or I could split it up evenly, if you prefer."
+        },
+        {
+          "text_prefix": "My hut is in",
+          "audio_file": "ogg\\Iolo.4.ogg",
+          "description": "My hut is in the deep forest south of Yew."
+        },
+        {
+          "text_prefix": "My horse Smith lives",
+          "audio_file": "ogg\\Iolo.5.ogg",
+          "description": "My horse Smith lives there."
+        },
+        {
+          "text_prefix": "Hopefully now that my",
+          "audio_file": "ogg\\Iolo.7.ogg",
+          "description": "Hopefully, now that my apprentice has taken over the shop, I'll be able to spend more time as a bard."
+        },
+        {
+          "text_prefix": "My shop still sells",
+          "audio_file": "ogg\\Iolo.8.ogg",
+          "description": "My shop still sells the finest crossbows in the land."
+        },
+        {
+          "text_prefix": "I've done a lot",
+          "audio_file": "ogg\\Iolo.9.ogg",
+          "description": "I've done a lot over the years to refine the design, and I trained my apprentice well."
+        },
+        {
+          "text_prefix": "I'm sure she'll carry",
+          "audio_file": "ogg\\Iolo.10.ogg",
+          "description": "I'm sure she'll carry on the tradition in fine fashion."
+        },
+        {
+          "text_prefix": "Have you heard the",
+          "audio_file": "ogg\\Iolo.12.ogg",
+          "description": "Have you heard the piece \"Stones\" that I composed some years ago?"
+        },
+        {
+          "text_prefix": "It's one of my",
+          "audio_file": "ogg\\Iolo.35.ogg",
+          "description": "It's one of my favorites."
+        },
+        {
+          "text_prefix": "That's too heavy for",
+          "audio_file": "ogg\\Iolo.36.ogg",
+          "description": "That's too heavy for you, but I'll let you have it anyway."
+        },
+        {
+          "text_prefix": "None of us are",
+          "audio_file": "ogg\\Iolo.37.ogg",
+          "description": "None of us are carrying any gold."
+        },
+        {
+          "text_prefix": "This is all you",
+          "audio_file": "ogg\\Iolo.38.ogg",
+          "description": "This is all you can carry right now."
+        },
+        {
+          "text_prefix": "You're carrying enough already",
+          "audio_file": "ogg\\Iolo.39.ogg",
+          "description": "You're carrying enough already, I think."
+        },
+        {
+          "text_prefix": "But we have no",
+          "audio_file": "ogg\\Iolo.40.ogg",
+          "description": "But we have no gold!"
+        },
+        {
+          "text_prefix": "We don't have enough",
+          "audio_file": "ogg\\Iolo.41.ogg",
+          "description": "We don't have enough gold to bother with."
+        },
+        {
+          "text_prefix": "But maybe I shouldn't",
+          "audio_file": "ogg\\Iolo.42.ogg",
+          "description": "But maybe I shouldn't tell you about that. After all, I did promise."
+        },
+        {
+          "text_prefix": "Iolo you promised never",
+          "audio_file": "ogg\\Iolo.43.ogg",
+          "description": "Iolo, you promised never to tell anyone about that!"
+        },
+        {
+          "text_prefix": "Though there is still",
+          "audio_file": "ogg\\Iolo.20.ogg",
+          "description": "Though there is still need for the instruments of war, as I grow in years I would now take up those of peace."
+        },
+        {
+          "text_prefix": "You know where Mr",
+          "audio_file": "ogg\\Iolo.21.ogg",
+          "description": "You know where Mr. Nose hangs out?"
+        },
+        {
+          "text_prefix": "Remember he doesn't like",
+          "audio_file": "ogg\\Iolo.22.ogg",
+          "description": "Remember, he doesn't like people to call him that."
+        },
+        {
+          "text_prefix": "I've been with you",
+          "audio_file": "ogg\\Iolo.23.ogg",
+          "description": "I've been with you since we saved you from those gargoyles, haven't I?"
+        },
+        {
+          "text_prefix": "They're pretty ugly looking",
+          "audio_file": "ogg\\Iolo.24.ogg",
+          "description": "They're pretty ugly-looking, if you ask me."
+        },
+        {
+          "text_prefix": "His nibs the king",
+          "audio_file": "ogg\\Iolo.25.ogg",
+          "description": "His nibs, the king, told me I should stay with you constantly."
+        },
+        {
+          "text_prefix": "I'll make an exception",
+          "audio_file": "ogg\\Iolo.26.ogg",
+          "description": "I'll make an exception when you have to relieve yourself, of course."
+        },
+        {
+          "text_prefix": "My favorite one is",
+          "audio_file": "ogg\\Iolo.27.ogg",
+          "description": "My favorite one is the time when I had to wake Dupre up for a tournament."
+        },
+        {
+          "text_prefix": "Yes you're right I'm",
+          "audio_file": "ogg\\Iolo.28.ogg",
+          "description": "Yes, you're right. I'm sorry."
+        },
+        {
+          "text_prefix": "Ask me later when",
+          "audio_file": "ogg\\Iolo.29.ogg",
+          "description": "Ask me later when he's not around."
+        },
+        {
+          "text_prefix": "I've still got to",
+          "audio_file": "ogg\\Iolo.30.ogg",
+          "description": "I've still got to tell you that story about Dupre sometime."
+        },
+        {
+          "text_prefix": "Ask Shamino about that",
+          "audio_file": "ogg\\Iolo.31.ogg",
+          "description": "Ask Shamino about that."
+        },
+        {
+          "text_prefix": "Ask Shamino about that",
+          "audio_file": "ogg\\Iolo.32.ogg",
+          "description": "Ask Shamino about that."
+        },
+        {
+          "text_prefix": "Ask Shamino about that",
+          "audio_file": "ogg\\Iolo.33.ogg",
+          "description": "Ask Shamino about that."
+        },
+        {
+          "text_prefix": "Oh you should get",
+          "audio_file": "ogg\\Iolo.34.ogg",
+          "description": "Oh, you should get my wife Gwenno to teach it to you sometime."
+        }
+      ]
+    },
+    {
+      "npc_port": 29,
+      "npc_name": "Terri",
+      "npc_portrait": 29,
+      "lines": [
+        {
+          "text_prefix": "Titain will never believe",
+          "audio_file": "ogg\\Terri.7.ogg",
+          "description": "Titain will never believe it when I tell her I got to meet the Avatar in person!"
+        },
+        {
+          "text_prefix": "It's so nice of",
+          "audio_file": "ogg\\Terri.6.ogg",
+          "description": "It's so nice of you to come by and talk to me!"
+        },
+        {
+          "text_prefix": "My father ran the",
+          "audio_file": "ogg\\Terri.5.ogg",
+          "description": "My father ran the mint before me, but I get lonely here sometimes."
+        },
+        {
+          "text_prefix": "Copper pence silver pieces",
+          "audio_file": "ogg\\Terri.4.ogg",
+          "description": "Copper pence, silver pieces, and gold crowns, they're all made right here."
+        },
+        {
+          "text_prefix": "Anyway I just wanted",
+          "audio_file": "ogg\\Terri.35.ogg",
+          "description": "Anyway, I just wanted to tell you that I always hoped someday I'd meet a man like you."
+        },
+        {
+          "text_prefix": "Oh I'm sorry I",
+          "audio_file": "ogg\\Terri.34.ogg",
+          "description": "Oh, I'm sorry, I wasn't listening. I was just noticing how strong and handsome you are."
+        },
+        {
+          "text_prefix": "It really was delightful",
+          "audio_file": "ogg\\Terri.33.ogg",
+          "description": "It really was delightful talking to you."
+        },
+        {
+          "text_prefix": "It's Terri Don't you",
+          "audio_file": "ogg\\Terri.32.ogg",
+          "description": "It's Terri. Don't you think that would be a good name for an Avatar's wife?"
+        },
+        {
+          "text_prefix": "Anyway I just wanted",
+          "audio_file": "ogg\\Terri.31.ogg",
+          "description": "Anyway, I just wanted to tell you that I always wanted to grow up to be just like you."
+        },
+        {
+          "text_prefix": "You probably wouldn't remember",
+          "audio_file": "ogg\\Terri.30.ogg",
+          "description": "You probably wouldn't remember her, but she was at the big celebration right after you recovered the Codex."
+        },
+        {
+          "text_prefix": "By royal decree I",
+          "audio_file": "ogg\\Terri.3.ogg",
+          "description": "By royal decree, I am the only one allowed to mint the official coinage of the realm."
+        },
+        {
+          "text_prefix": "My mother used to",
+          "audio_file": "ogg\\Terri.29.ogg",
+          "description": "My mother used to tell me stories about you when I was a girl."
+        },
+        {
+          "text_prefix": "Say aren't you the",
+          "audio_file": "ogg\\Terri.28.ogg",
+          "description": "Say, aren't you the Avatar? Yes, I recognize you from your portrait."
+        },
+        {
+          "text_prefix": "Hello my name's Terri",
+          "audio_file": "ogg\\Terri.27.ogg",
+          "description": "Hello, my name's Terri. I run the mint."
+        },
+        {
+          "text_prefix": "But since you're the",
+          "audio_file": "ogg\\Terri.26.ogg",
+          "description": "But since you're the Avatar, I'll give you a full hundred crowns for every stone's weight of gold you have."
+        },
+        {
+          "text_prefix": "Normally there's a ten",
+          "audio_file": "ogg\\Terri.25.ogg",
+          "description": "Normally, there's a ten percent tax on the exchange."
+        },
+        {
+          "text_prefix": "We must be mistaken",
+          "audio_file": "ogg\\Terri.24.ogg",
+          "description": "We must be mistaken. But let me know if you come across any gold nuggets later."
+        },
+        {
+          "text_prefix": "Well if you do",
+          "audio_file": "ogg\\Terri.23.ogg",
+          "description": "Well, if you do later, you know where to find me."
+        },
+        {
+          "text_prefix": "Do you have any",
+          "audio_file": "ogg\\Terri.22.ogg",
+          "description": "Do you have any gold nuggets you'd like to trade in for crowns?"
+        },
+        {
+          "text_prefix": "I get most of",
+          "audio_file": "ogg\\Terri.21.ogg",
+          "description": "I get most of my gold from people who bring in nuggets to exchange them for coins."
+        },
+        {
+          "text_prefix": "Oh I'm sorry I",
+          "audio_file": "ogg\\Terri.20.ogg",
+          "description": "Oh, I'm sorry. I wasn't listening. I was just thinking how nice it must be to be as beautiful as you."
+        },
+        {
+          "text_prefix": "It's Terri but I",
+          "audio_file": "ogg\\Terri.2.ogg",
+          "description": "It's Terri, but I wish I had been named after you."
+        },
+        {
+          "text_prefix": "And maybe if you",
+          "audio_file": "ogg\\Terri.19.ogg",
+          "description": "And maybe if you have time for it, I could show you more than a few silly coins."
+        },
+        {
+          "text_prefix": "I know you're very",
+          "audio_file": "ogg\\Terri.18.ogg",
+          "description": "I know you're very busy saving Britannia and all that, but I hope you'll come and visit me again."
+        },
+        {
+          "text_prefix": "You should visit there",
+          "audio_file": "ogg\\Terri.17.ogg",
+          "description": "You should visit there sometime. But please stay and talk to me a bit longer first!"
+        },
+        {
+          "text_prefix": "She's a good friend",
+          "audio_file": "ogg\\Terri.16.ogg",
+          "description": "She's a good friend of mine. She runs the museum."
+        },
+        {
+          "text_prefix": "My mother told me",
+          "audio_file": "ogg\\Terri.15.ogg",
+          "description": "My mother told me all about it."
+        },
+        {
+          "text_prefix": "Of course we have",
+          "audio_file": "ogg\\Terri.14.ogg",
+          "description": "Of course, we have you to thank for bringing us the Codex and saving Lord British."
+        },
+        {
+          "text_prefix": "Britannia has been so",
+          "audio_file": "ogg\\Terri.13.ogg",
+          "description": "Britannia has been so prosperous lately that there's been a lot of demand for gold coinage."
+        },
+        {
+          "text_prefix": "Here let me show",
+          "audio_file": "ogg\\Terri.12.ogg",
+          "description": "Here, let me show you."
+        },
+        {
+          "text_prefix": "Of course I'm sure",
+          "audio_file": "ogg\\Terri.11.ogg",
+          "description": "Of course, I'm sure you only carry gold crowns with you, being as important as you are!"
+        },
+        {
+          "text_prefix": "May she rest in",
+          "audio_file": "ogg\\Terri.10.ogg",
+          "description": "May she rest in peace."
+        },
+        {
+          "text_prefix": "Oh you've come back",
+          "audio_file": "ogg\\Terri.1.ogg",
+          "description": "Oh, you've come back to visit me again!"
+        },
+        {
+          "text_prefix": "I'm eating right now",
+          "audio_file": "ogg\\Terri.0.ogg",
+          "description": "I'm eating right now. Come see me at the mint sometime and we can chat."
+        },
+        {
+          "text_prefix": "May he rest in",
+          "audio_file": "ogg\\Terri.9.ogg",
+          "description": "May he rest in peace."
+        },
+        {
+          "text_prefix": "You must be the",
+          "audio_file": "ogg\\Terri.8.ogg",
+          "description": "You must be the bravest person I've ever met. I can't believe it's really you!"
         }
       ]
     }
