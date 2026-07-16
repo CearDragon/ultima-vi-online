@@ -76,28 +76,36 @@ bool startsWith(const char* text, const char* prefix) {
     return strncmp(text, prefix, strlen(prefix)) == 0;
 }
 
+/**
+ * Checks if the given text starts with the specified prefix, ignoring case,
+ * punctuation, and whitespace ("words only" comparison).
+ *
+ * @param text The string to search in.
+ * @param prefix The prefix to search for.
+ * @return true if text starts with prefix (ignoring case/punct/space), false otherwise.
+ */
 bool startsWithCaseInsensitive(const char* text, const char* prefix) {
     if (!text || !prefix) return false;
 
-    // Skip leading double quotes, whitespace and @ in the text
-    while (*text && (*text == ' ' || *text == '\"' || *text == '@' || *text == '\t' || *text == '\r' || *text == '\n')) {
+    // Skip leading punctuation, whitespace and @ in the text
+    while (*text && (isspace((unsigned char)*text) || ispunct((unsigned char)*text) || *text == '@')) {
         text++;
     }
 
     // Also skip them in prefix to be safe and consistent
-    while (*prefix && (*prefix == ' ' || *prefix == '\"' || *prefix == '@' || *prefix == '\t' || *prefix == '\r' || *prefix == '\n')) {
+    while (*prefix && (isspace((unsigned char)*prefix) || ispunct((unsigned char)*prefix) || *prefix == '@')) {
         prefix++;
     }
 
     if (!*prefix) return false;
 
-    // Compare strings, ignoring '@' in both
+    // Compare strings, ignoring punctuation, whitespace and '@' in both
     while (*prefix) {
-        if (*prefix == '@') {
+        if (ispunct((unsigned char)*prefix) || isspace((unsigned char)*prefix) || *prefix == '@') {
             prefix++;
             continue;
         }
-        if (*text == '@') {
+        if (ispunct((unsigned char)*text) || isspace((unsigned char)*text) || *text == '@') {
             text++;
             continue;
         }
