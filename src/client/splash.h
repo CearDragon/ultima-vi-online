@@ -1,4 +1,4 @@
-ï»¿// splash.h â€” minimal pre-game splash screen for the Ultima VI Online client.
+// splash.h — minimal pre-game splash screen for the Ultima VI Online client.
 //
 // Shows a borderless, centered, no-taskbar popup window with a PNG image (or
 // a graceful text-only fallback) for at least the requested duration in
@@ -13,7 +13,7 @@
 //
 // Designed so that on failure (image missing, GDI+ init failed, window
 // creation failed) the function still sleeps for the requested duration and
-// returns cleanly â€” the game must always start.
+// returns cleanly — the game must always start.
 #pragma once
 
 #include <windows.h>

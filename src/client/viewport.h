@@ -1,4 +1,4 @@
-ï»¿#ifndef VIEWPORT_H
+#ifndef VIEWPORT_H
 #define VIEWPORT_H
 
 // RW-P4.2: Dynamic 2D Array wrapper mimicking raw 2D arrays but with dynamic striding.
@@ -55,7 +55,7 @@ struct Dynamic2DArray {
 
 namespace u6o {
     namespace client {
-        // Lower clamp on the active back-buffer size â€” the legacy 1024x768
+        // Lower clamp on the active back-buffer size — the legacy 1024x768
         // dimensions that every renderer hot path was originally written
         // against. The active dims never go below this; if the client window
         // is smaller, blit_letterbox handles it via downscaling/letterbox.
@@ -93,7 +93,7 @@ namespace u6o {
         // `offset_y >= 768`. Those thresholds also acted as the per-frame
         // snap-back guard for the always-on inventory panels (see
         // loop_client.cpp:10227), which made it impossible to drag a panel
-        // past x=1024 / y=768 â€” every frame the guard would interpret the
+        // past x=1024 / y=768 — every frame the guard would interpret the
         // dragged position as the hide-sentinel and subtract 2048.
         //
         // With the always-resizable client the back buffer can grow up to
@@ -111,7 +111,7 @@ namespace u6o {
         //   Same on the Y axis.
         //
         // At the legacy 1024x768 client size the in-game behavior is
-        // unchanged â€” `offset_x += kPanelHideDeltaX` still pushes a panel
+        // unchanged — `offset_x += kPanelHideDeltaX` still pushes a panel
         // well off the back-buffer's right edge, and the per-frame guard
         // only fires for panels that were actually hidden via the sentinel
         // rather than dragged by the user.
@@ -126,7 +126,7 @@ namespace u6o {
         //
         // The server-side per-player object buffer `sobj_bufsize[96][72]` (see
         // data_both.h) is fixed at 96x72 tiles, positioned with the player
-        // near (32, 24) inside the buffer (see loop_client.inc:3950 â€” the
+        // near (32, 24) inside the buffer (see loop_client.inc:3950 — the
         // buffer is reset to `tpx-32, tpy-24` whenever the player drifts past
         // its extents). The world-render loops in loop_client.cpp iterate
         // `x in [0..viewTilesX()+1]` and read `tplayer->sobj_bufsize[bufx][bufy]`
@@ -192,8 +192,8 @@ namespace u6o {
         bool recreateBackbuffers(int newW, int newH);
 
         // Allocate / free the heap-resident lighting buffers (RW-P2.1).
-        // `lighting_alloc` is idempotent: same dims â†’ reuse, different dims
-        // â†’ free and re-malloc. Both implemented in viewport.cpp.
+        // `lighting_alloc` is idempotent: same dims ? reuse, different dims
+        // ? free and re-malloc. Both implemented in viewport.cpp.
         bool lighting_alloc(int w, int h);
         void lighting_free();
 

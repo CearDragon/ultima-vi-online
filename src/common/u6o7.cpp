@@ -16,6 +16,7 @@
 #include <dbghelp.h>
 #pragma comment(lib, "dbghelp.lib")
 #include "dmusic.h"
+#include "mp3_player.h"
 #endif
 #include "myfile.h"
 #ifdef _WIN32
@@ -194,29 +195,127 @@ LONG WINAPI MyUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo
 #include <csignal>
 #include <execinfo.h> // backtrace (glibc); link with -rdynamic for symbol names
 #include <ctime>
+#include <fcntl.h>
+#include <unistd.h>
 
-// Best-effort crash dump to a timestamped file + stderr, then re-raise the
-// default handler. Not strictly async-signal-safe, but mirrors the Win32
-// minidump filter's best-effort intent — the process is already dying.
+// Write a plain decimal integer to fd using only async-signal-safe calls.
+static void u6o_write_int_fd(int fd, int v) {
+    char buf[16];
+    int i = sizeof(buf);
+    bool neg = (v < 0);
+    unsigned uv = neg ? (unsigned)(-(long long)v) : (unsigned)v;
+    buf[--i] = '\n';
+    do { buf[--i] = '0' + (uv % 10); uv /= 10; } while (uv);
+    if (neg) buf[--i] = '-';
+    write(fd, buf + i, sizeof(buf) - i);
+}
+
+// Crash dump to a timestamped file + stderr using only async-signal-safe
+// primitives (open/write/close/backtrace/backtrace_symbols_fd).  fopen and
+// friends are NOT async-signal-safe (they call malloc, which may be holding
+// an internal lock if we crashed inside a malloc/free path).
+//
+// After writing the dump we:
+//   1. Use sigaction(SIG_DFL) + sigprocmask(SIG_UNBLOCK) to guarantee the
+//      re-raised signal is delivered immediately even though it was blocked
+//      in the signal mask during handler execution.
+//   2. Call raise(sig) — delivers the default action (usually core + SIGABRT).
+//   3. Fall back to _exit(128+sig) in case raise somehow doesn't kill us
+//      (e.g. the signal is still blocked, or the platform is weird).
+//
+// The _exit() fallback is what guarantees k8s sees a non-zero exit code and
+// restarts the pod.  Without it, a bug in step 1-2 leaves a zombie process
+// that never exits and k8s never restarts.
 static void u6o_posix_crash_handler(int sig) {
-    time_t tt = time(NULL);
-    struct tm tmv;
-    localtime_r(&tt, &tmv);
-    char stamp[32];
-    strftime(stamp, sizeof(stamp), "%Y%m%d_%H%M%S", &tmv);
+    // Collect backtrace first — before any other call that might clobber state.
+    void *bt[128];
+    int n = backtrace(bt, 128);
+
+    // Build a timestamp for the filename using only async-signal-safe calls.
+    // clock_gettime(CLOCK_REALTIME) is AS-safe; strftime is not, so we hand-
+    // format the digits ourselves.
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    long long secs = ts.tv_sec;
+    // Very rough UTC seconds → YYYYMMDD_HHMMSS (good enough for a crash tag)
+    long long s = secs % 86400;
+    long long d = secs / 86400;            // days since epoch
+    int hh = (int)(s / 3600);
+    int mm = (int)((s % 3600) / 60);
+    int ss = (int)(s % 60);
+    // Zeller-like day→date (good through 2099)
+    long long z = d + 719468;
+    long long era = (z >= 0 ? z : z - 146096) / 146097;
+    long long doe = z - era * 146097;
+    long long yoe = (doe - doe/1460 + doe/36524 - doe/146096) / 365;
+    int yr  = (int)(yoe + era * 400);
+    long long doy = doe - (365*yoe + yoe/4 - yoe/100);
+    long long mp  = (5*doy + 2) / 153;
+    int dy  = (int)(doy - (153*mp+2)/5 + 1);
+    int mo  = (int)(mp  + (mp < 10 ? 3 : -9));
+    if (mo <= 2) yr++;
+
     char fname[64];
-    snprintf(fname, sizeof(fname), "crash_%s.txt", stamp);
-    void *bt[100];
-    int n = backtrace(bt, 100);
-    FILE *f = fopen(fname, "w");
-    if (f) {
-        fprintf(f, "Fatal signal %d\n", sig);
-        backtrace_symbols_fd(bt, n, fileno(f));
-        fclose(f);
+    // Hand-format: crash_YYYYMMDD_HHMMSS.txt
+    const char *prefix = "crash_";
+    int fi = 0;
+    for (int k = 0; prefix[k]; k++) fname[fi++] = prefix[k];
+    // year
+    fname[fi++] = '0' + (yr/1000)%10; fname[fi++] = '0' + (yr/100)%10;
+    fname[fi++] = '0' + (yr/10)%10;   fname[fi++] = '0' + yr%10;
+    fname[fi++] = '0' + mo/10;        fname[fi++] = '0' + mo%10;
+    fname[fi++] = '0' + dy/10;        fname[fi++] = '0' + dy%10;
+    fname[fi++] = '_';
+    fname[fi++] = '0' + hh/10;        fname[fi++] = '0' + hh%10;
+    fname[fi++] = '0' + mm/10;        fname[fi++] = '0' + mm%10;
+    fname[fi++] = '0' + ss/10;        fname[fi++] = '0' + ss%10;
+    const char *suffix = ".txt";
+    for (int k = 0; suffix[k]; k++) fname[fi++] = suffix[k];
+    fname[fi] = '\0';
+
+    int fd = open(fname, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd >= 0) {
+        const char *hdr = "Fatal signal ";
+        write(fd, hdr, 13);
+        u6o_write_int_fd(fd, sig);
+        backtrace_symbols_fd(bt, n, fd);
+        close(fd);
     }
-    fprintf(stderr, "u6o host: fatal signal %d (backtrace in %s)\n", sig, fname);
-    signal(sig, SIG_DFL);
-    raise(sig);
+
+    // Also log to stderr (write is AS-safe; dprintf is not guaranteed).
+    {
+        const char *msg1 = "u6o host: fatal signal ";
+        const char *msg2 = " (backtrace in ";
+        const char *msg3 = ")\n";
+        write(STDERR_FILENO, msg1, 23);
+        u6o_write_int_fd(STDERR_FILENO, sig);
+        // strip trailing \n from the int writer, write msg2 + fname + msg3
+        write(STDERR_FILENO, msg2, 15);
+        write(STDERR_FILENO, fname, fi);
+        write(STDERR_FILENO, msg3, 2);
+    }
+
+    // Reset disposition to default and explicitly unblock the signal so
+    // raise() delivers it immediately (it was blocked in the signal mask while
+    // this handler ran).  Without the unblock, raise() only makes the signal
+    // pending; sigreturn would normally deliver it on return, but if the
+    // faulting instruction is re-executed we may loop back here forever.
+    struct sigaction sa;
+    sa.sa_handler = SIG_DFL;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(sig, &sa, nullptr);
+
+    sigset_t unblock;
+    sigemptyset(&unblock);
+    sigaddset(&unblock, sig);
+    sigprocmask(SIG_UNBLOCK, &unblock, nullptr);
+
+    raise(sig); // should terminate with a core dump if ulimit -c > 0
+
+    // Absolute fallback: _exit() is async-signal-safe and always terminates.
+    // This is what guarantees k8s sees a non-zero exit and restarts the pod.
+    _exit(128 + sig);
 }
 
 // Graceful shutdown on container stop: k8s sends SIGTERM, Ctrl-C sends SIGINT.
@@ -228,13 +327,25 @@ static void u6o_posix_term_handler(int /*sig*/) {
 }
 
 static void u6o_install_crash_handlers(void) {
-    signal(SIGSEGV, u6o_posix_crash_handler);
-    signal(SIGABRT, u6o_posix_crash_handler);
-    signal(SIGFPE, u6o_posix_crash_handler);
-    signal(SIGILL, u6o_posix_crash_handler);
-    signal(SIGBUS, u6o_posix_crash_handler);
-    signal(SIGTERM, u6o_posix_term_handler);
-    signal(SIGINT, u6o_posix_term_handler);
+    // Use sigaction rather than signal() so we can set SA_RESETHAND (auto-
+    // reset to SIG_DFL on first delivery, preventing re-entry loops) while
+    // keeping the signal blocked during the handler (default, no SA_NODEFER).
+    struct sigaction sa;
+    sa.sa_handler = u6o_posix_crash_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESETHAND; // one-shot: resets to SIG_DFL before handler runs
+    sigaction(SIGSEGV, &sa, nullptr);
+    sigaction(SIGABRT, &sa, nullptr);
+    sigaction(SIGFPE,  &sa, nullptr);
+    sigaction(SIGILL,  &sa, nullptr);
+    sigaction(SIGBUS,  &sa, nullptr);
+
+    struct sigaction sa_term;
+    sa_term.sa_handler = u6o_posix_term_handler;
+    sigemptyset(&sa_term.sa_mask);
+    sa_term.sa_flags = SA_RESTART;
+    sigaction(SIGTERM, &sa_term, nullptr);
+    sigaction(SIGINT,  &sa_term, nullptr);
 }
 
 #endif // _WIN32
@@ -476,9 +587,10 @@ PM_NOREMOVE
 
 #ifdef CLIENT
 			if (clientsettingsvalid){
-                cltset.u6omidivolume = u6omidivolume;
+                cltset.u6omusicvolume = u6omusicvolume;
                 cltset.u6ovolume = u6ovolume;
                 cltset.u6ovoicevolume = u6ovoicevolume;
+                cltset.u6ovoiceovervolume = u6ovoiceovervolume;
                 cltset.statusprev_logpinned = statusmessage_logpinned; // persist "keep text log visible" toggle
                 memcpy(&cltset.spellrecall_partymember, &spellrecall_partymember, 8);
                 memcpy(&cltset.spellrecall_i, &spellrecall_i, 8);
@@ -555,14 +667,14 @@ PM_NOREMOVE
 			//      "give the peer time to ACK the FIN" buffer that's
 			//      overkill on the client (one socket; the OS-level
 			//      linger handles it). 50ms is plenty.
-			if (u6omidisetup &&u6omidi) {
+			if (u6omusicsetup &&u6omusic) {
 				#ifdef _DEBUG
 				mm_p7_log_shutdown("MM-P7.2: client stop/release DirectMusic");
 				#endif
-                u6omidi->Stop();
-                delete u6omidi;
-                u6omidi = NULL;
-                u6omidisetup = 0;
+                u6omusic->Stop();
+                delete u6omusic;
+                u6omusic = NULL;
+                u6omusicsetup = 0;
             }
 			// Stop+release all live DirectSound voices and the dsnd device.
 			// Implementation lives in src/client/sound.cpp where the static

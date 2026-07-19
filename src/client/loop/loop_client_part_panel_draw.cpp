@@ -366,7 +366,7 @@ underground : img(qkstf->graphic, 0, 0, tmini_1); //moon and sun on qk stat
 
 img(volcontrol_surf, 0, 0, volcontrol_background);
 img(volcontrol_surf, 46 + u6ovolume * 20 / 72 - 4, 8 + 3, volcontrol_tab1);
-img(volcontrol_surf, 46 + u6omidivolume * 20 / 72 - 4, 32 + 8 - 5, volcontrol_tab3);
+img(volcontrol_surf, 46 + u6omusicvolume * 20 / 72 - 4, 32 + 8 - 5, volcontrol_tab3);
 img(volcontrol_surf, 46 + u6ovoicevolume * 20 / 72 - 4, 32 + 8 - 5 + 24, volcontrol_tab2);
 if
 (u6ovoicevolume
@@ -598,7 +598,30 @@ i
       cltset.party_spellbook_frame_offset_x[i-8]=pmf->offset_x; cltset.party_spellbook_frame_offset_y[i-8]=pmf->offset_y;
       if (cltset.party_spellbook_frame_offset_x[i-8]>kPanelHideThresholdX) cltset.party_spellbook_frame_offset_x[i-8]-=kPanelHideDeltaX;
     }
-    if (i==18){cltset.con_frm_offset_x=pmf->offset_x; cltset.con_frm_offset_y=pmf->offset_y;}
+    if (i==18){
+      if (u6o::client::g_confrm_user_positioned){
+        cltset.con_frm_offset_x=u6o::client::g_confrm_user_x;
+        cltset.con_frm_offset_y=u6o::client::g_confrm_user_y;
+      } else {
+        cltset.con_frm_offset_x=32767;
+      }
+      if (con_frm_img) {
+        // RW-P4.11: If the history overlay has been scrolled (offset_y != -256),
+        // we mark it as user-positioned so it survives window resizes.
+        if (con_frm_img->offset_y != -256 || con_frm_img->offset_x != 0) {
+           u6o::client::g_confrmimg_user_positioned = true;
+           u6o::client::g_confrmimg_user_x = con_frm_img->offset_x;
+           u6o::client::g_confrmimg_user_y = con_frm_img->offset_y;
+        }
+
+        if (u6o::client::g_confrmimg_user_positioned) {
+          cltset.con_frm_img_offset_x = u6o::client::g_confrmimg_user_x;
+          cltset.con_frm_img_offset_y = u6o::client::g_confrmimg_user_y;
+        } else {
+          cltset.con_frm_img_offset_x = 32767;
+        }
+      }
+    }
     // RW: mirror qkstf/volcontrol to cltset from the user-positioned
     // cache, NOT from pmf->offset_x — when volcontrol is hidden the
     // live offset is parked in the off-screen sentinel range and would
@@ -621,8 +644,22 @@ i
         cltset.volcontrol_offset_x=32767;
       }
     }
-    if (i==21){cltset.minimap_offset_x=pmf->offset_x; cltset.minimap_offset_y=pmf->offset_y;}
-    if (i==22){cltset.tmap_offset_x=pmf->offset_x; cltset.tmap_offset_y=pmf->offset_y;}
+    if (i==21){
+      if (u6o::client::g_minimap_user_positioned){
+        cltset.minimap_offset_x=u6o::client::g_minimap_user_x;
+        cltset.minimap_offset_y=u6o::client::g_minimap_user_y;
+      } else {
+        cltset.minimap_offset_x=32767;
+      }
+    }
+    if (i==22){
+      if (u6o::client::g_tmap_user_positioned){
+        cltset.tmap_offset_x=u6o::client::g_tmap_user_x;
+        cltset.tmap_offset_y=u6o::client::g_tmap_user_y;
+      } else {
+        cltset.tmap_offset_x=32767;
+      }
+    }
     // RW: mirror statusmessage_viewprev from the user-positioned cache (same
     // rule as qkstf/volcontrol). The live offset is auto-clamped above to the
     // current back-buffer, so reading the cache preserves a far-right/maximized

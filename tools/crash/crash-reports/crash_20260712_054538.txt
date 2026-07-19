@@ -1,0 +1,8 @@
+/usr/local/bin/u6o-host(+0x7a5dd)[0x576c45dd]
+linux-gate.so.1(__kernel_sigreturn+0x0)[0xed715590]
+/usr/local/bin/u6o-host(_Z9txtNEWLENP3txtl+0x3c)[0x577bce2c]
+/usr/local/bin/u6o-host(main+0x3acc)[0x5765612c]
+/lib/i386-linux-gnu/libc.so.6(+0x232d5)[0xed1bc2d5]
+/lib/i386-linux-gnu/libc.so.6(__libc_start_main+0x88)[0xed1bc398]
+/usr/local/bin/u6o-host(_start+0x27)[0x576c4447]
+Fatal signal 11

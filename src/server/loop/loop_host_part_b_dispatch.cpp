@@ -304,37 +304,50 @@ host_gotmessage:
 
         txtright(t5, t5->l - 2);
 
+        // Guard against truncated/malformed setup packets before every length-prefixed read.
+        if (t5->l < 1) goto malformed_setup_message;
+
         y9 = t5->d2[0]; //pw encryption
         txtright(t5, t5->l - 1);
         //get setup message info
 
+        if (t5->l < 1) goto malformed_setup_message;
         x = t5->d2[0];
         txtright(t5, t5->l - 1);
+        if (x < 0 || t5->l < x) goto malformed_setup_message;
         txtNEWLEN(tname, x);
         memcpy(tname->d2, t5->d2, x);
         txtright(t5, t5->l - x); //name
+        if (t5->l < 1) goto malformed_setup_message;
         tmale_female = t5->d2[0];
         txtright(t5, t5->l - 1);
         if (tmale_female > 1) tmale_female = 1;
         tport = 194;
+        if (t5->l < 2) goto malformed_setup_message;
         x = t5->ds[0];
         if ((x >= 0) && (x <= 13)) tport = 194 + x;
         txtright(t5, t5->l - 2);
         ttype = 410;
+        if (t5->l < 1) goto malformed_setup_message;
         x = t5->d2[0];
         if ((x > 0) && (x <= 12)) ttype = 375 + x;
         txtright(t5, t5->l - 1);
+        if (t5->l < 28) goto malformed_setup_message;
         txtset(t6, t5);
         txtleft(t6, 28);
         txtright(t5, t5->l - 28); //t6<-virtue answers
+        if (t5->l < 1) goto malformed_setup_message;
         x = t5->d2[0];
         txtright(t5, t5->l - 1);
+        if (x < 0 || t5->l < x) goto malformed_setup_message;
         txtNEWLEN(tusername, x);
         memcpy(tusername->d2, t5->d2, x);
         txtright(t5, t5->l - x);
         txtucase(tusername); //user_name
+        if (t5->l < 1) goto malformed_setup_message;
         x = t5->d2[0];
         txtright(t5, t5->l - 1);
+        if (x < 0 || t5->l < x) goto malformed_setup_message;
         txtNEWLEN(tuserpassword, x);
         memcpy(tuserpassword->d2, t5->d2, x);
         txtright(t5, t5->l - x); //user_password
@@ -343,8 +356,10 @@ host_gotmessage:
     }*/
         tcreatecharacter = t5->d2[0];
         txtright(t5, t5->l - 1);
+        if (t5->l < 1) goto malformed_setup_message;
         x = t5->d2[0];
         txtright(t5, t5->l - 1);
+        if (x < 0 || t5->l < x) goto malformed_setup_message;
         txtNEWLEN(tnewuserpassword, x);
         memcpy(tnewuserpassword->d2, t5->d2, x);
         txtright(t5, t5->l - x); //new_user_password
@@ -360,6 +375,7 @@ host_gotmessage:
                 //upload character portrait
                 tcustomportrait_upload = 1;
                 txtright(t5, t5->l - 1);
+                if (t5->l < 7168) goto malformed_setup_message;
                 memcpy(&tcustomportrait, t5->d, 7168);
                 txtright(t5, t5->l - 7168);
                 goto getsetupmessageinfo_more;
@@ -367,6 +383,7 @@ host_gotmessage:
 
             if (t5->d2[0] == 2) {
                 txtright(t5, t5->l - 1); //u6o_namecolour
+                if (t5->l < 3) goto malformed_setup_message;
                 tnamecolour = t5->dl[0] & 0xFFFFFF;
                 txtright(t5, t5->l - 3);
                 goto getsetupmessageinfo_more;
@@ -379,6 +396,14 @@ host_gotmessage:
                 txtaddchar(t, (u6o_namecolour >> 16) & 255);
             } //u6o_namecolour
         } //t5->l
+
+        goto setup_message_ok;
+
+    malformed_setup_message:
+        if (socket_disconnect[tnet] == 0) socket_disconnect[tnet] = 1;
+        goto doneclmess;
+
+    setup_message_ok:
 
 
         //autoformat: name, username, password, newuserpassword (all temp)

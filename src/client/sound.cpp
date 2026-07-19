@@ -6,10 +6,11 @@
 #include <math.h>
 
 #include "myfile.h"
+#include "voiceover.h"
 LPDIRECTSOUND dsnd;
 extern HWND hWnd;
 extern bool u6o_sound;
-extern unsigned char u6ovolume;
+extern int u6ovolume;
 bool DirectSoundCreate_fail = FALSE;
 
 struct sound {
@@ -36,6 +37,11 @@ bool soundsetup() {
         tempsound[i] = NULL;
     }
     soundsetupf = TRUE;
+
+    // NPC-VO: Load voiceover map from the runtime asset bundle (or repo fallbacks
+    // during local development).
+    voiceover_load_map("audio_map.json");
+
     return TRUE;
 }
 
@@ -68,7 +74,7 @@ sound *soundnew(long freq, long bit, long stereo, long bytes) {
     return ts;
 }
 
-sound *soundload(LPCSTR fn) {
+sound *soundload(LPCSTR fn, float gain) {
     if (DirectSoundCreate_fail) return NULL;
     if (soundsetupf == FALSE) soundsetup();
     if (DirectSoundCreate_fail) return NULL;
@@ -89,10 +95,34 @@ sound *soundload(LPCSTR fn) {
     stereo = 0;
     get(fh, &stereo, 2);
     if (stereo == (bits / 8)) { stereo = 1; } else { stereo = 2; }
-    ts = soundnew(freq, bits, stereo, lof(fh) - 58 - 16 - 16 - 32 - 32);
+    long bytes = lof(fh) - 58 - 16 - 16 - 32 - 32;
+    ts = soundnew(freq, bits, stereo, bytes);
     seek(fh, 58);
-    get(fh, ts->o, lof(fh) - 58 - 16 - 16 - 32 - 32);
+    get(fh, ts->o, bytes);
     close(fh);
+
+    if (gain != 1.0f && ts && ts->o) {
+        if (bits == 8) {
+            for (long i = 0; i < bytes; i++) {
+                int val = ts->o[i];
+                val = (int)((val - 128) * gain) + 128;
+                if (val > 255) val = 255;
+                if (val < 0) val = 0;
+                ts->o[i] = (unsigned char)val;
+            }
+        } else if (bits == 16) {
+            short *data = (short *)ts->o;
+            long samples = bytes / 2;
+            for (long i = 0; i < samples; i++) {
+                int val = data[i];
+                val = (int)(val * gain);
+                if (val > 32767) val = 32767;
+                if (val < -32768) val = -32768;
+                data[i] = (short)val;
+            }
+        }
+    }
+
     return ts;
 }
 
@@ -121,10 +151,13 @@ busysound:
     return ts;
 }
 
-sound *soundplay2(sound *s, long v) {
+sound *soundplay2(sound *s, long v, long global_v, bool allow_boost) {
     if (DirectSoundCreate_fail) return NULL;
     if (soundsetupf == FALSE) return NULL;
-    if (u6ovolume == 0) return NULL;
+
+    long actual_global_v = (global_v == -1) ? u6ovolume : global_v;
+    if (actual_global_v == 0) return NULL;
+
     if (v > 255) v = 255;
     if (v <= 0) return NULL;
     static long i;
@@ -147,11 +180,15 @@ busysound2:
     tempsound[i] = ts;
     tempsound[i]->ss = s;
     f = v;
-    f = f * (float) u6ovolume / 255.0f;
-    f = 255 - f;
+    f = f * (float) actual_global_v / 255.0f;
+    if (allow_boost) {
+        f = f * 1.0f;
+    }
+    if (f > 255.0f) f = 255.0f;
+    f = 255.0f - f;
     f = f * 0.25f;
     f *= f;
-    ts->s->SetVolume(-f);
+    ts->s->SetVolume((long)-f);
     ts->s->Play(NULL, NULL, NULL);
     return ts;
 }
@@ -189,6 +226,7 @@ void free(sound *s) {
 // Stop/Release/free triad.
 void soundshutdown() {
     if (soundsetupf == FALSE) return;
+    voiceover_shutdown();
     for (long i = 0; i < 256; i++) {
         if (tempsound[i] != NULL) {
             if (tempsound[i]->s) {
@@ -204,4 +242,17 @@ void soundshutdown() {
         dsnd = NULL;
     }
     soundsetupf = FALSE;
+}
+
+bool sound_is_any_copy_playing(sound *s) {
+    if (DirectSoundCreate_fail || !soundsetupf || !s) return false;
+    for (int i = 0; i < 256; i++) {
+        if (tempsound[i] != NULL && tempsound[i]->ss == s) {
+            unsigned long status = 0;
+            if (tempsound[i]->s->GetStatus(&status) == DS_OK) {
+                if (status & DSBSTATUS_PLAYING) return true;
+            }
+        }
+    }
+    return false;
 }

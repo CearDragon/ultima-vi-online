@@ -318,7 +318,7 @@ void setsetting_choice(const char *name, const char *value);
 #define IDM_OPTIONS_STRIDE 16
 #define IDM_OPTIONS_RANGE  2000
 
-// Push the current music-volume global (u6omidivolume) to the DirectMusic and
+// Push the current music-volume global (u6omusicvolume) to the DirectMusic and
 // low-level MIDI outputs. Extracted from the volume-panel loop so the Options
 // menu can apply music-volume changes with identical behavior.
 void applyMidiVolume();

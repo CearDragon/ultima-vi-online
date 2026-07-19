@@ -1,4 +1,4 @@
-ï»¿// viewport.cpp â€” RW-P2.1 implementation of lighting_alloc/lighting_free.
+// viewport.cpp — RW-P2.1 implementation of lighting_alloc/lighting_free.
 //
 // The lighting buffers `ls`, `ls_moon1..ls_moon4` were previously fixed-size
 // arrays declared in src/common/globals.inc:
@@ -37,7 +37,7 @@ extern Dynamic2DArray<unsigned char> nonvis;
 extern int uipanelsidebar;
 extern int uipanelsizex[20][11][6]; // UI_PANEL_MAX x UI_PANELWIDGET_MAX x UI_WIDGETSTATE_MAX
 
-// (windowResize extern removed 2026-05-27 â€” always-on now.)
+// (windowResize extern removed 2026-05-27 — always-on now.)
 
 namespace u6o {
     namespace client {
@@ -50,8 +50,8 @@ namespace u6o {
             // (ps->lPitch / 2), which DirectDraw may pad ABOVE the world width
             // (backbufferW()) at widths that aren't aligned to its internal
             // granularity. Keeping the lighting buffers and the linear-walk
-            // compose passes on the surface's real pitch â€” rather than newW â€” is
-            // what stops the lit overlay from skewing diagonally (top-right â†’
+            // compose passes on the surface's real pitch — rather than newW — is
+            // what stops the lit overlay from skewing diagonally (top-right ?
             // bottom-left) at intermediate window sizes. Seeded to the legacy
             // 1024 floor; recreateBackbuffers()/setup overwrite it via
             // set_lighting_stride(ps->lPitch / 2) before lighting_alloc().
@@ -121,7 +121,7 @@ namespace u6o {
         }
 
         int viewTilesY() {
-            // (windowResize early-return removed 2026-05-27 â€” see viewTilesX.)
+            // (windowResize early-return removed 2026-05-27 — see viewTilesX.)
             // RW-P4.11 (2026-05-26): clamp to kViewportTilesYMax. See note
             // above and the constant's definition in viewport.h.
             int tiles = (g_active_h - bottomPanelH()) / 32;
@@ -145,7 +145,7 @@ namespace u6o {
             return 0;
         }
 
-        // Setter is internal â€” only function_client.cpp's recreateBackbuffers()
+        // Setter is internal — only function_client.cpp's recreateBackbuffers()
         // implementation calls it, after the surfaces have been re-allocated
         // successfully. Exposed via a non-namespaced extern "C++" friend
         // function so we don't have to plumb a full namespaced header.
@@ -175,7 +175,7 @@ namespace u6o {
         }
 
         bool lighting_alloc(int w, int h) {
-            // MM-P8.1: RAII candidate â€” ls / ls_moon1..4 are five parallel raw
+            // MM-P8.1: RAII candidate — ls / ls_moon1..4 are five parallel raw
             // malloc'd buffers kept in lockstep with g_lighting_w/h. A small
             // owning buffer type (or std::unique_ptr<unsigned char[]>) per plane,
             // grouped in a struct, would make lighting_free()/the rollback block
@@ -185,7 +185,7 @@ namespace u6o {
             // (g_lighting_stride), not the world width `w`. DirectDraw pads the
             // ps row stride above newW*2 bytes at non-aligned widths; if ls/
             // ls_moon* used `w` as their stride while the compose passes walk
-            // ps at lPitch, the lit overlay drifts one (lPitch - w*2) per row â†’
+            // ps at lPitch, the lit overlay drifts one (lPitch - w*2) per row ?
             // the diagonal skew. set_lighting_stride() seeds g_lighting_stride
             // from ps->lPitch/2 before we get here. `w` is still validated
             // above but no longer drives the row stride.
@@ -212,14 +212,14 @@ namespace u6o {
             // Match the BSS-zero behavior of the previous static arrays. The
             // moonN buffers are overwritten by setup_client.inc before first use,
             // but ls is read by getsound() / lightshow before the first frame
-            // populates it â€” zero-init keeps that path well-defined.
+            // populates it — zero-init keeps that path well-defined.
             memset(new_ls, 0, bytes);
             memset(new_ls_moon1, 0, bytes);
             memset(new_ls_moon2, 0, bytes);
             memset(new_ls_moon3, 0, bytes);
             memset(new_ls_moon4, 0, bytes);
 
-            // MM-P6.1: commit point â€” old buffers are released only after all new
+            // MM-P6.1: commit point — old buffers are released only after all new
             // allocations/initialization succeeded.
             free_one(ls);
             free_one(ls_moon1);
@@ -319,7 +319,7 @@ namespace u6o {
             memset(new_vischeck, 0, viewSize);
             memset(new_nonvis, 0, viewSize);
 
-            // MM-P6.2: commit point â€” preserve prior buffers if any allocation
+            // MM-P6.2: commit point — preserve prior buffers if any allocation
             // fails above; replace live buffers only after full success.
             visibility_free();
 

@@ -14,6 +14,7 @@ az acr login --name acrultimavionline
 docker push acrultimavionline.azurecr.io/u6o-host:latest
 
 echo "Restarting deployment u6o-host in namespace ultima-dev..."
+kubectl config use-context k8s-ultimasixonline
 kubectl rollout restart deployment/u6o-host -n ultima-dev
 
 echo "Waiting for rollout to complete..."

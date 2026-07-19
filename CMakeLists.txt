@@ -264,6 +264,9 @@ set(Header_Files
         "src/client/viewport.h"
         "src/client/ui_layout.h"
         "src/client/splash.h"
+        "src/client/music_player.h"
+        "src/client/minimp3.h"
+        "src/client/voiceover.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -304,6 +307,8 @@ set(Source_Files
         "src/common/random/randi.cpp"
         "src/common/random/random.cpp"
         "src/client/sound.cpp"
+        "src/client/voiceover.cpp"
+        "src/client/mp3_player.cpp"
         "src/common/spell_code/spell_code.cpp"
         "src/common/stdafx.cpp"
         "src/common/txt.cpp"
@@ -689,6 +694,8 @@ set(Header_Files
         "src/client/viewport.h"
         "src/client/ui_layout.h"
         "src/client/splash.h"
+        "src/client/music_player.h"
+        "src/client/minimp3.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -717,6 +724,8 @@ set(Source_Files
         "src/common/random/randi.cpp"
         "src/common/random/random.cpp"
         "src/client/sound.cpp"
+        "src/client/voiceover.cpp"
+        "src/client/mp3_player.cpp"
         "src/common/stdafx.cpp"
         "src/common/txt.cpp"
         "src/common/u6o7.cpp"

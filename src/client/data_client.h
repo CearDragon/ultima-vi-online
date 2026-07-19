@@ -5,6 +5,8 @@
 #include "define_client.h" /* keys etc. */
 #include "mytxt.h" /* txt* etc */
 #include "data_both.h" /* schedule* etc. */
+#include "music_player.h"
+#include "mp3_player.h"
 #include "frame.h" /* FRAME* etc. */
 #include "dmusic.h" /* INFOPORT etc. */
 /* 
@@ -24,7 +26,7 @@ struct client_settings {
     short volcontrol_offset_x, volcontrol_offset_y;
     short qkstf_offset_x, qkstf_offset_y;
     unsigned char u6ovolume;
-    unsigned char u6omidivolume;
+    unsigned char u6omusicvolume;
     //add more settings here
     unsigned char u6ovoicevolume;
     unsigned char spellrecall_partymember[8];
@@ -39,6 +41,10 @@ struct client_settings {
     // Persisted "keep the status text log visible" toggle (statusmessage_logpinned).
     // 0 = off (default). Also appended at the end for the same reason.
     unsigned char statusprev_logpinned;
+    unsigned char music_format;
+    // Persisted position of the conversation history overlay (relative to con_frm)
+    short con_frm_img_offset_x, con_frm_img_offset_y;
+    short u6ovoiceovervolume;
 };
 
 struct inpmess_index {
@@ -208,10 +214,11 @@ extern bool U6O_WALKTHRU_REC;
 extern bool U6O_WALKTHRU;
 
 //master volume controls
-extern unsigned char u6ovolume;
-extern unsigned char u6omidivolume;
-extern unsigned char u6omidisetup;
-extern unsigned char u6ovoicevolume;
+extern int u6ovolume;
+extern int u6omusicvolume;
+extern unsigned char u6omusicsetup;
+extern int u6ovoicevolume;
+extern int u6ovoiceovervolume;
 
 //wav
 extern unsigned char u6osoundtype_volume[255];
@@ -222,11 +229,12 @@ extern unsigned char u6osound_volume[255]; //0 to 255
 extern bool wavinfo_loaded;
 
 //midi
-extern INFOPORT u6omidi_infoport;
-extern CMidiMusic *u6omidi;
-extern txt *u6omidi_filename[256];
-extern unsigned char u6omidi_volume[255];
+extern INFOPORT u6omusic_infoport;
+extern IMusicPlayer *u6omusic;
+extern txt *u6omusic_filename[256];
+extern unsigned char u6omusic_volume[255];
 extern bool midiinfo_loaded;
+extern unsigned char music_format;
 
 //System information and advance function declarations
 extern HWND hWnd;

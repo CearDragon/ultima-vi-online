@@ -84,49 +84,59 @@ txtadd(t3,t2);
 
 
 DWORD WINAPI sockets_send(LPVOID i) {
+    const unsigned long idx = (unsigned long) i;
 sockets_send_loop_wait:
     SleepEx(8, FALSE);
 sockets_send_loop:
-    if (socketclient_si[(unsigned long) i]->exit_thread) goto sockets_send_close;
-    if (socketclient_si[(unsigned long) i]->d[socketclient_si[(unsigned long) i]->next]->l) {
-        if (send(socketclient[(unsigned long) i],
-                 (const char *) &socketclient_si[(unsigned long) i]->d[socketclient_si[(unsigned long) i]->next]->d2[0],
-                 socketclient_si[(unsigned long) i]->d[socketclient_si[(unsigned long) i]->next]->l,
+    if (!socketclient_si[idx] || !socketclient_ri[idx]) goto sockets_send_close;
+    if (socketclient_si[idx]->exit_thread) goto sockets_send_close;
+    if (socketclient_si[idx]->d[socketclient_si[idx]->next]->l) {
+        if (send(socketclient[idx],
+                 (const char *) &socketclient_si[idx]->d[socketclient_si[idx]->next]->d2[0],
+                 socketclient_si[idx]->d[socketclient_si[idx]->next]->l,
                  0) == SOCKET_ERROR)
             goto sockets_send_close;
 
-        socketclient_si[(unsigned long) i]->d[socketclient_si[(unsigned long) i]->next]->l = 0;
-        socketclient_si[(unsigned long) i]->next++;
+        socketclient_si[idx]->d[socketclient_si[idx]->next]->l = 0;
+        socketclient_si[idx]->next++;
         SleepEx(0, FALSE);
         goto sockets_send_loop;
     }
     goto sockets_send_loop_wait;
 sockets_send_close:
-    if (socketclient_ri[(unsigned long) i]->exit_thread == 0) socketclient_ri[(unsigned long) i]->exit_thread = 1;
+    if (socketclient_ri[idx] && socketclient_ri[idx]->exit_thread == 0) socketclient_ri[idx]->exit_thread = 1;
     //close receiving thread
-    socketclient_si[(unsigned long) i]->exit_thread = 2; //set thread as closed
-    if (socket_disconnect[(unsigned long) i] == 0) socket_disconnect[(unsigned long) i] = 1; //request socket disconnect
+    if (socketclient_si[idx]) socketclient_si[idx]->exit_thread = 2; //set thread as closed
+    if (socket_disconnect[idx] == 0) socket_disconnect[idx] = 1; //request socket disconnect
     ExitThread(0);
     return 0;
 }
 
 DWORD WINAPI sockets_receive(LPVOID i) {
     unsigned int sig_to = 0;
+    const unsigned long idx = (unsigned long) i;
+    long recv_max = 0;
 
-    socketclient_ri[(unsigned long) i]->x2 = 0;
+    if (!socketclient_ri[idx] || !socketclient_ri[idx]->t || !socketclient_si[idx]) goto sockets_receive_close;
+    socketclient_ri[idx]->x2 = 0;
 sockets_receive_loop_wait:
     SleepEx(8, FALSE);
 sockets_receive_loop:
 
 
-    if (socketclient_ri[(unsigned long) i]->exit_thread) goto sockets_receive_close;
+    if (!socketclient_ri[idx] || !socketclient_ri[idx]->t || !socketclient_si[idx]) goto sockets_receive_close;
+    if (socketclient_ri[idx]->exit_thread) goto sockets_receive_close;
 
-    if ((socketclient_ri[(unsigned long) i]->x4 = recv(socketclient[(unsigned long) i],
-                                                       (char *) &socketclient_ri[(unsigned long) i]->t->d2[
-                                                           socketclient_ri[(unsigned long) i]->t->l], 32768,
+    // Clamp recv size to available slack in the staging txt buffer.
+    recv_max = socketclient_ri[idx]->t->bl - 1 - socketclient_ri[idx]->t->l;
+    if (recv_max <= 0) goto sockets_receive_close;
+    if (recv_max > 32768) recv_max = 32768;
+
+    if ((socketclient_ri[idx]->x4 = recv(socketclient[idx],
+                                         (char *) &socketclient_ri[idx]->t->d2[socketclient_ri[idx]->t->l], recv_max,
                                                        0)) == SOCKET_ERROR) {
-        socketclient_ri[(unsigned long) i]->x4 = WSAGetLastError();
-        if (socketclient_ri[(unsigned long) i]->x4 == WSAEWOULDBLOCK) {
+        socketclient_ri[idx]->x4 = WSAGetLastError();
+        if (socketclient_ri[idx]->x4 == WSAEWOULDBLOCK) {
             goto sockets_receive_loop_wait;
         }
 
@@ -135,18 +145,18 @@ sockets_receive_loop:
     }
 
 
-    socketclient_ri[(unsigned long) i]->t->l += socketclient_ri[(unsigned long) i]->x4;
+    socketclient_ri[idx]->t->l += socketclient_ri[idx]->x4;
     //VERIFY SIGNATURE
-    if (!socketclient_verified[(unsigned long) i]) {
-        if (socketclient_ri[(unsigned long) i]->t->l < 4) {
+    if (!socketclient_verified[idx]) {
+        if (socketclient_ri[idx]->t->l < 4) {
             sig_to++;
             if (sig_to > 1000) /* ~15 seconds */
                 SleepEx(15, FALSE);
             goto sockets_receive_loop;
         }
-        if ((unsigned long) socketclient_ri[(unsigned long) i]->t->dl[0] == U6O_SIGNATURE) {
-            socketclient_verified[(unsigned long) i] = 1;
-            txtright(socketclient_ri[(unsigned long) i]->t, socketclient_ri[(unsigned long) i]->t->l - 4);
+        if ((unsigned long) socketclient_ri[idx]->t->dl[0] == U6O_SIGNATURE) {
+            socketclient_verified[idx] = 1;
+            txtright(socketclient_ri[idx]->t, socketclient_ri[idx]->t->l - 4);
             SleepEx(0, FALSE);
             //MessageBox(NULL,"sockets_receive: verified signature","Ultima 6 Online",MB_OK);
             goto sockets_receive_loop;
@@ -157,43 +167,38 @@ sockets_receive_loop:
 
         //signature was incorrect: send old incorrect version message & close connection
         SleepEx(1000, FALSE);
-        send(socketclient[(unsigned long) i], (char *) &incorrectversionmessage, 9, 0);
+        send(socketclient[idx], (char *) &incorrectversionmessage, 9, 0);
         //send again in case first message is missed
         SleepEx(1000, FALSE);
-        send(socketclient[(unsigned long) i], (char *) &incorrectversionmessage, 9, 0);
+        send(socketclient[idx], (char *) &incorrectversionmessage, 9, 0);
         goto sockets_receive_close;
     }
 
 
 sockets_receive_checkformessage:
-    if (socketclient_ri[(unsigned long) i]->t->l >= 2) {
-        socketclient_ri[(unsigned long) i]->x2 = 0;
+    if (socketclient_ri[idx]->t->l >= 2) {
+        socketclient_ri[idx]->x2 = 0;
 
 
         //enough data has arrived to know the length of the message we are reading
-        if (socketclient_ri[(unsigned long) i]->t->ds[0] <= (socketclient_ri[(unsigned long) i]->t->l + 2)) {
+        if (socketclient_ri[idx]->t->ds[0] <= (socketclient_ri[idx]->t->l + 2)) {
             //message received
-            if (socketclient_ri[(unsigned long) i]->d[socketclient_ri[(unsigned long) i]->nextfree]->bl < (
-                    socketclient_ri[(unsigned long) i]->t->ds[0] + 1)) {
+            if (socketclient_ri[idx]->d[socketclient_ri[idx]->nextfree]->bl < (socketclient_ri[idx]->t->ds[0] + 1)) {
                 //free old allocated memory
-                free(socketclient_ri[(unsigned long) i]->d[socketclient_ri[(unsigned long) i]->nextfree]->d);
+                free(socketclient_ri[idx]->d[socketclient_ri[idx]->nextfree]->d);
                 //extend buffer
-                socketclient_ri[(unsigned long) i]->d[socketclient_ri[(unsigned long) i]->nextfree]->d = (char *)
-                        malloc(socketclient_ri[(unsigned long) i]->t->ds[0] + 1);
-                socketclient_ri[(unsigned long) i]->d[socketclient_ri[(unsigned long) i]->nextfree]->bl =
-                        socketclient_ri[(unsigned long) i]->t->ds[0] + 1;
+                socketclient_ri[idx]->d[socketclient_ri[idx]->nextfree]->d = (char *) malloc(
+                    socketclient_ri[idx]->t->ds[0] + 1);
+                socketclient_ri[idx]->d[socketclient_ri[idx]->nextfree]->bl = socketclient_ri[idx]->t->ds[0] + 1;
             }
-            memcpy(&socketclient_ri[(unsigned long) i]->d[socketclient_ri[(unsigned long) i]->nextfree]->d2[0],
-                   &socketclient_ri[(unsigned long) i]->t->d2[2], socketclient_ri[(unsigned long) i]->t->ds[0]);
+            memcpy(&socketclient_ri[idx]->d[socketclient_ri[idx]->nextfree]->d2[0],
+                   &socketclient_ri[idx]->t->d2[2], socketclient_ri[idx]->t->ds[0]);
             //set NULL terminator of txt
-            socketclient_ri[(unsigned long) i]->d[socketclient_ri[(unsigned long) i]->nextfree]->d2[socketclient_ri[(
-                unsigned long) i]->t->ds[0]] = 0;
+            socketclient_ri[idx]->d[socketclient_ri[idx]->nextfree]->d2[socketclient_ri[idx]->t->ds[0]] = 0;
             //set ->l (length) of txt
-            socketclient_ri[(unsigned long) i]->d[socketclient_ri[(unsigned long) i]->nextfree]->l = socketclient_ri[(
-                unsigned long) i]->t->ds[0];
-            socketclient_ri[(unsigned long) i]->nextfree++;
-            txtright(socketclient_ri[(unsigned long) i]->t,
-                     socketclient_ri[(unsigned long) i]->t->l - (socketclient_ri[(unsigned long) i]->t->ds[0] + 2));
+            socketclient_ri[idx]->d[socketclient_ri[idx]->nextfree]->l = socketclient_ri[idx]->t->ds[0];
+            socketclient_ri[idx]->nextfree++;
+            txtright(socketclient_ri[idx]->t, socketclient_ri[idx]->t->l - (socketclient_ri[idx]->t->ds[0] + 2));
 
             //MessageBox(NULL,"sockets_receive: received a message","Ultima 6 Online",MB_OK);
 
@@ -202,9 +207,9 @@ sockets_receive_checkformessage:
         }
     } else {
         //timeout  there was endless loop bug in some cases this should prevent it.
-        socketclient_ri[(unsigned long) i]->x2++;
+        socketclient_ri[idx]->x2++;
         SleepEx(5, FALSE);
-        if (socketclient_ri[(unsigned long) i]->x2 > 1000) {
+        if (socketclient_ri[idx]->x2 > 1000) {
             goto sockets_receive_close;
         }
     }
@@ -213,10 +218,10 @@ sockets_receive_checkformessage:
     goto sockets_receive_loop;
     //invalid signature or error
 sockets_receive_close:
-    if (socketclient_si[(unsigned long) i]->exit_thread == 0) socketclient_si[(unsigned long) i]->exit_thread = 1;
+    if (socketclient_si[idx] && socketclient_si[idx]->exit_thread == 0) socketclient_si[idx]->exit_thread = 1;
     //close sending thread
-    socketclient_ri[(unsigned long) i]->exit_thread = 2; //set thread as closed
-    if (socket_disconnect[(unsigned long) i] == 0) socket_disconnect[(unsigned long) i] = 1; //request socket disconnect
+    if (socketclient_ri[idx]) socketclient_ri[idx]->exit_thread = 2; //set thread as closed
+    if (socket_disconnect[idx] == 0) socket_disconnect[idx] = 1; //request socket disconnect
     ExitThread(0);
     return 0;
 }

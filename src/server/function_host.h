@@ -345,6 +345,7 @@ unsigned char stormcloakcheck2(unsigned short x, unsigned short y, player *p);
 unsigned char housecheck(unsigned short x, unsigned short y);
 
 void inbritanniacheck();
+void LOG_host_report();
 
 unsigned char ENHANCEget_attack(object * obj);
 

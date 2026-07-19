@@ -265,14 +265,15 @@ extern unsigned char MOVERNEW_ERROR; //valid when movernew(...) returns 0
 
 #ifndef CLIENT
 //STUBS TO SUPPORT EXTERNAL LINKING (DATA NOT ACTUALLY USED!)
-extern unsigned char u6omidisetup;
+extern unsigned char u6omusicsetup;
 extern HWND hWnd;
 extern HWND hWnd2;
 extern HWND hWnd3;
 extern HWND hWnd4;
 extern RECT desktop_rect;
 extern bool smallwindow;
-extern unsigned char u6ovolume;
+extern int u6ovolume;
+extern int u6ovoiceovervolume;
 #endif
 
 extern unsigned long revive_infiniteloopexit_i;

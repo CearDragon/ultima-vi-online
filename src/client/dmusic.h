@@ -17,6 +17,8 @@ All rights reserved.
 #ifndef DMUSIC_H
 #define DMUSIC_H
 
+#include "music_player.h"
+
 // Some required DX headers
 #include "dmusicc.h"
 #include "dmusici.h"
@@ -34,23 +36,11 @@ All rights reserved.
 #define SET_REVERB 0x1
 #define SET_CHORUS 0x2
 
-// Infoport structure
-typedef struct INFOPORT {
-    char szPortDescription[DMUS_MAX_DESCRIPTION * 2];
-    DWORD dwFlags;
-    DWORD dwClass;
-    DWORD dwType;
-    DWORD dwMaxAudioChannels;
-    DWORD dwMaxVoices;
-    DWORD dwMaxChannelGroups;
-    DWORD dwEffectFlags;
-    GUID guidSynthGUID;
-} *LPINFOPORT;
 
 
 // The definition of the class
 
-class CMidiMusic {
+class CMidiMusic : public IMusicPlayer {
 private:
     BOOL m_b3DPosition; //Indicates when we are using 3D mode
 protected:
@@ -69,28 +59,29 @@ public:
     CMidiMusic(); // The constructor and the destructor of the class
     ~CMidiMusic();
 
+    HRESULT Initialize() override { return Initialize(FALSE); }
     HRESULT Initialize(BOOL b3DPosition); // Public member functions
-    HRESULT PortEnumeration(DWORD dwIndex, LPINFOPORT lpInfoPort);
+    HRESULT PortEnumeration(DWORD dwIndex, LPINFOPORT lpInfoPort) override;
 
-    HRESULT SelectPort(LPINFOPORT InfoPort);
+    HRESULT SelectPort(LPINFOPORT InfoPort) override;
 
-    HRESULT LoadMidiFromFile(LPCSTR szMidi, BOOL bMidiFile);
+    HRESULT LoadMidiFromFile(const char* path, BOOL bMidiFile) override;
 
     HRESULT LoadMidiFromResource(TCHAR *strResource, TCHAR *strResourceType, BOOL bMidiFile);
 
     HRESULT LoadMidiFromMemory(void *offset, unsigned long bytes, BOOL bMidiFile);
 
-    HRESULT Play();
+    HRESULT Play() override;
 
     HRESULT Pause();
 
     HRESULT Resume();
 
-    HRESULT IsPlaying();
+    HRESULT IsPlaying() override;
 
     HRESULT SetRepeat(BOOL bRepeat);
 
-    HRESULT Stop();
+    HRESULT Stop() override;
 
     HRESULT GetLength(MUSIC_TIME *mtMusicTime);
 
@@ -126,7 +117,8 @@ public:
 
     HRESULT GetConeOutsideVolume(LPLONG plConeOutsideVolume);
 
-    HRESULT SetMasterVolume(long nVolume);
+    void SetMasterVolume(long volume) override { SetMasterVolume_internal(volume); }
+    HRESULT SetMasterVolume_internal(long nVolume);
 
     HRESULT SetMasterTempo(float fTempo);
 

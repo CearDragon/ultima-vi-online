@@ -739,28 +739,6 @@ scrlog("Opening message log [talk.txt]");
 
 messagelog=open2("talk.txt",OF_CREATE|OF_READWRITE|OF_SHARE_COMPAT);
 
-scrlog("Initializing MIDI driver");
-if (getsetting("ALLOWMIDI")==2) U6O_DISABLEMUSIC=TRUE;
-if (U6O_DISABLEMUSIC) goto u6omidisetup_failed;
-ZeroMemory(&midikeyboard2_keyon,sizeof(midikeyboard2_keyon));
-ZeroMemory(&u6omidi_filename,sizeof(u6omidi_filename));
-u6omidi=new CMidiMusic;
-if (u6omidi->Initialize(FALSE)!=S_OK) goto u6omidisetup_failed;
-u6omidisetup=1;
-i=0; i2=0;
-while (u6omidi->PortEnumeration(i,&u6omidi_infoport)==S_OK){
-if (u6omidi_infoport.dwClass==DMUS_PC_OUTPUTCLASS){ //Ensure it is an output hardware device
-if (i2==0){
-if (u6omidi_infoport.dwFlags&DMUS_PC_SOFTWARESYNTH){
-u6omidi->SelectPort(&u6omidi_infoport);
-i2=1;
-}
-}
-}
-i++;
-}
-if (i2==0) u6omidisetup=0;
-u6omidisetup_failed:
 
 scrlog("Loading music keyboard state [midikeyb.bin]");
 tfh=open(".\\dr\\midikeyb.bin"); get(tfh,&midikeyboard2,256); close(tfh);
@@ -795,17 +773,35 @@ cltset2_restored=1;
 // status message" arrow pinned to the top-left corner.
 cltset2.statusprev_offset_x=32767; cltset2.statusprev_offset_y=32767;
 cltset2.statusprev_logpinned=0; // default: log not pinned (old/short files keep this)
+cltset2.music_format=0; // default: MIDI
+cltset2.con_frm_img_offset_x=32767; cltset2.con_frm_img_offset_y=32767;
+cltset2.minimap_offset_x=32767; cltset2.minimap_offset_y=32767;
+cltset2.tmap_offset_x=32767; cltset2.tmap_offset_y=32767;
+cltset2.u6ovoiceovervolume = 128;
 get(tfh,&cltset2,sizeof(client_settings));
 close(tfh);
 u6ovolume=cltset2.u6ovolume;
-u6omidivolume=cltset2.u6omidivolume;
+u6omusicvolume=cltset2.u6omusicvolume;
 u6ovoicevolume=cltset2.u6ovoicevolume;
+u6ovoiceovervolume=cltset2.u6ovoiceovervolume;
 statusmessage_logpinned=cltset2.statusprev_logpinned; // restore "keep text log visible" toggle
+music_format=cltset2.music_format;
 memcpy(&spellrecall_partymember,&cltset2.spellrecall_partymember,8);
 memcpy(&spellrecall_i,&cltset2.spellrecall_i,8);
 if (cltset2.musickeyboard_offset_x!=32767){musickeyboard->offset_x=cltset2.musickeyboard_offset_x+kPanelHideDeltaX; musickeyboard->offset_y=cltset2.musickeyboard_offset_y;}
 if (cltset2.inpf_offset_x!=32767){inpf->offset_x=cltset2.inpf_offset_x+kPanelHideDeltaX; inpf->offset_y=cltset2.inpf_offset_y;}
-if (cltset2.con_frm_offset_x!=32767){con_frm->offset_x=cltset2.con_frm_offset_x; con_frm->offset_y=cltset2.con_frm_offset_y;}
+if (cltset2.con_frm_offset_x!=32767){con_frm->offset_x=cltset2.con_frm_offset_x; con_frm->offset_y=cltset2.con_frm_offset_y;
+  u6o::client::g_confrm_user_positioned = true;
+  u6o::client::g_confrm_user_x = cltset2.con_frm_offset_x;
+  u6o::client::g_confrm_user_y = cltset2.con_frm_offset_y;
+}
+if (cltset2.con_frm_img_offset_x!=32767){
+  con_frm_img->offset_x=cltset2.con_frm_img_offset_x;
+  con_frm_img->offset_y=cltset2.con_frm_img_offset_y;
+  u6o::client::g_confrmimg_user_positioned = true;
+  u6o::client::g_confrmimg_user_x = cltset2.con_frm_img_offset_x;
+  u6o::client::g_confrmimg_user_y = cltset2.con_frm_img_offset_y;
+}
 if (cltset2.volcontrol_offset_x!=32767){volcontrol->offset_x=cltset2.volcontrol_offset_x; volcontrol->offset_y=cltset2.volcontrol_offset_y;
   u6o::client::g_volcontrol_user_positioned = true;
   u6o::client::g_volcontrol_user_x = cltset2.volcontrol_offset_x;
@@ -820,6 +816,16 @@ if (cltset2.statusprev_offset_x!=32767){statusmessage_viewprev->offset_x=cltset2
   u6o::client::g_statusprev_user_positioned = true;
   u6o::client::g_statusprev_user_x = cltset2.statusprev_offset_x;
   u6o::client::g_statusprev_user_y = cltset2.statusprev_offset_y;
+}
+if (cltset2.minimap_offset_x!=32767){
+  u6o::client::g_minimap_user_positioned = true;
+  u6o::client::g_minimap_user_x = cltset2.minimap_offset_x;
+  u6o::client::g_minimap_user_y = cltset2.minimap_offset_y;
+}
+if (cltset2.tmap_offset_x!=32767){
+  u6o::client::g_tmap_user_positioned = true;
+  u6o::client::g_tmap_user_x = cltset2.tmap_offset_x;
+  u6o::client::g_tmap_user_y = cltset2.tmap_offset_y;
 }
 memcpy(&cltset,&cltset2,sizeof(client_settings));
 }else{
@@ -837,8 +843,42 @@ cltset.minimap_offset_x=32767;
 cltset.tmap_offset_x=32767;
 cltset.statusprev_offset_x=32767;
 cltset.statusprev_logpinned=0;
+cltset.music_format=0;
+cltset.con_frm_img_offset_x=32767;
 }
 FRAME_mbl[0]=FALSE; FRAME_mbl[1]=FALSE; lpn=NULL; //used by frame.h
+
+// Seed/repair the new MUSICFORMAT CHOICE entry in settings.txt so menu radio
+// state reflects persisted choice even on older settings.txt files that predate
+// this option.
+if (music_format == 1) setsetting_choice("MUSICFORMAT","MP3");
+else setsetting_choice("MUSICFORMAT","MIDI");
+
+scrlog("Initializing music driver");
+if (getsetting("ALLOWMIDI")==2) U6O_DISABLEMUSIC=TRUE;
+if (U6O_DISABLEMUSIC) goto u6omusicsetup_failed;
+ZeroMemory(&midikeyboard2_keyon,sizeof(midikeyboard2_keyon));
+ZeroMemory(&u6omusic_filename,sizeof(u6omusic_filename));
+if (music_format == 1) u6omusic = new CMp3Music;
+else u6omusic = new CMidiMusic;
+if (u6omusic->Initialize()!=S_OK) goto u6omusicsetup_failed;
+u6omusicsetup=1;
+if (music_format == 0) { // MIDI port selection
+i=0; i2=0;
+while (u6omusic->PortEnumeration(i,&u6omusic_infoport)==S_OK){
+if (u6omusic_infoport.dwClass==DMUS_PC_OUTPUTCLASS){ //Ensure it is an output hardware device
+if (i2==0){
+if (u6omusic_infoport.dwFlags&DMUS_PC_SOFTWARESYNTH){
+u6omusic->SelectPort(&u6omusic_infoport);
+i2=1;
+}
+}
+}
+i++;
+}
+if (i2==0) u6omusicsetup=0;
+}
+u6omusicsetup_failed:
 
 
 tfh=open2("ignore.txt",OF_READWRITE|OF_SHARE_COMPAT);
@@ -867,7 +907,7 @@ midiOutShortMsg(midiout_handle,0x000000C3+75*256); //76 Pan Flute
 midiOutShortMsg(midiout_handle,0x000000C4);//required
 midiOutShortMsg(midiout_handle,0x000020C4);//required
 midiOutShortMsg(midiout_handle,0x000000C4+13*256); //14 Xylophone
-x=u6omidivolume/2;//change 0-255 to 0-127
+x=u6omusicvolume/2;//change 0-255 to 0-127
 midiOutShortMsg(midiout_handle,0x000007B0+x*65536); //set volume
 midiOutShortMsg(midiout_handle,0x000007B1+x*65536); //set volume
 midiOutShortMsg(midiout_handle,0x000007B2+x*65536); //set volume

@@ -4533,7 +4533,6 @@ void inbritanniacheck() {
     txtnumint(inbritannia, inbritannia_totalplayers);
     txtadd(inbritannia, " in Britannia: ");
     txtadd(inbritannia, t);
-
     txtset(t2, "c:\\public_html\\who.jss");
     tfh = open2(t2, OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
     if (tfh->h != HFILE_ERROR) {
@@ -4544,6 +4543,32 @@ void inbritanniacheck() {
         close(tfh);
     } //!=HFILE_ERROR
 } //inbritanniacheck
+
+
+void LOG_host_report() {
+    txt *t = txtnew();
+    txt *t2 = txtnew();
+
+    txtset(t, "[In_Britania:");
+    txtadd(t, inbritannia);
+    txtadd(t, "]");
+    txtnumint(t2, framerate);
+    txtadd(t, "[Framerate:");
+    txtadd(t, t2);
+    txtadd(t, "]");
+    txtnumint(t2, vlnkb_last);
+    txtadd(t, "[vlnkb_last(MAX=65536):");
+    txtadd(t, t2);
+    txtadd(t, "]");
+    txtnumint(t2, objb_last);
+    txtadd(t, "[objb_last(MAX=524228):");
+    txtadd(t, t2);
+    txtadd(t, "]");
+    LOGadd(t);
+
+    free(t);
+    free(t2);
+}
 
 unsigned char ENHANCEget_attack(object *obj) {
     if (obj == NULL) return 0;

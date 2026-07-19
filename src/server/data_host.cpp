@@ -50,13 +50,14 @@ void data_host_init(void) {
 
 #ifndef CLIENT
     //STUBS TO SUPPORT EXTERNAL LINKING (DATA NOT ACTUALLY USED!)
-    u6omidisetup = NULL;
+    u6omusicsetup = NULL;
     hWnd = NULL;
     hWnd2 = NULL;
     hWnd3 = NULL;
     hWnd4 = NULL;
-    smallwindow = NULL;
-    u6ovolume = NULL;
+    smallwindow = FALSE;
+    u6ovolume = 128;
+    u6ovoiceovervolume = 128;
 #endif
 
     revive_infiniteloopexit_i = 0;

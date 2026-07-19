@@ -1,4 +1,4 @@
-﻿// ui_panels_apply.cpp — RW-P3.3 implementation of RepositionAnchoredPanels.
+﻿// ui_panels_apply.cpp � RW-P3.3 implementation of RepositionAnchoredPanels.
 //
 // This is the seam between the pure ui_layout module and the live game
 // panel globals. ui_layout.{h,cpp} stays free of any game-data
@@ -129,7 +129,7 @@ namespace u6o {
             resxn1w = clientW;
             resyn1w = clientH;
             // RW-P4.8 (2026-05-22): sidebar is no longer anchored to the right
-            // edge of the window — it stays at its legacy 1024-relative
+            // edge of the window � it stays at its legacy 1024-relative
             // position. `resxn1m` is the X coordinate just to the LEFT of the
             // sidebar; with the sidebar pinned to the legacy layout this is the
             // legacy 1024 - sidebarW (matches what setup_client.inc produced
@@ -166,14 +166,35 @@ namespace u6o {
             // uipanelx[uipanelsidebar][0][0] = clientW - sidebarW, plus the
             // dependent panels keyed off uipanelx[uipanelsidebar].
 
-            apply_to(con_frm, UiPanelId::ConvoArrows, clientW, clientH);
-            apply_to(con_frm_img, UiPanelId::ConvoHistory, clientW, clientH);
+            if (con_frm && g_confrm_user_positioned) {
+                int x = g_confrm_user_x;
+                int y = g_confrm_user_y;
+                if (x < 0) x = 0;
+                if (x > clientW) x = clientW;
+                if (y < 0) y = 0;
+                if (y > clientH) y = clientH;
+                con_frm->offset_x = (short)x;
+                con_frm->offset_y = (short)y;
+            } else {
+                apply_to(con_frm, UiPanelId::ConvoArrows, clientW, clientH);
+            }
+
+            if (con_frm_img && g_confrmimg_user_positioned) {
+                int x = g_confrmimg_user_x;
+                int y = g_confrmimg_user_y;
+                // Relative offsets can be negative, so we don't clamp as strictly as frames.
+                // But we should probably keep it somewhat sane.
+                con_frm_img->offset_x = (short)x;
+                con_frm_img->offset_y = (short)y;
+            } else {
+                apply_to(con_frm_img, UiPanelId::ConvoHistory, clientW, clientH);
+            }
             // RW: if the user dragged qkstf to a custom spot (this session or a
             // restored prior session), keep it there instead of snapping back
             // to the anchored top-right default. Clamp the *live* offset to
             // the current client area so a shrunken window doesn't strand the
             // panel off-screen, but do NOT write the clamp back into the
-            // cache — a maximized window may have saved a coordinate that's
+            // cache � a maximized window may have saved a coordinate that's
             // perfectly valid for the larger size and would be permanently
             // lost if the user briefly opened at the default size. The cache
             // is only ever mutated by an actual user drag (loop_client.cpp).
@@ -219,7 +240,7 @@ namespace u6o {
             apply_to(statusmessage_viewprev, UiPanelId::StatusViewPrev, clientW, clientH);
 
             // RW: honor a user-dragged position for the StatusViewPrev arrow,
-            // same rule as qkstf/volcontrol — clamp the live offset to the
+            // same rule as qkstf/volcontrol � clamp the live offset to the
             // current client area for display but never write the clamp back
             // to the cache (the cache is only mutated by an actual drag).
             if (statusmessage_viewprev && g_statusprev_user_positioned) {
@@ -231,6 +252,51 @@ namespace u6o {
                 if (y > clientH) y = clientH;
                 statusmessage_viewprev->offset_x = x;
                 statusmessage_viewprev->offset_y = y;
+            }
+
+            // RW-P4.11: Minimap and T-Map frames follow the user-positioned
+            // pattern, defaulting to centered in the viewport if no saved
+            // position exists.
+            if (minimap_frame && minimap_frame->graphic) {
+                int homeX, homeY;
+                if (g_minimap_user_positioned) {
+                    homeX = g_minimap_user_x;
+                    homeY = g_minimap_user_y;
+                } else {
+                    homeX = (clientW - (int)minimap_frame->graphic->dwWidth) / 2;
+                    homeY = (clientH - (int)minimap_frame->graphic->dwHeight) / 2;
+                }
+                int w = (int)minimap_frame->graphic->dwWidth;
+                int h = (int)minimap_frame->graphic->dwHeight;
+                if (homeX + w > clientW) homeX = clientW - w;
+                if (homeY + h > clientH) homeY = clientH - h;
+                if (homeX < 0) homeX = 0;
+                if (homeY < 0) homeY = 0;
+
+                minimap_frame->offset_y = (short)homeY;
+                minimap_frame->offset_x = (short)(peer ? homeX : homeX + kPanelHideDeltaX);
+                minimap_frame->positioned = true;
+            }
+
+            if (tmap_frame && tmap_frame->graphic) {
+                int homeX, homeY;
+                if (g_tmap_user_positioned) {
+                    homeX = g_tmap_user_x;
+                    homeY = g_tmap_user_y;
+                } else {
+                    homeX = (clientW - (int)tmap_frame->graphic->dwWidth) / 2;
+                    homeY = (clientH - (int)tmap_frame->graphic->dwHeight) / 2;
+                }
+                int w = (int)tmap_frame->graphic->dwWidth;
+                int h = (int)tmap_frame->graphic->dwHeight;
+                if (homeX + w > clientW) homeX = clientW - w;
+                if (homeY + h > clientH) homeY = clientH - h;
+                if (homeX < 0) homeX = 0;
+                if (homeY < 0) homeY = 0;
+
+                tmap_frame->offset_y = (short)homeY;
+                tmap_frame->offset_x = (short)(tmap ? homeX : homeX + kPanelHideDeltaX);
+                tmap_frame->positioned = true;
             }
 
             ValidateUiMetrics();

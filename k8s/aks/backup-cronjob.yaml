@@ -36,8 +36,8 @@ spec:
           volumes:
             - name: host-volume
               persistentVolumeClaim:
-                claimName: azure-file-pvc
+                claimName: azure-file-pvc-cheap
             - name: saves-volume
               persistentVolumeClaim:
-                claimName: azure-saves-pvc
+                claimName: azure-saves-pvc-cheap
 # kubectl create job --from=cronjob/u6o-host-save-backup u6o-backup-test -n ultima-dev

@@ -264,7 +264,7 @@ void mididown(unsigned char instrument, unsigned char key) {
     if (midipause == 0) {
         midipause = 1;
         if (U6O_DISABLEMUSIC == FALSE) {
-            u6omidi->Stop();
+            u6omusic->Stop();
         }
     }
 
@@ -2103,8 +2103,10 @@ void setsetting_choice(const char *name, const char *value) {
     static txt *lowerline = txtnew();
     static txt *rebuilt = txtnew();
     static long i, sz;
+    static bool found;
 
     txtNEWLEN(out, 0);
+    found = false;
 
     // "{NAME," marker (lowercased) uniquely identifies the setting's line.
     txtset(needle, "{");
@@ -2113,36 +2115,46 @@ void setsetting_choice(const char *name, const char *value) {
     txtlcase(needle);
 
     tfh = open2("settings.txt", OF_READ | OF_SHARE_COMPAT);
-    if (tfh->h == HFILE_ERROR) { close(tfh); return; } // nothing to rewrite
+    if (tfh->h != HFILE_ERROR) {
+        for (;;) {
+            i = seek(tfh);
+            sz = lof(tfh);
+            if (i >= sz) break;
+            txtfilein(line, tfh);
+            if (line->l == 0) continue;
 
-    for (;;) {
-        i = seek(tfh);
-        sz = lof(tfh);
-        if (i >= sz) break;
-        txtfilein(line, tfh);
-        if (line->l == 0) continue;
-
-        txtset(lowerline, line);
-        txtlcase(lowerline);
-        if (txtsearch(lowerline, needle) != 0) {
-            // Replace the first [..] token in the line with [value].
-            long lb = -1, rb = -1;
-            for (long j = 0; j < line->l; j++) { if (line->d[j] == '[') { lb = j; break; } }
-            if (lb >= 0)
-                for (long j = lb + 1; j < line->l; j++) { if (line->d[j] == ']') { rb = j; break; } }
-            if (lb >= 0 && rb > lb) {
-                txtNEWLEN(rebuilt, 0);
-                for (long j = 0; j <= lb; j++) txtaddchar(rebuilt, line->d[j]); // up to and incl '['
-                txtadd(rebuilt, value);
-                for (long j = rb; j < line->l; j++) txtaddchar(rebuilt, line->d[j]); // from ']' on
-                txtset(line, rebuilt);
+            txtset(lowerline, line);
+            txtlcase(lowerline);
+            if (txtsearch(lowerline, needle) != 0) {
+                found = true;
+                // Replace the first [..] token in the line with [value].
+                long lb = -1, rb = -1;
+                for (long j = 0; j < line->l; j++) { if (line->d[j] == '[') { lb = j; break; } }
+                if (lb >= 0)
+                    for (long j = lb + 1; j < line->l; j++) { if (line->d[j] == ']') { rb = j; break; } }
+                if (lb >= 0 && rb > lb) {
+                    txtNEWLEN(rebuilt, 0);
+                    for (long j = 0; j <= lb; j++) txtaddchar(rebuilt, line->d[j]); // up to and incl '['
+                    txtadd(rebuilt, value);
+                    for (long j = rb; j < line->l; j++) txtaddchar(rebuilt, line->d[j]); // from ']' on
+                    txtset(line, rebuilt);
+                }
             }
-        }
 
-        if (out->l) txtadd(out, "\r\n");
-        txtadd(out, line);
+            if (out->l) txtadd(out, "\r\n");
+            txtadd(out, line);
+        }
     }
     close(tfh);
+
+    // Seed missing CHOICE settings in existing/older settings.txt files.
+    if (!found) {
+        if (_stricmp(name, "MUSICFORMAT") != 0) return;
+        if (out->l) txtadd(out, "\r\n");
+        txtadd(out, "Music format is [");
+        txtadd(out, value);
+        txtadd(out, "].{MUSICFORMAT,CHOICE,MIDI,MP3}");
+    }
 
     if (out->l) txtadd(out, "\r\n");
     tfh = open2("settings.txt", OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
@@ -2154,21 +2166,22 @@ void setsetting_choice(const char *name, const char *value) {
 
 // Push the current music-volume global to the DirectMusic + low-level MIDI
 // outputs. This is a behavior-preserving extraction of the inline block that
-// used to live only at the `u6omidivolume_changed:` label in the volume-panel
+// used to live only at the `u6omusicvolume_changed:` label in the volume-panel
 // loop (loop_client_part_game_open.cpp); the Options menu reuses it.
 void applyMidiVolume() {
     if (U6O_DISABLEMUSIC) return;
-    float f = u6omidi_volume[midi_loaded];
-    f = f * (float) u6omidivolume / 255.0f;
-    f = 255 - f;
+    float f = u6omusic_volume[midi_loaded];
+    f = f * (float) u6omusicvolume / 255.0f;
+    if (f > 255.0f) f = 255.0f;
+    f = 255.0f - f;
     f = f * 0.25f;
     f *= f;
     // DMUS_VOLUME_MAX 2000 (+20 dB) .. DMUS_VOLUME_MIN -20000 (-200 dB)
-    u6omidi->SetMasterVolume(-f);
-    if (u6omidivolume == 0) u6omidi->Stop();
+    u6omusic->SetMasterVolume(-f);
+    if (u6omusicvolume == 0) u6omusic->Stop();
 
     if (midiout_setup) {
-        int x = u6omidivolume / 2; // 0-255 -> 0-127
+        int x = u6omusicvolume / 2; // 0-255 -> 0-127
         midiOutShortMsg(midiout_handle, 0x000007B0 + x * 65536);
         midiOutShortMsg(midiout_handle, 0x000007B1 + x * 65536);
         midiOutShortMsg(midiout_handle, 0x000007B2 + x * 65536);
@@ -2195,11 +2208,11 @@ struct MenuSetting {
     const char *label;        // submenu label
     int kind;                 // MS_CHOICE / MS_VOLUME
     const char *settingName;  // MS_CHOICE: settings.txt key; else nullptr
-    unsigned char *volTarget; // MS_VOLUME: global to read/write; else nullptr
+    int *volTarget;           // MS_VOLUME: global to read/write; else nullptr
     int isMusic;              // MS_VOLUME: also push to MIDI on change
     int optionCount;
     const char *optLabel[8];  // choice tokens (MS_CHOICE) / display (MS_VOLUME)
-    unsigned char optVol[8];  // MS_VOLUME values
+    int optVol[8];            // MS_VOLUME values
 };
 
 static const MenuSetting g_menuSettings[] = {
@@ -2215,9 +2228,11 @@ static const MenuSetting g_menuSettings[] = {
     {"Graphics", "Transparency: piano keys", MS_CHOICE, "PLAYINSTRUMENTPIANOKEYS_TRANSPARENCYLEVEL",      0, 0, 3, {"not", "50%", "25%"}, {0}},
     // ---- Audio ----
     {"Audio", "Load MIDI drivers",           MS_CHOICE, "ALLOWMIDI",     0, 0, 2, {"Do", "Don't"}, {0}},
-    {"Audio", "Music volume",                MS_VOLUME, 0, &u6omidivolume, 1, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    {"Audio", "Music volume",                MS_VOLUME, 0, &u6omusicvolume, 1, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
     {"Audio", "Sound volume",                MS_VOLUME, 0, &u6ovolume,     0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    {"Audio", "Voiceover volume",            MS_VOLUME, 0, &u6ovoiceovervolume, 0, 7, {"0%", "25%", "50%", "75%", "100%", "150%", "200%"}, {0, 64, 128, 191, 255, 384, 512}},
     {"Audio", "Voice volume",                MS_VOLUME, 0, &u6ovoicevolume, 0, 5, {"0%", "25%", "50%", "75%", "100%"}, {0, 64, 128, 191, 255}},
+    {"Audio", "Music format",                MS_CHOICE, "MUSICFORMAT",   0, 0, 2, {"MIDI", "MP3"}, {0}},
     // ---- Input ----
     {"Input", "Read joystick",               MS_CHOICE, "ALLOWJOYSTICK", 0, 0, 2, {"Do", "Don't"}, {0}},
 };
@@ -2261,6 +2276,10 @@ static void applyTransparencyLive(const char *name, int level) {
 // Current 0-based option index for a setting, or -1 if unknown.
 static int optionsCurrentIndex(const MenuSetting &ms) {
     if (ms.kind == MS_CHOICE) {
+        if (strcmp(ms.settingName, "MUSICFORMAT") == 0) {
+            if (music_format < ms.optionCount) return (int) music_format;
+            return 0;
+        }
         long v = getsetting(ms.settingName); // 1-based, 0/FALSE if missing
         return v > 0 ? (int) v - 1 : -1;
     }
@@ -2343,7 +2362,40 @@ bool HandleOptionsCommand(int cmdId) {
         // immediately via setsetting_choice above.
         if (strcmp(ms.settingName, "CLOUDS") == 0)
             noclouds = (opt == 1) ? TRUE : FALSE; // opt 0 = "Yes", opt 1 = "No"
-        else
+        else if (strcmp(ms.settingName, "MUSICFORMAT") == 0) {
+            cltset.music_format = (unsigned char) opt;
+            music_format = cltset.music_format;
+            if (u6omusic) {
+                u6omusic->Stop();
+                delete u6omusic;
+            }
+            if (music_format == 1) u6omusic = new CMp3Music();
+            else u6omusic = new CMidiMusic();
+            if (FAILED(u6omusic->Initialize())) {
+                u6omusicsetup = 0;
+            } else {
+                u6omusicsetup = 1;
+                if (music_format == 0) {
+                    // Match setup_client.inc MIDI init path: bind to a software synth port.
+                    int portIndex = 0;
+                    int portFound = 0;
+                    while (u6omusic->PortEnumeration(portIndex, &u6omusic_infoport) == S_OK) {
+                        if (u6omusic_infoport.dwClass == DMUS_PC_OUTPUTCLASS) {
+                            if (portFound == 0) {
+                                if (u6omusic_infoport.dwFlags & DMUS_PC_SOFTWARESYNTH) {
+                                    u6omusic->SelectPort(&u6omusic_infoport);
+                                    portFound = 1;
+                                }
+                            }
+                        }
+                        portIndex++;
+                    }
+                    if (portFound == 0) u6omusicsetup = 0;
+                }
+            }
+            midiinfo_loaded = FALSE; // Force reload paths for new format
+            midi_loaded = -1;
+        } else
             applyTransparencyLive(ms.settingName, opt);
     } else {
         if (ms.volTarget) *ms.volTarget = ms.optVol[opt];
@@ -2873,5 +2925,3 @@ void cleanup_player_namelist(void) {
     }
     idlstn = -1;  // Reset the player list counter
 }
-
-

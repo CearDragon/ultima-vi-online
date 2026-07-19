@@ -102,10 +102,23 @@ if
                             memcpy(&dbgt5->d2[0], &mess_SF->d2[i4], sfx[i3].x2);
                             i4 += sfx[i3].x2;
                             sfx[i3].p = dbgt5;
+                            
                             txtset(t, (txt *) sfx[i3].p);
                             txtset(t2, "?");
                             t2->d2[0] = 92;
                             z = txtsearch(t, t2);
+
+                            // NPC-VO: speech-triggered voiceovers are keyed by
+                            // speaker id + text match and run once per incoming
+                            // conversation message, not on UI redraw.
+                            if (z) {
+                                txtset(t4, t);
+                                txtleft(t4, z - 1);
+                                voiceover_play_for_message(sfx[i3].more, (const char *) t4->d2, u6ovoiceovervolume);
+                            } else {
+                                voiceover_play_for_message(sfx[i3].more, (const char *) dbgt5->d2, u6ovoiceovervolume);
+                            }
+
                             if (z == 0) z = t->l;
                             else z--;
                             f = (float) z / 10.0f;
@@ -640,9 +653,9 @@ if
             if (U6O_DISABLEMUSIC) goto CLIENT_donemess;
             if (midi_background == 0) {
                 //stop playing intro immediately
-                u6omidi->Stop(); //stop playing background midi
+                u6omusic->Stop(); //stop playing background midi
             isplayingwait3:
-                if (u6omidi->IsPlaying() == S_OK) goto isplayingwait3;
+                if (u6omusic->IsPlaying() == S_OK) goto isplayingwait3;
             }
 
             midi_background = t->d2[1];
@@ -1469,6 +1482,8 @@ if
         if (t->d2[0] == 254) {
             //incorrect version
             MessageBox(NULL, "U6O incorrect version, please download new version", "Ultima 6 Online", MB_OK);
+            ShellExecuteA(hWnd, "open", "https://github.com/CearDragon/ultima-vi-online/releases", NULL, NULL,
+                          SW_SHOWNORMAL);
             setupfail = TRUE;
             goto CLIENT_donemess;
         }
@@ -1578,10 +1593,7 @@ if
                 static sound *voicein;
                 voicein = soundload(".\\voice\\voicein.wav");
                 //4. play sound
-                x4 = u6ovolume;
-                u6ovolume = u6ovoicevolume;
-                soundplay2(voicein, 255); //should reflect voice volume controls!!
-                u6ovolume = x4;
+                soundplay2(voicein, 255, u6ovoicevolume);
                 //5. delete (primary) sound
                 voicein->s->Release();
                 free((void *) voicein);
