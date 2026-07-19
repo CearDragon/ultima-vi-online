@@ -1,5 +1,0 @@
-Date: 2026/07/12 Time: 12:44
-000:00:00:00 MDD: map-file manifest built [len=4194304 sum=A19C2F42] [len=4325376 sum=7071E1B8] [len=4325376 sum=B111B44A]
-000:00:00:00 GUARDIANGUILD: load house=200 shelfslots=14
-000:00:00:04 GUARDIANGUILD: save house=200 shelfslots=14 top-level-items=59 bytes=772
-000:00:00:04 GUARDIANGUILD: save house=200 shelfslots=14 top-level-items=59 bytes=772
