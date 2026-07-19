@@ -243,3 +243,16 @@ void soundshutdown() {
     }
     soundsetupf = FALSE;
 }
+
+bool sound_is_any_copy_playing(sound *s) {
+    if (DirectSoundCreate_fail || !soundsetupf || !s) return false;
+    for (int i = 0; i < 256; i++) {
+        if (tempsound[i] != NULL && tempsound[i]->ss == s) {
+            unsigned long status = 0;
+            if (tempsound[i]->s->GetStatus(&status) == DS_OK) {
+                if (status & DSBSTATUS_PLAYING) return true;
+            }
+        }
+    }
+    return false;
+}

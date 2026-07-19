@@ -38,6 +38,16 @@ bool g_voiceover_loaded = false;
 bool g_voiceover_mci_open = false;
 char g_voiceover_map_path[MAX_PATH] = "";
 char g_voiceover_map_dir[MAX_PATH] = "";
+sound* g_current_voiceover_ds_source = NULL;
+
+constexpr int kVoiceoverQueueSize = 32;
+struct QueuedVoiceover {
+    VoiceoverLine* line;
+    int volume;
+};
+QueuedVoiceover g_voiceover_queue[kVoiceoverQueueSize];
+int g_voiceover_queue_head = 0;
+int g_voiceover_queue_tail = 0;
 
 void logVoiceoverMessage(const char* message) {
     scrlog(message);
@@ -325,6 +335,7 @@ bool tryMciOpen(const char* path, const char* open_template, const char* stage) 
 
 bool playStreamingVoiceover(const char* path, int volume) {
     closeMciVoiceover();
+    g_current_voiceover_ds_source = NULL;
 
     char full_path[MAX_PATH];
     DWORD full_path_len = GetFullPathNameA(path, MAX_PATH, full_path, NULL);
@@ -467,6 +478,7 @@ bool playWaveVoiceover(VoiceoverLine* line, int volume) {
 
     if (!line->cached_sound) return false;
 
+    g_current_voiceover_ds_source = line->cached_sound;
     return soundplay2(line->cached_sound, 255, volume, true) != NULL;
 }
 
@@ -494,7 +506,22 @@ bool playOggVoiceover(VoiceoverLine* line, int volume) {
     }
 
     if (!line->cached_sound) return false;
+
+    g_current_voiceover_ds_source = line->cached_sound;
     return soundplay2(line->cached_sound, 255, volume, true) != NULL;
+}
+
+bool voiceover_is_playing() {
+    if (g_voiceover_mci_open) {
+        char status[128];
+        if (mciSendStringA("status u6ovoice mode", status, sizeof(status), NULL) == 0) {
+            if (_stricmp(status, "playing") == 0) return true;
+        }
+    }
+    if (g_current_voiceover_ds_source) {
+        if (sound_is_any_copy_playing(g_current_voiceover_ds_source)) return true;
+    }
+    return false;
 }
 
 VoiceoverLine* findVoiceoverLine(int npc_port, const char* text) {
@@ -519,6 +546,9 @@ VoiceoverLine* findVoiceoverLine(int npc_port, const char* text) {
 
 void voiceover_shutdown(void) {
     closeMciVoiceover();
+    g_current_voiceover_ds_source = NULL;
+    g_voiceover_queue_head = 0;
+    g_voiceover_queue_tail = 0;
 
     for (int npc_index = 0; npc_index < g_voiceover_npc_count; npc_index++) {
         for (int line_index = 0; line_index < g_voiceover_map[npc_index].line_count; line_index++) {
@@ -640,13 +670,16 @@ const char* voiceover_lookup_by_port_and_prefix(int npc_port, const char* text) 
     return line ? line->audio_file : NULL;
 }
 
-void voiceover_play_for_message(int npc_port, const char* text, int volume) {
-    VoiceoverLine* line = findVoiceoverLine(npc_port, text);
-    if (!line) return;
-    if (!resolveAudioPath(line)) {
-        logVoiceoverMessage("[VO] Audio file for mapped line was not found");
-        return;
-    }
+void voiceover_tick(void) {
+    if (voiceover_is_playing()) return;
+
+    if (g_voiceover_queue_head == g_voiceover_queue_tail) return;
+
+    QueuedVoiceover* next = &g_voiceover_queue[g_voiceover_queue_head];
+    g_voiceover_queue_head = (g_voiceover_queue_head + 1) % kVoiceoverQueueSize;
+
+    VoiceoverLine* line = next->line;
+    int volume = next->volume;
 
     const char* extension = fileExtension(line->resolved_audio_path);
     if (_stricmp(extension, ".wav") == 0) {
@@ -663,6 +696,27 @@ void voiceover_play_for_message(int npc_port, const char* text, int volume) {
     if (!playStreamingVoiceover(line->resolved_audio_path, volume)) {
         logVoiceoverMessage("[VO] Failed to play streaming voiceover file");
     }
+}
+
+void voiceover_play_for_message(int npc_port, const char* text, int volume) {
+    VoiceoverLine* line = findVoiceoverLine(npc_port, text);
+    if (!line) return;
+
+    if (!resolveAudioPath(line)) {
+        logVoiceoverMessage("[VO] Audio file for mapped line was not found");
+        return;
+    }
+
+    // Push to queue for sequential playback without blocking the main loop
+    int next_tail = (g_voiceover_queue_tail + 1) % kVoiceoverQueueSize;
+    if (next_tail == g_voiceover_queue_head) {
+        // Queue full - drop oldest to make room for newest dialog
+        g_voiceover_queue_head = (g_voiceover_queue_head + 1) % kVoiceoverQueueSize;
+    }
+
+    g_voiceover_queue[g_voiceover_queue_tail].line = line;
+    g_voiceover_queue[g_voiceover_queue_tail].volume = volume;
+    g_voiceover_queue_tail = next_tail;
 }
 
 

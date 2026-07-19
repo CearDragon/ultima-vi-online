@@ -1482,6 +1482,8 @@ if
         if (t->d2[0] == 254) {
             //incorrect version
             MessageBox(NULL, "U6O incorrect version, please download new version", "Ultima 6 Online", MB_OK);
+            ShellExecuteA(hWnd, "open", "https://github.com/CearDragon/ultima-vi-online/releases", NULL, NULL,
+                          SW_SHOWNORMAL);
             setupfail = TRUE;
             goto CLIENT_donemess;
         }

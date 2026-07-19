@@ -866,12 +866,12 @@
           "description": "Nystul says he learned of the Avatar's peril through his mystic arts."
         },
         {
-          "text_prefix": "Iolo, I saw that",
+          "text_prefix": "I saw in the",
           "audio_file": "ogg\\nystul\\Nystul.2.ogg",
-          "description": "Nystul tells Iolo he saw that he found a book."
+          "description": "Nystul tells Iolo he saw the book."
         },
         {
-          "text_prefix": "Might I examine it?",
+          "text_prefix": "I should like to",
           "audio_file": "ogg\\nystul\\Nystul.3.ogg",
           "description": "Nystul asks to examine the book."
         },
@@ -2123,6 +2123,4008 @@
           "text_prefix": "If we understood this",
           "audio_file": "ogg\\kytyn\\Kytyn.36.ogg",
           "description": "If we understood this process better, it would probably lead to all sorts of useful applications."
+        }
+      ]
+    },
+    {
+      "npc_port": 10,
+      "npc_name": "Kenneth",
+      "npc_portrait": 10,
+      "lines": [
+        {
+          "text_prefix": "Her name is Nan",
+          "audio_file": "ogg\\kenneth\\Kenneth.6.ogg",
+          "description": "Her name is Nan. Whatever you do, don't say anything to her about spiders!"
+        },
+        {
+          "text_prefix": "She has quite an",
+          "audio_file": "ogg\\kenneth\\Kenneth.7.ogg",
+          "description": "She has quite an imagination. Sometimes she lets it carry her away."
+        },
+        {
+          "text_prefix": "I asked you not",
+          "audio_file": "ogg\\kenneth\\Kenneth.2.ogg",
+          "description": "I asked you not to wear it out. It's the only name I've got."
+        },
+        {
+          "text_prefix": "My wife and I",
+          "audio_file": "ogg\\kenneth\\Kenneth.3.ogg",
+          "description": "My wife and I teach young bards the art of composition, performance, and improvisation."
+        },
+        {
+          "text_prefix": "Tell me what does",
+          "audio_file": "ogg\\kenneth\\Kenneth.18.ogg",
+          "description": "Tell me, what does it mean?"
+        },
+        {
+          "text_prefix": "Hmm no I don't",
+          "audio_file": "ogg\\kenneth\\Kenneth.19.ogg",
+          "description": "Hmm, no, I don't think that's it."
+        },
+        {
+          "text_prefix": "Until we meet again",
+          "audio_file": "ogg\\kenneth\\Kenneth.14.ogg",
+          "description": "Until we meet again"
+        },
+        {
+          "text_prefix": "I like the confused",
+          "audio_file": "ogg\\kenneth\\Kenneth.15.ogg",
+          "description": "I like the confused look on your face too much to ruin it by telling you."
+        },
+        {
+          "text_prefix": "Dost thou know what",
+          "audio_file": "ogg\\kenneth\\Kenneth.16.ogg",
+          "description": "Dost thou know what it means?"
+        },
+        {
+          "text_prefix": "Nobody I know does",
+          "audio_file": "ogg\\kenneth\\Kenneth.17.ogg",
+          "description": "Nobody I know does either!"
+        },
+        {
+          "text_prefix": "I've been trying to",
+          "audio_file": "ogg\\kenneth\\Kenneth.10.ogg",
+          "description": "I've been trying to work the mantra of compassion into a song, but I don't know what \"moo\" means."
+        },
+        {
+          "text_prefix": "Ariana has the rune",
+          "audio_file": "ogg\\kenneth\\Kenneth.11.ogg",
+          "description": "Ariana has the rune, and they could have hardly found a sweeter child to give it to."
+        },
+        {
+          "text_prefix": "Once in a great",
+          "audio_file": "ogg\\kenneth\\Kenneth.12.ogg",
+          "description": "Once in a great while, a student comes along with such a gift for learning that one need but offer a little guidance and step back to watch them learn."
+        },
+        {
+          "text_prefix": "To have such students",
+          "audio_file": "ogg\\kenneth\\Kenneth.13.ogg",
+          "description": "To have such students is the most rewarding part of a teacher's job, and Ariana is one such."
+        },
+        {
+          "text_prefix": "Welcome I am Sir",
+          "audio_file": "ogg\\kenneth\\Kenneth.0.ogg",
+          "description": "Welcome, I am Sir Kenneth, and I'd gladly play a song for thee."
+        },
+        {
+          "text_prefix": "Kenneth's my name don't",
+          "audio_file": "ogg\\kenneth\\Kenneth.1.ogg",
+          "description": "Kenneth's my name, don't wear it out."
+        },
+        {
+          "text_prefix": "Usually it doesn't give",
+          "audio_file": "ogg\\kenneth\\Kenneth.8.ogg",
+          "description": "Usually it doesn't give her any trouble."
+        },
+        {
+          "text_prefix": "Yes I know of",
+          "audio_file": "ogg\\kenneth\\Kenneth.9.ogg",
+          "description": "Yes, I know of the Rune and Mantra of Compassion."
+        },
+        {
+          "text_prefix": "We also give concerts",
+          "audio_file": "ogg\\kenneth\\Kenneth.4.ogg",
+          "description": "We also give concerts on occasion."
+        },
+        {
+          "text_prefix": "Bards must be well",
+          "audio_file": "ogg\\kenneth\\Kenneth.5.ogg",
+          "description": "Bards must be well versed in such matters."
+        }
+      ]
+    },
+    {
+      "npc_port": 11,
+      "npc_name": "Nan",
+      "npc_portrait": 11,
+      "lines": [
+        {
+          "text_prefix": "With my lute",
+          "audio_file": "ogg\\nan\\Nan.3.ogg",
+          "description": "With my lute"
+        },
+        {
+          "text_prefix": "Every time I pick",
+          "audio_file": "ogg\\nan\\Nan.4.ogg",
+          "description": "Every time I pick up my lute, spiders crawl out of it."
+        },
+        {
+          "text_prefix": "There must be hundreds",
+          "audio_file": "ogg\\nan\\Nan.5.ogg",
+          "description": "There must be hundreds of them nesting in there!"
+        },
+        {
+          "text_prefix": "I hate spiders They're",
+          "audio_file": "ogg\\nan\\Nan.6.ogg",
+          "description": "I hate spiders! They're creepy, ugly, disgusting things. Why won't they leave me alone?"
+        },
+        {
+          "text_prefix": "She's very talented She'll",
+          "audio_file": "ogg\\nan\\Nan.13.ogg",
+          "description": "She's very talented. She'll go far, if the spiders don't get her."
+        },
+        {
+          "text_prefix": "Fare thee well and",
+          "audio_file": "ogg\\nan\\Nan.14.ogg",
+          "description": "Fare thee well and watch thy step, the spiders are lurking everywhere."
+        },
+        {
+          "text_prefix": "I cannot help thee",
+          "audio_file": "ogg\\nan\\Nan.15.ogg",
+          "description": "I cannot help thee with that."
+        },
+        {
+          "text_prefix": "Now now my dear",
+          "audio_file": "ogg\\nan\\Nan.16.ogg",
+          "description": "Now, now, my dear, have you forgotten about the gloves I gave you?"
+        },
+        {
+          "text_prefix": "I am Lady Nan",
+          "audio_file": "ogg\\nan\\Nan.1.ogg",
+          "description": "I am Lady Nan."
+        },
+        {
+          "text_prefix": "The mantra of Compassion",
+          "audio_file": "ogg\\nan\\Nan.10.ogg",
+          "description": "The mantra of Compassion is Mu. Is that a spider on your shoulder?"
+        },
+        {
+          "text_prefix": "No 'tis just a",
+          "audio_file": "ogg\\nan\\Nan.11.ogg",
+          "description": "No, 'tis just a trick of the light."
+        },
+        {
+          "text_prefix": "'twas given to our",
+          "audio_file": "ogg\\nan\\Nan.12.ogg",
+          "description": "'twas given to our most promising student, young Ariana."
+        },
+        {
+          "text_prefix": "I would play for",
+          "audio_file": "ogg\\nan\\Nan.0.ogg",
+          "description": "I would play for thee, but I'm worried about my lute."
+        },
+        {
+          "text_prefix": "Oh yes Perhaps if",
+          "audio_file": "ogg\\nan\\Nan.7.ogg",
+          "description": "Oh, yes. Perhaps if I wore those I could play."
+        },
+        {
+          "text_prefix": "Iolo gave them to",
+          "audio_file": "ogg\\nan\\Nan.8.ogg",
+          "description": "Iolo gave them to me for my birthday."
+        },
+        {
+          "text_prefix": "Yes I know the",
+          "audio_file": "ogg\\nan\\Nan.9.ogg",
+          "description": "Yes, I know the Rune and Mantra of Compassion."
+        },
+        {
+          "text_prefix": "Why making music of",
+          "audio_file": "ogg\\nan\\Nan.2.ogg",
+          "description": "Why, making music, of course!"
+        }
+      ]
+    },
+    {
+      "npc_port": 13,
+      "npc_name": "Matt",
+      "npc_portrait": 13,
+      "lines": [
+        {
+          "text_prefix": "Matt here had a",
+          "audio_file": "ogg\\matt\\Matt.0.ogg",
+          "description": "Matt here had a most unfortunate accident as a child that left him deaf and dumb. I'd suggest you ask his wife instead."
+        }
+      ]
+    },
+    {
+      "npc_port": 15,
+      "npc_name": "Gwenneth",
+      "npc_portrait": 15,
+      "lines": [
+        {
+          "text_prefix": "Which one of you",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.56.ogg",
+          "description": "Which one of you?"
+        },
+        {
+          "text_prefix": "Which item",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.57.ogg",
+          "description": "Which item?"
+        },
+        {
+          "text_prefix": "That costs gold",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.58.ogg",
+          "description": "That costs gold!"
+        },
+        {
+          "text_prefix": "Interested",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.59.ogg",
+          "description": "Interested?"
+        },
+        {
+          "text_prefix": "but would make thee",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.60.ogg",
+          "description": "but would make thee overburdened."
+        },
+        {
+          "text_prefix": "Excellent",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.61.ogg",
+          "description": "Excellent!"
+        },
+        {
+          "text_prefix": "But thou hast not",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.62.ogg",
+          "description": "But thou hast not enough gold."
+        },
+        {
+          "text_prefix": "Thou hast not enough",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.63.ogg",
+          "description": "Thou hast not enough gold."
+        },
+        {
+          "text_prefix": "But I think I",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.64.ogg",
+          "description": "But I think I can trust thee with credit, just this once."
+        },
+        {
+          "text_prefix": "I'm sorry but I",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.65.ogg",
+          "description": "I'm sorry, but I cannot offer more credit, even to thee."
+        },
+        {
+          "text_prefix": "The Gargoyle Wars make",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.66.ogg",
+          "description": "The Gargoyle Wars make my wares much in demand."
+        },
+        {
+          "text_prefix": "How goes business Gwenneth",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.67.ogg",
+          "description": "How goes business, Gwenneth?"
+        },
+        {
+          "text_prefix": "Of course 'tis still",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.68.ogg",
+          "description": "Of course, 'tis still called Iolo's Bows out of respect for the master."
+        },
+        {
+          "text_prefix": "Yellow",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.0.ogg",
+          "description": "Yellow!"
+        },
+        {
+          "text_prefix": "And thy companions as",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.1.ogg",
+          "description": "And thy companions as well."
+        },
+        {
+          "text_prefix": "I heard rumors that",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.2.ogg",
+          "description": "I heard rumors that you were in town."
+        },
+        {
+          "text_prefix": "Very well Very well",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.3.ogg",
+          "description": "Very well. Very well indeed. Sir Geoffrey himself just placed quite a large order."
+        },
+        {
+          "text_prefix": "Much demand for bows",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.4.ogg",
+          "description": "Much demand for bows these days, what with the gargoyles."
+        },
+        {
+          "text_prefix": "And what can I",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.5.ogg",
+          "description": "And what can I do for Iolo's friend this fine day?"
+        },
+        {
+          "text_prefix": "I recognize thee Thou",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.6.ogg",
+          "description": "I recognize thee. Thou art Iolo's friend."
+        },
+        {
+          "text_prefix": "What can I do",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.7.ogg",
+          "description": "What can I do for thee?"
+        },
+        {
+          "text_prefix": "Hello again what can",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.8.ogg",
+          "description": "Hello again, what can I do for thee?"
+        },
+        {
+          "text_prefix": "What'll it be next",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.9.ogg",
+          "description": "What'll it be next?"
+        },
+        {
+          "text_prefix": "What a strange question",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.10.ogg",
+          "description": "What a strange question! I'm Gwenneth, of course."
+        },
+        {
+          "text_prefix": "Just ask Iolo",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.11.ogg",
+          "description": "Just ask Iolo."
+        },
+        {
+          "text_prefix": "But dost thou not",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.12.ogg",
+          "description": "But dost thou not know Yolo?"
+        },
+        {
+          "text_prefix": "Well I am his",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.13.ogg",
+          "description": "Well, I am his former apprentice, Gwenneth."
+        },
+        {
+          "text_prefix": "Once I was Iolo's",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.14.ogg",
+          "description": "Once I was Iolo's apprentice, but then he decided to retire."
+        },
+        {
+          "text_prefix": "Now 'tis my shop",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.15.ogg",
+          "description": "Now 'tis my shop, and I craft the bows sold here."
+        },
+        {
+          "text_prefix": "I hear from the",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.16.ogg",
+          "description": "I hear from the soldiers that the gargoyles are fierce opponents."
+        },
+        {
+          "text_prefix": "Some gargoyles move like",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.17.ogg",
+          "description": "Some gargoyles move like the wind itself and can strike you like lightning bolts."
+        },
+        {
+          "text_prefix": "The gargoyles also have",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.18.ogg",
+          "description": "The gargoyles also have a strange and terrible weapon."
+        },
+        {
+          "text_prefix": "It is called a",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.19.ogg",
+          "description": "It is called a boomerang, and it is a most bizarre ranged weapon."
+        },
+        {
+          "text_prefix": "It flies out to",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.20.ogg",
+          "description": "It flies out to strike its target, then returns to the hand that threw it."
+        },
+        {
+          "text_prefix": "Against such magic the",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.21.ogg",
+          "description": "Against such magic, the soldiers chose to arm themselves with good, stout Britannian bows."
+        },
+        {
+          "text_prefix": "I would not wish",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.22.ogg",
+          "description": "I would not wish to speak of Yello amongst his friends."
+        },
+        {
+          "text_prefix": "I might embarrass him",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.23.ogg",
+          "description": "I might embarrass him."
+        },
+        {
+          "text_prefix": "Nay I really would",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.24.ogg",
+          "description": "Nay, I really would not wish to speak of my master behind his back."
+        },
+        {
+          "text_prefix": "I usually do I",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.25.ogg",
+          "description": "I usually do I carry those in stock."
+        },
+        {
+          "text_prefix": "There has been a",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.26.ogg",
+          "description": "There has been a shortage of late because of the Gargoyle war."
+        },
+        {
+          "text_prefix": "Go see Lynne the",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.27.ogg",
+          "description": "Go see Lynne the fletcher over to the north."
+        },
+        {
+          "text_prefix": "Alina is a fine",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.28.ogg",
+          "description": "Alina is a fine fletcher and usually keeps me supplied with arrows and bolts"
+        },
+        {
+          "text_prefix": "I've none left in",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.29.ogg",
+          "description": "I've none left in stock, though, since the soldiers bought them all."
+        },
+        {
+          "text_prefix": "I fear I had",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.30.ogg",
+          "description": "I fear I had but one triple crossbow for sale."
+        },
+        {
+          "text_prefix": "Come back in six",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.31.ogg",
+          "description": "Come back in six months, and I may have another."
+        },
+        {
+          "text_prefix": "Farewell all of you",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.32.ogg",
+          "description": "Farewell, all of you!"
+        },
+        {
+          "text_prefix": "Farewell to thee",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.33.ogg",
+          "description": "Farewell to thee!"
+        },
+        {
+          "text_prefix": "Yolo I'll see thee",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.34.ogg",
+          "description": "Yolo, I'll see thee again soon with thy share of this month's profits."
+        },
+        {
+          "text_prefix": "Beg pardon",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.35.ogg",
+          "description": "Beg pardon?"
+        },
+        {
+          "text_prefix": "Ah I see thou",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.36.ogg",
+          "description": "Ah, I see thou art a discerning buyer."
+        },
+        {
+          "text_prefix": "The triple crossbow is",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.37.ogg",
+          "description": "The triple crossbow is a marvel to behold."
+        },
+        {
+          "text_prefix": "This enchanted weapon fires",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.38.ogg",
+          "description": "This enchanted weapon fires three bolts at once."
+        },
+        {
+          "text_prefix": "Normally I would not",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.39.ogg",
+          "description": "Normally, I would not offer it for sale."
+        },
+        {
+          "text_prefix": "But because thy cause",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.40.ogg",
+          "description": "But, because thy cause is important, I will allow thee, and thee only, to buy it."
+        },
+        {
+          "text_prefix": "But I fear I",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.41.ogg",
+          "description": "But I fear I must charge four hundred gold for it."
+        },
+        {
+          "text_prefix": "Dost thou wish to",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.42.ogg",
+          "description": "Dost thou wish to buy this weapon?"
+        },
+        {
+          "text_prefix": "Thou canst carry it",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.43.ogg",
+          "description": "Thou canst carry it."
+        },
+        {
+          "text_prefix": "But thou canst not",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.44.ogg",
+          "description": "But thou canst not afford it?"
+        },
+        {
+          "text_prefix": "It will be here",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.45.ogg",
+          "description": "It will be here, waiting for thee, if thou hast a need for it."
+        },
+        {
+          "text_prefix": "What can I do",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.46.ogg",
+          "description": "What can I do for you?"
+        },
+        {
+          "text_prefix": "Sorry none of you",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.47.ogg",
+          "description": "Sorry, none of you has anything I need."
+        },
+        {
+          "text_prefix": "Hi you have something",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.48.ogg",
+          "description": "Hi, you have something of interest?"
+        },
+        {
+          "text_prefix": "Which one of you",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.49.ogg",
+          "description": "Which one of you?"
+        },
+        {
+          "text_prefix": "Which item",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.50.ogg",
+          "description": "Which item?"
+        },
+        {
+          "text_prefix": "Will you take my",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.51.ogg",
+          "description": "Will you take my gold for that?"
+        },
+        {
+          "text_prefix": "Perhaps some other time",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.52.ogg",
+          "description": "Perhaps some other time then."
+        },
+        {
+          "text_prefix": "Perhaps something else then",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.53.ogg",
+          "description": "Perhaps something else then?"
+        },
+        {
+          "text_prefix": "Done",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.54.ogg",
+          "description": "Done."
+        },
+        {
+          "text_prefix": "Changed your mind eh",
+          "audio_file": "ogg\\gwenneth\\Gwenneth.55.ogg",
+          "description": "Changed your mind, eh?"
+        }
+      ]
+    },
+    {
+      "npc_port": 14,
+      "npc_name": "Anya",
+      "npc_portrait": 14,
+      "lines": [
+        {
+          "text_prefix": "The King's Way is",
+          "audio_file": "ogg\\anya\\Anya.6.ogg",
+          "description": "The King's Way is the oldest road in Britain."
+        },
+        {
+          "text_prefix": "I run this tavern",
+          "audio_file": "ogg\\anya\\Anya.7.ogg",
+          "description": "I run this tavern to support my family. The hours are long, but my husband offers what help he can."
+        },
+        {
+          "text_prefix": "We make enough to",
+          "audio_file": "ogg\\anya\\Anya.8.ogg",
+          "description": "We make enough to pay for my daughter's schooling, so 'tis all worthwhile."
+        },
+        {
+          "text_prefix": "My husband Matt and",
+          "audio_file": "ogg\\anya\\Anya.9.ogg",
+          "description": "My husband Matt and my daughter Ariana."
+        },
+        {
+          "text_prefix": "He had an accident",
+          "audio_file": "ogg\\anya\\Anya.10.ogg",
+          "description": "He had an accident as a child which left him deaf and dumb, but I love him all the same."
+        },
+        {
+          "text_prefix": "I only wish he",
+          "audio_file": "ogg\\anya\\Anya.11.ogg",
+          "description": "I only wish he could hear our daughter play, just once."
+        },
+        {
+          "text_prefix": "It will ne'er come",
+          "audio_file": "ogg\\anya\\Anya.12.ogg",
+          "description": "It will ne'er come to pass. He lives in a world of eternal silence."
+        },
+        {
+          "text_prefix": "You have the look",
+          "audio_file": "ogg\\anya\\Anya.13.ogg",
+          "description": "You have the look of one who practices the art of magic."
+        },
+        {
+          "text_prefix": "Perhaps thou couldst find",
+          "audio_file": "ogg\\anya\\Anya.14.ogg",
+          "description": "Perhaps thou couldst find some spell that might restore my husband's hearing."
+        },
+        {
+          "text_prefix": "I know 'tis a",
+          "audio_file": "ogg\\anya\\Anya.15.ogg",
+          "description": "I know 'tis a lot to ask, but wilt thou try?"
+        },
+        {
+          "text_prefix": "Arianna is the light",
+          "audio_file": "ogg\\anya\\Anya.16.ogg",
+          "description": "Arianna is the light of my life. Seems she had scarce learned to walk when she first showed a gift for music."
+        },
+        {
+          "text_prefix": "She studies now with",
+          "audio_file": "ogg\\anya\\Anya.17.ogg",
+          "description": "She studies now with the bards at the Conservatory."
+        },
+        {
+          "text_prefix": "Bless their hearts for",
+          "audio_file": "ogg\\anya\\Anya.18.ogg",
+          "description": "Bless their hearts for teaching her well. She'll be no tavern wench when she grows older."
+        },
+        {
+          "text_prefix": "Perhaps you'll even be",
+          "audio_file": "ogg\\anya\\Anya.19.ogg",
+          "description": "Perhaps you'll even be a court musician to Lord British someday."
+        },
+        {
+          "text_prefix": "Thou shouldst ask my",
+          "audio_file": "ogg\\anya\\Anya.20.ogg",
+          "description": "Thou shouldst ask my daughter of that. Methinks the bards have taught her of it."
+        },
+        {
+          "text_prefix": "I already gave thee",
+          "audio_file": "ogg\\anya\\Anya.21.ogg",
+          "description": "I already gave thee my permission to borrow the rune."
+        },
+        {
+          "text_prefix": "Do thou be careful",
+          "audio_file": "ogg\\anya\\Anya.22.ogg",
+          "description": "Do thou be careful not to lose the stone or let any harm befall it. Ariana would never forgive herself."
+        },
+        {
+          "text_prefix": "'Tis good to talk",
+          "audio_file": "ogg\\anya\\Anya.23.ogg",
+          "description": "'Tis good to talk with thee again. Things have been slow around here since the gypsies left."
+        },
+        {
+          "text_prefix": "Good Perhaps thou might",
+          "audio_file": "ogg\\anya\\Anya.24.ogg",
+          "description": "Good. Perhaps thou might stay and talk with me a while before I'm back about my work."
+        },
+        {
+          "text_prefix": "Come back any time",
+          "audio_file": "ogg\\anya\\Anya.25.ogg",
+          "description": "Come back any time."
+        },
+        {
+          "text_prefix": "Well 'tis time I",
+          "audio_file": "ogg\\anya\\Anya.26.ogg",
+          "description": "Well, 'tis time I was back about my work. Dishes to wash, food to cook, drinks to serve."
+        },
+        {
+          "text_prefix": "I thank thee for",
+          "audio_file": "ogg\\anya\\Anya.27.ogg",
+          "description": "I thank thee for stopping by to brighten my day with thy conversation. Do thou come again."
+        },
+        {
+          "text_prefix": "Wouldst thou like ale",
+          "audio_file": "ogg\\anya\\Anya.28.ogg",
+          "description": "Wouldst thou like ale, mead, wine, rations, or perhaps a cake?"
+        },
+        {
+          "text_prefix": "I cannot help thee",
+          "audio_file": "ogg\\anya\\Anya.29.ogg",
+          "description": "I cannot help thee with that."
+        },
+        {
+          "text_prefix": "Ah 'twas the proudest",
+          "audio_file": "ogg\\anya\\Anya.30.ogg",
+          "description": "Ah, 'twas the proudest moment of my life when they awarded my dear little Ariana the Rune of Compassion."
+        },
+        {
+          "text_prefix": "They said she was",
+          "audio_file": "ogg\\anya\\Anya.31.ogg",
+          "description": "They said she was the most promising student they'd ever had at the Conservatory."
+        },
+        {
+          "text_prefix": "I'm sure she would",
+          "audio_file": "ogg\\anya\\Anya.32.ogg",
+          "description": "I'm sure she would show thee the rune if thou wouldst care to see it."
+        },
+        {
+          "text_prefix": "Thou dost wish to",
+          "audio_file": "ogg\\anya\\Anya.33.ogg",
+          "description": "Thou dost wish to borrow the Rune of Compassion from my daughter?"
+        },
+        {
+          "text_prefix": "Very well Thou dost",
+          "audio_file": "ogg\\anya\\Anya.34.ogg",
+          "description": "Very well. Thou dost have an honest face. I grant thee my permission."
+        },
+        {
+          "text_prefix": "No thank you",
+          "audio_file": "ogg\\anya\\Anya.35.ogg",
+          "description": "No, thank you."
+        },
+        {
+          "text_prefix": "I'm sorry to have",
+          "audio_file": "ogg\\anya\\Anya.36.ogg",
+          "description": "I'm sorry to have bothered thee."
+        },
+        {
+          "text_prefix": "I'm sure thou hast",
+          "audio_file": "ogg\\anya\\Anya.37.ogg",
+          "description": "I'm sure thou hast more important things to do."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\anya\\Anya.38.ogg",
+          "description": "Which of you"
+        },
+        {
+          "text_prefix": "That'll be several crowns",
+          "audio_file": "ogg\\anya\\Anya.39.ogg",
+          "description": "That'll be several crowns. Wouldst thou like some?"
+        },
+        {
+          "text_prefix": "I'm sorry but you",
+          "audio_file": "ogg\\anya\\Anya.40.ogg",
+          "description": "I'm sorry, but you don't have enough gold."
+        },
+        {
+          "text_prefix": "You don't have room",
+          "audio_file": "ogg\\anya\\Anya.41.ogg",
+          "description": "You don't have room to carry it."
+        },
+        {
+          "text_prefix": "Fine",
+          "audio_file": "ogg\\anya\\Anya.42.ogg",
+          "description": "Fine."
+        },
+        {
+          "text_prefix": "Enjoy",
+          "audio_file": "ogg\\anya\\Anya.43.ogg",
+          "description": "Enjoy!"
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\anya\\Anya.44.ogg",
+          "description": "Which of you"
+        },
+        {
+          "text_prefix": "It'll be eight gold",
+          "audio_file": "ogg\\anya\\Anya.45.ogg",
+          "description": "It'll be eight gold for the cake. Is that all right?"
+        },
+        {
+          "text_prefix": "I'm sorry but you",
+          "audio_file": "ogg\\anya\\Anya.46.ogg",
+          "description": "I'm sorry, but you don't have enough gold."
+        },
+        {
+          "text_prefix": "You don't have enough",
+          "audio_file": "ogg\\anya\\Anya.47.ogg",
+          "description": "You don't have enough room to carry it."
+        },
+        {
+          "text_prefix": "I hope thou dost",
+          "audio_file": "ogg\\anya\\Anya.48.ogg",
+          "description": "I hope thou dost enjoy it."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\anya\\Anya.49.ogg",
+          "description": "Which of you?"
+        },
+        {
+          "text_prefix": "My price is four",
+          "audio_file": "ogg\\anya\\Anya.50.ogg",
+          "description": "My price is four gold for each ration. How many do you want?"
+        },
+        {
+          "text_prefix": "You haven't any room",
+          "audio_file": "ogg\\anya\\Anya.51.ogg",
+          "description": "You haven't any room in your pack."
+        },
+        {
+          "text_prefix": "I'm sorry but you",
+          "audio_file": "ogg\\anya\\Anya.52.ogg",
+          "description": "I'm sorry, but you don't have enough gold."
+        },
+        {
+          "text_prefix": "That's all you can",
+          "audio_file": "ogg\\anya\\Anya.53.ogg",
+          "description": "That's all you can carry."
+        },
+        {
+          "text_prefix": "That's all you can",
+          "audio_file": "ogg\\anya\\Anya.54.ogg",
+          "description": "That's all you can afford."
+        },
+        {
+          "text_prefix": "I'm sorry but I've",
+          "audio_file": "ogg\\anya\\Anya.0.ogg",
+          "description": "I'm sorry, but I've just an hour to myself today."
+        },
+        {
+          "text_prefix": "I'll gladly talk with",
+          "audio_file": "ogg\\anya\\Anya.1.ogg",
+          "description": "I'll gladly talk with thee later."
+        },
+        {
+          "text_prefix": "Welcome to the Blue",
+          "audio_file": "ogg\\anya\\Anya.2.ogg",
+          "description": "Welcome to the Blue Boar Tavern. Art thou here for business or pleasure?"
+        },
+        {
+          "text_prefix": "Anything else I can",
+          "audio_file": "ogg\\anya\\Anya.3.ogg",
+          "description": "Anything else I can do for thee?"
+        },
+        {
+          "text_prefix": "I am Anya",
+          "audio_file": "ogg\\anya\\Anya.4.ogg",
+          "description": "I am Anya."
+        },
+        {
+          "text_prefix": "They pass by Britain",
+          "audio_file": "ogg\\anya\\Anya.5.ogg",
+          "description": "They pass by Britain occasionally. I believe they travel on the King's Way."
+        }
+      ]
+    },
+    {
+      "npc_port": 12,
+      "npc_name": "Ariana",
+      "npc_portrait": 12,
+      "lines": [
+        {
+          "text_prefix": "Oh hello again",
+          "audio_file": "ogg\\ariana\\Ariana.2.ogg",
+          "description": "Oh, hello again!"
+        },
+        {
+          "text_prefix": "Arina is my name",
+          "audio_file": "ogg\\ariana\\Ariana.3.ogg",
+          "description": "Arina is my name."
+        },
+        {
+          "text_prefix": "I'm learning to be",
+          "audio_file": "ogg\\ariana\\Ariana.4.ogg",
+          "description": "I'm learning to be a bard. I like to play the harpsichord best."
+        },
+        {
+          "text_prefix": "I want to be",
+          "audio_file": "ogg\\ariana\\Ariana.5.ogg",
+          "description": "I want to be a bard when I grow up. They are more fun than anybody."
+        },
+        {
+          "text_prefix": "They taught me all",
+          "audio_file": "ogg\\ariana\\Ariana.6.ogg",
+          "description": "They taught me all about compassion. They say it's very important for bards."
+        },
+        {
+          "text_prefix": "I can't remember it",
+          "audio_file": "ogg\\ariana\\Ariana.7.ogg",
+          "description": "I can't remember it now, and Kenneth just taught it to me last week."
+        },
+        {
+          "text_prefix": "Wait I know it's",
+          "audio_file": "ogg\\ariana\\Ariana.8.ogg",
+          "description": "Wait, I know, it's Mo."
+        },
+        {
+          "text_prefix": "Or maybe it was",
+          "audio_file": "ogg\\ariana\\Ariana.9.ogg",
+          "description": "Or maybe it was um, or mu, or um, it was something like that."
+        },
+        {
+          "text_prefix": "Oh yes lots of",
+          "audio_file": "ogg\\ariana\\Ariana.10.ogg",
+          "description": "Oh yes, lots of it."
+        },
+        {
+          "text_prefix": "He's my teacher",
+          "audio_file": "ogg\\ariana\\Ariana.11.ogg",
+          "description": "He's my teacher."
+        },
+        {
+          "text_prefix": "See you later",
+          "audio_file": "ogg\\ariana\\Ariana.12.ogg",
+          "description": "See you later."
+        },
+        {
+          "text_prefix": "What do you mean",
+          "audio_file": "ogg\\ariana\\Ariana.13.ogg",
+          "description": "What do you mean?"
+        },
+        {
+          "text_prefix": "I was starting to",
+          "audio_file": "ogg\\ariana\\Ariana.14.ogg",
+          "description": "I was starting to be a bard since I was this many."
+        },
+        {
+          "text_prefix": "I'd like to play",
+          "audio_file": "ogg\\ariana\\Ariana.15.ogg",
+          "description": "I'd like to play something for you, but I'm not good enough yet."
+        },
+        {
+          "text_prefix": "Will you come back",
+          "audio_file": "ogg\\ariana\\Ariana.16.ogg",
+          "description": "Will you come back to hear my music when I'm older, if you can?"
+        },
+        {
+          "text_prefix": "I'm sorry",
+          "audio_file": "ogg\\ariana\\Ariana.17.ogg",
+          "description": "I'm sorry."
+        },
+        {
+          "text_prefix": "I shouldn't have asked",
+          "audio_file": "ogg\\ariana\\Ariana.18.ogg",
+          "description": "I shouldn't have asked that."
+        },
+        {
+          "text_prefix": "Really I would have",
+          "audio_file": "ogg\\ariana\\Ariana.19.ogg",
+          "description": "Really, I would have liked that very much."
+        },
+        {
+          "text_prefix": "I already gave it",
+          "audio_file": "ogg\\ariana\\Ariana.20.ogg",
+          "description": "I already gave it to you, silly. I hope you can figure out how to use it."
+        },
+        {
+          "text_prefix": "I have the Rune",
+          "audio_file": "ogg\\ariana\\Ariana.21.ogg",
+          "description": "I have the Rune of Compassion, isn't it pretty?"
+        },
+        {
+          "text_prefix": "Do you need it",
+          "audio_file": "ogg\\ariana\\Ariana.22.ogg",
+          "description": "Do you need it for something?"
+        },
+        {
+          "text_prefix": "Okay",
+          "audio_file": "ogg\\ariana\\Ariana.23.ogg",
+          "description": "Okay."
+        },
+        {
+          "text_prefix": "Are you on an",
+          "audio_file": "ogg\\ariana\\Ariana.24.ogg",
+          "description": "Are you on an important quest?"
+        },
+        {
+          "text_prefix": "I'd best hold on",
+          "audio_file": "ogg\\ariana\\Ariana.25.ogg",
+          "description": "I'd best hold on to it then. I was told to look after it carefully."
+        },
+        {
+          "text_prefix": "I'm not supposed to",
+          "audio_file": "ogg\\ariana\\Ariana.26.ogg",
+          "description": "I'm not supposed to let anyone else have it, but if you truly need it..."
+        },
+        {
+          "text_prefix": "I don't know what",
+          "audio_file": "ogg\\ariana\\Ariana.27.ogg",
+          "description": "I don't know what I should do."
+        },
+        {
+          "text_prefix": "My parents from the",
+          "audio_file": "ogg\\ariana\\Ariana.28.ogg",
+          "description": "My parents from the Blue Boar Tavern, go ask them if you can borrow the rune."
+        },
+        {
+          "text_prefix": "If they say 'tis",
+          "audio_file": "ogg\\ariana\\Ariana.29.ogg",
+          "description": "If they say 'tis okay, I'll give it to you."
+        },
+        {
+          "text_prefix": "See you later",
+          "audio_file": "ogg\\ariana\\Ariana.30.ogg",
+          "description": "See you later."
+        },
+        {
+          "text_prefix": "See you later",
+          "audio_file": "ogg\\ariana\\Ariana.31.ogg",
+          "description": "See you later."
+        },
+        {
+          "text_prefix": "Hi did you get",
+          "audio_file": "ogg\\ariana\\Ariana.32.ogg",
+          "description": "Hi, did you get permission from my parents to borrow the rune?"
+        },
+        {
+          "text_prefix": "Oh you're carrying too",
+          "audio_file": "ogg\\ariana\\Ariana.33.ogg",
+          "description": "Oh, you're carrying too much right now. You better come back for it later."
+        },
+        {
+          "text_prefix": "And here you are",
+          "audio_file": "ogg\\ariana\\Ariana.34.ogg",
+          "description": "And here you are."
+        },
+        {
+          "text_prefix": "I wish you the",
+          "audio_file": "ogg\\ariana\\Ariana.35.ogg",
+          "description": "I wish you the best of luck on your quest."
+        },
+        {
+          "text_prefix": "Well if you get",
+          "audio_file": "ogg\\ariana\\Ariana.36.ogg",
+          "description": "Well, if you get their permission later, let me know."
+        },
+        {
+          "text_prefix": "My parents told me",
+          "audio_file": "ogg\\ariana\\Ariana.0.ogg",
+          "description": "My parents told me never to talk to strangers. What's your name?"
+        },
+        {
+          "text_prefix": "Okay now I can",
+          "audio_file": "ogg\\ariana\\Ariana.1.ogg",
+          "description": "Okay, now I can talk to you."
+        }
+      ]
+    },
+    {
+      "npc_port": 16,
+      "npc_name": "Peyton",
+      "npc_portrait": 16,
+      "lines": [
+        {
+          "text_prefix": "Well perhaps next time",
+          "audio_file": "ogg\\peyton\\Peyton.7.ogg",
+          "description": "Well, perhaps next time you're in town."
+        },
+        {
+          "text_prefix": "Good morning and have",
+          "audio_file": "ogg\\peyton\\Peyton.8.ogg",
+          "description": "Good morning, and have a nice day!"
+        },
+        {
+          "text_prefix": "I'm sorry cash in",
+          "audio_file": "ogg\\peyton\\Peyton.9.ogg",
+          "description": "I'm sorry, cash in advance. That's our policy."
+        },
+        {
+          "text_prefix": "Did you need something",
+          "audio_file": "ogg\\peyton\\Peyton.2.ogg",
+          "description": "Did you need something?"
+        },
+        {
+          "text_prefix": "I can offer you",
+          "audio_file": "ogg\\peyton\\Peyton.3.ogg",
+          "description": "I can offer you a room for the evening."
+        },
+        {
+          "text_prefix": "Goodbye Take care of",
+          "audio_file": "ogg\\peyton\\Peyton.4.ogg",
+          "description": "Goodbye! Take care of yourself."
+        },
+        {
+          "text_prefix": "I'm sure you'll have",
+          "audio_file": "ogg\\peyton\\Peyton.5.ogg",
+          "description": "I'm sure you'll have to ask another."
+        },
+        {
+          "text_prefix": "Interested",
+          "audio_file": "ogg\\peyton\\Peyton.6.ogg",
+          "description": "Interested?"
+        },
+        {
+          "text_prefix": "Greetings, traveler, and welcome",
+          "audio_file": "ogg\\peyton\\Peyton.0.ogg",
+          "description": "Greetings, travelers, and welcome to the Wayfarers Inn."
+        },
+        {
+          "text_prefix": "I am Peyton and",
+          "audio_file": "ogg\\peyton\\Peyton.1.ogg",
+          "description": "I am Peyton and this is my place."
+        }
+      ]
+    },
+    {
+      "npc_port": 17,
+      "npc_name": "Max",
+      "npc_portrait": 17,
+      "lines": [
+        {
+          "text_prefix": "What's the matter you",
+          "audio_file": "ogg\\max\\Max.5.ogg",
+          "description": "What's the matter you? You blind or something?"
+        },
+        {
+          "text_prefix": "I'm making the swords",
+          "audio_file": "ogg\\max\\Max.6.ogg",
+          "description": "I'm making the swords and stuff. What's it look like I'm doing here?"
+        },
+        {
+          "text_prefix": "You got a something",
+          "audio_file": "ogg\\max\\Max.7.ogg",
+          "description": "You got a something to sell or a something you wanna buy?"
+        },
+        {
+          "text_prefix": "I'm a name of",
+          "audio_file": "ogg\\max\\Max.8.ogg",
+          "description": "I'm a name of the Max."
+        },
+        {
+          "text_prefix": "Good bye to you",
+          "audio_file": "ogg\\max\\Max.9.ogg",
+          "description": "Good-bye to you. Come back soon, eh?"
+        },
+        {
+          "text_prefix": "Hey my hearing she",
+          "audio_file": "ogg\\max\\Max.10.ogg",
+          "description": "Hey, my hearing, she no so good. What do you say?"
+        },
+        {
+          "text_prefix": "What can I do",
+          "audio_file": "ogg\\max\\Max.11.ogg",
+          "description": "What can I do for you?"
+        },
+        {
+          "text_prefix": "You do mind if",
+          "audio_file": "ogg\\max\\Max.12.ogg",
+          "description": "You do mind if I shop when she's open, eh?"
+        },
+        {
+          "text_prefix": "Hey that's a real",
+          "audio_file": "ogg\\max\\Max.13.ogg",
+          "description": "Hey, that's a real shame. But none of you has anything I'm needing."
+        },
+        {
+          "text_prefix": "Ah you has a",
+          "audio_file": "ogg\\max\\Max.14.ogg",
+          "description": "Ah, you has a somethin' of a interest."
+        },
+        {
+          "text_prefix": "Which are you",
+          "audio_file": "ogg\\max\\Max.15.ogg",
+          "description": "Which are you?"
+        },
+        {
+          "text_prefix": "Which of one of",
+          "audio_file": "ogg\\max\\Max.16.ogg",
+          "description": "Which of one of these?"
+        },
+        {
+          "text_prefix": "Will you taketh my",
+          "audio_file": "ogg\\max\\Max.17.ogg",
+          "description": "Will you taketh my gold for that?"
+        },
+        {
+          "text_prefix": "Perhaps some other time",
+          "audio_file": "ogg\\max\\Max.18.ogg",
+          "description": "Perhaps some other time then."
+        },
+        {
+          "text_prefix": "Perhaps 'tis something else",
+          "audio_file": "ogg\\max\\Max.19.ogg",
+          "description": "Perhaps 'tis something else then."
+        },
+        {
+          "text_prefix": "She's a don",
+          "audio_file": "ogg\\max\\Max.20.ogg",
+          "description": "She's a don."
+        },
+        {
+          "text_prefix": "Changing your mind eh",
+          "audio_file": "ogg\\max\\Max.21.ogg",
+          "description": "Changing your mind, eh?"
+        },
+        {
+          "text_prefix": "You to my shop",
+          "audio_file": "ogg\\max\\Max.22.ogg",
+          "description": "You to my shop or when she's open."
+        },
+        {
+          "text_prefix": "Which are you",
+          "audio_file": "ogg\\max\\Max.23.ogg",
+          "description": "Which are you?"
+        },
+        {
+          "text_prefix": "Which one of these",
+          "audio_file": "ogg\\max\\Max.24.ogg",
+          "description": "Which one of these?"
+        },
+        {
+          "text_prefix": "She's a cost of",
+          "audio_file": "ogg\\max\\Max.25.ogg",
+          "description": "She's a cost of gold."
+        },
+        {
+          "text_prefix": "You were interested",
+          "audio_file": "ogg\\max\\Max.26.ogg",
+          "description": "You were interested?"
+        },
+        {
+          "text_prefix": "But she'sa be making",
+          "audio_file": "ogg\\max\\Max.27.ogg",
+          "description": "But she'sa be making thee too heavy."
+        },
+        {
+          "text_prefix": "Hey that'sa good",
+          "audio_file": "ogg\\max\\Max.28.ogg",
+          "description": "Hey, that'sa good."
+        },
+        {
+          "text_prefix": "But she's a costin",
+          "audio_file": "ogg\\max\\Max.29.ogg",
+          "description": "But she's a-costin' too much for you."
+        },
+        {
+          "text_prefix": "Aye and a good",
+          "audio_file": "ogg\\max\\Max.30.ogg",
+          "description": "Aye, and a good day to you."
+        },
+        {
+          "text_prefix": "Hey it's the Avatar",
+          "audio_file": "ogg\\max\\Max.0.ogg",
+          "description": "Hey, it's the Avatar. Hello again."
+        },
+        {
+          "text_prefix": "What do you want",
+          "audio_file": "ogg\\max\\Max.1.ogg",
+          "description": "What do you want next?"
+        },
+        {
+          "text_prefix": "You want weapons or",
+          "audio_file": "ogg\\max\\Max.2.ogg",
+          "description": "You want weapons or armor?"
+        },
+        {
+          "text_prefix": "You to my shop",
+          "audio_file": "ogg\\max\\Max.3.ogg",
+          "description": "You to my shop when she's open, eh?"
+        },
+        {
+          "text_prefix": "Do to my shoppe",
+          "audio_file": "ogg\\max\\Max.4.ogg",
+          "description": "Do to my shoppe when she's open."
+        }
+      ]
+    },
+    {
+      "npc_port": 18,
+      "npc_name": "Lazeena",
+      "npc_portrait": 18,
+      "lines": [
+        {
+          "text_prefix": "South of Lock Lake",
+          "audio_file": "ogg\\lazeena\\Lazeena.5.ogg",
+          "description": "South of Lock Lake and north of the bay, the beautiful Shrine of Compassion doth lay."
+        },
+        {
+          "text_prefix": "My article set out",
+          "audio_file": "ogg\\lazeena\\Lazeena.6.ogg",
+          "description": "My article set out to chant there one day."
+        },
+        {
+          "text_prefix": "But still he has",
+          "audio_file": "ogg\\lazeena\\Lazeena.7.ogg",
+          "description": "But still he has not returned."
+        },
+        {
+          "text_prefix": "'Tis the aim of",
+          "audio_file": "ogg\\lazeena\\Lazeena.3.ogg",
+          "description": "'Tis the aim of my life to sing like a bird."
+        },
+        {
+          "text_prefix": "Then tell me what",
+          "audio_file": "ogg\\lazeena\\Lazeena.24.ogg",
+          "description": "Then tell me what would please thee more, a song of the sea or a rhyme of the shore?"
+        },
+        {
+          "text_prefix": "To be of more",
+          "audio_file": "ogg\\lazeena\\Lazeena.25.ogg",
+          "description": "To be of more help, I wish I knew just what this little bird could do."
+        },
+        {
+          "text_prefix": "From Cove I did",
+          "audio_file": "ogg\\lazeena\\Lazeena.2.ogg",
+          "description": "From Cove I did come, 'tis a town full of love."
+        },
+        {
+          "text_prefix": "And now the tail",
+          "audio_file": "ogg\\lazeena\\Lazeena.20.ogg",
+          "description": "And now the tail has nothing left but a gravesite on the floor."
+        },
+        {
+          "text_prefix": "Upon the Fens of",
+          "audio_file": "ogg\\lazeena\\Lazeena.21.ogg",
+          "description": "Upon the Fens of the Dead she came to rest, ne'er to sail no more."
+        },
+        {
+          "text_prefix": "Farewell my friend",
+          "audio_file": "ogg\\lazeena\\Lazeena.22.ogg",
+          "description": "Farewell, my friend."
+        },
+        {
+          "text_prefix": "I cannot help thee",
+          "audio_file": "ogg\\lazeena\\Lazeena.23.ogg",
+          "description": "I cannot help thee with that."
+        },
+        {
+          "text_prefix": "The match began the",
+          "audio_file": "ogg\\lazeena\\Lazeena.16.ogg",
+          "description": "The match began, the grim men fought to gather in her sails."
+        },
+        {
+          "text_prefix": "But thundrous was the",
+          "audio_file": "ogg\\lazeena\\Lazeena.17.ogg",
+          "description": "But thundrous was the kraken lo, the mighty vessel reeled."
+        },
+        {
+          "text_prefix": "When gentle winds danced",
+          "audio_file": "ogg\\lazeena\\Lazeena.18.ogg",
+          "description": "When gentle winds danced 'cross the surf, again the followed morn."
+        },
+        {
+          "text_prefix": "'Twas nothing left of",
+          "audio_file": "ogg\\lazeena\\Lazeena.19.ogg",
+          "description": "'Twas nothing left of Dutchess Hull but remnants of her born."
+        },
+        {
+          "text_prefix": "The Dutchman was a",
+          "audio_file": "ogg\\lazeena\\Lazeena.12.ogg",
+          "description": "The Dutchman was a giant ship with masts from the largest trees."
+        },
+        {
+          "text_prefix": "The pride of the",
+          "audio_file": "ogg\\lazeena\\Lazeena.13.ogg",
+          "description": "The pride of the people she was hailed, the ruler of all the sea."
+        },
+        {
+          "text_prefix": "She hailed out of",
+          "audio_file": "ogg\\lazeena\\Lazeena.14.ogg",
+          "description": "She hailed out of port one fine spring day and headed for distant shores."
+        },
+        {
+          "text_prefix": "But a Britni caught",
+          "audio_file": "ogg\\lazeena\\Lazeena.15.ogg",
+          "description": "But a Britni caught her by surprise, 'twas flung against her core."
+        },
+        {
+          "text_prefix": "Hail there come listen",
+          "audio_file": "ogg\\lazeena\\Lazeena.0.ogg",
+          "description": "Hail there, come listen to me. I have plenty of time to sing unto thee."
+        },
+        {
+          "text_prefix": "Lazeena they call me",
+          "audio_file": "ogg\\lazeena\\Lazeena.1.ogg",
+          "description": "Lazeena they call me, Lazeena the Dove."
+        },
+        {
+          "text_prefix": "But still he has",
+          "audio_file": "ogg\\lazeena\\Lazeena.10.ogg",
+          "description": "But still he has not returned."
+        },
+        {
+          "text_prefix": "He is a healer",
+          "audio_file": "ogg\\lazeena\\Lazeena.11.ogg",
+          "description": "He is a healer, you see."
+        },
+        {
+          "text_prefix": "Was he taken by",
+          "audio_file": "ogg\\lazeena\\Lazeena.8.ogg",
+          "description": "Was he taken by giants or headless so foul that nary a man could contend with the smell?"
+        },
+        {
+          "text_prefix": "He should have come",
+          "audio_file": "ogg\\lazeena\\Lazeena.9.ogg",
+          "description": "He should have come home weeks ago now."
+        },
+        {
+          "text_prefix": "Wouldst thou like to",
+          "audio_file": "ogg\\lazeena\\Lazeena.4.ogg",
+          "description": "Wouldst thou like to hear the news I've heard?"
+        }
+      ]
+    },
+    {
+      "npc_port": 19,
+      "npc_name": "Fyodor",
+      "npc_portrait": 19,
+      "lines": [
+        {
+          "text_prefix": "Come back when I'm",
+          "audio_file": "ogg\\fyodor\\Fyodor.7.ogg",
+          "description": "Come back when I'm at my loom. I'll help thee then."
+        },
+        {
+          "text_prefix": "But I don't need",
+          "audio_file": "ogg\\fyodor\\Fyodor.8.ogg",
+          "description": "But I don't need wool here."
+        },
+        {
+          "text_prefix": "Pleased to meet thee",
+          "audio_file": "ogg\\fyodor\\Fyodor.4.ogg",
+          "description": "Pleased to meet thee."
+        },
+        {
+          "text_prefix": "Will you take eight",
+          "audio_file": "ogg\\fyodor\\Fyodor.36.ogg",
+          "description": "Will you take eight gold for that wool?"
+        },
+        {
+          "text_prefix": "Done",
+          "audio_file": "ogg\\fyodor\\Fyodor.37.ogg",
+          "description": "Done."
+        },
+        {
+          "text_prefix": "Sorry you haven't any",
+          "audio_file": "ogg\\fyodor\\Fyodor.38.ogg",
+          "description": "Sorry, you haven't any wool?"
+        },
+        {
+          "text_prefix": "Changed your mind huh",
+          "audio_file": "ogg\\fyodor\\Fyodor.39.ogg",
+          "description": "Changed your mind, huh?"
+        },
+        {
+          "text_prefix": "This is fine cloth",
+          "audio_file": "ogg\\fyodor\\Fyodor.32.ogg",
+          "description": "This is fine cloth."
+        },
+        {
+          "text_prefix": "You'll find none better",
+          "audio_file": "ogg\\fyodor\\Fyodor.33.ogg",
+          "description": "You'll find none better."
+        },
+        {
+          "text_prefix": "Sorry none of you",
+          "audio_file": "ogg\\fyodor\\Fyodor.34.ogg",
+          "description": "Sorry, none of you has anything I need."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\fyodor\\Fyodor.35.ogg",
+          "description": "Which of you"
+        },
+        {
+          "text_prefix": "My name is Fyodor",
+          "audio_file": "ogg\\fyodor\\Fyodor.3.ogg",
+          "description": "My name is Fyodor. What is thy name?"
+        },
+        {
+          "text_prefix": "You look pretty full",
+          "audio_file": "ogg\\fyodor\\Fyodor.29.ogg",
+          "description": "You look pretty full to me."
+        },
+        {
+          "text_prefix": "Excellent",
+          "audio_file": "ogg\\fyodor\\Fyodor.30.ogg",
+          "description": "Excellent!"
+        },
+        {
+          "text_prefix": "You haven't the money",
+          "audio_file": "ogg\\fyodor\\Fyodor.31.ogg",
+          "description": "You haven't the money"
+        },
+        {
+          "text_prefix": "That I cannot help",
+          "audio_file": "ogg\\fyodor\\Fyodor.24.ogg",
+          "description": "That I cannot help thee with."
+        },
+        {
+          "text_prefix": "What can I do",
+          "audio_file": "ogg\\fyodor\\Fyodor.25.ogg",
+          "description": "What can I do for you?"
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\fyodor\\Fyodor.26.ogg",
+          "description": "Which of you?"
+        },
+        {
+          "text_prefix": "Cloth or thread",
+          "audio_file": "ogg\\fyodor\\Fyodor.27.ogg",
+          "description": "Cloth or thread?"
+        },
+        {
+          "text_prefix": "Interested",
+          "audio_file": "ogg\\fyodor\\Fyodor.28.ogg",
+          "description": "Interested?"
+        },
+        {
+          "text_prefix": "I regret that I",
+          "audio_file": "ogg\\fyodor\\Fyodor.20.ogg",
+          "description": "I regret that I am not skillful enough to weave silk."
+        },
+        {
+          "text_prefix": "In New Magincia however",
+          "audio_file": "ogg\\fyodor\\Fyodor.21.ogg",
+          "description": "In New Magincia, however, lives the silk weaver Charlotte."
+        },
+        {
+          "text_prefix": "She is the only",
+          "audio_file": "ogg\\fyodor\\Fyodor.22.ogg",
+          "description": "She is the only person I know who can weave silk."
+        },
+        {
+          "text_prefix": "May our paths cross",
+          "audio_file": "ogg\\fyodor\\Fyodor.23.ogg",
+          "description": "May our paths cross again someday."
+        },
+        {
+          "text_prefix": "What can I do",
+          "audio_file": "ogg\\fyodor\\Fyodor.2.ogg",
+          "description": "What can I do for you?"
+        },
+        {
+          "text_prefix": "It concerns a girl",
+          "audio_file": "ogg\\fyodor\\Fyodor.17.ogg",
+          "description": "It concerns a girl adventurer, a strange land, and a clever balloonist."
+        },
+        {
+          "text_prefix": "Are they not made",
+          "audio_file": "ogg\\fyodor\\Fyodor.18.ogg",
+          "description": "Are they not made of silk, in the form of great bag?"
+        },
+        {
+          "text_prefix": "'Tis a wondrous strong",
+          "audio_file": "ogg\\fyodor\\Fyodor.19.ogg",
+          "description": "'Tis a wondrous strong stuff, silk, and very light."
+        },
+        {
+          "text_prefix": "My father's loom was",
+          "audio_file": "ogg\\fyodor\\Fyodor.13.ogg",
+          "description": "My father's loom was not so complicated as mine. This design came from one of Lord British's old books."
+        },
+        {
+          "text_prefix": "I work on a",
+          "audio_file": "ogg\\fyodor\\Fyodor.14.ogg",
+          "description": "I work on a large new loom. The plans for it were found in one of Lord British's old books."
+        },
+        {
+          "text_prefix": "Lord British treasures antiques",
+          "audio_file": "ogg\\fyodor\\Fyodor.15.ogg",
+          "description": "Lord British treasures antiques. There is one book for which he hath offered a reward: The Wizard of Oz."
+        },
+        {
+          "text_prefix": "By Master L Frank",
+          "audio_file": "ogg\\fyodor\\Fyodor.16.ogg",
+          "description": "By Master L. Frank Baum, I believe."
+        },
+        {
+          "text_prefix": "Good day",
+          "audio_file": "ogg\\fyodor\\Fyodor.1.ogg",
+          "description": "Good day."
+        },
+        {
+          "text_prefix": "I push the pedals",
+          "audio_file": "ogg\\fyodor\\Fyodor.10.ogg",
+          "description": "I push the pedals with my feet, like this."
+        },
+        {
+          "text_prefix": "Then I pull these",
+          "audio_file": "ogg\\fyodor\\Fyodor.11.ogg",
+          "description": "Then I pull these levers."
+        },
+        {
+          "text_prefix": "The pattern depends on",
+          "audio_file": "ogg\\fyodor\\Fyodor.12.ogg",
+          "description": "The pattern depends on which combinations of levers and pedals I move."
+        },
+        {
+          "text_prefix": "Hello again",
+          "audio_file": "ogg\\fyodor\\Fyodor.0.ogg",
+          "description": "Hello again."
+        },
+        {
+          "text_prefix": "Come back when I'm",
+          "audio_file": "ogg\\fyodor\\Fyodor.9.ogg",
+          "description": "Come back when I'm at my loom. I'll deal with thee then."
+        },
+        {
+          "text_prefix": "I make cloth upon",
+          "audio_file": "ogg\\fyodor\\Fyodor.5.ogg",
+          "description": "I make cloth upon my loom. Perhaps you'd like to buy some?"
+        },
+        {
+          "text_prefix": "I fear I have",
+          "audio_file": "ogg\\fyodor\\Fyodor.6.ogg",
+          "description": "I fear I have none with me."
+        }
+      ]
+    },
+    {
+      "npc_port": 20,
+      "npc_name": "Daver",
+      "npc_portrait": 20,
+      "lines": [
+        {
+          "text_prefix": "Another of Lord British's",
+          "audio_file": "ogg\\daver\\Daver.8.ogg",
+          "description": "Another of Lord British's innovations, this bell thing."
+        },
+        {
+          "text_prefix": "You look much taller",
+          "audio_file": "ogg\\daver\\Daver.9.ogg",
+          "description": "You look much taller in person. Woodroffe's painting does not do you justice."
+        },
+        {
+          "text_prefix": "According to the numbers",
+          "audio_file": "ogg\\daver\\Daver.3.ogg",
+          "description": "According to the numbers in the hourglass, you see."
+        },
+        {
+          "text_prefix": "Well I usually know",
+          "audio_file": "ogg\\daver\\Daver.4.ogg",
+          "description": "Well, I usually know what time it is up here in my head somehow."
+        },
+        {
+          "text_prefix": "But just in case",
+          "audio_file": "ogg\\daver\\Daver.5.ogg",
+          "description": "But just in case, I start this hourglass at sunup, turning it over every nine hours."
+        },
+        {
+          "text_prefix": "It is especially important",
+          "audio_file": "ogg\\daver\\Daver.6.ogg",
+          "description": "It is especially important for those with shops."
+        },
+        {
+          "text_prefix": "Always wanted to visit",
+          "audio_file": "ogg\\daver\\Daver.23.ogg",
+          "description": "Always wanted to visit them, never had the time."
+        },
+        {
+          "text_prefix": "Heh heh",
+          "audio_file": "ogg\\daver\\Daver.24.ogg",
+          "description": "Heh heh"
+        },
+        {
+          "text_prefix": "Lord British appointed lords",
+          "audio_file": "ogg\\daver\\Daver.25.ogg",
+          "description": "Lord British appointed lords to rule the eight cities."
+        },
+        {
+          "text_prefix": "Until we meet again",
+          "audio_file": "ogg\\daver\\Daver.26.ogg",
+          "description": "Until we meet again."
+        },
+        {
+          "text_prefix": "Sorry I cannot help",
+          "audio_file": "ogg\\daver\\Daver.27.ogg",
+          "description": "Sorry, I cannot help you with that."
+        },
+        {
+          "text_prefix": "Every hour of the",
+          "audio_file": "ogg\\daver\\Daver.2.ogg",
+          "description": "Every hour of the day, I ring the bell a number of times."
+        },
+        {
+          "text_prefix": "Ah yes and New",
+          "audio_file": "ogg\\daver\\Daver.20.ogg",
+          "description": "Ah, yes, and New Magincia! I hear each of the lords knows a mantra."
+        },
+        {
+          "text_prefix": "Haven't the foggiest what",
+          "audio_file": "ogg\\daver\\Daver.21.ogg",
+          "description": "Haven't the foggiest what those are for."
+        },
+        {
+          "text_prefix": "Something to do with",
+          "audio_file": "ogg\\daver\\Daver.22.ogg",
+          "description": "Something to do with the shrines, I think."
+        },
+        {
+          "text_prefix": "But that hasn't been",
+          "audio_file": "ogg\\daver\\Daver.16.ogg",
+          "description": "But that hasn't been done for a long time."
+        },
+        {
+          "text_prefix": "After the Codex of",
+          "audio_file": "ogg\\daver\\Daver.17.ogg",
+          "description": "After the Codex of Ultimate Wisdom was brought back from the Underworld, Lord British gave the ruins to the lords of the eight cities."
+        },
+        {
+          "text_prefix": "Let's see now",
+          "audio_file": "ogg\\daver\\Daver.18.ogg",
+          "description": "Let's see now."
+        },
+        {
+          "text_prefix": "Minoc Trinsic Yew Skara",
+          "audio_file": "ogg\\daver\\Daver.19.ogg",
+          "description": "Minoc, Trinsic, Yew, Skara Brae, Britannia, Moonglow."
+        },
+        {
+          "text_prefix": "Probably out till all",
+          "audio_file": "ogg\\daver\\Daver.12.ogg",
+          "description": "Probably out till all hours, collecting ruins and such."
+        },
+        {
+          "text_prefix": "Magical little thing",
+          "audio_file": "ogg\\daver\\Daver.13.ogg",
+          "description": "Magical little thing."
+        },
+        {
+          "text_prefix": "There is a symbol",
+          "audio_file": "ogg\\daver\\Daver.14.ogg",
+          "description": "There is a symbol on one side and a letter on the other."
+        },
+        {
+          "text_prefix": "Probably spell something out",
+          "audio_file": "ogg\\daver\\Daver.15.ogg",
+          "description": "Probably spell something out if you put 'em all on a necklace."
+        },
+        {
+          "text_prefix": "Good day friend Avatar",
+          "audio_file": "ogg\\daver\\Daver.0.ogg",
+          "description": "Good day, friend Avatar."
+        },
+        {
+          "text_prefix": "I'm Daver McCord",
+          "audio_file": "ogg\\daver\\Daver.1.ogg",
+          "description": "I'm Daver McCord."
+        },
+        {
+          "text_prefix": "Heh I know little",
+          "audio_file": "ogg\\daver\\Daver.10.ogg",
+          "description": "Heh, I know little of that. I'm just the bellringer."
+        },
+        {
+          "text_prefix": "Hmm I guess that",
+          "audio_file": "ogg\\daver\\Daver.11.ogg",
+          "description": "Hmm, I guess that you don't keep a regular schedule being the Avatar and all."
+        },
+        {
+          "text_prefix": "They know when to",
+          "audio_file": "ogg\\daver\\Daver.7.ogg",
+          "description": "They know when to open for business, eat lunch, close, and that sort of thing."
+        }
+      ]
+    },
+    {
+      "npc_port": 21,
+      "npc_name": "Efram",
+      "npc_portrait": 21,
+      "lines": [
+        {
+          "text_prefix": "I'm glad you stopped",
+          "audio_file": "ogg\\efram\\Efram.9.ogg",
+          "description": "I'm glad you stopped by."
+        },
+        {
+          "text_prefix": "Hmm well haven't we",
+          "audio_file": "ogg\\efram\\Efram.3.ogg",
+          "description": "Hmm, well, haven't we... Never mind. Hmm."
+        },
+        {
+          "text_prefix": "What do you need",
+          "audio_file": "ogg\\efram\\Efram.4.ogg",
+          "description": "What do you need?"
+        },
+        {
+          "text_prefix": "Efram the provisioner",
+          "audio_file": "ogg\\efram\\Efram.5.ogg",
+          "description": "Efram, the provisioner."
+        },
+        {
+          "text_prefix": "It's a nice enough",
+          "audio_file": "ogg\\efram\\Efram.6.ogg",
+          "description": "It's a nice enough name."
+        },
+        {
+          "text_prefix": "Hm hello",
+          "audio_file": "ogg\\efram\\Efram.2.ogg",
+          "description": "Hm, hello."
+        },
+        {
+          "text_prefix": "It costs more gold",
+          "audio_file": "ogg\\efram\\Efram.17.ogg",
+          "description": "It costs more gold than you have."
+        },
+        {
+          "text_prefix": "There you go",
+          "audio_file": "ogg\\efram\\Efram.18.ogg",
+          "description": "There you go."
+        },
+        {
+          "text_prefix": "That's all you can",
+          "audio_file": "ogg\\efram\\Efram.19.ogg",
+          "description": "That's all you can carry."
+        },
+        {
+          "text_prefix": "That's all you can",
+          "audio_file": "ogg\\efram\\Efram.20.ogg",
+          "description": "That's all you can afford?"
+        },
+        {
+          "text_prefix": "It'll cost you gold",
+          "audio_file": "ogg\\efram\\Efram.13.ogg",
+          "description": "It'll cost you gold for each one. How many do you want?"
+        },
+        {
+          "text_prefix": "Come now that's a",
+          "audio_file": "ogg\\efram\\Efram.14.ogg",
+          "description": "Come now, that's a little much, don't you think?"
+        },
+        {
+          "text_prefix": "Hmm that was a",
+          "audio_file": "ogg\\efram\\Efram.15.ogg",
+          "description": "Hmm, that was a fair price. Well,"
+        },
+        {
+          "text_prefix": "You haven't any room",
+          "audio_file": "ogg\\efram\\Efram.16.ogg",
+          "description": "You haven't any room in your pack."
+        },
+        {
+          "text_prefix": "Well I'm busy now",
+          "audio_file": "ogg\\efram\\Efram.0.ogg",
+          "description": "Well, I'm busy now."
+        },
+        {
+          "text_prefix": "Yes well come back",
+          "audio_file": "ogg\\efram\\Efram.1.ogg",
+          "description": "Yes, well, come back to my shop later."
+        },
+        {
+          "text_prefix": "I'm sorry",
+          "audio_file": "ogg\\efram\\Efram.10.ogg",
+          "description": "I'm sorry."
+        },
+        {
+          "text_prefix": "Hmph Well perhaps you",
+          "audio_file": "ogg\\efram\\Efram.11.ogg",
+          "description": "Hmph. Well, perhaps you could ask someone else."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\efram\\Efram.12.ogg",
+          "description": "Which of you?"
+        },
+        {
+          "text_prefix": "Witch Torches oils Gems",
+          "audio_file": "ogg\\efram\\Efram.7.ogg",
+          "description": "Witch? Torches, oils? Gems, backpacks, bags, shovels? Or petticakes?"
+        },
+        {
+          "text_prefix": "I sell torches oils",
+          "audio_file": "ogg\\efram\\Efram.8.ogg",
+          "description": "I sell torches, oils, gems, backpacks, bags, shovels, and pannikins."
+        }
+      ]
+    },
+    {
+      "npc_port": 22,
+      "npc_name": "Rufus",
+      "npc_portrait": 22,
+      "lines": [
+        {
+          "text_prefix": "Remember to shoe your",
+          "audio_file": "ogg\\rufus\\Rufus.7.ogg",
+          "description": "Remember to shoe your steed often. Bye."
+        },
+        {
+          "text_prefix": "Aye it saves their",
+          "audio_file": "ogg\\rufus\\Rufus.8.ogg",
+          "description": "Aye, it saves their feet from stones and such."
+        },
+        {
+          "text_prefix": "I just shoe horses",
+          "audio_file": "ogg\\rufus\\Rufus.9.ogg",
+          "description": "I just shoe horses, sorry."
+        },
+        {
+          "text_prefix": "'Tis good to see",
+          "audio_file": "ogg\\rufus\\Rufus.2.ogg",
+          "description": "'Tis good to see thee, friend"
+        },
+        {
+          "text_prefix": "What do you need",
+          "audio_file": "ogg\\rufus\\Rufus.3.ogg",
+          "description": "What do you need?"
+        },
+        {
+          "text_prefix": "Rufus the Red",
+          "audio_file": "ogg\\rufus\\Rufus.4.ogg",
+          "description": "Rufus the Red"
+        },
+        {
+          "text_prefix": "Can you not tell",
+          "audio_file": "ogg\\rufus\\Rufus.5.ogg",
+          "description": "Can you not tell by my hair?"
+        },
+        {
+          "text_prefix": "You'll find none stronger",
+          "audio_file": "ogg\\rufus\\Rufus.16.ogg",
+          "description": "You'll find none stronger."
+        },
+        {
+          "text_prefix": "They look pretty full",
+          "audio_file": "ogg\\rufus\\Rufus.12.ogg",
+          "description": "They look pretty full to me."
+        },
+        {
+          "text_prefix": "Good good",
+          "audio_file": "ogg\\rufus\\Rufus.13.ogg",
+          "description": "Good, good."
+        },
+        {
+          "text_prefix": "You haven't enough gold",
+          "audio_file": "ogg\\rufus\\Rufus.14.ogg",
+          "description": "You haven't enough gold."
+        },
+        {
+          "text_prefix": "Those shoes will last",
+          "audio_file": "ogg\\rufus\\Rufus.15.ogg",
+          "description": "Those shoes will last you."
+        },
+        {
+          "text_prefix": "I'm busy just now",
+          "audio_file": "ogg\\rufus\\Rufus.0.ogg",
+          "description": "I'm busy just now. Why don't you come to me smithy and we'll talk then?"
+        },
+        {
+          "text_prefix": "Good day friends",
+          "audio_file": "ogg\\rufus\\Rufus.1.ogg",
+          "description": "Good day, friends."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\rufus\\Rufus.10.ogg",
+          "description": "Which of you?"
+        },
+        {
+          "text_prefix": "It'll cost you two",
+          "audio_file": "ogg\\rufus\\Rufus.11.ogg",
+          "description": "It'll cost you two gold for the horseshoes. Interested?"
+        },
+        {
+          "text_prefix": "If you want to",
+          "audio_file": "ogg\\rufus\\Rufus.6.ogg",
+          "description": "If you want to buy horseshoes, just ask."
+        }
+      ]
+    },
+    {
+      "npc_port": 23,
+      "npc_name": "Nema",
+      "npc_portrait": 23,
+      "lines": [
+        {
+          "text_prefix": "Of course this time",
+          "audio_file": "ogg\\nema\\Nema.4.ogg",
+          "description": "Of course, this time of year there's not much to do, so I take a lot of naps."
+        },
+        {
+          "text_prefix": "To provide fresh fruit",
+          "audio_file": "ogg\\nema\\Nema.5.ogg",
+          "description": "To provide fresh fruit for Lord British's banquet."
+        },
+        {
+          "text_prefix": "That's the way of",
+          "audio_file": "ogg\\nema\\Nema.6.ogg",
+          "description": "That's the way of it."
+        },
+        {
+          "text_prefix": "We have better things",
+          "audio_file": "ogg\\nema\\Nema.31.ogg",
+          "description": "We have better things to do than listen to this loon."
+        },
+        {
+          "text_prefix": "I tend Lord British's",
+          "audio_file": "ogg\\nema\\Nema.3.ogg",
+          "description": "I tend Lord British's orchard."
+        },
+        {
+          "text_prefix": "I have dreamed many",
+          "audio_file": "ogg\\nema\\Nema.28.ogg",
+          "description": "I have dreamed many a strange dream, but my favorite one is"
+        },
+        {
+          "text_prefix": "I had a dream",
+          "audio_file": "ogg\\nema\\Nema.29.ogg",
+          "description": "I had a dream about that one."
+        },
+        {
+          "text_prefix": "All this talking makes",
+          "audio_file": "ogg\\nema\\Nema.30.ogg",
+          "description": "All this talking makes me sleepy."
+        },
+        {
+          "text_prefix": "When the sun's blazing",
+          "audio_file": "ogg\\nema\\Nema.24.ogg",
+          "description": "When the sun's blazing eyes wink shut and Morpheus rules the heavens."
+        },
+        {
+          "text_prefix": "I dream of castles",
+          "audio_file": "ogg\\nema\\Nema.25.ogg",
+          "description": "I dream of castles of ice, rivers that run backwards, fairy princesses, and cloud dragons."
+        },
+        {
+          "text_prefix": "Once I dreamt that",
+          "audio_file": "ogg\\nema\\Nema.26.ogg",
+          "description": "Once I dreamt that my orchard grew and grew until I felt like a tiny bug amongst the giant plants."
+        },
+        {
+          "text_prefix": "Sometimes everything is upside",
+          "audio_file": "ogg\\nema\\Nema.27.ogg",
+          "description": "Sometimes everything is upside down or made of chocolate."
+        },
+        {
+          "text_prefix": "Colors never seem as",
+          "audio_file": "ogg\\nema\\Nema.20.ogg",
+          "description": "Colors never seem as vivid when I'm awake."
+        },
+        {
+          "text_prefix": "Day brings questions night",
+          "audio_file": "ogg\\nema\\Nema.21.ogg",
+          "description": "Day brings questions, night brings answers."
+        },
+        {
+          "text_prefix": "Thusly does the duality",
+          "audio_file": "ogg\\nema\\Nema.22.ogg",
+          "description": "Thusly does the duality of the universe find expression in our lives."
+        },
+        {
+          "text_prefix": "What color is seven",
+          "audio_file": "ogg\\nema\\Nema.23.ogg",
+          "description": "What color is seven? How many is green? Could horses speak if they wished to? These things concern me."
+        },
+        {
+          "text_prefix": "That's nice",
+          "audio_file": "ogg\\nema\\Nema.2.ogg",
+          "description": "That's nice."
+        },
+        {
+          "text_prefix": "Fear and desire what",
+          "audio_file": "ogg\\nema\\Nema.17.ogg",
+          "description": "Fear and desire, what would either be without the other?"
+        },
+        {
+          "text_prefix": "She is the sweet",
+          "audio_file": "ogg\\nema\\Nema.18.ogg",
+          "description": "She is the sweet harbinger of the night."
+        },
+        {
+          "text_prefix": "Sleep is the finest",
+          "audio_file": "ogg\\nema\\Nema.19.ogg",
+          "description": "Sleep is the finest medicine, for in our dreams lie the answer to all the problems of the waking world."
+        },
+        {
+          "text_prefix": "To snooze perchance to",
+          "audio_file": "ogg\\nema\\Nema.13.ogg",
+          "description": "To snooze, perchance to dream."
+        },
+        {
+          "text_prefix": "Amorphous I long for",
+          "audio_file": "ogg\\nema\\Nema.14.ogg",
+          "description": "Amorphous, I long for the taste of thy sweet oblivion."
+        },
+        {
+          "text_prefix": "Morpheus is the king",
+          "audio_file": "ogg\\nema\\Nema.15.ogg",
+          "description": "Morpheus is the king of Slumberland. I think the moon is one of his daughters."
+        },
+        {
+          "text_prefix": "It lies halfway between",
+          "audio_file": "ogg\\nema\\Nema.16.ogg",
+          "description": "It lies halfway between our fears and our desires."
+        },
+        {
+          "text_prefix": "My name is Nema",
+          "audio_file": "ogg\\nema\\Nema.1.ogg",
+          "description": "My name is Nema. What's yours?"
+        },
+        {
+          "text_prefix": "The earthquakes seem to",
+          "audio_file": "ogg\\nema\\Nema.10.ogg",
+          "description": "The earthquakes seem to have stopped, thank goodness."
+        },
+        {
+          "text_prefix": "We haven't had one",
+          "audio_file": "ogg\\nema\\Nema.11.ogg",
+          "description": "We haven't had one in well over a year now."
+        },
+        {
+          "text_prefix": "Well I have better",
+          "audio_file": "ogg\\nema\\Nema.12.ogg",
+          "description": "Well, I have better dreams at night, anyway."
+        },
+        {
+          "text_prefix": "Oh hello there I",
+          "audio_file": "ogg\\nema\\Nema.0.ogg",
+          "description": "Oh, hello there. I must have been daydreaming."
+        },
+        {
+          "text_prefix": "Long live the King",
+          "audio_file": "ogg\\nema\\Nema.7.ogg",
+          "description": "Long live the King! I was just a homeless orphan when he gave me this job."
+        },
+        {
+          "text_prefix": "My parents were killed",
+          "audio_file": "ogg\\nema\\Nema.8.ogg",
+          "description": "My parents were killed in an earthquake."
+        },
+        {
+          "text_prefix": "But now I have",
+          "audio_file": "ogg\\nema\\Nema.9.ogg",
+          "description": "But now I have a place to live and a job to put food on the table."
+        }
+      ]
+    },
+    {
+      "npc_port": 24,
+      "npc_name": "Cullen",
+      "npc_portrait": 24,
+      "lines": [
+        {
+          "text_prefix": "If you'd like to",
+          "audio_file": "ogg\\cullen\\Cullen.5.ogg",
+          "description": "If you'd like to buy some, just say the word."
+        },
+        {
+          "text_prefix": "Well what else will",
+          "audio_file": "ogg\\cullen\\Cullen.36.ogg",
+          "description": "Well, what else will it be then?"
+        },
+        {
+          "text_prefix": "Plus one for luck",
+          "audio_file": "ogg\\cullen\\Cullen.37.ogg",
+          "description": "Plus one for luck."
+        },
+        {
+          "text_prefix": "Will you take five",
+          "audio_file": "ogg\\cullen\\Cullen.32.ogg",
+          "description": "Will you take five gold for that sack of flour?"
+        },
+        {
+          "text_prefix": "Done",
+          "audio_file": "ogg\\cullen\\Cullen.33.ogg",
+          "description": "Done."
+        },
+        {
+          "text_prefix": "Sorry you haven't any",
+          "audio_file": "ogg\\cullen\\Cullen.34.ogg",
+          "description": "Sorry, you haven't any flour."
+        },
+        {
+          "text_prefix": "Changed your mind eh",
+          "audio_file": "ogg\\cullen\\Cullen.35.ogg",
+          "description": "Changed your mind, eh?"
+        },
+        {
+          "text_prefix": "You can buy bakery",
+          "audio_file": "ogg\\cullen\\Cullen.3.ogg",
+          "description": "You can buy bakery goods from me, or perhaps you have some flour to sell, eh?"
+        },
+        {
+          "text_prefix": "Perhaps thy friend then",
+          "audio_file": "ogg\\cullen\\Cullen.28.ogg",
+          "description": "Perhaps thy friend then?"
+        },
+        {
+          "text_prefix": "Come to my shop",
+          "audio_file": "ogg\\cullen\\Cullen.29.ogg",
+          "description": "Come to my shop when it's open."
+        },
+        {
+          "text_prefix": "Sorry none of you",
+          "audio_file": "ogg\\cullen\\Cullen.30.ogg",
+          "description": "Sorry, none of you has any flour."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\cullen\\Cullen.31.ogg",
+          "description": "Which of you?"
+        },
+        {
+          "text_prefix": "Here's thy goods",
+          "audio_file": "ogg\\cullen\\Cullen.24.ogg",
+          "description": "Here's thy goods."
+        },
+        {
+          "text_prefix": "How about something else",
+          "audio_file": "ogg\\cullen\\Cullen.25.ogg",
+          "description": "How about something else?"
+        },
+        {
+          "text_prefix": "Perhaps some other time",
+          "audio_file": "ogg\\cullen\\Cullen.26.ogg",
+          "description": "Perhaps some other time, then."
+        },
+        {
+          "text_prefix": "Perhaps one of thy",
+          "audio_file": "ogg\\cullen\\Cullen.27.ogg",
+          "description": "Perhaps one of thy friends, then?"
+        },
+        {
+          "text_prefix": "But thou canst not",
+          "audio_file": "ogg\\cullen\\Cullen.20.ogg",
+          "description": "But thou canst not carry any!"
+        },
+        {
+          "text_prefix": "Thou hast not enough",
+          "audio_file": "ogg\\cullen\\Cullen.21.ogg",
+          "description": "Thou hast not enough gold for that many."
+        },
+        {
+          "text_prefix": "I will sell thee",
+          "audio_file": "ogg\\cullen\\Cullen.22.ogg",
+          "description": "I will sell thee just as many as thou canst carry."
+        },
+        {
+          "text_prefix": "But thou canst not",
+          "audio_file": "ogg\\cullen\\Cullen.23.ogg",
+          "description": "But thou canst not afford any."
+        },
+        {
+          "text_prefix": "I'd have thought that'd",
+          "audio_file": "ogg\\cullen\\Cullen.2.ogg",
+          "description": "I'd have thought that'd be obvious. I'm a baker."
+        },
+        {
+          "text_prefix": "Whoa don't buy out",
+          "audio_file": "ogg\\cullen\\Cullen.17.ogg",
+          "description": "Whoa, don't buy out my entire stock!"
+        },
+        {
+          "text_prefix": "Thou canst not carry",
+          "audio_file": "ogg\\cullen\\Cullen.18.ogg",
+          "description": "Thou canst not carry that many."
+        },
+        {
+          "text_prefix": "I will sell thee",
+          "audio_file": "ogg\\cullen\\Cullen.19.ogg",
+          "description": "I will sell thee just as many as thou canst carry."
+        },
+        {
+          "text_prefix": "Suit thyself but thou'll",
+          "audio_file": "ogg\\cullen\\Cullen.13.ogg",
+          "description": "Suit thyself, but thou'll find no better."
+        },
+        {
+          "text_prefix": "Those cost gold",
+          "audio_file": "ogg\\cullen\\Cullen.14.ogg",
+          "description": "Those cost gold."
+        },
+        {
+          "text_prefix": "How many do you",
+          "audio_file": "ogg\\cullen\\Cullen.15.ogg",
+          "description": "How many do you want?"
+        },
+        {
+          "text_prefix": "Suit thyself but thou'd",
+          "audio_file": "ogg\\cullen\\Cullen.16.ogg",
+          "description": "Suit thyself, but thou'd find no better."
+        },
+        {
+          "text_prefix": "Hello there my friend",
+          "audio_file": "ogg\\cullen\\Cullen.0.ogg",
+          "description": "Hello there, my friend!"
+        },
+        {
+          "text_prefix": "I'm Cullen Cullen the",
+          "audio_file": "ogg\\cullen\\Cullen.1.ogg",
+          "description": "I'm Cullen, Cullen the baker."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\cullen\\Cullen.10.ogg",
+          "description": "Which of you?"
+        },
+        {
+          "text_prefix": "Suit yourself",
+          "audio_file": "ogg\\cullen\\Cullen.11.ogg",
+          "description": "Suit yourself."
+        },
+        {
+          "text_prefix": "Which item",
+          "audio_file": "ogg\\cullen\\Cullen.12.ogg",
+          "description": "Which item?"
+        },
+        {
+          "text_prefix": "Come again soon",
+          "audio_file": "ogg\\cullen\\Cullen.6.ogg",
+          "description": "Come again soon!"
+        },
+        {
+          "text_prefix": "Hmm",
+          "audio_file": "ogg\\cullen\\Cullen.7.ogg",
+          "description": "Hmm."
+        },
+        {
+          "text_prefix": "Nope I don't know",
+          "audio_file": "ogg\\cullen\\Cullen.8.ogg",
+          "description": "Nope, I don't know anything about that."
+        },
+        {
+          "text_prefix": "Come to my shop",
+          "audio_file": "ogg\\cullen\\Cullen.9.ogg",
+          "description": "Come to my shop when it's open."
+        },
+        {
+          "text_prefix": "I bake goods for",
+          "audio_file": "ogg\\cullen\\Cullen.4.ogg",
+          "description": "I bake goods for Lord British himself."
+        }
+      ]
+    },
+    {
+      "npc_port": 25,
+      "npc_name": "Tiberius",
+      "npc_portrait": 25,
+      "lines": [
+        {
+          "text_prefix": "I beg thy pardon",
+          "audio_file": "ogg\\tiberius\\Tiberius.7.ogg",
+          "description": "I beg thy pardon?"
+        },
+        {
+          "text_prefix": "Come to my shop",
+          "audio_file": "ogg\\tiberius\\Tiberius.8.ogg",
+          "description": "Come to my shop when I am open."
+        },
+        {
+          "text_prefix": "I attempt to heal",
+          "audio_file": "ogg\\tiberius\\Tiberius.4.ogg",
+          "description": "I attempt to heal, cure, or if needed, resurrect the fallen."
+        },
+        {
+          "text_prefix": "Yo mom",
+          "audio_file": "ogg\\tiberius\\Tiberius.38.ogg",
+          "description": "Yo mom"
+        },
+        {
+          "text_prefix": "Sixas",
+          "audio_file": "ogg\\tiberius\\Tiberius.39.ogg",
+          "description": "Sixas"
+        },
+        {
+          "text_prefix": "Off with you",
+          "audio_file": "ogg\\tiberius\\Tiberius.40.ogg",
+          "description": "Off with you!"
+        },
+        {
+          "text_prefix": "I see another slain",
+          "audio_file": "ogg\\tiberius\\Tiberius.41.ogg",
+          "description": "I see another slain friend."
+        },
+        {
+          "text_prefix": "There is naught I",
+          "audio_file": "ogg\\tiberius\\Tiberius.34.ogg",
+          "description": "There is naught I can do save grieve with thee."
+        },
+        {
+          "text_prefix": "That is not enough",
+          "audio_file": "ogg\\tiberius\\Tiberius.35.ogg",
+          "description": "That is not enough money."
+        },
+        {
+          "text_prefix": "Thou art several gold",
+          "audio_file": "ogg\\tiberius\\Tiberius.36.ogg",
+          "description": "Thou art several gold pieces short."
+        },
+        {
+          "text_prefix": "Go to a gravedigger",
+          "audio_file": "ogg\\tiberius\\Tiberius.37.ogg",
+          "description": "Go to a gravedigger. I'm sure his price would be lower."
+        },
+        {
+          "text_prefix": "I would kill thee",
+          "audio_file": "ogg\\tiberius\\Tiberius.30.ogg",
+          "description": "I would kill thee without payment."
+        },
+        {
+          "text_prefix": "I see that you",
+          "audio_file": "ogg\\tiberius\\Tiberius.31.ogg",
+          "description": "I see that you carry a parted friend."
+        },
+        {
+          "text_prefix": "Come to my shop",
+          "audio_file": "ogg\\tiberius\\Tiberius.32.ogg",
+          "description": "Come to my shop when I am open."
+        },
+        {
+          "text_prefix": "Wilt thou make an",
+          "audio_file": "ogg\\tiberius\\Tiberius.33.ogg",
+          "description": "Wilt thou make an offering of four hundred gold?"
+        },
+        {
+          "text_prefix": "It is my responsibility",
+          "audio_file": "ogg\\tiberius\\Tiberius.3.ogg",
+          "description": "It is my responsibility to care for the sick and the injured."
+        },
+        {
+          "text_prefix": "If thou will not",
+          "audio_file": "ogg\\tiberius\\Tiberius.27.ogg",
+          "description": "If thou will not pay, I cannot heal thee."
+        },
+        {
+          "text_prefix": "I'm sorry Without an",
+          "audio_file": "ogg\\tiberius\\Tiberius.28.ogg",
+          "description": "I'm sorry. Without an offering, I cannot heal thee."
+        },
+        {
+          "text_prefix": "Thou art poor but",
+          "audio_file": "ogg\\tiberius\\Tiberius.29.ogg",
+          "description": "Thou art poor, but thy cause is just."
+        },
+        {
+          "text_prefix": "Fret not for thou",
+          "audio_file": "ogg\\tiberius\\Tiberius.22.ogg",
+          "description": "Fret not, for thou art well."
+        },
+        {
+          "text_prefix": "But not for all",
+          "audio_file": "ogg\\tiberius\\Tiberius.23.ogg",
+          "description": "But not, for all of you are well."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\tiberius\\Tiberius.24.ogg",
+          "description": "Which of you"
+        },
+        {
+          "text_prefix": "I sensed that there",
+          "audio_file": "ogg\\tiberius\\Tiberius.25.ogg",
+          "description": "I sensed that there was poison."
+        },
+        {
+          "text_prefix": "Wilt thou make an",
+          "audio_file": "ogg\\tiberius\\Tiberius.26.ogg",
+          "description": "Wilt thou make an offering of ten gold?"
+        },
+        {
+          "text_prefix": "I am Tiberius healer",
+          "audio_file": "ogg\\tiberius\\Tiberius.2.ogg",
+          "description": "I am Tiberius, healer for this town."
+        },
+        {
+          "text_prefix": "Is there aught else",
+          "audio_file": "ogg\\tiberius\\Tiberius.19.ogg",
+          "description": "Is there aught else I can do for thee?"
+        },
+        {
+          "text_prefix": "Come to my shop",
+          "audio_file": "ogg\\tiberius\\Tiberius.20.ogg",
+          "description": "Come to my shop when I am open."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\tiberius\\Tiberius.21.ogg",
+          "description": "Which of you"
+        },
+        {
+          "text_prefix": "If thou wilt not",
+          "audio_file": "ogg\\tiberius\\Tiberius.15.ogg",
+          "description": "If thou wilt not pay, I cannot heal thee."
+        },
+        {
+          "text_prefix": "I'm sorry Without an",
+          "audio_file": "ogg\\tiberius\\Tiberius.16.ogg",
+          "description": "I'm sorry. Without an offering I cannot heal thee."
+        },
+        {
+          "text_prefix": "Thou art poor but",
+          "audio_file": "ogg\\tiberius\\Tiberius.17.ogg",
+          "description": "Thou art poor, but thy cause is just."
+        },
+        {
+          "text_prefix": "I will heal thee",
+          "audio_file": "ogg\\tiberius\\Tiberius.18.ogg",
+          "description": "I will heal thee without payment."
+        },
+        {
+          "text_prefix": "Fret not for all",
+          "audio_file": "ogg\\tiberius\\Tiberius.11.ogg",
+          "description": "Fret not, for all of you are well."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\tiberius\\Tiberius.12.ogg",
+          "description": "Which of you"
+        },
+        {
+          "text_prefix": "I see thy injury",
+          "audio_file": "ogg\\tiberius\\Tiberius.13.ogg",
+          "description": "I see thy injury."
+        },
+        {
+          "text_prefix": "Wilt thou make an",
+          "audio_file": "ogg\\tiberius\\Tiberius.14.ogg",
+          "description": "Wilt thou make an offering of thirty gold?"
+        },
+        {
+          "text_prefix": "Greetings my children What",
+          "audio_file": "ogg\\tiberius\\Tiberius.0.ogg",
+          "description": "Greetings, my children. What can I do for thee today?"
+        },
+        {
+          "text_prefix": "Thou weepest for no",
+          "audio_file": "ogg\\tiberius\\Tiberius.1.ogg",
+          "description": "Thou weepest for no reason. None of thy party is dead."
+        },
+        {
+          "text_prefix": "What not for thou",
+          "audio_file": "ogg\\tiberius\\Tiberius.10.ogg",
+          "description": "What not, for thou art well."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\tiberius\\Tiberius.9.ogg",
+          "description": "Which of you?"
+        },
+        {
+          "text_prefix": "Go in peace my",
+          "audio_file": "ogg\\tiberius\\Tiberius.5.ogg",
+          "description": "Go in peace, my children."
+        },
+        {
+          "text_prefix": "What can I do",
+          "audio_file": "ogg\\tiberius\\Tiberius.6.ogg",
+          "description": "What can I do for thee?"
+        }
+      ]
+    },
+    {
+      "npc_port": 26,
+      "npc_name": "Wilbur",
+      "npc_portrait": 26,
+      "lines": [
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\wilbur\\Wilbur.8.ogg",
+          "description": "Which of you?"
+        },
+        {
+          "text_prefix": "But thou already hast",
+          "audio_file": "ogg\\wilbur\\Wilbur.9.ogg",
+          "description": "But thou already hast a horse."
+        },
+        {
+          "text_prefix": "I work here at",
+          "audio_file": "ogg\\wilbur\\Wilbur.2.ogg",
+          "description": "I work here at the stables, taking care of the horses."
+        },
+        {
+          "text_prefix": "You can buy one",
+          "audio_file": "ogg\\wilbur\\Wilbur.3.ogg",
+          "description": "You can buy one if you'd like."
+        },
+        {
+          "text_prefix": "A talking horse Ridiculous",
+          "audio_file": "ogg\\wilbur\\Wilbur.4.ogg",
+          "description": "A talking horse? Ridiculous! Who told you that?"
+        },
+        {
+          "text_prefix": "How about one of",
+          "audio_file": "ogg\\wilbur\\Wilbur.17.ogg",
+          "description": "How about one of thy friends?"
+        },
+        {
+          "text_prefix": "But thou canst not",
+          "audio_file": "ogg\\wilbur\\Wilbur.13.ogg",
+          "description": "But thou canst not afford one."
+        },
+        {
+          "text_prefix": "My price is final",
+          "audio_file": "ogg\\wilbur\\Wilbur.14.ogg",
+          "description": "My price is final. Interested?"
+        },
+        {
+          "text_prefix": "Good",
+          "audio_file": "ogg\\wilbur\\Wilbur.15.ogg",
+          "description": "Good."
+        },
+        {
+          "text_prefix": "Perhaps some other time",
+          "audio_file": "ogg\\wilbur\\Wilbur.16.ogg",
+          "description": "Perhaps some other time then."
+        },
+        {
+          "text_prefix": "My name's Wilbur",
+          "audio_file": "ogg\\wilbur\\Wilbur.1.ogg",
+          "description": "My name's Wilbur."
+        },
+        {
+          "text_prefix": "But all of you",
+          "audio_file": "ogg\\wilbur\\Wilbur.10.ogg",
+          "description": "But all of you are already on horses."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\wilbur\\Wilbur.11.ogg",
+          "description": "Which of you?"
+        },
+        {
+          "text_prefix": "Aye thou hast need",
+          "audio_file": "ogg\\wilbur\\Wilbur.12.ogg",
+          "description": "Aye, thou hast need of a horse?"
+        },
+        {
+          "text_prefix": "Greetings travelers What can",
+          "audio_file": "ogg\\wilbur\\Wilbur.0.ogg",
+          "description": "Greetings, travelers. What can I do for you?"
+        },
+        {
+          "text_prefix": "If you wish to",
+          "audio_file": "ogg\\wilbur\\Wilbur.5.ogg",
+          "description": "If you wish to buy one, just say the word."
+        },
+        {
+          "text_prefix": "Come back again",
+          "audio_file": "ogg\\wilbur\\Wilbur.6.ogg",
+          "description": "Come back again."
+        },
+        {
+          "text_prefix": "Beg pardon",
+          "audio_file": "ogg\\wilbur\\Wilbur.7.ogg",
+          "description": "Beg pardon?"
+        }
+      ]
+    },
+    {
+      "npc_port": 27,
+      "npc_name": "Arty",
+      "npc_portrait": 27,
+      "lines": [
+        {
+          "text_prefix": "I know of this",
+          "audio_file": "ogg\\arty\\Arty.4.ogg",
+          "description": "I know of this person."
+        },
+        {
+          "text_prefix": "He is Arty the",
+          "audio_file": "ogg\\arty\\Arty.5.ogg",
+          "description": "He is Arty the Mute, a local shipwright and an honored citizen."
+        },
+        {
+          "text_prefix": "I know of this",
+          "audio_file": "ogg\\arty\\Arty.0.ogg",
+          "description": "I know of this person."
+        },
+        {
+          "text_prefix": "He is Arty the",
+          "audio_file": "ogg\\arty\\Arty.1.ogg",
+          "description": "He is Arty the Mute, a local shipwright and an honored citizen."
+        },
+        {
+          "text_prefix": "I know of this",
+          "audio_file": "ogg\\arty\\Arty.2.ogg",
+          "description": "I know of this person."
+        },
+        {
+          "text_prefix": "He is Arty the",
+          "audio_file": "ogg\\arty\\Arty.3.ogg",
+          "description": "He is Arty the mute, a local shipwright and an honored citizen."
+        }
+      ]
+    },
+    {
+      "npc_port": 28,
+      "npc_name": "Lynn",
+      "npc_portrait": 28,
+      "lines": [
+        {
+          "text_prefix": "Thou needn't tell me",
+          "audio_file": "ogg\\lynn\\Lynn.3.ogg",
+          "description": "Thou needn't tell me thy name. The Avatar is famous throughout the land."
+        },
+        {
+          "text_prefix": "I am a fletcher",
+          "audio_file": "ogg\\lynn\\Lynn.4.ogg",
+          "description": "I am a fletcher."
+        },
+        {
+          "text_prefix": "Perhaps some other time",
+          "audio_file": "ogg\\lynn\\Lynn.25.ogg",
+          "description": "Perhaps some other time."
+        },
+        {
+          "text_prefix": "Enjoy",
+          "audio_file": "ogg\\lynn\\Lynn.26.ogg",
+          "description": "Enjoy!"
+        },
+        {
+          "text_prefix": "I will sell thee",
+          "audio_file": "ogg\\lynn\\Lynn.21.ogg",
+          "description": "I will sell thee just a few dozen."
+        },
+        {
+          "text_prefix": "Thou canst not afford",
+          "audio_file": "ogg\\lynn\\Lynn.22.ogg",
+          "description": "Thou canst not afford any."
+        },
+        {
+          "text_prefix": "I appreciate thy business",
+          "audio_file": "ogg\\lynn\\Lynn.23.ogg",
+          "description": "I appreciate thy business."
+        },
+        {
+          "text_prefix": "Is there aught else",
+          "audio_file": "ogg\\lynn\\Lynn.24.ogg",
+          "description": "Is there aught else thou wouldst buy?"
+        },
+        {
+          "text_prefix": "I'm Lynn",
+          "audio_file": "ogg\\lynn\\Lynn.2.ogg",
+          "description": "I'm Lynn."
+        },
+        {
+          "text_prefix": "Thou canst not carry",
+          "audio_file": "ogg\\lynn\\Lynn.17.ogg",
+          "description": "Thou canst not carry that many."
+        },
+        {
+          "text_prefix": "I will sell thee",
+          "audio_file": "ogg\\lynn\\Lynn.18.ogg",
+          "description": "I will sell thee just a few dozen."
+        },
+        {
+          "text_prefix": "But thou canst not",
+          "audio_file": "ogg\\lynn\\Lynn.19.ogg",
+          "description": "But thou canst not carry any."
+        },
+        {
+          "text_prefix": "Thou hast not enough",
+          "audio_file": "ogg\\lynn\\Lynn.20.ogg",
+          "description": "Thou hast not enough gold for that many."
+        },
+        {
+          "text_prefix": "Which item",
+          "audio_file": "ogg\\lynn\\Lynn.13.ogg",
+          "description": "Which item?"
+        },
+        {
+          "text_prefix": "Beg pardon",
+          "audio_file": "ogg\\lynn\\Lynn.14.ogg",
+          "description": "Beg pardon?"
+        },
+        {
+          "text_prefix": "I sell only by",
+          "audio_file": "ogg\\lynn\\Lynn.15.ogg",
+          "description": "I sell only by the dozen."
+        },
+        {
+          "text_prefix": "How many dozen",
+          "audio_file": "ogg\\lynn\\Lynn.16.ogg",
+          "description": "How many dozen?"
+        },
+        {
+          "text_prefix": "Well hello again Avatar",
+          "audio_file": "ogg\\lynn\\Lynn.0.ogg",
+          "description": "Well, hello again, Avatar."
+        },
+        {
+          "text_prefix": "How can I help",
+          "audio_file": "ogg\\lynn\\Lynn.1.ogg",
+          "description": "How can I help thee?"
+        },
+        {
+          "text_prefix": "What can I do",
+          "audio_file": "ogg\\lynn\\Lynn.10.ogg",
+          "description": "What can I do for you?"
+        },
+        {
+          "text_prefix": "Come to my shop",
+          "audio_file": "ogg\\lynn\\Lynn.11.ogg",
+          "description": "Come to my shop when I'm open."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\lynn\\Lynn.12.ogg",
+          "description": "Which of you?"
+        },
+        {
+          "text_prefix": "Beg pardon",
+          "audio_file": "ogg\\lynn\\Lynn.9.ogg",
+          "description": "Beg pardon?"
+        },
+        {
+          "text_prefix": "I make arrows and",
+          "audio_file": "ogg\\lynn\\Lynn.5.ogg",
+          "description": "I make arrows and bolts for the armies of Lord British himself."
+        },
+        {
+          "text_prefix": "I have all I",
+          "audio_file": "ogg\\lynn\\Lynn.6.ogg",
+          "description": "I have all I need and have no reason to purchase anything more."
+        },
+        {
+          "text_prefix": "I appreciate thy offer",
+          "audio_file": "ogg\\lynn\\Lynn.7.ogg",
+          "description": "I appreciate thy offer."
+        },
+        {
+          "text_prefix": "Farewell I hope I",
+          "audio_file": "ogg\\lynn\\Lynn.8.ogg",
+          "description": "Farewell. I hope I have aided thy quest!"
+        }
+      ]
+    },
+    {
+      "npc_port": 162,
+      "npc_name": "Finn",
+      "npc_portrait": 162,
+      "lines": [
+        {
+          "text_prefix": "I'm Lord British and",
+          "audio_file": "ogg\\finn\\Finn.9.ogg",
+          "description": "I'm Lord British, and I can do whatever I want to!"
+        },
+        {
+          "text_prefix": "Of course nobody would",
+          "audio_file": "ogg\\finn\\Finn.4.ogg",
+          "description": "Of course, nobody would dare say anything bad about me to my face. Nobody except Chuckles, anyway."
+        },
+        {
+          "text_prefix": "But as a beggar",
+          "audio_file": "ogg\\finn\\Finn.5.ogg",
+          "description": "But as a beggar, people will tell me just about anything."
+        },
+        {
+          "text_prefix": "Pray honor me",
+          "audio_file": "ogg\\finn\\Finn.33.ogg",
+          "description": "Pray honor me."
+        },
+        {
+          "text_prefix": "Perhaps there's a little",
+          "audio_file": "ogg\\finn\\Finn.34.ogg",
+          "description": "Perhaps there's a little of Lord British in us all."
+        },
+        {
+          "text_prefix": "I'm pretending to be",
+          "audio_file": "ogg\\finn\\Finn.3.ogg",
+          "description": "I'm pretending to be a beggar. That way no one will suspect who I really am!"
+        },
+        {
+          "text_prefix": "Here give me a",
+          "audio_file": "ogg\\finn\\Finn.30.ogg",
+          "description": "Here, give me a few coins to keep anyone from getting suspicious."
+        },
+        {
+          "text_prefix": "Valor Fa Spirituality So",
+          "audio_file": "ogg\\finn\\Finn.31.ogg",
+          "description": "Valor, Fa, Spirituality, So, Humility, La."
+        },
+        {
+          "text_prefix": "Sacrifice Gee gosh wouldn't",
+          "audio_file": "ogg\\finn\\Finn.32.ogg",
+          "description": "Sacrifice? Gee, gosh, wouldn't ya know it, the mantra of honesty slips my mind at the moment."
+        },
+        {
+          "text_prefix": "But I won't admit",
+          "audio_file": "ogg\\finn\\Finn.26.ogg",
+          "description": "But I won't admit to it, if you ask me. Too many people that might hear."
+        },
+        {
+          "text_prefix": "Oh I know all",
+          "audio_file": "ogg\\finn\\Finn.27.ogg",
+          "description": "Oh, I know all about that, but I think you'd be better off if you learned about it on your own."
+        },
+        {
+          "text_prefix": "Well come by after",
+          "audio_file": "ogg\\finn\\Finn.28.ogg",
+          "description": "Well, come by after I'm done with this disguise and I'll give you a loan from the royal treasury."
+        },
+        {
+          "text_prefix": "Good I'll get this",
+          "audio_file": "ogg\\finn\\Finn.29.ogg",
+          "description": "Good. I'll get this back to you later."
+        },
+        {
+          "text_prefix": "A clever trick Or",
+          "audio_file": "ogg\\finn\\Finn.22.ogg",
+          "description": "A clever trick! Or my, I'm not Finn!"
+        },
+        {
+          "text_prefix": "Oh that's just the",
+          "audio_file": "ogg\\finn\\Finn.23.ogg",
+          "description": "Oh, that's just the name I'm pretending to go by. But of course, you know I'm really Lord British."
+        },
+        {
+          "text_prefix": "I can see you're",
+          "audio_file": "ogg\\finn\\Finn.24.ogg",
+          "description": "I can see you're too smart to be fooled by this disguise."
+        },
+        {
+          "text_prefix": "If ye need me",
+          "audio_file": "ogg\\finn\\Finn.25.ogg",
+          "description": "If ye need me later, I'll be at the Blue Boar disguised as the tavern keeper."
+        },
+        {
+          "text_prefix": "I'm in disguise so",
+          "audio_file": "ogg\\finn\\Finn.2.ogg",
+          "description": "I'm in disguise so I can mingle with the commoners."
+        },
+        {
+          "text_prefix": "I sent out eight",
+          "audio_file": "ogg\\finn\\Finn.19.ogg",
+          "description": "I sent out eight fake runes to all the lords to fool everybody."
+        },
+        {
+          "text_prefix": "I put all the",
+          "audio_file": "ogg\\finn\\Finn.20.ogg",
+          "description": "I put all the real ones in a little box and hid it under my throne."
+        },
+        {
+          "text_prefix": "You can't see it",
+          "audio_file": "ogg\\finn\\Finn.21.ogg",
+          "description": "You can't see it there, 'cause I turned it invisible!"
+        },
+        {
+          "text_prefix": "He was a big",
+          "audio_file": "ogg\\finn\\Finn.15.ogg",
+          "description": "He was a big one, but he hadn't reckoned with the likes of me! I was a tough kid!"
+        },
+        {
+          "text_prefix": "I was so tough",
+          "audio_file": "ogg\\finn\\Finn.16.ogg",
+          "description": "I was so tough he couldn't chew me, and he had to spit me out! That's when I killed him."
+        },
+        {
+          "text_prefix": "Okay here are the",
+          "audio_file": "ogg\\finn\\Finn.17.ogg",
+          "description": "Okay, here are the mantras. Justice: \"Do.\" Compassion:"
+        },
+        {
+          "text_prefix": "I'll tell you this",
+          "audio_file": "ogg\\finn\\Finn.18.ogg",
+          "description": "I'll tell you this because you look like someone who can keep a secret."
+        },
+        {
+          "text_prefix": "I got forty million",
+          "audio_file": "ogg\\finn\\Finn.11.ogg",
+          "description": "I got forty million crowns, not to mention my secret bank accounts."
+        },
+        {
+          "text_prefix": "I told you not",
+          "audio_file": "ogg\\finn\\Finn.12.ogg",
+          "description": "I told you not to mention that."
+        },
+        {
+          "text_prefix": "I'm really Lord British",
+          "audio_file": "ogg\\finn\\Finn.13.ogg",
+          "description": "I'm really Lord British. I can prove it to ya. I know all the eight mantras, and where the runes are, too."
+        },
+        {
+          "text_prefix": "I killed a dragon",
+          "audio_file": "ogg\\finn\\Finn.14.ogg",
+          "description": "I killed a dragon when I was eight, you know. With my bare hands, too!"
+        },
+        {
+          "text_prefix": "Hello",
+          "audio_file": "ogg\\finn\\Finn.0.ogg",
+          "description": "Hello."
+        },
+        {
+          "text_prefix": "I'm Lord British but",
+          "audio_file": "ogg\\finn\\Finn.1.ogg",
+          "description": "I'm Lord British, but don't tell anyone."
+        },
+        {
+          "text_prefix": "Very convincing don't you",
+          "audio_file": "ogg\\finn\\Finn.10.ogg",
+          "description": "Very convincing, don't you think? I made it myself."
+        },
+        {
+          "text_prefix": "He's in disguise too",
+          "audio_file": "ogg\\finn\\Finn.6.ogg",
+          "description": "He's in disguise too, you know. He's really Blackthorn."
+        },
+        {
+          "text_prefix": "I decided banishment was",
+          "audio_file": "ogg\\finn\\Finn.7.ogg",
+          "description": "I decided banishment was too harsh for him, so I brought him back and made him my jester."
+        },
+        {
+          "text_prefix": "The real Chuckles is",
+          "audio_file": "ogg\\finn\\Finn.8.ogg",
+          "description": "The real Chuckles is tied up in my dungeons. I got tired of him making fun of my nose."
+        }
+      ]
+    },
+    {
+      "npc_port": 186,
+      "npc_name": "Linda",
+      "npc_portrait": 186,
+      "lines": [
+        {
+          "text_prefix": "I raise crops If",
+          "audio_file": "ogg\\linda\\Linda.2.ogg",
+          "description": "I raise crops. If you'd like to buy some grain, just say the word."
+        },
+        {
+          "text_prefix": "Bread cakes pies pastries",
+          "audio_file": "ogg\\linda\\Linda.3.ogg",
+          "description": "Bread, cakes, pies, pastries, they all have their roots here."
+        },
+        {
+          "text_prefix": "A woman does not",
+          "audio_file": "ogg\\linda\\Linda.4.ogg",
+          "description": "A woman does not live on meat alone."
+        },
+        {
+          "text_prefix": "Cows and sheep are",
+          "audio_file": "ogg\\linda\\Linda.5.ogg",
+          "description": "Cows and sheep are much more trouble to raise than wheat."
+        },
+        {
+          "text_prefix": "It'll cost you two",
+          "audio_file": "ogg\\linda\\Linda.14.ogg",
+          "description": "It'll cost you two gold for a sack of grain. Interested?"
+        },
+        {
+          "text_prefix": "You look pretty full",
+          "audio_file": "ogg\\linda\\Linda.15.ogg",
+          "description": "You look pretty full to me."
+        },
+        {
+          "text_prefix": "Here you go",
+          "audio_file": "ogg\\linda\\Linda.16.ogg",
+          "description": "Here you go."
+        },
+        {
+          "text_prefix": "Best check your coin",
+          "audio_file": "ogg\\linda\\Linda.17.ogg",
+          "description": "Best check your coin pouch again."
+        },
+        {
+          "text_prefix": "Okay",
+          "audio_file": "ogg\\linda\\Linda.18.ogg",
+          "description": "Okay"
+        },
+        {
+          "text_prefix": "The word grain silly",
+          "audio_file": "ogg\\linda\\Linda.10.ogg",
+          "description": "The word grain, silly!"
+        },
+        {
+          "text_prefix": "May the sun shine",
+          "audio_file": "ogg\\linda\\Linda.11.ogg",
+          "description": "May the sun shine on you and the rain bring you nourishment."
+        },
+        {
+          "text_prefix": "I don't know I",
+          "audio_file": "ogg\\linda\\Linda.12.ogg",
+          "description": "I don't know, I guess so."
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\linda\\Linda.13.ogg",
+          "description": "Which of you..."
+        },
+        {
+          "text_prefix": "Welcome friend",
+          "audio_file": "ogg\\linda\\Linda.0.ogg",
+          "description": "Welcome, friend."
+        },
+        {
+          "text_prefix": "My name is Linda",
+          "audio_file": "ogg\\linda\\Linda.1.ogg",
+          "description": "My name is Linda."
+        },
+        {
+          "text_prefix": "They have their place",
+          "audio_file": "ogg\\linda\\Linda.6.ogg",
+          "description": "They have their place, but not on my farm."
+        },
+        {
+          "text_prefix": "I was born to",
+          "audio_file": "ogg\\linda\\Linda.7.ogg",
+          "description": "I was born to work the earth. It was either this or be a gravedigger."
+        },
+        {
+          "text_prefix": "That's not my kind",
+          "audio_file": "ogg\\linda\\Linda.8.ogg",
+          "description": "That's not my kind of work."
+        },
+        {
+          "text_prefix": "Yes men need to",
+          "audio_file": "ogg\\linda\\Linda.9.ogg",
+          "description": "Yes, men need to eat too, I suppose."
+        }
+      ]
+    },
+    {
+      "npc_port": 132,
+      "npc_name": "Zoltan",
+      "npc_portrait": 132,
+      "lines": [
+        {
+          "text_prefix": "I'll just give you",
+          "audio_file": "ogg\\zoltan\\Zoltan.64.ogg",
+          "description": "I'll just give you as much as you can carry."
+        },
+        {
+          "text_prefix": "You can't afford that",
+          "audio_file": "ogg\\zoltan\\Zoltan.63.ogg",
+          "description": "You can't afford that much."
+        },
+        {
+          "text_prefix": "You can't get any",
+          "audio_file": "ogg\\zoltan\\Zoltan.62.ogg",
+          "description": "You can't get any"
+        },
+        {
+          "text_prefix": "I'll just give you",
+          "audio_file": "ogg\\zoltan\\Zoltan.61.ogg",
+          "description": "I'll just give you as much as you can carry."
+        },
+        {
+          "text_prefix": "You can't carry that",
+          "audio_file": "ogg\\zoltan\\Zoltan.60.ogg",
+          "description": "You can't carry that much."
+        },
+        {
+          "text_prefix": "How many do you",
+          "audio_file": "ogg\\zoltan\\Zoltan.59.ogg",
+          "description": "How many do you want?"
+        },
+        {
+          "text_prefix": "Which one, blood moss",
+          "audio_file": "ogg\\zoltan\\Zoltan.58.ogg",
+          "description": "Which of these?"
+        },
+        {
+          "text_prefix": "What else would you",
+          "audio_file": "ogg\\zoltan\\Zoltan.57.ogg",
+          "description": "What else would you like to know?"
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\zoltan\\Zoltan.56.ogg",
+          "description": "Which of you"
+        },
+        {
+          "text_prefix": "Which of you",
+          "audio_file": "ogg\\zoltan\\Zoltan.55.ogg",
+          "description": "Which of you"
+        },
+        {
+          "text_prefix": "Thanks",
+          "audio_file": "ogg\\zoltan\\Zoltan.54.ogg",
+          "description": "Thanks."
+        },
+        {
+          "text_prefix": "Ha I should know",
+          "audio_file": "ogg\\zoltan\\Zoltan.53.ogg",
+          "description": "Ha! I should know better than to expect a gorheaul to accept a fine gypsy dance!"
+        },
+        {
+          "text_prefix": "We took the corner",
+          "audio_file": "ogg\\zoltan\\Zoltan.52.ogg",
+          "description": "We took the corner of the tablet that they missed to the Lycaeum and sold it to Mariah."
+        },
+        {
+          "text_prefix": "Most likely they went",
+          "audio_file": "ogg\\zoltan\\Zoltan.51.ogg",
+          "description": "Most likely they went to Buccaneer's Den with their loot."
+        },
+        {
+          "text_prefix": "Hawkwind took my finest",
+          "audio_file": "ogg\\zoltan\\Zoltan.50.ogg",
+          "description": "Hawkwind took my finest earring as well. I spit on his mother's grave!"
+        },
+        {
+          "text_prefix": "The tablet was broken",
+          "audio_file": "ogg\\zoltan\\Zoltan.49.ogg",
+          "description": "The tablet was broken in two during discovery. The pirates got away with the bigger half."
+        },
+        {
+          "text_prefix": "While we were on",
+          "audio_file": "ogg\\zoltan\\Zoltan.48.ogg",
+          "description": "While we were on the way there, we were ambushed by Captain Hawkins and his crew."
+        },
+        {
+          "text_prefix": "Some courier called Captain",
+          "audio_file": "ogg\\zoltan\\Zoltan.47.ogg",
+          "description": "Some courier called Captain John brought us the silver tablet and bade us to take it to the Lycaeum."
+        },
+        {
+          "text_prefix": "Come back when you",
+          "audio_file": "ogg\\zoltan\\Zoltan.46.ogg",
+          "description": "Come back when you have the money."
+        },
+        {
+          "text_prefix": "Let me know if",
+          "audio_file": "ogg\\zoltan\\Zoltan.45.ogg",
+          "description": "Let me know if you change your mind."
+        },
+        {
+          "text_prefix": "You would be willing",
+          "audio_file": "ogg\\zoltan\\Zoltan.44.ogg",
+          "description": "You would be willing to pay ten gold for the information, would you?"
+        },
+        {
+          "text_prefix": "Might be glad to",
+          "audio_file": "ogg\\zoltan\\Zoltan.43.ogg",
+          "description": "Might be glad to help you out. But 'tis a hard life sometimes, being a gypsy."
+        },
+        {
+          "text_prefix": "Powder kegs are useful",
+          "audio_file": "ogg\\zoltan\\Zoltan.42.ogg",
+          "description": "Powder kegs are useful for persuading uncooperative doors to open."
+        },
+        {
+          "text_prefix": "I'll tell you this",
+          "audio_file": "ogg\\zoltan\\Zoltan.41.ogg",
+          "description": "I'll tell you this."
+        },
+        {
+          "text_prefix": "Whatever you say",
+          "audio_file": "ogg\\zoltan\\Zoltan.40.ogg",
+          "description": "Whatever you say."
+        },
+        {
+          "text_prefix": "Whatever you say",
+          "audio_file": "ogg\\zoltan\\Zoltan.39.ogg",
+          "description": "Whatever you say."
+        },
+        {
+          "text_prefix": "Tell you what since",
+          "audio_file": "ogg\\zoltan\\Zoltan.38.ogg",
+          "description": "Tell you what, since I'm in a good mood, I'll only charge you two gold coins. Is it a deal?"
+        },
+        {
+          "text_prefix": "Perhaps you'd like to",
+          "audio_file": "ogg\\zoltan\\Zoltan.37.ogg",
+          "description": "Perhaps you'd like to look over some of the fine regions I have for sale?"
+        },
+        {
+          "text_prefix": "I ready yourself with",
+          "audio_file": "ogg\\zoltan\\Zoltan.36.ogg",
+          "description": "I ready yourself with that."
+        },
+        {
+          "text_prefix": "Fare thee well",
+          "audio_file": "ogg\\zoltan\\Zoltan.35.ogg",
+          "description": "Fare thee well."
+        },
+        {
+          "text_prefix": "Farewell My fellow gypsies",
+          "audio_file": "ogg\\zoltan\\Zoltan.34.ogg",
+          "description": "Farewell. My fellow gypsies and I will dance to your health and good fortune."
+        },
+        {
+          "text_prefix": "There are no women",
+          "audio_file": "ogg\\zoltan\\Zoltan.33.ogg",
+          "description": "There are no women like gypsy women."
+        },
+        {
+          "text_prefix": "Either you're Gortio or",
+          "audio_file": "ogg\\zoltan\\Zoltan.32.ogg",
+          "description": "Either you're Gortio, or my name's not Zoltan!"
+        },
+        {
+          "text_prefix": "He said the tablet",
+          "audio_file": "ogg\\zoltan\\Zoltan.31.ogg",
+          "description": "He said the tablet had something to do with translating."
+        },
+        {
+          "text_prefix": "He talks as if",
+          "audio_file": "ogg\\zoltan\\Zoltan.30.ogg",
+          "description": "He talks as if there's nothing evil about"
+        },
+        {
+          "text_prefix": "He's madder than a",
+          "audio_file": "ogg\\zoltan\\Zoltan.29.ogg",
+          "description": "He's madder than a gremlin. Claims he's been living with the gargoyles."
+        },
+        {
+          "text_prefix": "Captain John I talked",
+          "audio_file": "ogg\\zoltan\\Zoltan.28.ogg",
+          "description": "Captain John? I talked to him when he gave us the silver tablet for Mariah."
+        },
+        {
+          "text_prefix": "She knows how to",
+          "audio_file": "ogg\\zoltan\\Zoltan.27.ogg",
+          "description": "She knows how to be generous to poor wandering gypsies. You should follow her example."
+        },
+        {
+          "text_prefix": "on the same island",
+          "audio_file": "ogg\\zoltan\\Zoltan.26.ogg",
+          "description": "on the same island as the Lycaeum."
+        },
+        {
+          "text_prefix": "It's on the same",
+          "audio_file": "ogg\\zoltan\\Zoltan.25.ogg",
+          "description": "It's on the same island as Moonglow."
+        },
+        {
+          "text_prefix": "We pass Paws often",
+          "audio_file": "ogg\\zoltan\\Zoltan.24.ogg",
+          "description": "We pass Paws often in our travels. Taynith likes to go drinking there."
+        },
+        {
+          "text_prefix": "But if you're determined",
+          "audio_file": "ogg\\zoltan\\Zoltan.23.ogg",
+          "description": "But if you're determined to go, I hear it's on an island to east of here."
+        },
+        {
+          "text_prefix": "It's no place for",
+          "audio_file": "ogg\\zoltan\\Zoltan.22.ogg",
+          "description": "It's no place for an honest soul like you."
+        },
+        {
+          "text_prefix": "He is the lowest",
+          "audio_file": "ogg\\zoltan\\Zoltan.21.ogg",
+          "description": "He is the lowest scum I ever met."
+        },
+        {
+          "text_prefix": "Gypsies see and hear",
+          "audio_file": "ogg\\zoltan\\Zoltan.20.ogg",
+          "description": "Gypsies see and hear much, and occasionally happen across items of interest."
+        },
+        {
+          "text_prefix": "ask my people for",
+          "audio_file": "ogg\\zoltan\\Zoltan.19.ogg",
+          "description": "ask my people for advice or what they have to say"
+        },
+        {
+          "text_prefix": "Aye my spirit is",
+          "audio_file": "ogg\\zoltan\\Zoltan.18.ogg",
+          "description": "Aye, my spirit is free, but my advice is not."
+        },
+        {
+          "text_prefix": "Just now I am",
+          "audio_file": "ogg\\zoltan\\Zoltan.17.ogg",
+          "description": "Just now, I am thinking of what you might buy from me today."
+        },
+        {
+          "text_prefix": "As in Gypsy's body",
+          "audio_file": "ogg\\zoltan\\Zoltan.16.ogg",
+          "description": "As in Gypsy's body wanders, so does his mind."
+        },
+        {
+          "text_prefix": "Before winds there are",
+          "audio_file": "ogg\\zoltan\\Zoltan.15.ogg",
+          "description": "Before winds, there are gypsies too."
+        },
+        {
+          "text_prefix": "The roads wander everywhere",
+          "audio_file": "ogg\\zoltan\\Zoltan.14.ogg",
+          "description": "The roads wander everywhere, just like a gypsy."
+        },
+        {
+          "text_prefix": "We are free spirits",
+          "audio_file": "ogg\\zoltan\\Zoltan.13.ogg",
+          "description": "We are free spirits and must roam like the wind throughout the land."
+        },
+        {
+          "text_prefix": "You cannot tie a",
+          "audio_file": "ogg\\zoltan\\Zoltan.12.ogg",
+          "description": "You cannot tie a gypsy down to a single place."
+        },
+        {
+          "text_prefix": "No haven't seen any",
+          "audio_file": "ogg\\zoltan\\Zoltan.11.ogg",
+          "description": "No, haven't seen any around here."
+        },
+        {
+          "text_prefix": "Arturos Never heard of",
+          "audio_file": "ogg\\zoltan\\Zoltan.10.ogg",
+          "description": "Arturos? Never heard of him."
+        },
+        {
+          "text_prefix": "I have no lands",
+          "audio_file": "ogg\\zoltan\\Zoltan.9.ogg",
+          "description": "I have no lands nor castles, as most rulers do. Nay, for I am king of the open road."
+        },
+        {
+          "text_prefix": "Yes Zoltan king of",
+          "audio_file": "ogg\\zoltan\\Zoltan.8.ogg",
+          "description": "Yes, Zoltan, king of the Gypsies."
+        },
+        {
+          "text_prefix": "As I said I",
+          "audio_file": "ogg\\zoltan\\Zoltan.7.ogg",
+          "description": "As I said, I am Zoltan, king of the gypsies."
+        },
+        {
+          "text_prefix": "Huzzah! I am still Zoltan",
+          "audio_file": "ogg\\zoltan\\Zoltan.6.ogg",
+          "description": "I am still Zoltan, king of the gypsies."
+        },
+        {
+          "text_prefix": "Huzzah! I am Zoltan",
+          "audio_file": "ogg\\zoltan\\Zoltan.5.ogg",
+          "description": "Hail, Avatar! I am Zoltan, King of the Gypsies."
+        },
+        {
+          "text_prefix": "So be it Leave",
+          "audio_file": "ogg\\zoltan\\Zoltan.4.ogg",
+          "description": "So be it. Leave me before I place a gypsy curse on you."
+        },
+        {
+          "text_prefix": "Perhaps a few coins",
+          "audio_file": "ogg\\zoltan\\Zoltan.3.ogg",
+          "description": "Perhaps a few coins might ease the sting of your insult."
+        },
+        {
+          "text_prefix": "I dance for you",
+          "audio_file": "ogg\\zoltan\\Zoltan.2.ogg",
+          "description": "I dance for you, and how do you repay me?"
+        },
+        {
+          "text_prefix": "Shoo again You are",
+          "audio_file": "ogg\\zoltan\\Zoltan.1.ogg",
+          "description": "Shoo again? You are no friend to Zoltan!"
+        },
+        {
+          "text_prefix": "Anyone who would mistreat",
+          "audio_file": "ogg\\zoltan\\Zoltan.0.ogg",
+          "description": "Anyone who would mistreat a dog has no business with Zoltan."
+        },
+        {
+          "text_prefix": "at cost per portion",
+          "audio_file": "ogg\\zoltan\\Zoltan.66.ogg",
+          "description": "at cost per portion."
+        },
+        {
+          "text_prefix": "You can't afford any",
+          "audio_file": "ogg\\zoltan\\Zoltan.65.ogg",
+          "description": "You can't afford any."
+        }
+      ]
+    },
+    {
+      "npc_port": 133,
+      "npc_name": "Karina",
+      "npc_portrait": 133,
+      "lines": [
+        {
+          "text_prefix": "I'd be too embarrassed",
+          "audio_file": "ogg\\karina\\Karina.9.ogg",
+          "description": "I'd be too embarrassed."
+        },
+        {
+          "text_prefix": "That's what we call",
+          "audio_file": "ogg\\karina\\Karina.3.ogg",
+          "description": "That's what we call anyone who isn't a gypsy."
+        },
+        {
+          "text_prefix": "It's a nice life",
+          "audio_file": "ogg\\karina\\Karina.4.ogg",
+          "description": "It's a nice life, but it gets lonely. I miss my sister."
+        },
+        {
+          "text_prefix": "He is Zoltan king",
+          "audio_file": "ogg\\karina\\Karina.5.ogg",
+          "description": "He is Zoltan, king of the gypsies."
+        },
+        {
+          "text_prefix": "Ask our dog Cater",
+          "audio_file": "ogg\\karina\\Karina.25.ogg",
+          "description": "Ask our dog Cater to do some tricks for you. He knows lots of them."
+        },
+        {
+          "text_prefix": "Oh I'm so glad",
+          "audio_file": "ogg\\karina\\Karina.21.ogg",
+          "description": "Oh, I'm so glad to hear she's okay!"
+        },
+        {
+          "text_prefix": "I have to ask",
+          "audio_file": "ogg\\karina\\Karina.22.ogg",
+          "description": "I have to ask you for a gold piece for my advice. Is that okay?"
+        },
+        {
+          "text_prefix": "It was my father's",
+          "audio_file": "ogg\\karina\\Karina.23.ogg",
+          "description": "It was my father's idea."
+        },
+        {
+          "text_prefix": "I'm sorry I'm not",
+          "audio_file": "ogg\\karina\\Karina.24.ogg",
+          "description": "I'm sorry, I'm not supposed to help you unless you pay."
+        },
+        {
+          "text_prefix": "My father says I'm",
+          "audio_file": "ogg\\karina\\Karina.2.ogg",
+          "description": "My father says I'm supposed to dance for Georgios."
+        },
+        {
+          "text_prefix": "Oh",
+          "audio_file": "ogg\\karina\\Karina.17.ogg",
+          "description": "Oh."
+        },
+        {
+          "text_prefix": "Her name is Penumbra",
+          "audio_file": "ogg\\karina\\Karina.18.ogg",
+          "description": "Her name is Penumbra."
+        },
+        {
+          "text_prefix": "Have you any news",
+          "audio_file": "ogg\\karina\\Karina.19.ogg",
+          "description": "Have you any news of her?"
+        },
+        {
+          "text_prefix": "If you do please",
+          "audio_file": "ogg\\karina\\Karina.20.ogg",
+          "description": "If you do, please come tell me. I miss her so much!"
+        },
+        {
+          "text_prefix": "Goodbye and sweet dreams",
+          "audio_file": "ogg\\karina\\Karina.12.ogg",
+          "description": "Goodbye and sweet dreams to you!"
+        },
+        {
+          "text_prefix": "I can't help you",
+          "audio_file": "ogg\\karina\\Karina.13.ogg",
+          "description": "I can't help you with that."
+        },
+        {
+          "text_prefix": "My name is Karina",
+          "audio_file": "ogg\\karina\\Karina.14.ogg",
+          "description": "My name is Karina."
+        },
+        {
+          "text_prefix": "Do you think it's",
+          "audio_file": "ogg\\karina\\Karina.15.ogg",
+          "description": "Do you think it's a pretty name?"
+        },
+        {
+          "text_prefix": "Thank you",
+          "audio_file": "ogg\\karina\\Karina.16.ogg",
+          "description": "Thank you."
+        },
+        {
+          "text_prefix": "How could you be",
+          "audio_file": "ogg\\karina\\Karina.0.ogg",
+          "description": "How could you be so mean to Kato? You go and apologize to my poor little dog this instant!"
+        },
+        {
+          "text_prefix": "I have nothing to",
+          "audio_file": "ogg\\karina\\Karina.1.ogg",
+          "description": "I have nothing to sell you. Talk to my father."
+        },
+        {
+          "text_prefix": "Will do you promise",
+          "audio_file": "ogg\\karina\\Karina.10.ogg",
+          "description": "Will, do you promise not to make fun of me?"
+        },
+        {
+          "text_prefix": "He's such a sweet",
+          "audio_file": "ogg\\karina\\Karina.11.ogg",
+          "description": "He's such a sweet little doggie."
+        },
+        {
+          "text_prefix": "Well that's what he",
+          "audio_file": "ogg\\karina\\Karina.6.ogg",
+          "description": "Well, that's what he says."
+        },
+        {
+          "text_prefix": "Ask my father",
+          "audio_file": "ogg\\karina\\Karina.7.ogg",
+          "description": "Ask my father"
+        },
+        {
+          "text_prefix": "Oh I just couldn't",
+          "audio_file": "ogg\\karina\\Karina.8.ogg",
+          "description": "Oh, I just couldn't, not in front of so many people!"
+        }
+      ]
+    },
+    {
+      "npc_port": 134,
+      "npc_name": "Kador",
+      "npc_portrait": 134,
+      "lines": [
+        {
+          "text_prefix": "Greetings Avatar",
+          "audio_file": "ogg\\kador\\Kador.7.ogg",
+          "description": "Greetings, Avatar."
+        },
+        {
+          "text_prefix": "I feel that the",
+          "audio_file": "ogg\\kador\\Kador.0.ogg",
+          "description": "I feel that the whole debate over free will versus determinism arises from an artificial semantic division."
+        },
+        {
+          "text_prefix": "In light of the",
+          "audio_file": "ogg\\kador\\Kador.1.ogg",
+          "description": "In light of the work of Gödel and Heisenberg, it is evident that the two concepts are indistinguishable."
+        },
+        {
+          "text_prefix": "And thus for all",
+          "audio_file": "ogg\\kador\\Kador.2.ogg",
+          "description": "And thus, for all practical purposes, identical."
+        },
+        {
+          "text_prefix": "'Tis thou Avatar",
+          "audio_file": "ogg\\kador\\Kador.3.ogg",
+          "description": "'Tis thou, Avatar!"
+        },
+        {
+          "text_prefix": "'Tis",
+          "audio_file": "ogg\\kador\\Kador.4.ogg",
+          "description": "'Tis"
+        },
+        {
+          "text_prefix": "Avatar",
+          "audio_file": "ogg\\kador\\Kador.5.ogg",
+          "description": "Avatar?"
+        },
+        {
+          "text_prefix": "'Tis indeed Avatar",
+          "audio_file": "ogg\\kador\\Kador.6.ogg",
+          "description": "'Tis indeed, Avatar."
+        }
+      ]
+    },
+    {
+      "npc_port": 135,
+      "npc_name": "Taynith",
+      "npc_portrait": 135,
+      "lines": [
+        {
+          "text_prefix": "Seek not my true",
+          "audio_file": "ogg\\taynith\\Taynith.6.ogg",
+          "description": "Seek not my true name. Let Taynith suffice."
+        },
+        {
+          "text_prefix": "You try my patience",
+          "audio_file": "ogg\\taynith\\Taynith.7.ogg",
+          "description": "Thou try my patience!"
+        },
+        {
+          "text_prefix": "All of these things",
+          "audio_file": "ogg\\taynith\\Taynith.40.ogg",
+          "description": "All of these things and more must you be to find success in your quest."
+        },
+        {
+          "text_prefix": "But you will not",
+          "audio_file": "ogg\\taynith\\Taynith.41.ogg",
+          "description": "But you will not end up back where you started."
+        },
+        {
+          "text_prefix": "You are the Avatar",
+          "audio_file": "ogg\\taynith\\Taynith.4.ogg",
+          "description": "You are the Avatar. I had a vision that you would come to seek aid from me."
+        },
+        {
+          "text_prefix": "Britannia is on a",
+          "audio_file": "ogg\\taynith\\Taynith.37.ogg",
+          "description": "Britannia is on a path towards all-out war, that is plain enough."
+        },
+        {
+          "text_prefix": "The rogue is one",
+          "audio_file": "ogg\\taynith\\Taynith.38.ogg",
+          "description": "The rogue is one who would go against the wishes of his lord to find another path."
+        },
+        {
+          "text_prefix": "I cannot interpret this",
+          "audio_file": "ogg\\taynith\\Taynith.39.ogg",
+          "description": "I cannot interpret this pattern. I'm afraid you'll have to seek its meaning on your own."
+        },
+        {
+          "text_prefix": "If you pay her",
+          "audio_file": "ogg\\taynith\\Taynith.33.ogg",
+          "description": "If you pay her enough, she can tell you more than I."
+        },
+        {
+          "text_prefix": "This is strange",
+          "audio_file": "ogg\\taynith\\Taynith.34.ogg",
+          "description": "This is strange."
+        },
+        {
+          "text_prefix": "The tiles show that",
+          "audio_file": "ogg\\taynith\\Taynith.35.ogg",
+          "description": "The tiles show that to accomplish your ends, you must go down very far, then up very far."
+        },
+        {
+          "text_prefix": "The maelstrom indicates something",
+          "audio_file": "ogg\\taynith\\Taynith.36.ogg",
+          "description": "The maelstrom indicates something important as well, but I cannot determine what it means."
+        },
+        {
+          "text_prefix": "If ye consult the",
+          "audio_file": "ogg\\taynith\\Taynith.30.ogg",
+          "description": "If ye consult the tiles another time, perhaps they will have more to say of your future"
+        },
+        {
+          "text_prefix": "There is something made",
+          "audio_file": "ogg\\taynith\\Taynith.31.ogg",
+          "description": "There is something made of glass that plays a very important role in your future, but the signs are unclear."
+        },
+        {
+          "text_prefix": "Seek out Penumbra Her",
+          "audio_file": "ogg\\taynith\\Taynith.32.ogg",
+          "description": "Seek out Penumbra. Her crystal ball should hold more of an affinity for this item."
+        },
+        {
+          "text_prefix": "Welcome back Avatar",
+          "audio_file": "ogg\\taynith\\Taynith.3.ogg",
+          "description": "Welcome back, Avatar!"
+        },
+        {
+          "text_prefix": "Look through the books",
+          "audio_file": "ogg\\taynith\\Taynith.26.ogg",
+          "description": "Look through the books at the Lycaeum. You might learn something useful there."
+        },
+        {
+          "text_prefix": "I charge six gold",
+          "audio_file": "ogg\\taynith\\Taynith.27.ogg",
+          "description": "I charge six gold to cast my tiles. Are you interested?"
+        },
+        {
+          "text_prefix": "Very well",
+          "audio_file": "ogg\\taynith\\Taynith.28.ogg",
+          "description": "Very well."
+        },
+        {
+          "text_prefix": "Best check your purse",
+          "audio_file": "ogg\\taynith\\Taynith.29.ogg",
+          "description": "Best check your purse."
+        },
+        {
+          "text_prefix": "No doubt",
+          "audio_file": "ogg\\taynith\\Taynith.22.ogg",
+          "description": "No doubt."
+        },
+        {
+          "text_prefix": "My advice will cost",
+          "audio_file": "ogg\\taynith\\Taynith.23.ogg",
+          "description": "My advice will cost you two gold. Do you still want it?"
+        },
+        {
+          "text_prefix": "Very well",
+          "audio_file": "ogg\\taynith\\Taynith.24.ogg",
+          "description": "Very well."
+        },
+        {
+          "text_prefix": "Best check your purse",
+          "audio_file": "ogg\\taynith\\Taynith.25.ogg",
+          "description": "Best check your purse."
+        },
+        {
+          "text_prefix": "I have no time",
+          "audio_file": "ogg\\taynith\\Taynith.2.ogg",
+          "description": "I have no time for those who are cruel to animals."
+        },
+        {
+          "text_prefix": "Zoltan can tell you",
+          "audio_file": "ogg\\taynith\\Taynith.19.ogg",
+          "description": "Zoltan can tell you where it is."
+        },
+        {
+          "text_prefix": "I sense that you",
+          "audio_file": "ogg\\taynith\\Taynith.20.ogg",
+          "description": "I sense that you have met her already."
+        },
+        {
+          "text_prefix": "There is no need",
+          "audio_file": "ogg\\taynith\\Taynith.21.ogg",
+          "description": "There is no need for me to direct thee there. You are destined to meet her."
+        },
+        {
+          "text_prefix": "My path leads to",
+          "audio_file": "ogg\\taynith\\Taynith.15.ogg",
+          "description": "My path leads to Paws, as soon as I have time to visit there."
+        },
+        {
+          "text_prefix": "My good friend Dr",
+          "audio_file": "ogg\\taynith\\Taynith.16.ogg",
+          "description": "My good friend Dr. Cat lives there."
+        },
+        {
+          "text_prefix": "Ask him about the",
+          "audio_file": "ogg\\taynith\\Taynith.17.ogg",
+          "description": "Ask him about the duck sometime."
+        },
+        {
+          "text_prefix": "Yes ask him",
+          "audio_file": "ogg\\taynith\\Taynith.18.ogg",
+          "description": "Yes, ask him."
+        },
+        {
+          "text_prefix": "Captain John Yes he",
+          "audio_file": "ogg\\taynith\\Taynith.11.ogg",
+          "description": "Captain John? Yes, he brought us a silver tablet some time ago to deliver to the Lycaeum."
+        },
+        {
+          "text_prefix": "Zoltan took care of",
+          "audio_file": "ogg\\taynith\\Taynith.12.ogg",
+          "description": "Zoltan took care of the deal, so he could tell you more than I."
+        },
+        {
+          "text_prefix": "Ask Zoltan about it",
+          "audio_file": "ogg\\taynith\\Taynith.13.ogg",
+          "description": "Ask Zoltan about it."
+        },
+        {
+          "text_prefix": "King of the Gypsies",
+          "audio_file": "ogg\\taynith\\Taynith.14.ogg",
+          "description": "King of the Gypsies, sure as my name's Taynith."
+        },
+        {
+          "text_prefix": "My chances to visit",
+          "audio_file": "ogg\\taynith\\Taynith.0.ogg",
+          "description": "My chances to visit Dr. Cat come all too seldom."
+        },
+        {
+          "text_prefix": "Seek me out later",
+          "audio_file": "ogg\\taynith\\Taynith.1.ogg",
+          "description": "Seek me out later and I will speak with you."
+        },
+        {
+          "text_prefix": "Our paths will cross",
+          "audio_file": "ogg\\taynith\\Taynith.10.ogg",
+          "description": "Our paths will cross again, I have foreseen it."
+        },
+        {
+          "text_prefix": "I tell fortunes for",
+          "audio_file": "ogg\\taynith\\Taynith.8.ogg",
+          "description": "I tell fortunes for a price."
+        },
+        {
+          "text_prefix": "A Georgio That's almost",
+          "audio_file": "ogg\\taynith\\Taynith.9.ogg",
+          "description": "A Georgio! That's almost as good as being a gypsy."
+        },
+        {
+          "text_prefix": "Some know me as",
+          "audio_file": "ogg\\taynith\\Taynith.5.ogg",
+          "description": "Some know me as Taynith. That is what you may call me."
+        }
+      ]
+    },
+    {
+      "npc_port": 136,
+      "npc_name": "Blaine",
+      "npc_portrait": 136,
+      "lines": [
+        {
+          "text_prefix": "I can't help you",
+          "audio_file": "ogg\\blaine\\Blaine.8.ogg",
+          "description": "I can't help you with that."
+        },
+        {
+          "text_prefix": "My advice will cost",
+          "audio_file": "ogg\\blaine\\Blaine.9.ogg",
+          "description": "My advice will cost you a gold coin. What do you say?"
+        },
+        {
+          "text_prefix": "I don't have anything",
+          "audio_file": "ogg\\blaine\\Blaine.4.ogg",
+          "description": "I don't have anything to sell just now. Check back with me next week."
+        },
+        {
+          "text_prefix": "Here's a little tune",
+          "audio_file": "ogg\\blaine\\Blaine.5.ogg",
+          "description": "Here's a little tune to lighten your step on the road ahead."
+        },
+        {
+          "text_prefix": "Said the youthful earl",
+          "audio_file": "ogg\\blaine\\Blaine.6.ogg",
+          "description": "Said the youthful earl to the gypsy girl, as the moon was casting its silver shine."
+        },
+        {
+          "text_prefix": "I suppose you'll be",
+          "audio_file": "ogg\\blaine\\Blaine.31.ogg",
+          "description": "I suppose you'll be wanting to keep all this equipment."
+        },
+        {
+          "text_prefix": "I am a juggler",
+          "audio_file": "ogg\\blaine\\Blaine.3.ogg",
+          "description": "I am a juggler, but I would fain join thee and go adventuring."
+        },
+        {
+          "text_prefix": "I'm very grateful that",
+          "audio_file": "ogg\\blaine\\Blaine.28.ogg",
+          "description": "I'm very grateful that you've given me the chance to come along on your quest."
+        },
+        {
+          "text_prefix": "Let's get our feet",
+          "audio_file": "ogg\\blaine\\Blaine.29.ogg",
+          "description": "Let's get our feet back on solid ground first, okay?"
+        },
+        {
+          "text_prefix": "I'll be with my",
+          "audio_file": "ogg\\blaine\\Blaine.30.ogg",
+          "description": "I'll be with my fellow gypsies if you change your mind."
+        },
+        {
+          "text_prefix": "I knew it You",
+          "audio_file": "ogg\\blaine\\Blaine.24.ogg",
+          "description": "I knew it! You don't really want to have a gypsy around!"
+        },
+        {
+          "text_prefix": "You wish me to",
+          "audio_file": "ogg\\blaine\\Blaine.25.ogg",
+          "description": "You wish me to leave you now, right?"
+        },
+        {
+          "text_prefix": "Oh pardon my mistake",
+          "audio_file": "ogg\\blaine\\Blaine.26.ogg",
+          "description": "Oh, pardon my mistake."
+        },
+        {
+          "text_prefix": "It's just that we",
+          "audio_file": "ogg\\blaine\\Blaine.27.ogg",
+          "description": "It's just that we gypsies often have trouble finding acceptance among the ghorios."
+        },
+        {
+          "text_prefix": "Not while you're in",
+          "audio_file": "ogg\\blaine\\Blaine.20.ogg",
+          "description": "Not while you're in that thing."
+        },
+        {
+          "text_prefix": "You have enough traveling",
+          "audio_file": "ogg\\blaine\\Blaine.21.ogg",
+          "description": "You have enough traveling with you already."
+        },
+        {
+          "text_prefix": "If you ask one",
+          "audio_file": "ogg\\blaine\\Blaine.22.ogg",
+          "description": "If you ask one of them to leave first, I'd be happy to join you."
+        },
+        {
+          "text_prefix": "I look forward to",
+          "audio_file": "ogg\\blaine\\Blaine.23.ogg",
+          "description": "I look forward to the many adventures we will share."
+        },
+        {
+          "text_prefix": "I am called Blaine",
+          "audio_file": "ogg\\blaine\\Blaine.2.ogg",
+          "description": "I am called Blaine."
+        },
+        {
+          "text_prefix": "I have joined you",
+          "audio_file": "ogg\\blaine\\Blaine.17.ogg",
+          "description": "I have joined you already."
+        },
+        {
+          "text_prefix": "Do you want me",
+          "audio_file": "ogg\\blaine\\Blaine.18.ogg",
+          "description": "Do you want me to come with you?"
+        },
+        {
+          "text_prefix": "Okay let me know",
+          "audio_file": "ogg\\blaine\\Blaine.19.ogg",
+          "description": "Okay, let me know if you need my help later."
+        },
+        {
+          "text_prefix": "I charge five gold",
+          "audio_file": "ogg\\blaine\\Blaine.13.ogg",
+          "description": "I charge five gold for juggling. Would you like to see some?"
+        },
+        {
+          "text_prefix": "Perhaps some other time",
+          "audio_file": "ogg\\blaine\\Blaine.14.ogg",
+          "description": "Perhaps some other time."
+        },
+        {
+          "text_prefix": "Just check your purse",
+          "audio_file": "ogg\\blaine\\Blaine.15.ogg",
+          "description": "Just check your purse."
+        },
+        {
+          "text_prefix": "I hope you enjoyed",
+          "audio_file": "ogg\\blaine\\Blaine.16.ogg",
+          "description": "I hope you enjoyed the show!"
+        },
+        {
+          "text_prefix": "Our dog did his",
+          "audio_file": "ogg\\blaine\\Blaine.0.ogg",
+          "description": "Our dog did his best trick for you. You should show him some appreciation."
+        },
+        {
+          "text_prefix": "Good day",
+          "audio_file": "ogg\\blaine\\Blaine.1.ogg",
+          "description": "Good day."
+        },
+        {
+          "text_prefix": "As you wish",
+          "audio_file": "ogg\\blaine\\Blaine.10.ogg",
+          "description": "As you wish."
+        },
+        {
+          "text_prefix": "Best check your purse",
+          "audio_file": "ogg\\blaine\\Blaine.11.ogg",
+          "description": "Best check your purse."
+        },
+        {
+          "text_prefix": "Almost due east of",
+          "audio_file": "ogg\\blaine\\Blaine.12.ogg",
+          "description": "Almost due east of Iolo's hut there lives a powerful enchanter."
+        },
+        {
+          "text_prefix": "Dear little lady my",
+          "audio_file": "ogg\\blaine\\Blaine.7.ogg",
+          "description": "Dear little lady, my gypsy lady, let me kiss those sweet lips of thine."
         }
       ]
     }

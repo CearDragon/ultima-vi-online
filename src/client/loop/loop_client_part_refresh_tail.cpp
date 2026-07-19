@@ -374,6 +374,8 @@ if
 keyon [0xD8]=FALSE;
 keyon [0xD9]=FALSE; //release mousewheel "buttons"
 
+voiceover_tick();
+
 // The old per-frame font recreation workaround has been removed. Fonts are
 // created once during startup in `setup_client.inc` and released during
 // shutdown in `u6o7.cpp` WM_QUIT/WM_DESTROY handling.

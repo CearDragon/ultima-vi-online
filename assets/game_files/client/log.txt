@@ -3,7 +3,7 @@
 000:00:00:00 System-memory screen back-buffers created
 000:00:00:00 System font [System] loaded
 000:00:00:00 Client socket created
-000:00:00:00 Port: 22 Name: localhost
+000:00:00:00 Port: 22 Name: 20.246.146.166
 000:00:00:00 DNS translated to IP address successfully
 000:00:00:00 Connected to U6O server successfully!
 000:00:00:00 Send and Receive network data threads started
@@ -54,4 +54,31 @@
 000:00:00:00 [VO] Loaded NPC port 29 with 36 line(s)
 000:00:00:00 [VO] Loaded NPC port 7 with 17 line(s)
 000:00:00:00 [VO] Loaded NPC port 30 with 43 line(s)
-000:00:00:00 [VO] Loaded voiceover map: 13 NPC(s)
+000:00:00:00 [VO] Loaded NPC port 10 with 20 line(s)
+000:00:00:00 [VO] Loaded NPC port 11 with 17 line(s)
+000:00:00:00 [VO] Loaded NPC port 13 with 1 line(s)
+000:00:00:00 [VO] Loaded NPC port 15 with 64 line(s)
+000:00:00:00 [VO] Loaded NPC port 14 with 55 line(s)
+000:00:00:00 [VO] Loaded NPC port 12 with 37 line(s)
+000:00:00:00 [VO] Loaded NPC port 16 with 10 line(s)
+000:00:00:00 [VO] Loaded NPC port 17 with 31 line(s)
+000:00:00:00 [VO] Loaded NPC port 18 with 26 line(s)
+000:00:00:00 [VO] Loaded NPC port 19 with 40 line(s)
+000:00:00:00 [VO] Loaded NPC port 20 with 28 line(s)
+000:00:00:00 [VO] Loaded NPC port 21 with 21 line(s)
+000:00:00:00 [VO] Loaded NPC port 22 with 17 line(s)
+000:00:00:00 [VO] Loaded NPC port 23 with 32 line(s)
+000:00:00:00 [VO] Loaded NPC port 24 with 38 line(s)
+000:00:00:00 [VO] Loaded NPC port 25 with 42 line(s)
+000:00:00:00 [VO] Loaded NPC port 26 with 18 line(s)
+000:00:00:00 [VO] Loaded NPC port 27 with 6 line(s)
+000:00:00:00 [VO] Loaded NPC port 28 with 27 line(s)
+000:00:00:00 [VO] Loaded NPC port 162 with 35 line(s)
+000:00:00:00 [VO] Loaded NPC port 186 with 19 line(s)
+000:00:00:00 [VO] Loaded NPC port 132 with 64 line(s)
+000:00:00:00 [VO] Loaded NPC port 133 with 26 line(s)
+000:00:00:00 [VO] Loaded NPC port 134 with 8 line(s)
+000:00:00:00 [VO] Loaded NPC port 135 with 42 line(s)
+000:00:00:00 [VO] Loaded NPC port 136 with 32 line(s)
+000:00:00:00 [VO] Loaded voiceover map: 39 NPC(s)
+000:00:00:11 MDD: map data sync complete

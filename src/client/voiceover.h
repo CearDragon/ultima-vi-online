@@ -57,6 +57,14 @@ const char* voiceover_lookup_by_port_and_prefix(int npc_port, const char* text);
 void voiceover_play_for_message(int npc_port, const char* text, int volume);
 
 /**
+ * Per-frame update for the voiceover system.
+ *
+ * Processes the pending voiceover queue and triggers playback of the next
+ * line once the current one has finished. Called from the main client loop.
+ */
+void voiceover_tick(void);
+
+/**
  * Shutdown and free all voiceover map resources.
  *
  * Call once at client shutdown (or before reload/reconfig).
