@@ -1,4 +1,5 @@
 .vs
+.vs
 .vscode
 VC-files/old binaries
 VC-files/DebugInter
@@ -44,3 +45,4 @@ k8s/aks/storage/secrets.yaml
 
 /assets/game_files/client/userinfo.txt
 /assets/game_files/host/
+/assets/game_files/

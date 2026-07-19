@@ -1,41 +1,12 @@
-P187/Welcome to Ultima VI Online! Join our Discord today!
-P205/You see an experienced adventurer.
-P205/"How can I help thee milord?"
-P203/You see an experienced adventurer.
-P201/You see an experienced adventurer.
-P199/You see an experienced adventurer.
-P203/"How can I help thee milord?"
-P200/You see an experienced adventurer.
-P201/"How can I help thee milord?"
-P199/"How can I help thee milord?"
-P200/"How can I help thee milord?"
-P21/You see a grunting and grumbling man with a large stomach.
-P21/"Hrmmph. Hello." His breathing is quite heavy.
-P21/"Hrmmph, well. Haven't we...never mind. Hrmmph."
-P21/"What do you need?"
-P21/"@Efram the provisioner."
-P21/"It's a nice enough name, hrmmph."
-P21/"I sell @torches, @oil, @gems, @backpacks, @bags, @quest @bags, @shovels, and @powder @kegs."
-P21/"I'm sorry?"
-P19/You see a man in a multicolored jacket. His fingers are long and graceful.
-P19/You see a man in a multicolored jacket. His fingers are long and graceful.
-P19/"My name is Fyodor. What is thy name?"
-P19/"Hello again, milord."
-P19/"Hello again, milord."
-P19/"What can I do for you?"
-P19/"What can I do for you?"
-P19/"Pleased to meet thee, `name."
-P19/"I make cloth upon my @loom. Perhaps you'd like to @buy some."
-P19/"I push the pedals with my feet--like this."
-P19/"Then I pull these levers."
-P19/"The pattern depends on which combinations of levers and pedals I move."
-P19/"My father's loom was not so complicated as mine. This design came from one of Lord British's old @books."
-P19/"I work on a large new loom. The plans for it were found in one of Lord British's old @books."
-P19/"Lord British treasures antiques. There is one book for which he hath offered a reward:"
-P19/"'The Wizard of @Oz.'"
-P19/"By Master L. Frank Baum, I believe."
-P19/"It concerns a girl adventurer, a strange land, and a clever @balloonist."
-P19/"Are they not made of @silk, in the form of a great bag?"
-P19/"'Tis a wondrous strong stuff, silk, and very light."
-P19/"I regret that I am not skillful enough to weave silk."
-P19/"In New Magincia, however, lives the silk-weaver @Charlotte."
+P187/Welcome to Ultima VI Online!
+P30/You see a slender woman wearing a leather glove on her left hand.
+P30/"Hello and welcome, milord!"
+P30/"I can't tell you much about that. Lord British donated it to the museum, but I can't get him to talk about it."
+P30/"From what little he's said, I think it's an artifact from his home world."
+P30/"That's a very curious device. The motion of each gear turns another, until eventually the movement is propagated back to th
+P30/e same gear again."
+P30/"There's one thing I can't figure out."
+P30/"We've made plans of the device, and I can't see how they started it moving in the first place."
+P30/"None of the gears would turn unless all the others were already going."
+P30/"What's worse, the motions serve to hold the machine together."
+P30/"If the gears were still, the whole thing would fall apart! How it was built is quite a mystery."
