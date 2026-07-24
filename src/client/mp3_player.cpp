@@ -50,7 +50,9 @@ HRESULT CMp3Music::LoadMidiFromFile(const char* path, BOOL bMidiFile) {
 
 HRESULT CMp3Music::Play() {
     if (!pImpl->isOpen) return E_FAIL;
-    if (mciSendStringA("play " "u6omp3" " repeat", NULL, 0, NULL) != 0) return E_FAIL;
+    // Match MIDI behavior: play once; the game loop decides when/if to replay
+    // based on IsPlaying() and background/foreground IDs.
+    if (mciSendStringA("play " "u6omp3", NULL, 0, NULL) != 0) return E_FAIL;
     return S_OK;
 }
 
