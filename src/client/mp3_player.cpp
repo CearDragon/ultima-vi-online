@@ -50,7 +50,9 @@ HRESULT CMp3Music::LoadMidiFromFile(const char* path, BOOL bMidiFile) {
 
 HRESULT CMp3Music::Play() {
     if (!pImpl->isOpen) return E_FAIL;
-    if (mciSendStringA("play " "u6omp3" " repeat", NULL, 0, NULL) != 0) return E_FAIL;
+    // Match MIDI behavior: play once; the game loop decides when/if to replay
+    // based on IsPlaying() and background/foreground IDs.
+    if (mciSendStringA("play " "u6omp3", NULL, 0, NULL) != 0) return E_FAIL;
     return S_OK;
 }
 
@@ -62,17 +64,22 @@ HRESULT CMp3Music::Stop() {
 }
 
 HRESULT CMp3Music::IsPlaying() {
-    static unsigned char fallbackToggle = 0;
-    fallbackToggle = 1 - fallbackToggle;
     extern unsigned char u6omusicsetup;
-    if (u6omusicsetup == 0) return (HRESULT) fallbackToggle;
 
-    if (!pImpl->isOpen) return (HRESULT) fallbackToggle;
+    // If music setup failed, report not playing so background music can load
+    if (u6omusicsetup == 0) return S_FALSE;
 
+    // If no file is open, report not playing
+    if (!pImpl->isOpen) return S_FALSE;
+
+    // Query the actual playback status from the MCI device
     char status[64] = {0};
     if (mciSendStringA("status " "u6omp3" " mode", status, (UINT) sizeof(status), NULL) != 0) {
-        return (HRESULT) fallbackToggle;
+        // MCI query failed; return not playing to allow music system to retry
+        return S_FALSE;
     }
+
+    // Return S_OK if playing, S_FALSE otherwise
     if (_stricmp(status, "playing") == 0) return S_OK;
     return S_FALSE;
 }
