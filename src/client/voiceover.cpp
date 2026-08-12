@@ -11,7 +11,7 @@
 
 namespace {
 constexpr int kVoiceoverMaxNpcs = 256;
-constexpr int kVoiceoverMaxLinesPerNpc = 64;
+constexpr int kVoiceoverMaxLinesPerNpc = 128;
 constexpr int kVoiceoverMaxPrefixLen = 96;
 constexpr int kVoiceoverMaxFilenameLen = MAX_PATH;
 constexpr const char* kVoiceoverAlias = "u6ovoice";

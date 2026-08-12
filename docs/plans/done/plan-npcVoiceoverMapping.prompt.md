@@ -6,14 +6,14 @@
 
 ### Mapping Strategy
 - **Strategy**: Option A — NPC port + text prefix (human-readable, collision-resistant)
-- **Mapping Table**: Asset file (`assets/audio_map.json`)
+- **Mapping Table**: Asset file (`../../../assets/audio_map.json`)
 - **Text Prefix Length**: 6–12 characters (distinctive enough to avoid false positives, future-proof)
 
 ### Steps
 
 #### Phase 1: Audio Mapping Asset
 
-1. **Create `assets/audio_map.json`**
+1. **Create `../../../assets/audio_map.json`**
    - Format: 
      ```json
      {
@@ -39,18 +39,18 @@
 
 #### Phase 2: Client-Side Voiceover Infrastructure
 
-3. **Add voiceover data structure** in `src/client/voiceover.h` (new file):
+3. **Add voiceover data structure** in `../../../src/client/voiceover.h` (new file):
    - `struct VoiceoverLine { int text_prefix_len; char text_prefix[32]; const char* audio_file; }`
    - `struct VoiceoverNPC { int port; VoiceoverLine* lines; int line_count; }`
    - Root lookup structure or map-like container
 
-4. **Add voiceover loader** in `src/client/voiceover.cpp` (new file):
+4. **Add voiceover loader** in `../../../src/client/voiceover.cpp` (new file):
    - `bool load_voiceover_map(const char* json_path)` — parse `audio_map.json` into memory
    - `const char* lookup_voiceover_by_port_and_prefix(int port, const char* text)` — find match
    - Call from `soundsetup()` or early client init (before game loop starts)
    - Graceful fallback if JSON missing or parse fails (log to `scrlog()`, disable voiceovers)
 
-5. **Add voiceover header** (`src/client/voiceover.h`):
+5. **Add voiceover header** (`../../../src/client/voiceover.h`):
    - Export `load_voiceover_map()` and `lookup_voiceover_by_port_and_prefix()`
    - Include guard, minimal dependencies
 
@@ -74,7 +74,7 @@
    - Use `replace_string_in_file` (tight context) to avoid corrupting brace seams
    - **Do NOT use `insert_edit_into_file`** on this file (brace-seam fragment)
 
-7. **Define voiceover volume slot** in `src/client/data_client.cpp`:
+7. **Define voiceover volume slot** in `../../../src/client/data_client.cpp`:
    - Add `u6osound_volume[<idx>]` entry for voiceovers (or reuse existing SFX volume)
    - Document in comments
 
@@ -82,7 +82,7 @@
 
 8. **Call voiceover loader during client init**
    - Add to `soundsetup()` (after DirectSound init) or a dedicated voiceover init phase
-   - Location: `src/client/sound.cpp` or early game-open sequence
+   - Location: `../../../src/client/sound.cpp` or early game-open sequence
    - Ensure JSON is loaded before first game frame
 
 #### Phase 5: Testing
@@ -135,8 +135,8 @@
 
 ### Next Steps
 1. Discover exact Chuckles NPC port number
-2. Create `assets/audio_map.json` with Chuckles entry
-3. Implement `src/client/voiceover.h` + `src/client/voiceover.cpp`
+2. Create `../../../assets/audio_map.json` with Chuckles entry
+3. Implement `../../../src/client/voiceover.h` + `../../../src/client/voiceover.cpp`
 4. Integrate hook into `loop_client_part_net.cpp`
 5. Build and test with Chuckles conversation
 
