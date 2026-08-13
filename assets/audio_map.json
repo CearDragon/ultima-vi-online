@@ -1711,9 +1711,9 @@
           "description": "Normally there's a ten percent tax on the exchange."
         },
         {
-          "text_prefix": "We must be mistaken",
+          "text_prefix": "You must be mistaken.",
           "audio_file": "ogg\\terri\\Terri.24.ogg",
-          "description": "We must be mistaken. But let me know if you come across any gold nuggets later."
+          "description": "You must be mistaken. But let me know if you come across that many gold nuggets later."
         },
         {
           "text_prefix": "Well, if you do",
@@ -1863,7 +1863,7 @@
           "description": "I cannot help thee with that."
         },
         {
-          "text_prefix": "I have so many",
+          "text_prefix": "Records to keep, festivals",
           "audio_file": "ogg\\tholden\\Tholden.0.ogg",
           "description": "I have so many markers to keep, festivals to plan. I am so busy. But I can spare you a moment."
         },
@@ -2403,9 +2403,9 @@
           "description": "How goes business, Gwenneth?"
         },
         {
-          "text_prefix": "Of course 'tis still",
+          "text_prefix": "'Course, 'tis still called",
           "audio_file": "ogg\\gwenneth\\Gwenneth.68.ogg",
-          "description": "Of course, 'tis still called Iolo's Bows out of respect for the master."
+          "description": "'Course, 'tis still called Iolo's Bows, out of respect for the master."
         },
         {
           "text_prefix": "Yellow",
@@ -2503,9 +2503,9 @@
           "description": "The gargoyles also have a strange and terrible weapon."
         },
         {
-          "text_prefix": "It is called a",
+          "text_prefix": "'Tis called a boomerang,",
           "audio_file": "ogg\\gwenneth\\Gwenneth.19.ogg",
-          "description": "It is called a boomerang, and it is a most bizarre ranged weapon."
+          "description": "'Tis called a boomerang, and it is a most bizarre ranged weapon."
         },
         {
           "text_prefix": "It flies out to",
@@ -2548,9 +2548,9 @@
           "description": "Go see Lynn the Fletcher, over to the north."
         },
         {
-          "text_prefix": "Alina is a fine",
+          "text_prefix": "Lynn is a fine",
           "audio_file": "ogg\\gwenneth\\Gwenneth.28.ogg",
-          "description": "Alina is a fine fletcher and usually keeps me supplied with arrows and bolts"
+          "description": "Lynn is a fine fletcher, and usually keeps me supplied with arrows and bolts."
         },
         {
           "text_prefix": "I've none left in",
@@ -2648,7 +2648,7 @@
           "description": "Sorry, none of you has anything I need."
         },
         {
-          "text_prefix": "Hi you have something",
+          "text_prefix": "Aye, you have something",
           "audio_file": "ogg\\gwenneth\\Gwenneth.48.ogg",
           "description": "Hi, you have something of interest?"
         },
@@ -2727,7 +2727,7 @@
         {
           "text_prefix": "It will ne'er come",
           "audio_file": "ogg\\anya\\Anya.12.ogg",
-          "description": "It will ne'er come to pass. He lives in a world of eternal silence."
+          "description": "But 'twill ne'er come to pass. He lives in a world of eternal silence."
         },
         {
           "text_prefix": "You have the look",
@@ -3107,9 +3107,9 @@
           "description": "I don't know what I should do."
         },
         {
-          "text_prefix": "My parents from the",
+          "text_prefix": "I know! My parents",
           "audio_file": "ogg\\ariana\\Ariana.28.ogg",
-          "description": "My parents from the Blue Boar Tavern, go ask them if you can borrow the rune."
+          "description": "I know! My parents run the Blue Boar Tavern. Go ask them if you can borrow the rune."
         },
         {
           "text_prefix": "If they say 'tis",
@@ -3236,9 +3236,9 @@
           "description": "I'm making the swords and stuff. What's it look like I'm doing here?"
         },
         {
-          "text_prefix": "You got a something",
+          "text_prefix": "You gotta somethin' to",
           "audio_file": "ogg\\max\\Max.7.ogg",
-          "description": "You got a something to sell or a something you wanna buy?"
+          "description": "You gotta somethin' to sell oda somethin' you wanna buy?"
         },
         {
           "text_prefix": "I'm a name of",
@@ -3246,9 +3246,9 @@
           "description": "I'm a name of the Max."
         },
         {
-          "text_prefix": "Good bye to you",
+          "text_prefix": "Goodbyea to you. Come",
           "audio_file": "ogg\\max\\Max.9.ogg",
-          "description": "Good-bye to you. Come back soon, eh?"
+          "description": "Goodbyea to you. Come abacka soon, ah?"
         },
         {
           "text_prefix": "Hey, my hearing, she's",
@@ -3266,12 +3266,12 @@
           "description": "You do mind if I shop when she's open, eh?"
         },
         {
-          "text_prefix": "Hey that's a real",
+          "text_prefix": "Hey, atsa real shame,",
           "audio_file": "ogg\\max\\Max.13.ogg",
-          "description": "Hey, that's a real shame. But none of you has anything I'm needing."
+          "description": "Hey, atsa real shame, but anone of you hasa anything I'ma needing."
         },
         {
-          "text_prefix": "Ah you has a",
+          "text_prefix": "Aye, you have asomething",
           "audio_file": "ogg\\max\\Max.14.ogg",
           "description": "Ah, you has a somethin' of a interest."
         },
@@ -3366,9 +3366,9 @@
           "description": "What'sa you wanta nexta?"
         },
         {
-          "text_prefix": "You want weapons or",
+          "text_prefix": "Do you wanta weapons",
           "audio_file": "ogg\\max\\Max.2.ogg",
-          "description": "You want weapons or armor?"
+          "description": "Do you wanta weapons or armor?"
         },
         {
           "text_prefix": "You to my shop",
@@ -3376,7 +3376,7 @@
           "description": "You to my shopa when shesa open!"
         },
         {
-          "text_prefix": "Do to my shoppe",
+          "text_prefix": "You to my shopa",
           "audio_file": "ogg\\max\\Max.4.ogg",
           "description": "Do to my shoppe when she's open."
         }
@@ -4188,9 +4188,9 @@
           "description": "To snooze, perchance to dream..."
         },
         {
-          "text_prefix": "Amorphous I long for",
+          "text_prefix": "O Morpheus, I long",
           "audio_file": "ogg\\nema\\Nema.14.ogg",
-          "description": "Amorphous, I long for the taste of thy sweet oblivion."
+          "description": "O Morpheus, I long for a taste of thy sweet oblivion!"
         },
         {
           "text_prefix": "Morpheus is the king",
@@ -4734,7 +4734,7 @@
           "description": "Aye, Avatar, thou hast need of a horse."
         },
         {
-          "text_prefix": "Greetings travelers What can",
+          "text_prefix": "Greetings, traveler! What can",
           "audio_file": "ogg\\wilbur\\Wilbur.0.ogg",
           "description": "Greetings, travelers. What can I do for you?"
         },
@@ -4873,7 +4873,7 @@
           "description": "Beg pardon?"
         },
         {
-          "text_prefix": "I sell only by",
+          "text_prefix": "I sell bolts only",
           "audio_file": "ogg\\lynn\\Lynn.15.ogg",
           "description": "I sell only by the dozen."
         },
@@ -4975,14 +4975,14 @@
           "description": "Here, give me a few coins to keep anyone from getting suspicious."
         },
         {
-          "text_prefix": "Valor Fa Spirituality So",
+          "text_prefix": "honor mi valour fa",
           "audio_file": "ogg\\finn\\Finn.31.ogg",
-          "description": "Valor, Fa, Spirituality, So, Humility, La."
+          "description": "honor mi valour fa spirituality so"
         },
         {
-          "text_prefix": "Sacrifice Gee gosh wouldn't",
+          "text_prefix": "sacrifice ti Gosh, wouldn't",
           "audio_file": "ogg\\finn\\Finn.32.ogg",
-          "description": "Sacrifice? Gee, gosh, wouldn't ya know it, the mantra of honesty slips my mind at the moment."
+          "description": "sacrifice ti Gosh, wouldn't you know it? The Mantra of Honesty slips my mind at the moment..."
         },
         {
           "text_prefix": "But I won't admit",
@@ -5065,9 +5065,9 @@
           "description": "I'll tell you this, because you look like someone who can keep a secret."
         },
         {
-          "text_prefix": "I got forty million",
+          "text_prefix": "I've got forty million",
           "audio_file": "ogg\\finn\\Finn.11.ogg",
-          "description": "I got forty million crowns, not to mention my secret bank accounts."
+          "description": "I've got forty million crowns. Not to mention my secret bank accounts."
         },
         {
           "text_prefix": "I told you not",
@@ -5132,9 +5132,9 @@
           "description": "Bread, cakes, pies, pastries... They all have their roots here."
         },
         {
-          "text_prefix": "A woman does not",
+          "text_prefix": "Woman does not live",
           "audio_file": "ogg\\linda\\Linda.4.ogg",
-          "description": "A woman does not live on meat alone."
+          "description": "Woman does not live on meat alone."
         },
         {
           "text_prefix": "Cows and sheep are",
@@ -5329,9 +5329,9 @@
           "description": "You'd be willing to pay ten gold for the information, would you?"
         },
         {
-          "text_prefix": "Might be glad to",
+          "text_prefix": "I'd be glad to",
           "audio_file": "ogg\\zoltan\\Zoltan.43.ogg",
-          "description": "Might be glad to help you out. But 'tis a hard life sometimes, being a gypsy."
+          "description": "I'd be glad to help you out. But 'tis a hard life, sometimes, being a gypsy."
         },
         {
           "text_prefix": "Powder kegs are useful",
@@ -5469,7 +5469,7 @@
           "description": "As a gypsy's body wanders, so does his mind."
         },
         {
-          "text_prefix": "Before winds there are",
+          "text_prefix": "The four winds they",
           "audio_file": "ogg\\zoltan\\Zoltan.15.ogg",
           "description": "Before winds, there are gypsies too."
         },
@@ -5539,7 +5539,7 @@
           "description": "I dance for you, and how do you repay me?"
         },
         {
-          "text_prefix": "Shoo again You are",
+          "text_prefix": "Hah! You again! You",
           "audio_file": "ogg\\zoltan\\Zoltan.1.ogg",
           "description": "Shoo again? You are no friend to Zoltan!"
         },
@@ -5611,9 +5611,9 @@
           "description": "I'm sorry, I'm not supposed to help you unless you pay."
         },
         {
-          "text_prefix": "My father says I'm",
+          "text_prefix": "Father says I'm supposed",
           "audio_file": "ogg\\karina\\Karina.2.ogg",
-          "description": "My father says I'm supposed to dance for Georgios."
+          "description": "Father says I'm supposed to dance for gorgios."
         },
         {
           "text_prefix": "Oh",
@@ -6196,7 +6196,7 @@
         {
           "text_prefix": "Thrice shall a being",
           "audio_file": "ogg\\mariah\\Mariah.36.ogg",
-          "description": "Thrice shall a being of great evil come into our land, and by this it shall be known that the end is nigh."
+          "description": "Thrice shall a being of great evil come unto our land, and by this it shall be known that the end is nigh."
         },
         {
           "text_prefix": "This evil one is",
@@ -6436,9 +6436,9 @@
           "description": "Is there anything else you wanted to find?"
         },
         {
-          "text_prefix": "Aye you should have",
+          "text_prefix": "Fine. You should have",
           "audio_file": "ogg\\thariand\\Thariand.15.ogg",
-          "description": "Aye, you should have no trouble finding what you want once you have the catalog number."
+          "description": "Fine. You should have no trouble finding what you want once you have the call number."
         },
         {
           "text_prefix": "You do understand how",
@@ -6471,14 +6471,14 @@
           "description": "In that category I can recommend:"
         },
         {
-          "text_prefix": "821 34 RZ 14",
+          "text_prefix": "821.34 Rzl4n The Caverns",
           "audio_file": "ogg\\thariand\\Thariand.22.ogg",
-          "description": "821.34 RZ-14: The Caverns of Freitag"
+          "description": "821.34 Rzl4n The Caverns of Freitag"
         },
         {
-          "text_prefix": "KLRA 1734 N92 V3",
+          "text_prefix": "Klr1734 N92 v3 Around",
           "audio_file": "ogg\\thariand\\Thariand.23.ogg",
-          "description": "KLRA 1734 N92 V3 around the world in a washtub."
+          "description": "Klr1734 N92 v3 Around the World in a Washtub 417.8"
         },
         {
           "text_prefix": "Four hundred and seventeen",
@@ -6688,9 +6688,9 @@
           "description": "The dragon is a scaly sort Who spouts flame when he sneezes. Many a bold knight has he fought, For he goes where e'er he pleases."
         },
         {
-          "text_prefix": "Mr Porcupine's knots but",
+          "text_prefix": "Mister Porcupine's naught but",
           "audio_file": "ogg\\mandrake\\Mandrake.58.ogg",
-          "description": "Mr. Porcupine's knots but spines to the dismay of him and his missus."
+          "description": "Mister Porcupine's naught but spines, To the dismay of him and his missus."
         },
         {
           "text_prefix": "A gypsy girl and",
@@ -6715,7 +6715,7 @@
         {
           "text_prefix": "Many a bold knight",
           "audio_file": "ogg\\mandrake\\Mandrake.63.ogg",
-          "description": "Many a bold knight has he fought, for he goes where'er he pleases."
+          "description": "Many a bold knight has he fought, For he goes where e'er he pleases."
         },
         {
           "text_prefix": "For that for which",
@@ -6753,9 +6753,9 @@
           "description": "You look like the sort who knows how to enjoy a good story."
         },
         {
-          "text_prefix": "'Tis been too long",
+          "text_prefix": "It's been too long.",
           "audio_file": "ogg\\mandrake\\Mandrake.5.ogg",
-          "description": "'Tis been too long! What brings you to this part of the realm?"
+          "description": "It's been too long. What brings you to this part of the realm?"
         },
         {
           "text_prefix": "Well, never mind that",
@@ -7294,9 +7294,9 @@
           "description": "They say not all of the bodies end up where they're supposed to..."
         },
         {
-          "text_prefix": "You know you were",
+          "text_prefix": "You know, 'e was",
           "audio_file": "ogg\\mole\\Mole.33.ogg",
-          "description": "You know, you were supposed to have paid me for a new shovel, and then you wouldn't have had to go through so much trouble."
+          "description": "You know, 'e was supposed to have paid me for a new shovel, and then you wouldn't have 'ad to go to so much trouble."
         },
         {
           "text_prefix": "Aye, maybe there'd 'ave been",
@@ -7346,9 +7346,9 @@
           "description": "I forget little details like paying Mole..."
         },
         {
-          "text_prefix": "Now see what he",
+          "text_prefix": "See what he has",
           "audio_file": "ogg\\glen\\Glen.10.ogg",
-          "description": "Now see what he has to say about that."
+          "description": "See what he has to say about that!"
         },
         {
           "text_prefix": "Broke his shovel That's",
@@ -7356,12 +7356,12 @@
           "description": "Broke his shovel? That's no excuse."
         },
         {
-          "text_prefix": "Go tell him he",
+          "text_prefix": "Tell him he should",
           "audio_file": "ogg\\glen\\Glen.12.ogg",
-          "description": "Go tell him he should have bought another and kept on working."
+          "description": "Tell him he should have bought another one and kept working."
         },
         {
-          "text_prefix": "If he needs a",
+          "text_prefix": "Needed a shovel, did",
           "audio_file": "ogg\\glen\\Glen.13.ogg",
           "description": "If he needs a shovel, does he? Tell him to use the one I gave him when I hired him."
         },
@@ -7486,7 +7486,7 @@
           "description": "It's very relaxing work. At least it would be, if I didn't have to put up with that incompetent gravedigger."
         },
         {
-          "text_prefix": "So you've brought me",
+          "text_prefix": "Ah, you've brought me",
           "audio_file": "ogg\\glen\\Glen.36.ogg",
           "description": "So, you've brought me a client. Honestly, doesn't your friend look more peaceful this way?"
         },
@@ -7693,9 +7693,9 @@
           "description": "Yes, I used to make such fine clothes for my Nathaniel."
         },
         {
-          "text_prefix": "No he was not",
+          "text_prefix": "Though he was not",
           "audio_file": "ogg\\sylaina\\Sylaina.8.ogg",
-          "description": "No, he was not a bad husband. I'll always remember him as something of a scoundrel"
+          "description": "Though he was not a bad husband, I'll always remember him as something of a scoundrel."
         },
         {
           "text_prefix": "They say he went",
@@ -7815,9 +7815,9 @@
           "description": "As you wish, milord."
         },
         {
-          "text_prefix": "At a battle summons",
+          "text_prefix": "That's a battle summons.",
           "audio_file": "ogg\\sionnach\\Sionnach.28.ogg",
-          "description": "At a battle summons?"
+          "description": "That's a battle summons."
         },
         {
           "text_prefix": "Why, hello there, my",
@@ -7850,9 +7850,9 @@
           "description": "I'm a drummer and a singer."
         },
         {
-          "text_prefix": "What would you like",
+          "text_prefix": "Would you like me",
           "audio_file": "ogg\\sionnach\\Sionnach.7.ogg",
-          "description": "What would you like me to play for you?"
+          "description": "Would you like me to play for you?"
         },
         {
           "text_prefix": "'Twas long ago... Back",
@@ -8099,9 +8099,9 @@
           "description": "I seen yer face before."
         },
         {
-          "text_prefix": "To her it's like",
+          "text_prefix": "For her it is",
           "audio_file": "ogg\\faren\\Faren.10.ogg",
-          "description": "To her, it's like being born a gargoyle."
+          "description": "For her it is like being born a gargoyle."
         },
         {
           "text_prefix": "She knows no other",
@@ -8121,7 +8121,7 @@
         {
           "text_prefix": "We know them more",
           "audio_file": "ogg\\faren\\Faren.14.ogg",
-          "description": "We know them more by the ways they differ from us, rather than their similarity."
+          "description": "But we know them more by the ways they differ from us, rather than their similarities."
         },
         {
           "text_prefix": "I sell many types",
@@ -8169,9 +8169,9 @@
           "description": "Excellent!"
         },
         {
-          "text_prefix": "Y'all don't have enough",
+          "text_prefix": "You don't have enough",
           "audio_file": "ogg\\faren\\Faren.23.ogg",
-          "description": "Y'all don't have enough gold."
+          "description": "You don't have enough gold."
         },
         {
           "text_prefix": "Enjoy",
@@ -8214,7 +8214,7 @@
           "description": "You met her? Then you know she is blind."
         },
         {
-          "text_prefix": "Yeah been so since",
+          "text_prefix": "Yes, has been so",
           "audio_file": "ogg\\faren\\Faren.9.ogg",
           "description": "Yeah, been so since birth."
         }
@@ -8381,9 +8381,9 @@
           "description": "yet try and tell today's children of the age of darkness..."
         },
         {
-          "text_prefix": "I believe nothing can",
+          "text_prefix": "they believe nothing can",
           "audio_file": "ogg\\zeke\\Zeke.9.ogg",
-          "description": "I believe nothing can go wrong as long as the Avatar lives."
+          "description": "they believe nothing can go wrong, as long as the avatar lives."
         }
       ]
     },
@@ -8413,9 +8413,9 @@
           "description": "Yes. He lives east of here, between two rivers."
         },
         {
-          "text_prefix": "'Tis hot be due",
+          "text_prefix": "His hut be due",
           "audio_file": "ogg\\eckhart\\Eckhart.12.ogg",
-          "description": "'Tis hot be due north of Britain, or so they tell me."
+          "description": "His hut be due north of Britain, or so they tell me."
         },
         {
           "text_prefix": "Visit me in the",
@@ -8458,7 +8458,7 @@
           "description": "Eckhart the vinekeeper, at your service, ma'am."
         },
         {
-          "text_prefix": "She keeps bees on",
+          "text_prefix": "Zeke keeps bees on",
           "audio_file": "ogg\\eckhart\\Eckhart.3.ogg",
           "description": "She keeps bees on the other side of the abbey."
         },
@@ -8684,7 +8684,7 @@
         {
           "text_prefix": "A great craftsman I",
           "audio_file": "ogg\\gherick\\Gherick.2.ogg",
-          "description": "A great craftsman I is. Me shop is huge!"
+          "description": "I's a great craftsman, I is. Me shop is 'uge!"
         },
         {
           "text_prefix": "Here ya go. Just",
@@ -8737,9 +8737,9 @@
           "description": "Which item?"
         },
         {
-          "text_prefix": "You'll have to be",
+          "text_prefix": "You'll hafta be more",
           "audio_file": "ogg\\gherick\\Gherick.3.ogg",
-          "description": "You'll have to be more specific. Arms or armor?"
+          "description": "You'll hafta be more specific: arms or armor?"
         },
         {
           "text_prefix": "I'll give thee some",
@@ -9317,7 +9317,7 @@
         {
           "text_prefix": "That's right me bucko",
           "audio_file": "ogg\\morchella\\Morchella.5.ogg",
-          "description": "That's right, me bucko. Gwayn sailed with Lord British and Captain John"
+          "description": "That's right, me bucko. Why, I've sailed with Lord British and Captain John."
         },
         {
           "text_prefix": "He walks with a",
@@ -9352,9 +9352,9 @@
           "description": "Good day, mon ami."
         },
         {
-          "text_prefix": "Have you come to",
+          "text_prefix": "'Ave you come to",
           "audio_file": "ogg\\loubet\\Loubet.1.ogg",
-          "description": "Have you come to moi for instruction?"
+          "description": "'Ave you come to moi for instruction?"
         },
         {
           "text_prefix": "Zey are not like",
@@ -9372,7 +9372,7 @@
           "description": "Just ask and I'll give you a lesson!"
         },
         {
-          "text_prefix": "Come to my cell",
+          "text_prefix": "Come to ma salle",
           "audio_file": "ogg\\loubet\\Loubet.13.ogg",
           "description": "Come to my cell sometime, I'll give you a lesson."
         },
@@ -9399,7 +9399,7 @@
         {
           "text_prefix": "Much pleased to meet",
           "audio_file": "ogg\\loubet\\Loubet.18.ogg",
-          "description": "Much pleased to meet you, monsieur."
+          "description": "Much pleased to meet you, m'sieur."
         },
         {
           "text_prefix": "Zat simply means 'touch.'",
@@ -9474,7 +9474,7 @@
         {
           "text_prefix": "But no you are",
           "audio_file": "ogg\\loubet\\Loubet.4.ogg",
-          "description": "But no, you are too skilled. I have nothing more to teach you."
+          "description": "But no! You are too skilled, I 'ave nothing more to teach you!"
         },
         {
           "text_prefix": "Practice Here Surely you",
@@ -9576,7 +9576,7 @@
         {
           "text_prefix": "Then you will most",
           "audio_file": "ogg\\koranada\\Koranada.20.ogg",
-          "description": "Then you will most likely find him at Siegecrafters."
+          "description": "You will most likely find him at Siege Crafters."
         },
         {
           "text_prefix": "I have responsibilities here",
@@ -9636,7 +9636,7 @@
         {
           "text_prefix": "My dear friend he",
           "audio_file": "ogg\\koranada\\Koranada.31.ogg",
-          "description": "My dear friend, he was guild master here when I was in training."
+          "description": "A dear friend. He was guildmaster here when I was in training."
         },
         {
           "text_prefix": "He lives humbly in",
@@ -9970,7 +9970,7 @@
         {
           "text_prefix": "Seggallion you can call",
           "audio_file": "ogg\\seggallion\\Seggallion.36.ogg",
-          "description": "Seggallion, you can call me Seg though."
+          "description": "Seggallion. You can call me 'Segg' though."
         },
         {
           "text_prefix": "The same as yours",
@@ -10060,7 +10060,7 @@
           "description": "I heard at the guild that the Avatar was in town!"
         },
         {
-          "text_prefix": "Lord British says I",
+          "text_prefix": "Koronada says I will",
           "audio_file": "ogg\\dehugh\\DeHugh.14.ogg",
           "description": "Lord British says I will be considered for membership when I have done something noteworthy."
         },
@@ -10184,7 +10184,7 @@
         {
           "text_prefix": "Goodbye I hope that",
           "audio_file": "ogg\\simon\\Simon.13.ogg",
-          "description": "Goodbye. I hope that thou wilt visit me again when thou hast time, friend."
+          "description": "Goodbye. I hope thou wilt visit me again when thou hast time, friend."
         },
         {
           "text_prefix": "I wish I could",
@@ -10750,7 +10750,7 @@
         {
           "text_prefix": "The push me pull",
           "audio_file": "ogg\\sutek\\Sutek.14.ogg",
-          "description": "The push-me pull-you knows where all such bones can be found."
+          "description": "The Pushme-Pullyu knows where all such bones can be found!"
         },
         {
           "text_prefix": "Sutek created the pushme",
@@ -10773,9 +10773,9 @@
           "description": "Sutek grants thou a piece of wisdom to take to thy grave, and thou refusest it?"
         },
         {
-          "text_prefix": "And thou must die",
+          "text_prefix": "Then thou must die!",
           "audio_file": "ogg\\sutek\\Sutek.19.ogg",
-          "description": "And thou must die!"
+          "description": "Then thou must die!"
         },
         {
           "text_prefix": "So, Avatar, you disturb",
@@ -11167,7 +11167,7 @@
           "description": "Much vould I like to vander again, but I haf no vun to trafel mit now."
         },
         {
-          "text_prefix": "Someone will ask me",
+          "text_prefix": "Somevun vill ask me",
           "audio_file": "ogg\\gorn\\Gorn.9.ogg",
           "description": "Someone will ask me to join with them sooner or later."
         }
@@ -11299,7 +11299,7 @@
           "description": "But if I told you my name was Bonn, then you could work foul magic to destroy my mind..."
         },
         {
-          "text_prefix": "Thou wilt dance a",
+          "text_prefix": "They'll dance a waltz,",
           "audio_file": "ogg\\bonn\\Bonn.30.ogg",
           "description": "Thou wilt dance a waltz? I doubt it not."
         },
@@ -11341,7 +11341,7 @@
         {
           "text_prefix": "Good You can't have",
           "audio_file": "ogg\\bonn\\Bonn.38.ogg",
-          "description": "Good. You can't have it anyways."
+          "description": "Good! You can't have it anyway!"
         },
         {
           "text_prefix": "Too bad! I've hidden it",
@@ -11446,9 +11446,9 @@
           "description": "Rich gold"
         },
         {
-          "text_prefix": "Liketh much fish",
+          "text_prefix": "Like eat much fish!",
           "audio_file": "ogg\\papa\\Papa.19.ogg",
-          "description": "Liketh much fish."
+          "description": "Like eat much fish!"
         },
         {
           "text_prefix": "Bring more",
@@ -11578,9 +11578,9 @@
           "description": "Talk male. He have key."
         },
         {
-          "text_prefix": "Me’ll keep that in",
+          "text_prefix": "Male keep that in",
           "audio_file": "ogg\\mama\\Mama.15.ogg",
-          "description": "Me’ll keep that in cellar."
+          "description": "Male keep that in cellar."
         },
         {
           "text_prefix": "Come back soon, play",
@@ -11799,7 +11799,7 @@
         {
           "text_prefix": "The wingless ones are",
           "audio_file": "ogg\\sinvraal\\SinVraal.17.ogg",
-          "description": "The wingless ones are mute and unintelligent. They do all the manual labor."
+          "description": "Wingless ones are mute and unintelligent. They do all the manual labor."
         },
         {
           "text_prefix": "Winged ones are smart",
@@ -11959,9 +11959,9 @@
           "description": "You should try it. Saves you from looking for your shoes every morning."
         },
         {
-          "text_prefix": "I eat all the",
+          "text_prefix": "I eat Iolo's hay",
           "audio_file": "ogg\\smith\\Smith.14.ogg",
-          "description": "I eat all the hay to keep it from piling up everywhere and making a mess."
+          "description": "I eat Iolo's hay to keep it from piling up everywhere and making a mess."
         },
         {
           "text_prefix": "is the greatest menace",
@@ -11979,9 +11979,9 @@
           "description": "I've devoted my life to the task."
         },
         {
-          "text_prefix": "'Tis a thankless job",
+          "text_prefix": "It's a thankless job,",
           "audio_file": "ogg\\smith\\Smith.18.ogg",
-          "description": "'Tis a thankless job, but I am a determined horse."
+          "description": "It's a thankless job, but I am a determined horse."
         },
         {
           "text_prefix": "Hay, thou hath met",
@@ -12004,9 +12004,9 @@
           "description": "I don't have the answer to everything. I'm just a horse, you know."
         },
         {
-          "text_prefix": "You went to all",
+          "text_prefix": "We went to all",
           "audio_file": "ogg\\smith\\Smith.22.ogg",
-          "description": "You went to all that trouble just to hear this?"
+          "description": "We went to all that trouble just to hear this?"
         },
         {
           "text_prefix": "We rescued Lord British",
@@ -12123,7 +12123,7 @@
         {
           "text_prefix": "Zaurenia serves as a",
           "audio_file": "ogg\\wisp\\Wisp.17.ogg",
-          "description": "Zaurenia serves as a conduit for information between different planes."
+          "description": "Xorinia serves as a conduit for information between different planes."
         },
         {
           "text_prefix": "In exchange, these planes",
@@ -12251,7 +12251,7 @@
           "description": "So be it. 'I' must often repeat information when conversing with the life of Britannia, it seems."
         },
         {
-          "text_prefix": "The Cuboom have expressed",
+          "text_prefix": "Rklbwm have expressed desire",
           "audio_file": "ogg\\wisp\\Wisp.40.ogg",
           "description": "The Cuboom have expressed desire to possess this information."
         },
@@ -12313,7 +12313,7 @@
         {
           "text_prefix": "Of the imminent cessation",
           "audio_file": "ogg\\wisp\\Wisp.51.ogg",
-          "description": "Of the imminent cessation of proximity between one unit of Britannian life and one of Zorinite."
+          "description": "of the imminent cessation of proximity between one unit of Britannian life and one of Xorinite."
         },
         {
           "text_prefix": "Those which 'you' know",
@@ -12353,7 +12353,7 @@
           "description": "I am Nicodemus."
         },
         {
-          "text_prefix": "Hath none of you",
+          "text_prefix": "But none of you",
           "audio_file": "ogg\\nicodemus\\Nicodemus.10.ogg",
           "description": "Hath none of you have a spellbook?"
         },
@@ -12443,14 +12443,14 @@
           "description": "Thou dost not need the rest."
         },
         {
-          "text_prefix": "Thou cannot carry any",
+          "text_prefix": "Thou cannot carry that.",
           "audio_file": "ogg\\nicodemus\\Nicodemus.27.ogg",
           "description": "Thou cannot carry any."
         },
         {
-          "text_prefix": "I cannot afford that",
+          "text_prefix": "Thou cannot afford that",
           "audio_file": "ogg\\nicodemus\\Nicodemus.28.ogg",
-          "description": "I cannot afford that much."
+          "description": "Thou cannot afford that much!"
         },
         {
           "text_prefix": "'Tis all I have",
@@ -12478,9 +12478,9 @@
           "description": "Thou cannot afford that much!"
         },
         {
-          "text_prefix": "The spellbook costs 45",
+          "text_prefix": "A spellbook costs 45",
           "audio_file": "ogg\\nicodemus\\Nicodemus.33.ogg",
-          "description": "The spellbook costs 45 gold pieces, interested?"
+          "description": "A spellbook costs 45 gold pieces. Interested?"
         },
         {
           "text_prefix": "Perhaps one of thy",
@@ -12498,9 +12498,9 @@
           "description": "If thou knowest the Enchant spell, thou canst lock a spell within the staff for quick use!"
         },
         {
-          "text_prefix": "My new staff cost",
+          "text_prefix": "A yew staff costs",
           "audio_file": "ogg\\nicodemus\\Nicodemus.37.ogg",
-          "description": "My new staff cost 100 gold pieces, but it's worth twice that!"
+          "description": "A yew staff costs 100 gold pieces, but it's worth twice that!"
         },
         {
           "text_prefix": "Wouldst thou like to",
@@ -12525,7 +12525,7 @@
         {
           "text_prefix": "Thou canst not afford",
           "audio_file": "ogg\\nicodemus\\Nicodemus.41.ogg",
-          "description": "Thou canst not afford a staff?"
+          "description": "But thou cannot afford a staff!"
         },
         {
           "text_prefix": "Oh, nothing a great",
@@ -13299,9 +13299,9 @@
           "description": "It was late one night and I had just returned from my fields."
         },
         {
-          "text_prefix": "Of course my path",
+          "text_prefix": "'Course my path takes",
           "audio_file": "ogg\\stivius\\Stivius.12.ogg",
-          "description": "Of course, my path takes me right by Gideon's garden."
+          "description": "'Course my path takes me right by Gideon's garden."
         },
         {
           "text_prefix": "I heard a noise",
@@ -13334,9 +13334,9 @@
           "description": "His wife has a garden which you can see from my front door."
         },
         {
-          "text_prefix": "It stands straight across",
+          "text_prefix": "It's the Inn straight",
           "audio_file": "ogg\\stivius\\Stivius.19.ogg",
-          "description": "It stands straight across the lane from here."
+          "description": "It's the Inn straight across the lane from here."
         },
         {
           "text_prefix": "Back for some more",
@@ -13371,7 +13371,7 @@
         {
           "text_prefix": "Ask old Horance He",
           "audio_file": "ogg\\stivius\\Stivius.25.ogg",
-          "description": "Ask old Horance. He can tell you, if you can understand him."
+          "description": "Go ask old Horance. He can tell ya if you can understand him!"
         },
         {
           "text_prefix": "He lives over on",
@@ -13434,9 +13434,9 @@
           "description": "Yes, big, ugly, snarling beasts."
         },
         {
-          "text_prefix": "Of course they were",
+          "text_prefix": "'Course, they were kneeling",
           "audio_file": "ogg\\stivius\\Stivius.37.ogg",
-          "description": "Of course, they were kneeling when I saw them."
+          "description": "'Course, they were kneeling when I saw 'em."
         },
         {
           "text_prefix": "on their knees",
@@ -13544,9 +13544,9 @@
           "description": "Yeah, maybe you want to buy some?"
         },
         {
-          "text_prefix": "'Tis not just a",
+          "text_prefix": "It's not just a",
           "audio_file": "ogg\\stivius\\Stivius.8.ogg",
-          "description": "'Tis not just a tale you've been hearing."
+          "description": "It's not just a tale you've been hearing."
         },
         {
           "text_prefix": "Everyone knows that Quenton",
@@ -13606,9 +13606,9 @@
           "description": "He never comes into town."
         },
         {
-          "text_prefix": "'Twas the scariest thing",
+          "text_prefix": "It was the scariest",
           "audio_file": "ogg\\marta\\Marta.17.ogg",
-          "description": "'Twas the scariest thing I ever saw. I'm sure it's still lurking about somewhere."
+          "description": "It was the scariest thing I ever saw! I'm sure it's still lurking about somewhere..."
         },
         {
           "text_prefix": "Goodbye",
@@ -13646,9 +13646,9 @@
           "description": "You've not seen it? I have the loveliest roses."
         },
         {
-          "text_prefix": "What is the evening",
+          "text_prefix": "Red as the evening",
           "audio_file": "ogg\\marta\\Marta.7.ogg",
-          "description": "What is the evening sun on the sea?"
+          "description": "Red as the evening sun on the sea."
         },
         {
           "text_prefix": "He's a messy person",
@@ -13713,9 +13713,9 @@
           "description": "A pole'll never catch you enough to sell."
         },
         {
-          "text_prefix": "I never use them",
+          "text_prefix": "Never use 'em myself.",
           "audio_file": "ogg\\yorl\\Yorl.17.ogg",
-          "description": "I never use them myself. I stick to nets, faster and easier."
+          "description": "Never use 'em myself. I stick to nets--faster and easier."
         },
         {
           "text_prefix": "Man's gotta make a",
@@ -13843,9 +13843,9 @@
           "description": "My father was a coastal raider."
         },
         {
-          "text_prefix": "I've seen a lot",
+          "text_prefix": "I seen alot o'",
           "audio_file": "ogg\\yorl\\Yorl.40.ogg",
-          "description": "I've seen a lot of things at sea, serpents as big as the biggest foremaster."
+          "description": "I seen alot o' things out at sea, serpents as big as the biggest four-master."
         },
         {
           "text_prefix": "But 'nary a single",
@@ -13858,9 +13858,9 @@
           "description": "One o' the tall ships. My father used to pilot one o' the biggest in Lord British's fleet."
         },
         {
-          "text_prefix": "The Meredith Anne she",
+          "text_prefix": "The Merideth Ann. She",
           "audio_file": "ogg\\yorl\\Yorl.43.ogg",
-          "description": "The Meredith Anne, she was a sight to behold she was."
+          "description": "The Merideth Ann. She was a sight to behold, she was."
         },
         {
           "text_prefix": "She'd seen many a",
@@ -14070,9 +14070,9 @@
           "description": "Some are lost souls, others have a purpose. Quenton is not a lost soul."
         },
         {
-          "text_prefix": "'Tis a mystical place",
+          "text_prefix": "It is a mystical",
           "audio_file": "ogg\\dezana\\Dezana.11.ogg",
-          "description": "'Tis a mystical place between here and the hereafter. Quentin resides there."
+          "description": "It is a mystical place between here and the hereafter."
         },
         {
           "text_prefix": "They spent their whole",
@@ -14836,7 +14836,7 @@
           "description": "Hah, sneakin' around in my forest, huh?"
         },
         {
-          "text_prefix": "Hi Are you here",
+          "text_prefix": "Aye, are ya here",
           "audio_file": "ogg\\ben\\Ben.20.ogg",
           "description": "Hi. Are you here to buy a log?"
         },
@@ -15025,7 +15025,7 @@
         {
           "text_prefix": "Oh sorry I thought",
           "audio_file": "ogg\\lenard\\Lenard.6.ogg",
-          "description": "Oh, sorry. I thought you wanted to buy something."
+          "description": "Oh, sorry. I thought thou wanted to buy something."
         },
         {
           "text_prefix": "I'm sorry, but I really",
@@ -15257,7 +15257,7 @@
         {
           "text_prefix": "Yes thems who I",
           "audio_file": "ogg\\andrea\\Andrea.6.ogg",
-          "description": "Yes, thems who I beated arm wrestling call me Miss Barlap, though, out of respect."
+          "description": "Yes. Them's who I beat at arm wrestling call me Miss Barlap, though."
         },
         {
           "text_prefix": "All right all right",
@@ -15317,9 +15317,9 @@
           "description": "I come here from many days away. My home burned by evil man."
         },
         {
-          "text_prefix": "I am not sure",
+          "text_prefix": "I not sure where.",
           "audio_file": "ogg\\utomo\\Utomo.15.ogg",
-          "description": "I am not sure where. Got ride on big ship."
+          "description": "I not sure where. Got ride on big ship."
         },
         {
           "text_prefix": "I stow away when",
@@ -15352,9 +15352,9 @@
           "description": "She try kiss Utomo. Utomo say, I no want you, but she kiss anyway."
         },
         {
-          "text_prefix": "Utomo no go back",
+          "text_prefix": "Utomo not go back",
           "audio_file": "ogg\\utomo\\Utomo.21.ogg",
-          "description": "Utomo no go back there."
+          "description": "Utomo not go back there."
         },
         {
           "text_prefix": "Utomo have girl back",
@@ -15801,9 +15801,9 @@
           "description": "All right, I admit it. I 'aven't got any kids."
         },
         {
-          "text_prefix": "That stupid care they",
+          "text_prefix": "But that stupid cow",
           "audio_file": "ogg\\boskin\\Boskin.19.ogg",
-          "description": "That stupid care they got running this place won't listen to reason. A little give and take, know what I mean?"
+          "description": "But that stupid cow they got runnin' this place won't listen to reason. A little give-and-take, know what I mean?"
         },
         {
           "text_prefix": "All right, I give",
@@ -15871,9 +15871,9 @@
           "description": "You'll never get nothin' out of me!"
         },
         {
-          "text_prefix": "Alright I'll take your",
+          "text_prefix": "All right, I'll take",
           "audio_file": "ogg\\boskin\\Boskin.31.ogg",
-          "description": "Alright, I'll take your word for it."
+          "description": "All right, I'll take your word for it."
         },
         {
           "text_prefix": "Go to the slaughtered",
@@ -15886,9 +15886,9 @@
           "description": "And spit on Her Ladyship for me!"
         },
         {
-          "text_prefix": "I ain't saying nothing",
+          "text_prefix": "Then I ain't sayin'",
           "audio_file": "ogg\\boskin\\Boskin.34.ogg",
-          "description": "I ain't saying nothing. I've got me kids to think of, I do."
+          "description": "Then I ain't sayin' nothin'. I've got me kids to think of, I do."
         },
         {
           "text_prefix": "I knew I could",
@@ -15906,9 +15906,9 @@
           "description": "I 'id the rune under a potted plant in the Slaughtered Lamb inn."
         },
         {
-          "text_prefix": "Tell 'em about me",
+          "text_prefix": "Tell them about me",
           "audio_file": "ogg\\boskin\\Boskin.38.ogg",
-          "description": "Tell 'em about me poor fatherless kids. They'll listen to ya"
+          "description": "Tell them about me poor fatherless kids! They'll listen to you!"
         },
         {
           "text_prefix": "Maybe it was necessary",
@@ -15990,7 +15990,7 @@
         {
           "text_prefix": "A feller broke into",
           "audio_file": "ogg\\pridgarm\\Pridgarm.15.ogg",
-          "description": "A feller broke into the grave of His Lordship, the late mayor."
+          "description": "Feller broke into the grave of His Lordship, the late Mayor."
         },
         {
           "text_prefix": "'Taint my place to",
@@ -16055,7 +16055,7 @@
         {
           "text_prefix": "OK never had nobody",
           "audio_file": "ogg\\pridgarm\\Pridgarm.27.ogg",
-          "description": "OK, never had nobody sound so interested in just hearing about the jail before."
+          "description": "Okay. Never had nobody sound so interested in jest hearing about the jail before."
         },
         {
           "text_prefix": "Well, ya know, I",
@@ -16411,12 +16411,12 @@
         {
           "text_prefix": "Hi this is a",
           "audio_file": "ogg\\isabella\\Isabella.18.ogg",
-          "description": "Hi, this is a big city."
+          "description": "Aye, this is a big city."
         },
         {
           "text_prefix": "A good healer Taria",
           "audio_file": "ogg\\isabella\\Isabella.19.ogg",
-          "description": "A good healer, Taria, should be able to tell you the mantra."
+          "description": "The good healer Tara should be able to tell you the mantra."
         },
         {
           "text_prefix": "I have heard much",
@@ -16623,7 +16623,7 @@
         {
           "text_prefix": "He said something about",
           "audio_file": "ogg\\selganor\\Selganor.25.ogg",
-          "description": "He said something about a big job he had to do there."
+          "description": "Said something about a big job he had to do there."
         },
         {
           "text_prefix": "Sutek lives on an",
@@ -16681,7 +16681,7 @@
           "description": "Now tell me the sequence of notes in 'Stones' and I'll induct you into the guild."
         },
         {
-          "text_prefix": "The American notation will",
+          "text_prefix": "Numeric notation will be",
           "audio_file": "ogg\\selganor\\Selganor.36.ogg",
           "description": "The American notation will be fine."
         },
@@ -16880,7 +16880,7 @@
         {
           "text_prefix": "Thou make an offering",
           "audio_file": "ogg\\tara\\Tara.30.ogg",
-          "description": "Thou make an offering of ten gold?"
+          "description": "Wilt thou make an offering of 30 gold?"
         },
         {
           "text_prefix": "If thou wilt not",
@@ -16913,9 +16913,9 @@
           "description": "Without make an offering of four hundred gold?"
         },
         {
-          "text_prefix": "And there is naught",
+          "text_prefix": "Then there is naught",
           "audio_file": "ogg\\tara\\Tara.37.ogg",
-          "description": "And there is naught I can do save grieve with thee."
+          "description": "Then there is naught I can do save grieve with thee."
         },
         {
           "text_prefix": "That ain't enough money.",
@@ -16973,9 +16973,9 @@
           "description": "Those who need healing, curing, or to be resurrected."
         },
         {
-          "text_prefix": "Ka this is the",
+          "text_prefix": "'Cah,' that is the",
           "audio_file": "ogg\\tara\\Tara.9.ogg",
-          "description": "Ka, this is the word of Sacrifice."
+          "description": "'Cah,' that is the word of sacrifice."
         }
       ]
     },
@@ -17377,9 +17377,9 @@
           "description": "Aye, and good wood it is, too. A fine set of pipes this will make."
         },
         {
-          "text_prefix": "No are ye daft",
+          "text_prefix": "No? What are ye,",
           "audio_file": "ogg\\julia\\Julia.45.ogg",
-          "description": "No, are ye daft? I cannot be making pipes without wood."
+          "description": "No? What are ye, daft? I canna be makin' pipes without wood!"
         },
         {
           "text_prefix": "Go to Yew where",
@@ -17469,9 +17469,9 @@
           "description": "How can I help thee this fine morning?"
         },
         {
-          "text_prefix": "My father once told",
+          "text_prefix": "Father once told me",
           "audio_file": "ogg\\michelle\\Michelle.10.ogg",
-          "description": "My father once told me a story of weaving a basket large enough for eight people."
+          "description": "Father once told me a story of weaving a basket large enough for eight people!"
         },
         {
           "text_prefix": "He never showed me",
@@ -17489,9 +17489,9 @@
           "description": "Yes, without accurate plans it takes far too much time to craft a basket."
         },
         {
-          "text_prefix": "And it was true",
+          "text_prefix": "Then it was true!",
           "audio_file": "ogg\\michelle\\Michelle.14.ogg",
-          "description": "And it was true, Father did weave a basket that big."
+          "description": "Then it was true! Father did weave a basket that big!"
         },
         {
           "text_prefix": "Surely I could do",
@@ -17821,9 +17821,9 @@
           "description": "My name's Aaron."
         },
         {
-          "text_prefix": "I'm on the sawmill",
+          "text_prefix": "I run the sawmill!",
           "audio_file": "ogg\\aaron\\Aaron.5.ogg",
-          "description": "I'm on the sawmill. Is there anything I can do for thee?"
+          "description": "I run the sawmill! Is there anything I can do for thee?"
         },
         {
           "text_prefix": "Yea I saw logs",
@@ -18185,9 +18185,9 @@
           "description": "Me master 'as quite a large inventory."
         },
         {
-          "text_prefix": "Do you want arms",
+          "text_prefix": "Dost thou want arms",
           "audio_file": "ogg\\james\\James.6.ogg",
-          "description": "Do you want arms or armor?"
+          "description": "Dost thou want arms or armor?"
         },
         {
           "text_prefix": "Come to me shop",
@@ -18232,9 +18232,9 @@
           "description": "So long friend."
         },
         {
-          "text_prefix": "Mmm that's a puzzler",
+          "text_prefix": "That's a puzzler.",
           "audio_file": "ogg\\trebor\\Trebor.12.ogg",
-          "description": "Mmm, that's a puzzler."
+          "description": "That's a puzzler."
         },
         {
           "text_prefix": "Which of you",
@@ -18262,9 +18262,9 @@
           "description": "Sailor strength."
         },
         {
-          "text_prefix": "Ye ne'er find a",
+          "text_prefix": "You'll ne'er find a",
           "audio_file": "ogg\\trebor\\Trebor.18.ogg",
-          "description": "Ye ne'er find a better craft!"
+          "description": "You'll ne'er find a better craft."
         },
         {
           "text_prefix": "Thou hast not enough",
@@ -18307,7 +18307,7 @@
           "description": "Sorry, I sold you my last skiff."
         },
         {
-          "text_prefix": "I used to sell",
+          "text_prefix": "I sell ships and",
           "audio_file": "ogg\\trebor\\Trebor.8.ogg",
           "description": "I used to sell ships and skiffs."
         },
@@ -18451,9 +18451,9 @@
           "description": "Only she can teach the spells of the greatest power."
         },
         {
-          "text_prefix": "Mhm that's right",
+          "text_prefix": "Mmm-hmm, that's right.",
           "audio_file": "ogg\\doris\\Doris.14.ogg",
-          "description": "Mhm, that's right."
+          "description": "Mmm-hmm, that's right."
         },
         {
           "text_prefix": "Mmm-hmm",
@@ -18573,9 +18573,9 @@
           "description": "The Rune of Honor? Why, it is on a pedestal in the center of town!"
         },
         {
-          "text_prefix": "Arr even though the",
+          "text_prefix": "Even though the rune",
           "audio_file": "ogg\\whitsaber\\Whitsaber.15.ogg",
-          "description": "Arr, even though the Rune is our most prized possession, we do not guard it."
+          "description": "Even though the rune is our most prized possession, we do not guard it!"
         },
         {
           "text_prefix": "And dost thou know",
@@ -18745,9 +18745,9 @@
           "description": "Arturos, he, uh, found a map last time we were up at Empath Abbey."
         },
         {
-          "text_prefix": "He'll tell you your",
+          "text_prefix": "He'll tell your fortune",
           "audio_file": "ogg\\wanda\\Wanda.12.ogg",
-          "description": "He'll tell you your fortune for you. Just ask him."
+          "description": "He'll tell your fortune for you, sexy. Just ask him!"
         },
         {
           "text_prefix": "That's right",
@@ -18830,9 +18830,9 @@
           "description": "I've a cot in my wagon... 15 gold's the price--and I don't haggle! Interested, honey?"
         },
         {
-          "text_prefix": "Come on cross my",
+          "text_prefix": "Come on, honey. Cross",
           "audio_file": "ogg\\wanda\\Wanda.28.ogg",
-          "description": "Come on, cross my palm with 15 gold and I'll show you a good time, okay?"
+          "description": "Come on, honey. Cross my palm with 15 gold and I'll show you a good time."
         },
         {
           "text_prefix": "Fine come back when",
@@ -18875,9 +18875,9 @@
           "description": "I don't think we have time for this..."
         },
         {
-          "text_prefix": "'Tis a fine way",
+          "text_prefix": "That's a fine way",
           "audio_file": "ogg\\wanda\\Wanda.36.ogg",
-          "description": "'Tis a fine way to be carrying on when all of Britannia is in danger."
+          "description": "That's a fine way to be carrying on when all of Britannia is in danger!"
         },
         {
           "text_prefix": "When our quest is",
@@ -19112,7 +19112,7 @@
           "description": "My name's Tobatha."
         },
         {
-          "text_prefix": "They keep making mistakes",
+          "text_prefix": "Makin' mistakes and expecting",
           "audio_file": "ogg\\tobatha\\Tobatha.40.ogg",
           "description": "They keep making mistakes and expecting their elders to bail them out"
         },
@@ -19187,9 +19187,9 @@
           "description": "Job? I'm a mender of the inflicted!"
         },
         {
-          "text_prefix": "If I want why",
+          "text_prefix": "If I weren't, why",
           "audio_file": "ogg\\tobatha\\Tobatha.9.ogg",
-          "description": "If I want, why would you be here?"
+          "description": "If I weren't, why would you be here?"
         }
       ]
     },
@@ -19249,9 +19249,9 @@
           "description": "As first mate to Captain Hawkins himself! His real name is Alastor Gordon."
         },
         {
-          "text_prefix": "Hmm I better get",
+          "text_prefix": "Hmmm. I'd better get",
           "audio_file": "ogg\\sandy\\Sandy.18.ogg",
-          "description": "Hmm, I better get back to cooking. Excuse me."
+          "description": "Hmmm. I'd better get back to cooking... Excuse me."
         },
         {
           "text_prefix": "Majesty in pastry",
@@ -19274,9 +19274,9 @@
           "description": "I could do you a favor if you did one for me first."
         },
         {
-          "text_prefix": "Only dragons will do",
+          "text_prefix": "Only a dragon's will",
           "audio_file": "ogg\\sandy\\Sandy.22.ogg",
-          "description": "Only dragons will do"
+          "description": "Only a dragon's will do."
         },
         {
           "text_prefix": "There's a lair in",
@@ -19284,9 +19284,9 @@
           "description": "There's a lair in the dungeon Destard, to the northwest."
         },
         {
-          "text_prefix": "'Tis not far",
+          "text_prefix": "It's not far.",
           "audio_file": "ogg\\sandy\\Sandy.24.ogg",
-          "description": "'Tis not far."
+          "description": "It's not far."
         },
         {
           "text_prefix": "Hi",
@@ -19864,14 +19864,14 @@
           "description": "Hey, you come again soon, okay?"
         },
         {
-          "text_prefix": "A silver tablet I",
+          "text_prefix": "The silver tablet? I",
           "audio_file": "ogg\\arturos\\Arturos.11.ogg",
-          "description": "A silver tablet? I don't know anything about that."
+          "description": "The silver tablet? I don't know anything about that."
         },
         {
           "text_prefix": "Maybe there's something in",
           "audio_file": "ogg\\arturos\\Arturos.12.ogg",
-          "description": "Maybe there's something in the cards about it, huh?"
+          "description": "But hey, maybe there's something in the cards about it, ah?"
         },
         {
           "text_prefix": "Can'ta you think of",
@@ -19879,9 +19879,9 @@
           "description": "Can'ta you think of something more interesting to talk about?"
         },
         {
-          "text_prefix": "I got us a",
+          "text_prefix": "I gota this fine",
           "audio_file": "ogg\\arturos\\Arturos.14.ogg",
-          "description": "I got us a fine set of fortune telling cards. These were hand-painted by Musgrave and myself."
+          "description": "I gota this fine set of fortune telling cards. These werea hand painted by Musgrave himself."
         },
         {
           "text_prefix": "For justa two gold",
@@ -20016,12 +20016,12 @@
         {
           "text_prefix": "Map Oh yeah that",
           "audio_file": "ogg\\arturos\\Arturos.4.ogg",
-          "description": "Map? Oh yeah, that old thing. Sure, I got that, but she's not very interesting."
+          "description": "Hmm, map... Oh yeah, thata old thing. Sure, I got that, but she'sa not very interesting."
         },
         {
-          "text_prefix": "The curse didn't send",
+          "text_prefix": "The cards didn't say",
           "audio_file": "ogg\\arturos\\Arturos.40.ogg",
-          "description": "The curse didn't send nothing about the silver tablet. Guess that means you're not gonna find it!"
+          "description": "The cards didn't say nothin' about the silver tablet. Guess that means you're not gonna find it."
         },
         {
           "text_prefix": "That's a laugh you",
@@ -20071,7 +20071,7 @@
         {
           "text_prefix": "I am the king",
           "audio_file": "ogg\\arturos\\Arturos.5.ogg",
-          "description": "I am the king of all the gypsies."
+          "description": "Ima the king of all the gypsies."
         },
         {
           "text_prefix": "Well, I forget, but",
@@ -20086,12 +20086,12 @@
         {
           "text_prefix": "Thank you You have",
           "audio_file": "ogg\\arturos\\Arturos.52.ogg",
-          "description": "Thank you! You have saved me from making a big mistake."
+          "description": "Thank you! You have asaved me from amaking a big mistake!"
         },
         {
           "text_prefix": "I better hold onto",
           "audio_file": "ogg\\arturos\\Arturos.53.ogg",
-          "description": "I better hold onto this valuable map myself. No way is it worth less than a hundred gold."
+          "description": "You're right, I better hold on to this valuable map myself. No way is it worth less than 100 gold."
         },
         {
           "text_prefix": "What, are you nuts?",
@@ -20149,9 +20149,9 @@
           "description": "You cana just call me 'Uncle Arthur' if you like."
         },
         {
-          "text_prefix": "He's what you call",
+          "text_prefix": "He's a whadda you",
           "audio_file": "ogg\\arturos\\Arturos.8.ogg",
-          "description": "He's what you call an imposter. You shouldn't have listened to him."
+          "description": "He's a whadda you call, an impostor. You shouldn'ta listen to him."
         },
         {
           "text_prefix": "That'sa nice and friendly.",
@@ -20221,9 +20221,9 @@
           "description": "So that's what you're after, you naughty girl!"
         },
         {
-          "text_prefix": "Aha so that's what",
+          "text_prefix": "Oho, so that's what",
           "audio_file": "ogg\\andreas\\Andreas.19.ogg",
-          "description": "Aha, so that's what you're after, you naughty boy!"
+          "description": "Oho, so that's what you're after, you naughty boy!"
         },
         {
           "text_prefix": "You look like a",
@@ -20238,7 +20238,7 @@
         {
           "text_prefix": "Well normally I'm more",
           "audio_file": "ogg\\andreas\\Andreas.21.ogg",
-          "description": "Well, normally I'm more of a ladies' man, but I guess your money's as good as anyone else's. It'll cost you ten gold, okay?"
+          "description": "Well... Normally I'm more of a ladies' man. But I guess your money is as good as anyone else's. It'll cost you 10 gold, okay?"
         },
         {
           "text_prefix": "Don't trouble yourself about",
@@ -20705,9 +20705,9 @@
           "description": "If ye let one gargoyle live, then ye'll be tempted to spare trolls, and then even cyclopses."
         },
         {
-          "text_prefix": "And then you'll forget",
+          "text_prefix": "And then ye forget",
           "audio_file": "ogg\\vankellian\\VanKellian.29.ogg",
-          "description": "And then you'll forget valor, and soon you're overrun by monsters!"
+          "description": "And then ye forget valour, and soon ye are overrun by monsters!"
         },
         {
           "text_prefix": "A pleasure, to be",
@@ -20849,7 +20849,7 @@
         {
           "text_prefix": "There's a desert east",
           "audio_file": "ogg\\stelnar\\Stelnar.23.ogg",
-          "description": "There's a desert east of the Bloody Plains. There's a shrine there."
+          "description": "'Tis a desert east of the Bloody Plains. There is a shrine there."
         },
         {
           "text_prefix": "I've never been to",
@@ -20959,7 +20959,7 @@
           "description": "Hello,"
         },
         {
-          "text_prefix": "I used to sell",
+          "text_prefix": "I sell ships and",
           "audio_file": "ogg\\peer\\Peer.10.ogg",
           "description": "I used to sell ships and skiffs."
         },
@@ -21106,9 +21106,9 @@
           "description": "I remember it as if it were yesterday..."
         },
         {
-          "text_prefix": "Zella Van held attorney",
+          "text_prefix": "Zellivan held a tourney",
           "audio_file": "ogg\\nomaan\\Nomaan.14.ogg",
-          "description": "Zella Van held attorney, and I was awarded the Rune of Valor."
+          "description": "Zellivan held a tourney and I was awarded the Rune of Valour."
         },
         {
           "text_prefix": "Afterwards, we were at",
@@ -21126,9 +21126,9 @@
           "description": "I was showing the rune around when it fell from my grasp onto the floor."
         },
         {
-          "text_prefix": "Well that's when the",
+          "text_prefix": "That's when the rat",
           "audio_file": "ogg\\nomaan\\Nomaan.18.ogg",
-          "description": "Well, that's when the rat ran out."
+          "description": "That's when the rat ran out."
         },
         {
           "text_prefix": "It scampered over, seized",
@@ -21136,7 +21136,7 @@
           "description": "It scampered over, seized the trinket and ran back 'cross the floor."
         },
         {
-          "text_prefix": "I am Nomaan and",
+          "text_prefix": "I am Nomaan. What",
           "audio_file": "ogg\\nomaan\\Nomaan.2.ogg",
           "description": "I am Nomaan, and what is thy name?"
         },
@@ -21196,7 +21196,7 @@
           "description": "Well met, milord."
         },
         {
-          "text_prefix": "Aye you do have",
+          "text_prefix": "Aye, you have something",
           "audio_file": "ogg\\nomaan\\Nomaan.30.ogg",
           "description": "Aye, you do have something of interest."
         },
@@ -21353,9 +21353,9 @@
           "description": "A good breakfast is the beginning of a good day."
         },
         {
-          "text_prefix": "My name is Martin",
+          "text_prefix": "Mine name ist Martin,",
           "audio_file": "ogg\\martin\\Martin.2.ogg",
-          "description": "My name is Martin, but my friends call me Dutch."
+          "description": "Mine name ist Martin, but my friends call me 'Dutch.'"
         },
         {
           "text_prefix": "Ja, dat's mine name!",
@@ -21562,9 +21562,9 @@
           "description": "Darndest thing, too."
         },
         {
-          "text_prefix": "The gnome dropped a",
+          "text_prefix": "Nomaan dropped the rune",
           "audio_file": "ogg\\jerris\\Jerris.13.ogg",
-          "description": "The gnome dropped a rune, and the rat took it into a little hole."
+          "description": "Nomaan dropped the rune and the rat took it into a little hole."
         },
         {
           "text_prefix": "It's in the refrain",
@@ -21694,9 +21694,9 @@
           "description": "Soon as I've saved up a stake, I'm going in there to dig for gold."
         },
         {
-          "text_prefix": "For certainly the wrong",
+          "text_prefix": "'Twas certainly the wrong",
           "audio_file": "ogg\\heftimus\\Heftimus.16.ogg",
-          "description": "For certainly the wrong place for an old seadog to be."
+          "description": "'Twas certainly the wrong place for an old seadog to be!"
         },
         {
           "text_prefix": "I'll be allright, matey.",
@@ -21719,7 +21719,7 @@
           "description": "I be Heftimus McPry, matey."
         },
         {
-          "text_prefix": "Maybe ten Aye an",
+          "text_prefix": "Then maybe ten? Aye",
           "audio_file": "ogg\\heftimus\\Heftimus.20.ogg",
           "description": "Maybe ten? Aye an’ aye"
         },
@@ -21751,7 +21751,7 @@
         {
           "text_prefix": "But afore I could",
           "audio_file": "ogg\\heftimus\\Heftimus.26.ogg",
-          "description": "But afore I could apply sparks to the tinder, a huge swarm of rats drove me away."
+          "description": "But afore I could apply sparks to the tinder, a huge swarm o' rats drove me away."
         },
         {
           "text_prefix": "The scrap o map",
@@ -22038,9 +22038,9 @@
           "description": "Hi, hello there."
         },
         {
-          "text_prefix": "Afraid I can't talk",
+          "text_prefix": "'Fraid I can't talk",
           "audio_file": "ogg\\arvin\\Arvin.1.ogg",
-          "description": "Afraid I can't talk now, I have to cook."
+          "description": "'Fraid I can't talk now. I have to cook."
         },
         {
           "text_prefix": "Which of ya",
@@ -22078,9 +22078,9 @@
           "description": "Which of you?"
         },
         {
-          "text_prefix": "That'll be two crowns",
+          "text_prefix": "That'll be 2 crowns,",
           "audio_file": "ogg\\arvin\\Arvin.17.ogg",
-          "description": "That'll be two crowns, okay?"
+          "description": "That'll be 2 crowns, okay?"
         },
         {
           "text_prefix": "Come back when you",
@@ -22153,9 +22153,9 @@
           "description": "Which, rolls, ale, mead, wine, or rations?"
         },
         {
-          "text_prefix": "We sell rolls ale",
+          "text_prefix": "I sell rolls, ale,",
           "audio_file": "ogg\\arvin\\Arvin.7.ogg",
-          "description": "We sell rolls, ale, mead, wine, and rations."
+          "description": "I sell rolls, ale, mead, wine, and rations."
         },
         {
           "text_prefix": "See you later.",
@@ -22551,7 +22551,7 @@
         {
           "text_prefix": "Do you have any",
           "audio_file": "ogg\\dunbar\\Dunbar.24.ogg",
-          "description": "Do you have any room in your pack?"
+          "description": "You haven't any room in your pack."
         },
         {
           "text_prefix": "I'm afraid you haven't",
@@ -22955,9 +22955,9 @@
           "description": "Is there anything I can do for you?"
         },
         {
-          "text_prefix": "I weary well while",
+          "text_prefix": "I wear a robe",
           "audio_file": "ogg\\aurendir\\Aurendir.10.ogg",
-          "description": "I weary well while I tend sheep. It's all part of life's great circle."
+          "description": "I wear a robe while I tend sheep. It's all part of life's great circle."
         },
         {
           "text_prefix": "From earth, to grass",
@@ -23192,14 +23192,14 @@
           "description": "Keep asking around."
         },
         {
-          "text_prefix": "And what is that",
+          "text_prefix": "Then what is that",
           "audio_file": "ogg\\antonio\\Antonio.22.ogg",
-          "description": "And what is that person's name?"
+          "description": "Then what is that person's name?"
         },
         {
           "text_prefix": "Here is the Rune",
           "audio_file": "ogg\\antonio\\Antonio.23.ogg",
-          "description": "Here is the Rune. I wish thee success on thy mission."
+          "description": "Here is the rune, and I wish thee success on thy mission."
         },
         {
           "text_prefix": "'Tis not fitting that",
@@ -23299,9 +23299,9 @@
           "description": "Which of you?"
         },
         {
-          "text_prefix": "Do not waste my",
+          "text_prefix": "Don't waste my time!",
           "audio_file": "ogg\\sasha\\Sasha.17.ogg",
-          "description": "Do not waste my time. Thou art not wounded."
+          "description": "Don't waste my time! Thou art not wounded!"
         },
         {
           "text_prefix": "'Tis hard enough tending",
@@ -23556,7 +23556,7 @@
           "description": "I'll give thee all thou can carry. Thou dost not need the rest."
         },
         {
-          "text_prefix": "Thou cannot carry any",
+          "text_prefix": "Thou cannot carry that.",
           "audio_file": "ogg\\rudyom\\Rudyom.25.ogg",
           "description": "Thou cannot carry any."
         },
@@ -24011,9 +24011,9 @@
           "description": "Very well..."
         },
         {
-          "text_prefix": "It'll cost you five",
+          "text_prefix": "It'll cost you 5",
           "audio_file": "ogg\\shawn\\Shawn.17.ogg",
-          "description": "It'll cost you five gold for the ham. Interested?"
+          "description": "It'll cost you 5 gold for the ham. Interested?"
         },
         {
           "text_prefix": "You can't carry it",
@@ -24051,9 +24051,9 @@
           "description": "Very well..."
         },
         {
-          "text_prefix": "It'll cost you four",
+          "text_prefix": "It'll cost you 4",
           "audio_file": "ogg\\shawn\\Shawn.24.ogg",
-          "description": "It'll cost you four gold for each ration. How many do you want?"
+          "description": "It'll cost you 4 gold for each ration. How many do you want?"
         },
         {
           "text_prefix": "Come now that's a",
@@ -24230,9 +24230,9 @@
           "description": "He went down in Hythloth seeking a way to the other side of the world."
         },
         {
-          "text_prefix": "He said he was",
+          "text_prefix": "Said he was going",
           "audio_file": "ogg\\leonna\\Leonna.12.ogg",
-          "description": "He said he was going to kill as many gargoyles as he could before they got him."
+          "description": "Said he was going to kill as many gargoyles as he could before they got him."
         },
         {
           "text_prefix": "Please, let's not talk about",
@@ -24287,7 +24287,7 @@
         {
           "text_prefix": "Oh good I bet",
           "audio_file": "ogg\\leonna\\Leonna.22.ogg",
-          "description": "Oh, good. I bet we'll meet lots of interesting men."
+          "description": "Oh good! I bet we'll meet a lot of interesting men..."
         },
         {
           "text_prefix": "I'd have to join",
@@ -24604,9 +24604,9 @@
           "description": "If you should happen to run across Bonn, or Ybarra, or Hawkins, don't tell them I'm here."
         },
         {
-          "text_prefix": "Who is he Never",
+          "text_prefix": "Who's he? Never 'eard",
           "audio_file": "ogg\\johann\\Johann.13.ogg",
-          "description": "Who is he? Never heard of him."
+          "description": "Who's he? Never 'eard of 'im."
         },
         {
           "text_prefix": "What",
@@ -24614,9 +24614,9 @@
           "description": "What?"
         },
         {
-          "text_prefix": "A balloon with a",
+          "text_prefix": "Oh, a loon with",
           "audio_file": "ogg\\johann\\Johann.15.ogg",
-          "description": "A balloon with a spoon sang a song of ballooning, and the man in the moon said it was quite a tune."
+          "description": "Oh, a loon with a spoon Sang a song of ballooning. And the man in the moon Said it was quite a tune."
         },
         {
           "text_prefix": "Now one fine day",
@@ -24736,9 +24736,9 @@
           "description": "You're not a member of the guild. I don't have to tell you anything."
         },
         {
-          "text_prefix": "Y'all looking for the",
+          "text_prefix": "You're looking for the",
           "audio_file": "ogg\\homer\\Homer.15.ogg",
-          "description": "Y'all looking for the silver tablet? It's part of Captain Hawkins' buried treasure."
+          "description": "You're looking for the silver tablet? It's part of Captain Hawkin's buried treasure."
         },
         {
           "text_prefix": "It was buried in",
@@ -24756,7 +24756,7 @@
           "description": "What are you talking about?"
         },
         {
-          "text_prefix": "Go ask Poodle And",
+          "text_prefix": "Go ask Budo. And",
           "audio_file": "ogg\\homer\\Homer.19.ogg",
           "description": "Go ask Poodle. And you didn't hear it from me, understand?"
         },
@@ -24831,9 +24831,9 @@
           "description": "I'll tell you all I know about where the pieces might be..."
         },
         {
-          "text_prefix": "Alhawk set out for",
+          "text_prefix": "Ol' Hawknose set out",
           "audio_file": "ogg\\homer\\Homer.32.ogg",
-          "description": "Alhawk set out for the Drylands to kill the demon that is said to live there."
+          "description": "Ol' Hawknose set out for the Dry Land, to kill the daemon that is said to live there."
         },
         {
           "text_prefix": "Sandy, the ship's cook, went",
@@ -24841,9 +24841,9 @@
           "description": "Sandy, the ship's cook, went to Trinsic with the first mate."
         },
         {
-          "text_prefix": "Ole Ibera said he",
+          "text_prefix": "Old Ybarra said he",
           "audio_file": "ogg\\homer\\Homer.34.ogg",
-          "description": "Ole' Ibera said he was headed for the dungeon Shame, looking for more treasure."
+          "description": "Old Ybarra said he was headed for the dungeon Shame, looking for more treasure."
         },
         {
           "text_prefix": "I think one of",
@@ -24871,9 +24871,9 @@
           "description": "When you find the pieces, you can lay them out to see how they fit together."
         },
         {
-          "text_prefix": "Fine You can call",
+          "text_prefix": "You can call me",
           "audio_file": "ogg\\homer\\Homer.4.ogg",
-          "description": "Fine. You can call me Homer."
+          "description": "You can call me Homer."
         },
         {
           "text_prefix": "Remember only I know",
@@ -24896,9 +24896,9 @@
           "description": "Then hand it over and we're even."
         },
         {
-          "text_prefix": "Blast ya If I",
+          "text_prefix": "Blast ye! If I",
           "audio_file": "ogg\\homer\\Homer.44.ogg",
-          "description": "Blast ya! If I still had two good legs, I'd keelhaul the lot of you!"
+          "description": "Blast ye! If I still had two good legs, I'd keelhaul the lot of you!"
         },
         {
           "text_prefix": "We had a deal",
@@ -25058,9 +25058,9 @@
       "npc_portrait": 120,
       "lines": [
         {
-          "text_prefix": "Ah smell the salt",
+          "text_prefix": "Smell that salt air,",
           "audio_file": "ogg\\fentrissa\\Fentrissa.0.ogg",
-          "description": "Ah, smell the salt air, friend. Brings a tear to me eye."
+          "description": "Smell that salt air, friend. Brings a tear to me eye..."
         },
         {
           "text_prefix": "Welcome, welcome!",
@@ -25220,9 +25220,9 @@
           "description": "You can buy arms from me or sell me your used stuff."
         },
         {
-          "text_prefix": "Henrik the Hammer's what",
+          "text_prefix": "Enrik the Hammer's what",
           "audio_file": "ogg\\enrik\\Enrik.11.ogg",
-          "description": "Henrik the Hammer's what I'm known as round here."
+          "description": "Enrik the Hammer's what I'm known as 'round here."
         },
         {
           "text_prefix": "I prefers Hammer.",
@@ -25325,9 +25325,9 @@
           "description": "What'll it be?"
         },
         {
-          "text_prefix": "That'd make your burden",
+          "text_prefix": "But that'd make you",
           "audio_file": "ogg\\enrik\\Enrik.30.ogg",
-          "description": "That'd make your burden"
+          "description": "But that'd make you"
         },
         {
           "text_prefix": "Good",
@@ -25402,9 +25402,9 @@
           "description": "I don't like to think about it."
         },
         {
-          "text_prefix": "on a fair sized",
+          "text_prefix": "A fair sized island,",
           "audio_file": "ogg\\elad\\Elad.13.ogg",
-          "description": "on a fair-sized island, and now she's gone. Some of them earthquakes have been mighty fierce."
+          "description": "A fair sized island, and now she's gone! Some o' them earthquakes have been mighty fierce."
         },
         {
           "text_prefix": "Yes, they started soon",
@@ -25828,7 +25828,7 @@
         {
           "text_prefix": "Torches oil lockpicks gems",
           "audio_file": "ogg\\budo\\Budo.4.ogg",
-          "description": "Torches, oil, lockpicks, gems, backpacks, bags, shovels, powder kegs?"
+          "description": "Which, torches, oil, lockpicks, gems, backpacks, bags, shovels, or powder kegs?"
         },
         {
           "text_prefix": "So don't get too",
@@ -26055,7 +26055,7 @@
         {
           "text_prefix": "Very good You purr",
           "audio_file": "ogg\\drcat\\DrCat.31.ogg",
-          "description": "Very good. You purr almost as well as Kitten."
+          "description": "Very good! You purr almost as well as Kytyn."
         },
         {
           "text_prefix": "She lives in Britain",
@@ -26400,9 +26400,9 @@
           "description": "That will be several crowns, okay?"
         },
         {
-          "text_prefix": "Okay what is very",
+          "text_prefix": "Vell, okay, but is",
           "audio_file": "ogg\\ubermon\\Ubermon.16.ogg",
-          "description": "Okay, what is very good for you?"
+          "description": "Vell, okay, but is very good for you!"
         },
         {
           "text_prefix": "You have not ze",
@@ -26442,7 +26442,7 @@
         {
           "text_prefix": "If you want to",
           "audio_file": "ogg\\ubermon\\Ubermon.6.ogg",
-          "description": "If you want to buy something, come by my dairy when I'm open."
+          "description": "You vant to buy someting, come by my dairy ven I'm open."
         },
         {
           "text_prefix": "Come by my dairy",
@@ -26502,14 +26502,14 @@
           "description": "I'm named after my uncle. He was a kind soul."
         },
         {
-          "text_prefix": "Sir Timothy Endes Devastare",
+          "text_prefix": "Sir Timothy Enders Daverstock.",
           "audio_file": "ogg\\timothy\\Timothy.3.ogg",
-          "description": "Sir Timothy Endes Devastare. He was a famous knight in these parts."
+          "description": "Sir Timothy Enders Daverstock. He was a famous knight in these parts."
         },
         {
-          "text_prefix": "'Tis a busy one",
+          "text_prefix": "It is a busy",
           "audio_file": "ogg\\timothy\\Timothy.4.ogg",
-          "description": "'Tis a busy one, this job, that is. I find it rewarding though, meeting friendly faces."
+          "description": "It is a busy one this job, that is. I find it rewarding, though, meeting friendly faces."
         },
         {
           "text_prefix": "Maybe you want a",
@@ -26559,9 +26559,9 @@
           "description": "Yes again, friend!"
         },
         {
-          "text_prefix": "Johnny is my friend",
+          "text_prefix": "Shorty is my friend.",
           "audio_file": "ogg\\thindle\\Thindle.11.ogg",
-          "description": "Johnny is my friend. We play flippits together."
+          "description": "Shorty is my friend. We play flippits together."
         },
         {
           "text_prefix": "Silk Oh no oh",
@@ -26826,14 +26826,14 @@
           "description": "Don't ask me. If he likes ducks that's his business."
         },
         {
-          "text_prefix": "The lusty young smith",
+          "text_prefix": "A lusty young smith",
           "audio_file": "ogg\\patrick\\Patrick.24.ogg",
-          "description": "The lusty young smith at his vice stood a-firing, his hammer lay but his forge still aglow."
+          "description": "A lusty young smith at his feist stood a-firing, His hammer lay by but his forge still"
         },
         {
           "text_prefix": "To him a buxom",
           "audio_file": "ogg\\patrick\\Patrick.25.ogg",
-          "description": "To him a buxom young damsel came a smiling, and asked if to work at her forge he would go."
+          "description": "When to him a buxom young damsel came smiling, And asked if to work at her forge he would go."
         },
         {
           "text_prefix": "With a jingle van",
@@ -26861,14 +26861,14 @@
           "description": "A pleasure."
         },
         {
-          "text_prefix": "On to the young",
+          "text_prefix": "Unto the young damsel's",
           "audio_file": "ogg\\patrick\\Patrick.30.ogg",
-          "description": "On to the young damsel's forge they did go."
+          "description": "Unto the young damsel's forge they did go."
         },
         {
-          "text_prefix": "Strip to go to",
+          "text_prefix": "They stripped to go",
           "audio_file": "ogg\\patrick\\Patrick.31.ogg",
-          "description": "Strip to go to it, 'twas hot work in hot weather."
+          "description": "They stripped to go to it--'twas hot work and hot weather,"
         },
         {
           "text_prefix": "She kindled the fire",
@@ -26891,9 +26891,9 @@
           "description": "I was trained in the conservatory, like most of us."
         },
         {
-          "text_prefix": "Johann Lazena Sh'Nahk they",
+          "text_prefix": "Johann, Lazeena, Sionnach--they all",
           "audio_file": "ogg\\patrick\\Patrick.6.ogg",
-          "description": "Johann, Lazena, Sh'Nahk, they all studied there."
+          "description": "Johann, Lazeena, Sionnach--they all studied there."
         },
         {
           "text_prefix": "Of course, there are",
@@ -26985,7 +26985,7 @@
         {
           "text_prefix": "Too bad You'll never",
           "audio_file": "ogg\\mortude\\Mortude.20.ogg",
-          "description": "Too bad. You'll never find a better rope."
+          "description": "Too bad. You'll never find better rope."
         },
         {
           "text_prefix": "You look pretty full",
@@ -27125,9 +27125,9 @@
           "description": "He's a nice man. He got me this doll."
         },
         {
-          "text_prefix": "Prepare rope in a",
+          "text_prefix": "He put a rope",
           "audio_file": "ogg\\merideth\\Merideth.9.ogg",
-          "description": "Prepare rope in a tree for me to swing on."
+          "description": "He put a rope in a tree for me to swing on."
         }
       ]
     },
@@ -27459,9 +27459,9 @@
           "description": "Makes me a bit unpopular 'ere in the pub!"
         },
         {
-          "text_prefix": "Struth If I carried",
+          "text_prefix": "Strewth! If I carried",
           "audio_file": "ogg\\hendle\\Hendle.7.ogg",
-          "description": "Struth! If I carried it around with me, I'd be even more unpopular."
+          "description": "Strewth! If I carried it around with me, I'd be even more unpopular!"
         },
         {
           "text_prefix": "Nay, friend, come to",
@@ -27496,9 +27496,9 @@
           "description": "Yep. We were mates."
         },
         {
-          "text_prefix": "Shorty you mean He's",
+          "text_prefix": "Shorty, ya mean? He's",
           "audio_file": "ogg\\grison\\Grison.11.ogg",
-          "description": "Shorty, you mean? He's got a fair temper, I'll tell you that."
+          "description": "Shorty, ya mean? He's got a fair temper, I'll tell you that!"
         },
         {
           "text_prefix": "She's one with a nose",
@@ -27668,9 +27668,9 @@
           "description": "Hello,"
         },
         {
-          "text_prefix": "Old Shortie he's actually",
+          "text_prefix": "Old Shorty, eh? He's",
           "audio_file": "ogg\\dorin\\Dorin.10.ogg",
-          "description": "Old Shortie, he's actually quite a nice little man."
+          "description": "Old Shorty, eh? He's actually quite a nice little man."
         },
         {
           "text_prefix": "A bit caught up",
@@ -27840,19 +27840,19 @@
           "description": "He's much too loud."
         },
         {
-          "text_prefix": "I mean maybe not",
+          "text_prefix": "But...I mean...maybe not too",
           "audio_file": "ogg\\arbeth\\Arbeth.15.ogg",
-          "description": "I mean, maybe not too loud."
+          "description": "But...I mean...maybe not too loud."
         },
         {
-          "text_prefix": "She's all right I",
+          "text_prefix": "She's alright, I guess.",
           "audio_file": "ogg\\arbeth\\Arbeth.16.ogg",
-          "description": "She's all right, I guess."
+          "description": "She's alright, I guess."
         },
         {
-          "text_prefix": "He's all right I",
+          "text_prefix": "He's alright, I guess.",
           "audio_file": "ogg\\arbeth\\Arbeth.17.ogg",
-          "description": "He's all right, I guess."
+          "description": "He's alright, I guess."
         },
         {
           "text_prefix": "I like her.",
@@ -28114,12 +28114,12 @@
         {
           "text_prefix": "I feel that the",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.23.ogg",
-          "description": "I feel that the goods crafter dishonors us all by abandoning our principles."
+          "description": "To feel that the goodscrafter dishonors us all by abandoning our principles."
         },
         {
-          "text_prefix": "You feel that the",
+          "text_prefix": "To feel that the",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.24.ogg",
-          "description": "You feel that the goodscrafter needs a trip to the catacombs?"
+          "description": "To feel that the goodscrafter needs a trip to the catacombs."
         },
         {
           "text_prefix": "Yes, to have visited",
@@ -28137,9 +28137,9 @@
           "description": "Speak with these shrines and meditate to receive new insight."
         },
         {
-          "text_prefix": "I do not remember",
+          "text_prefix": "To not remember where",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.28.ogg",
-          "description": "I do not remember where the catacombs are."
+          "description": "To not remember where the catacombs are."
         },
         {
           "text_prefix": "to be sent there",
@@ -28157,9 +28157,9 @@
           "description": "Find that to the north in the mountains."
         },
         {
-          "text_prefix": "I would advise you",
+          "text_prefix": "To advise you to",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.31.ogg",
-          "description": "I would advise you to find some way to fly if you wish to get there, though."
+          "description": "To advise you to find some way to fly if you wish to get there, though!"
         },
         {
           "text_prefix": "To be unable to",
@@ -28192,9 +28192,9 @@
           "description": "Yes, to suggest you visit him if you are interested."
         },
         {
-          "text_prefix": "I do find the",
+          "text_prefix": "To find the snake-summoning",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.38.ogg",
-          "description": "I do find the snake-summoning horn a most impressive sight."
+          "description": "To find the snake-summoning horn a most impressive sight!"
         },
         {
           "text_prefix": "To create the Zu",
@@ -28212,9 +28212,9 @@
           "description": "to know of far worse effects of the disasters"
         },
         {
-          "text_prefix": "I see little of",
+          "text_prefix": "To see little of",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.41.ogg",
-          "description": "I see little of interest in that item."
+          "description": "To see little of interest in that item."
         },
         {
           "text_prefix": "May your long work",
@@ -28227,9 +28227,9 @@
           "description": "To be but a simple weaponsmith, False Prophet."
         },
         {
-          "text_prefix": "'Tis too lack a",
+          "text_prefix": "To lack a name,",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.44.ogg",
-          "description": "'Tis too lack a name as is appropriate for my station."
+          "description": "To lack a name, as is appropriate for my station."
         },
         {
           "text_prefix": "Surely to know of",
@@ -28282,9 +28282,9 @@
           "description": "I know nothing of that, being but a simple weaponsmith."
         },
         {
-          "text_prefix": "I ask you to",
+          "text_prefix": "To ask you to",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.54.ogg",
-          "description": "I ask you to see me at my shop."
+          "description": "To ask you to see me at my shop!"
         },
         {
           "text_prefix": "Ah, to see you",
@@ -28297,7 +28297,7 @@
           "description": "To regret being unable to create boomerangs myself."
         },
         {
-          "text_prefix": "We have only a",
+          "text_prefix": "have only a few",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.57.ogg",
           "description": "We have only a few left in stock."
         },
@@ -28312,9 +28312,9 @@
           "description": "To ask if anything else interests you?"
         },
         {
-          "text_prefix": "We thank you for",
+          "text_prefix": "To thank you for",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.6.ogg",
-          "description": "We thank you for your upcoming sacrifice."
+          "description": "To thank you for your upcoming sacrifice."
         },
         {
           "text_prefix": "Yes, to see that",
@@ -28357,9 +28357,9 @@
           "description": "I hope you find it useful."
         },
         {
-          "text_prefix": "I do understand your",
+          "text_prefix": "To understand your reluctance.",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.68.ogg",
-          "description": "I do understand your reluctance."
+          "description": "To understand your reluctance."
         },
         {
           "text_prefix": "To know the dangers",
@@ -28481,12 +28481,12 @@
         {
           "text_prefix": "I feel that the",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.23.ogg",
-          "description": "I feel that the goods crafter dishonors us all by abandoning our principles."
+          "description": "To feel that the goodscrafter dishonors us all by abandoning our principles."
         },
         {
-          "text_prefix": "You feel that the",
+          "text_prefix": "To feel that the",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.24.ogg",
-          "description": "You feel that the goodscrafter needs a trip to the catacombs?"
+          "description": "To feel that the goodscrafter needs a trip to the catacombs."
         },
         {
           "text_prefix": "Yes, to have visited",
@@ -28504,9 +28504,9 @@
           "description": "Speak with these shrines and meditate to receive new insight."
         },
         {
-          "text_prefix": "I do not remember",
+          "text_prefix": "To not remember where",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.28.ogg",
-          "description": "I do not remember where the catacombs are."
+          "description": "To not remember where the catacombs are."
         },
         {
           "text_prefix": "to be sent there",
@@ -28524,9 +28524,9 @@
           "description": "Find that to the north in the mountains."
         },
         {
-          "text_prefix": "I would advise you",
+          "text_prefix": "To advise you to",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.31.ogg",
-          "description": "I would advise you to find some way to fly if you wish to get there, though."
+          "description": "To advise you to find some way to fly if you wish to get there, though!"
         },
         {
           "text_prefix": "To be unable to",
@@ -28559,9 +28559,9 @@
           "description": "Yes, to suggest you visit him if you are interested."
         },
         {
-          "text_prefix": "I do find the",
+          "text_prefix": "To find the snake-summoning",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.38.ogg",
-          "description": "I do find the snake-summoning horn a most impressive sight."
+          "description": "To find the snake-summoning horn a most impressive sight!"
         },
         {
           "text_prefix": "To create the Zu",
@@ -28579,9 +28579,9 @@
           "description": "to know of far worse effects of the disasters"
         },
         {
-          "text_prefix": "I see little of",
+          "text_prefix": "To see little of",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.41.ogg",
-          "description": "I see little of interest in that item."
+          "description": "To see little of interest in that item."
         },
         {
           "text_prefix": "May your long work",
@@ -28594,9 +28594,9 @@
           "description": "To be but a simple weaponsmith, False Prophet."
         },
         {
-          "text_prefix": "'Tis too lack a",
+          "text_prefix": "To lack a name,",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.44.ogg",
-          "description": "'Tis too lack a name as is appropriate for my station."
+          "description": "To lack a name, as is appropriate for my station."
         },
         {
           "text_prefix": "Surely to know of",
@@ -28649,9 +28649,9 @@
           "description": "I know nothing of that, being but a simple weaponsmith."
         },
         {
-          "text_prefix": "I ask you to",
+          "text_prefix": "To ask you to",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.54.ogg",
-          "description": "I ask you to see me at my shop."
+          "description": "To ask you to see me at my shop!"
         },
         {
           "text_prefix": "Ah, to see you",
@@ -28664,7 +28664,7 @@
           "description": "To regret being unable to create boomerangs myself."
         },
         {
-          "text_prefix": "We have only a",
+          "text_prefix": "have only a few",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.57.ogg",
           "description": "We have only a few left in stock."
         },
@@ -28679,9 +28679,9 @@
           "description": "To ask if anything else interests you?"
         },
         {
-          "text_prefix": "We thank you for",
+          "text_prefix": "To thank you for",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.6.ogg",
-          "description": "We thank you for your upcoming sacrifice."
+          "description": "To thank you for your upcoming sacrifice."
         },
         {
           "text_prefix": "Yes, to see that",
@@ -28724,9 +28724,9 @@
           "description": "I hope you find it useful."
         },
         {
-          "text_prefix": "I do understand your",
+          "text_prefix": "To understand your reluctance.",
           "audio_file": "ogg\\weaponsmith\\Weaponsmith.68.ogg",
-          "description": "I do understand your reluctance."
+          "description": "To understand your reluctance."
         },
         {
           "text_prefix": "To know the dangers",
@@ -28776,9 +28776,9 @@
           "description": "'Tis good to see you have done the honorable thing."
         },
         {
-          "text_prefix": "We wish to address",
+          "text_prefix": "To wish to address",
           "audio_file": "ogg\\valkadesh\\Valkadesh.10.ogg",
-          "description": "We wish to address you honorably. Do ask your name?"
+          "description": "To wish to address you honorably. To ask your name?"
         },
         {
           "text_prefix": "To see that you're",
@@ -28826,19 +28826,19 @@
           "description": "To be written in the Book of Prophecies that you would destroy our world."
         },
         {
-          "text_prefix": "Thou hast earned much",
+          "text_prefix": "To have earned much",
           "audio_file": "ogg\\valkadesh\\Valkadesh.2.ogg",
-          "description": "Thou hast earned much respect from my people by doing this."
+          "description": "To have earned much respect from my people by doing this!"
         },
         {
-          "text_prefix": "It should also be",
+          "text_prefix": "To also be written",
           "audio_file": "ogg\\valkadesh\\Valkadesh.20.ogg",
-          "description": "It should also be written that only the sacrifice of the false prophet would save us."
+          "description": "To also be written that only the sacrifice of the False Prophet would save us."
         },
         {
-          "text_prefix": "I believe that it",
+          "text_prefix": "To believe that it",
           "audio_file": "ogg\\valkadesh\\Valkadesh.21.ogg",
-          "description": "I believe that it is not too late."
+          "description": "To believe that it is not too late."
         },
         {
           "text_prefix": "to beg you to",
@@ -28851,7 +28851,7 @@
           "description": "Avert the prophecy! Save your life, and my people's lives as well!"
         },
         {
-          "text_prefix": "It would be the",
+          "text_prefix": "To be the only",
           "audio_file": "ogg\\valkadesh\\Valkadesh.24.ogg",
           "description": "It would be the only alternative to returning the Codex."
         },
@@ -28876,14 +28876,14 @@
           "description": "To be unable to help more."
         },
         {
-          "text_prefix": "I suggest you seek",
+          "text_prefix": "To suggest you seek",
           "audio_file": "ogg\\valkadesh\\Valkadesh.29.ogg",
-          "description": "I suggest you seek out Naxatilor himself for further enlightenment."
+          "description": "To suggest you seek out Naxatilor himself for further enlightenment."
         },
         {
-          "text_prefix": "We hope your travels",
+          "text_prefix": "To hope your travels",
           "audio_file": "ogg\\valkadesh\\Valkadesh.3.ogg",
-          "description": "We hope your travels have brought you wisdom."
+          "description": "To hope your travels have brought you wisdom?"
         },
         {
           "text_prefix": "To learn much from",
@@ -28896,19 +28896,19 @@
           "description": "Find his chambers just to the northeast of the Hall of Knowledge."
         },
         {
-          "text_prefix": "I suggest you go",
+          "text_prefix": "To suggest you go",
           "audio_file": "ogg\\valkadesh\\Valkadesh.32.ogg",
-          "description": "I suggest you go there and ask him of Sacrifice."
+          "description": "To suggest you go there and ask him of sacrifice."
         },
         {
-          "text_prefix": "Go to Draxinisom the",
+          "text_prefix": "To go to Draxinusom,",
           "audio_file": "ogg\\valkadesh\\Valkadesh.33.ogg",
-          "description": "Go to Draxinisom, the Inquisitor and leader of my race."
+          "description": "To go to Draxinusom, the Inquisitor and leader of my race."
         },
         {
-          "text_prefix": "Ye find his chambers",
+          "text_prefix": "To find his chambers",
           "audio_file": "ogg\\valkadesh\\Valkadesh.34.ogg",
-          "description": "Ye find his chambers just to the northwest of the Hall of Knowledge."
+          "description": "To find his chambers just to the northwest of the Hall of Knowledge."
         },
         {
           "text_prefix": "to surrender to him",
@@ -28951,9 +28951,9 @@
           "description": "To tell the Inquisitor that you surrender."
         },
         {
-          "text_prefix": "Learn to be no",
+          "text_prefix": "Then to be no",
           "audio_file": "ogg\\valkadesh\\Valkadesh.42.ogg",
-          "description": "Learn to be no longer a threat, and no longer be feared."
+          "description": "Then to be no longer a threat, and no longer be feared."
         },
         {
           "text_prefix": "May your precision and",
@@ -29011,7 +29011,7 @@
           "description": "You ask what you mean?"
         },
         {
-          "text_prefix": "My human friend what",
+          "text_prefix": "I human friend. Walk",
           "audio_file": "ogg\\valkadesh\\Valkadesh.53.ogg",
           "description": "My human friend, what talk you?"
         },
@@ -29056,9 +29056,9 @@
           "description": "To have waited long for you to return to this side of the world."
         },
         {
-          "text_prefix": "We believe that the",
+          "text_prefix": "To believe that the",
           "audio_file": "ogg\\valkadesh\\Valkadesh.8.ogg",
-          "description": "We believe that the Book of Prophecies is wrong."
+          "description": "To believe that the Book of Prophecies is wrong."
         },
         {
           "text_prefix": "To believe that I",
@@ -29172,7 +29172,7 @@
         {
           "text_prefix": "I have nothing to",
           "audio_file": "ogg\\naxatilor\\Naxatilor.0.ogg",
-          "description": "I have nothing to say to you, False Prophet."
+          "description": "To have nothing to say to you, False Prophet!"
         },
         {
           "text_prefix": "To greet you again",
@@ -29195,9 +29195,9 @@
           "description": "surely to know what harm you have caused my world."
         },
         {
-          "text_prefix": "You have no choice",
+          "text_prefix": "To have no choice",
           "audio_file": "ogg\\naxatilor\\Naxatilor.13.ogg",
-          "description": "You have no choice but to return the Codex."
+          "description": "To have no choice but to return the Codex!"
         },
         {
           "text_prefix": "To have wreaked great",
@@ -29205,9 +29205,9 @@
           "description": "To have wreaked great havoc in this land by your theft of the Codex!"
         },
         {
-          "text_prefix": "You have no choice",
+          "text_prefix": "To have no choice",
           "audio_file": "ogg\\naxatilor\\Naxatilor.15.ogg",
-          "description": "You have no choice but to return it."
+          "description": "To have no choice but to return it!"
         },
         {
           "text_prefix": "To see only two",
@@ -29220,9 +29220,9 @@
           "description": "Yes! To return the Codex to the Vortex!"
         },
         {
-          "text_prefix": "'Twas to which type",
+          "text_prefix": "To ask to which",
           "audio_file": "ogg\\naxatilor\\Naxatilor.18.ogg",
-          "description": "'Twas to which type of sacrifice you refer? Self, other, or items of value?"
+          "description": "To ask to which type of sacrifice you refer: self, others or items of value?"
         },
         {
           "text_prefix": "To admire your willingness",
@@ -29235,9 +29235,9 @@
           "description": "To greet you, Avatar, Avatar of the Underworld."
         },
         {
-          "text_prefix": "to doubt that this",
+          "text_prefix": "But to doubt that",
           "audio_file": "ogg\\naxatilor\\Naxatilor.20.ogg",
-          "description": "to doubt that this is the meaning of the prophecy."
+          "description": "But to doubt that that is the meaning of the prophecy."
         },
         {
           "text_prefix": "What",
@@ -29245,9 +29245,9 @@
           "description": "What?!"
         },
         {
-          "text_prefix": "Who suggests that you",
+          "text_prefix": "What?! To suggest that",
           "audio_file": "ogg\\naxatilor\\Naxatilor.22.ogg",
-          "description": "Who suggests that you can atone for your misdeeds by bathing in the blood of others?"
+          "description": "What?! To suggest that you can atone for your misdeed by bathing in the blood of others?!"
         },
         {
           "text_prefix": "To find such thoughts",
@@ -29255,9 +29255,9 @@
           "description": "To find such thoughts well in keeping with the blackness of your aura!"
         },
         {
-          "text_prefix": "I find such thoughts",
+          "text_prefix": "To find such thoughts",
           "audio_file": "ogg\\naxatilor\\Naxatilor.24.ogg",
-          "description": "I find such thoughts unworthy of your honorable aura."
+          "description": "To find such thoughts unworthy of your honorable aura!"
         },
         {
           "text_prefix": "To know of only",
@@ -29330,9 +29330,9 @@
           "description": "Also to be sure to tell the human lensmaker that his lens must be concave!"
         },
         {
-          "text_prefix": "It is most important",
+          "text_prefix": "To be most important...",
           "audio_file": "ogg\\naxatilor\\Naxatilor.38.ogg",
-          "description": "It is most important, concave."
+          "description": "To be most important... Concave!"
         },
         {
           "text_prefix": "To know not where",
@@ -29340,9 +29340,9 @@
           "description": "To know not where the Codex is."
         },
         {
-          "text_prefix": "You to consider your",
+          "text_prefix": "To consider your acceptance",
           "audio_file": "ogg\\naxatilor\\Naxatilor.4.ogg",
-          "description": "You to consider your acceptance of this both noble and wise."
+          "description": "To consider your acceptance of this both noble and wise."
         },
         {
           "text_prefix": "But to remember that",
@@ -29350,9 +29350,9 @@
           "description": "But to remember that Captain Bolesh just returned from the Codex!"
         },
         {
-          "text_prefix": "I suggest you seek",
+          "text_prefix": "To suggest you seek",
           "audio_file": "ogg\\naxatilor\\Naxatilor.41.ogg",
-          "description": "I suggest you seek him. Try the healers' house to the north."
+          "description": "To suggest you seek him. To try the healer's house to the north."
         },
         {
           "text_prefix": "To find the Vortex",
@@ -29395,9 +29395,9 @@
           "description": "Then to return here with the whole lens!"
         },
         {
-          "text_prefix": "I do observe by",
+          "text_prefix": "To observe by your",
           "audio_file": "ogg\\naxatilor\\Naxatilor.5.ogg",
-          "description": "I do observe by your aura that such honorable deeds are rare for you."
+          "description": "To observe by your aura that such honorable deeds are rare for you."
         },
         {
           "text_prefix": "To require the Vortex",
@@ -29415,9 +29415,9 @@
           "description": "Go to the Hall of Knowledge and get the lens."
         },
         {
-          "text_prefix": "Bring to me personally",
+          "text_prefix": "To bring it to",
           "audio_file": "ogg\\naxatilor\\Naxatilor.53.ogg",
-          "description": "Bring to me personally, Avatar."
+          "description": "To bring it to me personally, Avatar!"
         },
         {
           "text_prefix": "Good, to see that",
@@ -29485,9 +29485,9 @@
           "description": "To then be available to both our peoples!"
         },
         {
-          "text_prefix": "I observe by your",
+          "text_prefix": "To observe by your",
           "audio_file": "ogg\\naxatilor\\Naxatilor.7.ogg",
-          "description": "I observe by your aura that you are not a being of evil."
+          "description": "To observe by your aura that you are not a being of evil."
         },
         {
           "text_prefix": "Regret for your sake",
@@ -29594,7 +29594,7 @@
         {
           "text_prefix": "to suggest that you",
           "audio_file": "ogg\\lensmaker\\Lensmaker.24.ogg",
-          "description": "to suggest that you ask that of others."
+          "description": "To suggest you ask that of others."
         },
         {
           "text_prefix": "to see the shattered",
@@ -29607,9 +29607,9 @@
           "description": "To remember making it, so very long ago."
         },
         {
-          "text_prefix": "I have far greater",
+          "text_prefix": "To have far greater",
           "audio_file": "ogg\\lensmaker\\Lensmaker.27.ogg",
-          "description": "I have far greater skill now than when first I made this lens."
+          "description": "To have far greater skill now than when first I made this lens, he says smugly."
         },
         {
           "text_prefix": "It will require little",
@@ -29617,9 +29617,9 @@
           "description": "It will require little time to repair it."
         },
         {
-          "text_prefix": "I have been told",
+          "text_prefix": "To have been told",
           "audio_file": "ogg\\lensmaker\\Lensmaker.3.ogg",
-          "description": "I have been told by Naxatilor long ago that you would one day come to me, wearing the Amulet of Submission."
+          "description": "To have been told by Naxatilor, long ago... That you would one day come to me, wearing the Amulet of Submission."
         },
         {
           "text_prefix": "To never have believed",
@@ -29637,14 +29637,14 @@
           "description": "To ask how again I may help you?"
         },
         {
-          "text_prefix": "I wonder why you",
+          "text_prefix": "To wonder why you",
           "audio_file": "ogg\\lensmaker\\Lensmaker.7.ogg",
-          "description": "I wonder why you have not brought back the broken lens."
+          "description": "To wonder why you have not brought back the broken lens?!"
         },
         {
-          "text_prefix": "I have already told",
+          "text_prefix": "To have already told",
           "audio_file": "ogg\\lensmaker\\Lensmaker.8.ogg",
-          "description": "I have already told you that I need it in order to craft a new one."
+          "description": "To have already told you that I need it in order to craft a new one!"
         },
         {
           "text_prefix": "To ask what you",
@@ -29669,9 +29669,9 @@
           "description": "To be unwilling to help you, False Prophet."
         },
         {
-          "text_prefix": "I doubt that anyone",
+          "text_prefix": "To doubt that anyone",
           "audio_file": "ogg\\healer\\Healer.10.ogg",
-          "description": "I doubt that anyone can do that."
+          "description": "To doubt that anyone can do that!"
         },
         {
           "text_prefix": "May fortune prevent the",
@@ -29724,9 +29724,9 @@
           "description": "To be a healer, a being of peace."
         },
         {
-          "text_prefix": "I have lost friends",
+          "text_prefix": "To have lost friends",
           "audio_file": "ogg\\healer\\Healer.20.ogg",
-          "description": "I have lost friends myself during that bad time."
+          "description": "To have lost friends myself during that bad time."
         },
         {
           "text_prefix": "To maintain the struggle",
@@ -29766,7 +29766,7 @@
         {
           "text_prefix": "To be certain that",
           "audio_file": "ogg\\healer\\Healer.28.ogg",
-          "description": "To be certain that all of you are well."
+          "description": "But to be certain that you are well!"
         },
         {
           "text_prefix": "Which of you",
@@ -29856,9 +29856,9 @@
           "description": "To not believe that you care. To believe, in fact, that you enjoy causing suffering."
         },
         {
-          "text_prefix": "I do not believe",
+          "text_prefix": "To not believe that",
           "audio_file": "ogg\\goodscrafter\\Goodscrafter.11.ogg",
-          "description": "I do not believe that you would do anything to help."
+          "description": "To not believe that you would do anything to help."
         },
         {
           "text_prefix": "to not have a",
@@ -29891,9 +29891,9 @@
           "description": "To have lost my entire family in the cataclysms."
         },
         {
-          "text_prefix": "I wish not to",
+          "text_prefix": "To wish not to",
           "audio_file": "ogg\\goodscrafter\\Goodscrafter.18.ogg",
-          "description": "I wish not to speak of it."
+          "description": "To wish not to speak of it."
         },
         {
           "text_prefix": "to wait here for",
@@ -29941,9 +29941,9 @@
           "description": "to feel that salvation has come too late."
         },
         {
-          "text_prefix": "I refuse to discuss",
+          "text_prefix": "To refuse to discuss",
           "audio_file": "ogg\\goodscrafter\\Goodscrafter.8.ogg",
-          "description": "I refuse to discuss my grief with the being who caused it."
+          "description": "To refuse to discuss my grief with the being who caused it."
         },
         {
           "text_prefix": "Surely to know what",
@@ -29988,9 +29988,9 @@
           "description": "Goodgrapher, to be pathetic."
         },
         {
-          "text_prefix": "Drop self pity when",
+          "text_prefix": "To have self-pity, when",
           "audio_file": "ogg\\foodmaker\\Foodmaker.14.ogg",
-          "description": "Drop self-pity when strength and long work will give success."
+          "description": "To have self-pity, when strength and long work will give success!"
         },
         {
           "text_prefix": "wish to hear no",
@@ -30033,9 +30033,9 @@
           "description": "But to be famous for my roast horseflesh!"
         },
         {
-          "text_prefix": "We offer you some",
+          "text_prefix": "To offer you some",
           "audio_file": "ogg\\foodmaker\\Foodmaker.22.ogg",
-          "description": "We offer you some of this fine food."
+          "description": "To offer you some of this fine food!"
         },
         {
           "text_prefix": "To not know what",
@@ -30088,9 +30088,9 @@
           "description": "Well then, to save it here for you!"
         },
         {
-          "text_prefix": "Welcome here to come",
+          "text_prefix": "To welcome you to",
           "audio_file": "ogg\\foodmaker\\Foodmaker.32.ogg",
-          "description": "Welcome here to come back when you are hungry again."
+          "description": "To welcome you to come back when you are hungry again!"
         },
         {
           "text_prefix": "We'd better do as",
@@ -30133,9 +30133,9 @@
           "description": "To not have food on me. To have you visit my shop."
         },
         {
-          "text_prefix": "I am famous among",
+          "text_prefix": "To be famous among",
           "audio_file": "ogg\\foodmaker\\Foodmaker.9.ogg",
-          "description": "I am famous among all gargoyles for the quality of my horseflesh."
+          "description": "To be famous among all gargoyles for the quality of my horseflesh!"
         }
       ]
     },
@@ -30145,9 +30145,9 @@
       "npc_portrait": 175,
       "lines": [
         {
-          "text_prefix": "On Balsilfer Deslem Kleplen",
+          "text_prefix": "Des-lem, klep lem!",
           "audio_file": "ogg\\farmernash\\FarmerNash.0.ogg",
-          "description": "On Balsilfer, Deslem, Kleplen"
+          "description": "Des-lem, klep lem!"
         },
         {
           "text_prefix": "The False Prophet! Workers",
@@ -30180,14 +30180,14 @@
           "description": "To be forced, on occasion, to tend the fields myself because of the harshness of the times."
         },
         {
-          "text_prefix": "I wish my fields",
+          "text_prefix": "To wish my fields",
           "audio_file": "ogg\\farmernash\\FarmerNash.15.ogg",
-          "description": "I wish my fields were as productive as those of Farmer Krill, my neighbor to the west."
+          "description": "To wish my fields were as productive as those of Farmer Krill, my neighbor to the west."
         },
         {
-          "text_prefix": "It be a shame",
+          "text_prefix": "To be ashamed that",
           "audio_file": "ogg\\farmernash\\FarmerNash.16.ogg",
-          "description": "It be a shame that Farmer Krill treats his worker so harshly"
+          "description": "To be ashamed that Farmer Krill treats his workers so harshly."
         },
         {
           "text_prefix": "to be appalled by",
@@ -30195,7 +30195,7 @@
           "description": "To be appalled by his lack of concern for their thoughts and feelings."
         },
         {
-          "text_prefix": "I have been greatly",
+          "text_prefix": "To have been greatly",
           "audio_file": "ogg\\farmernash\\FarmerNash.18.ogg",
           "description": "I have been greatly honored by this conversation."
         },
@@ -30215,9 +30215,9 @@
           "description": "To be amazed!"
         },
         {
-          "text_prefix": "I do greatly admire",
+          "text_prefix": "To greatly admire your",
           "audio_file": "ogg\\farmernash\\FarmerNash.4.ogg",
-          "description": "I do greatly admire your nobility, false prophet."
+          "description": "To greatly admire your nobility, False Prophet."
         },
         {
           "text_prefix": "To honor my people",
@@ -30267,14 +30267,14 @@
           "description": "To be forced by necessity to give the wingless ones no room for choice or freedom."
         },
         {
-          "text_prefix": "'Tis but a child",
+          "text_prefix": "Beh Lem? To be",
           "audio_file": "ogg\\farmerkrill\\FarmerKrill.11.ogg",
-          "description": "'Tis but a child, to someday grow wings just like its father."
+          "description": "Beh Lem? To be but a child. To someday grow wings just"
         },
         {
           "text_prefix": "I do not understand",
           "audio_file": "ogg\\farmerkrill\\FarmerKrill.12.ogg",
-          "description": "I do not understand what you mean."
+          "description": "To not understand what you mean."
         },
         {
           "text_prefix": "To admire the wisdom",
@@ -30297,9 +30297,9 @@
           "description": "To acknowledge the nobility of your sacrifice."
         },
         {
-          "text_prefix": "I consider you a",
+          "text_prefix": "To consider you a",
           "audio_file": "ogg\\farmerkrill\\FarmerKrill.17.ogg",
-          "description": "I consider you a great credit to your race."
+          "description": "To consider you a great credit to your race!"
         },
         {
           "text_prefix": "to acknowledge that it",
@@ -30307,9 +30307,9 @@
           "description": "To acknowledge that it may seem harsh, but to assure you that there is no other way to treat the wingless ones."
         },
         {
-          "text_prefix": "We receive good harvest",
+          "text_prefix": "To receive good harvests",
           "audio_file": "ogg\\farmerkrill\\FarmerKrill.19.ogg",
-          "description": "We receive good harvest only through firm control and clear direction."
+          "description": "To receive good harvests only through firm control and clear direction."
         },
         {
           "text_prefix": "to be pleased by",
@@ -30332,9 +30332,9 @@
           "description": "To receive bountiful harvests thanks to the efforts of my well-directed workers."
         },
         {
-          "text_prefix": "I feed my workers",
+          "text_prefix": "To feed my workers",
           "audio_file": "ogg\\farmerkrill\\FarmerKrill.23.ogg",
-          "description": "I feed my workers far better than misguided Farmer Nash to the east does."
+          "description": "To feed my workers far better than misguided Farmer Nash to the east does."
         },
         {
           "text_prefix": "To be ashamed that",
@@ -30362,9 +30362,9 @@
           "description": "Ask what you mean by that"
         },
         {
-          "text_prefix": "I note that you",
+          "text_prefix": "To note that you",
           "audio_file": "ogg\\farmerkrill\\FarmerKrill.3.ogg",
-          "description": "I note that you wear the amulet of submission."
+          "description": "To note that you wear the Amulet of Submission."
         },
         {
           "text_prefix": "to admire your courage",
@@ -30384,12 +30384,12 @@
         {
           "text_prefix": "Krill the leader of",
           "audio_file": "ogg\\farmerkrill\\FarmerKrill.7.ogg",
-          "description": "Krill, the leader of the farmers."
+          "description": "Krill the Leader of Farmers."
         },
         {
           "text_prefix": "Lead the wingless ones",
           "audio_file": "ogg\\farmerkrill\\FarmerKrill.8.ogg",
-          "description": "Lead the wingless ones, the worker gargoyles, to tend these fields."
+          "description": "To lead the wingless ones, the worker gargoyles who tend these fields."
         },
         {
           "text_prefix": "To have great fortune",
@@ -30414,9 +30414,9 @@
           "description": "To be honored by your presence, noble Avatar. To feel sorrow that matters of state prevent conversation."
         },
         {
-          "text_prefix": "to consent to wear",
+          "text_prefix": "Hsss....To consent to wear",
           "audio_file": "ogg\\draxinusom\\Draxinusom.10.ogg",
-          "description": "to consent to wear this"
+          "description": "Hsss....To consent to wear this?"
         },
         {
           "text_prefix": "Yes or no, False",
@@ -30449,9 +30449,9 @@
           "description": "To surprise me with the nobility of your deed. To no longer be a threat to my people."
         },
         {
-          "text_prefix": "I bid you to",
+          "text_prefix": "To bid you to",
           "audio_file": "ogg\\draxinusom\\Draxinusom.17.ogg",
-          "description": "I bid you to travel among my people. Talk to them. Learn our ways."
+          "description": "To bid you to travel among my people, talk to them, learn our ways."
         },
         {
           "text_prefix": "To inform you when",
@@ -30514,9 +30514,9 @@
           "description": "To refrain from slaying you only because of the presence of the child, False Prophet!"
         },
         {
-          "text_prefix": "I demand to know",
+          "text_prefix": "To demand to know",
           "audio_file": "ogg\\draxinusom\\Draxinusom.4.ogg",
-          "description": "I demand to know why you have returned here, false prophet!"
+          "description": "To demand to know why you have returned here, False Prophet!"
         },
         {
           "text_prefix": "To express astonishment at",
@@ -30539,9 +30539,9 @@
           "description": "To be the leader of our race. To have little time to waste chatting with the False Prophet!"
         },
         {
-          "text_prefix": "Leave false prophet to",
+          "text_prefix": "Flee, False Prophet! To",
           "audio_file": "ogg\\draxinusom\\Draxinusom.9.ogg",
-          "description": "Leave, false prophet, to seize you for sacrifice the instant my army returns from the Underworld."
+          "description": "Flee, False Prophet! To seize you for sacrifice the instant my army returns from the Underworld!"
         }
       ]
     },
@@ -30566,9 +30566,9 @@
           "description": "To find what you seek in the Vortex Chamber."
         },
         {
-          "text_prefix": "'Tis to regret that",
+          "text_prefix": "To regret that that",
           "audio_file": "ogg\\caretaker\\Caretaker.11.ogg",
-          "description": "'Tis to regret that that item is lost, stolen by human thieves years ago."
+          "description": "To regret that that item is lost, stolen by human thieves years ago."
         },
         {
           "text_prefix": "To have heard the",
@@ -30583,7 +30583,7 @@
         {
           "text_prefix": "I know nothing more",
           "audio_file": "ogg\\caretaker\\Caretaker.14.ogg",
-          "description": "I know nothing more about its whereabouts."
+          "description": "To know nothing more about its whereabouts."
         },
         {
           "text_prefix": "To admit ignorance regarding",
@@ -30591,9 +30591,9 @@
           "description": "To admit ignorance regarding the location of the moonstones."
         },
         {
-          "text_prefix": "'Tis suspected to be",
+          "text_prefix": "To suspect it to",
           "audio_file": "ogg\\caretaker\\Caretaker.16.ogg",
-          "description": "'Tis suspected to be someplace in the human-filled Underworld."
+          "description": "To suspect it to be someplace in the human-filled Underworld."
         },
         {
           "text_prefix": "to be called the",
@@ -30676,9 +30676,9 @@
           "description": "To only be able to reach that holy place if you are a winged gargoyle."
         },
         {
-          "text_prefix": "I find this most",
+          "text_prefix": "To find this most",
           "audio_file": "ogg\\caretaker\\Caretaker.7.ogg",
-          "description": "I find this most fitting and proper."
+          "description": "To find this most fitting and proper."
         },
         {
           "text_prefix": "To see no reason",
@@ -30788,9 +30788,9 @@
           "description": "But to wear the Amulet of Submission?"
         },
         {
-          "text_prefix": "and to express awe",
+          "text_prefix": "Then to express awe",
           "audio_file": "ogg\\bolesh\\Bolesh.4.ogg",
-          "description": "and to express awe at your honor and courage."
+          "description": "Then to express awe at your honor and courage."
         },
         {
           "text_prefix": "Greetings again, honored one.",
@@ -30835,9 +30835,9 @@
           "description": "Hello. I little human speak."
         },
         {
-          "text_prefix": "I do not receive",
+          "text_prefix": "To not receive a",
           "audio_file": "ogg\\behlem\\BehLem.10.ogg",
-          "description": "I do not receive a true name until I have proved myself worthy."
+          "description": "To not receive a true name until I have proved myself worthy."
         },
         {
           "text_prefix": "To be called Beh",
@@ -30915,9 +30915,9 @@
           "description": "To wish to stay with you!"
         },
         {
-          "text_prefix": "Do not leave until",
+          "text_prefix": "To not wish to",
           "audio_file": "ogg\\behlem\\BehLem.25.ogg",
-          "description": "Do not leave until there is peace between our races."
+          "description": "To not wish to leave until there is peace between our races!"
         },
         {
           "text_prefix": "May your persistence and",
@@ -30997,7 +30997,7 @@
         {
           "text_prefix": "No name I be",
           "audio_file": "ogg\\behlem\\BehLem.4.ogg",
-          "description": "No name. I be Lem."
+          "description": "No name. I Beh Lem."
         },
         {
           "text_prefix": "To walk east along",
@@ -31060,9 +31060,9 @@
           "description": "To be young. To think you should ask someone older."
         },
         {
-          "text_prefix": "I do truly wish",
+          "text_prefix": "To truly wish I",
           "audio_file": "ogg\\behlem\\BehLem.51.ogg",
-          "description": "I do truly wish I could help you with that."
+          "description": "To truly wish I could help you with that."
         },
         {
           "text_prefix": "to not understand what",
@@ -31070,9 +31070,9 @@
           "description": "To not understand what you mean by ."
         },
         {
-          "text_prefix": "I do not have",
+          "text_prefix": "To not have enough",
           "audio_file": "ogg\\behlem\\BehLem.53.ogg",
-          "description": "I do not have enough experience to answer that."
+          "description": "To not have enough experience to answer that."
         },
         {
           "text_prefix": "There's naught of use",
@@ -31085,9 +31085,9 @@
           "description": "As you wish, milord."
         },
         {
-          "text_prefix": "There is not of",
+          "text_prefix": "There's naught of use",
           "audio_file": "ogg\\behlem\\BehLem.56.ogg",
-          "description": "There is not of use this creature can tell us, agreed?"
+          "description": "There's naught of use this creature can tell us. Agreed?"
         },
         {
           "text_prefix": "As you wish",
