@@ -661,9 +661,28 @@
                             if (i == i4) {
                                 //oak door, ...
                                 if (i2 >= 8) {
-                                    txtsetchar(t, 8);
-                                    txtaddchar(t, 255);
-                                    txtadd(t, "It's locked!");
+                                    txtset(t3, "It's locked!");
+                                    txtset(t, "?");
+                                    t->d2[0] = 2;
+                                    txtset(t2, "??");
+                                    t2->ds[0] = 1;
+                                    txtadd(t, t2);
+                                    t2->ds[0] = 3;
+                                    txtadd(t, t2);
+                                    t2->ds[0] = myobj->x;
+                                    txtadd(t, t2);
+                                    t2->ds[0] = myobj->y - 1;
+                                    txtadd(t, t2);
+                                    t2->ds[0] = t3->l;
+                                    txtadd(t, t2);
+                                    t2->ds[0] = 0;
+                                    txtadd(t, t2);
+                                    t2->ds[0] = 187;
+                                    txtadd(t, t2);
+                                    txtset(t2, "????");
+                                    t2->df[0] = 2.0f;
+                                    txtadd(t, t2);
+                                    txtadd(t, t3);
                                     NET_send(NETplayer, tplayer->net, t);
                                     goto finishuse; //door is locked!
                                 }
