@@ -1118,17 +1118,8 @@ statusmessage_logpinned
           for (int k=0;k<nseg;k++){
             long yk=ytop+24*k;
             txtset(t,statuswrap[k]);
-            txtcol=rgb(0,0,0);
-            txtout(ps,x,yk,t);
-            txtout(ps,x+2,yk+2,t);
-            txtout(ps,x+2,yk,t);
-            txtout(ps,x,yk+2,t);
-            txtout(ps,x+1,yk,t);
-            txtout(ps,x+2,yk+1,t);
-            txtout(ps,x,yk+1,t);
-            txtout(ps,x+1,yk+2,t);
             txtcol=linecol;
-            txtout(ps,x+1,yk+1,t);
+            txtouts(ps,x+1,yk+1,t);
           }
           y=ytop-24;
         } else {

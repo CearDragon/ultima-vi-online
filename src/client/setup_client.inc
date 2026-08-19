@@ -778,12 +778,16 @@ cltset2.con_frm_img_offset_x=32767; cltset2.con_frm_img_offset_y=32767;
 cltset2.minimap_offset_x=32767; cltset2.minimap_offset_y=32767;
 cltset2.tmap_offset_x=32767; cltset2.tmap_offset_y=32767;
 cltset2.u6ovoiceovervolume = 128;
-get(tfh,&cltset2,sizeof(client_settings));
+cltset2.name_display_colour=0;
+long clientsettingsbytes=lof(tfh);
+if (clientsettingsbytes>(long)sizeof(client_settings)) clientsettingsbytes=sizeof(client_settings);
+if (clientsettingsbytes>0) get(tfh,&cltset2,clientsettingsbytes);
 close(tfh);
 u6ovolume=cltset2.u6ovolume;
 u6omusicvolume=cltset2.u6omusicvolume;
 u6ovoicevolume=cltset2.u6ovoicevolume;
 u6ovoiceovervolume=cltset2.u6ovoiceovervolume;
+u6o_namecolour=cltset2.name_display_colour;
 statusmessage_logpinned=cltset2.statusprev_logpinned; // restore "keep text log visible" toggle
 music_format=cltset2.music_format;
 memcpy(&spellrecall_partymember,&cltset2.spellrecall_partymember,8);
@@ -845,6 +849,7 @@ cltset.statusprev_offset_x=32767;
 cltset.statusprev_logpinned=0;
 cltset.music_format=0;
 cltset.con_frm_img_offset_x=32767;
+cltset.name_display_colour=0;
 }
 FRAME_mbl[0]=FALSE; FRAME_mbl[1]=FALSE; lpn=NULL; //used by frame.h
 

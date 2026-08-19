@@ -2007,14 +2007,7 @@ osdisplay_ktar:
         }
         
         x-=tagxy.cx/2;
-        x2=txtcol;
-        txtcol=rgb(0,0,0);
-        txtout(ps,x+1,y+1-1,t);
-        txtout(ps,x+1-1,y+1,t);
-        txtout(ps,x+1+1,y+1,t);
-        txtout(ps,x+1,y+1+1,t);
-        txtcol=x2;
-        txtout(ps,x+1,y+1,t);
+        txtouts(ps,x+1,y+1,t);
         txtfnt=fnt1;
         txtcol=rgb(255,255,255);
 osdisplay_ktar_skip:;

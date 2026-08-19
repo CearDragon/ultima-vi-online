@@ -45,6 +45,9 @@ struct client_settings {
     // Persisted position of the conversation history overlay (relative to con_frm)
     short con_frm_img_offset_x, con_frm_img_offset_y;
     short u6ovoiceovervolume;
+    // Optional 24-bit RGB name override. 0 keeps the server/default colour.
+    // Append-only: settings.bin is a positional, untagged file format.
+    unsigned long name_display_colour;
 };
 
 struct inpmess_index {

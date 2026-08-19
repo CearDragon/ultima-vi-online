@@ -329,6 +329,8 @@ struct client_settings {
     short tmap_offset_x,    tmap_offset_y;
     short statusprev_offset_x, statusprev_offset_y; // appended at end
     unsigned char statusprev_logpinned;             // appended at end (keep-log-visible toggle)
+    // ...other append-only fields...
+    unsigned long name_display_colour;               // appended at end; 0 = default
 };
 extern client_settings cltset;   // live (mirrors current state)
 extern client_settings cltset2;  // restored-from-disk snapshot
@@ -336,8 +338,9 @@ extern client_settings cltset2;  // restored-from-disk snapshot
 
 Lifecycle:
 
-1. **Startup load** — `setup_client.inc:775` reads `settings.bin` into
-   `cltset2`, then applies non-sentinel fields to the live panels.
+1. **Startup load** — `setup_client.inc:765` default-initializes appended
+   fields, then reads only `min(file size, sizeof(client_settings))` bytes of
+   `settings.bin` into `cltset2` and applies non-sentinel fields to the live panels.
    The sentinel value `32767` means "no saved override, use default".
 2. **Per-frame mirror** — `loop_client.cpp:11700–11750` walks every
    tracked panel and writes its live `offset_x/y` into the matching
@@ -382,12 +385,9 @@ Lifecycle:
    use the flag-and-cache pattern that `qkstf`/`volcontrol` use if
    the panel toggles off-screen.
 
-> The on-disk layout of `client_settings` is positional, not tagged.
-> **Adding a field invalidates existing `settings.bin` files** unless
-> you add to the end AND `get(tfh, &cltset2, sizeof(client_settings))`
-> at load time is replaced with a versioned reader. Today the load
-> code just reads `sizeof(client_settings)` bytes blindly. Treat the
-> struct layout as a file format.
+> The on-disk layout of `client_settings` is positional, not tagged. Add fields
+> only at the end, preinitialize their old-file defaults before loading, and
+> retain the size-bounded prefix read. Treat the struct layout as a file format.
 
 ---
 
