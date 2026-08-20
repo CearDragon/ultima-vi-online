@@ -632,17 +632,21 @@
                             // Normalize delta to unit 8-direction step.
                             if (spellx2 > 1) spellx2 = 1; else if (spellx2 < -1) spellx2 = -1;
                             if (spelly2 > 1) spelly2 = 1; else if (spelly2 < -1) spelly2 = -1;
-                            // MSP-P4.2: Visual uses the dragon sprite block starting at
-                            // frame 30 for the lower wing and frame 38 for the upper wing.
-                            // They stay on the same flight path tile so they appear side-by-side
-                            // rather than offset across the playfield.
+                            // MSP-P4.2: The direction is fully encoded in the frame block
+                            // number itself — no directional suffix needed or wanted.
+                            // Frame blocks per facing (spellz2: 0=left 1=right 2=up 3=down):
+                            //   lower wing: 30  34  24  36
+                            //   upper wing: 38  38  32  28
+                            static const long ws_lower_frame[4] = {30, 34, 24, 36};
+                            static const long ws_upper_frame[4] = {38, 38, 32, 28};
+
                             z2 = SFnew(myobj->x + spellx2 * 8, myobj->y + spelly2 * 8);
                             sf[z2].type = SF_THROWN_OBJ;
                             sf[z2].x = myobj->x - spellx2 * 8;
                             sf[z2].y = myobj->y - spelly2 * 8;
                             sf[z2].x2 = myobj->x + spellx2 * 8;
                             sf[z2].y2 = myobj->y + spelly2 * 8;
-                            sf[z2].more = OBJ_DRAGON + (OBJ_DRAGON_WINGSTRIKE_FRAME << 10) + (spellz2 << 11);
+                            sf[z2].more = OBJ_DRAGON + (ws_lower_frame[spellz2] << 10);
                             sf[z2].wait = 1;
 
                             z2 = SFnew(myobj->x + spellx2 * 8, myobj->y + spelly2 * 8);
@@ -651,9 +655,7 @@
                             sf[z2].y = myobj->y - spelly2 * 8;
                             sf[z2].x2 = myobj->x + spellx2 * 8;
                             sf[z2].y2 = myobj->y + spelly2 * 8;
-                            // Frame 38 is the upper wing block; keep it un-suffixed by direction
-                            // because the directional suffix is what made it resolve into the boat sprite.
-                            sf[z2].more = OBJ_DRAGON + (OBJ_DRAGON_WINGSTRIKE_FRAME_TOP << 10);
+                            sf[z2].more = OBJ_DRAGON + (ws_upper_frame[spellz2] << 10);
                             sf[z2].wait = 1;
                             // Sweep the actual projectile path from 8 behind the caster to
                             // 8 in front (inclusive): 17 crossed tiles total.
