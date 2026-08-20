@@ -640,6 +640,7 @@
                             static const long ws_lower_frame[4] = {30, 34, 24, 36};
                             static const long ws_upper_frame[4] = {38, 38, 32, 28};
 
+                            // Lower wing: travels along the centerline.
                             z2 = SFnew(myobj->x + spellx2 * 8, myobj->y + spelly2 * 8);
                             sf[z2].type = SF_THROWN_OBJ;
                             sf[z2].x = myobj->x - spellx2 * 8;
@@ -649,12 +650,14 @@
                             sf[z2].more = OBJ_DRAGON + (ws_lower_frame[spellz2] << 10);
                             sf[z2].wait = 1;
 
-                            z2 = SFnew(myobj->x + spellx2 * 8, myobj->y + spelly2 * 8);
+                            // Upper wing: offset 1 tile perpendicular to the flight direction
+                            // (perp = (-spelly2, spellx2)) so the two wings sit side-by-side.
+                            z2 = SFnew(myobj->x + spellx2 * 8 + (-spelly2), myobj->y + spelly2 * 8 + spellx2);
                             sf[z2].type = SF_THROWN_OBJ;
-                            sf[z2].x = myobj->x - spellx2 * 8;
-                            sf[z2].y = myobj->y - spelly2 * 8;
-                            sf[z2].x2 = myobj->x + spellx2 * 8;
-                            sf[z2].y2 = myobj->y + spelly2 * 8;
+                            sf[z2].x = myobj->x - spellx2 * 8 + (-spelly2);
+                            sf[z2].y = myobj->y - spelly2 * 8 + spellx2;
+                            sf[z2].x2 = myobj->x + spellx2 * 8 + (-spelly2);
+                            sf[z2].y2 = myobj->y + spelly2 * 8 + spellx2;
                             sf[z2].more = OBJ_DRAGON + (ws_upper_frame[spellz2] << 10);
                             sf[z2].wait = 1;
                             // Sweep the actual projectile path from 8 behind the caster to
