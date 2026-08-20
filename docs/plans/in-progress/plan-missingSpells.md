@@ -4,12 +4,12 @@ Status legend: ⬜ todo · 🟡 in-progress · ✅ done · ⏭ deferred · ❌ b
 Update a task's marker when its state changes; append `_(date: note)_` on completion.
 
 > Source of truth: this file. Reference phase IDs in commits/PR titles (e.g. `MSP-P2.3: ...`).
-> Companion docs: `docs/gameplay/spells.md` (implemented-spell mechanics + shared roll
-> pattern), `docs/gameplay/ultima-vi-online-missing-spell-summary.md` (original-game behavior).
+> Companion docs: `../../gameplay/spells.md` (implemented-spell mechanics + shared roll
+> pattern), `../../gameplay/ultima-vi-online-missing-spell-summary.md` (original-game behavior).
 
 ## Goal
 
-Implement the 17 spells defined in the spell tables (`src/common/setup_both_basic.h`) but
+Implement the 17 spells defined in the spell tables (`../../../src/common/setup_both_basic.h`) but
 missing from the host cast path, so every castable spell either works or is deliberately
 redesigned for multiplayer. Rebalance where the original single-player design is an exploit
 or griefing vector in an MMO (Armageddon, Magic Lock, Vanish, Clone, Animate).
@@ -24,7 +24,7 @@ or griefing vector in an MMO (Armageddon, Magic Lock, Vanish, Clone, Animate).
 
 ## How the cast path works (read before coding)
 
-- Dispatch: `src/server/loop/loop_host_part_d_cast.cpp` (+ `_summon_untrap.cpp`,
+- Dispatch: `../../../src/server/loop/loop_host_part_d_cast.cpp` (+ `_summon_untrap.cpp`,
   `_chainbolt.cpp`, `_weather_mass.cpp`) — a chain of
   `if (CASTSPELL_SPELLTYPE == ((circle << 4) + slot)) { ... goto spelldone; }` blocks.
   These are **brace-seam loop fragments**: edit with `replace_string_in_file` (tight
@@ -34,8 +34,8 @@ or griefing vector in an MMO (Armageddon, Magic Lock, Vanish, Clone, Animate).
 - Shared epilogue at `spelldone:` in `loop_host_part_d_weather_mass.cpp` handles MP,
   reagents, and cast delay — do NOT duplicate that logic in branches.
 - **Preferred structure for new spells:** put the logic in a helper in
-  `src/common/spell_code/spell_code.cpp` (macro `U6O_SPELL_FUNCTION` in `spell_code.h`,
-  returns `SPELL_SUCCESS/FAILURE/INVALID/NOTDONE` from `src/server/define_host.h`) and call
+  `../../../src/common/spell_code/spell_code.cpp` (macro `U6O_SPELL_FUNCTION` in `spell_code.h`,
+  returns `SPELL_SUCCESS/FAILURE/INVALID/NOTDONE` from `../../../src/server/define_host.h`) and call
   it from a minimal dispatch branch: `i2 = spell_xxx(tplayer, tnpc, NULL, tpx + x, tpy + y);`
   This keeps the fragile fragments small. Stubs already exist for: `detect_magic`,
   `infravision`, `reappear`, `trap`, `vanish`, `armageddon`.
@@ -143,11 +143,12 @@ or griefing vector in an MMO (Armageddon, Magic Lock, Vanish, Clone, Animate).
   **Exploit rails:** clone carries NO copy of the original's inventory/gold (empty bag),
   is temporary, and creature types ≥ boss/quest tier are excluded (reuse Replicate's
   `>= 342`-style blacklist judgment — audit which types are safe).
-- ⬜ **MSP-P4.2** **WingStrike** (C7): multi-target damage in a 3-wide line/cone toward
-  the target (pattern after FlameWind's wind-path loop but caster-directed, not
-  wind-directed); per-hit `dmg = floor(rnd*(64 + 2*INT))`; reuse an existing SF
-  projectile/wind effect type (no new client effect). Standard fire-style immunities do
-  not apply (physical).
+- ✅ **MSP-P4.2** **WingStrike** (C7): multi-target damage in a 3-wide line/cone toward
+  the target. Implemented as a directed Chebyshev-distance swath (center + ±1 perp per
+  step, up to 8 steps). `dmg = floor(rnd*(64 + 2*INT))` per hit; `0` roll skips tile.
+  No elemental immunities (physical). SFX type 24, `spelltarget = 1`. Dispatch block in
+  `loop_host_part_d_cast.cpp`; `spellattcrt1` routing added in `loop_host_part_d_chainbolt.cpp`;
+  `spelltarget[(6<<4)+8] = 1` added in `setup_both_basic.h`. _(date: 2026-08-19)_
 - **Exit:** both castable; clone of a gold-carrying creature drops nothing on death.
 
 ## MSP-P5 — World-state spells (highest blast radius, do LAST)
@@ -193,11 +194,18 @@ or griefing vector in an MMO (Armageddon, Magic Lock, Vanish, Clone, Animate).
 
 > **READ THIS FIRST when picking up the plan in a new session.**
 
-- **2026-08-12 (initial draft)** — Plan created from `docs/gameplay/spells.md` +
-  `docs/gameplay/ultima-vi-online-missing-spell-summary.md` audit. Nothing started.
-  Next step: branch `plan/missingSpells`, move this file to `docs/plans/in-progress/`,
+- **2026-08-12 (initial draft)** — Plan created from `../../gameplay/spells.md` +
+  `../../gameplay/ultima-vi-online-missing-spell-summary.md` audit. Nothing started.
+  Next step: branch `plan/missingSpells`, move this file to ``,
   start at **MSP-P0.1**. Key call-site facts already researched: dispatch pattern and
   `spelldone:` epilogue are in `loop_host_part_d_cast.cpp` / `_weather_mass.cpp`;
-  `SPELL_*` result constants are in `src/server/define_host.h`; helper stubs for 6 of
+  `SPELL_*` result constants are in `../../../src/server/define_host.h`; helper stubs for 6 of
   the 17 spells already exist in `spell_code.cpp`.
+
+- **2026-08-19 (MSP-P4.2 WingStrike)** — Implemented WingStrike `(6<<4)+8` as a
+  directed 3-wide physical line attack in `loop_host_part_d_cast.cpp` (block after
+  FlameWind); `spellattcrt1` routing added to `loop_host_part_d_chainbolt.cpp`;
+  `spelltarget[(6<<4)+8]=1` added to `setup_both_basic.h`. Builds cleanly (`host`
+  and `both`). `spells.md` row and backlog updated.
+  Next open MSP-P4 task: **MSP-P4.1** (Clone).
 

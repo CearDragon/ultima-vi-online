@@ -666,6 +666,8 @@ SPID
 MAND
 |
 SULF;
+spelltarget [(6<<4)+8]=
+1;
 txtset (spellname[(6 << 4) + 9]
 ,
 "WizardEye"

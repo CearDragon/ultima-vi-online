@@ -606,6 +606,83 @@
                             goto spelldone;
                         } //flamewind
 
+                        if (CASTSPELL_SPELLTYPE == ((6 << 4) + 8)) {
+                            //wing strike //txtset(spellname[(6<<4)+8],"WingStrike"); spellreagent[(6<<4)+8]=BLOO|SPID|MAND|SULF;
+                            // MSP-P4.2: dragon-wing projectile sweeps through the caster.
+                            // Aim chooses the 8-direction heading; the wing starts 8 tiles
+                            // behind the caster and travels to 8 tiles in front, damaging
+                            // only creatures standing on the crossed tiles.
+                            // No fire/elemental immunities — physical damage.
+                            // dmg = floor(rnd*(64 + 2*INT)) per creature hit (same as EnergyWind).
+                            i2 = 2; //implemented!
+                            if (stormcloakcheck2(tpx + x, tpy + y, tplayer)) goto spelldone;
+                            // Compute 8-direction unit step from caster toward target tile.
+                            spellx2 = (tpx + x) - myobj->x;
+                            spelly2 = (tpy + y) - myobj->y;
+                            if ((spellx2 == 0) && (spelly2 == 0)) goto spelldone;
+                            // Dragon sprites support 4 facings (PFleft/right/up/down) via
+                            // OBJ_DRAGON + (dir<<11). For diagonal casts, use the dominant axis.
+                            if (abs(spellx2) >= abs(spelly2)) {
+                                if (spellx2 < 0) spellz2 = PFleft;
+                                else spellz2 = PFright;
+                            } else {
+                                if (spelly2 < 0) spellz2 = PFup;
+                                else spellz2 = PFdown;
+                            }
+                            // Normalize delta to unit 8-direction step.
+                            if (spellx2 > 1) spellx2 = 1; else if (spellx2 < -1) spellx2 = -1;
+                            if (spelly2 > 1) spelly2 = 1; else if (spelly2 < -1) spelly2 = -1;
+                            // MSP-P4.2: Visual uses the dragon sprite block starting at
+                            // frame 30 while preserving the 4-way dragon facing.
+                            // Type encoding: OBJ_DRAGON + (frame<<10) + (dir<<11).
+                            z2 = SFnew(myobj->x + spellx2 * 8, myobj->y + spelly2 * 8);
+                            sf[z2].type = SF_THROWN_OBJ;
+                            sf[z2].x = myobj->x - spellx2 * 8;
+                            sf[z2].y = myobj->y - spelly2 * 8;
+                            sf[z2].x2 = myobj->x + spellx2 * 8;
+                            sf[z2].y2 = myobj->y + spelly2 * 8;
+                            sf[z2].more = OBJ_DRAGON + (OBJ_DRAGON_WINGSTRIKE_FRAME << 10) + (spellz2 << 11);
+                            sf[z2].wait = 1;
+                            // Sweep the actual projectile path from 8 behind the caster to
+                            // 8 in front (inclusive): 17 crossed tiles total.
+                            for (spellz = -8; spellz <= 8; spellz++) {
+                                spellx = myobj->x + spellx2 * spellz;
+                                spelly = myobj->y + spelly2 * spellz;
+                                if (stormcloakcheck2(spellx, spelly, tplayer) == 0) {
+                                    myobj2 = OBJfindlast(spellx, spelly);
+                                    if (myobj2 == NULL) myobj2 = OBJfindlastall(spellx, spelly);
+                                    if (myobj2) {
+                                        if (myobj2->info & 4) {
+                                            //<-crt
+                                            crt = (creature *) myobj2->more;
+                                            i9 = i3;
+                                            i8 = x2; //backup!
+                                            x2 = rnd * (64 + tnpc->i * 2);
+                                            if (x2 == 0) {
+                                                i2 = 1;
+                                                x2 = i8;
+                                                i3 = i9;
+                                                goto wingstrike_spelldone;
+                                            }
+                                            // Physical strike — no elemental immunities
+                                            i3 = SFnew(myobj2->x, myobj2->y);
+                                            sf[i3].type = 1; //attack hit
+                                            sf[i3].x2 = x2;
+                                            sf[i3].x = myobj2->x;
+                                            sf[i3].y = myobj2->y;
+                                            sf[i3].wait = 0.125f;
+                                            sf[i3].more = 1;
+                                            spellattcrt = TRUE;
+                                            goto spellattcrt0;
+                                        } //crt
+                                    } //myobj2
+                                } //stormcloakcheck2
+                            wingstrike_spelldone:;
+                            } //spellz path
+                            i2 = 1;
+                            goto spelldone;
+                        } //wingstrike
+
 
                         if (OBJcheckbolt(myobj->x, myobj->y, tpx + x, tpy + y)) {
                             if (!cast_spell) {

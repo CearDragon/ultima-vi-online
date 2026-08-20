@@ -789,6 +789,13 @@
 #define OBJ_LORD_BRITISH (409)
 #define OBJ_AVATAR (410)
 #define OBJ_DRAGON (411)
+// WingStrike uses the museum-dragon projectile visuals from the dragon sprite
+// sheet block that starts at object sub-index/frame 30. Dragon facings are
+// encoded in 2-frame pairs, so the final type is:
+//   OBJ_DRAGON + (OBJ_DRAGON_WINGSTRIKE_FRAME << 10) + (dir << 11)
+// where dir is PFleft/PFright/PFup/PFdown (0..3). The client's getspr()
+// then applies its normal 2-frame dragon animation within that chosen block.
+#define OBJ_DRAGON_WINGSTRIKE_FRAME (30)
 #define OBJ_SHIP (412)
 #define OBJ_SILVER_SERPENT (413)
 #define OBJ_SKIFF (414)

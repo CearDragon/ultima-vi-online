@@ -154,7 +154,7 @@ Primary source files:
 | 5 | Kill | `BLAC\|NIGH\|SULF` | Implemented | Single target creature. Kill-threshold roll `((floor(rnd*(512+8*INT)) + floor(rnd*(512+8*INT))) >> 1)`; must be `>= crt->hp` to kill. Immunity list (undead/daemon/wisp/skeleton/ghost: 352/368/373/367) sets zero damage. SFX types 1 + 15. **Example** (`INT=30`): `512 + 8*30 = 752`; rolls `floor(0.5*752)=376` and `floor(0.4*752)=300`, threshold `(376+300)>>1 = 338`. Vs a `300`-HP dragon, `338 >= 300` -> killed; vs a skeleton -> `0` (immune). |
 | 6 | MassCurse | `SULF\|NIGH\|GARL\|MAND` | **Unimplemented** | No host cast branch; falls through to "can't cast yet" (result `0`). |
 | 7 | MassInvisibility | `MAND\|NIGH\|BLOO\|BLAC` | Implemented | 5x5 diamond AOE. One roll `dur = floor(rnd*(32 + (INT>>1)))` capped 255; applied to each player NPC in area if stronger than current. SFX type 19. **Example** (`INT=30`): `32 + 15 = 47`, single `dur = floor(rnd*47)`; with `rnd=0.7`->`32` applied to every ally in range. |
-| 8 | WingStrike | `BLOO\|SPID\|MAND\|SULF` | **Unimplemented** | No host cast branch; falls through to "can't cast yet" (result `0`). |
+| 8 | WingStrike | `BLOO\|SPID\|MAND\|SULF` | Implemented | MSP-P4.2: directed physical sweep. Aim chooses an 8-direction heading; the dragon-wing projectile starts 8 tiles behind the caster, passes through the caster, and ends 8 tiles in front (17 crossed tiles total). Only creatures on those crossed tiles are damaged. Per-hit `dmg = floor(rnd*(64 + 2*INT))`; a `0` roll skips that tile. **No elemental immunities** (physical damage). SFX: thrown `OBJ_DRAGON` projectile using the dragon sprite block beginning at frame 30, with cardinal facing chosen from the cast direction. `spelltarget = 1` (tile cursor). **Example** (`INT=30`): per hit `64 + 60 = 124`, `floor(rnd*124)`, e.g. `87`; casting east sweeps the line `x-8 .. x+8` through the caster, rolling separately for each creature on that line. |
 | 9 | WizardEye | `BLOO\|NIGH\|MAND\|SULF\|BLAC\|SPID` | Implemented | If not already active, duration `dur = floor(rnd*(INT+1))`; result `3` (fail) if `dur==0`; initializes the wizard-eye camera position at the caster and sends an update packet (msg `d2[0]=36`). **Example** (`INT=30`): `dur = floor(rnd*31)` in `0..30`; with `rnd=0.6`->`18` ticks of remote viewing (a `rnd` low enough to yield `0` fails). |
 
 ## Eighth Circle (circle 7)
@@ -177,7 +177,7 @@ Primary source files:
 ## Unimplemented spell backlog (by circle)
 
 These are defined in spell tables but currently missing from the host cast implementation path.
-Implementation plan (phase IDs `MSP-P*`): `docs/plans/todo/plan-missingSpells.md`.
+Implementation plan (phase IDs `MSP-P*`): `../plans/in-progress/plan-missingSpells.md`.
 
 - Circle 1: `DetectMagic`
 - Circle 2: `Infravision`, `Reappear`, `Trap`, `Vanish`
@@ -185,7 +185,7 @@ Implementation plan (phase IDs `MSP-P*`): `docs/plans/todo/plan-missingSpells.md
 - Circle 4: `Animate`
 - Circle 5: `Seance`
 - Circle 6: `Clone`, `Confuse`
-- Circle 7: `Fear`, `MassCurse`, `WingStrike`
+- Circle 7: `Fear`, `MassCurse`
 - Circle 8: `Eclipse`, `Armageddon`
 
 ## Notes for upcoming implementation work
