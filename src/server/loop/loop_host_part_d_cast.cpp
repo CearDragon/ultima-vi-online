@@ -635,10 +635,14 @@
                             // MSP-P4.2: The direction is fully encoded in the frame block
                             // number itself — no directional suffix needed or wanted.
                             // Frame blocks per facing (spellz2: 0=left 1=right 2=up 3=down):
-                            //   lower wing: 30  34  24  36
-                            //   upper wing: 38  38  32  28
-                            static const long ws_lower_frame[4] = {30, 34, 24, 36};
-                            static const long ws_upper_frame[4] = {38, 38, 32, 28};
+                            // The perpendicular offset places the upper wing on the left-hand
+                            // (CCW) side for all directions.  For left/up that naturally matches
+                            // the visual orientation of the sprite pair, but for right/down the
+                            // two wing sprites must be swapped so each wing face reads correctly.
+                            //   lower wing: 30  38  24  28
+                            //   upper wing: 38  34  32  36
+                            static const long ws_lower_frame[4] = {30, 38, 24, 28};
+                            static const long ws_upper_frame[4] = {38, 34, 32, 36};
 
                             // Lower wing: travels along the centerline.
                             z2 = SFnew(myobj->x + spellx2 * 8, myobj->y + spelly2 * 8);
