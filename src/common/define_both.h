@@ -796,6 +796,9 @@
 // where dir is PFleft/PFright/PFup/PFdown (0..3). The client's getspr()
 // then applies its normal 2-frame dragon animation within that chosen block.
 #define OBJ_DRAGON_WINGSTRIKE_FRAME (30)
+// The paired WingStrike wing uses the adjacent dragon block starting at frame 38.
+// Together with frame 30 this gives the dual-wing visual the user wants.
+#define OBJ_DRAGON_WINGSTRIKE_FRAME_TOP (38)
 #define OBJ_SHIP (412)
 #define OBJ_SILVER_SERPENT (413)
 #define OBJ_SKIFF (414)
