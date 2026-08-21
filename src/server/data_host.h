@@ -45,6 +45,27 @@ struct crtenum_struct {
     char y;
 };
 
+constexpr unsigned short WING_STRIKE_DELAYED_DAMAGE = 0xFFFE;
+constexpr unsigned char WING_STRIKE_MAX_HITS = 34;
+
+struct wing_strike_flight {
+    player *owner;
+    object *caster;
+    object *hit[WING_STRIKE_MAX_HITS];
+    float elapsed;
+    float tile_interval;
+    signed char step_x;
+    signed char step_y;
+    signed char lower_offset_x;
+    signed char lower_offset_y;
+    signed char upper_offset_x;
+    signed char upper_offset_y;
+    signed char position;
+    unsigned char next_wing;
+    unsigned char hit_count;
+    bool active;
+};
+
 
 /* external variables globals.h */
 extern unsigned char save_buffer[SAVESLOTLAST + 1];
@@ -62,6 +83,7 @@ extern unsigned short mover_body[1024];
 
 extern unsigned char sfbuffersend;
 extern float sfbufferwait;
+extern wing_strike_flight wing_strike_flights[256];
 
 extern unsigned char cast_spell;
 extern unsigned char staff_cast_spell;

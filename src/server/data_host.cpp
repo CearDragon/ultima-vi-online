@@ -6,6 +6,7 @@ void data_host_init(void) {
     login_dead_callback = 0;
     sfbuffersend = 0;
     sfbufferwait = 0.0f;
+    ZeroMemory(wing_strike_flights, sizeof(wing_strike_flights));
     cast_spell = 0;
     staff_cast_spell = 0;
     motd = NULL;

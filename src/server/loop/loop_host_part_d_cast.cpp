@@ -668,44 +668,26 @@
                             sf[z2].y2 = myobj->y + spelly2 * 8 + spellx2;
                             sf[z2].more = OBJ_DRAGON + (ws_upper_frame[spellz2] << 10);
                             sf[z2].wait = 1;
-                            // Sweep the actual projectile path from 8 behind the caster to
-                            // 8 in front (inclusive): 17 crossed tiles total.
-                            for (spellz = -8; spellz <= 8; spellz++) {
-                                spellx = myobj->x + spellx2 * spellz;
-                                spelly = myobj->y + spelly2 * spellz;
-                                if (stormcloakcheck2(spellx, spelly, tplayer) == 0) {
-                                    myobj2 = OBJfindlast(spellx, spelly);
-                                    if (myobj2 == NULL) myobj2 = OBJfindlastall(spellx, spelly);
-                                    if (myobj2) {
-                                        if (myobj2->info & 4) {
-                                            //<-crt
-                                            crt = (creature *) myobj2->more;
-                                            i9 = i3;
-                                            i8 = x2; //backup!
-                                            // Damage happens when the wings intersect the monster
-                                            // on the centerline, not at cast-start.
-                                            x2 = rnd * (64 + tnpc->i * 2);
-                                            if (x2 == 0) {
-                                                i2 = 1;
-                                                x2 = i8;
-                                                i3 = i9;
-                                                goto wingstrike_spelldone;
-                                            }
-                                            // Physical strike — no elemental immunities
-                                            i3 = SFnew(myobj2->x, myobj2->y);
-                                            sf[i3].type = 1; //attack hit
-                                            sf[i3].x2 = x2;
-                                            sf[i3].x = myobj2->x;
-                                            sf[i3].y = myobj2->y;
-                                            sf[i3].wait = 0.125f;
-                                            sf[i3].more = 1;
-                                            spellattcrt = TRUE;
-                                            goto spellattcrt0;
-                                        } //crt
-                                    } //myobj2
-                                } //stormcloakcheck2
-                            wingstrike_spelldone:;
-                            } //spellz path
+
+                            // The client animates thrown objects at 24 tiles per second. Track
+                            // the same flight on the host and test both wing tiles after each move.
+                            ZeroMemory(&wing_strike_flights[tpl], sizeof(wing_strike_flights[tpl]));
+                            wing_strike_flights[tpl].owner = tplayer;
+                            wing_strike_flights[tpl].caster = myobj;
+                            wing_strike_flights[tpl].step_x = spellx2;
+                            wing_strike_flights[tpl].step_y = spelly2;
+                            wing_strike_flights[tpl].lower_offset_x = spellx;
+                            wing_strike_flights[tpl].lower_offset_y = spelly;
+                            wing_strike_flights[tpl].upper_offset_x = -spelly2;
+                            wing_strike_flights[tpl].upper_offset_y = spellx2;
+                            wing_strike_flights[tpl].position = -8;
+                            wing_strike_flights[tpl].next_wing = 2;
+                            wing_strike_flights[tpl].tile_interval =
+                                    sqrt((float) (spellx2 * spellx2 + spelly2 * spelly2)) / 24.0f;
+                            // Wait for the 8 Hz effect flush, then match the renderer's initial
+                            // 0.75-tile interpolation lead so collision follows the visible wings.
+                            wing_strike_flights[tpl].elapsed = sfbufferwait - (1.0f / 8.0f) + (0.75f / 24.0f);
+                            wing_strike_flights[tpl].active = true;
                             i2 = 1;
                             goto spelldone;
                         } //wingstrike

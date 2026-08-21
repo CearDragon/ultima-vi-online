@@ -521,7 +521,7 @@
                                     //NEWCODE
                                     if (CASTSPELL_SPELLTYPE == ((5 << 4) + 4)) goto hailstorm_spelldone;
                                     //NEWCODEEND
-                                    if (CASTSPELL_SPELLTYPE == ((6 << 4) + 8)) goto wingstrike_spelldone; //MSP-P4.2
+                                    if (CASTSPELL_SPELLTYPE == WING_STRIKE_DELAYED_DAMAGE) goto skip_pickup;
                                 } //crt
                             } //myobj2
                             goto spelldone;

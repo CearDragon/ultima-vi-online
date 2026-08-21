@@ -11,6 +11,9 @@
             //current player
 
             tplayer = playerlist[tpl];
+            if (wing_strike_flights[tpl].active && (wing_strike_flights[tpl].owner != tplayer)) {
+                wing_strike_flights[tpl].active = false;
+            }
 
             if (tplayer->mobj) {
                 tplayer->mobj->info |= 112; //set mobj flags as temp OBJ
@@ -204,6 +207,85 @@
 
                 myobj = tplayer->party[tplayer->selected_partymember];
                 tnpc = (npc *) myobj->more;
+
+                // MSP-P4.2: advance Wing Strike collision alongside the client animation.
+                if (wing_strike_flights[tpl].active) {
+                    static wing_strike_flight *wing_strike;
+                    static long wing_strike_x, wing_strike_y, wing_strike_piece;
+                    static bool wing_strike_caster_valid, wing_strike_already_hit;
+                    wing_strike = &wing_strike_flights[tpl];
+                    wing_strike_caster_valid = false;
+                    for (i = 0; i <= 7; i++) {
+                        if (tplayer->party[i] == wing_strike->caster) wing_strike_caster_valid = true;
+                    }
+                    if (!wing_strike_caster_valid) {
+                        wing_strike->active = false;
+                    } else {
+                        wing_strike->elapsed += et;
+                    wing_strike_next_tile:
+                        if (wing_strike->next_wing >= 2) {
+                            if (wing_strike->elapsed < wing_strike->tile_interval) goto wing_strike_update_done;
+                            wing_strike->elapsed -= wing_strike->tile_interval;
+                            wing_strike->position++;
+                            wing_strike->next_wing = 0;
+                        }
+
+                        wing_strike_piece = wing_strike->next_wing++;
+                        wing_strike_x = wing_strike->caster->x + wing_strike->step_x * wing_strike->position;
+                        wing_strike_y = wing_strike->caster->y + wing_strike->step_y * wing_strike->position;
+                        if (wing_strike_piece == 0) {
+                            wing_strike_x += wing_strike->lower_offset_x;
+                            wing_strike_y += wing_strike->lower_offset_y;
+                        } else {
+                            wing_strike_x += wing_strike->upper_offset_x;
+                            wing_strike_y += wing_strike->upper_offset_y;
+                        }
+
+                        if ((wing_strike_x >= 0) && (wing_strike_x < 2048) &&
+                            (wing_strike_y >= 0) && (wing_strike_y < 1024) &&
+                            !stormcloakcheck2(wing_strike_x, wing_strike_y, tplayer)) {
+                            myobj2 = OBJfindlast(wing_strike_x, wing_strike_y);
+                            if (myobj2 == NULL) myobj2 = OBJfindlastall(wing_strike_x, wing_strike_y);
+                            if (myobj2 && (myobj2->info & 8)) myobj2 = (object *) myobj2->more;
+                            if (myobj2 && (myobj2->info & 4)) {
+                                wing_strike_already_hit = false;
+                                for (i = 0; i < wing_strike->hit_count; i++) {
+                                    if (wing_strike->hit[i] == myobj2) wing_strike_already_hit = true;
+                                }
+                                if (!wing_strike_already_hit) {
+                                    if (wing_strike->hit_count < WING_STRIKE_MAX_HITS) {
+                                        wing_strike->hit[wing_strike->hit_count++] = myobj2;
+                                    }
+                                    myobj = wing_strike->caster;
+                                    tnpc = (npc *) myobj->more;
+                                    crt = (creature *) myobj2->more;
+                                    i9 = i3;
+                                    i8 = x2;
+                                    x2 = rnd * (64 + tnpc->i * 2);
+                                    if (x2) {
+                                        i3 = SFnew(myobj2->x, myobj2->y);
+                                        sf[i3].type = 1;
+                                        sf[i3].x2 = x2;
+                                        sf[i3].x = myobj2->x;
+                                        sf[i3].y = myobj2->y;
+                                        sf[i3].wait = 0.125f;
+                                        sf[i3].more = 1;
+                                        CASTSPELL_SPELLTYPE = WING_STRIKE_DELAYED_DAMAGE;
+                                        spellattcrt = TRUE;
+                                        goto spellattcrt0;
+                                    }
+                                    x2 = i8;
+                                    i3 = i9;
+                                }
+                            }
+                        }
+
+                        if (wing_strike->next_wing < 2) goto wing_strike_next_tile;
+                        if (wing_strike->position >= 8) wing_strike->active = false;
+                        if (wing_strike->active) goto wing_strike_next_tile;
+                    }
+                wing_strike_update_done:;
+                }
 
                 //tpx=myobj->x-15; tpy=myobj->y-11;
                 //if (tpx<0) tpx=0;

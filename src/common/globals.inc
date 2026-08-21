@@ -1215,6 +1215,7 @@ unsigned short mover_body[1024];
 
 unsigned char sfbuffersend;
 float sfbufferwait;
+wing_strike_flight wing_strike_flights[256];
 
 unsigned char cast_spell;
 unsigned char staff_cast_spell;
