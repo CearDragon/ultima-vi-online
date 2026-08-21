@@ -645,14 +645,16 @@
                             static const long ws_lower_frame[4] = {30, 26, 24, 28};
                             static const long ws_upper_frame[4] = {38, 34, 32, 36};
 
-                            // Lower wing: travels along the centerline. Diagonal casts use a
-                            // horizontal facing, whose lower piece shifts on X by vertical facing.
-                            z2 = SFnew(myobj->x + spellx2 * 8 + (spelly2 ? -spelly2 : 0), myobj->y + spelly2 * 8);
+                            // Lower wing: diagonal placement follows the selected 4-way facing.
+                            // Horizontal facings shift on X; vertical facings shift on Y.
+                            spellx = spelly2 && ((spellz2 == PFleft) || (spellz2 == PFright)) ? -spelly2 : 0;
+                            spelly = spellx2 && ((spellz2 == PFup) || (spellz2 == PFdown)) ? spellx2 : 0;
+                            z2 = SFnew(myobj->x + spellx2 * 8 + spellx, myobj->y + spelly2 * 8 + spelly);
                             sf[z2].type = SF_THROWN_OBJ;
-                            sf[z2].x = myobj->x - spellx2 * 8 + (spelly2 ? -spelly2 : 0);
-                            sf[z2].y = myobj->y - spelly2 * 8;
-                            sf[z2].x2 = myobj->x + spellx2 * 8 + (spelly2 ? -spelly2 : 0);
-                            sf[z2].y2 = myobj->y + spelly2 * 8;
+                            sf[z2].x = myobj->x - spellx2 * 8 + spellx;
+                            sf[z2].y = myobj->y - spelly2 * 8 + spelly;
+                            sf[z2].x2 = myobj->x + spellx2 * 8 + spellx;
+                            sf[z2].y2 = myobj->y + spelly2 * 8 + spelly;
                             sf[z2].more = OBJ_DRAGON + (ws_lower_frame[spellz2] << 10);
                             sf[z2].wait = 1;
 
