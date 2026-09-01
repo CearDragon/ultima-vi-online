@@ -277,6 +277,26 @@
                                 } //1.0
                             } //32
 
+                            if (crt->flags & 16) {
+                                //feared!
+                                f = 1.0f;
+                                if (int((ett / f)) != int((ett / f) - (et / f))) {
+                                    if (crt->fear > 0) {
+                                        crt->fear--;
+                                        if (crt->fear == 0) crt->flags -= 16;
+                                    } else {
+                                        crt->flags -= 16;
+                                    }
+                                } //1.0
+                            } //16
+
+                            if (crt->curse) {
+                                f = 1.0f;
+                                if (int((ett / f)) != int((ett / f) - (et / f))) {
+                                    crt->curse--;
+                                } //1.0
+                            }
+
                             if (crt->flags & 1) {
                                 //poisoned?
                                 f = 1.0f;

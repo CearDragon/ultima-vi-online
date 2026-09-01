@@ -50,20 +50,20 @@ or griefing vector in an MMO (Armageddon, Magic Lock, Vanish, Clone, Animate).
 
 ## MSP-P0 — Groundwork (do FIRST)
 
-- ⬜ **MSP-P0.1** Add a `flee` behavior hook: the `16`=fear flag exists on creatures but
+- ✅ **MSP-P0.1** Add a `flee` behavior hook: the `16`=fear flag exists on creatures but
   grep whether any AI reads it. If unread, add minimal host-AI handling (feared creature
   moves away from its target, decrementing a fear timer field or reusing `charm`-style
   wear-off). Needed by Fear and RepelUndead. No wire change — movement is already synced.
-- ⬜ **MSP-P0.2** Add a curse effect representation: pick storage for a temporary stat
+  _(2026-08-24: host-side fear timer + flee step added in creature AI.)_
+- ✅ **MSP-P0.2** Add a curse effect representation: pick storage for a temporary stat
   debuff (suggest a `curse` timer byte parallel to `charm` on `struct npc`/`creature` —
   **check `struct player` byte-blit/wire coupling first**; if adding a field to a
   wire-blitted struct is required, store curses host-side in a parallel array instead).
   Needed by Curse and MassCurse.
-- ⬜ **MSP-P0.3** Decision task: `spell_telekinesis` has an `(int)rnd * (...)` precedence
-  bug making its rolls always 0 (documented in `spells.md`). Decide with the maintainer:
-  fix (behavior change — players will start failing telekinesis) or keep. Record decision
-  here either way; do not silently fix.
-- ⬜ **MSP-P0.4** Sweep `setup_both_basic.h` for the 17 spells' `spelltarget[]` values;
+- ⏭ **MSP-P0.3** Decision task: `spell_telekinesis` has an `(int)rnd * (...)` precedence
+  bug making its rolls always 0 (documented in `spells.md`). Maintain the current behavior for
+  now; do not silently fix it during MSP-P0.
+- ✅ **MSP-P0.4** Sweep `setup_both_basic.h` for the 17 spells' `spelltarget[]` values;
   set/verify targeting mode per spell (self/tile/creature) so the client prompts correctly.
 - **Exit:** fear + curse mechanisms exist and are host-only (no wire/layout change);
   targeting table verified; P0.3 decision recorded.

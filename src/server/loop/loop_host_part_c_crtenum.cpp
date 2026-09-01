@@ -89,6 +89,31 @@
                                 if (crt->flags & 4) crt->flags -= 4;
                                 //awaken //1=poison, 2=invisible, 4=asleep, 8=paralyzed
 
+                                if ((crt->flags & 16) && crt->target) {
+                                    //feared creatures flee away from their current target.
+                                    myobj2 = crt->target;
+                                    x2 = myobj2->x;
+                                    y2 = myobj2->y;
+                                    x3 = x;
+                                    y3 = y;
+                                    if (x3 < x2) x3--;
+                                    else if (x3 > x2) x3++;
+                                    if (y3 < y2) y3--;
+                                    else if (y3 > y2) y3++;
+                                    if (OBJmove2(myobj, x3, y3)) {
+                                        if (x3 != x) {
+                                            if (OBJmove2(myobj, x3, y)) {
+                                                if (y3 != y) OBJmove2(myobj, x, y3);
+                                            }
+                                        } else if (y3 != y) {
+                                            OBJmove2(myobj, x, y3);
+                                        }
+                                    }
+                                    f = 0.5f + rnd * 0.5f;
+                                    if (crt->wait < f) crt->wait = f;
+                                    goto donemove;
+                                }
+
 
                                 if (crt->al == 0) {
                                     x2 = rnd * 4;

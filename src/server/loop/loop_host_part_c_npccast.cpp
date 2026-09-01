@@ -5,6 +5,31 @@
                             crtcantcast:
 
 
+                                if (crt->flags & 16) {
+                                    //feared creatures run away from their current target.
+                                    x3 = x;
+                                    y3 = y;
+                                    if (x3 < x2) x3--;
+                                    else if (x3 > x2) x3++;
+                                    if (y3 < y2) y3--;
+                                    else if (y3 > y2) y3++;
+                                    x4 = 0;
+                                    if (OBJmove2(myobj, x3, y3) == 0) {
+                                        x4 = 1;
+                                    } else {
+                                        if (x3 != x) {
+                                            if (OBJmove2(myobj, x3, y) == 0) x4 = 1;
+                                        }
+                                        if ((x4 == 0) && (y3 != y)) {
+                                            if (OBJmove2(myobj, x, y3) == 0) x4 = 1;
+                                        }
+                                    }
+                                    crt->pathn = 0;
+                                    f = 0.5f + rnd * 0.5f;
+                                    if (crt->wait < f) crt->wait = f;
+                                    goto donemove;
+                                }
+
                                 if ((abs(x - x2) <= 1) && (abs(y - y2) <= 1)) {
                                     //close ->attack
                                     //lower hp of target

@@ -279,6 +279,8 @@ struct creature {
     object *target;
     //creature specific info
     unsigned char charm; //time units till charm effect wears off! (always reverts to type 1)
+    unsigned char fear; //time units till fear wears off; paired with flags bit 16 on host AI
+    unsigned char curse; //time units till curse wears off; host-side debuff state only
 
 
     unsigned char mp;

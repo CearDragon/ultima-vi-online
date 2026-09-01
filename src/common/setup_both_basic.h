@@ -41,6 +41,8 @@ txtset (spellname[(0 << 4) + 1]
 spellreagent [(0<<4)+1]=NIGH
 |
 SULF;
+spelltarget [(0<<4)+1]=
+1;
 txtset (spellname[(0 << 4) + 2]
 ,
 "DetectTrap"
@@ -134,6 +136,8 @@ spellreagent [(1<<4)+3]=SPID
 BLOO
 |
 BLAC;
+spelltarget [(1<<4)+3]=
+1;
 txtset (spellname[(1 << 4) + 4]
 ,
 "Sleep"
@@ -161,6 +165,8 @@ txtset (spellname[(1 << 4) + 6]
 spellreagent [(1<<4)+6]=SPID
 |
 NIGH;
+spelltarget [(1<<4)+6]=
+1;
 txtset (spellname[(1 << 4) + 7]
 ,
 "UnlockMagic"
@@ -184,6 +190,8 @@ spellreagent [(1<<4)+9]=GARL
 BLOO
 |
 BLAC;
+spelltarget [(1<<4)+9]=
+1;
 
 txtset (spellname[(2 << 4) + 0]
 ,
@@ -228,6 +236,8 @@ spellreagent [(2<<4)+4]=SULF
 BLOO
 |
 GARL;
+spelltarget [(2<<4)+4]=
+1;
 txtset (spellname[(2 << 4) + 5]
 ,
 "MassAwaken"
@@ -281,6 +291,8 @@ spellreagent [(3<<4)+0]=SULF
 MAND
 |
 BLOO; //level 4
+spelltarget [(3<<4)+0]=
+1;
 txtset (spellname[(3 << 4) + 1]
 ,
 "Conjure"
@@ -450,6 +462,8 @@ NIGH
 SPID
 |
 SULF;
+spelltarget [(4<<4)+8]=
+1;
 txtset (spellname[(4 << 4) + 9]
 ,
 "X-ray"
@@ -484,6 +498,8 @@ GINS
 NIGH
 |
 MAND;
+spelltarget [(5<<4)+1]=
+1;
 txtset (spellname[(5 << 4) + 2]
 ,
 "Confuse"
@@ -611,6 +627,8 @@ spellreagent [(6<<4)+3]=NIGH
 MAND
 |
 GARL;
+spelltarget [(6<<4)+3]=
+1;
 txtset (spellname[(6 << 4) + 4]
 ,
 "GateTravel"
