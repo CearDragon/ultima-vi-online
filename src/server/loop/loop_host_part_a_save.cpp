@@ -821,7 +821,7 @@
                 gotprevsave:
 
                     //died from lack of Karma?
-                    if ((playerlist[tpl]->party[0] == NULL) && (playerlist[tpl]->karma <= 0)) goto save_complete;
+                    if ((playerlist[tpl]->party[0] == NULL) && (playerlist[tpl]->karma <= 0)) goto remove_player_save;
                     //skip save then remove
 
 
@@ -840,20 +840,28 @@
                             }
                         }
                     }
-                    if (playerlist[tpl]->party[0] == NULL) goto save_complete;
+                    if (playerlist[tpl]->party[0] == NULL) goto remove_player_save;
                     //ERROR! could not find in resurrection table
 
                     tnpc = (npc *) playerlist[tpl]->party[0]->more;
                     txtset(t, "New Player");
-                    if (txtsame(tnpc->name, t)) goto save_complete; //if a prev savegame exists it will be deleted
+                    if (txtsame(tnpc->name, t)) goto remove_player_save; //if a prev savegame exists it will be deleted
 
 
                     //find empty savefile
+                    if (i2 != -1) {
+                        i = i2;
+                        goto save_empty;
+                    }
                     for (i = 0; i <= SAVESLOTLAST; i++) {
                         if (save_buffer[i] == 0) goto save_empty;
                     }
                     goto save_failed; //ERROR! all savefile slots are full
                 save_empty:
+
+                    txtset(save_filename[i], ".\\save\\");
+                    txtadd(save_filename[i], playerlist[tpl]->name);
+                    txtadd(save_filename[i], ".SAV");
 
                     //implement new password?
                     if (playerlist[tpl]->newpassword->l) {

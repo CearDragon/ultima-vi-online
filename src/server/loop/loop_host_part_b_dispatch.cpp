@@ -749,10 +749,7 @@ host_gotmessage:
         if (tcreatecharacter) goto save_createcharacter;
 
         i = journeyonward_i;
-        txtset(t2, ".\\save\\");
-        txtnumint(t, i);
-        txtadd(t, ".sav");
-        txtadd(t2, t);
+        txtset(t2, save_filename[i]);
         tfh = open2(t2, OF_READWRITE | OF_SHARE_COMPAT);
         txtNEWLEN(t4, lof(tfh));
         get(tfh, t4->d2, t4->l);

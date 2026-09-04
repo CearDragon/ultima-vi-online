@@ -248,10 +248,7 @@
           encrypt(t4);
           */
 
-                    txtset(t2, ".\\save\\");
-                    txtnumint(t, i);
-                    txtadd(t, ".sav");
-                    txtadd(t2, t);
+                    txtset(t2, save_filename[i]);
                     tfh = open2(t2, OF_READWRITE | OF_SHARE_COMPAT | OF_CREATE);
                     put(tfh, t4->d2, t4->l);
                     close(tfh);
@@ -293,17 +290,16 @@
                     txtadd(t2, t3);
                     NET_send(NETplayer, playerlist[tpl]->net, t2);
 
-                save_complete:
+                    goto save_complete;
 
-                    //remove prev save file for USER_NAME & USER_PASSWORD!
+                remove_player_save:
                     if (i2 != -1) {
-                        txtset(t2, ".\\save\\");
-                        txtnumint(t, i2);
-                        txtadd(t, ".sav");
-                        txtadd(t2, t);
-                        DeleteFile(t2->d);
+                        deletefile(save_filename[i2]->d);
                         save_buffer[i2] = 0;
+                        txtset(save_filename[i2], "");
                     }
+
+                save_complete:
 
                 save_failed:
                     if (playerlist[tpl]->save_update == -1) {

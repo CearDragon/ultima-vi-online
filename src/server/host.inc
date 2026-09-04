@@ -2,7 +2,7 @@
 
 Randomc(timeGetTime());
 
-// The host writes all player saves under .\save\ (save.txt, N.sav, house.sav,
+// The host writes all player saves under .\save\ (save.txt, USERNAME.sav, house.sav,
 // guardianobjs.sav, adminlog.txt, the .QRT quarantine files, ...). When the
 // working directory is a freshly-mounted volume (e.g. the Azure File PVC in
 // k8s/aks/deployment.yaml, where the AKS image does not bundle a save/ folder)
@@ -2563,8 +2563,12 @@ if (i){
 //setup save buffer & delete duplicate savefiles
 
 for (i=0;i<=SAVESLOTLAST;i++){
-	save_buffer[i]=0; save_username[i]=txtnew(); save_password[i]=txtnew(); save_name[i]=txtnew(); save_exp[i]=0;
-	txtset(t2,".\\save\\"); txtnumint(t,i); txtadd(t,".sav"); txtadd(t2,t); //t2=filename (i.sav)
+	save_buffer[i]=0; save_filename[i]=txtnew(); save_username[i]=txtnew(); save_password[i]=txtnew(); save_name[i]=txtnew(); save_exp[i]=0;
+}
+HOST_listPlayerSaveFiles(save_filename,SAVESLOTLAST+1);
+for (i=0;i<=SAVESLOTLAST;i++){
+	if (save_filename[i]->l==0){save_buffer[i]=0; goto savefile_deleted;}
+	txtset(t2,save_filename[i]);
 	tfh=open2(t2,OF_READWRITE|OF_SHARE_COMPAT);
 	if (tfh->h==HFILE_ERROR){
 		save_buffer[i]=0;
@@ -2848,9 +2852,10 @@ autoformat_password_cull:
 		if (save_username[i]->l==0) i3=1; //NULL length username
 		if (save_password[i]->l==0) i3=1; //NULL length username
 		if (i3){
-			txtset(t2,".\\save\\"); txtnumint(t,i); txtadd(t,".sav"); txtadd(t2,t);
+			txtset(t2,save_filename[i]);
 			DeleteFile(t2->d);
 			save_buffer[i]=0;
+			txtset(save_filename[i],"");
 			goto savefile_deleted;
 		}
 

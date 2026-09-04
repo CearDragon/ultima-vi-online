@@ -1,6 +1,15 @@
 #include "function_host.h"
 #include "function_both.h" /* LOGadd etc */
+#include <algorithm>
+#include <cctype>
 #include <math.h> /* fabs etc. */
+#include <string>
+#include <vector>
+
+#ifndef _WIN32
+#include <dirent.h>
+#include <sys/stat.h>
+#endif
 
 #pragma warning(disable: 4018 4244)
 
@@ -647,6 +656,58 @@ void decrypt(txt *t4) {
         x3 = x2; //set prev UNENCRYPTED value
         t4->d2[i3] = x2; //set UNENCRYPTED value
     } //i3
+}
+
+long HOST_listPlayerSaveFiles(txt **filenames, long capacity) {
+    std::vector<std::string> paths;
+
+    const auto addPlayerSave = [&paths](const std::string &filename) {
+        const size_t extensionOffset = filename.rfind('.');
+        if (extensionOffset == std::string::npos || filename.size() - extensionOffset != 4) return;
+
+        std::string extension = filename.substr(extensionOffset);
+        std::transform(extension.begin(), extension.end(), extension.begin(),
+                       [](unsigned char value) { return static_cast<char>(std::tolower(value)); });
+        if (extension != ".sav") return;
+
+        const std::string username = filename.substr(0, extensionOffset);
+        if (username.empty() || username.size() > 16) return;
+        std::string uppercaseUsername = username;
+        std::transform(uppercaseUsername.begin(), uppercaseUsername.end(), uppercaseUsername.begin(),
+                       [](unsigned char value) { return static_cast<char>(std::toupper(value)); });
+        if (uppercaseUsername == "HOUSE" || uppercaseUsername == "GUARDIANOBJS") return;
+        if (!std::all_of(username.begin(), username.end(), [](unsigned char value) {
+                return (value >= 'A' && value <= 'Z') || (value >= '0' && value <= '9');
+            })) return;
+
+        paths.push_back(".\\save\\" + filename);
+    };
+
+#ifdef _WIN32
+    WIN32_FIND_DATAA entry;
+    HANDLE search = FindFirstFileA(".\\save\\*", &entry);
+    if (search != INVALID_HANDLE_VALUE) {
+        do {
+            if ((entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) addPlayerSave(entry.cFileName);
+        } while (FindNextFileA(search, &entry));
+        FindClose(search);
+    }
+#else
+    DIR *directory = opendir("./save");
+    if (directory) {
+        while (dirent *entry = readdir(directory)) {
+            const std::string path = std::string("./save/") + entry->d_name;
+            struct stat status{};
+            if (stat(path.c_str(), &status) == 0 && S_ISREG(status.st_mode)) addPlayerSave(entry->d_name);
+        }
+        closedir(directory);
+    }
+#endif
+
+    std::sort(paths.begin(), paths.end());
+    const long count = std::min<long>(capacity, static_cast<long>(paths.size()));
+    for (long index = 0; index < count; ++index) txtset(filenames[index], paths[index].c_str());
+    return count;
 }
 
 void addu6monsterdropitems(object *crtobj) {

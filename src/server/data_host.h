@@ -48,6 +48,7 @@ struct crtenum_struct {
 
 /* external variables globals.h */
 extern unsigned char save_buffer[SAVESLOTLAST + 1];
+extern txt *save_filename[SAVESLOTLAST + 1];
 extern txt *save_username[SAVESLOTLAST + 1];
 extern txt *save_password[SAVESLOTLAST + 1];
 extern txt *save_name[SAVESLOTLAST + 1];

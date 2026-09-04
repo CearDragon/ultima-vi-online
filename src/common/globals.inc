@@ -1201,6 +1201,7 @@ HCURSOR cur_lu;
 #ifdef HOST
 /* variables originally from data_host.h */
 unsigned char save_buffer[SAVESLOTLAST+1];
+txt *save_filename[SAVESLOTLAST+1];
 txt *save_username[SAVESLOTLAST+1];
 txt *save_password[SAVESLOTLAST+1];
 txt *save_name[SAVESLOTLAST+1];

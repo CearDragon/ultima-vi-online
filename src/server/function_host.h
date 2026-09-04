@@ -267,6 +267,15 @@ void BTset(long x, long y, unsigned short i);
 
 void decrypt(txt * t4); // needed for backwards compatibility. Don't make new use of this!
 
+/**
+ * Discovers username-named player saves in the host save directory.
+ *
+ * Only `<A-Z0-9>{1,16}.sav` files are returned. This excludes host-owned
+ * files such as house.sav and guardianobjs.sav without inspecting or changing
+ * any save payload bytes.
+ */
+long HOST_listPlayerSaveFiles(txt **filenames, long capacity);
+
 void addu6monsterdropitems(object * crtobj);
 
 void crtrespawn(object * obj);
